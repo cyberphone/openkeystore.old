@@ -31,7 +31,7 @@ public class Base64URL
  ////       ATTRIBUTES      ////
 ///////////////////////////////
 
-    public final static char[] MODIFIED_BASE64 = {
+    public final static char[] BASE64URL = {
     //   0   1   2   3   4   5   6   7
         'A','B','C','D','E','F','G','H', // 0
         'I','J','K','L','M','N','O','P', // 1
@@ -206,22 +206,22 @@ public class Base64URL
         //encode by threes
         while (j < uncoded.length - modulo3)
           {
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 2) & 0x3C) | ((uncoded[j] >>> 6) & 0x03)]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[uncoded[j++] & 0x3F]);
+            encoded[i++] = (byte)(BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(BASE64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte)(BASE64URL[((uncoded[j++] << 2) & 0x3C) | ((uncoded[j] >>> 6) & 0x03)]);
+            encoded[i++] = (byte)(BASE64URL[uncoded[j++] & 0x3F]);
           }
         //encode  "odd" bytes
         if (modulo3 == 1)
           {
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 4) & 0x30]);
+            encoded[i++] = (byte)(BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(BASE64URL[(uncoded[j] << 4) & 0x30]);
           }
         else if (modulo3 == 2)
           {
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 2) & 0x3C]);
+            encoded[i++] = (byte)(BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(BASE64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte)(BASE64URL[(uncoded[j] << 2) & 0x3C]);
           }
         //return results
         return encoded;
@@ -252,7 +252,7 @@ public class Base64URL
         StringBuffer buffer = new StringBuffer ();
         for (int i = 0; i < length_in_characters; i++)
           {
-            buffer.append (MODIFIED_BASE64[random[i] & 0x3F]);
+            buffer.append (BASE64URL[random[i] & 0x3F]);
           }
         return buffer.toString ();
       }

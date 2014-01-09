@@ -508,7 +508,7 @@ public class JSONTest
           {
             try
               {
-                String string = "A" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+                String string = "A" + org.webpki.util.Base64URL.BASE64URL[i]; 
                 should_fail = i % 16 > 0;
                 JSONParser.parse (new JSONObjectWriter ().setString ("blob", string).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
               }
@@ -519,7 +519,7 @@ public class JSONTest
             assertFalse ("A", should_fail);
             try
               {
-                String string = "AA" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+                String string = "AA" + org.webpki.util.Base64URL.BASE64URL[i]; 
                 should_fail = i % 4 > 0;
                 JSONParser.parse (new JSONObjectWriter ().setString ("blob", string).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
               }
