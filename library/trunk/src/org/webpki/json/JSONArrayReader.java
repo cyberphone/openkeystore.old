@@ -98,7 +98,7 @@ public class JSONArrayReader implements Serializable
         return ISODateTime.parseDateTime (getString ());
       }
 
-    public byte[] getBinary (String name) throws IOException
+    public byte[] getBinary () throws IOException
       {
         return Base64URL.decode (getString ());
       }

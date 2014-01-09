@@ -473,6 +473,14 @@ public class JSONTest
                   {
                       assertTrue ("Content", arr[q] == iarr[q]);
                   }
+                  JSONObjectWriter ow = new JSONObjectWriter ();
+                  ow.setArray ("arr").setBinary (iarr);
+                  arr = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("arr").getBinary ();
+                  assertTrue ("Length",arr.length == iarr.length);
+                  for (int q = 0; q < arr.length; q++)
+                  {
+                      assertTrue ("Content", arr[q] == iarr[q]);
+                  }
               }
           }
         boolean should_fail = true;
