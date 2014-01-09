@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
+import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -95,6 +96,11 @@ public class JSONArrayReader implements Serializable
     public GregorianCalendar getDateTime () throws IOException
       {
         return ISODateTime.parseDateTime (getString ());
+      }
+
+    public byte[] getBinary (String name) throws IOException
+      {
+        return Base64URL.decode (getString ());
       }
 
     public double getDouble () throws IOException

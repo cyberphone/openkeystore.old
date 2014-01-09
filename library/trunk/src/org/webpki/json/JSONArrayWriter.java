@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Vector;
 
+import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -95,6 +96,11 @@ public class JSONArrayWriter implements Serializable
     public JSONArrayWriter setDateTime (Date date_time) throws IOException
       {
         return setString (ISODateTime.formatDateTime (date_time));
+      }
+
+    public JSONArrayWriter setBinary (byte[] value) throws IOException 
+      {
+        return setString (Base64URL.encode (value));
       }
 
     public JSONArrayWriter setArray () throws IOException
