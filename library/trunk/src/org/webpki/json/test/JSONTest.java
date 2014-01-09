@@ -453,6 +453,74 @@ public class JSONTest
         dateTime (new Date ());
         booleanValues (true);
         booleanValues (false);
+        blobValues ();
+      }
+
+    private void blobValues () throws IOException
+      {
+        for (int times = 0; times < 1000; times++)
+          {
+              for (int i = 0; i < 10; i++)
+              {
+                  byte[] iarr = new byte[i];
+                  for (int j = 0; j < i; j++)
+                  {
+                      iarr[j] = (byte) Math.floor(Math.random()*256);
+                  }
+                  byte[] arr = JSONParser.parse (new JSONObjectWriter ().setBinary ("blob", iarr).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+                  assertTrue ("Length",arr.length == iarr.length);
+                  for (int q = 0; q < arr.length; q++)
+                  {
+                      assertTrue ("Content", arr[q] == iarr[q]);
+                  }
+              }
+          }
+        boolean should_fail = true;
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setString ("blob", "a").serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+            should_fail = false;
+          }
+        catch (IOException e)
+          {
+          }
+        assertTrue ("a", should_fail);
+        should_fail = true;
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setString ("blob", "i+").serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+            should_fail = false;
+          }
+        catch (IOException e)
+          {
+          }
+        assertTrue ("i+", should_fail);
+        // We are pretty strict, yes...
+        for (int i = 0; i < 64; i++)
+          {
+            try
+              {
+                String string = "A" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+                should_fail = i % 16 > 0;
+                JSONParser.parse (new JSONObjectWriter ().setString ("blob", string).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+              }
+            catch (IOException e)
+              {
+                should_fail = !should_fail;
+              }
+            assertFalse ("A", should_fail);
+            try
+              {
+                String string = "AA" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+                should_fail = i % 4 > 0;
+                JSONParser.parse (new JSONObjectWriter ().setString ("blob", string).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+              }
+            catch (IOException e)
+              {
+                  should_fail = !should_fail;
+              }
+            assertFalse ("AA", should_fail);
+          }
       }
 
     @Test

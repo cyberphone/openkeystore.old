@@ -31,7 +31,7 @@ public class Base64URL
  ////       ATTRIBUTES      ////
 ///////////////////////////////
 
-    private final static char[] MODIFIED_BASE64 = {
+    public final static char[] MODIFIED_BASE64 = {
     //   0   1   2   3   4   5   6   7
         'A','B','C','D','E','F','G','H', // 0
         'I','J','K','L','M','N','O','P', // 1
