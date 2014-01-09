@@ -152,11 +152,19 @@ public class Base64URL
         if (decoded_length_modulo_3 == 1)
           {
             decoded[j] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
+            if ((semidecoded[i] & 0x0F) != 0)
+              {
+                throw new IOException ("Wrong termination character");
+              }
           }
         else if (decoded_length_modulo_3 == 2)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
+            if ((semidecoded[i] & 0x03) != 0)
+              {
+                throw new IOException ("Wrong termination character");
+              }
           }
         //return results
         return decoded;
