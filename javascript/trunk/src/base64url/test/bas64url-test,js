@@ -54,7 +54,7 @@ for (var i = 0; i < 64; i++)
 	{
 		var string = "A" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
 		should_fail = i % 16 > 0;
-		org.webpki.util.Base64URL.decode (string)
+		org.webpki.util.Base64URL.decode (string);
 	}
 	catch (err)
 	{
@@ -68,7 +68,7 @@ for (var i = 0; i < 64; i++)
 	{
 		var string = "AA" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
 		should_fail = i % 4 > 0;
-		org.webpki.util.Base64URL.decode (string)
+		org.webpki.util.Base64URL.decode (string);
 	}
 	catch (err)
 	{
@@ -79,3 +79,4 @@ for (var i = 0; i < 64; i++)
 		throw "Bad" +i;
 	}
 }
+console.debug ("Done, it worked!");
