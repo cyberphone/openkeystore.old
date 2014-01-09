@@ -1,8 +1,23 @@
-var iarr = new Uint8Array([2,3,6,80,255,34,7,88,99,100,54,3,253,255,254,0,0,1]);
-for (var i = 0; i < iarr.length; i++)
-console.debug (iarr[i]);
-var b64 = org.webpki.util.Base64URL.encode (iarr);
-console.debug (b64);
-var arr = org.webpki.util.Base64URL.decode (b64);
-for (var i = 0; i < arr.length; i++)
-console.debug (arr[i]);
+for (var times = 0; times < 1000; times++)
+{
+	for (var i = 0; i < 10; i++)
+	{
+		var iarr = new Uint8Array(i);
+		for (var j = 0; j < i; j++)
+		{
+			iarr[j] =  Math.floor(Math.random()*256);
+		}
+		for (var q = 0; q < iarr.length; q++)
+		{
+			console.debug (iarr[q]);
+		}
+		var b64 = org.webpki.util.Base64URL.encode (iarr);
+		console.debug ("Base64URL=" + b64);
+		var arr = org.webpki.util.Base64URL.decode (b64);
+		if (arr.length != iarr.length) throw "Length error";
+		for (var q = 0; q < arr.length; q++)
+		{
+			if (arr[q] != iarr[q]) throw "Content error";
+		}
+	}
+}
