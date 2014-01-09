@@ -127,28 +127,33 @@ public class Base64URL
               }
           }
         int decoded_length = (encoded.length / 4) * 3;
-        if (encoded.length % 4 != 0)
+        int encoded_length_modulo_4 = encoded.length % 4; 
+        if (encoded_length_modulo_4 != 0)
           {
-             decoded_length += (encoded.length % 4) - 1;
+             decoded_length += encoded_length_modulo_4 - 1;
           }
         byte[] decoded = new byte[decoded_length];
-        int decoded_length_mod_3 = decoded.length % 3;
-        
+        int decoded_length_modulo_3 = decoded.length % 3;
+        if (decoded_length_modulo_3 == 0 && encoded_length_modulo_4 != 0)
+          {
+              throw new IOException ("Wrong number of Base64URL characters");
+          }
+       
         // -----:  D E C O D E :-----
         int i = 0, j = 0;
         //decode in groups of four bytes
-        while (j < decoded.length - decoded_length_mod_3)
+        while (j < decoded.length - decoded_length_modulo_3)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j++] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
             decoded[j++] = (byte)((semidecoded[i++] << 6) | semidecoded[i++]);
           }
         //decode "odd" bytes
-        if (decoded_length_mod_3 == 1)
+        if (decoded_length_modulo_3 == 1)
           {
             decoded[j] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
           }
-        else if (decoded_length_mod_3 == 2)
+        else if (decoded_length_modulo_3 == 2)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
