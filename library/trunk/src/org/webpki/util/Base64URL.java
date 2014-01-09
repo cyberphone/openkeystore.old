@@ -194,8 +194,8 @@ public class Base64URL
         while (j < uncoded.length - modulo3)
           {
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 2) & 0x3c) | ((uncoded[j] >>> 6) & 0x3)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 2) & 0x3C) | ((uncoded[j] >>> 6) & 0x03)]);
             encoded[i++] = (byte)(MODIFIED_BASE64[uncoded[j++] & 0x3F]);
           }
         //encode  "odd" bytes
@@ -207,8 +207,8 @@ public class Base64URL
         else if (modulo3 == 2)
           {
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
-            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 2) & 0x3c]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 2) & 0x3C]);
           }
         //return results
         return encoded;
