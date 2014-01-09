@@ -19,7 +19,6 @@
  * Encodes/decodes base64URL data.
  * See RFC 4648 Table 2.
  */
-    
 
 org.webpki.util.Base64URL =
 {
@@ -35,7 +34,6 @@ org.webpki.util.Base64URL =
         '4','5','6','7','8','9','-','_'  // 7
      ]
 };
-    
 
       ////////////////////
      ////   DECODE   //// Throws Base64Exception if argument isn't base64URL
@@ -142,15 +140,22 @@ org.webpki.util.Base64URL =
     if (decoded_length_modulo_3 == 1)
     {
         decoded[j] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
+        if (semidecoded[i] & 0x0F)
+        {
+            throw "Base64Exception: wrong termination character";
+        }
     }
     else if (decoded_length_modulo_3 == 2)
     {
         decoded[j++] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
         decoded[j] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
+        if (semidecoded[i] & 0x03)
+        {
+            throw "Base64Exception: wrong termination character";
+        }
     }
     return decoded;
 };
-    
   
       ////////////////////
      ////   ENCODE   //// Does not throw exceptions

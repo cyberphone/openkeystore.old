@@ -23,27 +23,59 @@ for (var times = 0; times < 1000; times++)
 }
 var should_fail = true;
 try
-  {
+{
 	var h = org.webpki.util.Base64URL.decode ("a");
 	should_fail = false;
-  }
+}
 catch (err)
-  {
-  }
+{
+}
 if (!should_fail)
-    {
-		throw "Bad";
-	}
+{
+	throw "Bad";
+}
 should_fail = true;
 try
-  {
+{
 	var h = org.webpki.util.Base64URL.decode ("i+");
 	should_fail = false;
-  }
+}
 catch (err)
-  {
-  }
+{
+}
 if (!should_fail)
-    {
-		throw "Bad";
+{
+	throw "Bad";
+}
+// We are pretty strict, yes...
+for (var i = 0; i < 64; i++)
+{
+	try
+	{
+		var string = "A" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+		should_fail = i % 16 > 0;
+		org.webpki.util.Base64URL.decode (string)
 	}
+	catch (err)
+	{
+		should_fail = !should_fail;
+	}
+	if (should_fail)
+	{
+		throw "Bad" + i;
+	}
+	try
+	{
+		var string = "AA" + org.webpki.util.Base64URL.MODIFIED_BASE64[i]; 
+		should_fail = i % 4 > 0;
+		org.webpki.util.Base64URL.decode (string)
+	}
+	catch (err)
+	{
+		should_fail = !should_fail;
+	}
+	if (should_fail)
+	{
+		throw "Bad" +i;
+	}
+}
