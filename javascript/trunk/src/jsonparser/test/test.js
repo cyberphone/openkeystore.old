@@ -86,11 +86,27 @@ newobjec.setInt ("kirt", 4).setObject ("Obja");
 loopa (newobjec.root);
 new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
-
+var inbin = new Uint8Array ([0,2,99,46,34,97,57,78,9]);
 newobjec = new org.webpki.json.JSONObjectWriter ();
-newobjec.setString ("dri", "dra").setInt ("numbah", 6).setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
+newobjec.setString ("dri", "dra")
+        .setInt ("numbah", 6)
+        .setBinary ("bin", inbin)
+        .setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
+
+var bin = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT)).getBinary ("bin");
+if (bin.length != inbin.length)
+{
+    throw "Lenght";
+}
+for (var i = 0; i < bin.length; i++)
+{
+    if (bin[i] != inbin[i])
+    {
+    throw "Content";
+    }
+}
 
 var signature = org.webpki.json.JSONParser.parse (
 

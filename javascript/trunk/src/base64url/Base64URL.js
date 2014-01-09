@@ -22,7 +22,7 @@
 
 org.webpki.util.Base64URL =
 {
-    MODIFIED_BASE64 :
+    BASE64URL :
     [//  0   1   2   3   4   5   6   7
         'A','B','C','D','E','F','G','H', // 0
         'I','J','K','L','M','N','O','P', // 1
@@ -168,21 +168,21 @@ org.webpki.util.Base64URL =
     var modulo3 = uncoded.length % 3;
     while (i < uncoded.length - modulo3)
     {
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[(uncoded[i] >>> 2) & 0x3F];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[((uncoded[i++] << 2) & 0x3C) | ((uncoded[i] >>> 6) & 0x03)];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[uncoded[i++] & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 2) & 0x3C) | ((uncoded[i] >>> 6) & 0x03)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[uncoded[i++] & 0x3F];
     }
     if (modulo3 == 1)
     {
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[(uncoded[i] >>> 2) & 0x3F];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[(uncoded[i] << 4) & 0x30];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] << 4) & 0x30];
     }
     else if (modulo3 == 2)
     {
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[(uncoded[i] >>> 2) & 0x3F];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
-        encoded += org.webpki.util.Base64URL.MODIFIED_BASE64[(uncoded[i] << 2) & 0x3C];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] << 2) & 0x3C];
     }
     return encoded;
 };

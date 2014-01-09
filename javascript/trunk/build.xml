@@ -69,7 +69,7 @@
     <!-- JSON parser testing -->
   <target name="jsonparser">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,jsonparser/test/*"/>
+       <param name="files" value="jsonparser/*,base64url/*,jsonparser/test/*"/>
     </antcall>
   </target>
   

@@ -19,6 +19,10 @@
 /*                           BigInteger                           */
 /*================================================================*/
 
+// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
+// the only functionality offered is a test for equivalence.  It is anticipated
+// that all cryptographic functions are performed in other and lower layers of
+// the platform.
 
 /* BigInteger */org.webpki.math.BigInteger = function ()
 {

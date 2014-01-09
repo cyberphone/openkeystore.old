@@ -72,12 +72,13 @@
  {
  return ISODateTime.parseDateTime (getString (name));
  }
-
- public byte[] org.webpki.json.JSONObjectReader.prototype.getBinary (String name) throws IOException
+*/
+/* Uint8Array */org.webpki.json.JSONObjectReader.prototype.getBinary = function (/* String */name)
  {
- return Base64URL.getBinaryFromBase64URL (getString (name));
- }
+    return org.webpki.util.Base64URL.decode (this.getString (name));
+ };
 
+ /*
  public BigInteger org.webpki.json.JSONObjectReader.prototype.getBigInteger (String name) throws IOException
  {
  return new BigInteger (_getString (name, org.webpki.json.JSONTypes.INTEGER));

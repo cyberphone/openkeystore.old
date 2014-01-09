@@ -136,12 +136,12 @@
       {
         return setString (name, ISODateTime.formatDateTime (date_time));
       }
-
-    public org.webpki.json.JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
-      {
-        return setString (name, Base64URL.getBase64URLFromBinary (value));
-      }
 */
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
+{
+    return this.setString (name, org.webpki.util.Base64URL.encode (value));
+};
+
 
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
 {
@@ -256,7 +256,8 @@ org.webpki.json.JSONObjectWriter.prototype.setBinaryArray (String name, Vector<b
      */
 
 /*
-    void writeCryptoBinary (BigInteger value, String name) throws IOException
+
+org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value,  String name)
       {
         byte[] crypto_binary = value.toByteArray ();
         if (crypto_binary[0] == 0x00)
