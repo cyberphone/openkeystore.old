@@ -159,7 +159,7 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
       {
-        return setString (name, Base64URL.getBase64URLFromBinary (value));
+        return setString (name, Base64URL.encode (value));
       }
 
     public JSONObjectWriter setObject (String name) throws IOException
@@ -198,7 +198,7 @@ public class JSONObjectWriter implements Serializable
         Vector<String> array = new Vector<String> ();
         for (byte[] value : values)
           {
-            array.add (Base64URL.getBase64URLFromBinary (value));
+            array.add (Base64URL.encode (value));
           }
         return setStringArray (name, array.toArray (new String[0]));
       }

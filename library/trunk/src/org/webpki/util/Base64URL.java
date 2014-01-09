@@ -52,7 +52,7 @@ public class Base64URL
      ////   DECODE   //// Throws IOException if argument isn't base64URL
     ////////////////////
 
-    private static byte[] decode (byte[] encoded) throws IOException
+    private static byte[] decodeInternal (byte[] encoded) throws IOException
       {
         byte[] semidecoded = new byte[encoded.length];
         for (int i = 0; i < encoded.length; i++)
@@ -126,25 +126,29 @@ public class Base64URL
                 default: throw new IOException("Not valid Base64URL data (bad byte at index " + i);
               }
           }
-        byte[] decoded;
-        if (encoded.length % 4 != 0) decoded = new byte[(encoded.length / 4) * 3 + (encoded.length % 4) - 1];
-        else decoded = new byte[(encoded.length / 4) * 3];
+        int decoded_length = (encoded.length / 4) * 3;
+        if (encoded.length % 4 != 0)
+          {
+             decoded_length += (encoded.length % 4) - 1;
+          }
+        byte[] decoded = new byte[decoded_length];
+        int decoded_length_mod_3 = decoded.length % 3;
         
         // -----:  D E C O D E :-----
         int i = 0, j = 0;
         //decode in groups of four bytes
-        while(j < decoded.length - (decoded.length % 3))
+        while (j < decoded.length - decoded_length_mod_3)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j++] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
             decoded[j++] = (byte)((semidecoded[i++] << 6) | semidecoded[i++]);
           }
         //decode "odd" bytes
-        if(decoded.length % 3 == 1)
+        if (decoded_length_mod_3 == 1)
           {
             decoded[j] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
           }
-        else if (decoded.length % 3 == 2)
+        else if (decoded_length_mod_3 == 2)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
@@ -161,16 +165,16 @@ public class Base64URL
      * or if the input String contains characters
      * other than ASCII8.
      */
-    public static byte[] getBinaryFromBase64URL (String base64url) throws IOException
+    public static byte[] decode (String base64url) throws IOException
       {
-        return decode (base64url.getBytes ("UTF-8"));
+        return decodeInternal (base64url.getBytes ("UTF-8"));
       }
     
       ////////////////////
      ////   ENCODE   //// Does not throw exceptions
     ////////////////////
 
-    private static byte[] encode (byte[] uncoded)
+    private static byte[] encodeInternal (byte[] uncoded)
       {
         //determine length of output
         int i;
@@ -216,11 +220,11 @@ public class Base64URL
      * @param binary_blob uncoded data
      * @return encoded data as a String
      */
-    public static String getBase64URLFromBinary (byte[] binary_blob)
+    public static String encode (byte[] binary_blob)
       {
         try
           {
-            return new String (encode (binary_blob), "UTF-8");
+            return new String (encodeInternal (binary_blob), "UTF-8");
           }
         catch (IOException e)
           {

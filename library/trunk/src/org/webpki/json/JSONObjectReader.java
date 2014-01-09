@@ -96,7 +96,7 @@ public class JSONObjectReader implements Serializable
 
     public byte[] getBinary (String name) throws IOException
       {
-        return Base64URL.getBinaryFromBase64URL (getString (name));
+        return Base64URL.decode (getString (name));
       }
 
     public BigInteger getBigInteger (String name) throws IOException
@@ -229,7 +229,7 @@ public class JSONObjectReader implements Serializable
         Vector<byte[]> blobs = new Vector<byte[]> ();
         for (String blob : getStringArray (name))
           {
-            blobs.add (Base64URL.getBinaryFromBase64URL (blob));
+            blobs.add (Base64URL.decode (blob));
           }
         return blobs;
       }
