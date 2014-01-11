@@ -7,10 +7,6 @@ for (var times = 0; times < 1000; times++)
 		{
 			iarr[j] =  Math.floor(Math.random()*256);
 		}
-		for (var q = 0; q < iarr.length; q++)
-		{
-			console.debug (iarr[q]);
-		}
 		var b64 = org.webpki.util.Base64URL.encode (iarr);
 		console.debug ("Base64URL=" + b64);
 		var arr = org.webpki.util.Base64URL.decode (b64);

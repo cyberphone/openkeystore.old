@@ -69,7 +69,7 @@
     <!-- JSON parser testing -->
   <target name="jsonparser">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,base64url/*,jsonparser/test/*"/>
+       <param name="files" value="jsonparser/*,biginteger/*,base64url/*,jsonparser/test/*"/>
     </antcall>
   </target>
   
@@ -83,7 +83,7 @@
      <!-- BigInteger testing -->
   <target name="base64url">
     <antcall target="test">
-       <param name="files" value="biginteger/*,base64url/*,base64url/test/*"/>
+       <param name="files" value="base64url/*,base64url/test/*"/>
     </antcall>
   </target>
   
