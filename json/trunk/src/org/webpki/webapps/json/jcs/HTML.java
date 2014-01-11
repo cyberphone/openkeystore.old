@@ -141,9 +141,9 @@ public class HTML
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width=\"300px\">" +
                    "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS (JSON Clear Text Signature)<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/verify\">Verify a JCS with a browser</a></td></tr>" +
+                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/verify\">Verify a JCS on the server</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/create\">Create a JCS using a browser</a></td></tr>" +
+                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/create\">Create a JCS on the server</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\">URL for testing with a client device: <a href=\"" + request_url + "\">" + request_url + "</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +

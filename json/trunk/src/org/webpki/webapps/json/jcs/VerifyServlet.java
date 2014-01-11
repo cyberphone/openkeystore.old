@@ -53,6 +53,6 @@ public class VerifyServlet extends HttpServlet
         String json = request.getParameter (RequestServlet.JCS_ARGUMENT);
         response.sendRedirect (ServletUtil.getContextURL (request) + 
                                "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                               Base64URL.getBase64URLFromBinary (json.getBytes ("UTF-8")));
+                               Base64URL.encode (json.getBytes ("UTF-8")));
       }
   }

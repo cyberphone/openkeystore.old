@@ -46,7 +46,7 @@ public class CreateServlet extends HttpServlet
             byte[] signed_json = new MySignature ().sign (new JSONObjectWriter (JSONParser.parse (json_object)), action);
             response.sendRedirect (ServletUtil.getContextURL (request) + 
                                    "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                                   Base64URL.getBase64URLFromBinary (signed_json));
+                                   Base64URL.encode (signed_json));
           }
         catch (IOException e)
           {

@@ -72,7 +72,7 @@ public class RequestServlet extends HttpServlet
           }
         try
           {
-            verifySignature (request, response, Base64URL.getBinaryFromBase64URL (json));
+            verifySignature (request, response, Base64URL.decode (json));
           }
         catch (IOException e)
           {
