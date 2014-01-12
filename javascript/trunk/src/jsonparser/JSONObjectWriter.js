@@ -136,6 +136,15 @@
     return value;
 };
 
+/* String */org.webpki.json.JSONObjectWriter._boolTest = function (/* boolean */value)
+{
+    if (typeof value != "boolean")
+    {
+        org.webpki.json.JSONError._error ("Bad bool type " + (typeof value));
+    }
+    return value.toString ();
+};
+
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDouble = function (/* String */name, /* double */value)
 {
     return this._setProperty (name, 
@@ -158,7 +167,9 @@
 
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
 {
-    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.BOOLEAN, value.toString ()));
+    return this._setProperty (name, 
+                              new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.BOOLEAN,
+                                                             org.webpki.json.JSONObjectWriter._boolTest (value)));
 };
 
 /*

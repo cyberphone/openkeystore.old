@@ -71,26 +71,30 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
     return org.webpki.math.BigInteger.fromString (this._get (org.webpki.json.JSONTypes.INTEGER));
 };
 
+//No real support for BigDecimal but at least text parsing is performed
+
 /* public BigDecimal */org.webpki.json.JSONArrayReader.prototype.getBigDecimal = function ()
 {
-    return new this, _get (org.webpki.json.JSONTypes.DECIMAL);
+    return this._get (org.webpki.json.JSONTypes.DECIMAL);
 };
 /*
  public GregorianCalendar getDateTime () throws IOException
  {
  return ISODateTime.parseDateTime (getString ());
  }
+ */
 
  /* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
  {
      return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
  };
-/*
- public boolean getBoolean () throws IOException
- {
- return new Boolean ((String) get (org.webpki.json.JSONTypes.BOOLEAN));
- }
 
+ /* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
+ {
+     return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
+ };
+
+ /*
  public boolean getIfNULL () throws IOException
  {
  if (getElementType () == org.webpki.json.JSONTypes.NULL)

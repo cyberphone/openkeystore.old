@@ -83,7 +83,7 @@
      return org.webpki.math.BigInteger.fromString (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
 };
 
-//No real support for BigDecimal but at least text parsing is performed
+// No real support for BigDecimal but at least text parsing is performed
 
 /* public BigDecimal */org.webpki.json.JSONObjectReader.prototype.getBigDecimal = function (/* String */name)
  {

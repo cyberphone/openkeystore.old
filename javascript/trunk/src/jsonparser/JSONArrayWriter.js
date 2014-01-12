@@ -45,11 +45,11 @@
     return this.setBigInteger (value.getLong ());
 };
 
-//No real support for BigDecimal but at least text parsing is performed
+// No real support for BigDecimal but at least text parsing is performed
 
 /* public org.webpki.json.JSONArrayWriter */ org.webpki.json.JSONArrayWriter.prototype.setBigDecimal = function (/* BigDecimal */value)
 {
-    return this._add (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter.bigDecimalTest (value));
+    return this._add (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value));
 };
 
 /* public org.webpki.json.JSONArrayWriter*/org.webpki.json.JSONArrayWriter.prototype.setBigInteger = function (/* BigInteger */value)
@@ -61,12 +61,13 @@
 {
     return this._add (org.webpki.json.JSONTypes.DOUBLE, org.webpki.json.JSONObjectWriter._doubleTest (value));
 };
-/*
-    public org.webpki.json.JSONArrayWriter setBoolean (boolean value) throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.BOOLEAN, Boolean.toString (value));
-      }
 
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setBoolean = function (/* boolean */value)
+{
+    return this._add (org.webpki.json.JSONTypes.BOOLEAN, org.webpki.json.JSONObjectWriter._boolTest (value));
+};
+
+/*
     public org.webpki.json.JSONArrayWriter setNULL () throws IOException
       {
         return add (org.webpki.json.JSONTypes.NULL, "null");

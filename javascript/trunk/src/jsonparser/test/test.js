@@ -98,6 +98,8 @@ var arr_writer = newobjec.setString ("dri", "dra")
         .setBinary ("bin", inbin)
         .setBigInteger ("bigint", really_bigint)
         .setDouble ("double", double_trouble)
+        .setBoolean ("bool", true)
+        .setBoolean ("bool2", false)
         .setLong ("long", a_long_one)
         .setBigDecimal ("bigdec", big_dec)
         
@@ -105,6 +107,9 @@ var arr_writer = newobjec.setString ("dri", "dra")
 arr_writer.setBigInteger (really_bigint);
 arr_writer.setInt (45);
 arr_writer.setLong (a_long_one);
+arr_writer.setBigDecimal (big_dec);
+arr_writer.setBoolean (true);
+arr_writer.setBoolean (false);
 arr_writer.setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
@@ -125,6 +130,10 @@ if (reader.getBigDecimal ("bigdec") != big_dec)
 {
     throw "BigDec";
 }
+if (!reader.getBoolean ("bool") || reader.getBoolean ("bool2"))
+{
+    throw "Bool";
+}
 var bin = reader.getBinary ("bin");
 if (bin.length != inbin.length)
 {
@@ -143,6 +152,9 @@ if (!arr_reader.getString ().equals (big_string) ||
     !arr_reader.getBigInteger ().equals (really_bigint) ||
     arr_reader.getInt () != 45 ||
     !arr_reader.getLong ().equals (a_long_one) ||
+    arr_reader.getBigDecimal () != big_dec ||
+    !arr_reader.getBoolean () ||
+    arr_reader.getBoolean () ||
     arr_reader.getDouble () != double_trouble ||
     arr_reader.hasMore ())
 {
