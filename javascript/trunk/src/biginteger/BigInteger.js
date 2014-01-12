@@ -20,7 +20,7 @@
 /*================================================================*/
 
 // The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
-// the only functionality offered is a test for equivalence.  It is anticipated
+// the only functionality offered are tests for equivalence and zero.  It is anticipated
 // that all cryptographic functions are performed in other and lower layers of
 // the platform.  Only positive values (and zero) are currently supported.
 
@@ -81,7 +81,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     throw "MATHException: " + message;
 };
 
-/* bool*/ org.webpki.math.BigInteger._isZero = function (/* Uint8Array */byte_array)
+/* bool*/ org.webpki.math.BigInteger.isZero = function (/* Uint8Array */byte_array)
 {
     for (var i = 0; i < byte_array.length; i++)
     {
@@ -225,7 +225,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         var digit = org.webpki.math.BigInteger._getNextDigit (divisor, base);
         reversed_string += String.fromCharCode (digit + (digit > 9 ? 55 : 48));
     }
-    while (!org.webpki.math.BigInteger._isZero (divisor))
+    while (!org.webpki.math.BigInteger.isZero (divisor))
   
     var result = "";
     var i = reversed_string.length;
