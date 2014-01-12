@@ -22,6 +22,17 @@ if (!org.webpki.math.BigInteger.fromString ("000000").isZero () || !org.webpki.m
 {
     throw "ZERO TEST!";
 }
+org.webpki.math.BigInteger.fromString ("1000000000000000",16).longTest ();
+var long = true;
+try
+{
+    org.webpki.math.BigInteger.fromString ("10000000000000001",16).longTest ();
+}
+catch (exp)
+{
+    long = !long;
+}
+if (long) throw "NOT LONG";
 function runit (base)
 {
     for (var times = 0; times < 100; times++)

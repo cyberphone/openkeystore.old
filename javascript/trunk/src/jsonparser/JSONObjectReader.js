@@ -57,9 +57,11 @@
     return parseInt (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
 };
 
-/* public long */org.webpki.json.JSONObjectReader.prototype.getLong = function (/* String */name)
+/* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getLong = function (/* String */name)
 {
-    return parseInt (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
+    var big_integer = this.getBigInteger (name);
+    big_integer.longTest ();
+    return big_integer;
 };
 
 /* public boolean */org.webpki.json.JSONObjectReader.prototype.getBoolean = function (/* String */name)
@@ -78,11 +80,12 @@
     return org.webpki.util.Base64URL.decode (this.getString (name));
  };
 
+/* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getBigInteger = function (/* String */name)
+{
+     return org.webpki.math.BigInteger.fromString (_getString (name, org.webpki.json.JSONTypes.INTEGER));
+};
+
  /*
- public BigInteger org.webpki.json.JSONObjectReader.prototype.getBigInteger (String name) throws IOException
- {
- return new BigInteger (_getString (name, org.webpki.json.JSONTypes.INTEGER));
- }
 
  public BigDecimal org.webpki.json.JSONObjectReader.prototype.getBigDecimal (String name) throws IOException
  {
