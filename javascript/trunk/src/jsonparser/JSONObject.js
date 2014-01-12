@@ -25,7 +25,7 @@ org.webpki.json.JSONObject = function ()
     this.read_flag = new Object ();
 };
 
-/* void */org.webpki.json.JSONObject.prototype._addProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
+/* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
 {
     if (!(value instanceof org.webpki.json.JSONValue))
     {

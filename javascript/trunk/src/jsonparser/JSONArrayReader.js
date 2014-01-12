@@ -61,14 +61,14 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
     return parseInt (/* (String) */this._get (org.webpki.json.JSONTypes.INTEGER));
 };
 
-/* public long */org.webpki.json.JSONArrayReader.prototype.getLong = function ()
+/* BigInteger */org.webpki.json.JSONArrayReader.prototype.getLong = function ()
 {
-    return this._get (org.webpki.json.JSONTypes.INTEGER);
+    return this.getBigInteger ().getLong ();
 };
 
 /* public BigInteger */org.webpki.json.JSONArrayReader.prototype.getBigInteger = function ()
 {
-    return this._get (org.webpki.json.JSONTypes.INTEGER);
+    return org.webpki.math.BigInteger.fromString (this._get (org.webpki.json.JSONTypes.INTEGER));
 };
 
 /* public BigDecimal */org.webpki.json.JSONArrayReader.prototype.getBigDecimal = function ()
@@ -81,11 +81,11 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
  return ISODateTime.parseDateTime (getString ());
  }
 
- public double getDouble () throws IOException
+ /* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
  {
- return new Double ((String) get (org.webpki.json.JSONTypes.DOUBLE));
- }
-
+     return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
+ };
+/*
  public boolean getBoolean () throws IOException
  {
  return new Boolean ((String) get (org.webpki.json.JSONTypes.BOOLEAN));

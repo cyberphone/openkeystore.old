@@ -106,7 +106,7 @@ org.webpki.json.JSONParser = function ()
             default:
                 value = this._scanSimpleType ();
         }
-        holder._addProperty (name, value);
+        holder._setProperty (name, value);
     }
     this._scan ();
     return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, holder);

@@ -37,30 +37,29 @@
 
 /* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setInt = function (/* int */value)
 {
-    return this._add (org.webpki.json.JSONTypes.INTEGER, value);
+    return this._add (org.webpki.json.JSONTypes.INTEGER, org.webpki.json.JSONObjectWriter._intTest (value));
 };
 
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setLong = function (/* BigInteger */value)
+{
+    return this.setBigInteger (value.getLong ());
+};
 /*
-    public org.webpki.json.JSONArrayWriter setLong (long value) throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.INTEGER, Long.toString (value));
-      }
-
     public org.webpki.json.JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
       {
         return add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
       }
+*/
+/* public org.webpki.json.JSONArrayWriter*/org.webpki.json.JSONArrayWriter.prototype.setBigInteger = function (/* BigInteger */value)
+{
+    return this._add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
+};
 
-    public org.webpki.json.JSONArrayWriter setBigInteger (BigInteger value) throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
-      }
-
-    public org.webpki.json.JSONArrayWriter setDouble (double value) throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.DOUBLE, Double.toString (value));
-      }
-
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setDouble = function (/* double */value)
+{
+    return this._add (org.webpki.json.JSONTypes.DOUBLE, org.webpki.json.JSONObjectWriter._doubleTest (value));
+};
+/*
     public org.webpki.json.JSONArrayWriter setBoolean (boolean value) throws IOException
       {
         return add (org.webpki.json.JSONTypes.BOOLEAN, Boolean.toString (value));
@@ -75,7 +74,7 @@
       {
         return setString (ISODateTime.formatDateTime (date_time));
       }
-
+*/
 /* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
 {
     /* Vector<org.webpki.json.JSONValue> */var new_array = [] /* new Vector<org.webpki.json.JSONValue> () */;

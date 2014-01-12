@@ -22,11 +22,11 @@ if (!org.webpki.math.BigInteger.fromString ("000000").isZero () || !org.webpki.m
 {
     throw "ZERO TEST!";
 }
-org.webpki.math.BigInteger.fromString ("1000000000000000",16).longTest ();
+org.webpki.math.BigInteger.fromString ("1000000000000000",16).getLong ();
 var long = true;
 try
 {
-    org.webpki.math.BigInteger.fromString ("10000000000000001",16).longTest ();
+    org.webpki.math.BigInteger.fromString ("10000000000000001",16).getlong ();
 }
 catch (exp)
 {

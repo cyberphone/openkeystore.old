@@ -59,9 +59,7 @@
 
 /* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getLong = function (/* String */name)
 {
-    var big_integer = this.getBigInteger (name);
-    big_integer.longTest ();
-    return big_integer;
+    return this.getBigInteger (name).getLong ();
 };
 
 /* public boolean */org.webpki.json.JSONObjectReader.prototype.getBoolean = function (/* String */name)

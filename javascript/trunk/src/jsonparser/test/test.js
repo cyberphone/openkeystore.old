@@ -16,14 +16,14 @@
  */
 
 var jo = new org.webpki.json.JSONObject ();
-jo._addProperty("one", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
-jo._addProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "hi"));
+jo._setProperty("one", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
+jo._setProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "hi"));
 console.debug ("T=" + jo._getProperty ("two").type.enumvalue + " V="+ jo._getProperty ("two").value);
-//jo._addProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
+//jo._setProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
 var jo1 = new org.webpki.json.JSONObject ();
-jo1._addProperty("one1", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 4));
-jo1._addProperty("two2", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jo));
-jo1._addProperty("tree", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "ghghg"));
+jo1._setProperty("one1", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 4));
+jo1._setProperty("two2", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jo));
+jo1._setProperty("tree", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "ghghg"));
 console.debug ("l1=" + jo1.property_list.length);
 console.debug ("l=" + jo.property_list.length);
 
@@ -89,13 +89,21 @@ new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse ('{"hello
 var inbin = new Uint8Array ([0,2,99,46,34,97,57,78,9]);
 var really_bigint = org.webpki.math.BigInteger.fromString ("20468687687668767676866876876876768768768768768767687687687687676709");
 var a_long_one = org.webpki.math.BigInteger.fromString ("FF00000000000000", 16);
+var double_trouble = 2.3e-25;
+var big_string = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija";
 newobjec = new org.webpki.json.JSONObjectWriter ();
-newobjec.setString ("dri", "dra")
+var arr_writer = newobjec.setString ("dri", "dra")
         .setInt ("numbah", 6)
         .setBinary ("bin", inbin)
         .setBigInteger ("bigint", really_bigint)
+        .setDouble ("double", double_trouble)
         .setLong ("long", a_long_one)
-        .setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
+        
+        .setArray ("arry").setString (big_string);
+arr_writer.setBigInteger (really_bigint);
+arr_writer.setInt (45);
+arr_writer.setLong (a_long_one);
+arr_writer.setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
 var reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
@@ -106,6 +114,10 @@ if (!reader.getBigInteger ("bigint").equals (really_bigint))
 if (!reader.getLong ("long").equals (a_long_one))
 {
     throw "Long";
+}
+if (reader.getDouble ("double") != double_trouble)
+{
+    throw "Double";
 }
 var bin = reader.getBinary ("bin");
 if (bin.length != inbin.length)
@@ -118,6 +130,17 @@ for (var i = 0; i < bin.length; i++)
     {
     throw "Content";
     }
+}
+var arr_reader = reader.getArray ("arry");
+if (!arr_reader.getString ().equals (big_string) ||
+    !arr_reader.hasMore () ||
+    !arr_reader.getBigInteger ().equals (really_bigint) ||
+    arr_reader.getInt () != 45 ||
+    !arr_reader.getLong ().equals (a_long_one) ||
+    arr_reader.getDouble () != double_trouble ||
+    arr_reader.hasMore ())
+{
+    throw "ARRAY";
 }
 
 var signature = org.webpki.json.JSONParser.parse (

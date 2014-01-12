@@ -98,12 +98,13 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     return org.webpki.math.BigInteger._isZero (this.value);
 };
 
-/* void */ org.webpki.math.BigInteger.prototype.longTest = function ()
+/* BigInteger */ org.webpki.math.BigInteger.prototype.getLong = function ()
 {
     if (this.value.length > 8)
     {
         org.webpki.math.BigInteger._error ("Out of \"Long\" range");
     }
+    return this;
 };
 
 /* void */org.webpki.math.BigInteger._setSmallValue = function (/* Uint8Array */byte_array, /* int*/value)
