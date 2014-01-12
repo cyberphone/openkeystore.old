@@ -18,6 +18,10 @@ if (org.webpki.math.BigInteger.fromString ("000000").getByteArray ().length != 1
 {
     throw "LEADING ZERO BIN!";
 }
+if (!org.webpki.math.BigInteger.fromString ("000000").isZero () || !org.webpki.math.BigInteger.fromString ("0").isZero ())
+{
+    throw "ZERO TEST!";
+}
 function runit (base)
 {
     for (var times = 0; times < 100; times++)
