@@ -82,7 +82,7 @@
 
 /* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getBigInteger = function (/* String */name)
 {
-     return org.webpki.math.BigInteger.fromString (_getString (name, org.webpki.json.JSONTypes.INTEGER));
+     return org.webpki.math.BigInteger.fromString (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
 };
 
  /*

@@ -87,18 +87,30 @@ loopa (newobjec.root);
 new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 var inbin = new Uint8Array ([0,2,99,46,34,97,57,78,9]);
+var really_bigint = org.webpki.math.BigInteger.fromString ("20468687687668767676866876876876768768768768768767687687687687676709");
+var a_long_one = org.webpki.math.BigInteger.fromString ("FF00000000000000", 16);
 newobjec = new org.webpki.json.JSONObjectWriter ();
 newobjec.setString ("dri", "dra")
         .setInt ("numbah", 6)
         .setBinary ("bin", inbin)
+        .setBigInteger ("bigint", really_bigint)
+        .setLong ("long", a_long_one)
         .setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
-
-var bin = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT)).getBinary ("bin");
+var reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+if (!reader.getBigInteger ("bigint").equals (really_bigint))
+{
+    throw "BigInit";
+}
+if (!reader.getLong ("long").equals (a_long_one))
+{
+    throw "Long";
+}
+var bin = reader.getBinary ("bin");
 if (bin.length != inbin.length)
 {
-    throw "Lenght";
+    throw "Length";
 }
 for (var i = 0; i < bin.length; i++)
 {
