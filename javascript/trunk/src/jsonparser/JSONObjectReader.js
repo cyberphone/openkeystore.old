@@ -83,13 +83,13 @@
      return org.webpki.math.BigInteger.fromString (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
 };
 
- /*
+//No real support for BigDecimal but at least text parsing is performed
 
- public BigDecimal org.webpki.json.JSONObjectReader.prototype.getBigDecimal (String name) throws IOException
+/* public BigDecimal */org.webpki.json.JSONObjectReader.prototype.getBigDecimal = function (/* String */name)
  {
- return new BigDecimal (_getString (name, org.webpki.json.JSONTypes.DECIMAL));
- }
- */
+    return this._getString (name, org.webpki.json.JSONTypes.DECIMAL);
+ };
+
 
 /* public double */org.webpki.json.JSONObjectReader.prototype.getDouble = function (/* String */name)
 {

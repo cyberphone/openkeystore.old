@@ -44,12 +44,14 @@
 {
     return this.setBigInteger (value.getLong ());
 };
-/*
-    public org.webpki.json.JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
-      }
-*/
+
+//No real support for BigDecimal but at least text parsing is performed
+
+/* public org.webpki.json.JSONArrayWriter */ org.webpki.json.JSONArrayWriter.prototype.setBigDecimal = function (/* BigDecimal */value)
+{
+    return this._add (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter.bigDecimalTest (value));
+};
+
 /* public org.webpki.json.JSONArrayWriter*/org.webpki.json.JSONArrayWriter.prototype.setBigInteger = function (/* BigInteger */value)
 {
     return this._add (org.webpki.json.JSONTypes.INTEGER, value.toString ());

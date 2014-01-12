@@ -120,6 +120,22 @@
     return value.toString ();
 };
 
+/* String */org.webpki.json.JSONObjectWriter._bigDecimalTest = function (/* BigDecimal */value)
+{
+    if (typeof value != "string")
+    {
+        org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
+    }
+    var jp = new org.webpki.json.JSONParser ();
+    if (!jp.INTEGER_PATTERN.test (value) &&
+        (!jp.DECIMAL_INITIAL_PATTERN.test (value) || 
+         jp.DECIMAL_2DOUBLE_PATTERN.test (value)))
+    {
+        org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
+    }
+    return value;
+};
+
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDouble = function (/* String */name, /* double */value)
 {
     return this._setProperty (name, 
@@ -133,12 +149,12 @@
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, value.toString ()));
 };
 
-/*
-    public org.webpki.json.JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
-      {
-        return setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DECIMAL, value.toString ()));
-      }
-*/
+// No real support for BigDecimal but at least text parsing is performed
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigDecimal = function (/* String */name, /* BigDecimal */value)
+{
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value)));
+};
 
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
 {

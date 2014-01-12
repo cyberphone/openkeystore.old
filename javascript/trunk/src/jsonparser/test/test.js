@@ -90,6 +90,7 @@ var inbin = new Uint8Array ([0,2,99,46,34,97,57,78,9]);
 var really_bigint = org.webpki.math.BigInteger.fromString ("20468687687668767676866876876876768768768768768767687687687687676709");
 var a_long_one = org.webpki.math.BigInteger.fromString ("FF00000000000000", 16);
 var double_trouble = 2.3e-25;
+var big_dec = "3500000000000000000000000000.56";
 var big_string = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija";
 newobjec = new org.webpki.json.JSONObjectWriter ();
 var arr_writer = newobjec.setString ("dri", "dra")
@@ -98,6 +99,7 @@ var arr_writer = newobjec.setString ("dri", "dra")
         .setBigInteger ("bigint", really_bigint)
         .setDouble ("double", double_trouble)
         .setLong ("long", a_long_one)
+        .setBigDecimal ("bigdec", big_dec)
         
         .setArray ("arry").setString (big_string);
 arr_writer.setBigInteger (really_bigint);
@@ -118,6 +120,10 @@ if (!reader.getLong ("long").equals (a_long_one))
 if (reader.getDouble ("double") != double_trouble)
 {
     throw "Double";
+}
+if (reader.getBigDecimal ("bigdec") != big_dec)
+{
+    throw "BigDec";
 }
 var bin = reader.getBinary ("bin");
 if (bin.length != inbin.length)
