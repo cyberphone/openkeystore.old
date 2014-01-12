@@ -6,14 +6,18 @@ console.debug (bigint.toString ());
 console.debug (org.webpki.math.BigInteger.fromString (679).toString (16));
 console.debug (org.webpki.math.BigInteger.fromString ("abcdef013456789", 16).toString (16));
 
-
-var bi = org.webpki.math.BigInteger.fromString ("7");
-//console.debug (bi.getByteArray ());
-//org.webpki.math.BigInteger._error ("Bla");
-
-var a = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-//console.debug (a.BYTES_PER_ELEMENT);
-
+if (org.webpki.math.BigInteger.fromString ("0").toString () != "0")
+{
+    throw "ZERO!";
+}
+if (org.webpki.math.BigInteger.fromString ("01").toString () != "1")
+{
+    throw "LEADING ZERO!";
+}
+if (org.webpki.math.BigInteger.fromString ("000000").getByteArray ().length != 1)
+{
+    throw "LEADING ZERO BIN!";
+}
 function runit (base)
 {
     for (var times = 0; times < 100; times++)
@@ -27,7 +31,7 @@ function runit (base)
             }
             var bigint = new org.webpki.math.BigInteger (iarr);
             var string = bigint.toString (base);
-            console.debug ("Value=" + string);
+//            console.debug ("Value=" + string);
             var bigint2 = org.webpki.math.BigInteger.fromString (string, base);
             var arr = bigint2.getByteArray ();
             var offset = 0;
@@ -35,18 +39,15 @@ function runit (base)
             {
                 offset++;
             }
-            if (offset == 0 && !bigint.equals (bigint2))
+            if (iarr.length - offset != bigint.getByteArray ().length) throw "Zero error";
+            if (!bigint.equals (bigint2))
             {
                 throw "Equals failed";
-            }
-            if (arr.length != (iarr.length - offset)) throw "Length error" + arr.length;
-            for (var q = 0; q < arr.length; q++)
-            {
-                if (arr[q] != iarr[q + offset]) throw "Content error";
             }
         }
     }
 }
 runit (16);
 runit (10);
+console.debug ("We did it!");
 

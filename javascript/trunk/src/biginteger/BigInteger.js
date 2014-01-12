@@ -22,16 +22,42 @@
 // The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
 // the only functionality offered is a test for equivalence.  It is anticipated
 // that all cryptographic functions are performed in other and lower layers of
-// the platform.
+// the platform.  Only positive values (and zero) are currently supported.
 
-/* BigInteger */org.webpki.math.BigInteger = function (optional_value)
+/* BigInteger */org.webpki.math.BigInteger = function (/* Uint8Array */optional_value)
 {
-    this.value = optional_value === undefined ? null : optional_value;
+    if (optional_value === undefined)
+    {
+        this.value = null;
+    }
+    else
+    {
+        this.value = optional_value;
+        this._trim ();
+    }
 };
 
 org.webpki.math.BigInteger._error = function (message)
 {
     throw "MATHException: " + message;
+};
+
+/* void */org.webpki.math.BigInteger.prototype._trim = function ()
+{
+    var offset = 0;
+    while (this.value[offset] == 0 && offset < (this.value.length - 1))
+    {
+        offset++;
+    }
+    if (offset != 0)
+    {
+        var trimmed = new Uint8Array (this.value.length - offset);
+        for (var q = 0; q < trimmed.length; q++)
+        {
+            trimmed[q] = this.value[q + offset];
+        }
+        this.value = trimmed;
+    }
 };
 
 org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
@@ -55,11 +81,11 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     throw "MATHException: " + message;
 };
 
-/* bool*/ org.webpki.math.BigInteger._isZero = function (bigint)
+/* bool*/ org.webpki.math.BigInteger._isZero = function (/* Uint8Array */byte_array)
 {
-    for (var i = 0; i < bigint.length; i++)
+    for (var i = 0; i < byte_array.length; i++)
     {
-        if (bigint[i] != 0)
+        if (byte_array[i] != 0)
         {
             return false;
         }
@@ -67,17 +93,17 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     return true;
 };
 
-/* void */org.webpki.math.BigInteger._setSmallValue = function (/* Unit8Array*/bigint, /* int*/value)
+/* void */org.webpki.math.BigInteger._setSmallValue = function (/* Uint8Array */byte_array, /* int*/value)
 {
-    var i = bigint.length;
-    bigint[--i] = value;
+    var i = byte_array.length;
+    byte_array[--i] = value;
     while (--i >= 0)
     {
-        bigint[i] = 0;
+        byte_array[i] = 0;
     }
 };
 
-/* int */org.webpki.math.BigInteger._getNextDigit = function (/* Unit8Array*/dividend, /* int*/divisor)
+/* int */org.webpki.math.BigInteger._getNextDigit = function (/* Uint8Array */dividend, /* int*/divisor)
 {
     var remainder = 0;
     for (var i = 0; i < dividend.length; i++)
@@ -151,6 +177,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     {
         bi.value [result.length - i - 1] = result[i];
     }
+    bi._trim ();
     return bi;
 };
 
@@ -163,7 +190,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     return this.value;
 };
 
-/* boolean */org.webpki.math.BigInteger.prototype.equals = function (big_integer)
+/* boolean */org.webpki.math.BigInteger.prototype.equals = function (/* BigInteger */big_integer)
 {
     if (!this.value || !big_integer.value) 
     {
@@ -183,29 +210,6 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     return true;
 };
 
-/* Uint8Array */org.webpki.math.BigInteger.prototype._getDivisor = function (index)
-{
-    var divisor = new Uint8Array (this.value.length + 1);
-    var last = divisor.length - 1;
-    for (var i = 0; i < divisor.length; i++)
-    {
-        divisor[i] = 0;
-    }
-    divisor[last] = 1;
-    for (var i = 0; i < index; i++)
-    {
-        var carry = 0;
-        var j = divisor.length;
-        while (--j >= 0)
-        {
-            var bigres = this.base * divisor[j] + carry;
-            bigres -= (carry = Math.floor (bigres / 256)) * 256;
-            divisor[j] = bigres;
-        }
-    }
-    return divisor;
-};
-
 /* String */org.webpki.math.BigInteger.prototype.toString = function (/* int */optional_10_or_16_base)
 {
     if (!this.value)
@@ -213,22 +217,21 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         org.webpki.math.BigInteger._error ("BigInteger not initialized");
     }
     var base = org.webpki.math.BigInteger._base (/* int */optional_10_or_16_base);
-    if (org.webpki.math.BigInteger._isZero (this.value))
+
+    var reversed_string = "";
+    var divisor = new Uint8Array (this.value);
+    do
     {
-        return "0";
+        var digit = org.webpki.math.BigInteger._getNextDigit (divisor, base);
+        reversed_string += String.fromCharCode (digit + (digit > 9 ? 55 : 48));
     }
-    var temp_string = "";
-    var result = new Uint8Array (this.value);
-    while (!org.webpki.math.BigInteger._isZero (result))
-    {
-        var digit = org.webpki.math.BigInteger._getNextDigit (result, base);
-        temp_string += String.fromCharCode (digit + (digit > 9 ? 55 : 48));
-    }
-    var the_string = "";
-    var i = temp_string.length;
+    while (!org.webpki.math.BigInteger._isZero (divisor))
+  
+    var result = "";
+    var i = reversed_string.length;
     while (--i >= 0)
     {
-        the_string += temp_string.charAt (i);
+        result += reversed_string.charAt (i);
     }
-    return the_string;
+    return result;
 };
