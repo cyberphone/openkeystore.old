@@ -37,7 +37,7 @@ class JSONObject implements Serializable
       {
       }
 
-    void addProperty (String name, JSONValue value) throws IOException
+    void setProperty (String name, JSONValue value) throws IOException
       {
         if (name.length () == 0)
           {

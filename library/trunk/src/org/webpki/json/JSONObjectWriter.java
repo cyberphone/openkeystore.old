@@ -101,9 +101,9 @@ public class JSONObjectWriter implements Serializable
         this.root = root;
       }
     
-    JSONObjectWriter addProperty (String name, JSONValue value) throws IOException
+    JSONObjectWriter setProperty (String name, JSONValue value) throws IOException
       {
-        root.addProperty (name, value);
+        root.setProperty (name, value);
         return this;
       }
 
@@ -114,42 +114,42 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setString (String name, String value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.STRING, value));
+        return setProperty (name, new JSONValue (JSONTypes.STRING, value));
       }
 
     public JSONObjectWriter setInt (String name, int value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
       }
 
     public JSONObjectWriter setLong (String name, long value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
       }
 
     public JSONObjectWriter setDouble (String name, double value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.DOUBLE, Double.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.DOUBLE, Double.toString (value)));
       }
 
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
+        return setProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
       }
 
     public JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
+        return setProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
       }
 
     public JSONObjectWriter setBoolean (String name, boolean value) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
       }
 
     public JSONObjectWriter setNULL (String name) throws IOException
       {
-        return addProperty (name, new JSONValue (JSONTypes.NULL, "null"));
+        return setProperty (name, new JSONValue (JSONTypes.NULL, "null"));
       }
 
     public JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
@@ -165,21 +165,21 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setObject (String name) throws IOException
       {
         JSONObject sub_object = new JSONObject ();
-        addProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
         return new JSONObjectWriter (sub_object);
       }
 
     public JSONObjectWriter createContainerObject (String name) throws IOException
       {
         JSONObjectWriter container = new JSONObjectWriter (new JSONObject ());
-        container.addProperty (name, new JSONValue (JSONTypes.OBJECT, this.root));
+        container.setProperty (name, new JSONValue (JSONTypes.OBJECT, this.root));
         return container;
       }
 
     public JSONArrayWriter setArray (String name) throws IOException
       {
         Vector<JSONValue> array = new Vector<JSONValue> ();
-        addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
+        setProperty (name, new JSONValue (JSONTypes.ARRAY, array));
         return new JSONArrayWriter (array);
       }
 
@@ -190,7 +190,7 @@ public class JSONObjectWriter implements Serializable
           {
             array.add (new JSONValue (json_type, value));
           }
-        return addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
+        return setProperty (name, new JSONValue (JSONTypes.ARRAY, array));
       }
 
     public JSONObjectWriter setBinaryArray (String name, Vector<byte[]> values) throws IOException
@@ -315,7 +315,7 @@ import org.webpki.json.JSONSignatureDecoder;
               {
                 array.add (new JSONValue (JSONTypes.OBJECT, jor.root));
               }
-            signature_writer.addProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
+            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
         signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (root)));
         return this;

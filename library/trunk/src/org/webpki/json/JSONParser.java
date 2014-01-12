@@ -128,7 +128,7 @@ public class JSONParser
                 default:
                   value = scanSimpleType ();
               }
-            holder.addProperty (name, value);
+            holder.setProperty (name, value);
           }
         scan ();
         return new JSONValue (JSONTypes.OBJECT, holder);
