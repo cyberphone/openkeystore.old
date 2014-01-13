@@ -4,9 +4,11 @@
 
   <property name="temp_dir" location=".tmp" />
   <property name="src_dir" value="src/" />
+  <property name="dist_dir" value="dist/" />
   <property name="ant_dir" value="src/antsupport/" />
   <property name="namespace" value="namespace.js" />
   <property name="runfile" value="${temp_dir}/runthis.js/" />
+  <property name="libjson" value="${dist_dir}/libjson.js/" />
   
 
   <target name="help">
@@ -28,7 +30,7 @@
 
   <target name="_antreplacement">
     <replaceregexp file="${runfile}"
-        match="\s+\/\*\s+\*\s+Copyright\ 2006\-2014\ WebPKI\.org.+?\*\/"
+        match="\s*\/\*\s+\*\s+Copyright\ 2006\-2014\ WebPKI\.org.+?\*\/"
         replace=""
         flags="sg"/>
   </target>
@@ -88,12 +90,45 @@
     </antcall>
   </target>
 
-     <!-- BigInteger testing -->
+  <!-- Base64URL testing -->
   <target name="base64url">
     <antcall target="test">
        <param name="files" value="base64url/*,base64url/test/*"/>
     </antcall>
   </target>
   
+  <!-- Browser JSON library -->
+  <target name="libjson" depends="clean">
+    <property name="files" value="jsonparser/*,biginteger/*,base64url/*"/>
+    <mkdir dir="${temp_dir}" />
+    <script language="javascript"> <![CDATA[
+        var path = project.getProperty ("files");
+
+        // Build one fileset at a time
+        while (path != null) {
+            var i = path.indexOf (',');
+            var jsfileset = path;
+            if (i > 0) {
+                jsfileset = path.substring (0, i);
+                path = path.substring (i + 1);
+            } else {
+                path = null;
+            }
+            var antcall = project.createTask ("antcall");
+            antcall.setTarget ("add-files");
+            var prop = antcall.createParam ();
+            prop.setName ("jsfileset");
+            prop.setValue (jsfileset);
+            antcall.perform ();
+        }
+    ]]>
+    </script>
+    <antcall target="_antreplacement"/>
+    <copy file="${src_dir}/webpkicopyright.js" tofile="${libjson}" overwrite="true"/>
+    <concat destfile="${libjson}" append="true">
+       <fileset file="${runfile}"/>
+    </concat>
+  </target>
+
 </project>
 

@@ -1,0 +1,2231 @@
+/*
+ *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// This file contains a JSON parser supporting JCS (JSON Cleartext Signature):            //
+// https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html                  //
+//                                                                                        //
+// The parser is essentially a JavaScript copy of a Java-based version available at:      //
+// https://code.google.com/p/openkeystore/source/browse/library/trunk/src/org/webpki/json //
+//                                                                                        //
+// Note: The cryptographic operations are supposed to be performed by WebCrypto when      //
+// used in a browser application.                                                         //
+//                                                                                        //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*================================================================*/
+/*             Namespace for the JSON core library                */
+/*================================================================*/
+
+"use strict";
+
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.json = org.webpki.json || {};
+
+/*================================================================*/
+/*                        JSONArrayReader                         */
+/*================================================================*/
+
+org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue> */array)
+{
+    this.index = 0;
+    this.array = array;
+};
+
+/* public boolean */org.webpki.json.JSONArrayReader.prototype.hasMore = function ()
+{
+    return this.index < this.array.length;
+};
+
+/* void */org.webpki.json.JSONArrayReader.prototype._inRangeCheck = function ()
+{
+    if (!this.hasMore ())
+    {
+        org.webpki.json.JSONError._error ("Trying to read past of array limit: " + this.index);
+    }
+};
+
+/* Object */org.webpki.json.JSONArrayReader.prototype._get = function (/* org.webpki.json.JSONTypes */expected_type)
+{
+    this._inRangeCheck ();
+    /* org.webpki.json.JSONValue */var value = this.array[this.index++];
+    if (!expected_type.isCompatible (value.type))
+    {
+        org.webpki.json.JSONError._error ("Incompatible request: " +
+                "Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
+                ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
+    }
+    return value.value;
+};
+
+/* public String */org.webpki.json.JSONArrayReader.prototype.getString = function ()
+{
+    return /* (String) */this._get (org.webpki.json.JSONTypes.STRING);
+};
+
+/* public int */org.webpki.json.JSONArrayReader.prototype.getInt = function ()
+{
+    return parseInt (/* (String) */this._get (org.webpki.json.JSONTypes.INTEGER));
+};
+
+/* BigInteger */org.webpki.json.JSONArrayReader.prototype.getLong = function ()
+{
+    return this.getBigInteger ().getLong ();
+};
+
+/* public BigInteger */org.webpki.json.JSONArrayReader.prototype.getBigInteger = function ()
+{
+    return org.webpki.math.BigInteger.fromString (this._get (org.webpki.json.JSONTypes.INTEGER));
+};
+
+//No real support for BigDecimal but at least text parsing is performed
+
+/* public BigDecimal */org.webpki.json.JSONArrayReader.prototype.getBigDecimal = function ()
+{
+    return this._get (org.webpki.json.JSONTypes.DECIMAL);
+};
+/*
+ public GregorianCalendar getDateTime () throws IOException
+ {
+ return ISODateTime.parseDateTime (getString ());
+ }
+ */
+
+ /* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
+ {
+     return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
+ };
+
+ /* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
+ {
+     return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
+ };
+
+ /*
+ public boolean getIfNULL () throws IOException
+ {
+ if (getElementType () == org.webpki.json.JSONTypes.NULL)
+ {
+ scanAway ();
+ return true;
+ }
+ return false;
+ }
+ */
+/* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
+{
+    return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */this._get (org.webpki.json.JSONTypes.ARRAY));
+};
+/*
+ public org.webpki.json.JSONTypes getElementType () throws IOException
+ {
+ _inRangeCheck ();
+ return array.elementAt (index).type;
+ }
+ */
+/* public org.webpki.json.JSONObjectReader */org.webpki.json.JSONArrayReader.prototype.getObject = function ()
+{
+    return new org.webpki.json.JSONObjectReader (/* (org.webpki.json.JSONObject) */this._get (org.webpki.json.JSONTypes.OBJECT));
+};
+/*
+ public void scanAway () throws IOException
+ {
+ get (getElementType ());
+ }
+ }
+ */
+
+/*================================================================*/
+/*                         JSONArrayWriter                        */
+/*================================================================*/
+
+ org.webpki.json.JSONArrayWriter = function (optional_array)
+{
+   /* Vector<org.webpki.json.JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
+};
+
+/* org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype._add = function (/* org.webpki.json.JSONTypes */type, /* Object */value)
+{
+    this.array[this.array.length] = new org.webpki.json.JSONValue (type, value);
+    return this;
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setString = function (/* String */value)
+{
+    return this._add (org.webpki.json.JSONTypes.STRING, value);
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setInt = function (/* int */value)
+{
+    return this._add (org.webpki.json.JSONTypes.INTEGER, org.webpki.json.JSONObjectWriter._intTest (value));
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setLong = function (/* BigInteger */value)
+{
+    return this.setBigInteger (value.getLong ());
+};
+
+// No real support for BigDecimal but at least text parsing is performed
+
+/* public org.webpki.json.JSONArrayWriter */ org.webpki.json.JSONArrayWriter.prototype.setBigDecimal = function (/* BigDecimal */value)
+{
+    return this._add (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value));
+};
+
+/* public org.webpki.json.JSONArrayWriter*/org.webpki.json.JSONArrayWriter.prototype.setBigInteger = function (/* BigInteger */value)
+{
+    return this._add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setDouble = function (/* double */value)
+{
+    return this._add (org.webpki.json.JSONTypes.DOUBLE, org.webpki.json.JSONObjectWriter._doubleTest (value));
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setBoolean = function (/* boolean */value)
+{
+    return this._add (org.webpki.json.JSONTypes.BOOLEAN, org.webpki.json.JSONObjectWriter._boolTest (value));
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setNULL = function ()
+{
+    return this._add (org.webpki.json.JSONTypes.NULL, "null");
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setDateTime = function (/* Date */date_time)
+{
+    return this.setString (date_time.toISOString ());
+};
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
+{
+    /* Vector<org.webpki.json.JSONValue> */var new_array = [] /* new Vector<org.webpki.json.JSONValue> () */;
+    this._add (org.webpki.json.JSONTypes.ARRAY, new_array);
+    return new org.webpki.json.JSONArrayWriter (new_array);
+};
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONArrayWriter.prototype.setObject = function ()
+{
+    /* org.webpki.json.JSONObject */var holder = new org.webpki.json.JSONObject ();
+    this._add (org.webpki.json.JSONTypes.OBJECT, holder);
+    return new org.webpki.json.JSONObjectWriter (holder);
+};
+
+/* public String */org.webpki.json.JSONArrayWriter.prototype.serializeJSONArray = function (/* org.webpki.json.JSONOutputFormats */output_format)
+{
+    /* org.webpki.json.JSONObject */var dummy = new org.webpki.json.JSONObject ();
+    dummy._setArray (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, this.array));
+    return new org.webpki.json.JSONObjectWriter (dummy).serializeJSONObject (output_format);
+};
+
+/*================================================================*/
+/*                           JSONError                            */
+/*================================================================*/
+
+org.webpki.json.JSONError = function ()
+{
+};
+
+org.webpki.json.JSONError._error = function (message)
+{
+    throw "JSONException: " + message;
+};
+
+/*================================================================*/
+/*                           JSONObject                           */
+/*================================================================*/
+
+org.webpki.json.JSONObject = function ()
+{
+    this.property_list = [];
+    this.read_flag = new Object ();
+};
+
+/* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
+{
+    if (!(value instanceof org.webpki.json.JSONValue))
+    {
+        org.webpki.json.JSONError._error ("Wrong value type: " + value);
+    }
+    var length = this.property_list.length;
+    var new_property = new Object;
+    new_property.name = name;
+    new_property.value = value;
+    for (var i = 0; i < length; i++)
+    {
+        if (this.property_list[i].name == name)
+        {
+            org.webpki.json.JSONError._error ("Property already defined: " + name);
+        }
+    }
+    this.property_list[length] = new_property;
+    this.read_flag.name = null;
+};
+
+org.webpki.json.JSONError._error = function (message)
+{
+    throw "JSONException: " + message;
+};
+
+org.webpki.json.JSONObject.prototype._getProperty = function (name)
+{
+    var length = this.property_list.length;
+    for (var i = 0; i < length; i++)
+    {
+        if (this.property_list[i].name == name)
+        {
+            return this.property_list[i].value;
+        }
+    }
+    return null;
+};
+
+org.webpki.json.JSONObject.prototype._isArray = function ()
+{
+    return this.property_list.length == 1 && !this.property_list[0].name;
+};
+
+org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JSONValue */array)
+{
+    this.property_list = [];
+    var unnamed_property = new Object;
+    unnamed_property.name = null;
+    unnamed_property.value = array;
+    this.property_list[0] = unnamed_property;
+};
+
+/*================================================================*/
+/*                        JSONObjectReader                        */
+/*================================================================*/
+
+ org.webpki.json.JSONObjectReader = function (/* org.webpki.json.JSONObject */json)
+{
+    this.json = json;
+};
+
+/* org.webpki.json.JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* org.webpki.json.JSONTypes */expected_type)
+{
+    /* org.webpki.json.JSONValue */var value = this.json._getProperty (name);
+    if (value == null)
+    {
+        org.webpki.json.JSONError._error ("Property \"" + name + "\" is missing");
+    }
+    if (!expected_type.isCompatible (value.type))
+    {
+        org.webpki.json.JSONError._error ("Type mismatch for \"" + name +
+                           "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
+                           ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
+    }
+    this.json.read_flag.name = true;
+    return value;
+};
+
+/* String */org.webpki.json.JSONObjectReader.prototype._getString = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
+{
+    /* org.webpki.json.JSONValue */var value = this._getProperty (name, expected);
+    return /* (String) */value.value;
+};
+
+/* public String */org.webpki.json.JSONObjectReader.prototype.getString = function (/* String */name)
+{
+    return this._getString (name, org.webpki.json.JSONTypes.STRING);
+};
+
+/* public int */org.webpki.json.JSONObjectReader.prototype.getInt = function (/* String */name)
+{
+    return parseInt (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
+};
+
+/* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getLong = function (/* String */name)
+{
+    return this.getBigInteger (name).getLong ();
+};
+
+/* public boolean */org.webpki.json.JSONObjectReader.prototype.getBoolean = function (/* String */name)
+{
+    return this._getString (name, org.webpki.json.JSONTypes.BOOLEAN) == "true";
+};
+
+/* public GregorianCalendar */org.webpki.json.JSONObjectReader.prototype.getDateTime = function (/* String */name)
+{
+    return new Date (this.getString (name));
+};
+
+/* Uint8Array */org.webpki.json.JSONObjectReader.prototype.getBinary = function (/* String */name)
+ {
+    return org.webpki.util.Base64URL.decode (this.getString (name));
+ };
+
+/* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getBigInteger = function (/* String */name)
+{
+     return org.webpki.math.BigInteger.fromString (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
+};
+
+// No real support for BigDecimal but at least text parsing is performed
+
+/* public BigDecimal */org.webpki.json.JSONObjectReader.prototype.getBigDecimal = function (/* String */name)
+ {
+    return this._getString (name, org.webpki.json.JSONTypes.DECIMAL);
+ };
+
+
+/* public double */org.webpki.json.JSONObjectReader.prototype.getDouble = function (/* String */name)
+{
+    return parseFloat (this._getString (name, org.webpki.json.JSONTypes.DOUBLE));
+};
+
+/* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONObjectReader.prototype.getJSONArrayReader = function ()
+{
+    return this.json._isArray () ?  new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */this.json.property_list[0].value.value) : null;
+};
+
+/* public boolean */org.webpki.json.JSONObjectReader.prototype.getIfNULL = function (/* String */name)
+{
+    if (this.getPropertyType (name) == org.webpki.json.JSONTypes.NULL)
+    {
+        this.scanAway (name);
+        return true;
+    }
+    return false;
+};
+
+/* public org.webpki.json.JSONObjectReader */org.webpki.json.JSONObjectReader.prototype.getObject = function (/* String */name)
+{
+    /* org.webpki.json.JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.OBJECT);
+    return new org.webpki.json.JSONObjectReader (/* (org.webpki.json.JSONObject) */value.value);
+};
+
+/* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONObjectReader.prototype.getArray = function (/* String */name)
+{
+    /* org.webpki.json.JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
+    return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */value.value);
+};
+
+/*
+ public String org.webpki.json.JSONObjectReader.prototype.getStringConditional (String name) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getString (name);
+ }
+ return null;
+ }
+
+ public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getBoolean (name);
+ }
+ return false;
+ }
+
+ public byte[] org.webpki.json.JSONObjectReader.prototype.getBinaryConditional (String name) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getBinary (name);
+ }
+ return null;
+ }
+
+ public String org.webpki.json.JSONObjectReader.prototype.getStringConditional (String name, String default_value) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getString (name);
+ }
+ return default_value;
+ }
+
+ public String[] org.webpki.json.JSONObjectReader.prototype.getStringArrayConditional (String name) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getStringArray (name);
+ }
+ return null;
+ }
+
+ public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name, boolean default_value) throws IOException
+ {
+ if (hasProperty (name))
+ {
+ return getBoolean (name);
+ }
+ return default_value;
+ }
+
+ Vector<org.webpki.json.JSONValue> org.webpki.json.JSONObjectReader.prototype.getArray (String name, org.webpki.json.JSONTypes expected) throws IOException
+ {
+ org.webpki.json.JSONValue value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
+ @SuppressWarnings("unchecked")
+ Vector<org.webpki.json.JSONValue> array = ((Vector<org.webpki.json.JSONValue>) value.value);
+ if (!array.isEmpty () && array.firstElement ().type != expected)
+ {
+ throw new IOException ("Array type mismatch for \"" + name + "\"");
+ }
+ return array;
+ }
+
+ String [] org.webpki.json.JSONObjectReader.prototype.getSimpleArray (String name, org.webpki.json.JSONTypes expected) throws IOException
+ {
+ Vector<String> array = new Vector<String> ();
+ for (org.webpki.json.JSONValue value : getArray (name, expected))
+ {
+ array.add ((String)value.value);
+ }
+ return array.toArray (new String[0]);
+ }
+
+ public String[] org.webpki.json.JSONObjectReader.prototype.getStringArray (String name) throws IOException
+ {
+ return getSimpleArray (name, org.webpki.json.JSONTypes.STRING);
+ }
+
+ public Vector<byte[]> org.webpki.json.JSONObjectReader.prototype.getBinaryArray (String name) throws IOException
+ {
+ Vector<byte[]> blobs = new Vector<byte[]> ();
+ for (String blob : getStringArray (name))
+ {
+ blobs.add (Base64URL.getBinaryFromBase64URL (blob));
+ }
+ return blobs;
+ }
+
+ public String[] org.webpki.json.JSONObjectReader.prototype.getProperties ()
+ {
+ return json.properties.keySet ().toArray (new String[0]);
+ }
+
+ public boolean org.webpki.json.JSONObjectReader.prototype.hasProperty (String name)
+ {
+ return json.properties.get (name) != null;
+ }
+ */
+
+/* public org.webpki.json.JSONTypes */org.webpki.json.JSONObjectReader.prototype.getPropertyType = function (/* String */name)
+{
+    /* org.webpki.json.JSONValue */var value = this.json._getProperty (name);
+    return value == null ? null : value.type;
+};
+
+/**
+ * Read and decode JCS signature object from the current JSON object.
+ * @return An object which can be used to verify keys etc.
+ * @see org.webpki.json.org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
+ * @throws IOException In case there is something wrong with the signature 
+ */
+/*
+ public JSONSignatureDecoder getSignature () throws IOException
+ {
+ return new JSONSignatureDecoder (this);
+ }
+
+ public PublicKey getPublicKey () throws IOException
+ {
+ return JSONSignatureDecoder.getPublicKey (this);
+ }
+
+ public X509Certificate[] getX509CertificatePath () throws IOException
+ {
+ return JSONSignatureDecoder.getX509CertificatePath (this);
+ }
+ */
+
+/* public void */org.webpki.json.JSONObjectReader.prototype.scanAway = function (/* String */name)
+{
+    this._getProperty (name, this.getPropertyType (name));
+};
+
+/*================================================================*/
+/*                        JSONObjectWriter                        */
+/*================================================================*/
+
+ org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_object_or_reader)
+{
+    /* int */this.STANDARD_INDENT = 2;
+
+    /* org.webpki.json.JSONObject */this.root = null;
+
+    /* StringBuffer */this.buffer = null;
+    
+    /* int */this.indent = 0;
+    
+    /* boolean */this.pretty_print = true;
+
+    /* boolean */this.java_script_string = false;
+
+    /* boolean */this.html_mode = false;
+    
+    /* int */this.indent_factor = 0;
+
+    /* boolean */this.xml_dsig_named_curve = false;
+    
+    /* static String */this.html_variable_color = "#008000";
+    /* static String */this.html_string_color   = "#0000C0";
+    /* static String */this.html_property_color = "#C00000";
+    /* static String */this.html_keyword_color  = "#606060";
+    /* static int */this.html_indent = 4;
+
+    if (optional_object_or_reader === undefined)
+    {
+        this.root = new org.webpki.json.JSONObject ();
+    }
+    else if (optional_object_or_reader instanceof org.webpki.json.JSONObject)
+    {
+        this.root = optional_object_or_reader;
+    }
+    else if (optional_object_or_reader instanceof org.webpki.json.JSONObjectReader)
+    {
+        this.root = optional_object_or_reader.json;
+        if (this.root._isArray ())
+        {
+            org.webpki.json.JSONError._error ("You cannot update array objects");
+        }
+    }
+    else
+    {
+        org.webpki.json.JSONError._error ("Wrong init of org.webpki.json.JSONObjectWriter");
+    }
+};
+    
+/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
+{
+    this.root._setProperty (name, value);
+    return this;
+};
+
+/*
+    public void setupForRewrite (String name)
+      {
+        root.properties.put (name, null);
+      }
+*/
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
+{
+    if (typeof value != "string")
+    {
+        org.webpki.json.JSONError._error ("Bad string: " + name);
+    }
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, value));
+};
+
+/* String */org.webpki.json.JSONObjectWriter._intTest = function (/* int */value)
+{
+    var int_string = value.toString ();
+    if (typeof value != "number" || int_string.indexOf ('.') >= 0)
+    {
+        org.webpki.json.JSONError._error ("Bad integer: " + int_string);
+    }
+    return int_string;
+};
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setInt = function (/* String */name, /* int */value)
+{
+    return this._setProperty (name,
+                              new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER,
+                                                             org.webpki.json.JSONObjectWriter._intTest (value)));
+};
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setLong = function (/* String */name, /* BigInteger */value)
+{
+    return this.setBigInteger (name, value.getLong ());
+};
+
+/* String */org.webpki.json.JSONObjectWriter._doubleTest = function (/* double */value)
+{
+    if (typeof value != "number")
+    {
+        org.webpki.json.JSONError._error ("Bad float type " + (typeof value));
+    }
+    return value.toString ();
+};
+
+/* String */org.webpki.json.JSONObjectWriter._bigDecimalTest = function (/* BigDecimal */value)
+{
+    if (typeof value != "string")
+    {
+        org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
+    }
+    if (!org.webpki.json.CONST.INTEGER_PATTERN.test (value) &&
+        (!org.webpki.json.CONST.DECIMAL_INITIAL_PATTERN.test (value) || 
+         org.webpki.json.CONST.DECIMAL_2DOUBLE_PATTERN.test (value)))
+    {
+        org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
+    }
+    return value;
+};
+
+/* String */org.webpki.json.JSONObjectWriter._boolTest = function (/* boolean */value)
+{
+    if (typeof value != "boolean")
+    {
+        org.webpki.json.JSONError._error ("Bad bool type " + (typeof value));
+    }
+    return value.toString ();
+};
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDouble = function (/* String */name, /* double */value)
+{
+    return this._setProperty (name, 
+                              new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DOUBLE, 
+                                                             org.webpki.json.JSONObjectWriter._doubleTest (value)));
+};
+
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigInteger = function (/* String */name, /* BigInteger */value)
+{
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, value.toString ()));
+};
+
+// No real support for BigDecimal but at least text parsing is performed
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigDecimal = function (/* String */name, /* BigDecimal */value)
+{
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value)));
+};
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
+{
+    return this._setProperty (name, 
+                              new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.BOOLEAN,
+                                                             org.webpki.json.JSONObjectWriter._boolTest (value)));
+};
+
+/*
+    public org.webpki.json.JSONObjectWriter setNULL (String name) throws IOException
+      {
+        return setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.NULL, "null"));
+      }
+*/
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDateTime = function (/* String */name, /* Date */date_time)
+{
+    return this.setString (name, date_time.toISOString ());
+};
+
+/*
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
+{
+    return this.setString (name, org.webpki.util.Base64URL.encode (value));
+};
+
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
+{
+    /* org.webpki.json.JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
+    this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, sub_object));
+    return new org.webpki.json.JSONObjectWriter (sub_object);
+};
+
+/*
+    public org.webpki.json.JSONObjectWriter createContainerObject (String name) throws IOException
+      {
+        org.webpki.json.JSONObjectWriter container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
+        container.setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, this.root));
+        return container;
+      }
+*/
+
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
+{
+    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> ()*/;
+    this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+    return new org.webpki.json.JSONArrayWriter (array);
+};
+
+/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* org.webpki.json.JSONTypes */json_type)
+{
+    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> () */;
+    for (var i = 0; i < values.length; i++)
+    {
+        array[i] = new org.webpki.json.JSONValue (json_type, values[i]);
+    }
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+};
+
+/*
+
+org.webpki.json.JSONObjectWriter.prototype.setBinaryArray (String name, Vector<byte[]> values) throws IOException
+      {
+        Vector<String> array = new Vector<String> ();
+        for (byte[] value : values)
+          {
+            array.add (Base64URL.getBase64URLFromBinary (value));
+          }
+        return setStringArray (name, array.toArray (new String[0]));
+      }
+*/
+
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setStringArray = function (/* String */name, /* String[] */values)
+{
+    return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
+};
+
+
+    /**
+     * Set signature property in JSON object.
+     * This is the JCS signature creation method.
+       .
+       .
+       .
+
+    public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
+      {
+        // Create an empty JSON document
+        org.webpki.json.JSONObjectWriter writer = new org.webpki.json.JSONObjectWriter ();
+    
+        // Fill it with some data
+        writer.setString ("MyProperty", "Some data");
+         
+        // Sign the document
+        writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
+          {
+            {@literal @}Override
+            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
+              {
+                try
+                  {
+                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
+                    signature.initSign (private_key);
+                    signature.update (data);
+                    return signature.sign ();
+                  }
+                catch (Exception e)
+                  {
+                    throw new IOException (e);
+                  }
+              }
+    
+            {@literal @}Override
+            public PublicKey getPublicKey () throws IOException
+              {
+                return public_key;
+              }
+          }));
+          
+        // Serialize the document
+        byte[] json = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT);
+    
+        // Print the signed document on the console
+        System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
+          
+        // Parse the document
+        org.webpki.json.JSONObjectReader reader = org.webpki.json.JSONParser.parse (json);
+         
+        // Get and verify the signature
+        JSONSignatureDecoder json_signature = reader.getSignature ();
+        json_signature.verify (new JSONAsymKeyVerifier (public_key));
+         
+        // Print the document payload on the console
+        System.out.println ("Returned data: " + reader.getString ("MyProperty"));
+      }
+ </pre>
+     */
+
+/*
+
+org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value,  String name)
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        setBinary (name, crypto_binary);
+      }
+
+    public org.webpki.json.JSONObjectWriter setSignature (JSONSigner signer) throws IOException
+      {
+        org.webpki.json.JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
+        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
+        signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
+        if (signer.extensions != null)
+          {
+            Vector<org.webpki.json.JSONValue> array = new Vector<org.webpki.json.JSONValue> ();
+            for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
+              {
+                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
+              }
+            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+          }
+        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
+        return this;
+      }
+    
+    public org.webpki.json.JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
+      {
+        org.webpki.json.JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
+        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+        if (key_alg.isRSAKey ())
+          {
+            org.webpki.json.JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
+            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
+            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
+            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+          }
+        else
+          {
+            org.webpki.json.JSONObjectWriter ec_key_writer = public_key_writer.setObject (JSONSignatureDecoder.EC_JSON);
+            ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
+               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
+            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+            ec_key_writer.writeCryptoBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON);
+            ec_key_writer.writeCryptoBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON);
+          }
+        return this;
+      }
+
+    public org.webpki.json.JSONObjectWriter setXMLDSigECCurveOption (boolean flag)
+      {
+        xml_dsig_named_curve = flag;
+        return this;
+      }
+
+    public org.webpki.json.JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
+      {
+        X509Certificate last_certificate = null;
+        Vector<byte[]> certificates = new Vector<byte[]> ();
+        for (X509Certificate certificate : certificate_path)
+          {
+            try
+              {
+                certificates.add (JSONSignatureDecoder.pathCheck (last_certificate, last_certificate = certificate).getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
+        return this;
+      }
+*/
+/* void */org.webpki.json.JSONObjectWriter.prototype._beginObject = function (/* boolean */array_flag)
+{
+    this._indentLine ();
+    this._spaceOut ();
+    if (array_flag)
+    {
+        this.indent++;
+        this.buffer += '[';
+    }
+    this.buffer += '{';
+    this._indentLine ();
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._newLine = function ()
+{
+    if (this.pretty_print)
+    {
+        this.buffer += this.html_mode ? "<br>" : "\n";
+    }
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._indentLine = function ()
+{
+    this.indent += this.indent_factor;
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._undentLine = function ()
+{
+    this.indent -= this.indent_factor;
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._endObject = function ()
+{
+    this._newLine ();
+    this._undentLine ();
+    this._spaceOut ();
+    this._undentLine ();
+    this.buffer += '}';
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printOneElement = function (/* org.webpki.json.JSONValue */json_value)
+{
+    switch (json_value.type)
+    {
+        case org.webpki.json.JSONTypes.ARRAY:
+            this._printArray (/* (Vector<org.webpki.json.JSONValue>) */json_value.value, false);
+            break;
+    
+        case org.webpki.json.JSONTypes.OBJECT:
+            this._newLine ();
+            this._printObject (/*(org.webpki.json.JSONObject) */json_value.value, false);
+            break;
+    
+        default:
+            this._printSimpleValue (json_value, false);
+    }
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printObject = function (/* org.webpki.json.JSONObject */object, /* boolean */array_flag)
+{
+    this._beginObject (array_flag);
+    /* boolean */var next = false;
+    var length = object.property_list.length;
+    for (var i = 0; i < length; i++)
+    {
+        /* org.webpki.json.JSONValue */var json_value = object.property_list[i].value;
+        /* String */var property = object.property_list[i].name;
+        if (next)
+        {
+            this.buffer += ',';
+        }
+        this._newLine ();
+        next = true;
+        this._printProperty (property);
+        this._printOneElement (json_value);
+    }
+    this._endObject ();
+};
+  
+/* boolean */org.webpki.json.JSONObjectWriter.prototype._complex = function (/* org.webpki.json.JSONTypes */json_type)
+{
+    return json_type.enumvalue >= 10;
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArray = function (/* Vector<org.webpki.json.JSONValue> */array, /* boolean */array_flag)
+{
+    if (array.length == 0)
+    {
+        this.buffer += '[';
+    }
+    else
+    {
+        /* boolean */var mixed = false;
+        /* org.webpki.json.JSONTypes */var first_type = array[0].type;
+        for (var i = 0; i < array.length; i++)
+        {
+            var json_value = array[i];
+            if (this._complex (first_type) != this._complex (json_value.type) ||
+                    (this._complex (first_type) && first_type != json_value.type))
+
+            {
+                mixed = true;
+                break;
+            }
+        }
+        if (mixed)
+        {
+            this.buffer += '[';
+            /* boolean */var next = false;
+            for (var i = 0; i < array.length; i++)
+            {
+                var json_value = array[i];
+                if (next)
+                {
+                    this.buffer += ',';
+                }
+                else
+                {
+                    next = true;
+                }
+                this._printOneElement (json_value);
+            }
+        }
+        else if (first_type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            this._printArrayObjects (array);
+        }
+        else if (first_type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            this._newLine ();
+            this._indentLine ();
+            this._spaceOut ();
+            this.buffer += '[';
+            /* boolean */var next = false;
+            for (var i = 0; i < array.length; i++)
+            {
+                var json_value = array[i];
+                /* Vector<org.webpki.json.JSONValue> */var sub_array = /* (Vector<org.webpki.json.JSONValue>) */json_value.value;
+                /* boolean */var extra_pretty = sub_array.length == 0 || !_complex (sub_array[0].type);
+                if (next)
+                {
+                    this.buffer += ',';
+                }
+                else
+                {
+                    next = true;
+                }
+                if (extra_pretty)
+                {
+                    this._newLine ();
+                    this._indentLine ();
+                    this._spaceOut ();
+                }
+                this._printArray (sub_array, true);
+                if (extra_pretty)
+                {
+                    this._undentLine ();
+                }
+            }
+            this._newLine ();
+            this._spaceOut ();
+            this._undentLine ();
+        }
+        else
+        {
+            this._printArraySimple (array, array_flag);
+        }
+    }
+    this.buffer += ']';
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArraySimple = function (/* Vector<org.webpki.json.JSONValue> */array, /* boolean */array_flag)
+{
+    /* int */var length = 0;
+    for (var i = 0; i < array.length; i++)
+    {
+        length += array[i].value.length;
+    }
+    /* boolean */var broken_lines = length > 100;
+    /* boolean */var next = false;
+    if (broken_lines && !array_flag)
+    {
+        this._indentLine ();
+        this._newLine ();
+        this._spaceOut ();
+    }
+    this.buffer += '[';
+    if (broken_lines)
+    {
+        this._indentLine ();
+        this._newLine ();
+    }
+    for (var i = 0; i < array.length; i++)
+    {
+        if (next)
+        {
+            this.buffer += ',';
+            if (broken_lines)
+            {
+                this._newLine ();
+            }
+        }
+        if (broken_lines)
+        {
+            this._spaceOut ();
+        }
+        this._printSimpleValue (array[i], false);
+        next = true;
+    }
+    if (broken_lines)
+    {
+        this._undentLine ();
+        this._newLine ();
+        this._spaceOut ();
+        if (!array_flag)
+        {
+            this._undentLine ();
+        }
+    }
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArrayObjects = function (/* Vector<org.webpki.json.JSONValue> */array)
+{
+    /* boolean */var next = false;
+    for (var i = 0; i < array.length; i++)
+    {
+        if (next)
+        {
+            this.buffer += ',';
+        }
+        this._newLine ();
+        this._printObject (array[i].value, !next);
+        next = true;
+    }
+    this.indent--;
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printSimpleValue = function (/* org.webpki.json.JSONValue */value, /* boolean */property)
+{
+    /* String */var string = /* (String) */value.value;
+    if (value.type != org.webpki.json.JSONTypes.STRING)
+    {
+        if (this.html_mode)
+        {
+            this.buffer += "<span style=\"color:" + html_variable_color + "\">";
+        }
+        this.buffer += string;
+        if (this.html_mode)
+        {
+            this.buffer += "</span>";
+        }
+        return;
+    }
+    if (this.html_mode)
+    {
+        this.buffer += "&quot;<span style=\"color:" +
+                            (property ?
+                                    (string.indexOf ('@') == 0) ?
+                                        this.html_keyword_color : this.html_property_color
+                                      : this.html_string_color) +
+                        "\">";
+    }
+    else
+    {
+        this.buffer += '"';
+    }
+    for (var i = 0; i < string.length; i++)
+    {
+        var c = string.charAt (i);
+        if (this.html_mode)
+        {
+            switch (c)
+            {
+                //
+                //      HTML needs specific escapes...
+                //
+                case '<':
+                    this.buffer += "&lt;";
+                    continue;
+    
+                case '>':
+                    this.buffer += "&gt;";
+                    continue;
+    
+                case '&':
+                    this.buffer += "&amp;";
+                    continue;
+    
+                case '"':
+                    this.buffer += "\\&quot;";
+                    continue;
+            }
+        }
+
+        switch (c)
+        {
+            case '\\':
+                if (this.java_script_string)
+                {
+                    // JS escaping need \\\\ in order to produce a JSON \\
+                    this.buffer += '\\';
+                }
+    
+            case '"':
+                this._escapeCharacter (c);
+                break;
+    
+            case '\b':
+                this._escapeCharacter ('b');
+                break;
+    
+            case '\f':
+                this._escapeCharacter ('f');
+                break;
+    
+            case '\n':
+                this._escapeCharacter ('n');
+                break;
+    
+            case '\r':
+                this._escapeCharacter ('r');
+                break;
+    
+            case '\t':
+                this._escapeCharacter ('t');
+                break;
+    
+            case '\'':
+                if (this.java_script_string)
+                {
+                    // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
+                    this.buffer += '\\';
+                }
+    
+            default:
+                var utf_value = c.charCodeAt (0);
+                if (utf_value < 0x20)
+                {
+                    this._escapeCharacter ('u');
+                    for (var j = 0; j < 4; j++)
+                    {
+                        /*int */var hex = utf_value >>> 12;
+                        this.buffer += String.fromCharCode (hex > 9 ? hex + 87 : hex + 48);
+                        utf_value <<= 4;
+                    }
+                    break;
+                }
+                this.buffer += c;
+        }
+    }
+    if (this.html_mode)
+    {
+        this.buffer += "</span>&quot;";
+    }
+    else
+    {
+        this.buffer += '"';
+    }
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._escapeCharacter = function (/* char */c)
+{
+    if (this.java_script_string)
+    {
+        this.buffer += '\\';
+    }
+    this.buffer += '\\' + c;
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._singleSpace = function ()
+{
+    if (this.pretty_print)
+    {
+        if (this.html_mode)
+        {
+            this.buffer += "&nbsp;";
+        }
+        else
+        {
+            this.buffer += ' ';
+        }
+    }
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._printProperty = function (/* String */name)
+{
+    this._spaceOut ();
+    this._printSimpleValue (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, name), true);
+    this.buffer += ':';
+    this._singleSpace ();
+};
+
+/* void */org.webpki.json.JSONObjectWriter.prototype._spaceOut = function ()
+{
+    for (var i = 0; i < this.indent; i++)
+    {
+        this._singleSpace ();
+    }
+};
+
+/* String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*org.webpki.json.JSONObject */signature_object_in)
+{
+    /* org.webpki.json.JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
+    /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
+    /*
+        if (canonicalization_debug_file != null)
+          {
+            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
+            ArrayUtil.writeFile (canonicalization_debug_file,
+                                 ArrayUtil.add (other, 
+                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
+          }
+     */
+    return result;
+};
+
+/* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* org.webpki.json.JSONOutputFormats */output_format)
+{
+    this.buffer = new String ();
+    this.indent_factor = output_format == org.webpki.json.JSONOutputFormats.PRETTY_HTML ? this.html_indent : this.STANDARD_INDENT;
+    this.indent = -this.indent_factor;
+    this.pretty_print = output_format == org.webpki.json.JSONOutputFormats.PRETTY_HTML || output_format == org.webpki.json.JSONOutputFormats.PRETTY_PRINT;
+    this.java_script_string = output_format == org.webpki.json.JSONOutputFormats.JAVASCRIPT_STRING;
+    this.html_mode = output_format == org.webpki.json.JSONOutputFormats.PRETTY_HTML;
+    if (this.java_script_string)
+    {
+        this.buffer += '\'';
+    }
+    if (this.root._isArray ())
+    {
+        this._printArray (/* (Vector<org.webpki.json.JSONValue>) */this.root.property_list[0].value, false);
+    }
+    else
+    {
+        this._printObject (this.root, false);
+    }
+    if (output_format == org.webpki.json.JSONOutputFormats.PRETTY_PRINT)
+    {
+        this._newLine ();
+    }
+    else if (this.java_script_string)
+    {
+        this.buffer += '\'';
+    }
+    return this.buffer;
+};
+/*
+    public static byte[] serializeParsedJSONDocument (JSONDecoder document, org.webpki.json.JSONOutputFormats output_format) throws IOException
+      {
+        return new org.webpki.json.JSONObjectWriter (document.root).serializeJSONObject (output_format);
+      }
+  
+    public static void setCanonicalizationDebugFile (String file) throws IOException
+      {
+        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
+        canonicalization_debug_file = file;
+      }
+
+    public static byte[] parseAndFormat (byte[] json_utf8, org.webpki.json.JSONOutputFormats output_format) throws IOException
+      {
+        return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
+      }
+
+*/
+
+/*================================================================*/
+/*                        JSONOutputFormats                       */
+/*================================================================*/
+
+org.webpki.json.JSONOutputFormats = 
+{
+    CANONICALIZED:
+    {
+    },
+    JAVASCRIPT_STRING:
+    {
+    },
+    PRETTY_PRINT:
+    {
+    },
+    PRETTY_HTML:
+    {
+    }
+};
+
+/*================================================================*/
+/*                           JSONParser                           */
+/*================================================================*/
+
+org.webpki.json.JSONParser = function ()
+{
+};
+
+org.webpki.json.CONST =
+{
+    LEFT_CURLY_BRACKET  : '{',
+    RIGHT_CURLY_BRACKET : '}',
+    BLANK_CHARACTER     : ' ',
+    DOUBLE_QUOTE        : '"',
+    COLON_CHARACTER     : ':',
+    LEFT_BRACKET        : '[',
+    RIGHT_BRACKET       : ']',
+    COMMA_CHARACTER     : ',',
+    BACK_SLASH          : '\\',
+
+    INTEGER_PATTERN         : new RegExp ("^((0)|(-?[1-9][0-9]*))$"),
+    BOOLEAN_PATTERN         : new RegExp ("^(true|false)$"),
+    DECIMAL_INITIAL_PATTERN : new RegExp ("^((\\+|-)?[0-9]+[\\.][0-9]+)$"),
+    DECIMAL_2DOUBLE_PATTERN : new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$"),
+    DOUBLE_PATTERN          : new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$")
+};
+
+/* org.webpki.json.JSONObjectReader */org.webpki.json.JSONParser.parse = function (/* String */json_string)
+{
+    var parser = new org.webpki.json.JSONParser ();
+    parser.json_data = json_string;
+    parser.max_length = json_string.length;
+    parser.index = 0;
+    var root = new org.webpki.json.JSONObject ();
+    if (parser._testNextNonWhiteSpaceChar () == org.webpki.json.CONST.LEFT_BRACKET)
+    {
+        parser._scan ();
+        root._setArray (parser._scanArray ("outer array"));
+    }
+    else
+    {
+        parser._scanFor (org.webpki.json.CONST.LEFT_CURLY_BRACKET);
+        parser._scanObject (root);
+    }
+    while (parser.index < parser.max_length)
+    {
+        if (!parser._isWhiteSpace (parser.json_data.charAt (parser.index++)))
+        {
+            org.webpki.json.JSONError._error ("Improperly terminated JSON object");
+        }
+    }
+    return new org.webpki.json.JSONObjectReader (root);
+};
+
+/* String */org.webpki.json.JSONParser.prototype._scanProperty = function ()
+{
+    this._scanFor (org.webpki.json.CONST.DOUBLE_QUOTE);
+    var property = this._scanQuotedString ().value;
+    if (property.length == 0)
+    {
+        org.webpki.json.JSONError._error ("Empty property");
+    }
+    this._scanFor (org.webpki.json.CONST.COLON_CHARACTER);
+    return property;
+};
+
+/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanObject = function (/* org.webpki.json.JSONObject */holder)
+{
+    /* boolean */var next = false;
+    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.CONST.RIGHT_CURLY_BRACKET)
+    {
+        if (next)
+        {
+            this._scanFor (org.webpki.json.CONST.COMMA_CHARACTER);
+        }
+        next = true;
+        /* String */var name = this._scanProperty ();
+        /* org.webpki.json.JSONValue */var value;
+        switch (this._scan ())
+        {
+            case org.webpki.json.CONST.LEFT_CURLY_BRACKET:
+                value = this._scanObject (new org.webpki.json.JSONObject ());
+                break;
+
+            case org.webpki.json.CONST.DOUBLE_QUOTE:
+                value = this._scanQuotedString ();
+                break;
+
+            case org.webpki.json.CONST.LEFT_BRACKET:
+                value = this._scanArray (name);
+                break;
+
+            default:
+                value = this._scanSimpleType ();
+        }
+        holder._setProperty (name, value);
+    }
+    this._scan ();
+    return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, holder);
+};
+
+/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
+{
+    var arr_index = 0;
+    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> () */;
+    /* org.webpki.json.JSONValue */var value = null;
+    /* boolean */var next = false;
+    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.CONST.RIGHT_BRACKET)
+    {
+        if (next)
+        {
+            this._scanFor (org.webpki.json.CONST.COMMA_CHARACTER);
+        }
+        else
+        {
+            next = true;
+        }
+        switch (this._scan ())
+        {
+            case org.webpki.json.CONST.LEFT_BRACKET:
+                value = this._scanArray (name);
+                break;
+
+            case org.webpki.json.CONST.LEFT_CURLY_BRACKET:
+                value = this._scanObject (new org.webpki.json.JSONObject ());
+                break;
+
+            case org.webpki.json.CONST.DOUBLE_QUOTE:
+                value = this._scanQuotedString ();
+                break;
+
+            default:
+                value = this._scanSimpleType ();
+        }
+        array[arr_index++] = value;
+    }
+    this._scan ();
+    return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array);
+};
+
+/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanSimpleType = function ()
+{
+    this.index--;
+    /* StringBuffer */var result = new String () /* StringBuffer () */;
+    /* char */var c;
+    while ((c = this._testNextNonWhiteSpaceChar ()) != org.webpki.json.CONST.COMMA_CHARACTER &&
+            c != org.webpki.json.CONST.RIGHT_BRACKET &&
+            c != org.webpki.json.CONST.RIGHT_CURLY_BRACKET)
+    {
+        if (this._isWhiteSpace (c = this._nextChar ()))
+        {
+            break;
+        }
+        result += c;
+    }
+    if (result.length == 0)
+    {
+        org.webpki.json.JSONError._error ("Missing argument");
+    }
+    /* org.webpki.json.JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
+    if (!org.webpki.json.CONST.INTEGER_PATTERN.test (result))
+    {
+        if (org.webpki.json.CONST.BOOLEAN_PATTERN.test (result))
+        {
+            type = org.webpki.json.JSONTypes.BOOLEAN;
+        }
+        else if (result == "null")
+        {
+            type = org.webpki.json.JSONTypes.NULL;
+        }
+        else if (org.webpki.json.CONST.DECIMAL_INITIAL_PATTERN.test (result))
+        {
+            type = org.webpki.json.CONST.DECIMAL_2DOUBLE_PATTERN.test (result) ? org.webpki.json.JSONTypes.DOUBLE : org.webpki.json.JSONTypes.DECIMAL;
+        }
+        else
+        {
+            type = org.webpki.json.JSONTypes.DOUBLE;
+            if (!org.webpki.json.CONST.DOUBLE_PATTERN.test (result))
+            {
+                org.webpki.json.JSONError._error ("Undecodable argument: " + result);
+            }
+        }
+    }
+    return new org.webpki.json.JSONValue (type, result);
+};
+
+/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanQuotedString = function ()
+{
+    /* StringBuffer */var result = new String () /* StringBuffer () */;
+    while (true)
+    {
+        /* char */var c = this._nextChar ();
+        if (c < ' ')
+        {
+            org.webpki.json.JSONError._error ("Unescaped control character: " + c);
+        }
+        if (c == org.webpki.json.CONST.DOUBLE_QUOTE)
+        {
+            break;
+        }
+        if (c == org.webpki.json.CONST.BACK_SLASH)
+        {
+            switch (c = this._nextChar ())
+            {
+                case '"':
+                case '\\':
+                case '/':
+                    break;
+
+                case 'b':
+                    c = '\b';
+                    break;
+
+                case 'f':
+                    c = '\f';
+                    break;
+
+                case 'n':
+                    c = '\n';
+                    break;
+
+                case 'r':
+                    c = '\r';
+                    break;
+
+                case 't':
+                    c = '\t';
+                    break;
+
+                case 'u':
+                    var unicode_char = 0;
+                    for (var i = 0; i < 4; i++)
+                    {
+                        unicode_char = ((unicode_char << 4) + this._getHexChar ());
+                    }
+                    c = String.fromCharCode (unicode_char);
+                    break;
+
+                default:
+                    org.webpki.json.JSONError._error ("Unsupported escape:" + c);
+            }
+        }
+        result += c;
+    }
+    return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, result);
+};
+
+/* int */org.webpki.json.JSONParser.prototype._getHexChar = function ()
+{
+    /* char */var c = this._nextChar ();
+    switch (c)
+    {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return c.charCodeAt (0) - 48;
+
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+            return c.charCodeAt (0) - 87;
+
+        case 'A':
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'E':
+        case 'F':
+            return c.charCodeAt (0) - 55;
+    }
+    org.webpki.json.JSONError._error ("Bad hex in \\u escape: " + c);
+};
+
+/* char */org.webpki.json.JSONParser.prototype._testNextNonWhiteSpaceChar = function ()
+{
+    /* int */var save = this.index;
+    /* char */var c = this._scan ();
+    this.index = save;
+    return c;
+};
+
+/* void */org.webpki.json.JSONParser.prototype._scanFor = function (/* char */expected)
+{
+    /* char */var c = this._scan ();
+    if (c != expected)
+    {
+        org.webpki.json.JSONError._error ("Expected '" + expected + "' but got '" + c + "'");
+    }
+};
+
+/* char */org.webpki.json.JSONParser.prototype._nextChar = function ()
+{
+    if (this.index < this.max_length)
+    {
+        return this.json_data.charAt (this.index++);
+    }
+    org.webpki.json.JSONError._error ("Unexpected EOF reached");
+};
+
+/* boolean */org.webpki.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)
+{
+    return c <= org.webpki.json.CONST.BLANK_CHARACTER;
+};
+
+/* char */org.webpki.json.JSONParser.prototype._scan = function ()
+{
+    while (true)
+    {
+        /* char */var c = this._nextChar ();
+        if (this._isWhiteSpace (c))
+        {
+            continue;
+        }
+        return c;
+    }
+};
+
+/*================================================================*/
+/*                            JSONTypes                           */
+/*================================================================*/
+
+org.webpki.json.JSONTypes = 
+{
+    NULL:
+    {
+        "enumvalue" : 0,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
+    },
+    BOOLEAN:
+    {
+        "enumvalue" : 1,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
+    },
+    INTEGER:
+    {
+        "enumvalue" : 2,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
+    },
+    DECIMAL:
+    {
+        "enumvalue" : 3,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+    },
+    DOUBLE:
+    {
+        "enumvalue" : 4,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+    },
+    STRING:
+    {
+        "enumvalue" : 5,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
+    },
+    ARRAY:
+    {
+        "enumvalue" : 10,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
+    },
+    OBJECT:
+    {
+        "enumvalue" : 11,
+        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
+    }
+};
+
+/*================================================================*/
+/*                            JSONValue                           */
+/*================================================================*/
+
+ org.webpki.json.JSONValue = function (type, value)
+{
+    this.type = type;
+    this.value = value;
+};
+
+org.webpki.json.JSONValue.prototype.getJSONTypeName = function (json_type)
+{
+    for (var obj in org.webpki.json.JSONTypes)
+    {
+        if (org.webpki.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
+        {
+            return obj;
+        }
+    }
+    return "UNKNOWN!";
+};
+
+/*================================================================*/
+/*               Namespace for the "Math" library                 */
+/*================================================================*/
+
+"use strict";
+
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.math = org.webpki.math || {};
+
+/*================================================================*/
+/*                           BigInteger                           */
+/*================================================================*/
+
+// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
+// the only functionality offered are tests for equivalence and zero.  It is anticipated
+// that all cryptographic functions are performed in other and lower layers of
+// the platform.  Only positive values (and zero) are currently supported.
+
+/* BigInteger */org.webpki.math.BigInteger = function (/* Uint8Array */optional_value)
+{
+    if (optional_value === undefined)
+    {
+        this.value = null;
+    }
+    else
+    {
+        this.value = optional_value;
+        this._trim ();
+    }
+};
+
+org.webpki.math.BigInteger._error = function (message)
+{
+    throw "MATHException: " + message;
+};
+
+/* void */org.webpki.math.BigInteger.prototype._trim = function ()
+{
+    var offset = 0;
+    while (this.value[offset] == 0 && offset < (this.value.length - 1))
+    {
+        offset++;
+    }
+    if (offset != 0)
+    {
+        var trimmed = new Uint8Array (this.value.length - offset);
+        for (var q = 0; q < trimmed.length; q++)
+        {
+            trimmed[q] = this.value[q + offset];
+        }
+        this.value = trimmed;
+    }
+};
+
+org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
+{
+    if (optional_10_or_16_base === undefined)
+    {
+        return 10;
+    }
+    else if (optional_10_or_16_base == 10)
+    {
+        return 10;
+    }
+    else if (optional_10_or_16_base == 16)
+    {
+        return 16;
+    }
+    else
+    {
+        org.webpki.math.BigInteger._error ("Incorrect base argument, only 10 and 16 are supported");
+    }
+    throw "MATHException: " + message;
+};
+
+/* bool*/ org.webpki.math.BigInteger._isZero = function (/* Uint8Array */byte_array)
+{
+    for (var i = 0; i < byte_array.length; i++)
+    {
+        if (byte_array[i] != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+};
+
+/* bool*/ org.webpki.math.BigInteger.prototype.isZero = function ()
+{
+    return org.webpki.math.BigInteger._isZero (this.value);
+};
+
+/* BigInteger */ org.webpki.math.BigInteger.prototype.getLong = function ()
+{
+    if (this.value.length > 8)
+    {
+        org.webpki.math.BigInteger._error ("Out of \"Long\" range");
+    }
+    return this;
+};
+
+/* void */org.webpki.math.BigInteger._setSmallValue = function (/* Uint8Array */byte_array, /* int*/value)
+{
+    var i = byte_array.length;
+    byte_array[--i] = value;
+    while (--i >= 0)
+    {
+        byte_array[i] = 0;
+    }
+};
+
+/* int */org.webpki.math.BigInteger._getNextDigit = function (/* Uint8Array */dividend, /* int*/divisor)
+{
+    var remainder = 0;
+    for (var i = 0; i < dividend.length; i++)
+    {
+        remainder = dividend[i] | (remainder << 8);
+        dividend[i] = Math.floor (remainder / divisor);
+        remainder = Math.floor (remainder % divisor);
+    }
+    return remainder;
+};
+
+/* BigInteger */org.webpki.math.BigInteger.fromString = function (/* String */string, /* int */optional_10_or_16_base)
+{
+    var base = org.webpki.math.BigInteger._base (/* int */optional_10_or_16_base);
+    if (typeof string  == 'number')
+    {
+        string = string.toString ();
+    }
+    else if (typeof string  != 'string')
+    {
+        org.webpki.math.BigInteger._error ("Expected a string argument");
+    }
+    if (string.length == 0)
+    {
+        org.webpki.math.BigInteger._error ("Empty string not allowed");
+    }
+    var bi = new org.webpki.math.BigInteger ();
+    var result = [];
+    result[0] = 0;
+    for (var i = 0; i <  string.length; i++)
+    {
+        var n;
+        /* char */var c = string.charAt (i);
+        if (c >= '0' && c <= '9')
+        {
+            n = c.charCodeAt (0) - 48;
+        }
+        else if (base == 10)
+        {
+            org.webpki.math.BigInteger._error ("Decimal number expected");
+
+        }
+        else if (c >= 'a' && c <= 'f')
+        {
+            n = c.charCodeAt (0) - 87;
+        }
+        else if (c >= 'A' && c <= 'F')
+        {
+            n = c.charCodeAt (0) - 55;
+        }
+        else
+        {
+            org.webpki.math.BigInteger._error ("Hexadecimal number expected");
+        }
+        var carry = 0;
+        var j = 0;
+        while (j < result.length)
+        {
+            var bigres = base * result[j] + n + carry;
+            n = 0;
+            bigres -= (carry = Math.floor (bigres / 256)) * 256;
+            result[j++] = bigres;
+            if (carry > 0 && j == result.length)
+            {
+                result[j] = 0;
+            }
+        }
+    }
+    bi.value = new Uint8Array (result.length);
+    for (var i = 0; i < result.length; i++)
+    {
+        bi.value [result.length - i - 1] = result[i];
+    }
+    bi._trim ();
+    return bi;
+};
+
+/* Uint8Array */org.webpki.math.BigInteger.prototype.getByteArray = function ()
+{
+    if (!this.value)
+    {
+        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+    }
+    return this.value;
+};
+
+/* boolean */org.webpki.math.BigInteger.prototype.equals = function (/* BigInteger */big_integer)
+{
+    if (!this.value || !big_integer.value) 
+    {
+        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+    }
+    if (this.value.length != big_integer.value.length)
+    {
+        return false;
+    }
+    for (var i = 0; i < this.value.length; i++)
+    {
+        if (this.value[i] != big_integer.value[i])
+        {
+            return false;
+        }
+    }
+    return true;
+};
+
+/* String */org.webpki.math.BigInteger.prototype.toString = function (/* int */optional_10_or_16_base)
+{
+    if (!this.value)
+    {
+        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+    }
+    var base = org.webpki.math.BigInteger._base (/* int */optional_10_or_16_base);
+
+    var reversed_string = "";
+    var divisor = new Uint8Array (this.value);
+    do
+    {
+        var digit = org.webpki.math.BigInteger._getNextDigit (divisor, base);
+        reversed_string += String.fromCharCode (digit + (digit > 9 ? 55 : 48));
+    }
+    while (!org.webpki.math.BigInteger._isZero (divisor))
+  
+    var result = "";
+    var i = reversed_string.length;
+    while (--i >= 0)
+    {
+        result += reversed_string.charAt (i);
+    }
+    return result;
+};
+
+/*================================================================*/
+/*               Namespace for the "Util" library                 */
+/*================================================================*/
+
+"use strict";
+
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.util = org.webpki.util || {};
+
+/*================================================================*/
+/*                            Base64URL                           */
+/*================================================================*/
+
+//* Encodes/decodes base64URL data as described in RFC 4648 Table 2.
+
+org.webpki.util.Base64URL =
+{
+    BASE64URL :
+    [//  0   1   2   3   4   5   6   7
+        'A','B','C','D','E','F','G','H', // 0
+        'I','J','K','L','M','N','O','P', // 1
+        'Q','R','S','T','U','V','W','X', // 2
+        'Y','Z','a','b','c','d','e','f', // 3
+        'g','h','i','j','k','l','m','n', // 4
+        'o','p','q','r','s','t','u','v', // 5
+        'w','x','y','z','0','1','2','3', // 6
+        '4','5','6','7','8','9','-','_'  // 7
+     ]
+};
+
+      ////////////////////
+     ////   DECODE   //// Throws Base64Exception if argument isn't base64URL
+    ////////////////////
+
+/* Uint8Array */org.webpki.util.Base64URL.decode = function (/* String */ encoded)
+{
+    var semidecoded = new Uint8Array (encoded.length);
+    for (var i = 0; i < encoded.length; i++)
+    {
+        switch (encoded.charAt (i))
+        {
+            case 'A': semidecoded[i] = 0; break;
+            case 'B': semidecoded[i] = 1; break;
+            case 'C': semidecoded[i] = 2; break;
+            case 'D': semidecoded[i] = 3; break;
+            case 'E': semidecoded[i] = 4; break;
+            case 'F': semidecoded[i] = 5; break;
+            case 'G': semidecoded[i] = 6; break;
+            case 'H': semidecoded[i] = 7; break;
+            case 'I': semidecoded[i] = 8; break;
+            case 'J': semidecoded[i] = 9; break;
+            case 'K': semidecoded[i] = 10; break;
+            case 'L': semidecoded[i] = 11; break;
+            case 'M': semidecoded[i] = 12; break;
+            case 'N': semidecoded[i] = 13; break;
+            case 'O': semidecoded[i] = 14; break;
+            case 'P': semidecoded[i] = 15; break;
+            case 'Q': semidecoded[i] = 16; break;
+            case 'R': semidecoded[i] = 17; break;
+            case 'S': semidecoded[i] = 18; break;
+            case 'T': semidecoded[i] = 19; break;
+            case 'U': semidecoded[i] = 20; break;
+            case 'V': semidecoded[i] = 21; break;
+            case 'W': semidecoded[i] = 22; break;
+            case 'X': semidecoded[i] = 23; break;
+            case 'Y': semidecoded[i] = 24; break;
+            case 'Z': semidecoded[i] = 25; break;
+            case 'a': semidecoded[i] = 26; break;
+            case 'b': semidecoded[i] = 27; break;
+            case 'c': semidecoded[i] = 28; break;
+            case 'd': semidecoded[i] = 29; break;
+            case 'e': semidecoded[i] = 30; break;
+            case 'f': semidecoded[i] = 31; break;
+            case 'g': semidecoded[i] = 32; break;
+            case 'h': semidecoded[i] = 33; break;
+            case 'i': semidecoded[i] = 34; break;
+            case 'j': semidecoded[i] = 35; break;
+            case 'k': semidecoded[i] = 36; break;
+            case 'l': semidecoded[i] = 37; break;
+            case 'm': semidecoded[i] = 38; break;
+            case 'n': semidecoded[i] = 39; break;
+            case 'o': semidecoded[i] = 40; break;
+            case 'p': semidecoded[i] = 41; break;
+            case 'q': semidecoded[i] = 42; break;
+            case 'r': semidecoded[i] = 43; break;
+            case 's': semidecoded[i] = 44; break;
+            case 't': semidecoded[i] = 45; break;
+            case 'u': semidecoded[i] = 46; break;
+            case 'v': semidecoded[i] = 47; break;
+            case 'w': semidecoded[i] = 48; break;
+            case 'x': semidecoded[i] = 49; break;
+            case 'y': semidecoded[i] = 50; break;
+            case 'z': semidecoded[i] = 51; break;
+            case '0': semidecoded[i] = 52; break;
+            case '1': semidecoded[i] = 53; break;
+            case '2': semidecoded[i] = 54; break;
+            case '3': semidecoded[i] = 55; break;
+            case '4': semidecoded[i] = 56; break;
+            case '5': semidecoded[i] = 57; break;
+            case '6': semidecoded[i] = 58; break;
+            case '7': semidecoded[i] = 59; break;
+            case '8': semidecoded[i] = 60; break;
+            case '9': semidecoded[i] = 61; break;
+            case '-': semidecoded[i] = 62; break;
+            case '_': semidecoded[i] = 63; break;
+            default: throw "Base64Exception: bad charcter at index " + i;
+        }
+    }
+    
+    var encoded_length_modulo_4 = Math.floor (encoded.length % 4);
+    var decoded_length = Math.floor (encoded.length / 4) * 3;
+    if (encoded_length_modulo_4 != 0)
+    {
+        decoded_length += encoded_length_modulo_4 - 1;
+    }
+    var decoded = new Uint8Array (decoded_length);
+    var decoded_length_modulo_3 = Math.floor (decoded_length % 3);
+    if (decoded_length_modulo_3 == 0 && encoded_length_modulo_4 != 0)
+    {
+        throw "Base64Exception: wrong number of characters";
+    }
+
+    // -----:  D E C O D E :-----
+    var i = 0, j = 0;
+    //decode in groups of four bytes
+    while (j < decoded.length - decoded_length_modulo_3)
+    {
+        decoded[j++] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
+        decoded[j++] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
+        decoded[j++] = (semidecoded[i++] << 6) | semidecoded[i++];
+    }
+    //decode "odd" bytes
+    if (decoded_length_modulo_3 == 1)
+    {
+        decoded[j] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
+        if (semidecoded[i] & 0x0F)
+        {
+            throw "Base64Exception: wrong termination character";
+        }
+    }
+    else if (decoded_length_modulo_3 == 2)
+    {
+        decoded[j++] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
+        decoded[j] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
+        if (semidecoded[i] & 0x03)
+        {
+            throw "Base64Exception: wrong termination character";
+        }
+    }
+    return decoded;
+};
+  
+      ////////////////////
+     ////   ENCODE   //// Does not throw exceptions
+    ////////////////////
+
+/* String */org.webpki.util.Base64URL.encode = function (/* Uint8Array */uncoded)
+{
+    var encoded = new String ();
+    var i = 0;
+    var modulo3 = uncoded.length % 3;
+    while (i < uncoded.length - modulo3)
+    {
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 2) & 0x3C) | ((uncoded[i] >>> 6) & 0x03)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[uncoded[i++] & 0x3F];
+    }
+    if (modulo3 == 1)
+    {
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] << 4) & 0x30];
+    }
+    else if (modulo3 == 2)
+    {
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] >>> 2) & 0x3F];
+        encoded += org.webpki.util.Base64URL.BASE64URL[((uncoded[i++] << 4) & 0x30) | ((uncoded[i] >>> 4) & 0x0F)];
+        encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] << 2) & 0x3C];
+    }
+    return encoded;
+};

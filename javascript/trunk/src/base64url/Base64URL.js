@@ -15,10 +15,11 @@
  *
  */
 
-/**
- * Encodes/decodes base64URL data.
- * See RFC 4648 Table 2.
- */
+/*================================================================*/
+/*                            Base64URL                           */
+/*================================================================*/
+
+//* Encodes/decodes base64URL data as described in RFC 4648 Table 2.
 
 org.webpki.util.Base64URL =
 {
