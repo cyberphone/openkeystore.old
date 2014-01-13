@@ -138,6 +138,7 @@ if (!reader.getBoolean ("bool") || reader.getBoolean ("bool2"))
 {
     throw "Bool";
 }
+console.debug ("HI=" + reader.getDateTime ("now").toString () + "/" + now.toString ());
 if (reader.getDateTime ("now").getTime () != now.getTime ())
 {
     throw "Date";
@@ -155,7 +156,7 @@ for (var i = 0; i < bin.length; i++)
     }
 }
 var arr_reader = reader.getArray ("arry");
-if (!arr_reader.getString ().equals (big_string) ||
+if (arr_reader.getString () != big_string ||
     !arr_reader.hasMore () ||
     !arr_reader.getBigInteger ().equals (really_bigint) ||
     arr_reader.getInt () != 45 ||
@@ -214,6 +215,6 @@ var signature = org.webpki.json.JSONParser.parse (
 );
 console.debug (new org.webpki.json.JSONObjectWriter (signature).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
 
-// console.debug (Date.fromISOString ('2011-06-02T09:34:02.99'));
+console.debug ("Successful");
 
 
