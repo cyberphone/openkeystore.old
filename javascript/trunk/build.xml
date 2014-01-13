@@ -27,9 +27,10 @@
   </target>
 
   <target name="_antreplacement">
-    <replace summary="true" file="${runfile}" value="return Date.fromISOString (this.getString (name))">
-       <replacetoken><![CDATA[return new Date (this.getString (name))]]></replacetoken>
-    </replace>
+    <replaceregexp file="${runfile}"
+        match="\s+\/\*\s+\*\s+Copyright\ 2006\-2014\ WebPKI\.org.+?\*\/"
+        replace=""
+        flags="sg"/>
   </target>
 
   <target name="test" depends="clean">
