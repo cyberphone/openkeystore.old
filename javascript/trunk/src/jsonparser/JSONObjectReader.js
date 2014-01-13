@@ -37,7 +37,7 @@
                            "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
                            ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
     }
-    this.json.read_flag.name = true;
+    this.json.read_flag[name] = true;
     return value;
 };
 
@@ -122,16 +122,16 @@
     return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */value.value);
 };
 
-/*
- public String org.webpki.json.JSONObjectReader.prototype.getStringConditional (String name) throws IOException
+ /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name)
  {
- if (hasProperty (name))
- {
- return getString (name);
- }
- return null;
- }
-
+     if (this.hasProperty (name))
+     {
+         return this.getString (name);
+     }
+     return null;
+ };
+ 
+ /*
  public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name) throws IOException
  {
  if (hasProperty (name))
@@ -218,13 +218,13 @@
  {
  return json.properties.keySet ().toArray (new String[0]);
  }
+*/
 
- public boolean org.webpki.json.JSONObjectReader.prototype.hasProperty (String name)
- {
- return json.properties.get (name) != null;
- }
- */
-
+/* public boolean */org.webpki.json.JSONObjectReader.prototype.hasProperty = function (/* String */name)
+{
+    return this.json._getProperty (name) != null;
+};
+ 
 /* public org.webpki.json.JSONTypes */org.webpki.json.JSONObjectReader.prototype.getPropertyType = function (/* String */name)
 {
     /* org.webpki.json.JSONValue */var value = this.json._getProperty (name);

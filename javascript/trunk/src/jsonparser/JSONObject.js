@@ -43,7 +43,7 @@ org.webpki.json.JSONObject = function ()
         }
     }
     this.property_list[length] = new_property;
-    this.read_flag.name = null;
+    this.read_flag[name] = null;
 };
 
 org.webpki.json.JSONError._error = function (message)
