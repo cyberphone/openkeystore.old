@@ -126,9 +126,9 @@
     {
         org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
     }
-    if (!org.webpki.json.CONST.INTEGER_PATTERN.test (value) &&
-        (!org.webpki.json.CONST.DECIMAL_INITIAL_PATTERN.test (value) || 
-         org.webpki.json.CONST.DECIMAL_2DOUBLE_PATTERN.test (value)))
+    if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) &&
+        (!org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (value) || 
+         org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (value)))
     {
         org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
     }
