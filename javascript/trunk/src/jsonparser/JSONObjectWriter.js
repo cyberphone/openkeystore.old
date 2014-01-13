@@ -176,12 +176,13 @@
       {
         return setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.NULL, "null"));
       }
-
-    public org.webpki.json.JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
-      {
-        return setString (name, ISODateTime.formatDateTime (date_time));
-      }
 */
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDateTime = function (/* String */name, /* Date */date_time)
+{
+    return this.setString (name, date_time.toISOString ());
+};
+
+/*
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
 {
     return this.setString (name, org.webpki.util.Base64URL.encode (value));

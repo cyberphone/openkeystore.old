@@ -26,6 +26,12 @@
      </concat>
   </target>
 
+  <target name="_antreplacement">
+    <replace summary="true" file="${runfile}" value="return Date.fromISOString (this.getString (name))">
+       <replacetoken><![CDATA[return new Date (this.getString (name))]]></replacetoken>
+    </replace>
+  </target>
+
   <target name="test" depends="clean">
     <fixcrlf srcdir="${src_dir}"
        tab="remove"
@@ -59,6 +65,7 @@
         }
     ]]>
     </script>
+    <antcall target="_antreplacement"/>
     <script language="javascript" src="${runfile}">
        <classpath>
            <fileset dir="rhino-lib" includes="*.jar"></fileset>

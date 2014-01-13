@@ -67,12 +67,11 @@
     return this._getString (name, org.webpki.json.JSONTypes.BOOLEAN) == "true";
 };
 
-/*
- public GregorianCalendar org.webpki.json.JSONObjectReader.prototype.getDateTime (String name) throws IOException
- {
- return ISODateTime.parseDateTime (getString (name));
- }
-*/
+/* public GregorianCalendar */org.webpki.json.JSONObjectReader.prototype.getDateTime = function (/* String */name)
+{
+    return new Date (this.getString (name));
+};
+
 /* Uint8Array */org.webpki.json.JSONObjectReader.prototype.getBinary = function (/* String */name)
  {
     return org.webpki.util.Base64URL.decode (this.getString (name));

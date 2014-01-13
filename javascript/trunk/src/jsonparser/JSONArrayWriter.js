@@ -67,17 +67,16 @@
     return this._add (org.webpki.json.JSONTypes.BOOLEAN, org.webpki.json.JSONObjectWriter._boolTest (value));
 };
 
-/*
-    public org.webpki.json.JSONArrayWriter setNULL () throws IOException
-      {
-        return add (org.webpki.json.JSONTypes.NULL, "null");
-      }
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setNULL = function ()
+{
+    return this._add (org.webpki.json.JSONTypes.NULL, "null");
+};
 
-    public org.webpki.json.JSONArrayWriter setDateTime (Date date_time) throws IOException
-      {
-        return setString (ISODateTime.formatDateTime (date_time));
-      }
-*/
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setDateTime = function (/* Date */date_time)
+{
+    return this.setString (date_time.toISOString ());
+};
+
 /* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
 {
     /* Vector<org.webpki.json.JSONValue> */var new_array = [] /* new Vector<org.webpki.json.JSONValue> () */;

@@ -92,8 +92,10 @@ var a_long_one = org.webpki.math.BigInteger.fromString ("FF00000000000000", 16);
 var double_trouble = 2.3e-25;
 var big_dec = "3500000000000000000000000000.56";
 var big_string = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija";
+var now = new Date ();
 newobjec = new org.webpki.json.JSONObjectWriter ();
-var arr_writer = newobjec.setString ("dri", "dra")
+var arr_writer = newobjec
+        .setString ("dri", "dra")
         .setInt ("numbah", 6)
         .setBinary ("bin", inbin)
         .setBigInteger ("bigint", really_bigint)
@@ -102,15 +104,17 @@ var arr_writer = newobjec.setString ("dri", "dra")
         .setBoolean ("bool2", false)
         .setLong ("long", a_long_one)
         .setBigDecimal ("bigdec", big_dec)
+        .setDateTime ("now", now)
         
         .setArray ("arry").setString (big_string);
-arr_writer.setBigInteger (really_bigint);
-arr_writer.setInt (45);
-arr_writer.setLong (a_long_one);
-arr_writer.setBigDecimal (big_dec);
-arr_writer.setBoolean (true);
-arr_writer.setBoolean (false);
-arr_writer.setDouble (double_trouble);
+arr_writer
+.setBigInteger (really_bigint)
+.setInt (45)
+.setLong (a_long_one)
+.setBigDecimal (big_dec)
+.setBoolean (true)
+.setBoolean (false)
+.setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
 var reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
@@ -133,6 +137,10 @@ if (reader.getBigDecimal ("bigdec") != big_dec)
 if (!reader.getBoolean ("bool") || reader.getBoolean ("bool2"))
 {
     throw "Bool";
+}
+if (reader.getDateTime ("now").getTime () != now.getTime ())
+{
+    throw "Date";
 }
 var bin = reader.getBinary ("bin");
 if (bin.length != inbin.length)
@@ -205,3 +213,7 @@ var signature = org.webpki.json.JSONParser.parse (
 
 );
 console.debug (new org.webpki.json.JSONObjectWriter (signature).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
+
+// console.debug (Date.fromISOString ('2011-06-02T09:34:02.99'));
+
+
