@@ -13,7 +13,7 @@ for (var times = 0; times < 1000; times++)
 		if (arr.length != iarr.length) throw "Length error";
 		for (var q = 0; q < arr.length; q++)
 		{
-			if (arr[q] != iarr[q]) throw "Content error";
+			if (arr[q] != iarr[q]) throw "Content error: " + b64;
 		}
 	}
 }
@@ -33,7 +33,20 @@ if (!should_fail)
 should_fail = true;
 try
 {
-	var h = org.webpki.util.Base64URL.decode ("i+");
+	var h = org.webpki.util.Base64URL.decode ("+xdFdYg");
+	should_fail = false;
+}
+catch (err)
+{
+}
+if (!should_fail)
+{
+	throw "Bad";
+}
+should_fail = true;
+try
+{
+	var h = org.webpki.util.Base64URL.decode ("/xdFdYg");
 	should_fail = false;
 }
 catch (err)

@@ -33,7 +33,26 @@ org.webpki.util.Base64URL =
         'o','p','q','r','s','t','u','v', // 5
         'w','x','y','z','0','1','2','3', // 6
         '4','5','6','7','8','9','-','_'  // 7
-     ]
+    ],
+    DECODE_TABLE :
+    [
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, 62, -1, -1,
+        52, 53, 54, 55, 56, 57, 58, 59,
+        60, 61, -1, -1, -1, -1, -1, -1,
+        -1,  0,  1,  2,  3,  4,  5,  6, 
+         7,  8,  9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22,
+        23, 24, 25, -1, -1, -1, -1, 63,
+        -1, 26, 27, 28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48,
+        49, 50, 51
+    ]
 };
 
       ////////////////////
@@ -45,74 +64,12 @@ org.webpki.util.Base64URL =
     var semidecoded = new Uint8Array (encoded.length);
     for (var i = 0; i < encoded.length; i++)
     {
-        switch (encoded.charAt (i))
+        var c = encoded.charCodeAt (i);
+        if (c >= org.webpki.util.Base64URL.DECODE_TABLE.length || (c = org.webpki.util.Base64URL.DECODE_TABLE[c]) < 0)
         {
-            case 'A': semidecoded[i] = 0; break;
-            case 'B': semidecoded[i] = 1; break;
-            case 'C': semidecoded[i] = 2; break;
-            case 'D': semidecoded[i] = 3; break;
-            case 'E': semidecoded[i] = 4; break;
-            case 'F': semidecoded[i] = 5; break;
-            case 'G': semidecoded[i] = 6; break;
-            case 'H': semidecoded[i] = 7; break;
-            case 'I': semidecoded[i] = 8; break;
-            case 'J': semidecoded[i] = 9; break;
-            case 'K': semidecoded[i] = 10; break;
-            case 'L': semidecoded[i] = 11; break;
-            case 'M': semidecoded[i] = 12; break;
-            case 'N': semidecoded[i] = 13; break;
-            case 'O': semidecoded[i] = 14; break;
-            case 'P': semidecoded[i] = 15; break;
-            case 'Q': semidecoded[i] = 16; break;
-            case 'R': semidecoded[i] = 17; break;
-            case 'S': semidecoded[i] = 18; break;
-            case 'T': semidecoded[i] = 19; break;
-            case 'U': semidecoded[i] = 20; break;
-            case 'V': semidecoded[i] = 21; break;
-            case 'W': semidecoded[i] = 22; break;
-            case 'X': semidecoded[i] = 23; break;
-            case 'Y': semidecoded[i] = 24; break;
-            case 'Z': semidecoded[i] = 25; break;
-            case 'a': semidecoded[i] = 26; break;
-            case 'b': semidecoded[i] = 27; break;
-            case 'c': semidecoded[i] = 28; break;
-            case 'd': semidecoded[i] = 29; break;
-            case 'e': semidecoded[i] = 30; break;
-            case 'f': semidecoded[i] = 31; break;
-            case 'g': semidecoded[i] = 32; break;
-            case 'h': semidecoded[i] = 33; break;
-            case 'i': semidecoded[i] = 34; break;
-            case 'j': semidecoded[i] = 35; break;
-            case 'k': semidecoded[i] = 36; break;
-            case 'l': semidecoded[i] = 37; break;
-            case 'm': semidecoded[i] = 38; break;
-            case 'n': semidecoded[i] = 39; break;
-            case 'o': semidecoded[i] = 40; break;
-            case 'p': semidecoded[i] = 41; break;
-            case 'q': semidecoded[i] = 42; break;
-            case 'r': semidecoded[i] = 43; break;
-            case 's': semidecoded[i] = 44; break;
-            case 't': semidecoded[i] = 45; break;
-            case 'u': semidecoded[i] = 46; break;
-            case 'v': semidecoded[i] = 47; break;
-            case 'w': semidecoded[i] = 48; break;
-            case 'x': semidecoded[i] = 49; break;
-            case 'y': semidecoded[i] = 50; break;
-            case 'z': semidecoded[i] = 51; break;
-            case '0': semidecoded[i] = 52; break;
-            case '1': semidecoded[i] = 53; break;
-            case '2': semidecoded[i] = 54; break;
-            case '3': semidecoded[i] = 55; break;
-            case '4': semidecoded[i] = 56; break;
-            case '5': semidecoded[i] = 57; break;
-            case '6': semidecoded[i] = 58; break;
-            case '7': semidecoded[i] = 59; break;
-            case '8': semidecoded[i] = 60; break;
-            case '9': semidecoded[i] = 61; break;
-            case '-': semidecoded[i] = 62; break;
-            case '_': semidecoded[i] = 63; break;
-            default: throw "Base64Exception: bad charcter at index " + i;
+            throw "Base64Exception: bad charcter at index " + i;
         }
+        semidecoded[i] = c;
     }
     
     var encoded_length_modulo_4 = Math.floor (encoded.length % 4);
