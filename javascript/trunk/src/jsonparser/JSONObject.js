@@ -46,11 +46,6 @@ org.webpki.json.JSONObject = function ()
     this.read_flag[name] = null;
 };
 
-org.webpki.json.JSONError._error = function (message)
-{
-    throw "JSONException: " + message;
-};
-
 org.webpki.json.JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
