@@ -145,29 +145,12 @@ public class JSONObjectReader implements Serializable
 
     public String getStringConditional (String name) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getString (name);
-          }
-        return null;
+        return this.getStringConditional (name, null);
       }
 
     public boolean getBooleanConditional (String name) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getBoolean (name);
-          }
-        return false;
-      }
-
-    public byte[] getBinaryConditional (String name) throws IOException
-      {
-        if (hasProperty (name))
-          {
-            return getBinary (name);
-          }
-        return null;
+        return this.getBooleanConditional (name, false);
       }
 
     public String getStringConditional (String name, String default_value) throws IOException
@@ -179,15 +162,6 @@ public class JSONObjectReader implements Serializable
         return default_value;
       }
 
-    public String[] getStringArrayConditional (String name) throws IOException
-      {
-        if (hasProperty (name))
-          {
-            return getStringArray (name);
-          }
-        return null;
-      }
-
     public boolean getBooleanConditional (String name, boolean default_value) throws IOException
       {
         if (hasProperty (name))
@@ -195,6 +169,24 @@ public class JSONObjectReader implements Serializable
             return getBoolean (name);
           }
         return default_value;
+      }
+
+    public byte[] getBinaryConditional (String name) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getBinary (name);
+          }
+        return null;
+      }
+
+    public String[] getStringArrayConditional (String name) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getStringArray (name);
+          }
+        return null;
       }
 
     Vector<JSONValue> getArray (String name, JSONTypes expected) throws IOException
