@@ -42,6 +42,26 @@ public class Base64URL
         'w','x','y','z','0','1','2','3', // 6
         '4','5','6','7','8','9','-','_'  // 7
     };
+    
+    public final static byte[] DECODE_TABLE = {
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, 62, -1, -1,
+        52, 53, 54, 55, 56, 57, 58, 59,
+        60, 61, -1, -1, -1, -1, -1, -1,
+        -1,  0,  1,  2,  3,  4,  5,  6, 
+         7,  8,  9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22,
+        23, 24, 25, -1, -1, -1, -1, 63,
+        -1, 26, 27, 28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48,
+        49, 50, 51
+    };
+
 
     
     private Base64URL ()
@@ -57,74 +77,12 @@ public class Base64URL
         byte[] semidecoded = new byte[encoded.length];
         for (int i = 0; i < encoded.length; i++)
           {
-            switch (encoded[i])
+            byte c = encoded[i];
+            if (c < 0 || c >= DECODE_TABLE.length || (c = DECODE_TABLE[c]) < 0)
               {
-                case (byte)'A': semidecoded[i] = 0; break;
-                case (byte)'B': semidecoded[i] = 1; break;
-                case (byte)'C': semidecoded[i] = 2; break;
-                case (byte)'D': semidecoded[i] = 3; break;
-                case (byte)'E': semidecoded[i] = 4; break;
-                case (byte)'F': semidecoded[i] = 5; break;
-                case (byte)'G': semidecoded[i] = 6; break;
-                case (byte)'H': semidecoded[i] = 7; break;
-                case (byte)'I': semidecoded[i] = 8; break;
-                case (byte)'J': semidecoded[i] = 9; break;
-                case (byte)'K': semidecoded[i] = 10; break;
-                case (byte)'L': semidecoded[i] = 11; break;
-                case (byte)'M': semidecoded[i] = 12; break;
-                case (byte)'N': semidecoded[i] = 13; break;
-                case (byte)'O': semidecoded[i] = 14; break;
-                case (byte)'P': semidecoded[i] = 15; break;
-                case (byte)'Q': semidecoded[i] = 16; break;
-                case (byte)'R': semidecoded[i] = 17; break;
-                case (byte)'S': semidecoded[i] = 18; break;
-                case (byte)'T': semidecoded[i] = 19; break;
-                case (byte)'U': semidecoded[i] = 20; break;
-                case (byte)'V': semidecoded[i] = 21; break;
-                case (byte)'W': semidecoded[i] = 22; break;
-                case (byte)'X': semidecoded[i] = 23; break;
-                case (byte)'Y': semidecoded[i] = 24; break;
-                case (byte)'Z': semidecoded[i] = 25; break;
-                case (byte)'a': semidecoded[i] = 26; break;
-                case (byte)'b': semidecoded[i] = 27; break;
-                case (byte)'c': semidecoded[i] = 28; break;
-                case (byte)'d': semidecoded[i] = 29; break;
-                case (byte)'e': semidecoded[i] = 30; break;
-                case (byte)'f': semidecoded[i] = 31; break;
-                case (byte)'g': semidecoded[i] = 32; break;
-                case (byte)'h': semidecoded[i] = 33; break;
-                case (byte)'i': semidecoded[i] = 34; break;
-                case (byte)'j': semidecoded[i] = 35; break;
-                case (byte)'k': semidecoded[i] = 36; break;
-                case (byte)'l': semidecoded[i] = 37; break;
-                case (byte)'m': semidecoded[i] = 38; break;
-                case (byte)'n': semidecoded[i] = 39; break;
-                case (byte)'o': semidecoded[i] = 40; break;
-                case (byte)'p': semidecoded[i] = 41; break;
-                case (byte)'q': semidecoded[i] = 42; break;
-                case (byte)'r': semidecoded[i] = 43; break;
-                case (byte)'s': semidecoded[i] = 44; break;
-                case (byte)'t': semidecoded[i] = 45; break;
-                case (byte)'u': semidecoded[i] = 46; break;
-                case (byte)'v': semidecoded[i] = 47; break;
-                case (byte)'w': semidecoded[i] = 48; break;
-                case (byte)'x': semidecoded[i] = 49; break;
-                case (byte)'y': semidecoded[i] = 50; break;
-                case (byte)'z': semidecoded[i] = 51; break;
-                case (byte)'0': semidecoded[i] = 52; break;
-                case (byte)'1': semidecoded[i] = 53; break;
-                case (byte)'2': semidecoded[i] = 54; break;
-                case (byte)'3': semidecoded[i] = 55; break;
-                case (byte)'4': semidecoded[i] = 56; break;
-                case (byte)'5': semidecoded[i] = 57; break;
-                case (byte)'6': semidecoded[i] = 58; break;
-                case (byte)'7': semidecoded[i] = 59; break;
-                case (byte)'8': semidecoded[i] = 60; break;
-                case (byte)'9': semidecoded[i] = 61; break;
-                case (byte)'-': semidecoded[i] = 62; break;
-                case (byte)'_': semidecoded[i] = 63; break;
-                default: throw new IOException("Not valid Base64URL data (bad byte at index " + i);
+                throw new IOException ("Not valid Base64URL data (bad byte at index " + i);
               }
+            semidecoded[i] = c;
           }
         int decoded_length = (encoded.length / 4) * 3;
         int encoded_length_modulo_4 = encoded.length % 4; 

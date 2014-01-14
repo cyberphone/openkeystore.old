@@ -496,13 +496,23 @@ public class JSONTest
         should_fail = true;
         try
           {
-            JSONParser.parse (new JSONObjectWriter ().setString ("blob", "i+").serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+            JSONParser.parse (new JSONObjectWriter ().setString ("blob", "+xdFdYg").serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
             should_fail = false;
           }
         catch (IOException e)
           {
           }
-        assertTrue ("i+", should_fail);
+        assertTrue ("+xdFdYg", should_fail);
+        should_fail = true;
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setString ("blob", "/xdFdYg").serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBinary ("blob");
+            should_fail = false;
+          }
+        catch (IOException e)
+          {
+          }
+        assertTrue ("/xdFdYg", should_fail);
         // We are pretty strict, yes...
         for (int i = 0; i < 64; i++)
           {
