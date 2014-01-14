@@ -3,7 +3,7 @@
     "@qualifier": "KeyCreationRequest",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
-    "SubmitURL": "http://issuer.example.com/keyinit",
+    "SubmitURL": "https://issuer.example.com/keyinit",
     "KeyEntryAlgorithm": "http://xmlns.webpki.org/sks/algorithm#key.1",
     "PINPolicySpecifiers": 
         [{

@@ -2,7 +2,7 @@
     "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
     "@qualifier": "ProvisioningInitializationRequest",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
-    "SubmitURL": "http://issuer.example.com/provsess",
+    "SubmitURL": "https://issuer.example.com/provsess",
     "ServerTime": "2013-12-14T16:33:30+01:00",
     "SessionKeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#session.1",
     "SessionKeyLimit": 20,

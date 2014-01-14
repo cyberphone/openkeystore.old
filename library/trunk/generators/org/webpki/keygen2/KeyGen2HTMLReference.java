@@ -1620,7 +1620,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>." +
+              .addString ("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>. " +
                           "If this property is undefined, it is assumed to be a zero-length array.")
           .newExtensionRow (new MAC ("createKeyEntry"));
 

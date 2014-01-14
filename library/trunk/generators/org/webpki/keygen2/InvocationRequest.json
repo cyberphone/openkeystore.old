@@ -2,6 +2,6 @@
     "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
     "@qualifier": "InvocationRequest",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
-    "SubmitURL": "http://issuer.example.com/platform",
+    "SubmitURL": "https://issuer.example.com/invocation",
     "Action": "manage"
 }
