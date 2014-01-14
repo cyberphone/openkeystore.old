@@ -235,6 +235,95 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
 };
 
 /*================================================================*/
+/*                       JSONDecoderCache                         */
+/*================================================================*/
+
+org.webpki.json.JSONDecoderCache = function ()
+{
+    this.cache = new Object ();
+    this.check_undefined = true;
+};
+
+org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER = '$';
+
+org.webpki.json.JSONDecoderCache.CONTEXT_JSON              = "@context";
+org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
+
+org.webpki.json.JSONDecoderCache.prototype.addToCache = function (object_class)
+{
+    var object = new object_class ();
+    if (object.getContext === undefined)
+    {
+        org.webpki.json.JSONError._error ('Missing mandatory method "getContext"');
+    }
+    if (object.readJSONData === undefined)
+    {
+        org.webpki.json.JSONError._error ('Missing mandatory method "readJSONData"');
+    }
+    var object_id = object.getContext ();
+    if (object.getQualifier != undefined)
+    {
+        object_id += org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER + object.getQualifier ();
+    }
+    if (this.cache[object_id] != null)
+    {
+        org.webpki.json.JSONError._error ("Duplicate definition: " + object_id);
+    }
+    this.cache[object_id] = object_class;
+};
+
+org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
+{
+    for (var i = 0; i < json_object.property_list.length; i++)
+    {
+        var name = json_object.property_list[i].name;
+        var value = json_object.property_list[i].value;
+        if (!json_object.read_flag[name])
+        {
+            org.webpki.json.JSONError._error ('Property "' + name + '" was never read');
+        }
+        if (value.type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            org.webpki.json.JSONDecoderCache._checkForUnread (value.value);
+        }
+        else if (value.type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            for (var q = 0; q < value.value.length; q++)
+            {
+                var object = value.value[q];
+                if (object.type == org.webpki.json.JSONTypes.OBJECT)
+                {
+                    org.webpki.json.JSONDecoderCache._checkForUnread (object.value);
+                }
+            }
+        }
+    }
+};
+
+org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
+{
+    var json_object_reader = org.webpki.json.JSONParser.parse (raw_json_document);
+    var object_id = json_object_reader.getString (org.webpki.json.JSONDecoderCache.CONTEXT_JSON);
+    var qualifier = json_object_reader.getStringConditional (org.webpki.json.JSONDecoderCache.QUALIFIER_JSON);
+    if (qualifier != null)
+    {
+        object_id += org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER + qualifier;
+    }
+    var object_class = this.cache[object_id];
+    if (object_class == null)
+    {
+        org.webpki.json.JSONError._error ("No document matching: " + object_id);
+    }
+    var object = new object_class ();
+    object.readJSONData (json_object_reader);
+    if (this.check_undefined)
+    {
+        org.webpki.json.JSONDecoderCache._checkForUnread (json_object_reader.json);
+    }
+    return object;
+};
+
+/*================================================================*/
 /*                           JSONError                            */
 /*================================================================*/
 
@@ -275,7 +364,7 @@ org.webpki.json.JSONObject = function ()
         }
     }
     this.property_list[length] = new_property;
-    this.read_flag.name = null;
+    this.read_flag[name] = null;
 };
 
 org.webpki.json.JSONError._error = function (message)
@@ -332,7 +421,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
                            "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
                            ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
     }
-    this.json.read_flag.name = true;
+    this.json.read_flag[name] = true;
     return value;
 };
 
@@ -417,16 +506,16 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
     return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */value.value);
 };
 
-/*
- public String org.webpki.json.JSONObjectReader.prototype.getStringConditional (String name) throws IOException
+ /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name)
  {
- if (hasProperty (name))
- {
- return getString (name);
- }
- return null;
- }
-
+     if (this.hasProperty (name))
+     {
+         return this.getString (name);
+     }
+     return null;
+ };
+ 
+ /*
  public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name) throws IOException
  {
  if (hasProperty (name))
@@ -513,13 +602,13 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
  {
  return json.properties.keySet ().toArray (new String[0]);
  }
+*/
 
- public boolean org.webpki.json.JSONObjectReader.prototype.hasProperty (String name)
- {
- return json.properties.get (name) != null;
- }
- */
-
+/* public boolean */org.webpki.json.JSONObjectReader.prototype.hasProperty = function (/* String */name)
+{
+    return this.json._getProperty (name) != null;
+};
+ 
 /* public org.webpki.json.JSONTypes */org.webpki.json.JSONObjectReader.prototype.getPropertyType = function (/* String */name)
 {
     /* org.webpki.json.JSONValue */var value = this.json._getProperty (name);
@@ -665,9 +754,9 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
     {
         org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
     }
-    if (!org.webpki.json.CONST.INTEGER_PATTERN.test (value) &&
-        (!org.webpki.json.CONST.DECIMAL_INITIAL_PATTERN.test (value) || 
-         org.webpki.json.CONST.DECIMAL_2DOUBLE_PATTERN.test (value)))
+    if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) &&
+        (!org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (value) || 
+         org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (value)))
     {
         org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
     }
@@ -1413,24 +1502,21 @@ org.webpki.json.JSONParser = function ()
 {
 };
 
-org.webpki.json.CONST =
-{
-    LEFT_CURLY_BRACKET  : '{',
-    RIGHT_CURLY_BRACKET : '}',
-    BLANK_CHARACTER     : ' ',
-    DOUBLE_QUOTE        : '"',
-    COLON_CHARACTER     : ':',
-    LEFT_BRACKET        : '[',
-    RIGHT_BRACKET       : ']',
-    COMMA_CHARACTER     : ',',
-    BACK_SLASH          : '\\',
+org.webpki.json.JSONParser.LEFT_CURLY_BRACKET  = '{';
+org.webpki.json.JSONParser.RIGHT_CURLY_BRACKET = '}';
+org.webpki.json.JSONParser.BLANK_CHARACTER     = ' ';
+org.webpki.json.JSONParser.DOUBLE_QUOTE        = '"';
+org.webpki.json.JSONParser.COLON_CHARACTER     = ':';
+org.webpki.json.JSONParser.LEFT_BRACKET        = '[';
+org.webpki.json.JSONParser.RIGHT_BRACKET       = ']';
+org.webpki.json.JSONParser.COMMA_CHARACTER     = ',';
+org.webpki.json.JSONParser.BACK_SLASH          = '\\';
 
-    INTEGER_PATTERN         : new RegExp ("^((0)|(-?[1-9][0-9]*))$"),
-    BOOLEAN_PATTERN         : new RegExp ("^(true|false)$"),
-    DECIMAL_INITIAL_PATTERN : new RegExp ("^((\\+|-)?[0-9]+[\\.][0-9]+)$"),
-    DECIMAL_2DOUBLE_PATTERN : new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$"),
-    DOUBLE_PATTERN          : new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$")
-};
+org.webpki.json.JSONParser.INTEGER_PATTERN         = new RegExp ("^((0)|(-?[1-9][0-9]*))$");
+org.webpki.json.JSONParser.BOOLEAN_PATTERN         = new RegExp ("^(true|false)$");
+org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN = new RegExp ("^((\\+|-)?[0-9]+[\\.][0-9]+)$");
+org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN = new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$");
+org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 
 /* org.webpki.json.JSONObjectReader */org.webpki.json.JSONParser.parse = function (/* String */json_string)
 {
@@ -1439,14 +1525,14 @@ org.webpki.json.CONST =
     parser.max_length = json_string.length;
     parser.index = 0;
     var root = new org.webpki.json.JSONObject ();
-    if (parser._testNextNonWhiteSpaceChar () == org.webpki.json.CONST.LEFT_BRACKET)
+    if (parser._testNextNonWhiteSpaceChar () == org.webpki.json.JSONParser.LEFT_BRACKET)
     {
         parser._scan ();
         root._setArray (parser._scanArray ("outer array"));
     }
     else
     {
-        parser._scanFor (org.webpki.json.CONST.LEFT_CURLY_BRACKET);
+        parser._scanFor (org.webpki.json.JSONParser.LEFT_CURLY_BRACKET);
         parser._scanObject (root);
     }
     while (parser.index < parser.max_length)
@@ -1461,39 +1547,39 @@ org.webpki.json.CONST =
 
 /* String */org.webpki.json.JSONParser.prototype._scanProperty = function ()
 {
-    this._scanFor (org.webpki.json.CONST.DOUBLE_QUOTE);
+    this._scanFor (org.webpki.json.JSONParser.DOUBLE_QUOTE);
     var property = this._scanQuotedString ().value;
     if (property.length == 0)
     {
         org.webpki.json.JSONError._error ("Empty property");
     }
-    this._scanFor (org.webpki.json.CONST.COLON_CHARACTER);
+    this._scanFor (org.webpki.json.JSONParser.COLON_CHARACTER);
     return property;
 };
 
 /* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanObject = function (/* org.webpki.json.JSONObject */holder)
 {
     /* boolean */var next = false;
-    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.CONST.RIGHT_CURLY_BRACKET)
+    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_CURLY_BRACKET)
     {
         if (next)
         {
-            this._scanFor (org.webpki.json.CONST.COMMA_CHARACTER);
+            this._scanFor (org.webpki.json.JSONParser.COMMA_CHARACTER);
         }
         next = true;
         /* String */var name = this._scanProperty ();
         /* org.webpki.json.JSONValue */var value;
         switch (this._scan ())
         {
-            case org.webpki.json.CONST.LEFT_CURLY_BRACKET:
+            case org.webpki.json.JSONParser.LEFT_CURLY_BRACKET:
                 value = this._scanObject (new org.webpki.json.JSONObject ());
                 break;
 
-            case org.webpki.json.CONST.DOUBLE_QUOTE:
+            case org.webpki.json.JSONParser.DOUBLE_QUOTE:
                 value = this._scanQuotedString ();
                 break;
 
-            case org.webpki.json.CONST.LEFT_BRACKET:
+            case org.webpki.json.JSONParser.LEFT_BRACKET:
                 value = this._scanArray (name);
                 break;
 
@@ -1512,11 +1598,11 @@ org.webpki.json.CONST =
     /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> () */;
     /* org.webpki.json.JSONValue */var value = null;
     /* boolean */var next = false;
-    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.CONST.RIGHT_BRACKET)
+    while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_BRACKET)
     {
         if (next)
         {
-            this._scanFor (org.webpki.json.CONST.COMMA_CHARACTER);
+            this._scanFor (org.webpki.json.JSONParser.COMMA_CHARACTER);
         }
         else
         {
@@ -1524,15 +1610,15 @@ org.webpki.json.CONST =
         }
         switch (this._scan ())
         {
-            case org.webpki.json.CONST.LEFT_BRACKET:
+            case org.webpki.json.JSONParser.LEFT_BRACKET:
                 value = this._scanArray (name);
                 break;
 
-            case org.webpki.json.CONST.LEFT_CURLY_BRACKET:
+            case org.webpki.json.JSONParser.LEFT_CURLY_BRACKET:
                 value = this._scanObject (new org.webpki.json.JSONObject ());
                 break;
 
-            case org.webpki.json.CONST.DOUBLE_QUOTE:
+            case org.webpki.json.JSONParser.DOUBLE_QUOTE:
                 value = this._scanQuotedString ();
                 break;
 
@@ -1550,9 +1636,9 @@ org.webpki.json.CONST =
     this.index--;
     /* StringBuffer */var result = new String () /* StringBuffer () */;
     /* char */var c;
-    while ((c = this._testNextNonWhiteSpaceChar ()) != org.webpki.json.CONST.COMMA_CHARACTER &&
-            c != org.webpki.json.CONST.RIGHT_BRACKET &&
-            c != org.webpki.json.CONST.RIGHT_CURLY_BRACKET)
+    while ((c = this._testNextNonWhiteSpaceChar ()) != org.webpki.json.JSONParser.COMMA_CHARACTER &&
+            c != org.webpki.json.JSONParser.RIGHT_BRACKET &&
+            c != org.webpki.json.JSONParser.RIGHT_CURLY_BRACKET)
     {
         if (this._isWhiteSpace (c = this._nextChar ()))
         {
@@ -1565,9 +1651,9 @@ org.webpki.json.CONST =
         org.webpki.json.JSONError._error ("Missing argument");
     }
     /* org.webpki.json.JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
-    if (!org.webpki.json.CONST.INTEGER_PATTERN.test (result))
+    if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (result))
     {
-        if (org.webpki.json.CONST.BOOLEAN_PATTERN.test (result))
+        if (org.webpki.json.JSONParser.BOOLEAN_PATTERN.test (result))
         {
             type = org.webpki.json.JSONTypes.BOOLEAN;
         }
@@ -1575,14 +1661,14 @@ org.webpki.json.CONST =
         {
             type = org.webpki.json.JSONTypes.NULL;
         }
-        else if (org.webpki.json.CONST.DECIMAL_INITIAL_PATTERN.test (result))
+        else if (org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (result))
         {
-            type = org.webpki.json.CONST.DECIMAL_2DOUBLE_PATTERN.test (result) ? org.webpki.json.JSONTypes.DOUBLE : org.webpki.json.JSONTypes.DECIMAL;
+            type = org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (result) ? org.webpki.json.JSONTypes.DOUBLE : org.webpki.json.JSONTypes.DECIMAL;
         }
         else
         {
             type = org.webpki.json.JSONTypes.DOUBLE;
-            if (!org.webpki.json.CONST.DOUBLE_PATTERN.test (result))
+            if (!org.webpki.json.JSONParser.DOUBLE_PATTERN.test (result))
             {
                 org.webpki.json.JSONError._error ("Undecodable argument: " + result);
             }
@@ -1601,11 +1687,11 @@ org.webpki.json.CONST =
         {
             org.webpki.json.JSONError._error ("Unescaped control character: " + c);
         }
-        if (c == org.webpki.json.CONST.DOUBLE_QUOTE)
+        if (c == org.webpki.json.JSONParser.DOUBLE_QUOTE)
         {
             break;
         }
-        if (c == org.webpki.json.CONST.BACK_SLASH)
+        if (c == org.webpki.json.JSONParser.BACK_SLASH)
         {
             switch (c = this._nextChar ())
             {
@@ -1716,7 +1802,7 @@ org.webpki.json.CONST =
 
 /* boolean */org.webpki.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)
 {
-    return c <= org.webpki.json.CONST.BLANK_CHARACTER;
+    return c <= org.webpki.json.JSONParser.BLANK_CHARACTER;
 };
 
 /* char */org.webpki.json.JSONParser.prototype._scan = function ()

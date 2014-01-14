@@ -130,5 +130,12 @@
     </concat>
   </target>
 
+    <!-- Temp testing -->
+  <target name="temp">
+    <antcall target="test">
+       <param name="files" value="jsonparser/*,biginteger/*,base64url/*,decoder/*,decoder/test/*"/>
+    </antcall>
+  </target>
+  
 </project>
 
