@@ -110,6 +110,10 @@ var invocation_response_2 =
 //////////////////////////////////////////////
 // Run!
 //////////////////////////////////////////////
+
+// Remove any of the property read statements above and you can see what the following method does...
+// cache.setCheckForUnreadProperties (false);
+
 var doc1 = cache.parse (invocation_request);
 if (!(doc1 instanceof org.webpki.keygen2.InvocationRequest)) throw "Object error1";    
 console.debug ("SubmitURL=" + doc1.submit_url + " @context=" + doc1.getContext ());
