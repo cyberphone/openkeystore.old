@@ -57,7 +57,7 @@ public class JSONDecoderCache implements Serializable
     
     static final char CONTEXT_QUALIFIER_DIVIDER = '$';
 
-    boolean test_unread = true;
+    boolean check_for_unread = true;
     
     Hashtable<String,Class<? extends JSONDecoder>> class_map = new Hashtable<String,Class<? extends JSONDecoder>> ();
     
@@ -79,7 +79,7 @@ public class JSONDecoderCache implements Serializable
             JSONDecoder decoder = decoder_class.newInstance ();
             decoder.root = reader.json;
             decoder.readJSONData (reader);
-            if (test_unread)
+            if (check_for_unread)
               {
                 checkForUnread (reader.json);
               }
@@ -191,6 +191,6 @@ public class JSONDecoderCache implements Serializable
 
     public void setCheckForUnreadProperties (boolean flag)
       {
-        test_unread = flag;
+        check_for_unread = flag;
       }
   }
