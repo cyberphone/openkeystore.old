@@ -67,7 +67,7 @@ org.webpki.util.Base64URL =
         var c = encoded.charCodeAt (i);
         if (c >= org.webpki.util.Base64URL.DECODE_TABLE.length || (c = org.webpki.util.Base64URL.DECODE_TABLE[c]) < 0)
         {
-            throw "Base64Exception: bad charcter at index " + i;
+            throw "Base64Exception: bad character at index " + i;
         }
         semidecoded[i] = c;
     }
