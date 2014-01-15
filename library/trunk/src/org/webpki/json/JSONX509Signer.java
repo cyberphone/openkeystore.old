@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
 /**
@@ -59,7 +60,7 @@ public class JSONX509Signer extends JSONSigner
       }
 
     @Override
-    AsymSignatureAlgorithms getAlgorithm ()
+    SignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }

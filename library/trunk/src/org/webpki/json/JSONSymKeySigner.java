@@ -19,6 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
 /**
@@ -47,7 +48,7 @@ public class JSONSymKeySigner extends JSONSigner
       }
 
     @Override
-    MACAlgorithms getAlgorithm ()
+    SignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }

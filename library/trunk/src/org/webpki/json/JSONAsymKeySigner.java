@@ -23,6 +23,7 @@ import java.security.PublicKey;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
 
 /**
  * Initiatiator object for asymmetric key signatures.
@@ -51,7 +52,7 @@ public class JSONAsymKeySigner extends JSONSigner
       }
 
     @Override
-    AsymSignatureAlgorithms getAlgorithm ()
+    SignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }
