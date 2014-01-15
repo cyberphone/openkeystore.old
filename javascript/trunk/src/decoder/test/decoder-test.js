@@ -39,8 +39,9 @@ org.webpki.keygen2.InvocationResponse.prototype.readJSONData = function (json_ob
     this.image_preferences = [];
     if (json_object_reader.hasProperty ("ImagePreferences"))
     {
+        // If present it must contain at least one item, hence the do {} while
         var json_array_reader = json_object_reader.getArray ("ImagePreferences");
-        while (json_array_reader.hasMore ())
+        do
         {
             var pref_reader = json_array_reader.getObject ();
             var pref_object = new Object ();
@@ -50,6 +51,7 @@ org.webpki.keygen2.InvocationResponse.prototype.readJSONData = function (json_ob
             pref_object.height = pref_reader.getInt ("Height");
             this.image_preferences[this.image_preferences.length] = pref_object;
         }
+        while (json_array_reader.hasMore ());
     }
 };
 
