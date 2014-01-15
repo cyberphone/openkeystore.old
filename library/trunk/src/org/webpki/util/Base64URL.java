@@ -80,7 +80,7 @@ public class Base64URL
             byte c = encoded[i];
             if (c < 0 || c >= DECODE_TABLE.length || (c = DECODE_TABLE[c]) < 0)
               {
-                throw new IOException ("Not valid Base64URL data (bad byte at index " + i);
+                throw new IOException ("bad character at index " + i);
               }
             semidecoded[i] = c;
           }
