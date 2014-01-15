@@ -22,7 +22,7 @@
 org.webpki.json.JSONDecoderCache = function ()
 {
     this.cache = new Object ();
-    this.check_undefined = true;
+    this.check_for_unread = true;
 };
 
 org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER = '$';
@@ -97,9 +97,14 @@ org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
     }
     var object = new object_class ();
     object.readJSONData (json_object_reader);
-    if (this.check_undefined)
+    if (this.check_for_unread)
     {
         org.webpki.json.JSONDecoderCache._checkForUnread (json_object_reader.json);
     }
     return object;
+};
+
+org.webpki.json.JSONDecoderCache.prototype.setCheckForUnreadProperties = function (/* boolean */flag)
+{
+    this.check_for_unread = flag;
 };

@@ -130,8 +130,8 @@
     </concat>
   </target>
 
-    <!-- Temp testing -->
-  <target name="temp">
+    <!-- Decoder only testing -->
+  <target name="decoder">
     <antcall target="test">
        <param name="files" value="jsonparser/*,biginteger/*,base64url/*,decoder/*,decoder/test/*"/>
     </antcall>

@@ -122,25 +122,25 @@
     return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */value.value);
 };
 
- /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name)
- {
-     if (this.hasProperty (name))
-     {
-         return this.getString (name);
-     }
-     return null;
- };
+ /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name, /* String */optional_default_value)
+{
+    if (this.hasProperty (name))
+    {
+        return this.getString (name);
+    }
+    return optional_default_value === undefined ? null : optional_default_value;
+};
  
- /*
- public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name) throws IOException
- {
- if (hasProperty (name))
- {
- return getBoolean (name);
- }
- return false;
- }
+/* public boolean */org.webpki.json.JSONObjectReader.prototype.getBooleanConditional = function (/* String */name, /* boolean */optional_default_value)
+{
+    if (hasProperty (name))
+    {
+        return getBoolean (name);
+    }
+    return optional_default_value === undefined ? false : optional_default_value;
+};
 
+ /*
  public byte[] org.webpki.json.JSONObjectReader.prototype.getBinaryConditional (String name) throws IOException
  {
  if (hasProperty (name))
@@ -150,14 +150,7 @@
  return null;
  }
 
- public String org.webpki.json.JSONObjectReader.prototype.getStringConditional (String name, String default_value) throws IOException
- {
- if (hasProperty (name))
- {
- return getString (name);
- }
- return default_value;
- }
+
 
  public String[] org.webpki.json.JSONObjectReader.prototype.getStringArrayConditional (String name) throws IOException
  {
@@ -168,14 +161,6 @@
  return null;
  }
 
- public boolean org.webpki.json.JSONObjectReader.prototype.getBooleanConditional (String name, boolean default_value) throws IOException
- {
- if (hasProperty (name))
- {
- return getBoolean (name);
- }
- return default_value;
- }
 
  Vector<org.webpki.json.JSONValue> org.webpki.json.JSONObjectReader.prototype.getArray (String name, org.webpki.json.JSONTypes expected) throws IOException
  {

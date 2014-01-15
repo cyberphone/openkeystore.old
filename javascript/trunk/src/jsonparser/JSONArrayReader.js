@@ -77,12 +77,11 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
 {
     return this._get (org.webpki.json.JSONTypes.DECIMAL);
 };
-/*
- public GregorianCalendar getDateTime () throws IOException
+
+/* public Date */org.webpki.json.JSONArrayReader.prototype.getDateTime = function ()
  {
- return ISODateTime.parseDateTime (getString ());
- }
- */
+    return new Date (this.getString ());
+ };
 
  /* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
  {

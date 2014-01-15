@@ -114,6 +114,7 @@ arr_writer
 .setBigDecimal (big_dec)
 .setBoolean (true)
 .setBoolean (false)
+.setDateTime (now)
 .setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
@@ -164,6 +165,7 @@ if (arr_reader.getString () != big_string ||
     arr_reader.getBigDecimal () != big_dec ||
     !arr_reader.getBoolean () ||
     arr_reader.getBoolean () ||
+    arr_reader.getDateTime ().getTime () != now.getTime () ||
     arr_reader.getDouble () != double_trouble ||
     arr_reader.hasMore ())
 {
