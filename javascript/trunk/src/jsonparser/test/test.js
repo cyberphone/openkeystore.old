@@ -103,6 +103,7 @@ var arr_writer = newobjec
         .setStringArray ("strings!", ["a string", "another one"])
         .setBinaryArray ("binarr", bin_arr)
         .setInt ("numbah", 6)
+        .setInt ("nobodycared", -5545)
         .setBinary ("bin", inbin)
         .setBigInteger ("bigint", really_bigint)
         .setDouble ("double", double_trouble)
@@ -113,18 +114,23 @@ var arr_writer = newobjec
         .setDateTime ("now", now)
         
         .setArray ("arry").setString (big_string);
+newobjec.setArray ("arr2").setArray ().setString ("The other one");
 arr_writer
 .setBigInteger (really_bigint)
 .setInt (45)
 .setLong (a_long_one)
+.setNULL ()
+.setInt (6)
 .setBigDecimal (big_dec)
 .setBoolean (true)
 .setBoolean (false)
 .setDateTime (now)
 .setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
-console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
+var json1 = newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
+console.debug (json1);
 var reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+reader.scanAway ("nobodycared");
 if (!reader.getBigInteger ("bigint").equals (really_bigint))
 {
     throw "BigInit";
@@ -177,7 +183,7 @@ for (var i = 0; i < reader.getProperties ().length; i++)
 {
     props += " " + reader.getProperties ()[i]; 
 }
-if (props != " dri not.much.there strings! binarr numbah bin bigint double bool bool2 long bigdec now arry")
+if (props != " dri not.much.there strings! binarr numbah nobodycared bin bigint double bool bool2 long bigdec now arry arr2")
 {
     throw "Properties " + props;
 }
@@ -189,12 +195,19 @@ if (reader.getPropertyType ("No") != null || reader.getPropertyType ("numbah") !
 {
     throw "PropType";
 }
+if (reader.getArray ("arr2").getArray ().getString () != "The other one")
+{
+    throw "Arr+Arr";
+}
 var arr_reader = reader.getArray ("arry");
 if (arr_reader.getString () != big_string ||
     !arr_reader.hasMore () ||
     !arr_reader.getBigInteger ().equals (really_bigint) ||
     arr_reader.getInt () != 45 ||
     !arr_reader.getLong ().equals (a_long_one) ||
+    !arr_reader.getIfNULL () ||
+    arr_reader.getIfNULL () ||
+    arr_reader.getInt () != 6 ||
     arr_reader.getBigDecimal () != big_dec ||
     !arr_reader.getBoolean () ||
     arr_reader.getBoolean () ||
@@ -203,6 +216,12 @@ if (arr_reader.getString () != big_string ||
     arr_reader.hasMore ())
 {
     throw "ARRAY";
+}
+
+if (newobjec.createContainerObject ("Keeper").serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)
+        != ('{"Keeper":' + json1 + '}'))
+{
+    throw "Container";
 }
 
 var signature = org.webpki.json.JSONParser.parse (

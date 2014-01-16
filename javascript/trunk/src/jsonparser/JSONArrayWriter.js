@@ -19,9 +19,9 @@
 /*                         JSONArrayWriter                        */
 /*================================================================*/
 
- org.webpki.json.JSONArrayWriter = function (optional_array)
+org.webpki.json.JSONArrayWriter = function (optional_array)
 {
-   /* Vector<org.webpki.json.JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
+    /* Vector<org.webpki.json.JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
 };
 
 /* org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype._add = function (/* org.webpki.json.JSONTypes */type, /* Object */value)

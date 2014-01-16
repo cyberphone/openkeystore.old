@@ -79,29 +79,29 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
 };
 
 /* public Date */org.webpki.json.JSONArrayReader.prototype.getDateTime = function ()
- {
+{
     return new Date (this.getString ());
- };
+};
 
- /* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
- {
-     return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
- };
+/* public double */org.webpki.json.JSONArrayReader.prototype.getDouble = function ()
+{
+    return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
+};
 
  /* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
- {
-     return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
- };
+{
+    return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
+};
 
  /* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
- {
-     if (this.getElementType () == org.webpki.json.JSONTypes.NULL)
-     {
-         this.scanAway ();
-         return true;
-     }
-     return false;
- };
+{
+    if (this.getElementType () == org.webpki.json.JSONTypes.NULL)
+    {
+        this.scanAway ();
+        return true;
+    }
+    return false;
+};
  
 /* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
 {
@@ -119,7 +119,7 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
     return new org.webpki.json.JSONObjectReader (/* (org.webpki.json.JSONObject) */this._get (org.webpki.json.JSONTypes.OBJECT));
 };
 
-/* public void */org.webpki.json.JSONArrayReader.scanAway = function ()
+/* public void */org.webpki.json.JSONArrayReader.prototype.scanAway = function ()
 {
     this._get (this.getElementType ());
 };
