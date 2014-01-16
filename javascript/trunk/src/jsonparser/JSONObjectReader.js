@@ -140,70 +140,67 @@
     return optional_default_value === undefined ? false : optional_default_value;
 };
 
- /*
- public byte[] org.webpki.json.JSONObjectReader.prototype.getBinaryConditional (String name) throws IOException
- {
- if (hasProperty (name))
- {
- return getBinary (name);
- }
- return null;
- }
+ /* Uint8Array */org.webpki.json.JSONObjectReader.prototype.getBinaryConditional = function (/* String */name)
+{
+    return this.hasProperty (name) ? this.getBinary (name) : null;
+};
 
 
 
- public String[] org.webpki.json.JSONObjectReader.prototype.getStringArrayConditional (String name) throws IOException
- {
- if (hasProperty (name))
- {
- return getStringArray (name);
- }
- return null;
- }
+ /* public String[] */org.webpki.json.JSONObjectReader.prototype.getStringArrayConditional = function (/* String */name)
+{
+    return this.hasProperty (name) ? this.getStringArray (name) : null;
+};
 
 
- Vector<org.webpki.json.JSONValue> org.webpki.json.JSONObjectReader.prototype.getArray (String name, org.webpki.json.JSONTypes expected) throws IOException
+ /* Vector<org.webpki.json.JSONValue> */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
  {
- org.webpki.json.JSONValue value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
- @SuppressWarnings("unchecked")
- Vector<org.webpki.json.JSONValue> array = ((Vector<org.webpki.json.JSONValue>) value.value);
- if (!array.isEmpty () && array.firstElement ().type != expected)
- {
- throw new IOException ("Array type mismatch for \"" + name + "\"");
- }
- return array;
- }
+     /* org.webpki.json.JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
+     /* Vector<org.webpki.json.JSONValue> */var array = /* ((Vector<org.webpki.json.JSONValue>) */value.value;
+     if (array.length > 0 && array[0].type != expected)
+     {
+         throw IOException ("Array type mismatch for \"" + name + "\"");
+     }
+     return array;
+ };
 
- String [] org.webpki.json.JSONObjectReader.prototype.getSimpleArray (String name, org.webpki.json.JSONTypes expected) throws IOException
- {
- Vector<String> array = new Vector<String> ();
- for (org.webpki.json.JSONValue value : getArray (name, expected))
- {
- array.add ((String)value.value);
- }
- return array.toArray (new String[0]);
- }
+ /* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
+{
+     /* Vector<String> */var array = [] /* new Vector<String> () */;
+     var in_arr = this._getArray (name, expected);
+     for (var i = 0; i < in_arr.length; i++)
+     {
+         array[i] = in_arr[i].value;
+     }
+     return array;
+ };
 
- public String[] org.webpki.json.JSONObjectReader.prototype.getStringArray (String name) throws IOException
+/* public String[] */org.webpki.json.JSONObjectReader.prototype.getStringArray = function (/* String */name)
  {
- return getSimpleArray (name, org.webpki.json.JSONTypes.STRING);
- }
+    return this._getSimpleArray (name, org.webpki.json.JSONTypes.STRING);
+ };
+ 
+ /* public Vector<byte[]> */org.webpki.json.JSONObjectReader.prototype.getBinaryArray = function (/* String */name)
+{
+    /* Vector<byte[]> */var blobs = []/* new Vector<byte[]> () */;
+    var in_arr = this.getStringArray (name);
+    for (var i = 0; i < in_arr.length; i++)
+    {
+        blobs[i] = org.webpki.util.Base64URL.decode (in_arr[i]);
+    }
+     return blobs;
+};
 
- public Vector<byte[]> org.webpki.json.JSONObjectReader.prototype.getBinaryArray (String name) throws IOException
- {
- Vector<byte[]> blobs = new Vector<byte[]> ();
- for (String blob : getStringArray (name))
- {
- blobs.add (Base64URL.getBinaryFromBase64URL (blob));
- }
- return blobs;
- }
 
- public String[] org.webpki.json.JSONObjectReader.prototype.getProperties ()
- {
- return json.properties.keySet ().toArray (new String[0]);
- }
-*/
+/* public String[] */org.webpki.json.JSONObjectReader.prototype.getProperties = function ()
+{
+    var properties = [];
+    for (var i = 0; i < this.json.property_list.length; i++)
+    {
+        properties[i] = this.json.property_list[i].name;
+    }
+    return properties;
+};
 
 /* public boolean */org.webpki.json.JSONObjectReader.prototype.hasProperty = function (/* String */name)
 {

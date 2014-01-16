@@ -87,6 +87,9 @@ loopa (newobjec.root);
 new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 var inbin = new Uint8Array ([0,2,99,46,34,97,57,78,9]);
+var bin_arr = [];
+bin_arr[0] = inbin;
+bin_arr[1] = new Uint8Array ([255, 4, 8]);
 var really_bigint = org.webpki.math.BigInteger.fromString ("20468687687668767676866876876876768768768768768767687687687687676709");
 var a_long_one = org.webpki.math.BigInteger.fromString ("FF00000000000000", 16);
 var double_trouble = 2.3e-25;
@@ -96,6 +99,9 @@ var now = new Date ();
 newobjec = new org.webpki.json.JSONObjectWriter ();
 var arr_writer = newobjec
         .setString ("dri", "dra")
+        .setNULL ("not.much.there")
+        .setStringArray ("strings!", ["a string", "another one"])
+        .setBinaryArray ("binarr", bin_arr)
         .setInt ("numbah", 6)
         .setBinary ("bin", inbin)
         .setBigInteger ("bigint", really_bigint)
@@ -127,6 +133,16 @@ if (!reader.getLong ("long").equals (a_long_one))
 {
     throw "Long";
 }
+var strings = reader.getStringArray ("strings!");
+if (strings.length != 2 || strings[1] != "another one")
+{
+    throw "String arr";
+}
+var blobs = reader.getBinaryArray ("binarr");
+if (blobs.length != 2 || blobs[1].length != 3 || blobs[1][1] != 4)
+{
+    throw "Blob arr";
+}
 if (reader.getDouble ("double") != double_trouble)
 {
     throw "Double";
@@ -155,6 +171,23 @@ for (var i = 0; i < bin.length; i++)
     {
     throw "Content";
     }
+}
+var props = "";
+for (var i = 0; i < reader.getProperties ().length; i++)
+{
+    props += " " + reader.getProperties ()[i]; 
+}
+if (props != " dri not.much.there strings! binarr numbah bin bigint double bool bool2 long bigdec now arry")
+{
+    throw "Properties " + props;
+}
+if (reader.getStringConditional ("No") != null || reader.getStringConditional ("No", "Yes") != "Yes")
+{
+    throw "Conditional";
+}
+if (reader.getPropertyType ("No") != null || reader.getPropertyType ("numbah") != org.webpki.json.JSONTypes.INTEGER)
+{
+    throw "PropType";
 }
 var arr_reader = reader.getArray ("arry");
 if (arr_reader.getString () != big_string ||

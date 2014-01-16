@@ -171,12 +171,11 @@
                                                              org.webpki.json.JSONObjectWriter._boolTest (value)));
 };
 
-/*
-    public org.webpki.json.JSONObjectWriter setNULL (String name) throws IOException
-      {
-        return setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.NULL, "null"));
-      }
-*/
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setNULL = function (/* String */name)
+{
+    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.NULL, "null"));
+};
+
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDateTime = function (/* String */name, /* Date */date_time)
 {
     return this.setString (name, date_time.toISOString ());
@@ -196,14 +195,12 @@
     return new org.webpki.json.JSONObjectWriter (sub_object);
 };
 
-/*
-    public org.webpki.json.JSONObjectWriter createContainerObject (String name) throws IOException
-      {
-        org.webpki.json.JSONObjectWriter container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
-        container.setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, this.root));
-        return container;
-      }
-*/
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.createContainerObject = function (/* String */name)
+{
+    /* org.webpki.json.JSONObjectWriter */var container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
+    container.setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, this.root));
+    return container;
+};
 
 /* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
 {
@@ -222,18 +219,15 @@
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
 };
 
-/*
-
-org.webpki.json.JSONObjectWriter.prototype.setBinaryArray (String name, Vector<byte[]> values) throws IOException
-      {
-        Vector<String> array = new Vector<String> ();
-        for (byte[] value : values)
-          {
-            array.add (Base64URL.getBase64URLFromBinary (value));
-          }
-        return setStringArray (name, array.toArray (new String[0]));
-      }
-*/
+/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinaryArray = function (/* String */name, /* Vector<byte[]> */values)
+{
+    /* Vector<String> */var array = []/* new Vector<String> ()*/;
+    for (var i = 0; i < values.length; i++)
+    {
+        array[i] = org.webpki.util.Base64URL.encode (values[i]);
+    }
+    return this.setStringArray (name, array);
+};
 
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setStringArray = function (/* String */name, /* String[] */values)
 {

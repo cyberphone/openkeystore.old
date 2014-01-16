@@ -93,36 +93,33 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
      return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
  };
 
- /*
- public boolean getIfNULL () throws IOException
+ /* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
  {
- if (getElementType () == org.webpki.json.JSONTypes.NULL)
- {
- scanAway ();
- return true;
- }
- return false;
- }
- */
+     if (this.getElementType () == org.webpki.json.JSONTypes.NULL)
+     {
+         this.scanAway ();
+         return true;
+     }
+     return false;
+ };
+ 
 /* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
 {
     return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */this._get (org.webpki.json.JSONTypes.ARRAY));
 };
-/*
- public org.webpki.json.JSONTypes getElementType () throws IOException
- {
- _inRangeCheck ();
- return array.elementAt (index).type;
- }
- */
+
+/* public org.webpki.json.JSONTypes */org.webpki.json.JSONArrayReader.prototype.getElementType = function ()
+{
+    this._inRangeCheck ();
+    return this.array[this.index].type;
+};
+
 /* public org.webpki.json.JSONObjectReader */org.webpki.json.JSONArrayReader.prototype.getObject = function ()
 {
     return new org.webpki.json.JSONObjectReader (/* (org.webpki.json.JSONObject) */this._get (org.webpki.json.JSONTypes.OBJECT));
 };
-/*
- public void scanAway () throws IOException
- {
- get (getElementType ());
- }
- }
- */
+
+/* public void */org.webpki.json.JSONArrayReader.scanAway = function ()
+{
+    this._get (this.getElementType ());
+};
