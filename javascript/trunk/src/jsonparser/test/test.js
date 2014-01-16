@@ -223,6 +223,16 @@ if (newobjec.createContainerObject ("Keeper").serializeJSONObject (org.webpki.js
 {
     throw "Container";
 }
+try
+{
+    newobjec.setString ("dri", "blah");
+    throw "Rewrite not ok";
+}
+catch (err)
+{
+}
+newobjec.setupForRewrite ("dri");
+newobjec.setString ("dri", "blih");
 
 var signature = org.webpki.json.JSONParser.parse (
 

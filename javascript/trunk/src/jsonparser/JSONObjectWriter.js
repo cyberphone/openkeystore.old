@@ -73,12 +73,17 @@
     return this;
 };
 
-/*
-    public void setupForRewrite (String name)
-      {
-        root.properties.put (name, null);
-      }
-*/
+/* public void */org.webpki.json.JSONObjectWriter.prototype.setupForRewrite = function (/* String */name)
+{
+    for (var i = 0; i < this.root.property_list.length; i++)
+    {
+        if (this.root.property_list[i].name == name)
+        {
+            this.root.property_list[i].value = null;
+            return;
+        }
+    }
+};
 
 /* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
 {

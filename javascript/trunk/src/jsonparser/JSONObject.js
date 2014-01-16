@@ -39,6 +39,12 @@ org.webpki.json.JSONObject = function ()
     {
         if (this.property_list[i].name == name)
         {
+            // For setupForRewrite
+            if (this.property_list[i].value == null)
+            {
+                length = i;
+                break;
+            }
             org.webpki.json.JSONError._error ("Property already defined: " + name);
         }
     }
