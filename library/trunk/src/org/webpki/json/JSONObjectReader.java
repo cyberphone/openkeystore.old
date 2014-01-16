@@ -155,38 +155,22 @@ public class JSONObjectReader implements Serializable
 
     public String getStringConditional (String name, String default_value) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getString (name);
-          }
-        return default_value;
+        return hasProperty (name) ? getString (name) : default_value;
       }
 
     public boolean getBooleanConditional (String name, boolean default_value) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getBoolean (name);
-          }
-        return default_value;
+        return hasProperty (name) ? getBoolean (name) : default_value;
       }
 
     public byte[] getBinaryConditional (String name) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getBinary (name);
-          }
-        return null;
+        return hasProperty (name) ? getBinary (name) : null;
       }
 
     public String[] getStringArrayConditional (String name) throws IOException
       {
-        if (hasProperty (name))
-          {
-            return getStringArray (name);
-          }
-        return null;
+        return hasProperty (name) ? getStringArray (name) : null;
       }
 
     Vector<JSONValue> getArray (String name, JSONTypes expected) throws IOException
