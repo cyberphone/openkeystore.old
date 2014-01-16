@@ -531,24 +531,21 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
     return this.hasProperty (name) ? this.getBinary (name) : null;
 };
 
-
-
 /* public String[] */org.webpki.json.JSONObjectReader.prototype.getStringArrayConditional = function (/* String */name)
 {
     return this.hasProperty (name) ? this.getStringArray (name) : null;
 };
 
-
- /* Vector<org.webpki.json.JSONValue> */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
- {
-     /* org.webpki.json.JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
-     /* Vector<org.webpki.json.JSONValue> */var array = /* ((Vector<org.webpki.json.JSONValue>) */value.value;
-     if (array.length > 0 && array[0].type != expected)
-     {
-         org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
-     }
-     return array;
- };
+/* Vector<org.webpki.json.JSONValue> */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
+{
+    /* org.webpki.json.JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
+    /* Vector<org.webpki.json.JSONValue> */var array = /* ((Vector<org.webpki.json.JSONValue>) */value.value;
+    if (array.length > 0 && array[0].type != expected)
+    {
+        org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
+    }
+    return array;
+};
 
 /* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* org.webpki.json.JSONTypes */expected)
 {
@@ -576,7 +573,6 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JS
     }
      return blobs;
 };
-
 
 /* public String[] */org.webpki.json.JSONObjectReader.prototype.getProperties = function ()
 {
