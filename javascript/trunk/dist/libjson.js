@@ -799,7 +799,6 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
     return this.setString (name, org.webpki.util.Base64URL.encode (value));
 };
 
-
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
 {
     /* JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
