@@ -116,7 +116,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
 {
     var arr_index = 0;
-    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var array = [];
     /* JSONValue */var value = null;
     /* boolean */var next = false;
     while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_BRACKET)
@@ -155,7 +155,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanSimpleType = function ()
 {
     this.index--;
-    /* StringBuffer */var result = new String () /* StringBuffer () */;
+    /* String */var result = new String ();
     /* char */var c;
     while ((c = this._testNextNonWhiteSpaceChar ()) != org.webpki.json.JSONParser.COMMA_CHARACTER &&
             c != org.webpki.json.JSONParser.RIGHT_BRACKET &&

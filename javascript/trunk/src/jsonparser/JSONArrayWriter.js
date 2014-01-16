@@ -79,7 +79,7 @@ org.webpki.json.JSONArrayWriter = function (optional_array)
 
 /* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
 {
-    /* JSONValue[] */var new_array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var new_array = [];
     this._add (org.webpki.json.JSONTypes.ARRAY, new_array);
     return new org.webpki.json.JSONArrayWriter (new_array);
 };

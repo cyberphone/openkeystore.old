@@ -44,7 +44,7 @@
 /* String */org.webpki.json.JSONObjectReader.prototype._getString = function (/* String */name, /* JSONTypes */expected)
 {
     /* JSONValue */var value = this._getProperty (name, expected);
-    return /* (String) */value.value;
+    return /* String */value.value;
 };
 
 /* public String */org.webpki.json.JSONObjectReader.prototype.getString = function (/* String */name)
@@ -153,7 +153,7 @@
 /* JSONValue[] */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* JSONTypes */expected)
 {
     /* JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
-    /* JSONValue[] */var array = /* ((JSONValue[]) */value.value;
+    /* JSONValue[] */var array = /* JSONValue[] */value.value;
     if (array.length > 0 && array[0].type != expected)
     {
         org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
@@ -163,7 +163,7 @@
 
 /* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* JSONTypes */expected)
 {
-    /* Vector<String> */var array = [] /* new Vector<String> () */;
+    /* String[] */var array = [];
     var in_arr = this._getArray (name, expected);
     for (var i = 0; i < in_arr.length; i++)
     {

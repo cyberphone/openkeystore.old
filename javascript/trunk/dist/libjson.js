@@ -76,12 +76,12 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 
 /* public String */org.webpki.json.JSONArrayReader.prototype.getString = function ()
 {
-    return /* (String) */this._get (org.webpki.json.JSONTypes.STRING);
+    return /* String */this._get (org.webpki.json.JSONTypes.STRING);
 };
 
 /* public int */org.webpki.json.JSONArrayReader.prototype.getInt = function ()
 {
-    return parseInt (/* (String) */this._get (org.webpki.json.JSONTypes.INTEGER));
+    return parseInt (/* String */this._get (org.webpki.json.JSONTypes.INTEGER));
 };
 
 /* BigInteger */org.webpki.json.JSONArrayReader.prototype.getLong = function ()
@@ -128,7 +128,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
  
 /* public JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
 {
-    return new org.webpki.json.JSONArrayReader (/* (JSONValue[]) */this._get (org.webpki.json.JSONTypes.ARRAY));
+    return new org.webpki.json.JSONArrayReader (/* JSONValue[] */this._get (org.webpki.json.JSONTypes.ARRAY));
 };
 
 /* public JSONTypes */org.webpki.json.JSONArrayReader.prototype.getElementType = function ()
@@ -211,7 +211,7 @@ org.webpki.json.JSONArrayWriter = function (optional_array)
 
 /* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
 {
-    /* JSONValue[] */var new_array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var new_array = [];
     this._add (org.webpki.json.JSONTypes.ARRAY, new_array);
     return new org.webpki.json.JSONArrayWriter (new_array);
 };
@@ -430,7 +430,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 /* String */org.webpki.json.JSONObjectReader.prototype._getString = function (/* String */name, /* JSONTypes */expected)
 {
     /* JSONValue */var value = this._getProperty (name, expected);
-    return /* (String) */value.value;
+    return /* String */value.value;
 };
 
 /* public String */org.webpki.json.JSONObjectReader.prototype.getString = function (/* String */name)
@@ -539,7 +539,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 /* JSONValue[] */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* JSONTypes */expected)
 {
     /* JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
-    /* JSONValue[] */var array = /* ((JSONValue[]) */value.value;
+    /* JSONValue[] */var array = /* JSONValue[] */value.value;
     if (array.length > 0 && array[0].type != expected)
     {
         org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
@@ -549,7 +549,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 
 /* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* JSONTypes */expected)
 {
-    /* Vector<String> */var array = [] /* new Vector<String> () */;
+    /* String[] */var array = [];
     var in_arr = this._getArray (name, expected);
     for (var i = 0; i < in_arr.length; i++)
     {
@@ -633,7 +633,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 
     /* JSONObject */this.root = null;
 
-    /* StringBuffer */this.buffer = null;
+    /* String */this.buffer = null;
     
     /* int */this.indent = 0;
     
@@ -816,14 +816,14 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 
 /* public JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
 {
-    /* JSONValue[] */var array = [] /* new JSONValue[] ()*/;
+    /* JSONValue[] */var array = [];
     this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     return new org.webpki.json.JSONArrayWriter (array);
 };
 
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* JSONTypes */json_type)
 {
-    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var array = [];
     for (var i = 0; i < values.length; i++)
     {
         array[i] = new org.webpki.json.JSONValue (json_type, values[i]);
@@ -1032,7 +1032,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     switch (json_value.type)
     {
         case org.webpki.json.JSONTypes.ARRAY:
-            this._printArray (/* (JSONValue[]) */json_value.value, false);
+            this._printArray (/* JSONValue[] */json_value.value, false);
             break;
     
         case org.webpki.json.JSONTypes.OBJECT:
@@ -1124,7 +1124,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
             for (var i = 0; i < array.length; i++)
             {
                 var json_value = array[i];
-                /* JSONValue[] */var sub_array = /* (JSONValue[]) */json_value.value;
+                /* JSONValue[] */var sub_array = json_value.value;
                 /* boolean */var extra_pretty = sub_array.length == 0 || !this._complex (sub_array[0].type);
                 if (next)
                 {
@@ -1226,7 +1226,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
 
 /* void */org.webpki.json.JSONObjectWriter.prototype._printSimpleValue = function (/* JSONValue */value, /* boolean */property)
 {
-    /* String */var string = /* (String) */value.value;
+    /* String */var string = value.value;
     if (value.type != org.webpki.json.JSONTypes.STRING)
     {
         if (this.html_mode)
@@ -1417,7 +1417,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
     if (this.root._isArray ())
     {
-        this._printArray (/* (JSONValue[]) */this.root.property_list[0].value, false);
+        this._printArray (/* JSONValue[] */this.root.property_list[0].value, false);
     }
     else
     {
@@ -1573,7 +1573,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
 {
     var arr_index = 0;
-    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var array = [];
     /* JSONValue */var value = null;
     /* boolean */var next = false;
     while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_BRACKET)
@@ -1612,7 +1612,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanSimpleType = function ()
 {
     this.index--;
-    /* StringBuffer */var result = new String () /* StringBuffer () */;
+    /* String */var result = new String ();
     /* char */var c;
     while ((c = this._testNextNonWhiteSpaceChar ()) != org.webpki.json.JSONParser.COMMA_CHARACTER &&
             c != org.webpki.json.JSONParser.RIGHT_BRACKET &&

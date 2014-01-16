@@ -53,12 +53,12 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 
 /* public String */org.webpki.json.JSONArrayReader.prototype.getString = function ()
 {
-    return /* (String) */this._get (org.webpki.json.JSONTypes.STRING);
+    return /* String */this._get (org.webpki.json.JSONTypes.STRING);
 };
 
 /* public int */org.webpki.json.JSONArrayReader.prototype.getInt = function ()
 {
-    return parseInt (/* (String) */this._get (org.webpki.json.JSONTypes.INTEGER));
+    return parseInt (/* String */this._get (org.webpki.json.JSONTypes.INTEGER));
 };
 
 /* BigInteger */org.webpki.json.JSONArrayReader.prototype.getLong = function ()
@@ -105,7 +105,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
  
 /* public JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
 {
-    return new org.webpki.json.JSONArrayReader (/* (JSONValue[]) */this._get (org.webpki.json.JSONTypes.ARRAY));
+    return new org.webpki.json.JSONArrayReader (/* JSONValue[] */this._get (org.webpki.json.JSONTypes.ARRAY));
 };
 
 /* public JSONTypes */org.webpki.json.JSONArrayReader.prototype.getElementType = function ()

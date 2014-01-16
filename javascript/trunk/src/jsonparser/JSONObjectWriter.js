@@ -25,7 +25,7 @@
 
     /* JSONObject */this.root = null;
 
-    /* StringBuffer */this.buffer = null;
+    /* String */this.buffer = null;
     
     /* int */this.indent = 0;
     
@@ -208,14 +208,14 @@
 
 /* public JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
 {
-    /* JSONValue[] */var array = [] /* new JSONValue[] ()*/;
+    /* JSONValue[] */var array = [];
     this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     return new org.webpki.json.JSONArrayWriter (array);
 };
 
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* JSONTypes */json_type)
 {
-    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
+    /* JSONValue[] */var array = [];
     for (var i = 0; i < values.length; i++)
     {
         array[i] = new org.webpki.json.JSONValue (json_type, values[i]);
@@ -424,7 +424,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     switch (json_value.type)
     {
         case org.webpki.json.JSONTypes.ARRAY:
-            this._printArray (/* (JSONValue[]) */json_value.value, false);
+            this._printArray (/* JSONValue[] */json_value.value, false);
             break;
     
         case org.webpki.json.JSONTypes.OBJECT:
@@ -516,7 +516,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
             for (var i = 0; i < array.length; i++)
             {
                 var json_value = array[i];
-                /* JSONValue[] */var sub_array = /* (JSONValue[]) */json_value.value;
+                /* JSONValue[] */var sub_array = json_value.value;
                 /* boolean */var extra_pretty = sub_array.length == 0 || !this._complex (sub_array[0].type);
                 if (next)
                 {
@@ -618,7 +618,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
 
 /* void */org.webpki.json.JSONObjectWriter.prototype._printSimpleValue = function (/* JSONValue */value, /* boolean */property)
 {
-    /* String */var string = /* (String) */value.value;
+    /* String */var string = value.value;
     if (value.type != org.webpki.json.JSONTypes.STRING)
     {
         if (this.html_mode)
@@ -809,7 +809,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
     if (this.root._isArray ())
     {
-        this._printArray (/* (JSONValue[]) */this.root.property_list[0].value, false);
+        this._printArray (/* JSONValue[] */this.root.property_list[0].value, false);
     }
     else
     {
