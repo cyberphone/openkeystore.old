@@ -23,7 +23,7 @@
 {
     /* int */this.STANDARD_INDENT = 2;
 
-    /* org.webpki.json.JSONObject */this.root = null;
+    /* JSONObject */this.root = null;
 
     /* StringBuffer */this.buffer = null;
     
@@ -67,7 +67,7 @@
     }
 };
     
-/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
     this.root._setProperty (name, value);
     return this;
@@ -85,7 +85,7 @@
     }
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
 {
     if (typeof value != "string")
     {
@@ -104,14 +104,14 @@
     return int_string;
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setInt = function (/* String */name, /* int */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setInt = function (/* String */name, /* int */value)
 {
     return this._setProperty (name,
                               new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER,
                                                              org.webpki.json.JSONObjectWriter._intTest (value)));
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setLong = function (/* String */name, /* BigInteger */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setLong = function (/* String */name, /* BigInteger */value)
 {
     return this.setBigInteger (name, value.getLong ());
 };
@@ -149,73 +149,73 @@
     return value.toString ();
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDouble = function (/* String */name, /* double */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDouble = function (/* String */name, /* double */value)
 {
     return this._setProperty (name, 
                               new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DOUBLE, 
                                                              org.webpki.json.JSONObjectWriter._doubleTest (value)));
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigInteger = function (/* String */name, /* BigInteger */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigInteger = function (/* String */name, /* BigInteger */value)
 {
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, value.toString ()));
 };
 
 // No real support for BigDecimal but at least text parsing is performed
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigDecimal = function (/* String */name, /* BigDecimal */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigDecimal = function (/* String */name, /* BigDecimal */value)
 {
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value)));
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
 {
     return this._setProperty (name, 
                               new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.BOOLEAN,
                                                              org.webpki.json.JSONObjectWriter._boolTest (value)));
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setNULL = function (/* String */name)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setNULL = function (/* String */name)
 {
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.NULL, "null"));
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDateTime = function (/* String */name, /* Date */date_time)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setDateTime = function (/* String */name, /* Date */date_time)
 {
     return this.setString (name, date_time.toISOString ());
 };
 
 /*
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
 {
     return this.setString (name, org.webpki.util.Base64URL.encode (value));
 };
 
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
 {
-    /* org.webpki.json.JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
+    /* JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
     this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, sub_object));
     return new org.webpki.json.JSONObjectWriter (sub_object);
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.createContainerObject = function (/* String */name)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.createContainerObject = function (/* String */name)
 {
-    /* org.webpki.json.JSONObjectWriter */var container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
+    /* JSONObjectWriter */var container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
     container._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, this.root));
     return container;
 };
 
-/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
+/* public JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
 {
-    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> ()*/;
+    /* JSONValue[] */var array = [] /* new JSONValue[] ()*/;
     this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     return new org.webpki.json.JSONArrayWriter (array);
 };
 
-/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* org.webpki.json.JSONTypes */json_type)
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* JSONTypes */json_type)
 {
-    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> () */;
+    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
     for (var i = 0; i < values.length; i++)
     {
         array[i] = new org.webpki.json.JSONValue (json_type, values[i]);
@@ -223,9 +223,9 @@
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
 };
 
-/* org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinaryArray = function (/* String */name, /* Vector<byte[]> */values)
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinaryArray = function (/* String */name, /* Uint8Array[] */values)
 {
-    /* Vector<String> */var array = []/* new Vector<String> ()*/;
+    /* String[] */var array = [];
     for (var i = 0; i < values.length; i++)
     {
         array[i] = org.webpki.util.Base64URL.encode (values[i]);
@@ -233,7 +233,7 @@
     return this.setStringArray (name, array);
 };
 
-/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setStringArray = function (/* String */name, /* String[] */values)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setStringArray = function (/* String */name, /* String[] */values)
 {
     return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
 };
@@ -320,7 +320,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
         signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
         if (signer.extensions != null)
           {
-            Vector<org.webpki.json.JSONValue> array = new Vector<org.webpki.json.JSONValue> ();
+            JSONValue[] array = new JSONValue[] ();
             for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
               {
                 array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
@@ -419,17 +419,17 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     this.buffer += '}';
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printOneElement = function (/* org.webpki.json.JSONValue */json_value)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printOneElement = function (/* JSONValue */json_value)
 {
     switch (json_value.type)
     {
         case org.webpki.json.JSONTypes.ARRAY:
-            this._printArray (/* (Vector<org.webpki.json.JSONValue>) */json_value.value, false);
+            this._printArray (/* (JSONValue[]) */json_value.value, false);
             break;
     
         case org.webpki.json.JSONTypes.OBJECT:
             this._newLine ();
-            this._printObject (/*(org.webpki.json.JSONObject) */json_value.value, false);
+            this._printObject (/* JSONObject */json_value.value, false);
             break;
     
         default:
@@ -437,14 +437,14 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printObject = function (/* org.webpki.json.JSONObject */object, /* boolean */array_flag)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printObject = function (/* JSONObject */object, /* boolean */array_flag)
 {
     this._beginObject (array_flag);
     /* boolean */var next = false;
     var length = object.property_list.length;
     for (var i = 0; i < length; i++)
     {
-        /* org.webpki.json.JSONValue */var json_value = object.property_list[i].value;
+        /* JSONValue */var json_value = object.property_list[i].value;
         /* String */var property = object.property_list[i].name;
         if (next)
         {
@@ -458,12 +458,12 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     this._endObject ();
 };
   
-/* boolean */org.webpki.json.JSONObjectWriter.prototype._complex = function (/* org.webpki.json.JSONTypes */json_type)
+/* boolean */org.webpki.json.JSONObjectWriter.prototype._complex = function (/* JSONTypes */json_type)
 {
     return json_type.enumvalue >= 10;
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printArray = function (/* Vector<org.webpki.json.JSONValue> */array, /* boolean */array_flag)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArray = function (/* JSONValue[] */array, /* boolean */array_flag)
 {
     if (array.length == 0)
     {
@@ -472,7 +472,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     else
     {
         /* boolean */var mixed = false;
-        /* org.webpki.json.JSONTypes */var first_type = array[0].type;
+        /* JSONTypes */var first_type = array[0].type;
         for (var i = 0; i < array.length; i++)
         {
             var json_value = array[i];
@@ -516,7 +516,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
             for (var i = 0; i < array.length; i++)
             {
                 var json_value = array[i];
-                /* Vector<org.webpki.json.JSONValue> */var sub_array = /* (Vector<org.webpki.json.JSONValue>) */json_value.value;
+                /* JSONValue[] */var sub_array = /* (JSONValue[]) */json_value.value;
                 /* boolean */var extra_pretty = sub_array.length == 0 || !this._complex (sub_array[0].type);
                 if (next)
                 {
@@ -550,7 +550,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     this.buffer += ']';
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printArraySimple = function (/* Vector<org.webpki.json.JSONValue> */array, /* boolean */array_flag)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArraySimple = function (/* JSONValue[] */array, /* boolean */array_flag)
 {
     /* int */var length = 0;
     for (var i = 0; i < array.length; i++)
@@ -600,7 +600,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printArrayObjects = function (/* Vector<org.webpki.json.JSONValue> */array)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printArrayObjects = function (/* JSONValue[] */array)
 {
     /* boolean */var next = false;
     for (var i = 0; i < array.length; i++)
@@ -616,7 +616,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     this.indent--;
 };
 
-/* void */org.webpki.json.JSONObjectWriter.prototype._printSimpleValue = function (/* org.webpki.json.JSONValue */value, /* boolean */property)
+/* void */org.webpki.json.JSONObjectWriter.prototype._printSimpleValue = function (/* JSONValue */value, /* boolean */property)
 {
     /* String */var string = /* (String) */value.value;
     if (value.type != org.webpki.json.JSONTypes.STRING)
@@ -779,9 +779,9 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
 };
 
-/* String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*org.webpki.json.JSONObject */signature_object_in)
+/* String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
 {
-    /* org.webpki.json.JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
+    /* JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
     /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
     /*
         if (canonicalization_debug_file != null)
@@ -795,7 +795,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     return result;
 };
 
-/* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* org.webpki.json.JSONOutputFormats */output_format)
+/* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
 {
     this.buffer = new String ();
     this.indent_factor = output_format == org.webpki.json.JSONOutputFormats.PRETTY_HTML ? this.html_indent : this.STANDARD_INDENT;
@@ -809,7 +809,7 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
     if (this.root._isArray ())
     {
-        this._printArray (/* (Vector<org.webpki.json.JSONValue>) */this.root.property_list[0].value, false);
+        this._printArray (/* (JSONValue[]) */this.root.property_list[0].value, false);
     }
     else
     {

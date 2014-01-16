@@ -25,7 +25,7 @@ org.webpki.json.JSONObject = function ()
     this.read_flag = new Object ();
 };
 
-/* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
+/* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
     if (!(value instanceof org.webpki.json.JSONValue))
     {
@@ -70,7 +70,7 @@ org.webpki.json.JSONObject.prototype._isArray = function ()
     return this.property_list.length == 1 && !this.property_list[0].name;
 };
 
-org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JSONValue */array)
+org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 {
     this.property_list = [];
     var unnamed_property = new Object;

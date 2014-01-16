@@ -19,7 +19,7 @@
 /*                        JSONArrayReader                         */
 /*================================================================*/
 
-org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue> */array)
+org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     this.index = 0;
     this.array = array;
@@ -38,10 +38,10 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
     }
 };
 
-/* Object */org.webpki.json.JSONArrayReader.prototype._get = function (/* org.webpki.json.JSONTypes */expected_type)
+/* Object */org.webpki.json.JSONArrayReader.prototype._get = function (/* JSONTypes */expected_type)
 {
     this._inRangeCheck ();
-    /* org.webpki.json.JSONValue */var value = this.array[this.index++];
+    /* JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.json.JSONError._error ("Incompatible request: " +
@@ -103,20 +103,20 @@ org.webpki.json.JSONArrayReader = function (/* Vector<org.webpki.json.JSONValue>
     return false;
 };
  
-/* public org.webpki.json.JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
+/* public JSONArrayReader */org.webpki.json.JSONArrayReader.prototype.getArray = function ()
 {
-    return new org.webpki.json.JSONArrayReader (/* (Vector<org.webpki.json.JSONValue>) */this._get (org.webpki.json.JSONTypes.ARRAY));
+    return new org.webpki.json.JSONArrayReader (/* (JSONValue[]) */this._get (org.webpki.json.JSONTypes.ARRAY));
 };
 
-/* public org.webpki.json.JSONTypes */org.webpki.json.JSONArrayReader.prototype.getElementType = function ()
+/* public JSONTypes */org.webpki.json.JSONArrayReader.prototype.getElementType = function ()
 {
     this._inRangeCheck ();
     return this.array[this.index].type;
 };
 
-/* public org.webpki.json.JSONObjectReader */org.webpki.json.JSONArrayReader.prototype.getObject = function ()
+/* public JSONObjectReader */org.webpki.json.JSONArrayReader.prototype.getObject = function ()
 {
-    return new org.webpki.json.JSONObjectReader (/* (org.webpki.json.JSONObject) */this._get (org.webpki.json.JSONTypes.OBJECT));
+    return new org.webpki.json.JSONObjectReader (/* JSONObject */this._get (org.webpki.json.JSONTypes.OBJECT));
 };
 
 /* public void */org.webpki.json.JSONArrayReader.prototype.scanAway = function ()

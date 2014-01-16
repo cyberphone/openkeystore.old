@@ -39,7 +39,7 @@ org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN = new RegExp ("^((\\+|-)?[0-9
 org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN = new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$");
 org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 
-/* org.webpki.json.JSONObjectReader */org.webpki.json.JSONParser.parse = function (/* String */json_string)
+/* JSONObjectReader */org.webpki.json.JSONParser.parse = function (/* String */json_string)
 {
     var parser = new org.webpki.json.JSONParser ();
     parser.json_data = json_string;
@@ -78,7 +78,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     return property;
 };
 
-/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanObject = function (/* org.webpki.json.JSONObject */holder)
+/* JSONValue */org.webpki.json.JSONParser.prototype._scanObject = function (/* JSONObject */holder)
 {
     /* boolean */var next = false;
     while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_CURLY_BRACKET)
@@ -89,7 +89,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         }
         next = true;
         /* String */var name = this._scanProperty ();
-        /* org.webpki.json.JSONValue */var value;
+        /* JSONValue */var value;
         switch (this._scan ())
         {
             case org.webpki.json.JSONParser.LEFT_CURLY_BRACKET:
@@ -113,11 +113,11 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, holder);
 };
 
-/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
+/* JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
 {
     var arr_index = 0;
-    /* Vector<org.webpki.json.JSONValue> */var array = [] /* new Vector<org.webpki.json.JSONValue> () */;
-    /* org.webpki.json.JSONValue */var value = null;
+    /* JSONValue[] */var array = [] /* new JSONValue[] () */;
+    /* JSONValue */var value = null;
     /* boolean */var next = false;
     while (this._testNextNonWhiteSpaceChar () != org.webpki.json.JSONParser.RIGHT_BRACKET)
     {
@@ -152,7 +152,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array);
 };
 
-/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanSimpleType = function ()
+/* JSONValue */org.webpki.json.JSONParser.prototype._scanSimpleType = function ()
 {
     this.index--;
     /* StringBuffer */var result = new String () /* StringBuffer () */;
@@ -171,7 +171,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     {
         org.webpki.json.JSONError._error ("Missing argument");
     }
-    /* org.webpki.json.JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
+    /* JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
     if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (result))
     {
         if (org.webpki.json.JSONParser.BOOLEAN_PATTERN.test (result))
@@ -198,9 +198,9 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     return new org.webpki.json.JSONValue (type, result);
 };
 
-/* org.webpki.json.JSONValue */org.webpki.json.JSONParser.prototype._scanQuotedString = function ()
+/* JSONValue */org.webpki.json.JSONParser.prototype._scanQuotedString = function ()
 {
-    /* StringBuffer */var result = new String () /* StringBuffer () */;
+    var result = new String ();
     while (true)
     {
         /* char */var c = this._nextChar ();
