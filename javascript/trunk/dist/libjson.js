@@ -68,8 +68,8 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.json.JSONError._error ("Incompatible request: " +
-                "Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
-                ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
+                "Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
+                ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
     return value.value;
 };
@@ -421,8 +421,8 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.json.JSONError._error ("Type mismatch for \"" + name +
-                           "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
-                           ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
+                           "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
+                           ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
     this.root.read_flag[name] = true;
     return value;
@@ -1844,17 +1844,8 @@ org.webpki.json.JSONTypes =
     }
 };
 
-/*================================================================*/
-/*                            JSONValue                           */
-/*================================================================*/
 
- org.webpki.json.JSONValue = function (type, value)
-{
-    this.type = type;
-    this.value = value;
-};
-
-org.webpki.json.JSONValue.prototype.getJSONTypeName = function (json_type)
+org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
 {
     for (var obj in org.webpki.json.JSONTypes)
     {
@@ -1864,6 +1855,16 @@ org.webpki.json.JSONValue.prototype.getJSONTypeName = function (json_type)
         }
     }
     return "UNKNOWN!";
+};
+
+/*================================================================*/
+/*                            JSONValue                           */
+/*================================================================*/
+
+ org.webpki.json.JSONValue = function (type, value)
+{
+    this.type = type;
+    this.value = value;
 };
 
 /*================================================================*/

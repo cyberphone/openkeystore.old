@@ -62,3 +62,17 @@ org.webpki.json.JSONTypes =
         "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
     }
 };
+
+
+org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
+{
+    for (var obj in org.webpki.json.JSONTypes)
+    {
+        if (org.webpki.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
+        {
+            return obj;
+        }
+    }
+    return "UNKNOWN!";
+};
+

@@ -24,15 +24,3 @@
     this.type = type;
     this.value = value;
 };
-
-org.webpki.json.JSONValue.prototype.getJSONTypeName = function (json_type)
-{
-    for (var obj in org.webpki.json.JSONTypes)
-    {
-        if (org.webpki.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
-        {
-            return obj;
-        }
-    }
-    return "UNKNOWN!";
-};

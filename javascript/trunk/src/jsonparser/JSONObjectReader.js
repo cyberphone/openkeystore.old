@@ -34,8 +34,8 @@
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.json.JSONError._error ("Type mismatch for \"" + name +
-                           "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
-                           ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
+                           "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
+                           ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
     this.root.read_flag[name] = true;
     return value;
