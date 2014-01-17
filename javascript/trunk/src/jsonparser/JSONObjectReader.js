@@ -19,7 +19,7 @@
 /*                        JSONObjectReader                        */
 /*================================================================*/
 
- org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
+org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 {
     this.root = root;
 };

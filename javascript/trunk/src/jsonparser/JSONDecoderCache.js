@@ -30,7 +30,7 @@ org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER = '$';
 org.webpki.json.JSONDecoderCache.CONTEXT_JSON              = "@context";
 org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
 
-org.webpki.json.JSONDecoderCache.prototype.addToCache = function (object_class)
+/* void */org.webpki.json.JSONDecoderCache.prototype.addToCache = function (/* decoder */object_class)
 {
     var object = new object_class ();
     if (object.getContext === undefined)
@@ -53,7 +53,7 @@ org.webpki.json.JSONDecoderCache.prototype.addToCache = function (object_class)
     this.cache[object_id] = object_class;
 };
 
-org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
+/*void */org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
 {
     for (var i = 0; i < json_object.property_list.length; i++)
     {
@@ -81,7 +81,7 @@ org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
     }
 };
 
-org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
+/* deserialized JSON object */org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
 {
     var json_object_reader = org.webpki.json.JSONParser.parse (raw_json_document);
     var object_id = json_object_reader.getString (org.webpki.json.JSONDecoderCache.CONTEXT_JSON);
@@ -105,7 +105,7 @@ org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
     return object;
 };
 
-org.webpki.json.JSONDecoderCache.prototype.setCheckForUnreadProperties = function (/* boolean */flag)
+/* void */org.webpki.json.JSONDecoderCache.prototype.setCheckForUnreadProperties = function (/* boolean */flag)
 {
     this.check_for_unread = flag;
 };

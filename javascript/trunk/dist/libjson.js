@@ -245,7 +245,7 @@ org.webpki.json.JSONDecoderCache.CONTEXT_QUALIFIER_DIVIDER = '$';
 org.webpki.json.JSONDecoderCache.CONTEXT_JSON              = "@context";
 org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
 
-org.webpki.json.JSONDecoderCache.prototype.addToCache = function (object_class)
+/* void */org.webpki.json.JSONDecoderCache.prototype.addToCache = function (/* decoder */object_class)
 {
     var object = new object_class ();
     if (object.getContext === undefined)
@@ -268,7 +268,7 @@ org.webpki.json.JSONDecoderCache.prototype.addToCache = function (object_class)
     this.cache[object_id] = object_class;
 };
 
-org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
+/*void */org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
 {
     for (var i = 0; i < json_object.property_list.length; i++)
     {
@@ -296,7 +296,7 @@ org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
     }
 };
 
-org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
+/* deserialized JSON object */org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
 {
     var json_object_reader = org.webpki.json.JSONParser.parse (raw_json_document);
     var object_id = json_object_reader.getString (org.webpki.json.JSONDecoderCache.CONTEXT_JSON);
@@ -320,7 +320,7 @@ org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
     return object;
 };
 
-org.webpki.json.JSONDecoderCache.prototype.setCheckForUnreadProperties = function (/* boolean */flag)
+/* void */org.webpki.json.JSONDecoderCache.prototype.setCheckForUnreadProperties = function (/* boolean */flag)
 {
     this.check_for_unread = flag;
 };
@@ -375,7 +375,7 @@ org.webpki.json.JSONObject = function ()
     this.read_flag[name] = null;
 };
 
-org.webpki.json.JSONObject.prototype._getProperty = function (name)
+/* JSONValue */org.webpki.json.JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
     for (var i = 0; i < length; i++)
@@ -388,12 +388,12 @@ org.webpki.json.JSONObject.prototype._getProperty = function (name)
     return null;
 };
 
-org.webpki.json.JSONObject.prototype._isArray = function ()
+/* boolean */org.webpki.json.JSONObject.prototype._isArray = function ()
 {
     return this.property_list.length == 1 && !this.property_list[0].name;
 };
 
-org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
+/* void */org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 {
     this.property_list = [];
     var unnamed_property = new Object;
@@ -406,7 +406,7 @@ org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 /*                        JSONObjectReader                        */
 /*================================================================*/
 
- org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
+org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 {
     this.root = root;
 };

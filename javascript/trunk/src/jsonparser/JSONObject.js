@@ -52,7 +52,7 @@ org.webpki.json.JSONObject = function ()
     this.read_flag[name] = null;
 };
 
-org.webpki.json.JSONObject.prototype._getProperty = function (name)
+/* JSONValue */org.webpki.json.JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
     for (var i = 0; i < length; i++)
@@ -65,12 +65,12 @@ org.webpki.json.JSONObject.prototype._getProperty = function (name)
     return null;
 };
 
-org.webpki.json.JSONObject.prototype._isArray = function ()
+/* boolean */org.webpki.json.JSONObject.prototype._isArray = function ()
 {
     return this.property_list.length == 1 && !this.property_list[0].name;
 };
 
-org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
+/* void */org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 {
     this.property_list = [];
     var unnamed_property = new Object;
