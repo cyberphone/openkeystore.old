@@ -63,7 +63,6 @@ org.webpki.json.JSONTypes =
     }
 };
 
-
 org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
 {
     for (var obj in org.webpki.json.JSONTypes)
