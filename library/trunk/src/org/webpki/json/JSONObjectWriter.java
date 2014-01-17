@@ -81,8 +81,8 @@ public class JSONObjectWriter implements Serializable
      */
     public JSONObjectWriter (JSONObjectReader reader) throws IOException
       {
-        this (reader.json);
-        if (reader.json.properties.containsKey (null))
+        this (reader.root);
+        if (reader.root.properties.containsKey (null))
           {
             throw new IOException ("You cannot update array objects");
           }

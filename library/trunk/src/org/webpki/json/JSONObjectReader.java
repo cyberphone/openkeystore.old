@@ -41,16 +41,16 @@ public class JSONObjectReader implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    JSONObject json;
+    JSONObject root;
 
-    JSONObjectReader (JSONObject json)
+    JSONObjectReader (JSONObject root)
       {
-        this.json = json;
+        this.root = root;
       }
 
     JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
       {
-        JSONValue value = json.properties.get (name);
+        JSONValue value = root.properties.get (name);
         if (value == null)
           {
             throw new IOException ("Property \"" + name + "\" is missing");
@@ -59,7 +59,7 @@ public class JSONObjectReader implements Serializable
           {
             throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected_type.toString ());
           }
-        json.read_flag.add (name);
+        root.read_flag.add (name);
         return value;
       }
 
@@ -117,7 +117,7 @@ public class JSONObjectReader implements Serializable
     @SuppressWarnings("unchecked")
     public JSONArrayReader getJSONArrayReader ()
       {
-        return json.properties.containsKey (null) ? new JSONArrayReader ((Vector<JSONValue>) json.properties.get (null).value) : null;
+        return root.properties.containsKey (null) ? new JSONArrayReader ((Vector<JSONValue>) root.properties.get (null).value) : null;
       }
 
     public boolean getIfNULL (String name) throws IOException
@@ -212,17 +212,17 @@ public class JSONObjectReader implements Serializable
 
     public String[] getProperties ()
       {
-        return json.properties.keySet ().toArray (new String[0]);
+        return root.properties.keySet ().toArray (new String[0]);
       }
 
     public boolean hasProperty (String name)
       {
-        return json.properties.get (name) != null;
+        return root.properties.get (name) != null;
       }
 
     public JSONTypes getPropertyType (String name) throws IOException
       {
-        JSONValue value = json.properties.get (name);
+        JSONValue value = root.properties.get (name);
         return value == null ? null : value.type;
       }
 

@@ -77,11 +77,11 @@ public class JSONDecoderCache implements Serializable
         try
           {
             JSONDecoder decoder = decoder_class.newInstance ();
-            decoder.root = reader.json;
+            decoder.root = reader.root;
             decoder.readJSONData (reader);
             if (check_for_unread)
               {
-                checkForUnread (reader.json);
+                checkForUnread (reader.root);
               }
             return decoder;
           }

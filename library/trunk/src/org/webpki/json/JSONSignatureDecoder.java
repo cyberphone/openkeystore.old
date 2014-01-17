@@ -133,10 +133,10 @@ public class JSONSignatureDecoder
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
-        JSONValue save = signature.json.properties.get (SIGNATURE_VALUE_JSON);
-        signature.json.properties.remove (SIGNATURE_VALUE_JSON);
-        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.json);
-        signature.json.properties.put (SIGNATURE_VALUE_JSON, save);
+        JSONValue save = signature.root.properties.get (SIGNATURE_VALUE_JSON);
+        signature.root.properties.remove (SIGNATURE_VALUE_JSON);
+        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.root);
+        signature.root.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
