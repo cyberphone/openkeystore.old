@@ -97,9 +97,10 @@ org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
     }
     var object = new object_class ();
     object.readJSONData (json_object_reader);
+    object._root = json_object_reader.root;
     if (this.check_for_unread)
     {
-        org.webpki.json.JSONDecoderCache._checkForUnread (json_object_reader.json);
+        org.webpki.json.JSONDecoderCache._checkForUnread (object._root);
     }
     return object;
 };

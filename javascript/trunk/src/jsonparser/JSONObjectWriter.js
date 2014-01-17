@@ -55,7 +55,7 @@
     }
     else if (optional_object_or_reader instanceof org.webpki.json.JSONObjectReader)
     {
-        this.root = optional_object_or_reader.json;
+        this.root = optional_object_or_reader.root;
         if (this.root._isArray ())
         {
             org.webpki.json.JSONError._error ("You cannot update array objects");

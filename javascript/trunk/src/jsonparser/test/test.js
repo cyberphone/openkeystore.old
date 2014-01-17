@@ -72,10 +72,10 @@ loopa (jo1);
 console.debug (org.webpki.json.JSONTypes.DOUBLE.isCompatible(org.webpki.json.JSONTypes.OBJECT));
 
 loopa (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-        0.00e4 , "bool": true, "arr":[5,7]}}').json);
+        0.00e4 , "bool": true, "arr":[5,7]}}').root);
 
 loopa (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").json);
+0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").root);
 
 console.debug (org.webpki.json.JSONParser.parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 7 , "bool": false, "arr":[3]}}]]').getJSONArrayReader ().getArray ().getObject ().getObject ("bello").getArray ("arr").getInt ());

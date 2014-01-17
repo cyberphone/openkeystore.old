@@ -19,14 +19,14 @@
 /*                        JSONObjectReader                        */
 /*================================================================*/
 
- org.webpki.json.JSONObjectReader = function (/* JSONObject */json)
+ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 {
-    this.json = json;
+    this.root = root;
 };
 
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
 {
-    /* JSONValue */var value = this.json._getProperty (name);
+    /* JSONValue */var value = this.root._getProperty (name);
     if (value == null)
     {
         org.webpki.json.JSONError._error ("Property \"" + name + "\" is missing");
@@ -37,7 +37,7 @@
                            "\": Read=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (value.type) +
                            ", Expected=" + org.webpki.json.JSONValue.prototype.getJSONTypeName (expected_type));
     }
-    this.json.read_flag[name] = true;
+    this.root.read_flag[name] = true;
     return value;
 };
 
@@ -97,7 +97,7 @@
 
 /* public JSONArrayReader */org.webpki.json.JSONObjectReader.prototype.getJSONArrayReader = function ()
 {
-    return this.json._isArray () ?  new org.webpki.json.JSONArrayReader (/* JSONValue[] */this.json.property_list[0].value.value) : null;
+    return this.root._isArray () ?  new org.webpki.json.JSONArrayReader (/* JSONValue[] */this.root.property_list[0].value.value) : null;
 };
 
 /* public boolean */org.webpki.json.JSONObjectReader.prototype.getIfNULL = function (/* String */name)
@@ -191,21 +191,21 @@
 /* public String[] */org.webpki.json.JSONObjectReader.prototype.getProperties = function ()
 {
     var properties = [];
-    for (var i = 0; i < this.json.property_list.length; i++)
+    for (var i = 0; i < this.root.property_list.length; i++)
     {
-        properties[i] = this.json.property_list[i].name;
+        properties[i] = this.root.property_list[i].name;
     }
     return properties;
 };
 
 /* public boolean */org.webpki.json.JSONObjectReader.prototype.hasProperty = function (/* String */name)
 {
-    return this.json._getProperty (name) != null;
+    return this.root._getProperty (name) != null;
 };
  
 /* public JSONTypes */org.webpki.json.JSONObjectReader.prototype.getPropertyType = function (/* String */name)
 {
-    /* JSONValue */var value = this.json._getProperty (name);
+    /* JSONValue */var value = this.root._getProperty (name);
     return value == null ? null : value.type;
 };
 
