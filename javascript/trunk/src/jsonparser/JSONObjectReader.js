@@ -211,26 +211,22 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 
 /**
  * Read and decode JCS signature object from the current JSON object.
- * @return An object which can be used to verify keys etc.
- * @see org.webpki.json.org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
- * @throws IOException In case there is something wrong with the signature 
+ * Returns a object which can be used to verify keys etc.
  */
-/*
- public JSONSignatureDecoder getSignature () throws IOException
- {
- return new JSONSignatureDecoder (this);
- }
+/* public JSONSignatureDecoder */org.webpki.json.JSONObjectReader.prototype.getSignature = function ()
+{
+    return new org.webpki.json.JSONSignatureDecoder (this);
+};
 
- public PublicKey getPublicKey () throws IOException
- {
- return JSONSignatureDecoder.getPublicKey (this);
- }
+/* public PublicKey/Uint8Array */org.webpki.json.JSONObjectReader.prototype.getPublicKey = function ()
+{
+    return org.webpki.json.JSONSignatureDecoder._getPublicKey (this);
+};
 
- public X509Certificate[] getX509CertificatePath () throws IOException
- {
- return JSONSignatureDecoder.getX509CertificatePath (this);
- }
- */
+/* public X509Certificate[]/Uint8Array[] */org.webpki.json.JSONObjectReader.prototype.getX509CertificatePath = function ()
+{
+    return org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (this);
+};
 
 /* public void */org.webpki.json.JSONObjectReader.prototype.scanAway = function (/* String */name)
 {

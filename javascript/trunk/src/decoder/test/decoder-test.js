@@ -126,4 +126,11 @@ console.debug ("Number of ImagePreferences=" + doc2.image_preferences.length);
 
 console.debug ("Number of ImagePreferences=" + cache.parse (invocation_response_2).image_preferences.length);
 
+if (org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument (doc1, org.webpki.json.JSONOutputTypes) !=
+    org.webpki.json.JSONObjectWriter.parseAndFormat (invocation_request, org.webpki.json.JSONOutputTypes))
+{
+    throw "Parsing problem";
+}
+
 console.debug ("Successful decoding/instantiation of two different JSON document types");
+

@@ -66,6 +66,8 @@
         org.webpki.json.JSONError._error ("Wrong init of org.webpki.json.JSONObjectWriter");
     }
 };
+
+org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
@@ -778,19 +780,14 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
 };
 
-/* String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
+/* static String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
 {
     /* JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
     /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
-    /*
-        if (canonicalization_debug_file != null)
-          {
-            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
-            ArrayUtil.writeFile (canonicalization_debug_file,
-                                 ArrayUtil.add (other, 
-                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
-          }
-     */
+    if (org.webpki.json.JSONObjectWriter.canonicalization_debug_mode)
+    {
+        console.debug ("Canonicalization debug:\n" + result);
+    }
     return result;
 };
 
@@ -824,21 +821,18 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
     return this.buffer;
 };
-/*
-    public static byte[] serializeParsedJSONDocument (JSONDecoder document, org.webpki.json.JSONOutputFormats output_format) throws IOException
-      {
-        return new org.webpki.json.JSONObjectWriter (document.root).serializeJSONObject (output_format);
-      }
+
+/* public static String */org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument = function (/* JSONDecoderCache.parse() */ document, /* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (document._root).serializeJSONObject (output_format);
+};
   
-    public static void setCanonicalizationDebugFile (String file) throws IOException
-      {
-        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
-        canonicalization_debug_file = file;
-      }
+/* public static void */org.webpki.json.JSONObjectWriter.setCanonicalizationDebugMode = function (/* boolean */flag)
+{
+    org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = flag;
+};
 
-    public static byte[] parseAndFormat (byte[] json_utf8, org.webpki.json.JSONOutputFormats output_format) throws IOException
-      {
-        return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
-      }
-
-*/
+/* public static string */org.webpki.json.JSONObjectWriter.parseAndFormat = function (/* String */json_string, /* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_string)).serializeJSONObject (output_format);
+};

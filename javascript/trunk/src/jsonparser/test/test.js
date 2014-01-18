@@ -277,7 +277,15 @@ var signature = org.webpki.json.JSONParser.parse (
 }'
 
 );
-console.debug (new org.webpki.json.JSONObjectWriter (signature).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
+
+var canon_sign = new org.webpki.json.JSONObjectWriter (signature).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
+
+if (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (signature.root) != canon_sign)
+{
+    throw "Canon sign bug";
+}
+org.webpki.json.JSONObjectWriter.setCanonicalizationDebugMode (true);
+signature.getSignature ();
 
 console.debug ("Successful");
 
