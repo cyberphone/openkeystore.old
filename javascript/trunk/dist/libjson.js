@@ -598,26 +598,22 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 
 /**
  * Read and decode JCS signature object from the current JSON object.
- * @return An object which can be used to verify keys etc.
- * @see org.webpki.json.org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
- * @throws IOException In case there is something wrong with the signature 
+ * Returns a object which can be used to verify keys etc.
  */
-/*
- public JSONSignatureDecoder getSignature () throws IOException
- {
- return new JSONSignatureDecoder (this);
- }
+/* public JSONSignatureDecoder */org.webpki.json.JSONObjectReader.prototype.getSignature = function ()
+{
+    return new org.webpki.json.JSONSignatureDecoder (this);
+};
 
- public PublicKey getPublicKey () throws IOException
- {
- return JSONSignatureDecoder.getPublicKey (this);
- }
+/* public PublicKey/Uint8Array */org.webpki.json.JSONObjectReader.prototype.getPublicKey = function ()
+{
+    return org.webpki.json.JSONSignatureDecoder._getPublicKey (this);
+};
 
- public X509Certificate[] getX509CertificatePath () throws IOException
- {
- return JSONSignatureDecoder.getX509CertificatePath (this);
- }
- */
+/* public X509Certificate[]/Uint8Array[] */org.webpki.json.JSONObjectReader.prototype.getX509CertificatePath = function ()
+{
+    return org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (this);
+};
 
 /* public void */org.webpki.json.JSONObjectReader.prototype.scanAway = function (/* String */name)
 {
@@ -675,6 +671,8 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
         org.webpki.json.JSONError._error ("Wrong init of org.webpki.json.JSONObjectWriter");
     }
 };
+
+org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
@@ -1387,19 +1385,14 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
 };
 
-/* String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
+/* static String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
 {
     /* JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
     /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
-    /*
-        if (canonicalization_debug_file != null)
-          {
-            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
-            ArrayUtil.writeFile (canonicalization_debug_file,
-                                 ArrayUtil.add (other, 
-                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
-          }
-     */
+    if (org.webpki.json.JSONObjectWriter.canonicalization_debug_mode)
+    {
+        console.debug ("Canonicalization debug:\n" + result);
+    }
     return result;
 };
 
@@ -1433,24 +1426,21 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
     }
     return this.buffer;
 };
-/*
-    public static byte[] serializeParsedJSONDocument (JSONDecoder document, org.webpki.json.JSONOutputFormats output_format) throws IOException
-      {
-        return new org.webpki.json.JSONObjectWriter (document.root).serializeJSONObject (output_format);
-      }
+
+/* public static String */org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument = function (/* JSONDecoderCache.parse() */ document, /* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (document._root).serializeJSONObject (output_format);
+};
   
-    public static void setCanonicalizationDebugFile (String file) throws IOException
-      {
-        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
-        canonicalization_debug_file = file;
-      }
+/* public static void */org.webpki.json.JSONObjectWriter.setCanonicalizationDebugMode = function (/* boolean */flag)
+{
+    org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = flag;
+};
 
-    public static byte[] parseAndFormat (byte[] json_utf8, org.webpki.json.JSONOutputFormats output_format) throws IOException
-      {
-        return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
-      }
-
-*/
+/* public static string */org.webpki.json.JSONObjectWriter.parseAndFormat = function (/* String */json_string, /* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_string)).serializeJSONObject (output_format);
+};
 
 /*================================================================*/
 /*                        JSONOutputFormats                       */
@@ -1793,6 +1783,196 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
             continue;
         }
         return c;
+    }
+};
+
+/*================================================================*/
+/*                       JSONSignatureDecoder                     */
+/*================================================================*/
+
+org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd) 
+{
+    var signature = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    var version = signature.getStringConditional (org.webpki.json.JSONSignatureDecoder.VERSION_JSON,
+                                                  org.webpki.json.JSONSignatureDecoder.SIGNATURE_VERSION_ID);
+    if (version != org.webpki.json.JSONSignatureDecoder.SIGNATURE_VERSION_ID)
+    {
+        org.webpki.json.JSONError._error ("Unknown \"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON + "\" version: " + version);
+    }
+    this._algorithm = signature.getString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON);
+    this._getKeyInfo (signature.getObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON));
+    this._extensions = null;
+    if (signature.hasProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON))
+    {
+        var ext_arr_reader = signature.getArray (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON);
+        this._extensions = [];
+        do
+        {
+            var ext_obj = ext_arr_reader.getObject ();
+            if (!ext_obj.hasProperty (org.webpki.json.JSONSignatureDecoder.TYPE_JSON))
+            {
+                org.webpki.json.JSONError._error ("An \"" + org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON + "\" object lack a \"" + org.webpki.json.JSONSignatureDecoder.TYPE_JSON + "\" property");
+            }
+            this._extensions[this._extensions.length] = ext_obj;
+        }
+        while (ext_arr_reader.hasMore ());
+    }
+    this._signature_value = signature.getBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON);
+    var save = signature.root.property_list;
+    var new_list = [];
+    for (var i = 0; i < save.length; i++)
+    {
+        if (save[i].name != org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
+        {
+            new_list[new_list.length] = save[i];
+        }
+    }
+    signature.root.property_list = new_list;
+    this._canonicalized_data = org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (rd.root);
+    signature.root.property_list = save;
+};
+
+org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON             = "Algorithm";
+
+org.webpki.json.JSONSignatureDecoder.EC_JSON                    = "EC";
+
+org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON              = "Exponent";
+
+org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON            = "Extensions";
+
+org.webpki.json.JSONSignatureDecoder.ISSUER_JSON                = "Issuer";
+
+org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON                = "KeyID";
+
+org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON              = "KeyInfo";
+
+org.webpki.json.JSONSignatureDecoder.MODULUS_JSON               = "Modulus";
+
+org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON           = "NamedCurve";
+
+org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON            = "PublicKey";
+
+org.webpki.json.JSONSignatureDecoder.RSA_JSON                   = "RSA";
+
+org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON         = "SerialNumber";
+
+org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON             = "Signature";
+
+org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON = "SignatureCertificate";
+
+org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON       = "SignatureValue";
+
+org.webpki.json.JSONSignatureDecoder.SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
+
+org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON               = "Subject";
+
+org.webpki.json.JSONSignatureDecoder.TYPE_JSON                  = "Type";
+
+org.webpki.json.JSONSignatureDecoder.URL_JSON                   = "URL";
+
+org.webpki.json.JSONSignatureDecoder.VERSION_JSON               = "Version";
+
+org.webpki.json.JSONSignatureDecoder.X_JSON                     = "X";
+
+org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
+
+org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
+
+/* void */org.webpki.json.JSONSignatureDecoder.prototype._getKeyInfo = function (/* JSONObjectReader */rd)
+{
+    if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON))
+    {
+    }
+    else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON))
+    {
+        this._public_key = org.webpki.json.JSONSignatureDecoder._getPublicKey (rd);
+    }
+    else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON))
+    {
+        this._key_id = rd.getString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON);
+    }
+    else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.URL_JSON))
+    {
+        org.webpki.json.JSONError._error ("\"" + org.webpki.json.JSONSignatureDecoder.URL_JSON + "\" not yet implemented");
+    }
+    else
+    {
+        org.webpki.json.JSONError._error ("Undecodable \"" + org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON + "\" object");
+    }
+};
+
+/* static Uint8Array */org.webpki.json.JSONSignatureDecoder._readCryptoBinary = function (/* JSONObjectReader */rd, /* String */property)
+{
+    var crypto_binary = rd.getBinary (property);
+    if (crypto_binary[0] == 0x00)
+    {
+        org.webpki.json.JSONError._error ("Public key parameters must not contain leading zeroes");
+    }
+    crypto_binary;
+};
+
+/* Uint8Array */org.webpki.json.JSONSignatureDecoder._getPublicKey = function (/* JSONObjectReader */rd)
+{
+    rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
+    if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON))
+    {
+        rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
+        var modulus = org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
+        var exponent = org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+        return new Uint8Array ([5]);
+    }
+    rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
+    var curve_name = rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON);
+/*
+  KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
+                                 getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
+*/
+    var x = org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON);
+    var y = org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON);
+    return new Uint8Array ([6]);
+};
+
+/* Uint8Array[] */org.webpki.json.JSONSignatureDecoder._getX509CertificatePath = function (/* JSONObjectReader */rd)
+{
+    return rd.getBinaryArray (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON);
+/*      
+        X509Certificate last_certificate = null;
+        Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
+        for (byte[] certificate_blob : rd.getBinaryArray (X509_CERTIFICATE_PATH_JSON))
+          {
+            try
+              {
+                CertificateFactory cf = CertificateFactory.getInstance ("X.509");
+                X509Certificate certificate = (X509Certificate)cf.generateCertificate (new ByteArrayInputStream (certificate_blob));
+                certificates.add (pathCheck (last_certificate, last_certificate = certificate));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        return certificates.toArray (new X509Certificate[0]);
+*/
+};
+
+/* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
+{
+    this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
+    if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
+    {
+        rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
+        var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
+        var serial_number = rd.getBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON);
+        var subject = rd.getString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON);
+      /*      
+      X509Certificate signature_certificate = certificate_path[0];
+      if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
+          !signature_certificate.getSerialNumber ().equals (serial_number) ||
+          !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
+        {
+          throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+        }
+*/
     }
 };
 
