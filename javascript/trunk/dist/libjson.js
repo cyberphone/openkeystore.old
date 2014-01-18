@@ -1799,7 +1799,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
     {
         org.webpki.json.JSONError._error ("Unknown \"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON + "\" version: " + version);
     }
-    this._algorithm = signature.getString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON);
+    this._signature_algorithm = signature.getString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON);
     this._getKeyInfo (signature.getObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON));
     this._extensions = null;
     if (signature.hasProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON))
@@ -1882,6 +1882,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 {
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON))
     {
+        this._readX509CertificateEntry (rd);
     }
     else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON))
     {
@@ -1932,6 +1933,56 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     return new Uint8Array ([6]);
 };
 
+/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureValue = function ()
+{
+    return this._signature_value;
+};
+
+/* public String */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureAlgorithm = function ()
+{
+    return this._signature_algorithm;
+};
+
+/* public JSONObjectReader[] */org.webpki.json.JSONSignatureDecoder.prototype.getExtensions = function ()
+{
+    return this._extensions;
+};
+
+/* void */org.webpki.json.JSONSignatureDecoder.prototype._checkRequest = function (/* JSONSignatureTypes */signature_type)
+{
+    if (signature_type != this.getSignatureType ())
+    {
+        org.webpki.json.JSONError._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+    }
+};
+
+/* public Uint8Array[]/X509Certificate[] */org.webpki.json.JSONSignatureDecoder.prototype.getX509CertificatePath = function ()
+{
+    this._checkRequest (org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE);
+    return this._certificate_path;
+};
+
+/* public Uint8Array/PublicKey */org.webpki.json.JSONSignatureDecoder.prototype.getPublicKey = function ()
+{
+    this._checkRequest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY);
+    return this._public_key;
+};
+
+/* public String */org.webpki.json.JSONSignatureDecoder.prototype.getKeyID = function ()
+{
+    this._checkRequest (org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY);
+    return this._key_id;
+};
+
+/* public JSONSignatureTypes */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureType = function ()
+{
+    if (this._certificate_path != null)
+    {
+        return org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE;
+    }
+    return this._public_key == null ? org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY : org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY;
+};
+
 /* Uint8Array[] */org.webpki.json.JSONSignatureDecoder._getX509CertificatePath = function (/* JSONObjectReader */rd)
 {
     return rd.getBinaryArray (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON);
@@ -1958,7 +2009,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
-    if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
+    if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
         var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
@@ -1973,6 +2024,26 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
           throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
         }
 */
+    }
+};
+
+/*================================================================*/
+/*                       JSONSignatureTypes                       */
+/*================================================================*/
+
+org.webpki.json.JSONSignatureTypes = 
+{
+    X509_CERTIFICATE:
+    {
+        "toString": function () { return "X509 path";}
+    },
+    ASYMMETRIC_KEY:
+    {
+        "toString": function () { return "Asymmetric key";}
+    },
+    SYMMETRIC_KEY:
+    {
+        "toString": function () { return "Symmetric key";}
     }
 };
 
