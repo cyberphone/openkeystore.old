@@ -99,7 +99,7 @@
   
   <!-- Browser JSON library -->
   <target name="libjson" depends="clean">
-    <property name="files" value="jsonparser/*,math/*,util/*,crypto/*"/>
+    <property name="files" value="jsonparser/*,math/*,util/*,crypto/*,asn1/*"/>
     <mkdir dir="${temp_dir}" />
     <script language="javascript"> <![CDATA[
         var path = project.getProperty ("files");

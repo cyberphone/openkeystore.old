@@ -1878,44 +1878,6 @@ org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON = "X509Certifica
 
 org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 
-org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES = 
-[
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163", "1.3.132.0.15",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233", "1.3.132.0.27",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283", "1.3.132.0.17",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192", "1.2.840.10045.3.1.1",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256", "1.2.840.10045.3.1.7",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384", "1.3.132.0.34",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521", "1.3.132.0.35",
-    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", "1.3.36.3.3.2.8.1.1.7"
-];
-
-org.webpki.json.JSONSignatureDecoder.getECOIDFromURI = function (/* String */uri)
-{
-    if (uri.indexOf (org.webpki.json.JSONSignatureDecoder.XML_DSIG_CURVE_PREFIX) == 0)
-    {
-        var oid = uri.substring (org.webpki.json.JSONSignatureDecoder.XML_DSIG_CURVE_PREFIX.length);
-        for (var i = 1; i < org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES.length; i+= 2)
-        {
-            if (org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i] == oid)
-            {
-                return oid;
-            }
-        }
-    }
-    else
-    {
-        for (var i = 0; i < org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES.length; i += 2)
-        {
-            if (org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i] == uri)
-            {
-                return org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i + 1];
-            }
-        }
-    }
-    org.webpki.json.JSONError._error ("Unsupported EC curve: " + uri);
-};
-
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._getKeyInfo = function (/* JSONObjectReader */rd)
 {
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON))
@@ -1947,7 +1909,7 @@ org.webpki.json.JSONSignatureDecoder.getECOIDFromURI = function (/* String */uri
     {
         org.webpki.json.JSONError._error ("Public key parameters must not contain leading zeroes");
     }
-    crypto_binary;
+    return crypto_binary;
 };
 
 /* Uint8Array */org.webpki.json.JSONSignatureDecoder._getPublicKey = function (/* JSONObjectReader */rd)
@@ -1956,13 +1918,13 @@ org.webpki.json.JSONSignatureDecoder.getECOIDFromURI = function (/* String */uri
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        return org.webpki.asn1.createRSAPublicKey 
+        return org.webpki.crypto.createRSAPublicKey 
             (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
              org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
-    return org.webpki.asn1.createECPublicKey 
-        (org.webpki.json.JSONSignatureDecoder.getECOIDFromURI (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON)),
+    return org.webpki.crypto.createECPublicKey 
+        (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
@@ -2356,18 +2318,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     {
         org.webpki.math.BigInteger._error ("BigInteger not initialized");
     }
-    if (this.value.length != big_integer.value.length)
-    {
-        return false;
-    }
-    for (var i = 0; i < this.value.length; i++)
-    {
-        if (this.value[i] != big_integer.value[i])
-        {
-            return false;
-        }
-    }
-    return true;
+    return org.webpki.util.ByteArray.equals (this.value, big_integer.value);
 };
 
 /* String */org.webpki.math.BigInteger.prototype.toString = function (/* int */optional_10_or_16_base)
@@ -2534,4 +2485,304 @@ org.webpki.util.Base64URL =
         encoded += org.webpki.util.Base64URL.BASE64URL[(uncoded[i] << 2) & 0x3C];
     }
     return encoded;
+};
+
+/*================================================================*/
+/*                            ByteArray                           */
+/*================================================================*/
+
+//* Encodes/decodes base64URL data as described in RFC 4648 Table 2.
+
+org.webpki.util.ByteArray = {};
+
+/* boolean */org.webpki.util.ByteArray.equals = function (/* Uint8Array */arg1, /* Uint8Array */arg2)
+{
+    if (arg1.length != arg2.length)
+    {
+        return false;
+    }
+    for (var i = 0; i < arg1.length; i++)
+    {
+        if (arg1[i] != arg2[i])
+        {
+            return false;
+        }
+    }
+    return true;
+};
+
+/* Uint8Array */org.webpki.util.ByteArray.add = function (/* Uint8Array */arg1, /* Uint8Array */arg2)
+{
+    var combined = new Uint8Array (arg1.length + arg2.length);
+    var i = 0;
+    while (i < arg1.length)
+    {
+        combined[i] = arg1[i++];
+    }
+    for (var j = 0; j < arg2.length; j++)
+    {
+        combined[i++] = arg2[j];
+    }
+    return combined;
+};
+
+/* String */ org.webpki.util.ByteArray._hex = function (/* byte */i)
+{
+    if (i < 10)
+    {
+        return String.fromCharCode (i + 48);
+    }
+    return String.fromCharCode (i + 55);
+};
+
+/* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
+{
+    return org.webpki.util.ByteArray._hex (i / 16) + org.webpki.util.ByteArray._hex (i % 16);
+};
+
+/* String */org.webpki.util.ByteArray.toHex = function (/* Uint8Array */arg)
+{
+    var result = "";
+    for (var i = 0; i < arg.length; i++)
+    {
+        result += " " + org.webpki.util.ByteArray._twohex (arg[i]);
+    }
+    return result;
+};
+
+/*================================================================*/
+/*              Namespace for the "Crypto" library                */
+/*================================================================*/
+
+"use strict";
+
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.crypto = org.webpki.crypto || {};
+
+/*================================================================*/
+/*                        Key Serializing                         */
+/*================================================================*/
+
+org.webpki.crypto.SUPPORTED_EC_CURVES = 
+[//                 SKS Algorithm ID                             Bits       Textual OID            ASN.1 OID (without header)
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        163,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        233,     "1.3.132.0.27",         [0x2B, 0x81, 0x04, 0x00, 0x1B],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",        283,     "1.3.132.0.17",         [0x2B, 0x81, 0x04, 0x00, 0x11],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",        192,     "1.2.840.10045.3.1.1",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x01],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",        256,     "1.2.840.10045.3.1.7",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",        384,     "1.3.132.0.34",         [0x2B, 0x81, 0x04, 0x00, 0x22],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",        521,     "1.3.132.0.35",         [0x2B, 0x81, 0x04, 0x00, 0x23],
+    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", 256,     "1.3.36.3.3.2.8.1.1.7", [0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07]
+];
+
+org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01];
+org.webpki.crypto.EC_ALGORITHM_OID     = [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01]; 
+
+org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
+
+org.webpki.crypto._error = function (/* String */message)
+{
+    throw "CryptoException: " + message;
+};
+
+
+/* int */org.webpki.crypto.getECParamsFromURI = function (/* String */uri)
+{
+    if (uri.indexOf (org.webpki.crypto.XML_DSIG_CURVE_PREFIX) == 0)
+    {
+        var oid = uri.substring (org.webpki.crypto.XML_DSIG_CURVE_PREFIX.length);
+        for (var i = 2; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i+= 4)
+        {
+            if (org.webpki.crypto.SUPPORTED_EC_CURVES[i] == oid)
+            {
+                return i - 2;
+            }
+        }
+    }
+    else
+    {
+        for (var i = 0; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i += 4)
+        {
+            if (org.webpki.crypto.SUPPORTED_EC_CURVES[i] == uri)
+            {
+                return i;
+            }
+        }
+    }
+    org.webpki.crypto._error ("Unsupported EC curve: " + uri);
+};
+
+/* Uint8Array */org.webpki.crypto.adjustECCoordinate = function (/* int */params_entry, /* Unit8Array */coordinate)
+{
+    var length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1] + 7) / 8);
+    while (coordinate.length < length)
+    {
+        coordinate = org.webpki.util.ByteArray.add ([0x00], coordinate);
+    }
+    return coordinate;
+};
+
+/* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
+{
+    var params_entry = org.webpki.crypto.getECParamsFromURI (url);
+    return new org.webpki.asn1.ASN1Object
+      (
+        org.webpki.asn1.TAGS.SEQUENCE,
+          new org.webpki.asn1.ASN1Object
+            (
+              org.webpki.asn1.TAGS.SEQUENCE,
+              new org.webpki.asn1.ASN1Object
+                (
+                  org.webpki.asn1.TAGS.OID,
+                  org.webpki.crypto.EC_ALGORITHM_OID
+                )
+            )
+        .addData 
+          (
+            new org.webpki.asn1.ASN1Object 
+              (
+                org.webpki.asn1.TAGS.OID,
+                org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 3]
+              )
+          )
+      )
+    .addData
+      (
+        new org.webpki.asn1.ASN1Object 
+          (
+            org.webpki.asn1.TAGS.BITSTRING,
+            org.webpki.util.ByteArray.add 
+              (
+                org.webpki.util.ByteArray.add
+                  (
+                    [0x04],
+                    org.webpki.crypto.adjustECCoordinate (params_entry, x)
+                  ), 
+                org.webpki.crypto.adjustECCoordinate (params_entry, y)
+              )
+          )
+      ).encode ();
+};
+
+/* Uint8Array */org.webpki.crypto.createRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
+{
+    return new org.webpki.asn1.ASN1Object
+      (
+        org.webpki.asn1.TAGS.SEQUENCE,
+          new org.webpki.asn1.ASN1Object
+            (
+              org.webpki.asn1.TAGS.SEQUENCE,
+              new org.webpki.asn1.ASN1Object
+                (
+                  org.webpki.asn1.TAGS.OID,
+                  org.webpki.crypto.RSA_ALGORITHM_OID
+                )
+            )
+        .addData (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
+      )
+    .addData
+      (
+        new org.webpki.asn1.ASN1Object 
+          (
+            org.webpki.asn1.TAGS.BITSTRING,
+            new org.webpki.asn1.ASN1Object
+              (
+                org.webpki.asn1.TAGS.SEQUENCE,
+                org.webpki.asn1.ASN1PositiveInteger (modulus)
+              )
+            .addData (org.webpki.asn1.ASN1PositiveInteger (exponent))
+          )
+      ).encode ();
+};
+
+/*================================================================*/
+/*               Namespace for the "ASN1" library                 */
+/*================================================================*/
+
+"use strict";
+
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.asn1 = org.webpki.asn1 || {};
+
+/*================================================================*/
+/*                            ASN1                                */
+/*================================================================*/
+
+org.webpki.asn1.TAGS =
+{
+    OID                : 0x06,
+    SEQUENCE           : 0x30,
+    INTEGER            : 0x02,
+    NULL               : 0x05,
+    BITSTRING          : 0x03,
+    EXPLICIT_CONTEXT_0 : 0xA0,
+    EXPLICIT_CONTEXT_1 : 0xA1,
+    OCTET_STRING       : 0x04
+};
+
+org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */data)
+{
+    this.data = [];  /* ASN1Object or Unit8Array */
+    this.data[0] = data;
+    this.tag = tag;
+    return this;
+};
+
+/* ASN1Object */org.webpki.asn1.ASN1Object.prototype.addData = function (/* ASN1Object or Unit8Array */data)
+{
+    this.data[this.data.length] = data;
+    return this;
+};
+
+/* Unit8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
+{
+    this.result = new Uint8Array ();
+    if (this.tag == org.webpki.asn1.TAGS.BITSTRING)
+    {
+        this.update ([0]);  // This implementation doesn't support everything ASN.1...
+    }
+    for (var i = 0; i < this.data.length; i++)
+    {
+        if (this.data[i] instanceof org.webpki.asn1.ASN1Object)
+        {
+            this.update (this.data[i].encode ()); 
+        }
+        else
+        {
+            this.update (this.data[i]);
+        }
+    }
+    var payload = this.result;
+    var length = payload.length;
+    this.result = new Uint8Array ([this.tag, length]);
+    if (length > 127)
+    {
+        if (length > 255)
+        {
+            this.result[1] = 0x82;
+            this.update ([length >> 8]);
+        }
+        else
+        {
+            this.result[1] = 0x81;
+        }
+        this.update ([length & 0xFF]);
+    }
+    return this.update (payload);
+};
+
+/* Unit8Array */org.webpki.asn1.ASN1Object.prototype.update = function (array)
+{
+    return this.result = org.webpki.util.ByteArray.add (this.result, array);
+};
+
+/* ASN1Object */org.webpki.asn1.ASN1PositiveInteger = function (/* Uint8Array */blob_integer)
+{
+    if (blob_integer[0] > 127)
+    {
+        blob_integer = org.webpki.util.ByteArray.add ([0], blob_integer);
+    }
+    return new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.INTEGER, blob_integer);
 };
