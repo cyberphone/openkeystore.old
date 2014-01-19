@@ -93,7 +93,7 @@ org.webpki.crypto._error = function (/* String */message)
      .addData (new org.webpki.asn1.ASN1Object 
        (
          org.webpki.asn1.TAGS.BITSTRING,
-         org.webpki.util.ByteArray.add (org.webpki.util.ByteArray.add ([0x00, 0x04], x), y))
+         org.webpki.util.ByteArray.add (org.webpki.util.ByteArray.add ([0x04], x), y))
        ).encode ();
 };
 
@@ -113,18 +113,17 @@ org.webpki.crypto._error = function (/* String */message)
             )
         .addData (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
        )
-     .addData (new org.webpki.asn1.ASN1Object 
+     .addData
        (
-         org.webpki.asn1.TAGS.BITSTRING,
-         org.webpki.util.ByteArray.add 
+         new org.webpki.asn1.ASN1Object 
            (
-             [0x00],
+             org.webpki.asn1.TAGS.BITSTRING,
              new org.webpki.asn1.ASN1Object
                (
                  org.webpki.asn1.TAGS.SEQUENCE,
                  org.webpki.asn1.ASN1PositiveInteger (modulus)
                )
-             .addData (org.webpki.asn1.ASN1PositiveInteger (exponent)).encode ())
-            )
+             .addData (org.webpki.asn1.ASN1PositiveInteger (exponent))
+           )
        ).encode ();
 };

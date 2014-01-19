@@ -48,6 +48,10 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
 /* Unit8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
 {
     this.result = new Uint8Array ();
+    if (this.tag == org.webpki.asn1.TAGS.BITSTRING)
+    {
+        this.update ([0]);  // This implementation doesn't support everything ASN.1...
+    }
     for (var i = 0; i < this.data.length; i++)
     {
         if (this.data[i] instanceof org.webpki.asn1.ASN1Object)
