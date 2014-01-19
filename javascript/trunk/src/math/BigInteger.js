@@ -210,18 +210,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     {
         org.webpki.math.BigInteger._error ("BigInteger not initialized");
     }
-    if (this.value.length != big_integer.value.length)
-    {
-        return false;
-    }
-    for (var i = 0; i < this.value.length; i++)
-    {
-        if (this.value[i] != big_integer.value[i])
-        {
-            return false;
-        }
-    }
-    return true;
+    return org.webpki.util.ByteArray.equals (this.value, big_integer.value);
 };
 
 /* String */org.webpki.math.BigInteger.prototype.toString = function (/* int */optional_10_or_16_base)

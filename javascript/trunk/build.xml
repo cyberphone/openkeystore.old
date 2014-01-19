@@ -79,27 +79,27 @@
     <!-- JSON parser testing -->
   <target name="jsonparser">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,biginteger/*,base64url/*,crypto/*,jsonparser/test/*"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,jsonparser/test/*"/>
     </antcall>
   </target>
   
     <!-- BigInteger testing -->
   <target name="biginteger">
     <antcall target="test">
-       <param name="files" value="biginteger/*,biginteger/test/*"/>
+       <param name="files" value="math/*,util/*,math/test/biginteger-test.js"/>
     </antcall>
   </target>
 
   <!-- Base64URL testing -->
   <target name="base64url">
     <antcall target="test">
-       <param name="files" value="base64url/*,base64url/test/*"/>
+       <param name="files" value="util/*,util/test/base64url-test.js"/>
     </antcall>
   </target>
   
   <!-- Browser JSON library -->
   <target name="libjson" depends="clean">
-    <property name="files" value="jsonparser/*,biginteger/*,base64url/*"/>
+    <property name="files" value="jsonparser/*,math/*,util/*,crypto/*"/>
     <mkdir dir="${temp_dir}" />
     <script language="javascript"> <![CDATA[
         var path = project.getProperty ("files");
@@ -133,14 +133,14 @@
   <!-- Decoder only testing -->
   <target name="decoder">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,biginteger/*,base64url/*,decoder/*,decoder/test/*"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,util/*,decoder/test/*"/>
     </antcall>
   </target>
   
   <!-- Key serializing only testing -->
   <target name="keyserialize">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,biginteger/*,base64url/*,decoder/*,crypto/*,crypto/test/keyserialize-test.js"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,crypto/test/keyserialize-test.js"/>
     </antcall>
   </target>
 
