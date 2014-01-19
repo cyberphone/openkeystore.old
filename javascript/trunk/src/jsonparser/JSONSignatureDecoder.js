@@ -103,49 +103,9 @@ org.webpki.json.JSONSignatureDecoder.VERSION_JSON               = "Version";
 
 org.webpki.json.JSONSignatureDecoder.X_JSON                     = "X";
 
-org.webpki.json.JSONSignatureDecoder.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
-
 org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
 
 org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
-
-org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES = 
-[
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163", "1.3.132.0.15",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233", "1.3.132.0.27",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283", "1.3.132.0.17",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192", "1.2.840.10045.3.1.1",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256", "1.2.840.10045.3.1.7",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384", "1.3.132.0.34",
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521", "1.3.132.0.35",
-    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", "1.3.36.3.3.2.8.1.1.7"
-];
-
-org.webpki.json.JSONSignatureDecoder.getECOIDFromURI = function (/* String */uri)
-{
-    if (uri.indexOf (org.webpki.json.JSONSignatureDecoder.XML_DSIG_CURVE_PREFIX) == 0)
-    {
-        var oid = uri.substring (org.webpki.json.JSONSignatureDecoder.XML_DSIG_CURVE_PREFIX.length);
-        for (var i = 1; i < org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES.length; i+= 2)
-        {
-            if (org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i] == oid)
-            {
-                return oid;
-            }
-        }
-    }
-    else
-    {
-        for (var i = 0; i < org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES.length; i += 2)
-        {
-            if (org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i] == uri)
-            {
-                return org.webpki.json.JSONSignatureDecoder.SUPPORTED_EC_CURVES[i + 1];
-            }
-        }
-    }
-    org.webpki.json.JSONError._error ("Unsupported EC curve: " + uri);
-};
 
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._getKeyInfo = function (/* JSONObjectReader */rd)
 {
@@ -187,13 +147,13 @@ org.webpki.json.JSONSignatureDecoder.getECOIDFromURI = function (/* String */uri
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        return org.webpki.asn1.createRSAPublicKey 
+        return org.webpki.crypto.createRSAPublicKey 
             (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
              org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
-    return org.webpki.asn1.createECPublicKey 
-        (org.webpki.json.JSONSignatureDecoder.getECOIDFromURI (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON)),
+    return org.webpki.crypto.createECPublicKey 
+        (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
