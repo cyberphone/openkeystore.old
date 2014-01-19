@@ -68,8 +68,15 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     this.result = new Uint8Array ([this.tag, length]);
     if (length > 127)
     {
-        this.result[1] = 0x82;
-        this.update ([length >> 8]);
+        if (length > 255)
+        {
+            this.result[1] = 0x82;
+            this.update ([length >> 8]);
+        }
+        else
+        {
+            this.result[1] = 0x81;
+        }
         this.update ([length & 0xFF]);
     }
     return this.update (payload);
