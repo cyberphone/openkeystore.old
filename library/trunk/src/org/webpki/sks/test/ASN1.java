@@ -20,7 +20,7 @@ public class ASN1
     static final int ASN1_OBJECT_IDENTIFIER  = 0x06;
     static final int ASN1_INTEGER            = 0x02;
     static final int ASN1_NULL               = 0x05;
-    static final int ASN1_BISTRING           = 0x03;
+    static final int ASN1_BITSTRING          = 0x03;
     static final int ASN1_EXPLICIT_CONTEXT_0 = 0xA0;
     static final int ASN1_EXPLICIT_CONTEXT_1 = 0xA1;
     static final int ASN1_OCTET_STRING       = 0x04;
@@ -216,7 +216,7 @@ public class ASN1
 
     private static void getBitString () throws GeneralSecurityException
       {
-        getObject (ASN1_BISTRING);
+        getObject (ASN1_BITSTRING);
         if (buffer[index++] != 0x00) throw new GeneralSecurityException ("Unexpectd bitfield unused bit");
         length--;
       }
