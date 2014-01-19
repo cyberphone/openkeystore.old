@@ -138,7 +138,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     {
         org.webpki.json.JSONError._error ("Public key parameters must not contain leading zeroes");
     }
-    crypto_binary;
+    return crypto_binary;
 };
 
 /* Uint8Array */org.webpki.json.JSONSignatureDecoder._getPublicKey = function (/* JSONObjectReader */rd)

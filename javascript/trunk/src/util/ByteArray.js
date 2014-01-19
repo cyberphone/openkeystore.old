@@ -38,3 +38,42 @@ org.webpki.util.ByteArray = {};
     }
     return true;
 };
+
+/* Uint8Array */org.webpki.util.ByteArray.add = function (/* Uint8Array */arg1, /* Uint8Array */arg2)
+{
+    var combined = new Uint8Array (arg1.length + arg2.length);
+    var i = 0;
+    while (i < arg1.length)
+    {
+        combined[i] = arg1[i++];
+    }
+    for (var j = 0; j < arg2.length; j++)
+    {
+        combined[i++] = arg2[j];
+    }
+    return combined;
+};
+
+/* String */ org.webpki.util.ByteArray._hex = function (/* byte */i)
+{
+    if (i < 10)
+    {
+        return String.fromCharCode (i + 48);
+    }
+    return String.fromCharCode (i + 55);
+};
+
+/* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
+{
+    return org.webpki.util.ByteArray._hex (i / 16) + org.webpki.util.ByteArray._hex (i % 16);
+};
+
+/* String */org.webpki.util.ByteArray.toHex = function (/* Uint8Array */arg)
+{
+    var result = "";
+    for (var i = 0; i < arg.length; i++)
+    {
+        result += " " + org.webpki.util.ByteArray._twohex (arg[i]);
+    }
+    return result;
+};

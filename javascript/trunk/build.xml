@@ -140,7 +140,7 @@
   <!-- Key serializing only testing -->
   <target name="keyserialize">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,crypto/test/keyserialize-test.js"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialize-test.js"/>
     </antcall>
   </target>
 
