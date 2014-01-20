@@ -300,20 +300,17 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
  </pre>
      */
 
+
+org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
+{
+    if (value[0] == 0x00)
+    {
+        value = new Uint8Array (value.subarray (1));
+    }
+    this.setBinary (name, value);
+};
+
 /*
-
-org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value,  String name)
-      {
-        byte[] crypto_binary = value.toByteArray ();
-        if (crypto_binary[0] == 0x00)
-          {
-            byte[] wo_zero = new byte[crypto_binary.length - 1];
-            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
-            crypto_binary = wo_zero;
-          }
-        setBinary (name, crypto_binary);
-      }
-
     public org.webpki.json.JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         org.webpki.json.JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
@@ -331,36 +328,36 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
         signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
         return this;
       }
-    
-    public org.webpki.json.JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
-      {
-        org.webpki.json.JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
-        if (key_alg.isRSAKey ())
-          {
-            org.webpki.json.JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
-            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
-          }
-        else
-          {
-            org.webpki.json.JSONObjectWriter ec_key_writer = public_key_writer.setObject (JSONSignatureDecoder.EC_JSON);
-            ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
-               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
-            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON);
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON);
-          }
-        return this;
-      }
+*/    
 
-    public org.webpki.json.JSONObjectWriter setXMLDSigECCurveOption (boolean flag)
-      {
-        xml_dsig_named_curve = flag;
-        return this;
-      }
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
+{
+    /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
+    var key_alg = new org.webpki.crypto.createPublicKeyFromSPKI (public_key);
+    if (key_alg.rsa_flag)
+    {
+        /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
+        rsa_key_writer._writeCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
+        rsa_key_writer._writeCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+    }
+    else
+    {
+        /* JSONObjectWriter */var ec_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
+        ec_key_writer.setString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON, this.xml_dsig_named_curve ?
+                                                            org.webpki.crypto.XML_DSIG_CURVE_PREFIX + key_alg.oid : key_alg.uri);
+        ec_key_writer._writeCryptoBinary (key_alg.x, org.webpki.json.JSONSignatureDecoder.X_JSON);
+        ec_key_writer._writeCryptoBinary (key_alg.y, org.webpki.json.JSONSignatureDecoder.Y_JSON);
+    }
+    return this;
+};
 
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setXMLDSigECCurveOption = function (/* boolean */flag)
+{
+    this.xml_dsig_named_curve = flag;
+    return this;
+};
+
+    /*
     public org.webpki.json.JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
       {
         X509Certificate last_certificate = null;

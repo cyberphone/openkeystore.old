@@ -905,20 +905,17 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
  </pre>
      */
 
+
+org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
+{
+    if (value[0] == 0x00)
+    {
+        value = new Uint8Array (value.subarray (1));
+    }
+    this.setBinary (name, value);
+};
+
 /*
-
-org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value,  String name)
-      {
-        byte[] crypto_binary = value.toByteArray ();
-        if (crypto_binary[0] == 0x00)
-          {
-            byte[] wo_zero = new byte[crypto_binary.length - 1];
-            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
-            crypto_binary = wo_zero;
-          }
-        setBinary (name, crypto_binary);
-      }
-
     public org.webpki.json.JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         org.webpki.json.JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
@@ -936,36 +933,36 @@ org.webpki.json.JSONObjectWriter.swriteCryptoBinary = function (BigInteger value
         signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
         return this;
       }
-    
-    public org.webpki.json.JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
-      {
-        org.webpki.json.JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
-        if (key_alg.isRSAKey ())
-          {
-            org.webpki.json.JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
-            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
-          }
-        else
-          {
-            org.webpki.json.JSONObjectWriter ec_key_writer = public_key_writer.setObject (JSONSignatureDecoder.EC_JSON);
-            ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
-               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
-            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON);
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON);
-          }
-        return this;
-      }
+*/    
 
-    public org.webpki.json.JSONObjectWriter setXMLDSigECCurveOption (boolean flag)
-      {
-        xml_dsig_named_curve = flag;
-        return this;
-      }
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
+{
+    /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
+    var key_alg = new org.webpki.crypto.createPublicKeyFromSPKI (public_key);
+    if (key_alg.rsa_flag)
+    {
+        /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
+        rsa_key_writer._writeCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
+        rsa_key_writer._writeCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+    }
+    else
+    {
+        /* JSONObjectWriter */var ec_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
+        ec_key_writer.setString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON, this.xml_dsig_named_curve ?
+                                                            org.webpki.crypto.XML_DSIG_CURVE_PREFIX + key_alg.oid : key_alg.uri);
+        ec_key_writer._writeCryptoBinary (key_alg.x, org.webpki.json.JSONSignatureDecoder.X_JSON);
+        ec_key_writer._writeCryptoBinary (key_alg.y, org.webpki.json.JSONSignatureDecoder.Y_JSON);
+    }
+    return this;
+};
 
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setXMLDSigECCurveOption = function (/* boolean */flag)
+{
+    this.xml_dsig_named_curve = flag;
+    return this;
+};
+
+    /*
     public org.webpki.json.JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
       {
         X509Certificate last_certificate = null;
@@ -2699,6 +2696,62 @@ org.webpki.crypto._error = function (/* String */message)
       ).encode ();
 };
 
+org.webpki.crypto.createPublicKeyFromSPKI = function (/* Uint8Array */spki)
+{
+    var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
+    if (outer_sequence.numberOfComponents () != 2)
+    {
+        org.webpki.crypto._error ("SubjectPublicKeyInfo sequence must be two elements");        
+    }
+    var algorithm_id = outer_sequence.getComponent (0).getASN1Sequence ();
+    if (algorithm_id.numberOfComponents () != 2)
+    {
+        org.webpki.crypto._error ("Algorithm ID sequence must be two elements");        
+    }
+    var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
+    var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
+    if ((this.rsa_flag = org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.RSA_ALGORITHM_OID)))
+    {
+        algorithm_id.getComponent (1).getASN1NULL ();
+        var rsa_params = new org.webpki.asn1.ParsedASN1Sequence (encapsulated_key);
+        if (rsa_params.numberOfComponents () != 2)
+        {
+            org.webpki.crypto._error ("RSA parameter sequence must be two elements");        
+        }
+        this.modulus = rsa_params.getComponent (0).getASN1Integer ();
+        this.exponent = rsa_params.getComponent (1).getASN1Integer ();
+    }
+    else if (org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.EC_ALGORITHM_OID))
+    {
+        if (encapsulated_key[0] != 0x04)
+        {
+            org.webpki.crypto._error ("EC uncompressed parameter expected");        
+        }
+        var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
+        for (var i = 3; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i += 4)
+        {
+            if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_EC_CURVES[i], ec_curve))
+            {
+                var coordinate_length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[i - 2] + 7) / 8);
+                if (encapsulated_key.length != coordinate_length * 2 + 1)
+                {
+                    org.webpki.crypto._error ("ECPoint length error");        
+                }
+                this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
+                this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
+                this.uri = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 3];
+                this.oid = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 1];
+                return;
+            }
+        }
+        org.webpki.crypto._error ("EC curve OID unknown");        
+    }
+    else
+    {
+        org.webpki.crypto._error ("Public key OID unknown");        
+    }
+};
+
 /*================================================================*/
 /*               Namespace for the "ASN1" library                 */
 /*================================================================*/
@@ -2723,6 +2776,11 @@ org.webpki.asn1.TAGS =
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
     OCTET_STRING       : 0x04
+};
+
+org.webpki.asn1._error = function (/* String */message)
+{
+    throw "ASN1Exception: " + message;
 };
 
 org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */data)
@@ -2788,4 +2846,126 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
         blob_integer = org.webpki.util.ByteArray.add ([0], blob_integer);
     }
     return new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.INTEGER, blob_integer);
+};
+
+/* ParsedASN1Object */org.webpki.asn1.ParsedASN1object = function (/* Uint8Array */raw_der)
+{
+    this.raw_der = raw_der;
+    this.index = 0;
+    this.tag = this.readDERByte ();
+//    console.debug ("TAG=" + this.tag + " RDL=" + raw_der.length + " DA=" + org.webpki.util.ByteArray.toHex (raw_der));
+    var length = this.readDERByte ();
+    if ((length & 0x80) != 0)
+    {
+        var bytes = length & 0x7F;
+        length = 0;
+        while (bytes-- > 0)
+        {
+            length <<= 8;
+            length += this.readDERByte ();
+        }
+    }
+    this.argument = new Uint8Array (raw_der.subarray (this.index, this.index + length));
+    if (this.tag == org.webpki.asn1.TAGS.SEQUENCE)
+    {
+        this.components = [];
+        var new_der = this.argument;
+        while (new_der.length != 0)
+        {
+            var asn1_object = new org.webpki.asn1.ParsedASN1object (new_der);
+            var chunk = asn1_object.argument.length + asn1_object.index; 
+            this.components[this.components.length] = asn1_object;
+            if (chunk > new_der.length)
+            {
+                org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);
+            }
+            new_der = new Uint8Array (new_der.subarray (chunk));
+        }
+    }
+    
+    return this;
+};
+
+/* int */org.webpki.asn1.ParsedASN1object.prototype.readDERByte = function ()
+{
+    if (this.index >= this.raw_der.length)
+    {
+        org.webpki.asn1._error ("Buffer overrun");
+    }
+    return this.raw_der[this.index++];
+};
+
+/* int */org.webpki.asn1.ParsedASN1object.prototype.numberOfComponents = function ()
+{
+    if (this.components === undefined)
+    {
+        org.webpki.asn1._error ("This object type doesn't have components: " + this.tag);
+    }
+    return this.components.length;
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1object.prototype.getComponent = function (index)
+{
+    if (index >= this.numberOfComponents ())
+    {
+        org.webpki.asn1._error ("Component index out of range: " + index);
+    }
+    return this.components[index];
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getASN1ObjectIDRawData = function ()
+{
+    return this.getRawData (org.webpki.asn1.TAGS.OID);
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getASN1Integer = function ()
+{
+    return this.getRawData (org.webpki.asn1.TAGS.INTEGER);
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getASN1BitString = function (/* boolean */unused_must_be_zero)
+{
+    var raw = this.getRawData (org.webpki.asn1.TAGS.BITSTRING);
+    if (unused_must_be_zero)
+    {
+        if (raw[0] != 0)
+        {
+            org.webpki.asn1._error ("Bitstring with unused bits not allowed");
+        }
+        raw = new Uint8Array (raw.subarray (1));
+    }
+    return raw;
+};
+
+/* void */org.webpki.asn1.ParsedASN1object.prototype.getASN1NULL = function ()
+{
+    if (this.getRawData (org.webpki.asn1.TAGS.NULL).length != 0)
+    {
+        org.webpki.asn1._error ("Misformed ASN.1 NULL");
+    }
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1object.prototype.getASN1Sequence = function ()
+{
+    this.getRawData (org.webpki.asn1.TAGS.SEQUENCE);
+    return this;
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getRawData = function (/* int */tag)
+{
+    if (tag != this.tag)
+    {
+        org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
+    }
+    return this.argument;
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1Sequence = function (/* Uint8Array */raw_der)
+{
+    var sequence = new org.webpki.asn1.ParsedASN1object (raw_der, org.webpki.asn1.TAGS.SEQUENCE);
+    if (sequence.argument.length != (sequence.raw_der.length - sequence.index))
+    {
+        org.webpki.asn1._error ("Sequence length error");
+    }
+    return sequence;
 };

@@ -196,7 +196,9 @@ org.webpki.crypto.createPublicKeyFromSPKI = function (/* Uint8Array */spki)
                     org.webpki.crypto._error ("ECPoint length error");        
                 }
                 this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
-                this.x = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
+                this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
+                this.uri = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 3];
+                this.oid = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 1];
                 return;
             }
         }

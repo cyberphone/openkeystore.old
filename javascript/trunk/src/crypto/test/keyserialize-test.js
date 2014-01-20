@@ -1,12 +1,35 @@
-function deserializeTest (x509_spki, jcs_pk)
+function deserializeTest (spki, jcs)
 {
-    var x509_spki_bin = org.webpki.util.Base64URL.decode (x509_spki);
-    var seq = new org.webpki.crypto.createPublicKeyFromSPKI (x509_spki_bin);
-    console.debug ("Key type : " + (seq.rsa_flag ? "RSA" : "EC"));
-    var reader = org.webpki.json.JSONParser.parse (jcs_pk);
-    if (!org.webpki.util.ByteArray.equals (x509_spki_bin, reader.getPublicKey ()))
+    var spki_bin = org.webpki.util.Base64URL.decode (spki);
+    /* JSONObjectReader */var or = org.webpki.json.JSONParser.parse (jcs);
+    /* PublicKey */var public_key = or.getPublicKey ();
+    if (!org.webpki.util.ByteArray.equals (public_key, spki_bin))
     {
-        throw "Didn't match: ";
+        throw "Reading JCS key failed";
+    }
+    /* JSONObjectWriter */var ow = new org.webpki.json.JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
+    if (ow.setPublicKey (spki_bin).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)
+                 != 
+        new org.webpki.json.JSONObjectWriter (or).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED))
+    {
+        throw "Writing Public key failed";
+    }
+    /* JSONObjectReader */var pub_key_object = or.getObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
+    /* boolean */var rsa_flag = pub_key_object.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
+    pub_key_object = pub_key_object.getObject (rsa_flag ? org.webpki.json.JSONSignatureDecoder.RSA_JSON : org.webpki.json.JSONSignatureDecoder.EC_JSON);
+    console.debug ("Serializing " + (rsa_flag ? "RSA" : "EC curve=" + pub_key_object.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON)));
+    /* String */var key_parm = rsa_flag ? org.webpki.json.JSONSignatureDecoder.MODULUS_JSON : org.webpki.json.JSONSignatureDecoder.Y_JSON;
+    var parm_bytes = org.webpki.util.ByteArray.add ([0], pub_key_object.getBinary (key_parm));
+    /* JSONObjectWriter */var updated_pub_key_object = new org.webpki.json.JSONObjectWriter (pub_key_object);
+    updated_pub_key_object.setupForRewrite (key_parm);
+    updated_pub_key_object.setBinary (key_parm, parm_bytes);
+    try
+    {
+        org.webpki.json.JSONParser.parse (new org.webpki.json.JSONObjectWriter (or).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
+        throw "Should have failed";
+    }
+    catch (err)
+    {
     }
 }
 
@@ -40,7 +63,6 @@ var p256_key_spki = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGRgbhKB9Mw1lDKJFMbD_HsB
 
 var rsa_2048_key = 
 '{\
-    "@context": "http://keys/test",\
     "PublicKey": \
       {\
         "RSA": \
