@@ -591,7 +591,20 @@ public class JSONTest
       "    }" +
       "}";
 
-   static final String p521_spki =
+    static final String p521_jcs_xml =
+      "{" +
+      "  \"PublicKey\": " +
+      "     {" +
+      "      \"EC\":" + 
+      "        {" +
+      "          \"NamedCurve\": \"urn:oid:1.3.132.0.35\"," +
+      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
+      "          \"Y\": \"_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek\"" +
+      "        }" +
+      "    }" +
+      "}";
+
+    static final String p521_spki =
         "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBCCAc9n4N7ZOr_tTu_wAOmPKi4qTp5X3su6O3010hxmBYj9zI4u" +
         "_0dm6UZa0LsjdfvcAET6vH3mEApvGKpDWrRsAA_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiae" +
         "Gp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek";
@@ -617,6 +630,23 @@ public class JSONTest
 "PYtwqa0cEfcLVIHhI-ktsId5WpIW-AAwYftQITGn1CarwjtVZ3_g8mlfW_G4xC43D_5LVNPQM3R7TnAP3IQ1wyntT29dpvc8_aaxOlmhwg1x" +
 "hFc3smDv1R4mOo-MEel_TjKDaci5xsRC0VuzOp5HKyjHKHOBCF3BFcGHV_zo9QIDAQAB";
 
+    static final String p256_jcs =
+      "{" +
+      "  \"PublicKey\":" + 
+      "    {" +
+      "      \"EC\":" + 
+      "        {" +
+      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
+      "          \"X\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
+      "          \"Y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"" +
+      "        }" +
+      "    }" +
+      "}";
+
+
+    static final String p256_spki = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2Sx" +
+                                    "HkDiOWKzGmrFLHoAASZl-Avkd69Lrt6N-b_gdywHzzdNRpxyw";
+
     PublicKey getPublicKeyFromSPKI (byte[] spki) throws Exception
       {
         try
@@ -635,7 +665,7 @@ public class JSONTest
         JSONObjectReader or = JSONParser.parse (jcs);
         PublicKey public_key = or.getPublicKey ();
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
-        JSONObjectWriter ow = new JSONObjectWriter ();
+        JSONObjectWriter ow = new JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.CANONICALIZED),
                                 new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
@@ -661,7 +691,9 @@ public class JSONTest
     @Test
     public void KeySerializing () throws Exception
       {
+        serializeKey (p256_spki, p256_jcs);
         serializeKey (p521_spki, p521_jcs);
+        serializeKey (p521_spki, p521_jcs_xml);
         serializeKey (rsa_spki, rsa_jcs);
       }
   }
