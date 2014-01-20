@@ -29,6 +29,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.Date;
@@ -47,6 +48,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONTypes;
 
 import org.webpki.util.ArrayUtil;
@@ -589,20 +591,7 @@ public class JSONTest
       "    }" +
       "}";
 
-    static final String p521_jcs_leading_zero =
-      "{" +
-      "  \"PublicKey\": " +
-      "     {" +
-      "      \"EC\":" + 
-      "        {" +
-      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
-      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
-      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
-      "        }" +
-      "    }" +
-      "}";
-    
-    static final String p521_spki =
+   static final String p521_spki =
         "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBCCAc9n4N7ZOr_tTu_wAOmPKi4qTp5X3su6O3010hxmBYj9zI4u" +
         "_0dm6UZa0LsjdfvcAET6vH3mEApvGKpDWrRsAA_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiae" +
         "Gp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek";
@@ -650,6 +639,22 @@ public class JSONTest
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.CANONICALIZED),
                                 new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+                                            .getObject (public_key instanceof RSAPublicKey ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
+        String key_parm = public_key instanceof RSAPublicKey ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
+        byte[] parm_bytes = ArrayUtil.add (new byte[]{0}, pub_key_object.getBinary (key_parm));
+        JSONObjectWriter updated_pub_key_object = new JSONObjectWriter (pub_key_object);
+        updated_pub_key_object.setupForRewrite (key_parm);
+        updated_pub_key_object.setBinary (key_parm, parm_bytes);
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Public key parameters must not contain leading zeroes");
+          }
       }
 
     @Test
@@ -657,14 +662,5 @@ public class JSONTest
       {
         serializeKey (p521_spki, p521_jcs);
         serializeKey (rsa_spki, rsa_jcs);
-        try
-          {
-            serializeKey (p521_spki, p521_jcs_leading_zero);
-            fail ("Should have failed");
-          }
-        catch (Exception e)
-          {
-            checkException (e, "Public key parameters must not contain leading zeroes");
-          }
       }
   }
