@@ -639,9 +639,10 @@ public class JSONTest
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.CANONICALIZED),
                                 new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
-        JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-                                            .getObject (public_key instanceof RSAPublicKey ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
-        String key_parm = public_key instanceof RSAPublicKey ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
+        JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
+        boolean rsa_flag = pub_key_object.hasProperty (JSONSignatureDecoder.RSA_JSON);
+        pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
+        String key_parm = rsa_flag ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = ArrayUtil.add (new byte[]{0}, pub_key_object.getBinary (key_parm));
         JSONObjectWriter updated_pub_key_object = new JSONObjectWriter (pub_key_object);
         updated_pub_key_object.setupForRewrite (key_parm);
