@@ -2586,8 +2586,7 @@ org.webpki.crypto._error = function (/* String */message)
     throw "CryptoException: " + message;
 };
 
-
-/* int */org.webpki.crypto.getECParamsFromURI = function (/* String */uri)
+/* int */org.webpki.crypto._getECParamsFromURI = function (/* String */uri)
 {
     if (uri.indexOf (org.webpki.crypto.XML_DSIG_CURVE_PREFIX) == 0)
     {
@@ -2613,14 +2612,13 @@ org.webpki.crypto._error = function (/* String */message)
     org.webpki.crypto._error ("Unsupported EC curve: " + uri);
 };
 
-/* Uint8Array */org.webpki.crypto.adjustECCoordinate = function (/* int */params_entry, /* Unit8Array */coordinate)
+/* Uint8Array */org.webpki.crypto._adjustECCoordinate = function (/* int */required_length, /* Unit8Array */coordinate)
 {
-    var length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1] + 7) / 8);
-    if (coordinate.length > length)
+    if (coordinate.length > required_length)
     {
         org.webpki.crypto._error ("EC coordinate length error: " + coordinate.length);        
     }
-    while (coordinate.length < length)
+    while (coordinate.length < required_length)
     {
         coordinate = org.webpki.util.ByteArray.add ([0x00], coordinate);
     }
@@ -2629,19 +2627,20 @@ org.webpki.crypto._error = function (/* String */message)
 
 /* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
 {
-    var params_entry = org.webpki.crypto.getECParamsFromURI (url);
+    var params_entry = org.webpki.crypto._getECParamsFromURI (url);
+    var coordinate_length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1] + 7) / 8);
     return new org.webpki.asn1.ASN1Object
       (
         org.webpki.asn1.TAGS.SEQUENCE,
-          new org.webpki.asn1.ASN1Object
-            (
-              org.webpki.asn1.TAGS.SEQUENCE,
-              new org.webpki.asn1.ASN1Object
-                (
-                  org.webpki.asn1.TAGS.OID,
-                  org.webpki.crypto.EC_ALGORITHM_OID
-                )
-            )
+        new org.webpki.asn1.ASN1Object
+          (
+            org.webpki.asn1.TAGS.SEQUENCE,
+            new org.webpki.asn1.ASN1Object
+              (
+                org.webpki.asn1.TAGS.OID,
+                org.webpki.crypto.EC_ALGORITHM_OID
+              )
+          )
         .addData 
           (
             new org.webpki.asn1.ASN1Object 
@@ -2661,9 +2660,9 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.util.ByteArray.add
                   (
                     [0x04],
-                    org.webpki.crypto.adjustECCoordinate (params_entry, x)
+                    org.webpki.crypto._adjustECCoordinate (coordinate_length, x)
                   ), 
-                org.webpki.crypto.adjustECCoordinate (params_entry, y)
+                org.webpki.crypto._adjustECCoordinate (coordinate_length, y)
               )
           )
       ).encode ();
@@ -2674,15 +2673,15 @@ org.webpki.crypto._error = function (/* String */message)
     return new org.webpki.asn1.ASN1Object
       (
         org.webpki.asn1.TAGS.SEQUENCE,
-          new org.webpki.asn1.ASN1Object
-            (
-              org.webpki.asn1.TAGS.SEQUENCE,
-              new org.webpki.asn1.ASN1Object
-                (
-                  org.webpki.asn1.TAGS.OID,
-                  org.webpki.crypto.RSA_ALGORITHM_OID
-                )
-            )
+        new org.webpki.asn1.ASN1Object
+          (
+            org.webpki.asn1.TAGS.SEQUENCE,
+            new org.webpki.asn1.ASN1Object
+              (
+                org.webpki.asn1.TAGS.OID,
+                org.webpki.crypto.RSA_ALGORITHM_OID
+              )
+          )
         .addData (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
       )
     .addData
