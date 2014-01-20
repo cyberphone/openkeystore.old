@@ -1,4 +1,4 @@
-<project name="WEBPKI.ORG library" default="clean" basedir=".">
+<project name="WEBPKI.ORG library" default="help" basedir=".">
 
   <!-- set global properties for this build -->
 
@@ -12,10 +12,9 @@
   
 
   <target name="help">
-    <echo message="Targets: help dist doc testkg2 testsks pkcs12import sks-service."/>
+    <echo message="Targets: parsercore decoder biginteger base64url libjson."/>
   </target>
     
-  <!-- .NET assumes that NAnt is installed, together with Windows SDK 7.1 and .NET 4 -->
   <target name="clean">
     <delete dir="${temp_dir}"/>
   </target>
@@ -76,10 +75,10 @@
     </script>
   </target>
 
-    <!-- JSON parser testing -->
-  <target name="jsonparser">
+    <!-- Core JSON parser testing -->
+  <target name="parsercore">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,jsonparser/test/*"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,jsonparser/test/core-test.js"/>
     </antcall>
   </target>
   
@@ -97,7 +96,22 @@
     </antcall>
   </target>
   
-  <!-- Browser JSON library -->
+
+  <!-- Decoder only testing -->
+  <target name="decoder">
+    <antcall target="test">
+       <param name="files" value="jsonparser/*,math/*,util/*,util/*,jsonparser/test/decoder-test.js"/>
+    </antcall>
+  </target>
+  
+  <!-- Key serializing only testing -->
+  <target name="keyserialize">
+    <antcall target="test">
+       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialize-test.js"/>
+    </antcall>
+  </target>
+
+  <!-- Building browser JSON library -->
   <target name="libjson" depends="clean">
     <property name="files" value="jsonparser/*,math/*,util/*,crypto/*,asn1/*"/>
     <mkdir dir="${temp_dir}" />
@@ -130,19 +144,4 @@
     </concat>
   </target>
 
-  <!-- Decoder only testing -->
-  <target name="decoder">
-    <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,crypto/*,util/*,decoder/test/*"/>
-    </antcall>
-  </target>
-  
-  <!-- Key serializing only testing -->
-  <target name="keyserialize">
-    <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialize-test.js"/>
-    </antcall>
-  </target>
-
 </project>
-

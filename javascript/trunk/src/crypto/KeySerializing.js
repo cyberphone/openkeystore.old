@@ -71,6 +71,10 @@ org.webpki.crypto._error = function (/* String */message)
 /* Uint8Array */org.webpki.crypto.adjustECCoordinate = function (/* int */params_entry, /* Unit8Array */coordinate)
 {
     var length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1] + 7) / 8);
+    if (coordinate.length > length)
+    {
+        org.webpki.crypto._error ("EC coordinate length error: " + coordinate.length);        
+    }
     while (coordinate.length < length)
     {
         coordinate = org.webpki.util.ByteArray.add ([0x00], coordinate);
