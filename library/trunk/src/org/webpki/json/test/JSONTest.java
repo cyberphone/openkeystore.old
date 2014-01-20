@@ -28,9 +28,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.RSAPublicKeySpec;
+
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.Date;
@@ -39,7 +37,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.webpki.crypto.CustomCryptoProvider;
-import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
