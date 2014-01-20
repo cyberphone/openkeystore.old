@@ -1,7 +1,10 @@
 function deserializeTest (x509_spki, jcs_pk)
 {
-    if (!org.webpki.util.ByteArray.equals (org.webpki.util.Base64URL.decode (x509_spki), 
-                                           org.webpki.json.JSONParser.parse (jcs_pk).getPublicKey ()))
+    var x509_spki_bin = org.webpki.util.Base64URL.decode (x509_spki);
+    var seq = new org.webpki.crypto.createPublicKeyFromSPKI (x509_spki_bin);
+    console.debug ("Key type : " + (seq.rsa_flag ? "RSA" : "EC"));
+    var reader = org.webpki.json.JSONParser.parse (jcs_pk);
+    if (!org.webpki.util.ByteArray.equals (x509_spki_bin, reader.getPublicKey ()))
     {
         throw "Didn't match: ";
     }

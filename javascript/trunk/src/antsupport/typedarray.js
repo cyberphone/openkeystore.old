@@ -461,6 +461,7 @@ var ArrayBuffer, ArrayBufferView,
 
                     start = ECMAScript.ToInt32(start);
                     end = ECMAScript.ToInt32(end);
+//console.debug ("END=" + end + " START=" + start);
 
                     if (arguments.length < 1) { start = 0; }
                     if (arguments.length < 2) { end = this.length; }
@@ -470,6 +471,7 @@ var ArrayBuffer, ArrayBufferView,
 
                     start = clamp(start, 0, this.length);
                     end = clamp(end, 0, this.length);
+//console.debug ("END2=" + end + " START=" + start);
 
                     var len = end - start;
                     if (len < 0) {

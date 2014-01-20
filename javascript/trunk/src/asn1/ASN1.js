@@ -31,6 +31,11 @@ org.webpki.asn1.TAGS =
     OCTET_STRING       : 0x04
 };
 
+org.webpki.asn1._error = function (/* String */message)
+{
+    throw "ASN1Exception: " + message;
+};
+
 org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */data)
 {
     this.data = [];  /* ASN1Object or Unit8Array */
@@ -94,4 +99,137 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
         blob_integer = org.webpki.util.ByteArray.add ([0], blob_integer);
     }
     return new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.INTEGER, blob_integer);
+};
+
+/* ParsedASN1Object */org.webpki.asn1.ParsedASN1object = function (/* Uint8Array */raw_der)
+{
+    this.raw_der = raw_der;
+    this.index = 0;
+    this.tag = this.readDERByte ();
+    console.debug ("TAG=" + this.tag + " RDL=" + raw_der.length + " DA=" + org.webpki.util.ByteArray.toHex (raw_der));
+    var length = this.readDERByte ();
+    if ((length & 0x80) != 0)
+    {
+        var bytes = length & 0x7F;
+        length = 0;
+        while (bytes-- > 0)
+        {
+            length <<= 8;
+            length += this.readDERByte ();
+        }
+    }
+    this.argument = new Uint8Array (raw_der.subarray (this.index, this.index + length));
+ //   console.debug ("KDA=" + org.webpki.util.ByteArray.toHex (this.argument));
+    if (this.tag == org.webpki.asn1.TAGS.SEQUENCE)
+    {
+        this.components = [];
+        var new_der = this.argument;
+ //       console.debug ("RD=" + new_der.length);
+        while (new_der.length != 0)
+        {
+            var asn1_object = new org.webpki.asn1.ParsedASN1object (new_der);
+            var chunk = asn1_object.argument.length + asn1_object.index; 
+            this.components[this.components.length] = asn1_object;
+//                console.debug ("CH=" + chunk + " RD=" + new_der.length);
+            if (chunk > new_der.length)
+            {
+                org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);
+            }
+            new_der = new Uint8Array (new_der.subarray (chunk));
+//            console.debug ("NDA=" + org.webpki.util.ByteArray.toHex (new_der));
+        }
+    }
+    
+    return this;
+};
+
+/* int */org.webpki.asn1.ParsedASN1object.prototype.readDERByte = function ()
+{
+    if (this.index >= this.raw_der.length)
+    {
+        org.webpki.asn1._error ("Buffer overrun");
+    }
+    return this.raw_der[this.index++];
+};
+
+/* int */org.webpki.asn1.ParsedASN1object.prototype.numberOfComponents = function ()
+{
+    if (this.components === undefined)
+    {
+        org.webpki.asn1._error ("This object type doesn't have components: " + this.tag);
+    }
+    return this.components.length;
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1object.prototype.getComponent = function (index)
+{
+    if (index >= this.numberOfComponents ())
+    {
+        org.webpki.asn1._error ("Component index out of range: " + index);
+    }
+    return this.components[index];
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getASN1ObjectIDRawData = function ()
+{
+    return this.getRawData (org.webpki.asn1.TAGS.OID);
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getASN1BitString = function (/* boolean */unused_must_be_zero)
+{
+    var raw = this.getRawData (org.webpki.asn1.TAGS.BITSTRING);
+    if (unused_must_be_zero)
+    {
+        if (raw[0] != 0)
+        {
+            org.webpki.asn1._error ("Bitstring with unused bits not allowed");
+        }
+        raw = new Uint8Array (raw.subarray (1));
+    }
+    return raw;
+};
+
+/* void */org.webpki.asn1.ParsedASN1object.prototype.getASN1NULL = function ()
+{
+    if (this.getRawData (org.webpki.asn1.TAGS.NULL).length != 0)
+    {
+        org.webpki.asn1._error ("Misformed ASN.1 NULL");
+    }
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1object.prototype.getASN1Sequence = function ()
+{
+    this.getRawData (org.webpki.asn1.TAGS.SEQUENCE);
+    return this;
+};
+
+/* Unit8Array */org.webpki.asn1.ParsedASN1object.prototype.getRawData = function (/* int */tag)
+{
+    if (tag != this.tag)
+    {
+        org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
+    }
+    return this.argument;
+};
+
+/* ParsedASN1object */org.webpki.asn1.ParsedASN1Sequence = function (/* Uint8Array */raw_der)
+{
+/*
+    if (optional_expected_tag != undefined)
+    {
+        if (this.tag != optional_expected_tag)
+        {
+            org.webpki.asn1._error ("Expected tag: " + optional_expected_tag + " got: " + this.tag);
+        }
+    }
+
+ */
+    console.debug (org.webpki.util.ByteArray.toHex (raw_der));
+//    console.debug ("SEQRD=" + raw_der.length);
+    var sequence = new org.webpki.asn1.ParsedASN1object (raw_der, org.webpki.asn1.TAGS.SEQUENCE);
+    if (sequence.argument.length != (sequence.raw_der.length - sequence.index))
+    {
+        org.webpki.asn1._error ("Sequence length error");
+    }
+    return sequence;
 };
