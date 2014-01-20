@@ -25,12 +25,21 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+
 import java.util.Date;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
@@ -44,6 +53,7 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.JSONTypes;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64URL;
 
 /**
  * JSON JUnit suite
@@ -566,6 +576,98 @@ public class JSONTest
         catch (Exception e)
           {
             checkException (e, "You cannot update array objects");
+          }
+      }
+
+    static final String p521_jcs =
+      "{" +
+      "  \"PublicKey\": " +
+      "     {" +
+      "      \"EC\":" + 
+      "        {" +
+      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
+      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
+      "          \"Y\": \"_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek\"" +
+      "        }" +
+      "    }" +
+      "}";
+
+    static final String p521_jcs_leading_zero =
+      "{" +
+      "  \"PublicKey\": " +
+      "     {" +
+      "      \"EC\":" + 
+      "        {" +
+      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
+      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
+      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
+      "        }" +
+      "    }" +
+      "}";
+    
+    static final String p521_spki =
+        "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBCCAc9n4N7ZOr_tTu_wAOmPKi4qTp5X3su6O3010hxmBYj9zI4u" +
+        "_0dm6UZa0LsjdfvcAET6vH3mEApvGKpDWrRsAA_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiae" +
+        "Gp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek";
+      
+    static final String rsa_jcs =
+      "{" +
+      "  \"PublicKey\":" + 
+      "    {" +
+      "      \"RSA\":" + 
+      "        {" +
+      "          \"Modulus\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
+"snMwabXH4flk5Akf21Xd1GnAy-FCZoyiORHLfSLcjs2MDPbEWbol3U70PJl3OpyG81yE4lrRXd816JqRLMBFoJXMDIPYtwqa0cEfcLVIHhI" +
+"-ktsId5WpIW-AAwYftQITGn1CarwjtVZ3_g8mlfW_G4xC43D_5LVNPQM3R7TnAP3IQ1wyntT29dpvc8_aaxOlmhwg1xhFc3smDv1R4mOo-M" +
+"Eel_TjKDaci5xsRC0VuzOp5HKyjHKHOBCF3BFcGHV_zo9Q\"," +
+      "          \"Exponent\": \"AQAB\"" + 
+      "        }" + 
+      "    }" + 
+      "}";
+
+    static final String rsa_spki =
+"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5" +
+"odONGr61d0G3YW3PvfsnMwabXH4flk5Akf21Xd1GnAy-FCZoyiORHLfSLcjs2MDPbEWbol3U70PJl3OpyG81yE4lrRXd816JqRLMBFoJXMDI" +
+"PYtwqa0cEfcLVIHhI-ktsId5WpIW-AAwYftQITGn1CarwjtVZ3_g8mlfW_G4xC43D_5LVNPQM3R7TnAP3IQ1wyntT29dpvc8_aaxOlmhwg1x" +
+"hFc3smDv1R4mOo-MEel_TjKDaci5xsRC0VuzOp5HKyjHKHOBCF3BFcGHV_zo9QIDAQAB";
+
+    PublicKey getPublicKeyFromSPKI (byte[] spki) throws Exception
+      {
+        try
+          {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec (spki));
+          }
+        catch (GeneralSecurityException e)
+          {
+            return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec (spki));
+          }
+      }
+        
+    void serializeKey (String spki, String jcs) throws Exception
+      {
+        byte[] spki_bin = Base64URL.decode (spki);
+        JSONObjectReader or = JSONParser.parse (jcs);
+        PublicKey public_key = or.getPublicKey ();
+        assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
+        JSONObjectWriter ow = new JSONObjectWriter ();
+        assertTrue ("Public key jcs",
+             ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.CANONICALIZED),
+                                new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+      }
+
+    @Test
+    public void KeySerializing () throws Exception
+      {
+        serializeKey (p521_spki, p521_jcs);
+        serializeKey (rsa_spki, rsa_jcs);
+        try
+          {
+            serializeKey (p521_spki, p521_jcs_leading_zero);
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Public key parameters must not contain leading zeroes");
           }
       }
   }
