@@ -159,35 +159,44 @@ org.webpki.crypto.createPublicKeyFromSPKI = function (/* Uint8Array */spki)
     var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
     if (outer_sequence.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Public key sequence not two elements");        
+        org.webpki.crypto._error ("SubjectPublicKeyInfo sequence must be two elements");        
     }
     var algorithm_id = outer_sequence.getComponent (0).getASN1Sequence ();
     if (algorithm_id.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Algorithm ID sequence not two elements");        
+        org.webpki.crypto._error ("Algorithm ID sequence must be two elements");        
     }
     var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
     var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
-    console.debug ("key=" +  org.webpki.util.ByteArray.toHex (encapsulated_key));
     if ((this.rsa_flag = org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.RSA_ALGORITHM_OID)))
     {
-        console.debug ("RSA");
         algorithm_id.getComponent (1).getASN1NULL ();
         var rsa_params = new org.webpki.asn1.ParsedASN1Sequence (encapsulated_key);
         if (rsa_params.numberOfComponents () != 2)
         {
-            org.webpki.crypto._error ("RSA parameter sequence not two elements");        
+            org.webpki.crypto._error ("RSA parameter sequence must be two elements");        
         }
+        this.modulus = rsa_params.getComponent (0).getASN1Integer ();
+        this.exponent = rsa_params.getComponent (1).getASN1Integer ();
     }
     else if (org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.EC_ALGORITHM_OID))
     {
-        console.debug ("EC");
+        if (encapsulated_key[0] != 0x04)
+        {
+            org.webpki.crypto._error ("EC uncompressed parameter expected");        
+        }
         var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
-        console.debug (org.webpki.util.ByteArray.toHex (ec_curve));
         for (var i = 3; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i += 4)
         {
             if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_EC_CURVES[i], ec_curve))
             {
+                var coordinate_length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[i - 2] + 7) / 8);
+                if (encapsulated_key.length != coordinate_length * 2 + 1)
+                {
+                    org.webpki.crypto._error ("ECPoint length error");        
+                }
+                this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
+                this.x = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
                 return;
             }
         }
