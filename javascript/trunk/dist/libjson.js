@@ -938,7 +938,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
 {
     /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    var key_alg = new org.webpki.crypto.createPublicKeyFromSPKI (public_key);
+    var key_alg = new org.webpki.crypto.decodePublicKey (public_key);
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
@@ -2696,7 +2696,7 @@ org.webpki.crypto._error = function (/* String */message)
       ).encode ();
 };
 
-org.webpki.crypto.createPublicKeyFromSPKI = function (/* Uint8Array */spki)
+org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
 {
     var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
     if (outer_sequence.numberOfComponents () != 2)

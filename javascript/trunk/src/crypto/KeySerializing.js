@@ -154,7 +154,7 @@ org.webpki.crypto._error = function (/* String */message)
       ).encode ();
 };
 
-org.webpki.crypto.createPublicKeyFromSPKI = function (/* Uint8Array */spki)
+org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
 {
     var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
     if (outer_sequence.numberOfComponents () != 2)
