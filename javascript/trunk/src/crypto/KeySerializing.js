@@ -20,15 +20,15 @@
 /*================================================================*/
 
 org.webpki.crypto.SUPPORTED_EC_CURVES = 
-[//                 SKS Algorithm ID                             Bits       Textual OID            ASN.1 OID (without header)
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        163,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        233,     "1.3.132.0.27",         [0x2B, 0x81, 0x04, 0x00, 0x1B],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",        283,     "1.3.132.0.17",         [0x2B, 0x81, 0x04, 0x00, 0x11],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",        192,     "1.2.840.10045.3.1.1",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x01],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",        256,     "1.2.840.10045.3.1.7",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",        384,     "1.3.132.0.34",         [0x2B, 0x81, 0x04, 0x00, 0x22],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",        521,     "1.3.132.0.35",         [0x2B, 0x81, 0x04, 0x00, 0x23],
-    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", 256,     "1.3.36.3.3.2.8.1.1.7", [0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07]
+[//                 SKS Algorithm ID                   Coordinate Length   Textual OID            ASN.1 OID (without header)
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        21,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        30,     "1.3.132.0.27",         [0x2B, 0x81, 0x04, 0x00, 0x1B],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",        36,     "1.3.132.0.17",         [0x2B, 0x81, 0x04, 0x00, 0x11],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",        24,     "1.2.840.10045.3.1.1",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x01],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",        32,     "1.2.840.10045.3.1.7",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",        48,     "1.3.132.0.34",         [0x2B, 0x81, 0x04, 0x00, 0x22],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",        66,     "1.3.132.0.35",         [0x2B, 0x81, 0x04, 0x00, 0x23],
+    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", 32,     "1.3.36.3.3.2.8.1.1.7", [0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07]
 ];
 
 org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01];
@@ -83,7 +83,7 @@ org.webpki.crypto._error = function (/* String */message)
 /* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
 {
     var params_entry = org.webpki.crypto._getECParamsFromURI (url);
-    var coordinate_length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1] + 7) / 8);
+    var coordinate_length = org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1];
     return new org.webpki.asn1.ASN1Object
       (
         org.webpki.asn1.TAGS.SEQUENCE,
@@ -190,7 +190,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
         {
             if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_EC_CURVES[i], ec_curve))
             {
-                var coordinate_length = Math.floor ((org.webpki.crypto.SUPPORTED_EC_CURVES[i - 2] + 7) / 8);
+                var coordinate_length = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 2];
                 if (encapsulated_key.length != coordinate_length * 2 + 1)
                 {
                     org.webpki.crypto._error ("ECPoint length error");        
