@@ -2561,7 +2561,7 @@ org.webpki.crypto = org.webpki.crypto || {};
 /*                        Key Serializing                         */
 /*================================================================*/
 
-org.webpki.crypto.SUPPORTED_EC_CURVES = 
+org.webpki.crypto.SUPPORTED_NAMED_CURVES = 
 [//                 SKS Algorithm ID                   Coordinate Length   Textual OID            ASN.1 OID (without header)
     "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        21,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
     "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        30,     "1.3.132.0.27",         [0x2B, 0x81, 0x04, 0x00, 0x1B],
@@ -2588,9 +2588,9 @@ org.webpki.crypto._error = function (/* String */message)
     if (uri.indexOf (org.webpki.crypto.XML_DSIG_CURVE_PREFIX) == 0)
     {
         var oid = uri.substring (org.webpki.crypto.XML_DSIG_CURVE_PREFIX.length);
-        for (var i = 2; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i+= 4)
+        for (var i = 2; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i+= 4)
         {
-            if (org.webpki.crypto.SUPPORTED_EC_CURVES[i] == oid)
+            if (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i] == oid)
             {
                 return i - 2;
             }
@@ -2598,9 +2598,9 @@ org.webpki.crypto._error = function (/* String */message)
     }
     else
     {
-        for (var i = 0; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i += 4)
+        for (var i = 0; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
         {
-            if (org.webpki.crypto.SUPPORTED_EC_CURVES[i] == uri)
+            if (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i] == uri)
             {
                 return i;
             }
@@ -2625,7 +2625,7 @@ org.webpki.crypto._error = function (/* String */message)
 /* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
 {
     var params_entry = org.webpki.crypto._getECParamsFromURI (url);
-    var coordinate_length = org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 1];
+    var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
     return new org.webpki.asn1.ASN1Object
       (
         org.webpki.asn1.TAGS.SEQUENCE,
@@ -2643,7 +2643,7 @@ org.webpki.crypto._error = function (/* String */message)
             new org.webpki.asn1.ASN1Object 
               (
                 org.webpki.asn1.TAGS.OID,
-                org.webpki.crypto.SUPPORTED_EC_CURVES[params_entry + 3]
+                org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 3]
               )
           )
       )
@@ -2728,19 +2728,19 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
             org.webpki.crypto._error ("EC uncompressed parameter expected");        
         }
         var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
-        for (var i = 3; i < org.webpki.crypto.SUPPORTED_EC_CURVES.length; i += 4)
+        for (var i = 3; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
         {
-            if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_EC_CURVES[i], ec_curve))
+            if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i], ec_curve))
             {
-                var coordinate_length = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 2];
+                var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 2];
                 if (encapsulated_key.length != coordinate_length * 2 + 1)
                 {
                     org.webpki.crypto._error ("ECPoint length error");        
                 }
                 this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
                 this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
-                this.uri = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 3];
-                this.oid = org.webpki.crypto.SUPPORTED_EC_CURVES[i - 1];
+                this.uri = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 3];
+                this.oid = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 1];
                 return;
             }
         }
