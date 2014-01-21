@@ -1401,7 +1401,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("RSA modulus.")
+              .addString ("RSA modulus. Also see the ")
+              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+              .addString (" data type.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.EXPONENT_JSON)
@@ -1411,7 +1413,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("RSA exponent.");
+              .addString ("RSA exponent. Also see the ")
+              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+              .addString (" data type.");
 
         addSubItemTable (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
           .newRow ()
