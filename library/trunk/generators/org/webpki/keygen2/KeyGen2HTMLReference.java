@@ -93,16 +93,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         private void sign (String protcol_step, String description)
           {
-            s.append ("<tr><td style=\"padding:0px\"><div style=\"padding:20pt;font-size:14pt;text-align:center;" +
-//                      "background: radial-gradient(ellipse at center, rgba(252,246,239,1) 12%,rgba(252,217,174,1) 100%)" +
-//                      "background: radial-gradient(ellipse at center, rgba(249,246,229,1) 9%,rgba(247,221,170,1) 100%)" +
-//                      "background: radial-gradient(ellipse at center, rgba(242,243,252,1) 0%,rgba(196,210,242,1) 100%)" +
-                      "background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%)" +
-                      ";border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0\">")
-            .append (protcol_step)
-            .append ("</div></td><td style=\"padding-left:20pt\">")
-            .append (description)
-            .append ("</td></tr>");
+            s.append ("<tr><td style=\"padding:0px\"><div class=\"kg2box\">")
+             .append (protcol_step)
+             .append ("</div></td><td style=\"padding-left:20pt\">")
+             .append (description)
+             .append ("</td></tr>");
           }
 
         private void bar (int height)
@@ -598,6 +593,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             new RuntimeException ("Missing file argument");
           }
         json = new JSONBaseHTML (args, "KeyGen2 - Credential Enrollment and Management Protocol");
+        
+        json.addGlobalStyle (".kg2box {padding:20pt;font-size:14pt;text-align:center;" +
+//          "background: radial-gradient(ellipse at center, rgba(252,246,239,1) 12%,rgba(252,217,174,1) 100%)" +
+//          "background: radial-gradient(ellipse at center, rgba(249,246,229,1) 9%,rgba(247,221,170,1) 100%)" +
+//          "background: radial-gradient(ellipse at center, rgba(242,243,252,1) 0%,rgba(196,210,242,1) 100%)" +
+          "background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%)" +
+          ";border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0}");
         
         json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
              "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>Credential Provisioning and Management Protocol</span></div>");

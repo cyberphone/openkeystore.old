@@ -182,6 +182,13 @@ public class JSONBaseHTML
         return "<a target=\"_blank\" title=\"External link opened in a new windows\" href=\"" + url + "\">" + url + "</a>";
       }
     
+    StringBuffer external_styles = new StringBuffer ();
+    
+    public void addGlobalStyle (String style)
+      {
+        external_styles.append (style);
+      }
+    
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
         if (args.length != 1)
@@ -213,7 +220,7 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+            ", <span style=\"white-space: nowrap\">January&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
@@ -304,7 +311,7 @@ public class JSONBaseHTML
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           REF_XMLDSIG,
-                     "Base64URL-encoded large positive integer. Functionally equivalent to XML DSig's <a href=\"#Reference." + REF_XMLDSIG + "\">[" + REF_XMLDSIG + "]</a> <code>ds:CryptoBinary</code>"),
+                     "Base64URL-encoded positive integer. Note that leading zero-valued bytes <b>must</b> be discarded"),
                      
             DATE    ("date",   "<i>string</i>",                           null,
                      "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
@@ -375,6 +382,8 @@ public class JSONBaseHTML
     class DataTypesTable extends Content
       {
         static final String DATA_TYPES = "Data Types";
+        
+        static final String LINK_PREFIX = "Datatype.";
 
         DataTypesTable ()
           {
@@ -390,7 +399,9 @@ public class JSONBaseHTML
               {
                 if (type.isUsed ())
                   {
-                    s.append ("<tr><td style=\"text-align:center\">")
+                    s.append ("<tr id=\"" + LINK_PREFIX)
+                     .append (type.getDataType ())
+                     .append ("\"><td style=\"text-align:center\">")
                      .append (type.getDataType ())
                      .append ("</td><td style=\"text-align:center\">")
                      .append (type.getJSON ())
@@ -716,6 +727,12 @@ public class JSONBaseHTML
                     return this;
                   }
 
+                public Column addDataTypeLink (Types.WEBPKI_DATA_TYPES type) throws IOException
+                  {
+                    link (DataTypesTable.LINK_PREFIX + type.getDataType (), type.getDataType (), "");
+                    return this;
+                  }
+
                 public Column addPropertyLink (String property, String holding_object) throws IOException
                   {
                     link (holding_object + "." + property, property, "");
@@ -912,8 +929,9 @@ public class JSONBaseHTML
                  "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
                  "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-                 "</style></head><body style=\"margin:15pt\">" +
+                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}");
+        html.append (external_styles)
+         .append("</style></head><body style=\"margin:15pt\">" +
                  "<div style=\"position:absolute;top:5pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
                  "<img src=\"data:image/gif;base64,")
           .append (new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.gif"))))
@@ -1357,7 +1375,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point X.")
+              .addString ("EC curve point X. Also see the ")
+              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+              .addString (" data type.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.Y_JSON)
@@ -1367,7 +1387,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point Y.");        
+              .addString ("EC curve point Y. Also see the ")        
+              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+             .addString (" data type.");
 
         addSubItemTable (JSONSignatureDecoder.RSA_JSON)
           .newRow ()
