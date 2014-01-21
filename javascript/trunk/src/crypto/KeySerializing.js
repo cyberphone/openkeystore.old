@@ -96,7 +96,7 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.crypto.EC_ALGORITHM_OID
               )
           )
-        .addData 
+        .addComponent 
           (
             new org.webpki.asn1.ASN1Object 
               (
@@ -105,7 +105,7 @@ org.webpki.crypto._error = function (/* String */message)
               )
           )
       )
-    .addData
+    .addComponent
       (
         new org.webpki.asn1.ASN1Object 
           (
@@ -137,9 +137,9 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.crypto.RSA_ALGORITHM_OID
               )
           )
-        .addData (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
+        .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
       )
-    .addData
+    .addComponent
       (
         new org.webpki.asn1.ASN1Object 
           (
@@ -149,7 +149,7 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.asn1.TAGS.SEQUENCE,
                 org.webpki.asn1.ASN1PositiveInteger (modulus)
               )
-            .addData (org.webpki.asn1.ASN1PositiveInteger (exponent))
+            .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent))
           )
       ).encode ();
 };

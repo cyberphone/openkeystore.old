@@ -2638,7 +2638,7 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.crypto.EC_ALGORITHM_OID
               )
           )
-        .addData 
+        .addComponent 
           (
             new org.webpki.asn1.ASN1Object 
               (
@@ -2647,7 +2647,7 @@ org.webpki.crypto._error = function (/* String */message)
               )
           )
       )
-    .addData
+    .addComponent
       (
         new org.webpki.asn1.ASN1Object 
           (
@@ -2679,9 +2679,9 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.crypto.RSA_ALGORITHM_OID
               )
           )
-        .addData (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
+        .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
       )
-    .addData
+    .addComponent
       (
         new org.webpki.asn1.ASN1Object 
           (
@@ -2691,7 +2691,7 @@ org.webpki.crypto._error = function (/* String */message)
                 org.webpki.asn1.TAGS.SEQUENCE,
                 org.webpki.asn1.ASN1PositiveInteger (modulus)
               )
-            .addData (org.webpki.asn1.ASN1PositiveInteger (exponent))
+            .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent))
           )
       ).encode ();
 };
@@ -2783,60 +2783,60 @@ org.webpki.asn1._error = function (/* String */message)
     throw "ASN1Exception: " + message;
 };
 
-org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */data)
+org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */argument)
 {
-    this.data = [];  /* ASN1Object or Unit8Array */
-    this.data[0] = data;
+    this.components = [];  /* ASN1Object or Unit8Array */
+    this.components[0] = argument;
     this.tag = tag;
     return this;
 };
 
-/* ASN1Object */org.webpki.asn1.ASN1Object.prototype.addData = function (/* ASN1Object or Unit8Array */data)
+/* ASN1Object */org.webpki.asn1.ASN1Object.prototype.addComponent = function (/* ASN1Object */component)
 {
-    this.data[this.data.length] = data;
+    this.components[this.components.length] = component;
     return this;
 };
 
 /* Unit8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
 {
-    this.result = new Uint8Array ();
+    this.encoded = new Uint8Array ();
     if (this.tag == org.webpki.asn1.TAGS.BITSTRING)
     {
         this.update ([0]);  // This implementation doesn't support everything ASN.1...
     }
-    for (var i = 0; i < this.data.length; i++)
+    for (var i = 0; i < this.components.length; i++)
     {
-        if (this.data[i] instanceof org.webpki.asn1.ASN1Object)
+        if (this.components[i] instanceof org.webpki.asn1.ASN1Object)
         {
-            this.update (this.data[i].encode ()); 
+            this.update (this.components[i].encode ()); 
         }
         else
         {
-            this.update (this.data[i]);
+            this.update (this.components[i]);
         }
     }
-    var payload = this.result;
-    var length = payload.length;
-    this.result = new Uint8Array ([this.tag, length]);
+    var body = this.encoded;
+    var length = body.length;
+    this.encoded = new Uint8Array ([this.tag, length & 0x7F]);
     if (length > 127)
     {
         if (length > 255)
         {
-            this.result[1] = 0x82;
+            this.encoded[1] = 0x82;
             this.update ([length >> 8]);
         }
         else
         {
-            this.result[1] = 0x81;
+            this.encoded[1] = 0x81;
         }
         this.update ([length & 0xFF]);
     }
-    return this.update (payload);
+    return this.update (body);
 };
 
 /* Unit8Array */org.webpki.asn1.ASN1Object.prototype.update = function (array)
 {
-    return this.result = org.webpki.util.ByteArray.add (this.result, array);
+    return this.encoded = org.webpki.util.ByteArray.add (this.encoded, array);
 };
 
 /* ASN1Object */org.webpki.asn1.ASN1PositiveInteger = function (/* Uint8Array */blob_integer)
@@ -2865,15 +2865,15 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
             length += this.readDERByte ();
         }
     }
-    this.argument = new Uint8Array (raw_der.subarray (this.index, this.index + length));
+    this.body = new Uint8Array (raw_der.subarray (this.index, this.index + length));
     if (this.tag == org.webpki.asn1.TAGS.SEQUENCE)
     {
         this.components = [];
-        var new_der = this.argument;
+        var new_der = this.body;
         while (new_der.length != 0)
         {
             var asn1_object = new org.webpki.asn1.ParsedASN1object (new_der);
-            var chunk = asn1_object.argument.length + asn1_object.index; 
+            var chunk = asn1_object.body.length + asn1_object.index; 
             this.components[this.components.length] = asn1_object;
             if (chunk > new_der.length)
             {
@@ -2882,7 +2882,6 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
             new_der = new Uint8Array (new_der.subarray (chunk));
         }
     }
-    
     return this;
 };
 
@@ -2957,13 +2956,13 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     {
         org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
     }
-    return this.argument;
+    return this.body;
 };
 
 /* ParsedASN1object */org.webpki.asn1.ParsedASN1Sequence = function (/* Uint8Array */raw_der)
 {
     var sequence = new org.webpki.asn1.ParsedASN1object (raw_der, org.webpki.asn1.TAGS.SEQUENCE);
-    if (sequence.argument.length != (sequence.raw_der.length - sequence.index))
+    if (sequence.body.length != (sequence.raw_der.length - sequence.index))
     {
         org.webpki.asn1._error ("Sequence length error");
     }
