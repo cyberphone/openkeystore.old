@@ -100,14 +100,21 @@
   <!-- Decoder only testing -->
   <target name="decoder">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,util/*,jsonparser/test/decoder-test.js"/>
+       <param name="files" value="jsonparser/*,math/*,util/*,jsonparser/test/decoder-test.js"/>
     </antcall>
   </target>
   
-  <!-- Key serializing only testing -->
-  <target name="keyserialize">
+  <!-- ASN.1 only testing -->
+  <target name="asn1">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialize-test.js"/>
+       <param name="files" value="asn1/*,util/*,asn1/test/asn1-test.js"/>
+    </antcall>
+  </target>
+  
+  <!-- Key serialization only testing -->
+  <target name="keyserialization">
+    <antcall target="test">
+       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialization-test.js"/>
     </antcall>
   </target>
 

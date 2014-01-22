@@ -213,6 +213,6 @@ deserializeTest (brainpool256_key_spki, brainpool256_key);
 
 deserializeTest (rsa_2048_key_spki, rsa_2048_key);
 
-console.debug ("Key serializing tests successful!");
+console.debug ("Key serialization tests successful!");
 
 
