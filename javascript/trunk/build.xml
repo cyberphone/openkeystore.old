@@ -117,7 +117,14 @@
        <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/keyserialization-test.js"/>
     </antcall>
   </target>
-
+  
+  <!-- Signature testing -->
+  <target name="signatures">
+    <antcall target="test">
+       <param name="files" value="jsonparser/*,math/*,util/*,asn1/*,crypto/*,crypto/test/signature-test.js"/>
+    </antcall>
+  </target>
+  
   <!-- Building browser JSON library -->
   <target name="libjson" depends="clean">
     <property name="files" value="jsonparser/*,math/*,util/*,crypto/*,asn1/*"/>

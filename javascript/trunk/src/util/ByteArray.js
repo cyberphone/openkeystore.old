@@ -39,6 +39,31 @@ org.webpki.util.ByteArray = {};
     return true;
 };
 
+/* Uint8Array */org.webpki.util.ByteArray.convertStringToUTF8 = function (/* String */string)
+{
+    var buffer = [];
+    for (var n = 0; n < string.length; n++)
+    {
+        var c = string.charCodeAt (n);
+        if (c < 128) 
+        {
+            buffer.push (c);
+        }
+        else if ((c > 127) && (c < 2048))
+        {
+            buffer.push ((c >> 6) | 192);
+            buffer.push ((c & 63) | 128);
+        }
+        else 
+        {
+            buffer.push ((c >> 12) | 224);
+            buffer.push (((c >> 6) & 63) | 128);
+            buffer.push ((c & 63) | 128);
+        }
+    }
+    return new Uint8Array (buffer);
+};
+
 /* Uint8Array */org.webpki.util.ByteArray.add = function (/* Uint8Array */arg1, /* Uint8Array */arg2)
 {
     var combined = new Uint8Array (arg1.length + arg2.length);
