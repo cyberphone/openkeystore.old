@@ -112,7 +112,7 @@ org.webpki.crypto._error = function (/* String */message)
             org.webpki.asn1.TAGS.BITSTRING,
             org.webpki.util.ByteArray.add 
               (
-                [0x04],
+                [0x00, 0x04],
                 org.webpki.util.ByteArray.add
                   (
                     org.webpki.crypto._adjustECCoordinate (coordinate_length, x),
@@ -144,12 +144,16 @@ org.webpki.crypto._error = function (/* String */message)
         new org.webpki.asn1.ASN1Object 
           (
             org.webpki.asn1.TAGS.BITSTRING,
-            new org.webpki.asn1.ASN1Object
+            org.webpki.util.ByteArray.add 
               (
-                org.webpki.asn1.TAGS.SEQUENCE,
-                org.webpki.asn1.ASN1PositiveInteger (modulus)
+                [0],
+                new org.webpki.asn1.ASN1Object
+                  (
+                    org.webpki.asn1.TAGS.SEQUENCE,
+                    org.webpki.asn1.ASN1PositiveInteger (modulus)
+                  )
+                .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent)).encode ()
               )
-            .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent))
           )
       ).encode ();
 };
