@@ -147,12 +147,12 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        return org.webpki.crypto.createRSAPublicKey 
+        return org.webpki.crypto.encodeRSAPublicKey 
             (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
              org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
-    return org.webpki.crypto.createECPublicKey 
+    return org.webpki.crypto.encodeECPublicKey 
         (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));

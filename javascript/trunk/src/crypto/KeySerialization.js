@@ -67,20 +67,20 @@ org.webpki.crypto._error = function (/* String */message)
     org.webpki.crypto._error ("Unsupported EC curve: " + uri);
 };
 
-/* Uint8Array */org.webpki.crypto._adjustECCoordinate = function (/* int */required_length, /* Unit8Array */coordinate)
+/* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
 {
-    if (coordinate.length > required_length)
+    if (original.length > required_length)
     {
-        org.webpki.crypto._error ("EC coordinate length error: " + coordinate.length);        
+        org.webpki.crypto._error ("Input data out of bounds: " + original.length);        
     }
-    while (coordinate.length < required_length)
+    while (original.length < required_length)
     {
-        coordinate = org.webpki.util.ByteArray.add ([0x00], coordinate);
+        original = org.webpki.util.ByteArray.add ([0x00], original);
     }
-    return coordinate;
+    return original;
 };
 
-/* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
+/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
 {
     var params_entry = org.webpki.crypto._getECParamsFromURI (url);
     var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
@@ -115,15 +115,15 @@ org.webpki.crypto._error = function (/* String */message)
                 [0x00, 0x04],
                 org.webpki.util.ByteArray.add
                   (
-                    org.webpki.crypto._adjustECCoordinate (coordinate_length, x),
-                    org.webpki.crypto._adjustECCoordinate (coordinate_length, y)
+                    org.webpki.crypto.leftPadWithZeros (coordinate_length, x),
+                    org.webpki.crypto.leftPadWithZeros (coordinate_length, y)
                   )
               )
           )
       ).encode ();
 };
 
-/* Uint8Array */org.webpki.crypto.createRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
+/* Uint8Array */org.webpki.crypto.encodeRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
 {
     return new org.webpki.asn1.ASN1Object
       (

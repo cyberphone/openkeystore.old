@@ -844,96 +844,34 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
 };
 
-
-    /**
-     * Set signature property in JSON object.
-     * This is the JCS signature creation method.
-       .
-       .
-       .
-
-    public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
-      {
-        // Create an empty JSON document
-        org.webpki.json.JSONObjectWriter writer = new org.webpki.json.JSONObjectWriter ();
-    
-        // Fill it with some data
-        writer.setString ("MyProperty", "Some data");
-         
-        // Sign the document
-        writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
-          {
-            {@literal @}Override
-            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
-              {
-                try
-                  {
-                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
-                    signature.initSign (private_key);
-                    signature.update (data);
-                    return signature.sign ();
-                  }
-                catch (Exception e)
-                  {
-                    throw new IOException (e);
-                  }
-              }
-    
-            {@literal @}Override
-            public PublicKey getPublicKey () throws IOException
-              {
-                return public_key;
-              }
-          }));
-          
-        // Serialize the document
-        byte[] json = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT);
-    
-        // Print the signed document on the console
-        System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
-          
-        // Parse the document
-        org.webpki.json.JSONObjectReader reader = org.webpki.json.JSONParser.parse (json);
-         
-        // Get and verify the signature
-        JSONSignatureDecoder json_signature = reader.getSignature ();
-        json_signature.verify (new JSONAsymKeyVerifier (public_key));
-         
-        // Print the document payload on the console
-        System.out.println ("Returned data: " + reader.getString ("MyProperty"));
-      }
- </pre>
-     */
-
-
 org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
-    if (value[0] == 0x00)
+    while (value[0] == 0x00)  // It is possible that some EC parameters could need more than one turn...
     {
         value = new Uint8Array (value.subarray (1));
     }
     this.setBinary (name, value);
 };
 
-/*
-    public org.webpki.json.JSONObjectWriter setSignature (JSONSigner signer) throws IOException
-      {
-        org.webpki.json.JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-        signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
-        if (signer.extensions != null)
-          {
-            JSONValue[] array = new JSONValue[] ();
-            for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
-              {
-                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
-              }
-            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
-          }
-        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
-        return this;
-      }
-*/    
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setSignature = function (/* JSONSigner */signer)
+{
+    /* JSONObjectWriter */var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    /* JSONObjectWriter */var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+//    if (signer.getExtensions != null)
+    //    {
+    //        var array = /* new JSONValue */[];
+    //            for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
+    //              {
+    //                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
+    //              }
+    //            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+    //          }
+    //        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
+    //        
+    //      }
+    return this;
+};
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
 {
@@ -962,10 +900,10 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     return this;
 };
 
-    /*
-    public org.webpki.json.JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
-      {
-        X509Certificate last_certificate = null;
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setX509CertificatePath = function (/* X509Certificate[] */certificate_path)
+{
+/*
+     X509Certificate last_certificate = null;
         Vector<byte[]> certificates = new Vector<byte[]> ();
         for (X509Certificate certificate : certificate_path)
           {
@@ -979,9 +917,10 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
               }
           }
         setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
-        return this;
-      }
 */
+    return this;
+};
+
 /* void */org.webpki.json.JSONObjectWriter.prototype._beginObject = function (/* boolean */array_flag)
 {
     this._indentLine ();
@@ -1915,12 +1854,12 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        return org.webpki.crypto.createRSAPublicKey 
+        return org.webpki.crypto.encodeRSAPublicKey 
             (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
              org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
-    return org.webpki.crypto.createECPublicKey 
+    return org.webpki.crypto.encodeECPublicKey 
         (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
@@ -2609,20 +2548,20 @@ org.webpki.crypto._error = function (/* String */message)
     org.webpki.crypto._error ("Unsupported EC curve: " + uri);
 };
 
-/* Uint8Array */org.webpki.crypto._adjustECCoordinate = function (/* int */required_length, /* Unit8Array */coordinate)
+/* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
 {
-    if (coordinate.length > required_length)
+    if (original.length > required_length)
     {
-        org.webpki.crypto._error ("EC coordinate length error: " + coordinate.length);        
+        org.webpki.crypto._error ("Input data out of bounds: " + original.length);        
     }
-    while (coordinate.length < required_length)
+    while (original.length < required_length)
     {
-        coordinate = org.webpki.util.ByteArray.add ([0x00], coordinate);
+        original = org.webpki.util.ByteArray.add ([0x00], original);
     }
-    return coordinate;
+    return original;
 };
 
-/* Uint8Array */org.webpki.crypto.createECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
+/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
 {
     var params_entry = org.webpki.crypto._getECParamsFromURI (url);
     var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
@@ -2654,18 +2593,18 @@ org.webpki.crypto._error = function (/* String */message)
             org.webpki.asn1.TAGS.BITSTRING,
             org.webpki.util.ByteArray.add 
               (
-                [0x04],
+                [0x00, 0x04],
                 org.webpki.util.ByteArray.add
                   (
-                    org.webpki.crypto._adjustECCoordinate (coordinate_length, x),
-                    org.webpki.crypto._adjustECCoordinate (coordinate_length, y)
+                    org.webpki.crypto.leftPadWithZeros (coordinate_length, x),
+                    org.webpki.crypto.leftPadWithZeros (coordinate_length, y)
                   )
               )
           )
       ).encode ();
 };
 
-/* Uint8Array */org.webpki.crypto.createRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
+/* Uint8Array */org.webpki.crypto.encodeRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
 {
     return new org.webpki.asn1.ASN1Object
       (
@@ -2686,12 +2625,16 @@ org.webpki.crypto._error = function (/* String */message)
         new org.webpki.asn1.ASN1Object 
           (
             org.webpki.asn1.TAGS.BITSTRING,
-            new org.webpki.asn1.ASN1Object
+            org.webpki.util.ByteArray.add 
               (
-                org.webpki.asn1.TAGS.SEQUENCE,
-                org.webpki.asn1.ASN1PositiveInteger (modulus)
+                [0],
+                new org.webpki.asn1.ASN1Object
+                  (
+                    org.webpki.asn1.TAGS.SEQUENCE,
+                    org.webpki.asn1.ASN1PositiveInteger (modulus)
+                  )
+                .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent)).encode ()
               )
-            .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent))
           )
       ).encode ();
 };
@@ -2810,10 +2753,6 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
 /* Unit8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
 {
     this.encoded = new Uint8Array ();
-    if (this.tag == org.webpki.asn1.TAGS.BITSTRING)
-    {
-        this._update ([0]);  // This implementation doesn't support everything ASN.1...
-    }
     for (var i = 0; i < this.components.length; i++)
     {
         if (this.components[i] instanceof org.webpki.asn1.ASN1Object)

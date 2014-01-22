@@ -239,96 +239,34 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
 };
 
-
-    /**
-     * Set signature property in JSON object.
-     * This is the JCS signature creation method.
-       .
-       .
-       .
-
-    public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
-      {
-        // Create an empty JSON document
-        org.webpki.json.JSONObjectWriter writer = new org.webpki.json.JSONObjectWriter ();
-    
-        // Fill it with some data
-        writer.setString ("MyProperty", "Some data");
-         
-        // Sign the document
-        writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
-          {
-            {@literal @}Override
-            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
-              {
-                try
-                  {
-                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
-                    signature.initSign (private_key);
-                    signature.update (data);
-                    return signature.sign ();
-                  }
-                catch (Exception e)
-                  {
-                    throw new IOException (e);
-                  }
-              }
-    
-            {@literal @}Override
-            public PublicKey getPublicKey () throws IOException
-              {
-                return public_key;
-              }
-          }));
-          
-        // Serialize the document
-        byte[] json = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT);
-    
-        // Print the signed document on the console
-        System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
-          
-        // Parse the document
-        org.webpki.json.JSONObjectReader reader = org.webpki.json.JSONParser.parse (json);
-         
-        // Get and verify the signature
-        JSONSignatureDecoder json_signature = reader.getSignature ();
-        json_signature.verify (new JSONAsymKeyVerifier (public_key));
-         
-        // Print the document payload on the console
-        System.out.println ("Returned data: " + reader.getString ("MyProperty"));
-      }
- </pre>
-     */
-
-
 org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
-    if (value[0] == 0x00)
+    while (value[0] == 0x00)  // It is possible that some EC parameters could need more than one turn...
     {
         value = new Uint8Array (value.subarray (1));
     }
     this.setBinary (name, value);
 };
 
-/*
-    public org.webpki.json.JSONObjectWriter setSignature (JSONSigner signer) throws IOException
-      {
-        org.webpki.json.JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-        signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
-        if (signer.extensions != null)
-          {
-            JSONValue[] array = new JSONValue[] ();
-            for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
-              {
-                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
-              }
-            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
-          }
-        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
-        return this;
-      }
-*/    
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setSignature = function (/* JSONSigner */signer)
+{
+    /* JSONObjectWriter */var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    /* JSONObjectWriter */var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+//    if (signer.getExtensions != null)
+    //    {
+    //        var array = /* new JSONValue */[];
+    //            for (org.webpki.json.JSONObjectWriter jor : signer.extensions)
+    //              {
+    //                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
+    //              }
+    //            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+    //          }
+    //        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
+    //        
+    //      }
+    return this;
+};
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
 {
@@ -357,10 +295,10 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     return this;
 };
 
-    /*
-    public org.webpki.json.JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
-      {
-        X509Certificate last_certificate = null;
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setX509CertificatePath = function (/* X509Certificate[] */certificate_path)
+{
+/*
+     X509Certificate last_certificate = null;
         Vector<byte[]> certificates = new Vector<byte[]> ();
         for (X509Certificate certificate : certificate_path)
           {
@@ -374,9 +312,10 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
               }
           }
         setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
-        return this;
-      }
 */
+    return this;
+};
+
 /* void */org.webpki.json.JSONObjectWriter.prototype._beginObject = function (/* boolean */array_flag)
 {
     this._indentLine ();
