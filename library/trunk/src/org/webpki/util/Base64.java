@@ -17,8 +17,6 @@
 package org.webpki.util;
 
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 /**
  * Encodes/decodes base64 data.
@@ -603,9 +601,12 @@ public class Base64
       ///////////////////////////////
      ////       DEBUGGING       ////
     ///////////////////////////////
-    
-    
-    final private static String COMMAND_LINE_USAGE = "\nUsage:\n\n  org.webpki.util.Base64 [e|d|dm] <infile> <outfile>\n";
+  
+    static void exitCommand ()
+      {
+        System.out.println("\nUsage:\n\n  org.webpki.util.Base64 [enc|dec|encurl|decurl] <infile> <outfile>\n");
+        System.exit (3);
+      }
     
     /** Used for debugging the application.
      */
@@ -613,71 +614,48 @@ public class Base64
       {
         if(args.length != 3)
           {
-              System.out.println(COMMAND_LINE_USAGE);
+            exitCommand ();
           }
         else
           {
-            if(args[0].equalsIgnoreCase("d"))
+            byte[] output = null;
+            byte[]input = ArrayUtil.readFile (args[1]);
+            if (args[0].startsWith ("dec"))
               {
-                FileInputStream in = new FileInputStream(args[1]);
-                FileOutputStream out = new FileOutputStream(args[2]);
-            
-                byte[] b = new byte[in.available()];
-                in.read(b);
-                in.close();
-            
-                b = new Base64().getBinaryFromBase64Binary(b);
-            
-                out.write(b);
-                out.close();
-              }
-            else if(args[0].equalsIgnoreCase("dm"))
-              {
-                FileInputStream in = new FileInputStream(args[1]);
-                FileOutputStream out = new FileOutputStream(args[2]);
-            
-                String read = "";
-            
-                while(!read.endsWith("\n\n") && 
-                      !read.endsWith("\r\r") && 
-                      !read.endsWith("\r\n\r\n"))
+                StringBuffer string = new StringBuffer ();
+                for (byte b : input)
                   {
-                    int t = in.read();
-                    if(t == -1)
-                      throw new IOException("Unexpected EOF");
-                    if(t == '\n' || t == '\r')
-                      read += (char)t;
-                    else
-                      read = "";
+                    if (b > ' ')
+                      {
+                        string.append ((char)b);
+                      }
                   }
-            
-                byte[] b = new byte[in.available()];
-                in.read(b);
-                in.close();            
-
-                b = new Base64().getBinaryFromBase64Binary(b);
-            
-                out.write(b);
-                out.close();
+                if (args[0].equals ("dec"))
+                  {
+                    output = new Base64 ().getBinaryFromBase64String (string.toString ());
+                  }
+                else if (args[0].equals ("decurl"))
+                  {
+                    output = Base64URL.decode (string.toString ());
+                  }
+                else
+                  {
+                    exitCommand ();
+                  }
               }
-            else if(args[0].equalsIgnoreCase("e"))
+            else if (args[0].equals ("enc"))
               {
-                FileInputStream in = new FileInputStream(args[1]);
-                FileOutputStream out = new FileOutputStream(args[2]);
-            
-                byte[] b = new byte[in.available()];
-                in.read(b);
-                in.close();
-            
-                b = new Base64().getBase64BinaryFromBinary(b);
-            
-                out.write(b);
-                out.close();
+                output = new Base64 ().getBase64BinaryFromBinary (input);
+              }
+            else if (args[0].equals ("encurl"))
+              {
+                output = Base64URL.encode (input).getBytes ("UTF-8");
               }
             else
               {
-                System.out.println(COMMAND_LINE_USAGE);
+                exitCommand ();
               }
+            ArrayUtil.writeFile (args[2], output);
           }
       }
   }
