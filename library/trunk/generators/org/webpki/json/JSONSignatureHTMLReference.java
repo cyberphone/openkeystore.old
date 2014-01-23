@@ -268,7 +268,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2013-12-17", "0.3", "Initial publication in HTML5");
         json.addDocumentHistoryLine ("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
         json.addDocumentHistoryLine ("2013-12-29", "0.5", "Added a signature extension facility");
-        json.addDocumentHistoryLine ("2014-01-21", "0.51", "Added clarification to EC parameter representation");
+        json.addDocumentHistoryLine ("2014-01-21", "0.51", "Added clarification to public key parameter representation");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +
