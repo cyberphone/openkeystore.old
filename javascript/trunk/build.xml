@@ -5,6 +5,11 @@
   <property name="temp_dir" location=".tmp" />
   <property name="src_dir" value="src/" />
   <property name="dist_dir" value="dist/" />
+  <property name="ext_dir" value="src/antcrypto"/> 
+  <property name="ext_jar" value="antcrypto.jar"/> 
+  <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
+  <property name="webpki.dist_dir" value="../library/dist/" />
+  <property name="bc.jar"  value="../resources/third-party-jars"/>
   <property name="ant_dir" value="src/antsupport/" />
   <property name="namespace" value="namespace.js" />
   <property name="runfile" value="${temp_dir}/runthis.js/" />
@@ -12,12 +17,32 @@
   
 
   <target name="help">
-    <echo message="Targets: parsercore decoder biginteger base64url libjson."/>
+    <echo message="Targets: parsercore decoder biginteger base64url libjson signatures antcrypto."/>
   </target>
     
   <target name="clean">
     <delete dir="${temp_dir}"/>
   </target>
+  
+  <target name="antcrypto" depends="clean">
+    <mkdir dir="${temp_dir}" />
+    <javac debug="${debug}"
+           srcdir="${ext_dir}"
+           destdir="${temp_dir}" 
+           includeAntRuntime="false">
+       <classpath>
+            <fileset dir="${webpki.dist_dir}">
+               <include name="${webpki-libext}"/>
+             </fileset>
+             <fileset dir="${bc.jar}">
+                <include name="*.jar"/>
+             </fileset>
+       </classpath>
+    </javac>
+    <jar jarfile="${dist_dir}/${ext_jar}">
+      <fileset dir="${temp_dir}"/>
+    </jar>
+    </target>
   
   <target name="add-files">
      <concat destfile="${runfile}" append="true">
@@ -70,8 +95,17 @@
     <antcall target="_antreplacement"/>
     <script language="javascript" src="${runfile}">
        <classpath>
-           <fileset dir="rhino-lib" includes="*.jar"></fileset>
-       </classpath>
+           <fileset dir="rhino-lib" includes="*.jar"/>
+            <fileset dir="${webpki.dist_dir}">
+               <include name="${webpki-libext}"/>
+             </fileset>
+             <fileset dir="${bc.jar}">
+                <include name="*.jar"/>
+             </fileset>
+             <fileset dir="${dist_dir}">
+                <include name="${ext_jar}"/>
+             </fileset>
+           </classpath>
     </script>
   </target>
 

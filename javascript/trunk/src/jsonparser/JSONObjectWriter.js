@@ -241,7 +241,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 
 org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
-    while (value[0] == 0x00)  // It is possible that some EC parameters could need more than one turn...
+    while (value.length > 1 && value[0] == 0x00)  // Could some EC parameters actually need more than one turn?
     {
         value = new Uint8Array (value.subarray (1));
     }
@@ -253,11 +253,23 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
     signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
     var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
-    if (signer.getSignatureType () == org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY)
+    switch (signer.getSignatureType ())
     {
-        console.debug ("ASYM");
-        key_info_writer.setPublicKey (signer.getPublicKey ());
-    }
+        case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
+             key_info_writer.setPublicKey (signer.getPublicKey ());
+             break;
+
+        case org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY:
+            key_info_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyID ());
+            break;
+
+        case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
+            key_info_writer.setX509CertificatePath (signer.getX509CertificatePath ());
+            break;
+
+        default:
+            org.webpki.json.JSONError._error ("Unknown signature type requested");
+     }
             
 //    if (signer.getExtensions != null)
     //    {
@@ -318,8 +330,9 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
                 throw new IOException (e);
               }
           }
-        setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
 */
+    var certificates = certificate_path;  // Note: the above is still missing...
+    this.setBinaryArray (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
     return this;
 };
 

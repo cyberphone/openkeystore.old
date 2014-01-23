@@ -158,6 +158,11 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
+/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
+{
+    return this._canonicalized_data;
+};
+
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureValue = function ()
 {
     return this._signature_value;
@@ -178,6 +183,18 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     if (signature_type != this.getSignatureType ())
     {
         org.webpki.json.JSONError._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+    }
+};
+
+org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/verifier)
+{
+    if (verifier.getVerifierType () != this.getSignatureType ())
+    {
+        org.webpki.json.JSONError._error ("Verifier type doesn't match the received signature");
+    }
+    if (!verifier.verify (this))
+    {
+        org.webpki.json.JSONError._error ("Signature didn't validate");
     }
 };
 

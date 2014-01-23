@@ -1,3 +1,4 @@
+importClass (org.webpki.antcrypto.AntCrypto);
 "use strict";
 function AntConsole ()
 {

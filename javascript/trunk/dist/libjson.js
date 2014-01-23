@@ -846,7 +846,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 
 org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
-    while (value[0] == 0x00)  // It is possible that some EC parameters could need more than one turn...
+    while (value.length > 1 && value[0] == 0x00)  // Could some EC parameters actually need more than one turn?
     {
         value = new Uint8Array (value.subarray (1));
     }
@@ -855,9 +855,27 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setSignature = function (/* JSONSigner */signer)
 {
-    /* JSONObjectWriter */var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
     signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
-    /* JSONObjectWriter */var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+    var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+    switch (signer.getSignatureType ())
+    {
+        case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
+             key_info_writer.setPublicKey (signer.getPublicKey ());
+             break;
+
+        case org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY:
+            key_info_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyID ());
+            break;
+
+        case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
+            key_info_writer.setX509CertificatePath (signer.getX509CertificatePath ());
+            break;
+
+        default:
+            org.webpki.json.JSONError._error ("Unknown signature type requested");
+     }
+            
 //    if (signer.getExtensions != null)
     //    {
     //        var array = /* new JSONValue */[];
@@ -867,16 +885,17 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     //              }
     //            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     //          }
-    //        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (root)));
     //        
     //      }
+    signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON,
+                                signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root)));
     return this;
 };
 
-/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key_in_x509_format)
 {
     /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    var key_alg = new org.webpki.crypto.decodePublicKey (public_key);
+    var key_alg = new org.webpki.crypto.decodePublicKey (public_key_in_x509_format);
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
@@ -916,8 +935,9 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
                 throw new IOException (e);
               }
           }
-        setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
 */
+    var certificates = certificate_path;  // Note: the above is still missing...
+    this.setBinaryArray (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
     return this;
 };
 
@@ -1321,7 +1341,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     }
 };
 
-/* static String */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
+/* static Uint8Array */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
 {
     /* JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
     /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
@@ -1329,7 +1349,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     {
         console.debug ("Canonicalization debug:\n" + result);
     }
-    return result;
+    return org.webpki.util.ByteArray.convertStringToUTF8 (result);
 };
 
 /* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
@@ -1865,6 +1885,11 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
          org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
+/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
+{
+    return this._canonicalized_data;
+};
+
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureValue = function ()
 {
     return this._signature_value;
@@ -1885,6 +1910,18 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     if (signature_type != this.getSignatureType ())
     {
         org.webpki.json.JSONError._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+    }
+};
+
+org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/verifier)
+{
+    if (verifier.getVerifierType () != this.getSignatureType ())
+    {
+        org.webpki.json.JSONError._error ("Verifier type doesn't match the received signature");
+    }
+    if (!verifier.verify (this))
+    {
+        org.webpki.json.JSONError._error ("Signature didn't validate");
     }
 };
 
@@ -2445,6 +2482,31 @@ org.webpki.util.ByteArray = {};
         }
     }
     return true;
+};
+
+/* Uint8Array */org.webpki.util.ByteArray.convertStringToUTF8 = function (/* String */string)
+{
+    var buffer = [];
+    for (var n = 0; n < string.length; n++)
+    {
+        var c = string.charCodeAt (n);
+        if (c < 128) 
+        {
+            buffer.push (c);
+        }
+        else if ((c > 127) && (c < 2048))
+        {
+            buffer.push ((c >> 6) | 192);
+            buffer.push ((c & 63) | 128);
+        }
+        else 
+        {
+            buffer.push ((c >> 12) | 224);
+            buffer.push (((c >> 6) & 63) | 128);
+            buffer.push ((c & 63) | 128);
+        }
+    }
+    return new Uint8Array (buffer);
 };
 
 /* Uint8Array */org.webpki.util.ByteArray.add = function (/* Uint8Array */arg1, /* Uint8Array */arg2)
