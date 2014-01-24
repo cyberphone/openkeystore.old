@@ -50,6 +50,8 @@ function badzero (raw_asn1, ok_with_zero)
 
 if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
         new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 0]))) throw "SEQ error";
+if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SET, []).encode (),
+        new Uint8Array ([org.webpki.asn1.TAGS.SET, 0]))) throw "SEQ error";
 badASN1 (new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 1]), "Buffer underrun");
 badASN1 (org.webpki.util.ByteArray.add (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
                                                                new Uint8Array ([0])), "Sequence length");
@@ -125,8 +127,6 @@ OBVXc65g2PFxTXdMwzzjsvUGJ7SVCCSRrCl6zfN1SLUzm1NZ9WlmpZdRJEy0kTRxQb7XBhVQ7_nHk01x
 wbP7RfZHM047QSv4dk-NoS_zcnwbNDu-97bi5p9wIDAQABMA0GCSqGSIb3DQEBBQUAA4GBADt_UG9vUJSZSWI4OB9L-KXIPqeCgf\
 Yrx-jFzug6EILLGACOTb2oWH-heQC1u-mNr0HZDzTuIYEZoDJJKPTEjlbVUjP9UNV-mWwD5MlM_Mtsq2azSiGM5bUMMj4Qssxsod\
 yamEwCW_POuZ6lcg5Ktz885hZo-L7tdEy8W9ViH0Pd");
-
-console.debug (org.webpki.util.ByteArray.toHex (cert));
 
 printAsn1 (new org.webpki.asn1.ParsedASN1Object (cert));
         

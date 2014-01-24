@@ -233,6 +233,12 @@ catch (err)
 newobjec.setupForRewrite ("dri");
 newobjec.setString ("dri", "blih");
 
+if (!org.webpki.util.ByteArray.equals (org.webpki.util.ByteArray.convertStringToUTF8 ("A\u20ac\u00c5"),
+                                       new Uint8Array ([0x41, 0xE2, 0x82, 0xAC, 0xC3,0x85])))
+{
+    throw "UTF 8";
+}
+
 console.debug ("Successful");
 
 

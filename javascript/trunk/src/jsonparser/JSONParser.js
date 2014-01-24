@@ -115,7 +115,6 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
 {
-    var arr_index = 0;
     /* JSONValue[] */var array = [];
     /* JSONValue */var value = null;
     /* boolean */var next = false;
@@ -146,7 +145,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
             default:
                 value = this._scanSimpleType ();
         }
-        array[arr_index++] = value;
+        array.push (value);
     }
     this._scan ();
     return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array);

@@ -229,7 +229,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     /* String[] */var array = [];
     for (var i = 0; i < values.length; i++)
     {
-        array[i] = org.webpki.util.Base64URL.encode (values[i]);
+        array.push (org.webpki.util.Base64URL.encode (values[i]));
     }
     return this.setStringArray (name, array);
 };
@@ -264,7 +264,19 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             break;
 
         case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
-            key_info_writer.setX509CertificatePath (signer.getX509CertificatePath ());
+            var certificate_path = signer.getX509CertificatePath ();
+            if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
+            {
+                var signature_certificate = new org.webpki.crypto.decodeX509Certificate (certificate_path[0]);
+                if (signature_certificate.issuer != null && signature_certificate.subject != null)
+                {
+                    var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
+                    signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON, signature_certificate.issuer);
+                    signature_certificate_info_writer.setBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON, signature_certificate.serial_number);
+                    signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON, signature_certificate.subject);
+                }
+            }
+            key_info_writer.setX509CertificatePath (certificate_path);
             break;
 
         default:

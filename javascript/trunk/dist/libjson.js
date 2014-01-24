@@ -158,7 +158,7 @@ org.webpki.json.JSONArrayWriter = function (optional_array)
 
 /* JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype._add = function (/* JSONTypes */type, /* Object */value)
 {
-    this.array[this.array.length] = new org.webpki.json.JSONValue (type, value);
+    this.array.push (new org.webpki.json.JSONValue (type, value));
     return this;
 };
 
@@ -834,7 +834,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     /* String[] */var array = [];
     for (var i = 0; i < values.length; i++)
     {
-        array[i] = org.webpki.util.Base64URL.encode (values[i]);
+        array.push (org.webpki.util.Base64URL.encode (values[i]));
     }
     return this.setStringArray (name, array);
 };
@@ -869,7 +869,19 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             break;
 
         case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
-            key_info_writer.setX509CertificatePath (signer.getX509CertificatePath ());
+            var certificate_path = signer.getX509CertificatePath ();
+            if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
+            {
+                var signature_certificate = new org.webpki.crypto.decodeX509Certificate (certificate_path[0]);
+                if (signature_certificate.issuer != null && signature_certificate.subject != null)
+                {
+                    var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
+                    signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON, signature_certificate.issuer);
+                    signature_certificate_info_writer.setBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON, signature_certificate.serial_number);
+                    signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON, signature_certificate.subject);
+                }
+            }
+            key_info_writer.setX509CertificatePath (certificate_path);
             break;
 
         default:
@@ -1518,7 +1530,6 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
 
 /* JSONValue */org.webpki.json.JSONParser.prototype._scanArray = function (/* String */name)
 {
-    var arr_index = 0;
     /* JSONValue[] */var array = [];
     /* JSONValue */var value = null;
     /* boolean */var next = false;
@@ -1549,7 +1560,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
             default:
                 value = this._scanSimpleType ();
         }
-        array[arr_index++] = value;
+        array.push (value);
     }
     this._scan ();
     return new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array);
@@ -1988,15 +1999,16 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
         var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
         var serial_number = rd.getBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON);
         var subject = rd.getString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON);
-      /*      
-      X509Certificate signature_certificate = certificate_path[0];
-      if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
-          !signature_certificate.getSerialNumber ().equals (serial_number) ||
-          !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
+        var signature_certificate = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]);
+        if (signature_certificate.issuer != null && signature_certificate.subject != null)
         {
-          throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+            if (signature_certificate.issuer != issuer ||
+                !signature_certificate.serial_number.equals (serial_number) ||
+                signature_certificate.subject != subject)
+            {
+                org.webpki.json.JSONError._error ("\"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+            }
         }
-*/
     }
 };
 
@@ -2500,14 +2512,14 @@ org.webpki.util.ByteArray = {};
         }
         else if ((c > 127) && (c < 2048))
         {
-            buffer.push ((c >> 6) | 192);
-            buffer.push ((c & 63) | 128);
+            buffer.push ((c >> 6) | 0xC0);
+            buffer.push ((c & 0x3F) | 0x80);
         }
         else 
         {
-            buffer.push ((c >> 12) | 224);
-            buffer.push (((c >> 6) & 63) | 128);
-            buffer.push ((c & 63) | 128);
+            buffer.push ((c >> 12) | 0xE0);
+            buffer.push (((c >> 6) & 0x3F) | 0x80);
+            buffer.push ((c & 0x3F) | 0x80);
         }
     }
     return new Uint8Array (buffer);
@@ -2534,7 +2546,7 @@ org.webpki.util.ByteArray = {};
     {
         return String.fromCharCode (i + 48);
     }
-    return String.fromCharCode (i + 55);
+    return String.fromCharCode (i + 87);
 };
 
 /* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
@@ -2547,7 +2559,7 @@ org.webpki.util.ByteArray = {};
     var result = "";
     for (var i = 0; i < arg.length; i++)
     {
-        result += " " + org.webpki.util.ByteArray._twohex (arg[i]);
+        result += org.webpki.util.ByteArray._twohex (arg[i]);
     }
     return result;
 };
@@ -2761,21 +2773,111 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
     }
 };
 
+org.webpki.crypto.X500_ATTRIBUTES = 
+    [// Symbolic       ASN.1 OID (without header)
+        "CN",       [0x55, 0x04, 0x03],
+        "DC",       [0x09, 0x92, 0x26, 0x89, 0x93, 0xF2, 0x2C, 0x64, 0x01, 0x19],
+        "OU",       [0x55, 0x04, 0x0B],
+        "O",        [0x55, 0x04, 0x0A],
+        "L",        [0x55, 0x04, 0x07],
+        "ST",       [0x55, 0x04, 0x08],
+        "STREET"    [0x55, 0x04, 0x09],
+        "C",        [0x55, 0x04, 0x06]
+    ];
+
+/* String */org.webpki.crypto.getAttributeString = function (asn1_type)
+{
+    var string = "";
+    var data = asn1_type.getBodyData ();
+    for (var i = 0; i < data.length; i++)
+    {
+        var b = data[i];
+        if (asn1_type.tag == org.webpki.asn1.TAGS.UTF8STRING && b > 127)
+        {
+            var b2 = data[++i];
+            if ((b & 0x20) == 0) // Two byters
+            {
+                var c = String.fromCharCode (((b & 0x1F) << 6) | (b2 & 0x3F));
+            }
+            else  // Three byters
+            {
+                var b3 = data[++i];
+                var c = String.fromCharCode (((b & 0x0F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F));
+            }
+        }
+        else
+        {
+            var c = String.fromCharCode (b);
+            if (c == ',' || c == ';' || c == '+' || c == '=' || c == '\\')
+            {
+                string += '\\';
+            }
+        }
+        string += c;
+    }
+    return string;
+};
+
 /* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
 {
     var holder = asn1_sequence.getASN1Sequence ();
     var dn = "";
-    for (var i = 0; i < holder.numberOfComponents (); i++)
+    var next = false;
+    var q = holder.numberOfComponents ();
+    while (--q >= 0)
     {
-        var set = holder.getComponent (i).getASN1Set ();
+        if (next)
+        {
+            dn += ',';
+        }
+        else
+        {
+            next = true;
+        }
+        var set = holder.getComponent (q).getASN1Set ();
         if (set.numberOfComponents () != 1)
         {
+console.debug ("Multivalued, drop it");
             return null;
         }
         var attr = set.getComponent (0).getASN1Sequence ();
-        if (attr.numberOfComponents () != 1)
+        if (attr.numberOfComponents () != 2)
         {
+console.debug ("Weird, drop it");
             return null;
+        }
+        // Now it seems that we can try to do something sensible!
+        var attr_name = attr.getComponent (0).getASN1ObjectIDRawData ();
+        var non_symbolic = true;
+        for (var i = 1; i < org.webpki.crypto.X500_ATTRIBUTES.length; i += 2)
+        {
+            if (org.webpki.util.ByteArray.equals (attr_name, org.webpki.crypto.X500_ATTRIBUTES[i]))
+            {
+                non_symbolic = false;
+                dn += org.webpki.crypto.X500_ATTRIBUTES[i - 1] + '=' + org.webpki.crypto.getAttributeString (attr.getComponent (1));
+                break;
+            }
+        }
+        if (non_symbolic)
+        {
+            var i = 0;
+            var id = null;
+            while (i < attr_name.length)
+            {
+                var subid = 0;
+                do
+                {
+                    subid = (subid << 7) + (attr_name[i] &0x7F);
+                }
+                while ((attr_name[i++] & 0x80) != 0);
+                if (id == null)
+                {
+                    id = (Math.floor (subid / 40)).toString ();
+                    Math.floor (subid %= 40);
+                }
+                id += '.' + subid;
+            }
+            dn += id + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
         }
     }
     return dn;
@@ -2831,6 +2933,7 @@ org.webpki.asn1.TAGS =
     INTEGER            : 0x02,
     NULL               : 0x05,
     BITSTRING          : 0x03,
+    UTF8STRING         : 0x0C,
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
     EXPLICIT_CONTEXT_3 : 0xA3,
@@ -2862,7 +2965,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 
 /* ASN1Object */org.webpki.asn1.ASN1Object.prototype.addComponent = function (/* ASN1Object */component)
 {
-    this.components[this.components.length] = component;
+    this.components.push (component);
     return this;
 };
 
@@ -2946,7 +3049,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
         {
             var asn1_object = new org.webpki.asn1.ParsedASN1Object (new_der);
             var chunk = asn1_object.body.length + asn1_object.start_of_body; 
-            this.components[this.components.length] = asn1_object;
+            this.components.push (asn1_object);
             if (chunk > new_der.length)
             {
                 org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);

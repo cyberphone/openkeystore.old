@@ -51,14 +51,14 @@ org.webpki.util.ByteArray = {};
         }
         else if ((c > 127) && (c < 2048))
         {
-            buffer.push ((c >> 6) | 192);
-            buffer.push ((c & 63) | 128);
+            buffer.push ((c >> 6) | 0xC0);
+            buffer.push ((c & 0x3F) | 0x80);
         }
         else 
         {
-            buffer.push ((c >> 12) | 224);
-            buffer.push (((c >> 6) & 63) | 128);
-            buffer.push ((c & 63) | 128);
+            buffer.push ((c >> 12) | 0xE0);
+            buffer.push (((c >> 6) & 0x3F) | 0x80);
+            buffer.push ((c & 0x3F) | 0x80);
         }
     }
     return new Uint8Array (buffer);
@@ -85,7 +85,7 @@ org.webpki.util.ByteArray = {};
     {
         return String.fromCharCode (i + 48);
     }
-    return String.fromCharCode (i + 55);
+    return String.fromCharCode (i + 87);
 };
 
 /* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
@@ -98,7 +98,7 @@ org.webpki.util.ByteArray = {};
     var result = "";
     for (var i = 0; i < arg.length; i++)
     {
-        result += " " + org.webpki.util.ByteArray._twohex (arg[i]);
+        result += org.webpki.util.ByteArray._twohex (arg[i]);
     }
     return result;
 };

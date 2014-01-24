@@ -28,12 +28,17 @@ var mySigner = function (signature_type, algorithm)
 
 /* String */ mySigner.prototype.getKeyID = function ()
 {
-    return "mykey";
+    return "" + AntCrypto.getKeyID ();
 };
 
-/* Uint8Array */ mySigner.prototype.signData = function (/* Uint8Array */ data)
+/* Uint8Array */mySigner.prototype.signData = function (/* Uint8Array */ data)
 {
     return new Uint8Array (org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data), this._algorithm)));
+};
+
+/* boolean */mySigner.prototype.wantSignatureCertificateAttributes = function ()
+{
+    return true;
 };
 
 function myVerifier (signer)

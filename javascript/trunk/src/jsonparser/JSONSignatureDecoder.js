@@ -261,14 +261,15 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
         var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
         var serial_number = rd.getBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON);
         var subject = rd.getString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON);
-      /*      
-      X509Certificate signature_certificate = certificate_path[0];
-      if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
-          !signature_certificate.getSerialNumber ().equals (serial_number) ||
-          !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
+        var signature_certificate = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]);
+        if (signature_certificate.issuer != null && signature_certificate.subject != null)
         {
-          throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+            if (signature_certificate.issuer != issuer ||
+                !signature_certificate.serial_number.equals (serial_number) ||
+                signature_certificate.subject != subject)
+            {
+                org.webpki.json.JSONError._error ("\"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+            }
         }
-*/
     }
 };

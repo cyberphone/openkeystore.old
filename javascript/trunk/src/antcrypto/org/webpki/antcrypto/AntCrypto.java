@@ -8,6 +8,8 @@ import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.PrivateKey;
 
+import javax.security.auth.x500.X500Principal;
+
 import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -16,6 +18,7 @@ import org.webpki.util.Base64URL;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.CertificateUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -40,9 +43,32 @@ public class AntCrypto
 		return Base64URL.encode (((X509Certificate)getKeyStore (algorithm).getCertificate ("mykey")).getPublicKey ().getEncoded ());
 	}
 	
+	public static String getKeyID () throws Exception
+	{
+		return Sign.SYMMETRIC_KEY_NAME;  // To maintain compatibility with the server-demo...
+	}
+
+	public static String getX509CertificateParams (String b64_data) throws Exception
+	{
+		X509Certificate cert = CertificateUtil.getCertificateFromBlob (Base64URL.decode (b64_data));
+		return cert.getIssuerX500Principal ().getName () + '\n' + 
+		       cert.getSubjectX500Principal ().getName () + '\n' + 
+		       cert.getSerialNumber ().toString ();
+	}
+
 	public static String getX509Certificate (String algorithm) throws Exception
 	{
 		return Base64URL.encode (((X509Certificate)getKeyStore (algorithm).getCertificate ("mykey")).getEncoded ());
+	}
+	
+	public static String getDistinguishedName (String b64_data) throws Exception
+	{
+		return new X500Principal (Base64URL.decode (b64_data)).getName ();
+	}
+	
+	public static String convertToUTF8 (String string) throws Exception
+	{
+		return Base64URL.encode (string.getBytes ("UTF-8"));
 	}
 
 	public static String signData (String b64_data, String algorithm) throws Exception

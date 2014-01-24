@@ -59,7 +59,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 
 /* ASN1Object */org.webpki.asn1.ASN1Object.prototype.addComponent = function (/* ASN1Object */component)
 {
-    this.components[this.components.length] = component;
+    this.components.push (component);
     return this;
 };
 
@@ -143,7 +143,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
         {
             var asn1_object = new org.webpki.asn1.ParsedASN1Object (new_der);
             var chunk = asn1_object.body.length + asn1_object.start_of_body; 
-            this.components[this.components.length] = asn1_object;
+            this.components.push (asn1_object);
             if (chunk > new_der.length)
             {
                 org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);

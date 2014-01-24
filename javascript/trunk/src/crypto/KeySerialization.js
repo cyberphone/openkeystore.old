@@ -214,21 +214,111 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
     }
 };
 
+org.webpki.crypto.X500_ATTRIBUTES = 
+    [// Symbolic       ASN.1 OID (without header)
+        "CN",       [0x55, 0x04, 0x03],
+        "DC",       [0x09, 0x92, 0x26, 0x89, 0x93, 0xF2, 0x2C, 0x64, 0x01, 0x19],
+        "OU",       [0x55, 0x04, 0x0B],
+        "O",        [0x55, 0x04, 0x0A],
+        "L",        [0x55, 0x04, 0x07],
+        "ST",       [0x55, 0x04, 0x08],
+        "STREET"    [0x55, 0x04, 0x09],
+        "C",        [0x55, 0x04, 0x06]
+    ];
+
+/* String */org.webpki.crypto.getAttributeString = function (asn1_type)
+{
+    var string = "";
+    var data = asn1_type.getBodyData ();
+    for (var i = 0; i < data.length; i++)
+    {
+        var b = data[i];
+        if (asn1_type.tag == org.webpki.asn1.TAGS.UTF8STRING && b > 127)
+        {
+            var b2 = data[++i];
+            if ((b & 0x20) == 0) // Two byters
+            {
+                var c = String.fromCharCode (((b & 0x1F) << 6) | (b2 & 0x3F));
+            }
+            else  // Three byters
+            {
+                var b3 = data[++i];
+                var c = String.fromCharCode (((b & 0x0F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F));
+            }
+        }
+        else
+        {
+            var c = String.fromCharCode (b);
+            if (c == ',' || c == ';' || c == '+' || c == '=' || c == '\\')
+            {
+                string += '\\';
+            }
+        }
+        string += c;
+    }
+    return string;
+};
+
 /* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
 {
     var holder = asn1_sequence.getASN1Sequence ();
     var dn = "";
-    for (var i = 0; i < holder.numberOfComponents (); i++)
+    var next = false;
+    var q = holder.numberOfComponents ();
+    while (--q >= 0)
     {
-        var set = holder.getComponent (i).getASN1Set ();
+        if (next)
+        {
+            dn += ',';
+        }
+        else
+        {
+            next = true;
+        }
+        var set = holder.getComponent (q).getASN1Set ();
         if (set.numberOfComponents () != 1)
         {
+console.debug ("Multivalued, drop it");
             return null;
         }
         var attr = set.getComponent (0).getASN1Sequence ();
-        if (attr.numberOfComponents () != 1)
+        if (attr.numberOfComponents () != 2)
         {
+console.debug ("Weird, drop it");
             return null;
+        }
+        // Now it seems that we can try to do something sensible!
+        var attr_name = attr.getComponent (0).getASN1ObjectIDRawData ();
+        var non_symbolic = true;
+        for (var i = 1; i < org.webpki.crypto.X500_ATTRIBUTES.length; i += 2)
+        {
+            if (org.webpki.util.ByteArray.equals (attr_name, org.webpki.crypto.X500_ATTRIBUTES[i]))
+            {
+                non_symbolic = false;
+                dn += org.webpki.crypto.X500_ATTRIBUTES[i - 1] + '=' + org.webpki.crypto.getAttributeString (attr.getComponent (1));
+                break;
+            }
+        }
+        if (non_symbolic)
+        {
+            var i = 0;
+            var id = null;
+            while (i < attr_name.length)
+            {
+                var subid = 0;
+                do
+                {
+                    subid = (subid << 7) + (attr_name[i] &0x7F);
+                }
+                while ((attr_name[i++] & 0x80) != 0);
+                if (id == null)
+                {
+                    id = (Math.floor (subid / 40)).toString ();
+                    Math.floor (subid %= 40);
+                }
+                id += '.' + subid;
+            }
+            dn += id + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
         }
     }
     return dn;
