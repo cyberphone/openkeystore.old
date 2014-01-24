@@ -33,6 +33,13 @@ function deserializeTest (spki, jcs)
     }
 }
 
+function certReader (cert_in_b64)
+{
+    var cert_data = new org.webpki.crypto.decodeX509Certificate (org.webpki.util.Base64URL.decode (cert_in_b64));
+    console.debug ("Certificate with SN=" + cert_data.serial_number.toString () + "\n" +
+            new org.webpki.json.JSONObjectWriter ().setPublicKey (cert_data.public_key).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+}
+
 var p256_key =
 '{\
   "PublicKey": \
@@ -194,6 +201,31 @@ var b233_key =
 var b233_key_spki = 'MFIwEAYHKoZIzj0CAQYFK4EEABsDPgAEAP2_Y-mMTM0vqpOqdHWP1gn-f9OIMhW\
 lcHR5-jxoAJKLZXznUzWyiuWfHKNfmJIdtq6TKKxtJZTayXtk';
 
+var cert = "MIIDYzCCAkugAwIBAgIGAUOeUH5GMA0GCS\
+qGSIb3DQEBCwUAMEMxEzARBgoJkiaJk_IsZAEZFgNvcmcxFjAUBgoJkiaJk_IsZAEZFgZ3ZWJwa2kxFDASBgNVBAMTC0RlbW8gU3ViIENBMB4XD\
+TE0MDExNzAzNDgzMVoXDTM5MDExNzAzNDgzMVowQzEjMCEGCSqGSIb3DQEJARYUam9obi5kb2VAZXhhbXBsZS5jb20xHDAaBgNVBAMTE0tleUdl\
+bjIgVHJ1c3RBbmNob3IwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCp61eV2UkUj8Fx5XYVA60l7SCXpISCmWdSPB_4Bbcw7Naa_x2\
+fkyNsD179_dZPy3FbaQtNzqLIo6EPXaLYLWOGKjnpzp2MZXYKxNfwSccPjxhSyO40zaDY5CLP4QfzUVVvD4SETzQGqxSJXMXzUPzePBiUGG5qO\
+k8ZxGv12lmGThfiTQJC2ENzguwjEELejPQrOAQIbG-_CYqUsYBt0alJBAkD89WQ7M9ssJx7kPuqdD32YMBNOPc0jAswrpsFB-1narT33L2wkpN\
+UK9DnKsrvIu1nCp0u6PaMDeeHL1TR51vzpZvDUMUvL2kE-e0iqN_Due0sYIpU9Qh0wy952shjAgMBAAGjXTBbMAkGA1UdEwQCMAAwDgYDVR0PA\
+QH_BAQDAgOIMB0GA1UdDgQWBBQeM7I_s8St2uxNVg4AUyrAOU4LhDAfBgNVHSMEGDAWgBRZXCF2vVvvaakHecbUVh7jS1yIVTANBgkqhkiG9w\
+0BAQsFAAOCAQEAGhQMWLwV1sK1QQvXM_P0_VznWsXK8OGXZ7XSk2Ja9ajrECempZKBkDCQ63GiUSDaKjkXIkA9b9VKX6lMNytvOTHWIzh4cH49\
+5cyhKtQ3UT1DNOakqrqkAlkWCjpOUerUNyYJRhgtd5xRssMUo4O1QB-PPniM01PStB6OrXWjc2OvSX6-EZwsZbPTOSSdUQK9jQ8V6MSC4rz5cQ\
+2JHizYBx_6h-Kg8_xHKCLZc__mV9rHhByW0hP2HbBocjXg4uUCAOS8GVPnD_OoJ4rYtd_AyHRuedOnG-AwwLnKNGZSKsMDA89BE79FxkLf8cnS\
+UnjPrTE9tPGAsi7a2CfSZz8VXg";
+
+var cert_v1 = "MIIC5zCCAlACAQEwDQYJKoZIhvcNAQEFBQAwgbsxJDAiBgNVBAcTG1ZhbGlDZ\
+XJ0IFZhbGlkYXRpb24gTmV0d29yazEXMBUGA1UEChMOVmFsaUNlcnQsIEluYy4xNTAzBgNVBAsTLFZhbGlDZXJ0IENsYXNzIDIg\
+UG9saWN5IFZhbGlkYXRpb24gQXV0aG9yaXR5MSEwHwYDVQQDExhodHRwOi8vd3d3LnZhbGljZXJ0LmNvbS8xIDAeBgkqhkiG9w0\
+BCQEWEWluZm9AdmFsaWNlcnQuY29tMB4XDTk5MDYyNjAwMTk1NFoXDTE5MDYyNjAwMTk1NFowgbsxJDAiBgNVBAcTG1ZhbGlDZX\
+J0IFZhbGlkYXRpb24gTmV0d29yazEXMBUGA1UEChMOVmFsaUNlcnQsIEluYy4xNTAzBgNVBAsTLFZhbGlDZXJ0IENsYXNzIDIgU\
+G9saWN5IFZhbGlkYXRpb24gQXV0aG9yaXR5MSEwHwYDVQQDExhodHRwOi8vd3d3LnZhbGljZXJ0LmNvbS8xIDAeBgkqhkiG9w0B\
+CQEWEWluZm9AdmFsaWNlcnQuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDOOnHK5avIWZJV16vYdA757tn2VUdZZUc\
+OBVXc65g2PFxTXdMwzzjsvUGJ7SVCCSRrCl6zfN1SLUzm1NZ9WlmpZdRJEy0kTRxQb7XBhVQ7_nHk01xC-YDgkRoKWzk2Z_M_VX\
+wbP7RfZHM047QSv4dk-NoS_zcnwbNDu-97bi5p9wIDAQABMA0GCSqGSIb3DQEBBQUAA4GBADt_UG9vUJSZSWI4OB9L-KXIPqeCgf\
+Yrx-jFzug6EILLGACOTb2oWH-heQC1u-mNr0HZDzTuIYEZoDJJKPTEjlbVUjP9UNV-mWwD5MlM_Mtsq2azSiGM5bUMMj4Qssxsod\
+yamEwCW_POuZ6lcg5Ktz885hZo-L7tdEy8W9ViH0Pd";
+
 deserializeTest (b163_key_spki, b163_key);
 
 deserializeTest (b233_key_spki, b233_key);
@@ -212,6 +244,10 @@ deserializeTest (p521_key_spki, p521_key);
 deserializeTest (brainpool256_key_spki, brainpool256_key);
 
 deserializeTest (rsa_2048_key_spki, rsa_2048_key);
+
+certReader (cert);
+
+certReader (cert_v1);
 
 console.debug ("Key serialization tests successful!");
 

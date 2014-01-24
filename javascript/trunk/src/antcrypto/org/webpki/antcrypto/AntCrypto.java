@@ -39,6 +39,11 @@ public class AntCrypto
 	{
 		return Base64URL.encode (((X509Certificate)getKeyStore (algorithm).getCertificate ("mykey")).getPublicKey ().getEncoded ());
 	}
+	
+	public static String getX509Certificate (String algorithm) throws Exception
+	{
+		return Base64URL.encode (((X509Certificate)getKeyStore (algorithm).getCertificate ("mykey")).getEncoded ());
+	}
 
 	public static String signData (String b64_data, String algorithm) throws Exception
 	{

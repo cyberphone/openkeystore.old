@@ -1933,7 +1933,10 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 
 /* public Uint8Array/PublicKey */org.webpki.json.JSONSignatureDecoder.prototype.getPublicKey = function ()
 {
-    this._checkRequest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY);
+    if (this.getSignatureType () != org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE)
+    {
+        this._checkRequest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY);
+    }
     return this._public_key;
 };
 
@@ -1978,6 +1981,7 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
+    this._public_key = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]).public_key;
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
@@ -2757,6 +2761,54 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
     }
 };
 
+/* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
+{
+    var holder = asn1_sequence.getASN1Sequence ();
+    var dn = "";
+    for (var i = 0; i < holder.numberOfComponents (); i++)
+    {
+        var set = holder.getComponent (i).getASN1Set ();
+        if (set.numberOfComponents () != 1)
+        {
+            return null;
+        }
+        var attr = set.getComponent (0).getASN1Sequence ();
+        if (attr.numberOfComponents () != 1)
+        {
+            return null;
+        }
+    }
+    return dn;
+};
+
+/* certificate data */org.webpki.crypto.decodeX509Certificate = function(/* Uint8Array */certificate_blob)
+{
+    var asn1 = new org.webpki.asn1.ParsedASN1Sequence (certificate_blob);
+    var tbs = asn1.getComponent (0).getASN1Sequence ();
+    var index = 0;
+    if (tbs.getComponent (0).getTag () == org.webpki.asn1.TAGS.EXPLICIT_CONTEXT_0)
+    {
+        index++;  // V3
+    }
+    this.serial_number = new org.webpki.math.BigInteger (tbs.getComponent (index++).getASN1PositiveInteger ());
+    tbs.getComponent (index++).getASN1Sequence ();  // Signature alg, skip
+    this.issuer = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
+    if (this.issuer === undefined)
+    {
+        console.debug ("Couldn't decode issuer DN");
+    }
+    if (tbs.getComponent (index++).getASN1Sequence ().numberOfComponents () != 2)
+    {
+        org.webpki.crypto._error ("Certificate validity not found");        
+    }
+    this.subject = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
+    if (this.subject === undefined)
+    {
+        console.debug ("Couldn't decode subject DN");
+    }
+    org.webpki.crypto.decodePublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+};
+
 /*================================================================*/
 /*               Namespace for the "ASN1" library                 */
 /*================================================================*/
@@ -2775,11 +2827,13 @@ org.webpki.asn1.TAGS =
 {
     OID                : 0x06,
     SEQUENCE           : 0x30,
+    SET                : 0x31,
     INTEGER            : 0x02,
     NULL               : 0x05,
     BITSTRING          : 0x03,
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
+    EXPLICIT_CONTEXT_3 : 0xA3,
     OCTET_STRING       : 0x04
 };
 
@@ -2798,9 +2852,9 @@ org.webpki.asn1._error = function (/* String */message)
     }
 };
 
-org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Array */argument)
+org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Array */argument)
 {
-    this.components = [];  /* ASN1Object or Unit8Array */
+    this.components = [];  /* ASN1Object or Uint8Array */
     this.components[0] = argument;
     this.tag = tag;
     return this;
@@ -2812,7 +2866,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     return this;
 };
 
-/* Unit8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
+/* Uint8Array */org.webpki.asn1.ASN1Object.prototype.encode = function ()
 {
     this.encoded = new Uint8Array ();
     for (var i = 0; i < this.components.length; i++)
@@ -2845,7 +2899,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     return this._update (body);
 };
 
-/* Unit8Array */org.webpki.asn1.ASN1Object.prototype._update = function (array)
+/* Uint8Array */org.webpki.asn1.ASN1Object.prototype._update = function (array)
 {
     return this.encoded = org.webpki.util.ByteArray.add (this.encoded, array);
 };
@@ -2884,7 +2938,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     {
         this.body[i] = this._readDERByte (); 
     }
-    if (this.tag == org.webpki.asn1.TAGS.SEQUENCE)
+    if (this.tag == org.webpki.asn1.TAGS.SEQUENCE || this.tag == org.webpki.asn1.TAGS.SET)
     {
         this.components = [];
         var new_der = this.body;
@@ -2900,7 +2954,9 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
             new_der = new Uint8Array (new_der.subarray (chunk));
         }
     }
-    if (this.tag != org.webpki.asn1.TAGS.NULL && this.tag != org.webpki.asn1.TAGS.SEQUENCE)
+    if (this.tag != org.webpki.asn1.TAGS.NULL &&
+        this.tag != org.webpki.asn1.TAGS.SEQUENCE &&
+        this.tag != org.webpki.asn1.TAGS.SET)
     {
         if (this.body.length == 0)
         {
@@ -2937,17 +2993,17 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     return this.components[index];
 };
 
-/* Unit8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1ObjectIDRawData = function ()
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1ObjectIDRawData = function ()
 {
     return this._getBodyData (org.webpki.asn1.TAGS.OID);
 };
 
-/* Unit8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1Integer = function ()
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1Integer = function ()
 {
     return this._getBodyData (org.webpki.asn1.TAGS.INTEGER);
 };
 
-/* Unit8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1PositiveInteger = function ()
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1PositiveInteger = function ()
 {
     var data = this.getASN1Integer ();
     if (data[0] > 127)
@@ -2957,7 +3013,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     return data;
 };
 
-/* Unit8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1BitString = function (/* boolean */unused_must_be_zero)
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.getASN1BitString = function (/* boolean */unused_must_be_zero)
 {
     var raw = this._getBodyData (org.webpki.asn1.TAGS.BITSTRING);
     if (unused_must_be_zero)
@@ -2985,13 +3041,34 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Unit8Arra
     return this;
 };
 
-/* Unit8Array */org.webpki.asn1.ParsedASN1Object.prototype._getBodyData = function (/* int */tag, /* boolean */optional_accept_zero)
+/* ParsedASN1Object */org.webpki.asn1.ParsedASN1Object.prototype.getASN1Set = function ()
+{
+    this._getBodyData (org.webpki.asn1.TAGS.SET);
+    return this;
+};
+
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype._getBodyData = function (/* int */tag, /* boolean */optional_accept_zero)
 {
     if (tag != this.tag)
     {
         org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
     }
     return this.body;
+};
+
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.getBodyData = function ()
+{
+    return this._getBodyData (this.tag);
+};
+
+/* int */org.webpki.asn1.ParsedASN1Object.prototype.getTag = function ()
+{
+    return this.tag;
+};
+
+/* Uint8Array */org.webpki.asn1.ParsedASN1Object.prototype.encode = function ()
+{
+    return new Uint8Array (this.raw_der.subarray (0, this.body.length + this.start_of_body));
 };
 
 /* ParsedASN1Object */org.webpki.asn1.ParsedASN1Sequence = function (/* Uint8Array */raw_der)

@@ -213,3 +213,51 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
         org.webpki.crypto._error ("Public key OID unknown");        
     }
 };
+
+/* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
+{
+    var holder = asn1_sequence.getASN1Sequence ();
+    var dn = "";
+    for (var i = 0; i < holder.numberOfComponents (); i++)
+    {
+        var set = holder.getComponent (i).getASN1Set ();
+        if (set.numberOfComponents () != 1)
+        {
+            return null;
+        }
+        var attr = set.getComponent (0).getASN1Sequence ();
+        if (attr.numberOfComponents () != 1)
+        {
+            return null;
+        }
+    }
+    return dn;
+};
+
+/* certificate data */org.webpki.crypto.decodeX509Certificate = function(/* Uint8Array */certificate_blob)
+{
+    var asn1 = new org.webpki.asn1.ParsedASN1Sequence (certificate_blob);
+    var tbs = asn1.getComponent (0).getASN1Sequence ();
+    var index = 0;
+    if (tbs.getComponent (0).getTag () == org.webpki.asn1.TAGS.EXPLICIT_CONTEXT_0)
+    {
+        index++;  // V3
+    }
+    this.serial_number = new org.webpki.math.BigInteger (tbs.getComponent (index++).getASN1PositiveInteger ());
+    tbs.getComponent (index++).getASN1Sequence ();  // Signature alg, skip
+    this.issuer = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
+    if (this.issuer === undefined)
+    {
+        console.debug ("Couldn't decode issuer DN");
+    }
+    if (tbs.getComponent (index++).getASN1Sequence ().numberOfComponents () != 2)
+    {
+        org.webpki.crypto._error ("Certificate validity not found");        
+    }
+    this.subject = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
+    if (this.subject === undefined)
+    {
+        console.debug ("Couldn't decode subject DN");
+    }
+    org.webpki.crypto.decodePublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+};

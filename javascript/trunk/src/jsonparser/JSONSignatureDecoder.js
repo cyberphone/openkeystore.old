@@ -206,7 +206,10 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 
 /* public Uint8Array/PublicKey */org.webpki.json.JSONSignatureDecoder.prototype.getPublicKey = function ()
 {
-    this._checkRequest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY);
+    if (this.getSignatureType () != org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE)
+    {
+        this._checkRequest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY);
+    }
     return this._public_key;
 };
 
@@ -251,6 +254,7 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
+    this._public_key = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]).public_key;
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);

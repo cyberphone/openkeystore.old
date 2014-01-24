@@ -4,7 +4,7 @@ var mySigner = function (signature_type, algorithm)
     this._algorithm = algorithm;
 };
 
-mySigner.prototype.getAlgorithm = function ()
+/* String */ mySigner.prototype.getAlgorithm = function ()
 {
     return this._algorithm;
 };
@@ -14,17 +14,24 @@ mySigner.prototype.getAlgorithm = function ()
     return this._signature_type;
 };
 
-mySigner.prototype.getPublicKey = function ()
+/* Uint8Array */ mySigner.prototype.getPublicKey = function ()
 {
     return this._public_key = org.webpki.util.Base64URL.decode ("" + AntCrypto.getPublicKey (this._algorithm));
 };
 
-mySigner.prototype.getKeyID = function ()
+/* Uint8Array[] */ mySigner.prototype.getX509CertificatePath = function ()
+{
+    var path = [];
+    path[0] = org.webpki.util.Base64URL.decode ("" + AntCrypto.getX509Certificate (this._algorithm));
+    return this._x509_certificate_path = path;
+};
+
+/* String */ mySigner.prototype.getKeyID = function ()
 {
     return "mykey";
 };
 
-mySigner.prototype.signData = function (data)
+/* Uint8Array */ mySigner.prototype.signData = function (/* Uint8Array */ data)
 {
     return new Uint8Array (org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data), this._algorithm)));
 };
@@ -74,6 +81,12 @@ signatureTest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY,
                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
 
 signatureTest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY,
+               "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+
+signatureTest (org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE,
+               "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
+
+signatureTest (org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE,
                "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
 
 signatureTest (org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY,
