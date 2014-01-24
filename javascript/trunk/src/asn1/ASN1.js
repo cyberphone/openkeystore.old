@@ -27,6 +27,7 @@ org.webpki.asn1.TAGS =
     INTEGER            : 0x02,
     NULL               : 0x05,
     BITSTRING          : 0x03,
+    UTF8STRING         : 0x0C,
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
     EXPLICIT_CONTEXT_3 : 0xA3,
