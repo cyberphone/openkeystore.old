@@ -8,7 +8,7 @@ import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.PrivateKey;
 
-import javax.security.auth.x500.X500Principal;
+import org.bouncycastle.jce.X509Principal;
 
 import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
@@ -60,7 +60,7 @@ public class AntCrypto
 	
 	public static String getDistinguishedName (String b64_data) throws Exception
 	{
-		return new X500Principal (Base64URL.decode (b64_data)).getName ();
+		return new X509Principal (Base64URL.decode (b64_data)).getName ();
 	}
 	
 	public static String convertToUTF8 (String string) throws Exception

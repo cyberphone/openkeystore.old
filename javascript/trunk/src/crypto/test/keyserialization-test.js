@@ -52,7 +52,7 @@ function certReader (cert_in_b64)
     }
 }
 
-function asn1DnTest (utf8)
+function rawDnTest (binary)
 {
     var asn1 = 
         new org.webpki.asn1.ASN1Object
@@ -66,17 +66,26 @@ function asn1DnTest (utf8)
                     org.webpki.asn1.TAGS.SEQUENCE,
                     new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.OID,  new Uint8Array ([0x55, 0x04, 0x03]))
                   )
-                .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.UTF8STRING, utf8))
+                .addComponent (binary)
               )
           )
     .encode ();
 var java_dn =  "" +  AntCrypto.getDistinguishedName (org.webpki.util.Base64URL.encode (asn1));
 
 var json_dn = org.webpki.crypto.getDistinguishedName (new org.webpki.asn1.ParsedASN1Sequence (asn1));
-if (!java_dn.equals (json_dn))
+if (java_dn.equals (json_dn))
 {
-throw "DN fail " + json_dn + " " + java_dn;
+    console.debug ("DN=" + java_dn);
 }
+else
+{
+    throw "DN fail " + json_dn + " " + java_dn;
+}
+}
+
+function asn1DnTest (utf8)
+{
+    rawDnTest (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.UTF8STRING, utf8).encode ());
 }
 
 function dnTest (unicode_argument)
@@ -331,6 +340,8 @@ dnTest ("Jo\u20achn");
 dnTest ("Jo\u00c5hn");
 
 asn1DnTest (new Uint8Array ([0xEC, 0xA1, 0xB0, 0xEC, 0x83, 0x81, 0xEB, 0x9E, 0x98]));
+
+rawDnTest (new Uint8Array ([0x1E, 0x08, 0x00, 0x41, 0x20, 0xAC, 0x00, 0xC5, 0x00, 0x42]));
 
 console.debug ("Key serialization tests successful!");
 

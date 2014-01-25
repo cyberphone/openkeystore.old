@@ -30,6 +30,7 @@ org.webpki.asn1.TAGS =
     NULL               : 0x05,
     BITSTRING          : 0x03,
     UTF8STRING         : 0x0C,
+    BMPSTRING          : 0x1E,
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
     EXPLICIT_CONTEXT_3 : 0xA3,

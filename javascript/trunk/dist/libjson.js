@@ -2819,6 +2819,10 @@ org.webpki.crypto.X500_ATTRIBUTES =
                 var c = String.fromCharCode (((b & 0x0F) << 12) | ((b2 & 0x3F) << 6) | (b3 & 0x3F));
             }
         }
+        else if (asn1_type.tag == org.webpki.asn1.TAGS.BMPSTRING)
+        {
+            var c = String.fromCharCode ((b << 8) | data[++i]);
+        }
         else
         {
             var c = String.fromCharCode (b);
@@ -2950,6 +2954,7 @@ org.webpki.asn1.TAGS =
     NULL               : 0x05,
     BITSTRING          : 0x03,
     UTF8STRING         : 0x0C,
+    BMPSTRING          : 0x1E,
     EXPLICIT_CONTEXT_0 : 0xA0,
     EXPLICIT_CONTEXT_1 : 0xA1,
     EXPLICIT_CONTEXT_3 : 0xA3,
