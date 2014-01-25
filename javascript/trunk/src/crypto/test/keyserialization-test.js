@@ -333,7 +333,7 @@ certReader (cert_v1);
 
 certReader (other_cert);
 
-//dnTest ("CN=John\\+Doe\u20ac");
+dnTest ("CN=John\\+Doe\u20ac");
 dnTest ("John");
 dnTest ("Jo,;:=hn\\");
 dnTest ("Jo\u20achn");
