@@ -30,14 +30,14 @@ function deserializeTest (spki, jcs)
     }
     catch (err)
     {
-        var failed = false;
+        failed = false;
     }
     if (failed) throw "Should have failed";
 }
 
 function certReader (cert_in_b64)
 {
-    var cert_data = new org.webpki.crypto.decodeX509Certificate (org.webpki.util.Base64URL.decode (cert_in_b64));
+    var cert_data = new org.webpki.crypto.DecodedX509Certificate (org.webpki.util.Base64URL.decode (cert_in_b64));
     console.debug ("Certificate with SN=" + cert_data.serial_number.toString () + "\n" +
             new org.webpki.json.JSONObjectWriter ().setPublicKey (cert_data.public_key).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
     var cert = "" + AntCrypto.getX509CertificateParams (cert_in_b64);

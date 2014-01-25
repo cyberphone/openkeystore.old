@@ -35,11 +35,11 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     var object = new object_class ();
     if (object.getContext === undefined)
     {
-        org.webpki.json.JSONError._error ('Missing mandatory method "getContext"');
+        org.webpki.util._error ('Missing mandatory method "getContext"');
     }
     if (object.readJSONData === undefined)
     {
-        org.webpki.json.JSONError._error ('Missing mandatory method "readJSONData"');
+        org.webpki.util._error ('Missing mandatory method "readJSONData"');
     }
     var object_id = object.getContext ();
     if (object.getQualifier != undefined)
@@ -48,7 +48,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     }
     if (this.cache[object_id] != null)
     {
-        org.webpki.json.JSONError._error ("Duplicate definition: " + object_id);
+        org.webpki.util._error ("Duplicate definition: " + object_id);
     }
     this.cache[object_id] = object_class;
 };
@@ -61,7 +61,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
         var value = json_object.property_list[i].value;
         if (!json_object.read_flag[name])
         {
-            org.webpki.json.JSONError._error ('Property "' + name + '" was never read');
+            org.webpki.util._error ('Property "' + name + '" was never read');
         }
         if (value.type == org.webpki.json.JSONTypes.OBJECT)
         {
@@ -93,7 +93,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     var object_class = this.cache[object_id];
     if (object_class == null)
     {
-        org.webpki.json.JSONError._error ("No document matching: " + object_id);
+        org.webpki.util._error ("No document matching: " + object_id);
     }
     var object = new object_class ();
     object.readJSONData (json_object_reader);

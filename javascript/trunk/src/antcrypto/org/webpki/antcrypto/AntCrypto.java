@@ -22,11 +22,13 @@ import org.webpki.crypto.CertificateUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.json.test.Sign;
-
-
 public class AntCrypto
 {
+    public static final byte[] SYMMETRIC_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
+                                                (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
+                                                (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
+                                                (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
+
     static
     {
     	CustomCryptoProvider.conditionalLoad ();
@@ -43,11 +45,6 @@ public class AntCrypto
 		return Base64URL.encode (((X509Certificate)getKeyStore (algorithm).getCertificate ("mykey")).getPublicKey ().getEncoded ());
 	}
 	
-	public static String getKeyID () throws Exception
-	{
-		return Sign.SYMMETRIC_KEY_NAME;  // To maintain compatibility with the server-demo...
-	}
-
 	public static String getX509CertificateParams (String b64_data) throws Exception
 	{
 		X509Certificate cert = CertificateUtil.getCertificateFromBlob (Base64URL.decode (b64_data));
@@ -75,7 +72,7 @@ public class AntCrypto
 	{
 		if (MACAlgorithms.testAlgorithmURI (algorithm))
 		{
-			return Base64URL.encode (MACAlgorithms.getAlgorithmFromURI (algorithm).digest (Sign.SYMMETRIC_KEY,
+			return Base64URL.encode (MACAlgorithms.getAlgorithmFromURI (algorithm).digest (SYMMETRIC_KEY,
 					                                                                       Base64URL.decode (b64_data)));
 		}
         Signature s = Signature.getInstance (AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm).getJCEName ());
@@ -84,7 +81,7 @@ public class AntCrypto
 		return Base64URL.encode (s.sign ());
 	}
 
-	public static boolean verifySignature (String b64_data, String b64_signature_value, String algorithm, String key_id_or_public_key_in_b64y) throws Exception
+	public static boolean verifySignature (String b64_data, String b64_signature_value, String algorithm, String public_key_b64) throws Exception
 	{
 		if (MACAlgorithms.testAlgorithmURI (algorithm))
 		{
@@ -92,7 +89,7 @@ public class AntCrypto
 		}
 		AsymSignatureAlgorithms asym_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm);
 		Signature s = Signature.getInstance (asym_alg.getJCEName ());
-		s.initVerify (KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC").generatePublic (new X509EncodedKeySpec (Base64URL.decode (key_id_or_public_key_in_b64y))));
+		s.initVerify (KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC").generatePublic (new X509EncodedKeySpec (Base64URL.decode (public_key_b64))));
 		s.update (Base64URL.decode (b64_data));
 		return s.verify (Base64URL.decode (b64_signature_value));
 	}

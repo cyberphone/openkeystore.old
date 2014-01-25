@@ -29,11 +29,11 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     /* JSONValue */var value = this.root._getProperty (name);
     if (value == null)
     {
-        org.webpki.json.JSONError._error ("Property \"" + name + "\" is missing");
+        org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
     if (!expected_type.isCompatible (value.type))
     {
-        org.webpki.json.JSONError._error ("Type mismatch for \"" + name +
+        org.webpki.util._error ("Type mismatch for \"" + name +
                            "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
                            ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
@@ -156,7 +156,7 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     /* JSONValue[] */var array = /* JSONValue[] */value.value;
     if (array.length > 0 && array[0].type != expected)
     {
-        org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
+        org.webpki.util._error ("Array type mismatch for \"" + name + "\"");
     }
     return array;
 };

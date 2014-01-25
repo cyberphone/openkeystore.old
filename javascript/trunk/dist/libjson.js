@@ -57,7 +57,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     if (!this.hasMore ())
     {
-        org.webpki.json.JSONError._error ("Trying to read past of array limit: " + this.index);
+        org.webpki.util._error ("Trying to read past of array limit: " + this.index);
     }
 };
 
@@ -67,7 +67,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     /* JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
-        org.webpki.json.JSONError._error ("Incompatible request: " +
+        org.webpki.util._error ("Incompatible request: " +
                 "Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
                 ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
@@ -250,11 +250,11 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     var object = new object_class ();
     if (object.getContext === undefined)
     {
-        org.webpki.json.JSONError._error ('Missing mandatory method "getContext"');
+        org.webpki.util._error ('Missing mandatory method "getContext"');
     }
     if (object.readJSONData === undefined)
     {
-        org.webpki.json.JSONError._error ('Missing mandatory method "readJSONData"');
+        org.webpki.util._error ('Missing mandatory method "readJSONData"');
     }
     var object_id = object.getContext ();
     if (object.getQualifier != undefined)
@@ -263,7 +263,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     }
     if (this.cache[object_id] != null)
     {
-        org.webpki.json.JSONError._error ("Duplicate definition: " + object_id);
+        org.webpki.util._error ("Duplicate definition: " + object_id);
     }
     this.cache[object_id] = object_class;
 };
@@ -276,7 +276,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
         var value = json_object.property_list[i].value;
         if (!json_object.read_flag[name])
         {
-            org.webpki.json.JSONError._error ('Property "' + name + '" was never read');
+            org.webpki.util._error ('Property "' + name + '" was never read');
         }
         if (value.type == org.webpki.json.JSONTypes.OBJECT)
         {
@@ -308,7 +308,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     var object_class = this.cache[object_id];
     if (object_class == null)
     {
-        org.webpki.json.JSONError._error ("No document matching: " + object_id);
+        org.webpki.util._error ("No document matching: " + object_id);
     }
     var object = new object_class ();
     object.readJSONData (json_object_reader);
@@ -326,19 +326,6 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
 };
 
 /*================================================================*/
-/*                           JSONError                            */
-/*================================================================*/
-
-org.webpki.json.JSONError = function ()
-{
-};
-
-org.webpki.json.JSONError._error = function (message)
-{
-    throw "JSONException: " + message;
-};
-
-/*================================================================*/
 /*                           JSONObject                           */
 /*================================================================*/
 
@@ -352,7 +339,7 @@ org.webpki.json.JSONObject = function ()
 {
     if (!(value instanceof org.webpki.json.JSONValue))
     {
-        org.webpki.json.JSONError._error ("Wrong value type: " + value);
+        org.webpki.util._error ("Wrong value type: " + value);
     }
     var length = this.property_list.length;
     var new_property = new Object;
@@ -368,7 +355,7 @@ org.webpki.json.JSONObject = function ()
                 length = i;
                 break;
             }
-            org.webpki.json.JSONError._error ("Property already defined: " + name);
+            org.webpki.util._error ("Property already defined: " + name);
         }
     }
     this.property_list[length] = new_property;
@@ -416,11 +403,11 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     /* JSONValue */var value = this.root._getProperty (name);
     if (value == null)
     {
-        org.webpki.json.JSONError._error ("Property \"" + name + "\" is missing");
+        org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
     if (!expected_type.isCompatible (value.type))
     {
-        org.webpki.json.JSONError._error ("Type mismatch for \"" + name +
+        org.webpki.util._error ("Type mismatch for \"" + name +
                            "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
                            ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }
@@ -543,7 +530,7 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     /* JSONValue[] */var array = /* JSONValue[] */value.value;
     if (array.length > 0 && array[0].type != expected)
     {
-        org.webpki.json.JSONError._error ("Array type mismatch for \"" + name + "\"");
+        org.webpki.util._error ("Array type mismatch for \"" + name + "\"");
     }
     return array;
 };
@@ -663,12 +650,12 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
         this.root = optional_object_or_reader.root;
         if (this.root._isArray ())
         {
-            org.webpki.json.JSONError._error ("You cannot update array objects");
+            org.webpki.util._error ("You cannot update array objects");
         }
     }
     else
     {
-        org.webpki.json.JSONError._error ("Wrong init of org.webpki.json.JSONObjectWriter");
+        org.webpki.util._error ("Wrong init of org.webpki.json.JSONObjectWriter");
     }
 };
 
@@ -696,7 +683,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "string")
     {
-        org.webpki.json.JSONError._error ("Bad string: " + name);
+        org.webpki.util._error ("Bad string: " + name);
     }
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, value));
 };
@@ -706,7 +693,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     var int_string = value.toString ();
     if (typeof value != "number" || int_string.indexOf ('.') >= 0)
     {
-        org.webpki.json.JSONError._error ("Bad integer: " + int_string);
+        org.webpki.util._error ("Bad integer: " + int_string);
     }
     return int_string;
 };
@@ -727,7 +714,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "number")
     {
-        org.webpki.json.JSONError._error ("Bad float type " + (typeof value));
+        org.webpki.util._error ("Bad float type " + (typeof value));
     }
     return value.toString ();
 };
@@ -736,13 +723,13 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "string")
     {
-        org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
+        org.webpki.util._error ("Bad big decimal type " + (typeof value));
     }
     if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) &&
         (!org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (value) || 
          org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (value)))
     {
-        org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
+        org.webpki.util._error ("Bad big decimal syntax: " + value);
     }
     return value;
 };
@@ -751,7 +738,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "boolean")
     {
-        org.webpki.json.JSONError._error ("Bad bool type " + (typeof value));
+        org.webpki.util._error ("Bad bool type " + (typeof value));
     }
     return value.toString ();
 };
@@ -855,9 +842,20 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setSignature = function (/* JSONSigner */signer)
 {
-    var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
-    signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
-    var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+    return this.endSignature (signer.signData (this.beginSignature (signer)));
+};
+
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
+{
+    this.signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signature_value);
+    return this;
+};
+
+/* public Uint8Array */org.webpki.json.JSONObjectWriter.prototype.beginSignature = function (/* JSONSigner */signer)
+{
+    this.signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    var key_info_writer = this.signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
     switch (signer.getSignatureType ())
     {
         case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
@@ -872,7 +870,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             var certificate_path = signer.getX509CertificatePath ();
             if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
             {
-                var signature_certificate = new org.webpki.crypto.decodeX509Certificate (certificate_path[0]);
+                var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (certificate_path[0]);
                 if (signature_certificate.issuer != null && signature_certificate.subject != null)
                 {
                     var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
@@ -885,7 +883,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             break;
 
         default:
-            org.webpki.json.JSONError._error ("Unknown signature type requested");
+            org.webpki.util._error ("Unknown signature type requested");
      }
             
 //    if (signer.getExtensions != null)
@@ -895,19 +893,17 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     //              {
     //                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
     //              }
-    //            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+    //            this.signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     //          }
     //        
     //      }
-    signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON,
-                                signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root)));
-    return this;
+    return org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root);
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key_in_x509_format)
 {
     /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    var key_alg = new org.webpki.crypto.decodePublicKey (public_key_in_x509_format);
+    var key_alg = new org.webpki.crypto.DecodedPublicKey (public_key_in_x509_format);
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
@@ -1475,7 +1471,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     {
         if (!parser._isWhiteSpace (parser.json_data.charAt (parser.index++)))
         {
-            org.webpki.json.JSONError._error ("Improperly terminated JSON object");
+            org.webpki.util._error ("Improperly terminated JSON object");
         }
     }
     return new org.webpki.json.JSONObjectReader (root);
@@ -1487,7 +1483,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     var property = this._scanQuotedString ().value;
     if (property.length == 0)
     {
-        org.webpki.json.JSONError._error ("Empty property");
+        org.webpki.util._error ("Empty property");
     }
     this._scanFor (org.webpki.json.JSONParser.COLON_CHARACTER);
     return property;
@@ -1583,7 +1579,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     }
     if (result.length == 0)
     {
-        org.webpki.json.JSONError._error ("Missing argument");
+        org.webpki.util._error ("Missing argument");
     }
     /* JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
     if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (result))
@@ -1605,7 +1601,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
             type = org.webpki.json.JSONTypes.DOUBLE;
             if (!org.webpki.json.JSONParser.DOUBLE_PATTERN.test (result))
             {
-                org.webpki.json.JSONError._error ("Undecodable argument: " + result);
+                org.webpki.util._error ("Undecodable argument: " + result);
             }
         }
     }
@@ -1620,7 +1616,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         /* char */var c = this._nextChar ();
         if (c < ' ')
         {
-            org.webpki.json.JSONError._error ("Unescaped control character: " + c);
+            org.webpki.util._error ("Unescaped control character: " + c);
         }
         if (c == org.webpki.json.JSONParser.DOUBLE_QUOTE)
         {
@@ -1665,7 +1661,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
                     break;
 
                 default:
-                    org.webpki.json.JSONError._error ("Unsupported escape:" + c);
+                    org.webpki.util._error ("Unsupported escape:" + c);
             }
         }
         result += c;
@@ -1706,7 +1702,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         case 'F':
             return c.charCodeAt (0) - 55;
     }
-    org.webpki.json.JSONError._error ("Bad hex in \\u escape: " + c);
+    org.webpki.util._error ("Bad hex in \\u escape: " + c);
 };
 
 /* char */org.webpki.json.JSONParser.prototype._testNextNonWhiteSpaceChar = function ()
@@ -1722,7 +1718,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     /* char */var c = this._scan ();
     if (c != expected)
     {
-        org.webpki.json.JSONError._error ("Expected '" + expected + "' but got '" + c + "'");
+        org.webpki.util._error ("Expected '" + expected + "' but got '" + c + "'");
     }
 };
 
@@ -1732,7 +1728,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     {
         return this.json_data.charAt (this.index++);
     }
-    org.webpki.json.JSONError._error ("Unexpected EOF reached");
+    org.webpki.util._error ("Unexpected EOF reached");
 };
 
 /* boolean */org.webpki.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)
@@ -1764,7 +1760,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
                                                   org.webpki.json.JSONSignatureDecoder.SIGNATURE_VERSION_ID);
     if (version != org.webpki.json.JSONSignatureDecoder.SIGNATURE_VERSION_ID)
     {
-        org.webpki.json.JSONError._error ("Unknown \"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON + "\" version: " + version);
+        org.webpki.util._error ("Unknown \"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON + "\" version: " + version);
     }
     this._signature_algorithm = signature.getString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON);
     this._getKeyInfo (signature.getObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON));
@@ -1778,7 +1774,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
             var ext_obj = ext_arr_reader.getObject ();
             if (!ext_obj.hasProperty (org.webpki.json.JSONSignatureDecoder.TYPE_JSON))
             {
-                org.webpki.json.JSONError._error ("An \"" + org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON + "\" object lack a \"" + org.webpki.json.JSONSignatureDecoder.TYPE_JSON + "\" property");
+                org.webpki.util._error ("An \"" + org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON + "\" object lack a \"" + org.webpki.json.JSONSignatureDecoder.TYPE_JSON + "\" property");
             }
             this._extensions[this._extensions.length] = ext_obj;
         }
@@ -1861,11 +1857,11 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     }
     else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.URL_JSON))
     {
-        org.webpki.json.JSONError._error ("\"" + org.webpki.json.JSONSignatureDecoder.URL_JSON + "\" not yet implemented");
+        org.webpki.util._error ("\"" + org.webpki.json.JSONSignatureDecoder.URL_JSON + "\" not yet implemented");
     }
     else
     {
-        org.webpki.json.JSONError._error ("Undecodable \"" + org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON + "\" object");
+        org.webpki.util._error ("Undecodable \"" + org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON + "\" object");
     }
 };
 
@@ -1874,7 +1870,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     var crypto_binary = rd.getBinary (property);
     if (crypto_binary[0] == 0x00)
     {
-        org.webpki.json.JSONError._error ("Public key parameters must not contain leading zeroes");
+        org.webpki.util._error ("Public key parameters must not contain leading zeroes");
     }
     return crypto_binary;
 };
@@ -1920,7 +1916,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 {
     if (signature_type != this.getSignatureType ())
     {
-        org.webpki.json.JSONError._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+        org.webpki.util._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
     }
 };
 
@@ -1928,11 +1924,11 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 {
     if (verifier.getVerifierType () != this.getSignatureType ())
     {
-        org.webpki.json.JSONError._error ("Verifier type doesn't match the received signature");
+        org.webpki.util._error ("Verifier type doesn't match the received signature");
     }
     if (!verifier.verify (this))
     {
-        org.webpki.json.JSONError._error ("Signature didn't validate");
+        org.webpki.util._error ("Signature didn't validate");
     }
 };
 
@@ -1992,21 +1988,21 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
-    this._public_key = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]).public_key;
+    this._public_key = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]).public_key;
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
         var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
         var serial_number = rd.getBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON);
         var subject = rd.getString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON);
-        var signature_certificate = new org.webpki.crypto.decodeX509Certificate (this._certificate_path[0]);
+        var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]);
         if (signature_certificate.issuer != null && signature_certificate.subject != null)
         {
             if (signature_certificate.issuer != issuer ||
                 !signature_certificate.serial_number.equals (serial_number) ||
                 signature_certificate.subject != subject)
             {
-                org.webpki.json.JSONError._error ("\"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+                org.webpki.util._error ("\"" + org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
             }
         }
     }
@@ -2116,10 +2112,10 @@ org.webpki.math = org.webpki.math || {};
 /*                           BigInteger                           */
 /*================================================================*/
 
-// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
-// the only functionality offered are tests for equivalence and zero.  It is anticipated
-// that all cryptographic functions are performed in other and lower layers of
-// the platform.  Only positive values (and zero) are currently supported.
+// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and the only
+// functionality offered beyond parsing and toString are tests for equivalence and zero.
+// It is anticipated that all cryptographic functions are performed in other and lower
+// layers of the platform.  Only positive values (and zero) are currently supported.
 
 /* BigInteger */org.webpki.math.BigInteger = function (/* Uint8Array */optional_value)
 {
@@ -2132,11 +2128,6 @@ org.webpki.math = org.webpki.math || {};
         this.value = optional_value;
         this._trim ();
     }
-};
-
-org.webpki.math.BigInteger._error = function (message)
-{
-    throw "MATHException: " + message;
 };
 
 /* void */org.webpki.math.BigInteger.prototype._trim = function ()
@@ -2173,7 +2164,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     }
     else
     {
-        org.webpki.math.BigInteger._error ("Incorrect base argument, only 10 and 16 are supported");
+        org.webpki.util._error ("Incorrect base argument, only 10 and 16 are supported");
     }
     throw "MATHException: " + message;
 };
@@ -2199,7 +2190,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (this.value.length > 8)
     {
-        org.webpki.math.BigInteger._error ("Out of \"Long\" range");
+        org.webpki.util._error ("Out of \"Long\" range");
     }
     return this;
 };
@@ -2235,11 +2226,11 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     }
     else if (typeof string  != 'string')
     {
-        org.webpki.math.BigInteger._error ("Expected a string argument");
+        org.webpki.util._error ("Expected a string argument");
     }
     if (string.length == 0)
     {
-        org.webpki.math.BigInteger._error ("Empty string not allowed");
+        org.webpki.util._error ("Empty string not allowed");
     }
     var bi = new org.webpki.math.BigInteger ();
     var result = [];
@@ -2254,7 +2245,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         }
         else if (base == 10)
         {
-            org.webpki.math.BigInteger._error ("Decimal number expected");
+            org.webpki.util._error ("Decimal number expected");
 
         }
         else if (c >= 'a' && c <= 'f')
@@ -2267,7 +2258,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         }
         else
         {
-            org.webpki.math.BigInteger._error ("Hexadecimal number expected");
+            org.webpki.util._error ("Hexadecimal number expected");
         }
         var carry = 0;
         var j = 0;
@@ -2296,7 +2287,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value)
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     return this.value;
 };
@@ -2305,7 +2296,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value || !big_integer.value) 
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     return org.webpki.util.ByteArray.equals (this.value, big_integer.value);
 };
@@ -2314,7 +2305,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value)
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     var base = org.webpki.math.BigInteger._base (/* int */optional_10_or_16_base);
 
@@ -2398,7 +2389,7 @@ org.webpki.util.Base64URL =
         var c = encoded.charCodeAt (i);
         if (c >= org.webpki.util.Base64URL.DECODE_TABLE.length || (c = org.webpki.util.Base64URL.DECODE_TABLE[c]) < 0)
         {
-            throw "Base64Exception: bad character at index " + i;
+            org.webpki.util._error ("Bad character at index " + i);
         }
         semidecoded[i] = c;
     }
@@ -2413,7 +2404,7 @@ org.webpki.util.Base64URL =
     var decoded_length_modulo_3 = Math.floor (decoded_length % 3);
     if (decoded_length_modulo_3 == 0 && encoded_length_modulo_4 != 0)
     {
-        throw "Base64Exception: wrong number of characters";
+        org.webpki.util._error ("Wrong number of characters");
     }
 
     // -----:  D E C O D E :-----
@@ -2431,7 +2422,7 @@ org.webpki.util.Base64URL =
         decoded[j] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
         if (semidecoded[i] & 0x0F)
         {
-            throw "Base64Exception: wrong termination character";
+            org.webpki.util._error ("Wrong termination character");
         }
     }
     else if (decoded_length_modulo_3 == 2)
@@ -2440,7 +2431,7 @@ org.webpki.util.Base64URL =
         decoded[j] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
         if (semidecoded[i] & 0x03)
         {
-            throw "Base64Exception: wrong termination character";
+            org.webpki.util._error ("Wrong termination character");
         }
     }
     return decoded;
@@ -2480,7 +2471,7 @@ org.webpki.util.Base64URL =
 /*                            ByteArray                           */
 /*================================================================*/
 
-//* Encodes/decodes base64URL data as described in RFC 4648 Table 2.
+//* A set of basic methods for dealing with Uint8Arrays.
 
 org.webpki.util.ByteArray = {};
 
@@ -2565,6 +2556,32 @@ org.webpki.util.ByteArray = {};
 };
 
 /*================================================================*/
+/*                             Error                              */
+/*================================================================*/
+
+//* Central error handling
+
+org.webpki.util.Error = function (message)
+{
+    this.message = message;
+};
+
+/* String */org.webpki.util.Error.prototype.toString = function ()
+{
+    return this.message;
+};
+
+/* boolean */org.webpki.util.Error.prototype.contains = function (string)
+{
+    return this.message.indexOf (string) >= 0;
+};
+
+/* catch (Error) */ org.webpki.util._error = function (message)
+{
+    throw new org.webpki.util.Error (message);
+};
+
+/*================================================================*/
 /*              Namespace for the "Crypto" library                */
 /*================================================================*/
 
@@ -2577,6 +2594,8 @@ org.webpki.crypto = org.webpki.crypto || {};
 /*================================================================*/
 /*                       Key Serialization                        */
 /*================================================================*/
+
+//* Serialization/de-serialization of X.509 SPKIs + rudimentary X.509 certificate decoder
 
 org.webpki.crypto.SUPPORTED_NAMED_CURVES = 
 [//                 SKS Algorithm ID                   Coordinate Length   Textual OID            ASN.1 OID (without header)
@@ -2594,11 +2613,6 @@ org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x
 org.webpki.crypto.EC_ALGORITHM_OID     = [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01]; 
 
 org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
-
-org.webpki.crypto._error = function (/* String */message)
-{
-    throw "CryptoException: " + message;
-};
 
 /* int */org.webpki.crypto._getECParamsFromURI = function (/* String */uri)
 {
@@ -2623,14 +2637,14 @@ org.webpki.crypto._error = function (/* String */message)
             }
         }
     }
-    org.webpki.crypto._error ("Unsupported EC curve: " + uri);
+    org.webpki.util._error ("Unsupported EC curve: " + uri);
 };
 
 /* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
 {
     if (original.length > required_length)
     {
-        org.webpki.crypto._error ("Input data out of bounds: " + original.length);        
+        org.webpki.util._error ("Input data out of bounds: " + original.length);        
     }
     while (original.length < required_length)
     {
@@ -2717,17 +2731,17 @@ org.webpki.crypto._error = function (/* String */message)
       ).encode ();
 };
 
-org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
+/* Public Key Data */org.webpki.crypto.DecodedPublicKey = function (/* Uint8Array */spki)
 {
     var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
     if (outer_sequence.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("SubjectPublicKeyInfo sequence must be two elements");        
+        org.webpki.util._error ("SubjectPublicKeyInfo sequence must be two elements");        
     }
     var algorithm_id = outer_sequence.getComponent (0).getASN1Sequence ();
     if (algorithm_id.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Algorithm ID sequence must be two elements");        
+        org.webpki.util._error ("Algorithm ID sequence must be two elements");        
     }
     var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
     var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
@@ -2737,7 +2751,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
         var rsa_params = new org.webpki.asn1.ParsedASN1Sequence (encapsulated_key);
         if (rsa_params.numberOfComponents () != 2)
         {
-            org.webpki.crypto._error ("RSA parameter sequence must be two elements");        
+            org.webpki.util._error ("RSA parameter sequence must be two elements");        
         }
         this.modulus = rsa_params.getComponent (0).getASN1PositiveInteger ();
         this.exponent = rsa_params.getComponent (1).getASN1PositiveInteger ();
@@ -2746,7 +2760,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
     {
         if (encapsulated_key[0] != 0x04)
         {
-            org.webpki.crypto._error ("EC uncompressed parameter expected");        
+            org.webpki.util._error ("EC uncompressed parameter expected");        
         }
         var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
         for (var i = 3; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
@@ -2756,7 +2770,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
                 var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 2];
                 if (encapsulated_key.length != coordinate_length * 2 + 1)
                 {
-                    org.webpki.crypto._error ("ECPoint length error");        
+                    org.webpki.util._error ("ECPoint length error");        
                 }
                 this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
                 this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
@@ -2765,11 +2779,11 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
                 return;
             }
         }
-        org.webpki.crypto._error ("EC curve OID unknown");        
+        org.webpki.util._error ("EC curve OID unknown");        
     }
     else
     {
-        org.webpki.crypto._error ("Public key OID unknown");        
+        org.webpki.util._error ("Public key OID unknown");        
     }
 };
 
@@ -2820,10 +2834,10 @@ org.webpki.crypto.X500_ATTRIBUTES =
 
 /* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
 {
-    var holder = asn1_sequence.getASN1Sequence ();
+    var dn_holder = asn1_sequence.getASN1Sequence ();
     var dn = "";
     var next = false;
-    var q = holder.numberOfComponents ();
+    var q = dn_holder.numberOfComponents ();
     while (--q >= 0)
     {
         if (next)
@@ -2834,7 +2848,7 @@ org.webpki.crypto.X500_ATTRIBUTES =
         {
             next = true;
         }
-        var set = holder.getComponent (q).getASN1Set ();
+        var set = dn_holder.getComponent (q).getASN1Set ();
         if (set.numberOfComponents () != 1)
         {
 console.debug ("Multivalued, drop it");
@@ -2861,7 +2875,7 @@ console.debug ("Weird, drop it");
         if (non_symbolic)
         {
             var i = 0;
-            var id = null;
+            var oid = null;
             while (i < attr_name.length)
             {
                 var subid = 0;
@@ -2870,20 +2884,20 @@ console.debug ("Weird, drop it");
                     subid = (subid << 7) + (attr_name[i] &0x7F);
                 }
                 while ((attr_name[i++] & 0x80) != 0);
-                if (id == null)
+                if (oid == null)
                 {
-                    id = (Math.floor (subid / 40)).toString ();
-                    Math.floor (subid %= 40);
+                    oid = (Math.floor (subid / 40)).toString ();
+                    subid = Math.floor (subid % 40);
                 }
-                id += '.' + subid;
+                oid += '.' + subid;
             }
-            dn += id + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
+            dn += oid + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
         }
     }
     return dn;
 };
 
-/* certificate data */org.webpki.crypto.decodeX509Certificate = function(/* Uint8Array */certificate_blob)
+/* Certificate Data */org.webpki.crypto.DecodedX509Certificate = function(/* Uint8Array */certificate_blob)
 {
     var asn1 = new org.webpki.asn1.ParsedASN1Sequence (certificate_blob);
     var tbs = asn1.getComponent (0).getASN1Sequence ();
@@ -2901,14 +2915,14 @@ console.debug ("Weird, drop it");
     }
     if (tbs.getComponent (index++).getASN1Sequence ().numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Certificate validity not found");        
+        org.webpki.util._error ("Certificate validity not found");        
     }
     this.subject = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
     if (this.subject === undefined)
     {
         console.debug ("Couldn't decode subject DN");
     }
-    org.webpki.crypto.decodePublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
 };
 
 /*================================================================*/
@@ -2924,6 +2938,8 @@ org.webpki.asn1 = org.webpki.asn1 || {};
 /*================================================================*/
 /*                            ASN1                                */
 /*================================================================*/
+
+//* Ultra-light ASN.1 library
 
 org.webpki.asn1.TAGS =
 {
@@ -2942,16 +2958,11 @@ org.webpki.asn1.TAGS =
 
 org.webpki.asn1.LIBRARY_LIMIT = 50000;  // 50k of ASN.1 is all we care of
 
-org.webpki.asn1._error = function (/* String */message)
-{
-    throw "ASN1Exception: " + message;
-};
-
 /* void */org.webpki.asn1._lengthCheck = function (/* int */length)
 {
     if (length > org.webpki.asn1.LIBRARY_LIMIT)
     {
-        org.webpki.asn1._error ("Exceeded library limit " + org.webpki.asn1.LIBRARY_LIMIT + " bytes");
+        org.webpki.util._error ("Exceeded library limit " + org.webpki.asn1.LIBRARY_LIMIT + " bytes");
     }
 };
 
@@ -3052,7 +3063,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
             this.components.push (asn1_object);
             if (chunk > new_der.length)
             {
-                org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);
+                org.webpki.util._error ("Length error for tag: " + asn1_object.tag);
             }
             new_der = new Uint8Array (new_der.subarray (chunk));
         }
@@ -3063,7 +3074,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     {
         if (this.body.length == 0)
         {
-            org.webpki.asn1._error ("Zero-length body not permitted for tag: " + this.tag);
+            org.webpki.util._error ("Zero-length body not permitted for tag: " + this.tag);
         }
     }
     return this;
@@ -3073,7 +3084,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this.position >= this.raw_der.length)
     {
-        org.webpki.asn1._error ("Buffer underrun for tag: " + this.tag);
+        org.webpki.util._error ("Buffer underrun for tag: " + this.tag);
     }
     return this.raw_der[this.position++];
 };
@@ -3082,7 +3093,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this.components === undefined)
     {
-        org.webpki.asn1._error ("This object type doesn't have components: " + this.tag);
+        org.webpki.util._error ("This object type doesn't have components: " + this.tag);
     }
     return this.components.length;
 };
@@ -3091,7 +3102,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (index >= this.numberOfComponents ())
     {
-        org.webpki.asn1._error ("Component index out of range: " + index);
+        org.webpki.util._error ("Component index out of range: " + index);
     }
     return this.components[index];
 };
@@ -3111,7 +3122,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     var data = this.getASN1Integer ();
     if (data[0] > 127)
     {
-        org.webpki.asn1._error ("Unexpected negative integer value");
+        org.webpki.util._error ("Unexpected negative integer value");
     }
     return data;
 };
@@ -3123,7 +3134,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     {
         if (raw[0] != 0)
         {
-            org.webpki.asn1._error ("Bitstring with unused bits not allowed");
+            org.webpki.util._error ("Bitstring with unused bits not allowed");
         }
         raw = new Uint8Array (raw.subarray (1));
     }
@@ -3134,7 +3145,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this._getBodyData (org.webpki.asn1.TAGS.NULL).length != 0)
     {
-        org.webpki.asn1._error ("Misformed ASN.1 NULL");
+        org.webpki.util._error ("Misformed ASN.1 NULL");
     }
 };
 
@@ -3154,7 +3165,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (tag != this.tag)
     {
-        org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
+        org.webpki.util._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
     }
     return this.body;
 };
@@ -3179,7 +3190,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     var sequence = new org.webpki.asn1.ParsedASN1Object (raw_der, org.webpki.asn1.TAGS.SEQUENCE);
     if (sequence.body.length != (raw_der.length - sequence.start_of_body))
     {
-        org.webpki.asn1._error ("Sequence length error");
+        org.webpki.util._error ("Sequence length error");
     }
     return sequence;
 };

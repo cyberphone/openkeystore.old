@@ -29,7 +29,7 @@ org.webpki.json.JSONObject = function ()
 {
     if (!(value instanceof org.webpki.json.JSONValue))
     {
-        org.webpki.json.JSONError._error ("Wrong value type: " + value);
+        org.webpki.util._error ("Wrong value type: " + value);
     }
     var length = this.property_list.length;
     var new_property = new Object;
@@ -45,7 +45,7 @@ org.webpki.json.JSONObject = function ()
                 length = i;
                 break;
             }
-            org.webpki.json.JSONError._error ("Property already defined: " + name);
+            org.webpki.util._error ("Property already defined: " + name);
         }
     }
     this.property_list[length] = new_property;

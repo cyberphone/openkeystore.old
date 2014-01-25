@@ -60,7 +60,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     {
         if (!parser._isWhiteSpace (parser.json_data.charAt (parser.index++)))
         {
-            org.webpki.json.JSONError._error ("Improperly terminated JSON object");
+            org.webpki.util._error ("Improperly terminated JSON object");
         }
     }
     return new org.webpki.json.JSONObjectReader (root);
@@ -72,7 +72,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     var property = this._scanQuotedString ().value;
     if (property.length == 0)
     {
-        org.webpki.json.JSONError._error ("Empty property");
+        org.webpki.util._error ("Empty property");
     }
     this._scanFor (org.webpki.json.JSONParser.COLON_CHARACTER);
     return property;
@@ -168,7 +168,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     }
     if (result.length == 0)
     {
-        org.webpki.json.JSONError._error ("Missing argument");
+        org.webpki.util._error ("Missing argument");
     }
     /* JSONTypes */var type = org.webpki.json.JSONTypes.INTEGER;
     if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (result))
@@ -190,7 +190,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
             type = org.webpki.json.JSONTypes.DOUBLE;
             if (!org.webpki.json.JSONParser.DOUBLE_PATTERN.test (result))
             {
-                org.webpki.json.JSONError._error ("Undecodable argument: " + result);
+                org.webpki.util._error ("Undecodable argument: " + result);
             }
         }
     }
@@ -205,7 +205,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         /* char */var c = this._nextChar ();
         if (c < ' ')
         {
-            org.webpki.json.JSONError._error ("Unescaped control character: " + c);
+            org.webpki.util._error ("Unescaped control character: " + c);
         }
         if (c == org.webpki.json.JSONParser.DOUBLE_QUOTE)
         {
@@ -250,7 +250,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
                     break;
 
                 default:
-                    org.webpki.json.JSONError._error ("Unsupported escape:" + c);
+                    org.webpki.util._error ("Unsupported escape:" + c);
             }
         }
         result += c;
@@ -291,7 +291,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         case 'F':
             return c.charCodeAt (0) - 55;
     }
-    org.webpki.json.JSONError._error ("Bad hex in \\u escape: " + c);
+    org.webpki.util._error ("Bad hex in \\u escape: " + c);
 };
 
 /* char */org.webpki.json.JSONParser.prototype._testNextNonWhiteSpaceChar = function ()
@@ -307,7 +307,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     /* char */var c = this._scan ();
     if (c != expected)
     {
-        org.webpki.json.JSONError._error ("Expected '" + expected + "' but got '" + c + "'");
+        org.webpki.util._error ("Expected '" + expected + "' but got '" + c + "'");
     }
 };
 
@@ -317,7 +317,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
     {
         return this.json_data.charAt (this.index++);
     }
-    org.webpki.json.JSONError._error ("Unexpected EOF reached");
+    org.webpki.util._error ("Unexpected EOF reached");
 };
 
 /* boolean */org.webpki.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)

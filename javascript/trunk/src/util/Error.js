@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+*  Copyright 2006-2014 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,14 +16,27 @@
  */
 
 /*================================================================*/
-/*                           JSONError                            */
+/*                             Error                              */
 /*================================================================*/
 
-org.webpki.json.JSONError = function ()
+//* Central error handling
+
+org.webpki.util.Error = function (message)
 {
+    this.message = message;
 };
 
-org.webpki.json.JSONError._error = function (message)
+/* String */org.webpki.util.Error.prototype.toString = function ()
 {
-    throw "JSONException: " + message;
+    return this.message;
+};
+
+/* boolean */org.webpki.util.Error.prototype.contains = function (string)
+{
+    return this.message.indexOf (string) >= 0;
+};
+
+/* catch (Error) */ org.webpki.util._error = function (message)
+{
+    throw new org.webpki.util.Error (message);
 };

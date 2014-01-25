@@ -28,12 +28,12 @@ var mySigner = function (signature_type, algorithm)
 
 /* String */ mySigner.prototype.getKeyID = function ()
 {
-    return "" + AntCrypto.getKeyID ();
+    return "my.symmetric.key";
 };
 
 /* Uint8Array */mySigner.prototype.signData = function (/* Uint8Array */ data)
 {
-    return new Uint8Array (org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data), this._algorithm)));
+    return org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data), this._algorithm));
 };
 
 /* boolean */mySigner.prototype.wantSignatureCertificateAttributes = function ()
@@ -54,13 +54,17 @@ function myVerifier (signer)
 /* JSONSignatureTypes */myVerifier.prototype.verify = function (/* JSONSignatureDecoder */signature_decoder)
 {
     console.debug (signature_decoder.getSignatureAlgorithm ());
+    var signature_key = "";
     if (signature_decoder.getSignatureType () == org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY)
     {
-        var signature_key = "";
+        if (this._signer.getKeyID () != signature_decoder.getKeyID ())
+        {
+            throw "Key ID";
+        }
     }
     else
     {
-        var signature_key = org.webpki.util.Base64URL.encode (signature_decoder.getPublicKey ());
+        signature_key = org.webpki.util.Base64URL.encode (signature_decoder.getPublicKey ());
 //        console.debug (getSignatureAlgorithm ());
 //        AntCrypto.verify (signature_decoder.getSignatureAlgorithm ())
     }
@@ -74,8 +78,19 @@ function signatureTest (signature_type, algorithm)
 {
     var signer = new mySigner (signature_type, algorithm);
     var signedDoc = new org.webpki.json.JSONObjectWriter ();
-    signedDoc.setString ("Statement", "Hello \u20acsigned world!");
+    signedDoc.setString ("Statement", "Hello signed world!");
     signedDoc.setSignature (signer);
+    var result = signedDoc.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT);
+    console.debug (result);
+    var document_reader = org.webpki.json.JSONParser.parse (result);
+    document_reader.getSignature ().verify (new myVerifier (signer));
+    signer = new mySigner (signature_type, algorithm);
+    signer.signData = null;
+    signedDoc = new org.webpki.json.JSONObjectWriter ();
+    signedDoc.setString ("Statement", "Hello async signed world!");
+    var data_to_sign = signedDoc.beginSignature (signer);
+    var signature_value = org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data_to_sign), algorithm));
+    signedDoc.endSignature (signature_value);
     var result = signedDoc.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT);
     console.debug (result);
     var document_reader = org.webpki.json.JSONParser.parse (result);

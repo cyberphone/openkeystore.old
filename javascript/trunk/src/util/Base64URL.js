@@ -67,7 +67,7 @@ org.webpki.util.Base64URL =
         var c = encoded.charCodeAt (i);
         if (c >= org.webpki.util.Base64URL.DECODE_TABLE.length || (c = org.webpki.util.Base64URL.DECODE_TABLE[c]) < 0)
         {
-            throw "Base64Exception: bad character at index " + i;
+            org.webpki.util._error ("Bad character at index " + i);
         }
         semidecoded[i] = c;
     }
@@ -82,7 +82,7 @@ org.webpki.util.Base64URL =
     var decoded_length_modulo_3 = Math.floor (decoded_length % 3);
     if (decoded_length_modulo_3 == 0 && encoded_length_modulo_4 != 0)
     {
-        throw "Base64Exception: wrong number of characters";
+        org.webpki.util._error ("Wrong number of characters");
     }
 
     // -----:  D E C O D E :-----
@@ -100,7 +100,7 @@ org.webpki.util.Base64URL =
         decoded[j] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
         if (semidecoded[i] & 0x0F)
         {
-            throw "Base64Exception: wrong termination character";
+            org.webpki.util._error ("Wrong termination character");
         }
     }
     else if (decoded_length_modulo_3 == 2)
@@ -109,7 +109,7 @@ org.webpki.util.Base64URL =
         decoded[j] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
         if (semidecoded[i] & 0x03)
         {
-            throw "Base64Exception: wrong termination character";
+            org.webpki.util._error ("Wrong termination character");
         }
     }
     return decoded;

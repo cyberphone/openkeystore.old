@@ -19,7 +19,7 @@
 /*                            ByteArray                           */
 /*================================================================*/
 
-//* Encodes/decodes base64URL data as described in RFC 4648 Table 2.
+//* A set of basic methods for dealing with Uint8Arrays.
 
 org.webpki.util.ByteArray = {};
 

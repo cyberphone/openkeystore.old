@@ -34,7 +34,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     if (!this.hasMore ())
     {
-        org.webpki.json.JSONError._error ("Trying to read past of array limit: " + this.index);
+        org.webpki.util._error ("Trying to read past of array limit: " + this.index);
     }
 };
 
@@ -44,7 +44,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     /* JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
-        org.webpki.json.JSONError._error ("Incompatible request: " +
+        org.webpki.util._error ("Incompatible request: " +
                 "Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
                 ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
     }

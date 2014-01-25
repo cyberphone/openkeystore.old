@@ -21,12 +21,12 @@ var should_fail = true;
 try
 {
     var h = org.webpki.util.Base64URL.decode ("a");
-    should_fail = false;
 }
 catch (err)
 {
+    should_fail = !err.contains ("Wrong number of characters");
 }
-if (!should_fail)
+if (should_fail)
 {
     throw "Bad";
 }
@@ -34,12 +34,12 @@ should_fail = true;
 try
 {
     var h = org.webpki.util.Base64URL.decode ("+xdFdYg");
-    should_fail = false;
 }
 catch (err)
 {
+    should_fail = !err.contains ("Bad character at index");
 }
-if (!should_fail)
+if (should_fail)
 {
     throw "Bad";
 }
@@ -47,12 +47,12 @@ should_fail = true;
 try
 {
     var h = org.webpki.util.Base64URL.decode ("/xdFdYg");
-    should_fail = false;
 }
 catch (err)
 {
+    should_fail = !err.contains ("Bad character at index");
 }
-if (!should_fail)
+if (should_fail)
 {
     throw "Bad";
 }
@@ -67,7 +67,14 @@ for (var i = 0; i < 64; i++)
     }
     catch (err)
     {
-        should_fail = !should_fail;
+        if (err.contains ("Wrong termination character"))
+         {
+            should_fail = !should_fail;
+         }
+        else
+        {
+            should_fail = true;
+        }
     }
     if (should_fail)
     {
@@ -81,7 +88,14 @@ for (var i = 0; i < 64; i++)
     }
     catch (err)
     {
-        should_fail = !should_fail;
+        if (err.contains ("Wrong termination character"))
+        {
+           should_fail = !should_fail;
+        }
+       else
+       {
+           should_fail = true;
+       }
     }
     if (should_fail)
     {

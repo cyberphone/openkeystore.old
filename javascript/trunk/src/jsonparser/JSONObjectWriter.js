@@ -58,12 +58,12 @@
         this.root = optional_object_or_reader.root;
         if (this.root._isArray ())
         {
-            org.webpki.json.JSONError._error ("You cannot update array objects");
+            org.webpki.util._error ("You cannot update array objects");
         }
     }
     else
     {
-        org.webpki.json.JSONError._error ("Wrong init of org.webpki.json.JSONObjectWriter");
+        org.webpki.util._error ("Wrong init of org.webpki.json.JSONObjectWriter");
     }
 };
 
@@ -91,7 +91,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "string")
     {
-        org.webpki.json.JSONError._error ("Bad string: " + name);
+        org.webpki.util._error ("Bad string: " + name);
     }
     return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, value));
 };
@@ -101,7 +101,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     var int_string = value.toString ();
     if (typeof value != "number" || int_string.indexOf ('.') >= 0)
     {
-        org.webpki.json.JSONError._error ("Bad integer: " + int_string);
+        org.webpki.util._error ("Bad integer: " + int_string);
     }
     return int_string;
 };
@@ -122,7 +122,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "number")
     {
-        org.webpki.json.JSONError._error ("Bad float type " + (typeof value));
+        org.webpki.util._error ("Bad float type " + (typeof value));
     }
     return value.toString ();
 };
@@ -131,13 +131,13 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "string")
     {
-        org.webpki.json.JSONError._error ("Bad big decimal type " + (typeof value));
+        org.webpki.util._error ("Bad big decimal type " + (typeof value));
     }
     if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) &&
         (!org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (value) || 
          org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (value)))
     {
-        org.webpki.json.JSONError._error ("Bad big decimal syntax: " + value);
+        org.webpki.util._error ("Bad big decimal syntax: " + value);
     }
     return value;
 };
@@ -146,7 +146,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 {
     if (typeof value != "boolean")
     {
-        org.webpki.json.JSONError._error ("Bad bool type " + (typeof value));
+        org.webpki.util._error ("Bad bool type " + (typeof value));
     }
     return value.toString ();
 };
@@ -250,9 +250,20 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setSignature = function (/* JSONSigner */signer)
 {
-    var signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
-    signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
-    var key_info_writer = signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
+    return this.endSignature (signer.signData (this.beginSignature (signer)));
+};
+
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
+{
+    this.signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signature_value);
+    return this;
+};
+
+/* public Uint8Array */org.webpki.json.JSONObjectWriter.prototype.beginSignature = function (/* JSONSigner */signer)
+{
+    this.signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
+    this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    var key_info_writer = this.signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
     switch (signer.getSignatureType ())
     {
         case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
@@ -267,7 +278,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             var certificate_path = signer.getX509CertificatePath ();
             if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
             {
-                var signature_certificate = new org.webpki.crypto.decodeX509Certificate (certificate_path[0]);
+                var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (certificate_path[0]);
                 if (signature_certificate.issuer != null && signature_certificate.subject != null)
                 {
                     var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
@@ -280,7 +291,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             break;
 
         default:
-            org.webpki.json.JSONError._error ("Unknown signature type requested");
+            org.webpki.util._error ("Unknown signature type requested");
      }
             
 //    if (signer.getExtensions != null)
@@ -290,19 +301,17 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     //              {
     //                array.add (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jor.root));
     //              }
-    //            signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+    //            this.signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     //          }
     //        
     //      }
-    signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON,
-                                signer.signData (org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root)));
-    return this;
+    return org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root);
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key_in_x509_format)
 {
     /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    var key_alg = new org.webpki.crypto.decodePublicKey (public_key_in_x509_format);
+    var key_alg = new org.webpki.crypto.DecodedPublicKey (public_key_in_x509_format);
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);

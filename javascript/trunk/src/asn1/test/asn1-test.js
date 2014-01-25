@@ -8,7 +8,7 @@ function badASN1 (raw_asn1, error)
     }
     catch (err)
     {
-        failed = err.indexOf (error) < 0;
+        failed = !err.contains (error);
         error = "got: " + err + " expected: " + error;
     }
     if (failed) throw error;
@@ -27,7 +27,7 @@ function sequence (raw_asn1, components)
         }
         catch (err)
         {
-            failed = err.indexOf ("Component index out of range") < 0 || i < components;
+            failed = !err.contains ("Component index out of range") || i < components;
         }
         if (failed) throw "component: " + i;
     }
@@ -43,7 +43,7 @@ function badzero (raw_asn1, ok_with_zero)
     }
     catch (err)
     {
-        failed = err.indexOf ("Zero-length body not permitted for tag") < 0 || ok_with_zero;
+        failed = !err.contains ("Zero-length body not permitted for tag") || ok_with_zero;
     }
     if (failed) throw "Zero problem: " + ok_with_zero;
 }

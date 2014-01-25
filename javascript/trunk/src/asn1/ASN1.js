@@ -19,6 +19,8 @@
 /*                            ASN1                                */
 /*================================================================*/
 
+//* Ultra-light ASN.1 library
+
 org.webpki.asn1.TAGS =
 {
     OID                : 0x06,
@@ -36,16 +38,11 @@ org.webpki.asn1.TAGS =
 
 org.webpki.asn1.LIBRARY_LIMIT = 50000;  // 50k of ASN.1 is all we care of
 
-org.webpki.asn1._error = function (/* String */message)
-{
-    throw "ASN1Exception: " + message;
-};
-
 /* void */org.webpki.asn1._lengthCheck = function (/* int */length)
 {
     if (length > org.webpki.asn1.LIBRARY_LIMIT)
     {
-        org.webpki.asn1._error ("Exceeded library limit " + org.webpki.asn1.LIBRARY_LIMIT + " bytes");
+        org.webpki.util._error ("Exceeded library limit " + org.webpki.asn1.LIBRARY_LIMIT + " bytes");
     }
 };
 
@@ -146,7 +143,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
             this.components.push (asn1_object);
             if (chunk > new_der.length)
             {
-                org.webpki.asn1._error ("Length error for tag: " + asn1_object.tag);
+                org.webpki.util._error ("Length error for tag: " + asn1_object.tag);
             }
             new_der = new Uint8Array (new_der.subarray (chunk));
         }
@@ -157,7 +154,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     {
         if (this.body.length == 0)
         {
-            org.webpki.asn1._error ("Zero-length body not permitted for tag: " + this.tag);
+            org.webpki.util._error ("Zero-length body not permitted for tag: " + this.tag);
         }
     }
     return this;
@@ -167,7 +164,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this.position >= this.raw_der.length)
     {
-        org.webpki.asn1._error ("Buffer underrun for tag: " + this.tag);
+        org.webpki.util._error ("Buffer underrun for tag: " + this.tag);
     }
     return this.raw_der[this.position++];
 };
@@ -176,7 +173,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this.components === undefined)
     {
-        org.webpki.asn1._error ("This object type doesn't have components: " + this.tag);
+        org.webpki.util._error ("This object type doesn't have components: " + this.tag);
     }
     return this.components.length;
 };
@@ -185,7 +182,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (index >= this.numberOfComponents ())
     {
-        org.webpki.asn1._error ("Component index out of range: " + index);
+        org.webpki.util._error ("Component index out of range: " + index);
     }
     return this.components[index];
 };
@@ -205,7 +202,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     var data = this.getASN1Integer ();
     if (data[0] > 127)
     {
-        org.webpki.asn1._error ("Unexpected negative integer value");
+        org.webpki.util._error ("Unexpected negative integer value");
     }
     return data;
 };
@@ -217,7 +214,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     {
         if (raw[0] != 0)
         {
-            org.webpki.asn1._error ("Bitstring with unused bits not allowed");
+            org.webpki.util._error ("Bitstring with unused bits not allowed");
         }
         raw = new Uint8Array (raw.subarray (1));
     }
@@ -228,7 +225,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (this._getBodyData (org.webpki.asn1.TAGS.NULL).length != 0)
     {
-        org.webpki.asn1._error ("Misformed ASN.1 NULL");
+        org.webpki.util._error ("Misformed ASN.1 NULL");
     }
 };
 
@@ -248,7 +245,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
 {
     if (tag != this.tag)
     {
-        org.webpki.asn1._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
+        org.webpki.util._error ("Tag mismatch, expected: " + tag + " got: " + this.tag);
     }
     return this.body;
 };
@@ -273,7 +270,7 @@ org.webpki.asn1.ASN1Object = function (/* byte */tag, /* ASN1Object or Uint8Arra
     var sequence = new org.webpki.asn1.ParsedASN1Object (raw_der, org.webpki.asn1.TAGS.SEQUENCE);
     if (sequence.body.length != (raw_der.length - sequence.start_of_body))
     {
-        org.webpki.asn1._error ("Sequence length error");
+        org.webpki.util._error ("Sequence length error");
     }
     return sequence;
 };

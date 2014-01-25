@@ -19,10 +19,10 @@
 /*                           BigInteger                           */
 /*================================================================*/
 
-// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and
-// the only functionality offered are tests for equivalence and zero.  It is anticipated
-// that all cryptographic functions are performed in other and lower layers of
-// the platform.  Only positive values (and zero) are currently supported.
+// The JS version of BigInteger is just a thin wrapper over an "Uint8Array" and the only
+// functionality offered beyond parsing and toString are tests for equivalence and zero.
+// It is anticipated that all cryptographic functions are performed in other and lower
+// layers of the platform.  Only positive values (and zero) are currently supported.
 
 /* BigInteger */org.webpki.math.BigInteger = function (/* Uint8Array */optional_value)
 {
@@ -35,11 +35,6 @@
         this.value = optional_value;
         this._trim ();
     }
-};
-
-org.webpki.math.BigInteger._error = function (message)
-{
-    throw "MATHException: " + message;
 };
 
 /* void */org.webpki.math.BigInteger.prototype._trim = function ()
@@ -76,7 +71,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     }
     else
     {
-        org.webpki.math.BigInteger._error ("Incorrect base argument, only 10 and 16 are supported");
+        org.webpki.util._error ("Incorrect base argument, only 10 and 16 are supported");
     }
     throw "MATHException: " + message;
 };
@@ -102,7 +97,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (this.value.length > 8)
     {
-        org.webpki.math.BigInteger._error ("Out of \"Long\" range");
+        org.webpki.util._error ("Out of \"Long\" range");
     }
     return this;
 };
@@ -138,11 +133,11 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     }
     else if (typeof string  != 'string')
     {
-        org.webpki.math.BigInteger._error ("Expected a string argument");
+        org.webpki.util._error ("Expected a string argument");
     }
     if (string.length == 0)
     {
-        org.webpki.math.BigInteger._error ("Empty string not allowed");
+        org.webpki.util._error ("Empty string not allowed");
     }
     var bi = new org.webpki.math.BigInteger ();
     var result = [];
@@ -157,7 +152,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         }
         else if (base == 10)
         {
-            org.webpki.math.BigInteger._error ("Decimal number expected");
+            org.webpki.util._error ("Decimal number expected");
 
         }
         else if (c >= 'a' && c <= 'f')
@@ -170,7 +165,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
         }
         else
         {
-            org.webpki.math.BigInteger._error ("Hexadecimal number expected");
+            org.webpki.util._error ("Hexadecimal number expected");
         }
         var carry = 0;
         var j = 0;
@@ -199,7 +194,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value)
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     return this.value;
 };
@@ -208,7 +203,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value || !big_integer.value) 
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     return org.webpki.util.ByteArray.equals (this.value, big_integer.value);
 };
@@ -217,7 +212,7 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 {
     if (!this.value)
     {
-        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+        org.webpki.util._error ("BigInteger not initialized");
     }
     var base = org.webpki.math.BigInteger._base (/* int */optional_10_or_16_base);
 

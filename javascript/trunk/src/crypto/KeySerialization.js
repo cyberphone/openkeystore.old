@@ -19,6 +19,8 @@
 /*                       Key Serialization                        */
 /*================================================================*/
 
+//* Serialization/de-serialization of X.509 SPKIs + rudimentary X.509 certificate decoder
+
 org.webpki.crypto.SUPPORTED_NAMED_CURVES = 
 [//                 SKS Algorithm ID                   Coordinate Length   Textual OID            ASN.1 OID (without header)
     "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        21,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
@@ -35,11 +37,6 @@ org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x
 org.webpki.crypto.EC_ALGORITHM_OID     = [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01]; 
 
 org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
-
-org.webpki.crypto._error = function (/* String */message)
-{
-    throw "CryptoException: " + message;
-};
 
 /* int */org.webpki.crypto._getECParamsFromURI = function (/* String */uri)
 {
@@ -64,14 +61,14 @@ org.webpki.crypto._error = function (/* String */message)
             }
         }
     }
-    org.webpki.crypto._error ("Unsupported EC curve: " + uri);
+    org.webpki.util._error ("Unsupported EC curve: " + uri);
 };
 
 /* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
 {
     if (original.length > required_length)
     {
-        org.webpki.crypto._error ("Input data out of bounds: " + original.length);        
+        org.webpki.util._error ("Input data out of bounds: " + original.length);        
     }
     while (original.length < required_length)
     {
@@ -158,17 +155,17 @@ org.webpki.crypto._error = function (/* String */message)
       ).encode ();
 };
 
-org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
+/* Public Key Data */org.webpki.crypto.DecodedPublicKey = function (/* Uint8Array */spki)
 {
     var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
     if (outer_sequence.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("SubjectPublicKeyInfo sequence must be two elements");        
+        org.webpki.util._error ("SubjectPublicKeyInfo sequence must be two elements");        
     }
     var algorithm_id = outer_sequence.getComponent (0).getASN1Sequence ();
     if (algorithm_id.numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Algorithm ID sequence must be two elements");        
+        org.webpki.util._error ("Algorithm ID sequence must be two elements");        
     }
     var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
     var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
@@ -178,7 +175,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
         var rsa_params = new org.webpki.asn1.ParsedASN1Sequence (encapsulated_key);
         if (rsa_params.numberOfComponents () != 2)
         {
-            org.webpki.crypto._error ("RSA parameter sequence must be two elements");        
+            org.webpki.util._error ("RSA parameter sequence must be two elements");        
         }
         this.modulus = rsa_params.getComponent (0).getASN1PositiveInteger ();
         this.exponent = rsa_params.getComponent (1).getASN1PositiveInteger ();
@@ -187,7 +184,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
     {
         if (encapsulated_key[0] != 0x04)
         {
-            org.webpki.crypto._error ("EC uncompressed parameter expected");        
+            org.webpki.util._error ("EC uncompressed parameter expected");        
         }
         var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
         for (var i = 3; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
@@ -197,7 +194,7 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
                 var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 2];
                 if (encapsulated_key.length != coordinate_length * 2 + 1)
                 {
-                    org.webpki.crypto._error ("ECPoint length error");        
+                    org.webpki.util._error ("ECPoint length error");        
                 }
                 this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
                 this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
@@ -206,11 +203,11 @@ org.webpki.crypto.decodePublicKey = function (/* Uint8Array */spki)
                 return;
             }
         }
-        org.webpki.crypto._error ("EC curve OID unknown");        
+        org.webpki.util._error ("EC curve OID unknown");        
     }
     else
     {
-        org.webpki.crypto._error ("Public key OID unknown");        
+        org.webpki.util._error ("Public key OID unknown");        
     }
 };
 
@@ -261,10 +258,10 @@ org.webpki.crypto.X500_ATTRIBUTES =
 
 /* String */org.webpki.crypto.getDistinguishedName = function (asn1_sequence)
 {
-    var holder = asn1_sequence.getASN1Sequence ();
+    var dn_holder = asn1_sequence.getASN1Sequence ();
     var dn = "";
     var next = false;
-    var q = holder.numberOfComponents ();
+    var q = dn_holder.numberOfComponents ();
     while (--q >= 0)
     {
         if (next)
@@ -275,7 +272,7 @@ org.webpki.crypto.X500_ATTRIBUTES =
         {
             next = true;
         }
-        var set = holder.getComponent (q).getASN1Set ();
+        var set = dn_holder.getComponent (q).getASN1Set ();
         if (set.numberOfComponents () != 1)
         {
 console.debug ("Multivalued, drop it");
@@ -302,7 +299,7 @@ console.debug ("Weird, drop it");
         if (non_symbolic)
         {
             var i = 0;
-            var id = null;
+            var oid = null;
             while (i < attr_name.length)
             {
                 var subid = 0;
@@ -311,20 +308,20 @@ console.debug ("Weird, drop it");
                     subid = (subid << 7) + (attr_name[i] &0x7F);
                 }
                 while ((attr_name[i++] & 0x80) != 0);
-                if (id == null)
+                if (oid == null)
                 {
-                    id = (Math.floor (subid / 40)).toString ();
-                    Math.floor (subid %= 40);
+                    oid = (Math.floor (subid / 40)).toString ();
+                    subid = Math.floor (subid % 40);
                 }
-                id += '.' + subid;
+                oid += '.' + subid;
             }
-            dn += id + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
+            dn += oid + '=#' + org.webpki.util.ByteArray.toHex (attr.getComponent (1).encode ());
         }
     }
     return dn;
 };
 
-/* certificate data */org.webpki.crypto.decodeX509Certificate = function(/* Uint8Array */certificate_blob)
+/* Certificate Data */org.webpki.crypto.DecodedX509Certificate = function(/* Uint8Array */certificate_blob)
 {
     var asn1 = new org.webpki.asn1.ParsedASN1Sequence (certificate_blob);
     var tbs = asn1.getComponent (0).getASN1Sequence ();
@@ -342,12 +339,12 @@ console.debug ("Weird, drop it");
     }
     if (tbs.getComponent (index++).getASN1Sequence ().numberOfComponents () != 2)
     {
-        org.webpki.crypto._error ("Certificate validity not found");        
+        org.webpki.util._error ("Certificate validity not found");        
     }
     this.subject = org.webpki.crypto.getDistinguishedName (tbs.getComponent (index++));
     if (this.subject === undefined)
     {
         console.debug ("Couldn't decode subject DN");
     }
-    org.webpki.crypto.decodePublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
 };
