@@ -601,7 +601,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     {
         if (this.html_mode)
         {
-            this.buffer += "<span style=\"color:" + html_variable_color + "\">";
+            this.buffer += "<span style=\"color:" + this.html_variable_color + "\">";
         }
         this.buffer += string;
         if (this.html_mode)
