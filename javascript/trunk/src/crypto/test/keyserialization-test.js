@@ -52,34 +52,36 @@ function certReader (cert_in_b64)
     }
 }
 
-function dnTest (unicode_argument)
+function asn1DnTest (utf8)
 {
-    var utf8 = org.webpki.util.Base64URL.decode ("" + AntCrypto.convertToUTF8 (unicode_argument));
     var asn1 = 
-                new org.webpki.asn1.ASN1Object
+        new org.webpki.asn1.ASN1Object
+          (
+            org.webpki.asn1.TAGS.SEQUENCE,
+            new org.webpki.asn1.ASN1Object 
+              (
+                org.webpki.asn1.TAGS.SET,
+                new org.webpki.asn1.ASN1Object 
                   (
                     org.webpki.asn1.TAGS.SEQUENCE,
-                    new org.webpki.asn1.ASN1Object 
-                      (
-                        org.webpki.asn1.TAGS.SET,
-                        new org.webpki.asn1.ASN1Object 
-                          (
-                            org.webpki.asn1.TAGS.SEQUENCE,
-                            new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.OID,  new Uint8Array ([0x55, 0x04, 0x03]))
-                          )
-                        .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.UTF8STRING, utf8))
-                      )
+                    new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.OID,  new Uint8Array ([0x55, 0x04, 0x03]))
                   )
-            .encode ();
-    var java_dn =  "" +  AntCrypto.getDistinguishedName (org.webpki.util.Base64URL.encode (asn1));
+                .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.UTF8STRING, utf8))
+              )
+          )
+    .encode ();
+var java_dn =  "" +  AntCrypto.getDistinguishedName (org.webpki.util.Base64URL.encode (asn1));
 
-    var json_dn = org.webpki.crypto.getDistinguishedName (new org.webpki.asn1.ParsedASN1Sequence (asn1));
-    if (!java_dn.equals (json_dn))
-    {
-        throw "DN fail " + json_dn + " " + java_dn;
-    }
+var json_dn = org.webpki.crypto.getDistinguishedName (new org.webpki.asn1.ParsedASN1Sequence (asn1));
+if (!java_dn.equals (json_dn))
+{
+throw "DN fail " + json_dn + " " + java_dn;
+}
+}
 
-//    AntCrypto.getDistinguishedName (org.webpki.util.Base64URL.encode (utf8)); 
+function dnTest (unicode_argument)
+{
+    asn1DnTest (org.webpki.util.Base64URL.decode ("" + AntCrypto.convertToUTF8 (unicode_argument)));
 }
 
 
@@ -327,6 +329,8 @@ dnTest ("John");
 dnTest ("Jo,;:=hn\\");
 dnTest ("Jo\u20achn");
 dnTest ("Jo\u00c5hn");
+
+asn1DnTest (new Uint8Array ([0xEC, 0xA1, 0xB0, 0xEC, 0x83, 0x81, 0xEB, 0x9E, 0x98]));
 
 console.debug ("Key serialization tests successful!");
 
