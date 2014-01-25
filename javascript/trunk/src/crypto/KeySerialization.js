@@ -219,7 +219,7 @@ org.webpki.crypto.X500_ATTRIBUTES =
         "O",        [0x55, 0x04, 0x0A],
         "L",        [0x55, 0x04, 0x07],
         "ST",       [0x55, 0x04, 0x08],
-        "STREET"    [0x55, 0x04, 0x09],
+        "STREET",   [0x55, 0x04, 0x09],
         "C",        [0x55, 0x04, 0x06]
     ];
 
@@ -346,5 +346,5 @@ console.debug ("Weird, drop it");
     {
         console.debug ("Couldn't decode subject DN");
     }
-    org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    new org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
 };

@@ -1988,14 +1988,14 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
-    this._public_key = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]).public_key;
+    var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]);
+    this._public_key = signature_certificate.public_key;
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
         var issuer = rd.getString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON);
         var serial_number = rd.getBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON);
         var subject = rd.getString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON);
-        var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]);
         if (signature_certificate.issuer != null && signature_certificate.subject != null)
         {
             if (signature_certificate.issuer != issuer ||
@@ -2795,7 +2795,7 @@ org.webpki.crypto.X500_ATTRIBUTES =
         "O",        [0x55, 0x04, 0x0A],
         "L",        [0x55, 0x04, 0x07],
         "ST",       [0x55, 0x04, 0x08],
-        "STREET"    [0x55, 0x04, 0x09],
+        "STREET",   [0x55, 0x04, 0x09],
         "C",        [0x55, 0x04, 0x06]
     ];
 
@@ -2922,7 +2922,7 @@ console.debug ("Weird, drop it");
     {
         console.debug ("Couldn't decode subject DN");
     }
-    org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    new org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
 };
 
 /*================================================================*/
