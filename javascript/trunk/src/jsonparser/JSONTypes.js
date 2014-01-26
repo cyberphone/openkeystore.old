@@ -23,43 +23,43 @@ org.webpki.json.JSONTypes =
 {
     NULL:
     {
-        "enumvalue" : 0,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
+        enumvalue    : 0,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
     },
     BOOLEAN:
     {
-        "enumvalue" : 1,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
+        enumvalue    : 1,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
     },
     INTEGER:
     {
-        "enumvalue" : 2,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
+        enumvalue    : 2,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DECIMAL:
     {
-        "enumvalue" : 3,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+        enumvalue    : 3,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DOUBLE:
     {
-        "enumvalue" : 4,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+        enumvalue    : 4,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     STRING:
     {
-        "enumvalue" : 5,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
+        enumvalue    : 5,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
     },
     ARRAY:
     {
-        "enumvalue" : 10,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
+        enumvalue    : 10,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
     },
     OBJECT:
     {
-        "enumvalue" : 11,
-        "isCompatible" : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
+        enumvalue    : 11,
+        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
     }
 };
 
@@ -67,7 +67,7 @@ org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
 {
     for (var obj in org.webpki.json.JSONTypes)
     {
-        if (org.webpki.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
+        if (org.webpki.json.JSONTypes[obj].enumvalue  == json_type.enumvalue )
         {
             return obj;
         }

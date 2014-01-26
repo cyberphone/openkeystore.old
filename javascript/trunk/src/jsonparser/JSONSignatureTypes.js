@@ -23,14 +23,14 @@ org.webpki.json.JSONSignatureTypes =
 {
     X509_CERTIFICATE:
     {
-        "toString": function () { return "X509 path";}
+        toString: function () { return "X.509 certificate path";}
     },
     ASYMMETRIC_KEY:
     {
-        "toString": function () { return "Asymmetric key";}
+        toString: function () { return "Asymmetric key";}
     },
     SYMMETRIC_KEY:
     {
-        "toString": function () { return "Symmetric key";}
+        toString: function () { return "Symmetric key";}
     }
 };
