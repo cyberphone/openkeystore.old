@@ -2834,10 +2834,10 @@ org.webpki.crypto.X500_ATTRIBUTES =
         else
         {
             var c = String.fromCharCode (b);
-            if (c == ',' || c == ';' || c == '+' || c == '=' || c == '\\')
-            {
-                string += '\\';
-            }
+        }
+        if (c == ',' || c == ';' || c == '+' || c == '=' || c == '\\')
+        {
+            string += '\\';
         }
         string += c;
     }
