@@ -1321,7 +1321,10 @@ public class JSONBaseHTML
                           JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
                           "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON +
                           "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
-                          "</code>.");
+                          "</code>." + Types.LINE_SEPARATOR +
+                          "Note: due to the fact that X.500 name comparisions have turned out (in practice) to " +
+                          "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + 
+                          "</code> option <i>should only be used in specific environments</i>.");
 
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
           .newRow ()
