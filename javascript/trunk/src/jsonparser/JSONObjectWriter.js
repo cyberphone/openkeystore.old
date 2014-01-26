@@ -296,7 +296,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             array.push (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, extensions[i].root));
         }
         this.signature_writer._setProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON,
-                                           new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
+                                            new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     }
     return org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root);
 };
