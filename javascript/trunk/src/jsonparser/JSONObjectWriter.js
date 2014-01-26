@@ -696,12 +696,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
                 if (utf_value < 0x20)
                 {
                     this._escapeCharacter ('u');
-                    for (var j = 0; j < 4; j++)
-                    {
-                        /*int */var hex = utf_value >>> 12;
-                        this.buffer += String.fromCharCode (hex > 9 ? hex + 87 : hex + 48);
-                        utf_value <<= 4;
-                    }
+                    this.buffer += org.webpki.util.HEX.fourHex (utf_value);
                     break;
                 }
                 this.buffer += c;

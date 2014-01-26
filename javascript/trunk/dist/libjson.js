@@ -1193,7 +1193,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     {
         if (this.html_mode)
         {
-            this.buffer += "<span style=\"color:" + html_variable_color + "\">";
+            this.buffer += "<span style=\"color:" + this.html_variable_color + "\">";
         }
         this.buffer += string;
         if (this.html_mode)
@@ -1288,12 +1288,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
                 if (utf_value < 0x20)
                 {
                     this._escapeCharacter ('u');
-                    for (var j = 0; j < 4; j++)
-                    {
-                        /*int */var hex = utf_value >>> 12;
-                        this.buffer += String.fromCharCode (hex > 9 ? hex + 87 : hex + 48);
-                        utf_value <<= 4;
-                    }
+                    this.buffer += org.webpki.util.HEX.fourHex (utf_value);
                     break;
                 }
                 this.buffer += c;
@@ -1616,8 +1611,9 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         /* char */var c = this._nextChar ();
         if (c < ' ')
         {
-            org.webpki.util._error ("Unescaped control character: " + c);
-        }
+            org.webpki.util._error (c == '\n' ?
+                "Unterminated string literal" : "Unescaped control character: 0x" + c.charCodeAt (0).toString (16));
+         }
         if (c == org.webpki.json.JSONParser.DOUBLE_QUOTE)
         {
             break;
@@ -2531,26 +2527,12 @@ org.webpki.util.ByteArray = {};
     return combined;
 };
 
-/* String */ org.webpki.util.ByteArray._hex = function (/* byte */i)
-{
-    if (i < 10)
-    {
-        return String.fromCharCode (i + 48);
-    }
-    return String.fromCharCode (i + 87);
-};
-
-/* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
-{
-    return org.webpki.util.ByteArray._hex (i / 16) + org.webpki.util.ByteArray._hex (i % 16);
-};
-
 /* String */org.webpki.util.ByteArray.toHex = function (/* Uint8Array */arg)
 {
     var result = "";
     for (var i = 0; i < arg.length; i++)
     {
-        result += org.webpki.util.ByteArray._twohex (arg[i]);
+        result += org.webpki.util.HEX.twoHex (arg[i]);
     }
     return result;
 };
@@ -2579,6 +2561,33 @@ org.webpki.util.Error = function (message)
 /* catch (Error) */ org.webpki.util._error = function (message)
 {
     throw new org.webpki.util.Error (message);
+};
+
+/*================================================================*/
+/*                              HEX                               */
+/*================================================================*/
+
+//* Just to avoid duplication all over the place
+
+org.webpki.util.HEX = {};
+
+/* String */ org.webpki.util.HEX.oneHex = function (/* byte */value)
+{
+    if (value < 10)
+    {
+        return String.fromCharCode (value + 48);
+    }
+    return String.fromCharCode (value + 87);
+};
+
+/* String */org.webpki.util.HEX.twoHex = function (/* byte */value)
+{
+    return org.webpki.util.HEX.oneHex (value >>> 4) + org.webpki.util.HEX.oneHex (value & 0xF);
+};
+
+/* String */ org.webpki.util.HEX.fourHex = function (/* int */value)
+{
+    return org.webpki.util.HEX.twoHex (value >>> 8) + org.webpki.util.HEX.twoHex (value & 0xFF);
 };
 
 /*================================================================*/

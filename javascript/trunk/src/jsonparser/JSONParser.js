@@ -205,8 +205,9 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]
         /* char */var c = this._nextChar ();
         if (c < ' ')
         {
-            org.webpki.util._error ("Unescaped control character: " + c);
-        }
+            org.webpki.util._error (c == '\n' ?
+                "Unterminated string literal" : "Unescaped control character: 0x" + c.charCodeAt (0).toString (16));
+         }
         if (c == org.webpki.json.JSONParser.DOUBLE_QUOTE)
         {
             break;

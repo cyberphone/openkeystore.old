@@ -79,26 +79,12 @@ org.webpki.util.ByteArray = {};
     return combined;
 };
 
-/* String */ org.webpki.util.ByteArray._hex = function (/* byte */i)
-{
-    if (i < 10)
-    {
-        return String.fromCharCode (i + 48);
-    }
-    return String.fromCharCode (i + 87);
-};
-
-/* String */org.webpki.util.ByteArray._twohex = function (/* byte */i)
-{
-    return org.webpki.util.ByteArray._hex (i / 16) + org.webpki.util.ByteArray._hex (i % 16);
-};
-
 /* String */org.webpki.util.ByteArray.toHex = function (/* Uint8Array */arg)
 {
     var result = "";
     for (var i = 0; i < arg.length; i++)
     {
-        result += org.webpki.util.ByteArray._twohex (arg[i]);
+        result += org.webpki.util.HEX.twoHex (arg[i]);
     }
     return result;
 };
