@@ -50,7 +50,7 @@ public class VerifyServlet extends HttpServlet
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         request.setCharacterEncoding ("UTF-8");
-        String json = request.getParameter (RequestServlet.JCS_ARGUMENT);
+        String json = CreateServlet.getTextArea (request, RequestServlet.JCS_ARGUMENT);
         response.sendRedirect (ServletUtil.getContextURL (request) + 
                                "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
                                Base64URL.encode (json.getBytes ("UTF-8")));
