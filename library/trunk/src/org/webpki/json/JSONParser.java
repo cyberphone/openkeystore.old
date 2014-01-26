@@ -226,7 +226,8 @@ public class JSONParser
             char c = nextChar ();
             if (c < ' ')
               {
-                throw new IOException ("Unescaped control character: 0x" + Integer.toString (c, 16));
+                throw new IOException (c == '\n' ?
+                   "Unterminated string literal" : "Unescaped control character: 0x" + Integer.toString (c, 16));
               }
             if (c == DOUBLE_QUOTE)
               {
