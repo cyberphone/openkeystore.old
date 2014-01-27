@@ -2953,7 +2953,7 @@ console.debug ("Weird, drop it");
     {
         console.debug ("Couldn't decode subject DN");
     }
-    new org.webpki.crypto.PublicKeyDecoder (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    new org.webpki.crypto.PublicKeyDecoder (this.public_key = tbs.getComponent (index).getASN1Sequence ().encode ());
 };
 
 /*================================================================*/
