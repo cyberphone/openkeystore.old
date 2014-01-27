@@ -3174,7 +3174,7 @@ org.webpki.asn1.ASN1Encoder = function (/* byte */tag, /* ASN1Encoder or Uint8Ar
     return this;
 };
 
-/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype._getBodyData = function (/* int */tag, /* boolean */optional_accept_zero)
+/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype._getBodyData = function (/* int */tag)
 {
     if (tag != this.tag)
     {
