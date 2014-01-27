@@ -24,7 +24,7 @@
 //                                                                                        //
 // - JSON object validation and automatic instantiation                                   //
 //                                                                                        //
-// The parser is essentially a JavaScript copy of a Java-based version available at:      //
+// The code is essentially a JavaScript port of a Java-based version available at:        //
 // https://code.google.com/p/openkeystore/source/browse/library/trunk/src/org/webpki/json //
 //                                                                                        //
 // Note: The cryptographic operations are supposed to be performed by WebCrypto when      //
