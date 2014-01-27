@@ -16,9 +16,12 @@
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// This file contains a JSON encoder/decoder written in JavaScript (ECMA V5) supporting:  //
+//                                                                                        //
+// JSON encoder/decoder written in JavaScript (ECMA V5) supporting:                       //
+//                                                                                        //
 // - JCS (JSON Cleartext Signature):                                                      //
 //   https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html                //
+//                                                                                        //
 // - JSON object validation and automatic instantiation                                   //
 //                                                                                        //
 // The parser is essentially a JavaScript copy of a Java-based version available at:      //
