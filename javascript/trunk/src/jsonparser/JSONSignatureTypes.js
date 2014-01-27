@@ -23,14 +23,23 @@ org.webpki.json.JSONSignatureTypes =
 {
     X509_CERTIFICATE:
     {
-        toString: function () { return "X.509 certificate path";}
     },
     ASYMMETRIC_KEY:
     {
-        toString: function () { return "Asymmetric key";}
     },
     SYMMETRIC_KEY:
     {
-        toString: function () { return "Symmetric key";}
     }
+};
+
+org.webpki.json.JSONSignatureTypes.getName = function (signature_type)
+{
+    for (var obj in org.webpki.json.JSONSignatureTypes)
+    {
+        if (org.webpki.json.JSONSignatureTypes[obj] == signature_type)
+        {
+            return obj;
+        }
+    }
+    return "UNKNOWN!";
 };

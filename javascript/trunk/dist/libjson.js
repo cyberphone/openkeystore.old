@@ -68,8 +68,8 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.util._error ("Incompatible request: " +
-                "Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
-                ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
+                "Read=" + org.webpki.json.JSONTypes.getName (value.type) +
+                ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
     }
     return value.value;
 };
@@ -408,8 +408,8 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.util._error ("Type mismatch for \"" + name +
-                           "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
-                           ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
+                           "\": Read=" + org.webpki.json.JSONTypes.getName (value.type) +
+                           ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
     }
     this.root.read_flag[name] = true;
     return value;
@@ -1027,11 +1027,6 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     this._endObject ();
 };
   
-/* boolean */org.webpki.json.JSONObjectWriter.prototype._complex = function (/* JSONTypes */json_type)
-{
-    return json_type.enumvalue >= 10;
-};
-
 /* void */org.webpki.json.JSONObjectWriter.prototype._printArray = function (/* JSONValue[] */array, /* boolean */array_flag)
 {
     if (array.length == 0)
@@ -1045,8 +1040,8 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
         for (var i = 0; i < array.length; i++)
         {
             var json_value = array[i];
-            if (this._complex (first_type) != this._complex (json_value.type) ||
-                    (this._complex (first_type) && first_type != json_value.type))
+            if (first_type.isComplex () != json_value.type.isComplex () ||
+                    (first_type.isComplex () && first_type != json_value.type))
 
             {
                 mixed = true;
@@ -1086,7 +1081,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             {
                 var json_value = array[i];
                 /* JSONValue[] */var sub_array = json_value.value;
-                /* boolean */var extra_pretty = sub_array.length == 0 || !this._complex (sub_array[0].type);
+                /* boolean */var extra_pretty = sub_array.length == 0 || !sub_array[0].type.isComplex ();
                 if (next)
                 {
                     this.buffer += ',';
@@ -1911,7 +1906,8 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 {
     if (signature_type != this.getSignatureType ())
     {
-        org.webpki.util._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+        org.webpki.util._error ("Request doesn't match received signature: " + 
+                                org.webpki.json.JSONSignatureTypes.getName (this.getSignatureType ()));
     }
 };
 
@@ -2011,16 +2007,25 @@ org.webpki.json.JSONSignatureTypes =
 {
     X509_CERTIFICATE:
     {
-        toString: function () { return "X.509 certificate path";}
     },
     ASYMMETRIC_KEY:
     {
-        toString: function () { return "Asymmetric key";}
     },
     SYMMETRIC_KEY:
     {
-        toString: function () { return "Symmetric key";}
     }
+};
+
+org.webpki.json.JSONSignatureTypes.getName = function (signature_type)
+{
+    for (var obj in org.webpki.json.JSONSignatureTypes)
+    {
+        if (org.webpki.json.JSONSignatureTypes[obj] == signature_type)
+        {
+            return obj;
+        }
+    }
+    return "UNKNOWN!";
 };
 
 /*================================================================*/
@@ -2031,51 +2036,51 @@ org.webpki.json.JSONTypes =
 {
     NULL:
     {
-        enumvalue    : 0,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
     },
     BOOLEAN:
     {
-        enumvalue    : 1,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
     },
     INTEGER:
     {
-        enumvalue    : 2,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DECIMAL:
     {
-        enumvalue    : 3,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DOUBLE:
     {
-        enumvalue    : 4,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     STRING:
     {
-        enumvalue    : 5,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
     },
     ARRAY:
     {
-        enumvalue    : 10,
+        isComplex    : function () { return true;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
     },
     OBJECT:
     {
-        enumvalue    : 11,
+        isComplex    : function () { return true;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
     }
 };
 
-org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
+org.webpki.json.JSONTypes.getName = function (json_type)
 {
     for (var obj in org.webpki.json.JSONTypes)
     {
-        if (org.webpki.json.JSONTypes[obj].enumvalue  == json_type.enumvalue )
+        if (org.webpki.json.JSONTypes[obj]  == json_type)
         {
             return obj;
         }

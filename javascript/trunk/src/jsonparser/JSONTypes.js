@@ -23,51 +23,51 @@ org.webpki.json.JSONTypes =
 {
     NULL:
     {
-        enumvalue    : 0,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
     },
     BOOLEAN:
     {
-        enumvalue    : 1,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
     },
     INTEGER:
     {
-        enumvalue    : 2,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DECIMAL:
     {
-        enumvalue    : 3,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     DOUBLE:
     {
-        enumvalue    : 4,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
     },
     STRING:
     {
-        enumvalue    : 5,
+        isComplex    : function () { return false;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
     },
     ARRAY:
     {
-        enumvalue    : 10,
+        isComplex    : function () { return true;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
     },
     OBJECT:
     {
-        enumvalue    : 11,
+        isComplex    : function () { return true;},
         isCompatible : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
     }
 };
 
-org.webpki.json.JSONTypes.getJSONTypeName = function (json_type)
+org.webpki.json.JSONTypes.getName = function (json_type)
 {
     for (var obj in org.webpki.json.JSONTypes)
     {
-        if (org.webpki.json.JSONTypes[obj].enumvalue  == json_type.enumvalue )
+        if (org.webpki.json.JSONTypes[obj]  == json_type)
         {
             return obj;
         }

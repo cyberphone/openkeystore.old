@@ -45,8 +45,8 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.util._error ("Incompatible request: " +
-                "Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
-                ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
+                "Read=" + org.webpki.json.JSONTypes.getName (value.type) +
+                ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
     }
     return value.value;
 };

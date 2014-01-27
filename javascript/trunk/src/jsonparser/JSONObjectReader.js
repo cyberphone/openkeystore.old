@@ -34,8 +34,8 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     if (!expected_type.isCompatible (value.type))
     {
         org.webpki.util._error ("Type mismatch for \"" + name +
-                           "\": Read=" + org.webpki.json.JSONTypes.getJSONTypeName (value.type) +
-                           ", Expected=" + org.webpki.json.JSONTypes.getJSONTypeName (expected_type));
+                           "\": Read=" + org.webpki.json.JSONTypes.getName (value.type) +
+                           ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
     }
     this.root.read_flag[name] = true;
     return value;

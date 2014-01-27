@@ -182,7 +182,8 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
 {
     if (signature_type != this.getSignatureType ())
     {
-        org.webpki.util._error ("Request doesn't match received signature: " + this.getSignatureType ().toString ());
+        org.webpki.util._error ("Request doesn't match received signature: " + 
+                                org.webpki.json.JSONSignatureTypes.getName (this.getSignatureType ()));
     }
 };
 

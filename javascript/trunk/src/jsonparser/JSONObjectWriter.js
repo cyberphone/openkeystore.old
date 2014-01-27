@@ -435,11 +435,6 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     this._endObject ();
 };
   
-/* boolean */org.webpki.json.JSONObjectWriter.prototype._complex = function (/* JSONTypes */json_type)
-{
-    return json_type.enumvalue >= 10;
-};
-
 /* void */org.webpki.json.JSONObjectWriter.prototype._printArray = function (/* JSONValue[] */array, /* boolean */array_flag)
 {
     if (array.length == 0)
@@ -453,8 +448,8 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
         for (var i = 0; i < array.length; i++)
         {
             var json_value = array[i];
-            if (this._complex (first_type) != this._complex (json_value.type) ||
-                    (this._complex (first_type) && first_type != json_value.type))
+            if (first_type.isComplex () != json_value.type.isComplex () ||
+                    (first_type.isComplex () && first_type != json_value.type))
 
             {
                 mixed = true;
@@ -494,7 +489,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             {
                 var json_value = array[i];
                 /* JSONValue[] */var sub_array = json_value.value;
-                /* boolean */var extra_pretty = sub_array.length == 0 || !this._complex (sub_array[0].type);
+                /* boolean */var extra_pretty = sub_array.length == 0 || !sub_array[0].type.isComplex ();
                 if (next)
                 {
                     this.buffer += ',';
