@@ -254,7 +254,7 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._readX509CertificateEntry = function (/* JSONObjectReader */rd)
 {
     this._certificate_path = org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (rd);
-    var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (this._certificate_path[0]);
+    var signature_certificate = new org.webpki.crypto.X509CertificateDecoder (this._certificate_path[0]);
     this._public_key = signature_certificate.public_key;
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON))
     {

@@ -81,13 +81,13 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
 {
     var params_entry = org.webpki.crypto._getECParamsFromURI (url);
     var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
-    return new org.webpki.asn1.ASN1Object
+    return new org.webpki.asn1.ASN1Encoder
       (
         org.webpki.asn1.TAGS.SEQUENCE,
-        new org.webpki.asn1.ASN1Object
+        new org.webpki.asn1.ASN1Encoder
           (
             org.webpki.asn1.TAGS.SEQUENCE,
-            new org.webpki.asn1.ASN1Object
+            new org.webpki.asn1.ASN1Encoder
               (
                 org.webpki.asn1.TAGS.OID,
                 org.webpki.crypto.EC_ALGORITHM_OID
@@ -95,7 +95,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
           )
         .addComponent 
           (
-            new org.webpki.asn1.ASN1Object 
+            new org.webpki.asn1.ASN1Encoder 
               (
                 org.webpki.asn1.TAGS.OID,
                 org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 3]
@@ -104,7 +104,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
       )
     .addComponent
       (
-        new org.webpki.asn1.ASN1Object 
+        new org.webpki.asn1.ASN1Encoder 
           (
             org.webpki.asn1.TAGS.BITSTRING,
             org.webpki.util.ByteArray.add 
@@ -120,44 +120,53 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
       ).encode ();
 };
 
+/* ASN1Encoder */org.webpki.crypto.createASN1PositiveInteger = function (/* Uint8Array */blob_integer)
+{
+    if (blob_integer[0] > 127)
+    {
+        blob_integer = org.webpki.util.ByteArray.add ([0], blob_integer);
+    }
+    return new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.INTEGER, blob_integer);
+};
+
 /* Uint8Array */org.webpki.crypto.encodeRSAPublicKey = function (/* Uint8Array */modulus, /* Uint8Array */exponent)
 {
-    return new org.webpki.asn1.ASN1Object
+    return new org.webpki.asn1.ASN1Encoder
       (
         org.webpki.asn1.TAGS.SEQUENCE,
-        new org.webpki.asn1.ASN1Object
+        new org.webpki.asn1.ASN1Encoder
           (
             org.webpki.asn1.TAGS.SEQUENCE,
-            new org.webpki.asn1.ASN1Object
+            new org.webpki.asn1.ASN1Encoder
               (
                 org.webpki.asn1.TAGS.OID,
                 org.webpki.crypto.RSA_ALGORITHM_OID
               )
           )
-        .addComponent (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.NULL, []))
+        .addComponent (new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.NULL, []))
       )
     .addComponent
       (
-        new org.webpki.asn1.ASN1Object 
+        new org.webpki.asn1.ASN1Encoder 
           (
             org.webpki.asn1.TAGS.BITSTRING,
             org.webpki.util.ByteArray.add 
               (
                 [0],
-                new org.webpki.asn1.ASN1Object
+                new org.webpki.asn1.ASN1Encoder
                   (
                     org.webpki.asn1.TAGS.SEQUENCE,
-                    org.webpki.asn1.ASN1PositiveInteger (modulus)
+                    org.webpki.crypto.createASN1PositiveInteger (modulus)
                   )
-                .addComponent (org.webpki.asn1.ASN1PositiveInteger (exponent)).encode ()
+                .addComponent (org.webpki.crypto.createASN1PositiveInteger (exponent)).encode ()
               )
           )
       ).encode ();
 };
 
-/* Public Key Data */org.webpki.crypto.DecodedPublicKey = function (/* Uint8Array */spki)
+/* Public Key Data */org.webpki.crypto.PublicKeyDecoder = function (/* Uint8Array */spki)
 {
-    var outer_sequence = new org.webpki.asn1.ParsedASN1Sequence (spki);
+    var outer_sequence = new org.webpki.asn1.ASN1SequenceDecoder (spki);
     if (outer_sequence.numberOfComponents () != 2)
     {
         org.webpki.util._error ("SubjectPublicKeyInfo sequence must be two elements");        
@@ -167,12 +176,12 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
     {
         org.webpki.util._error ("Algorithm ID sequence must be two elements");        
     }
-    var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
+    var public_key_type = algorithm_id.getComponent (0).getASN1EncoderIDRawData ();
     var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
     if ((this.rsa_flag = org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.RSA_ALGORITHM_OID)))
     {
         algorithm_id.getComponent (1).getASN1NULL ();
-        var rsa_params = new org.webpki.asn1.ParsedASN1Sequence (encapsulated_key);
+        var rsa_params = new org.webpki.asn1.ASN1SequenceDecoder (encapsulated_key);
         if (rsa_params.numberOfComponents () != 2)
         {
             org.webpki.util._error ("RSA parameter sequence must be two elements");        
@@ -186,7 +195,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
         {
             org.webpki.util._error ("EC uncompressed parameter expected");        
         }
-        var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
+        var ec_curve = algorithm_id.getComponent (1).getASN1EncoderIDRawData ();
         for (var i = 3; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
         {
             if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i], ec_curve))
@@ -289,7 +298,7 @@ console.debug ("Weird, drop it");
             return null;
         }
         // Now it seems that we can try to do something sensible!
-        var attr_name = attr.getComponent (0).getASN1ObjectIDRawData ();
+        var attr_name = attr.getComponent (0).getASN1EncoderIDRawData ();
         var non_symbolic = true;
         for (var i = 1; i < org.webpki.crypto.X500_ATTRIBUTES.length; i += 2)
         {
@@ -325,9 +334,9 @@ console.debug ("Weird, drop it");
     return dn;
 };
 
-/* Certificate Data */org.webpki.crypto.DecodedX509Certificate = function(/* Uint8Array */certificate_blob)
+/* Certificate Data */org.webpki.crypto.X509CertificateDecoder = function(/* Uint8Array */certificate_blob)
 {
-    var asn1 = new org.webpki.asn1.ParsedASN1Sequence (certificate_blob);
+    var asn1 = new org.webpki.asn1.ASN1SequenceDecoder (certificate_blob);
     var tbs = asn1.getComponent (0).getASN1Sequence ();
     var index = 0;
     if (tbs.getComponent (0).getTag () == org.webpki.asn1.TAGS.EXPLICIT_CONTEXT_0)
@@ -350,5 +359,5 @@ console.debug ("Weird, drop it");
     {
         console.debug ("Couldn't decode subject DN");
     }
-    new org.webpki.crypto.DecodedPublicKey (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
+    new org.webpki.crypto.PublicKeyDecoder (this.public_key = tbs.getComponent (index++).getASN1Sequence ().encode ());
 };

@@ -272,7 +272,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             var certificate_path = signer.getX509CertificatePath ();
             if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
             {
-                var signature_certificate = new org.webpki.crypto.DecodedX509Certificate (certificate_path[0]);
+                var signature_certificate = new org.webpki.crypto.X509CertificateDecoder (certificate_path[0]);
                 if (signature_certificate.issuer != null && signature_certificate.subject != null)
                 {
                     var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
@@ -310,7 +310,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setPublicKey = function (/* Uint8Array */public_key_in_x509_format)
 {
     /* JSONObjectWriter */var public_key_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    var key_alg = new org.webpki.crypto.DecodedPublicKey (public_key_in_x509_format);
+    var key_alg = new org.webpki.crypto.PublicKeyDecoder (public_key_in_x509_format);
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);

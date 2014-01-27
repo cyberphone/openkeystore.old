@@ -3,7 +3,7 @@ function badASN1 (raw_asn1, error)
     var failed = false;
     try
     {
-        new org.webpki.asn1.ParsedASN1Sequence (raw_asn1);
+        new org.webpki.asn1.ASN1SequenceDecoder (raw_asn1);
         failed = true;
     }
     catch (err)
@@ -16,7 +16,7 @@ function badASN1 (raw_asn1, error)
 
 function sequence (raw_asn1, components)
 {
-    var seq = org.webpki.asn1.ParsedASN1Sequence (new Uint8Array (raw_asn1));
+    var seq = org.webpki.asn1.ASN1SequenceDecoder (new Uint8Array (raw_asn1));
     for (var i = 0; i < 5; i++)
     {
         var failed = false;
@@ -38,7 +38,7 @@ function badzero (raw_asn1, ok_with_zero)
     var failed = false;
     try
     {
-        new org.webpki.asn1.ParsedASN1Object (raw_asn1);
+        new org.webpki.asn1.ASN1Decoder (raw_asn1);
         failed = !ok_with_zero;
     }
     catch (err)
@@ -48,12 +48,12 @@ function badzero (raw_asn1, ok_with_zero)
     if (failed) throw "Zero problem: " + ok_with_zero;
 }
 
-if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
+if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
         new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 0]))) throw "SEQ error";
-if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SET, []).encode (),
+if (!org.webpki.util.ByteArray.equals (new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.SET, []).encode (),
         new Uint8Array ([org.webpki.asn1.TAGS.SET, 0]))) throw "SEQ error";
 badASN1 (new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 1]), "Buffer underrun");
-badASN1 (org.webpki.util.ByteArray.add (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
+badASN1 (org.webpki.util.ByteArray.add (new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.SEQUENCE, []).encode (),
                                                                new Uint8Array ([0])), "Sequence length");
 badASN1 (new Uint8Array (org.webpki.asn1.LIBRARY_LIMIT + 1), "Exceeded library limit");
 
@@ -101,7 +101,7 @@ function printAsn1 (asn1_object)
     }
 }
 
-printAsn1 (new org.webpki.asn1.ParsedASN1Object (new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 5, org.webpki.asn1.TAGS.INTEGER, 1, 8, org.webpki.asn1.TAGS.NULL, 0])));
+printAsn1 (new org.webpki.asn1.ASN1Decoder (new Uint8Array ([org.webpki.asn1.TAGS.SEQUENCE, 5, org.webpki.asn1.TAGS.INTEGER, 1, 8, org.webpki.asn1.TAGS.NULL, 0])));
 
 var cert = org.webpki.util.Base64URL.decode ("MIIDYzCCAkugAwIBAgIGAUOeUH5GMA0GCS\
 qGSIb3DQEBCwUAMEMxEzARBgoJkiaJk_IsZAEZFgNvcmcxFjAUBgoJkiaJk_IsZAEZFgZ3ZWJwa2kxFDASBgNVBAMTC0RlbW8gU3ViIENBMB4XD\
@@ -128,8 +128,8 @@ wbP7RfZHM047QSv4dk-NoS_zcnwbNDu-97bi5p9wIDAQABMA0GCSqGSIb3DQEBBQUAA4GBADt_UG9vUJ
 Yrx-jFzug6EILLGACOTb2oWH-heQC1u-mNr0HZDzTuIYEZoDJJKPTEjlbVUjP9UNV-mWwD5MlM_Mtsq2azSiGM5bUMMj4Qssxsod\
 yamEwCW_POuZ6lcg5Ktz885hZo-L7tdEy8W9ViH0Pd");
 
-printAsn1 (new org.webpki.asn1.ParsedASN1Object (cert));
+printAsn1 (new org.webpki.asn1.ASN1Decoder (cert));
         
-printAsn1 (new org.webpki.asn1.ParsedASN1Object (cert_v1));
+printAsn1 (new org.webpki.asn1.ASN1Decoder (cert_v1));
 
 console.debug ("ASN.1 tests successful!");

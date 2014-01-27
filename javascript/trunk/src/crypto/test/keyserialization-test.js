@@ -37,7 +37,7 @@ function deserializeTest (spki, jcs)
 
 function certReader (cert_in_b64)
 {
-    var cert_data = new org.webpki.crypto.DecodedX509Certificate (org.webpki.util.Base64URL.decode (cert_in_b64));
+    var cert_data = new org.webpki.crypto.X509CertificateDecoder (org.webpki.util.Base64URL.decode (cert_in_b64));
     console.debug ("Certificate with SN=" + cert_data.serial_number.toString () + "\n" +
             new org.webpki.json.JSONObjectWriter ().setPublicKey (cert_data.public_key).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
     var cert = "" + AntCrypto.getX509CertificateParams (cert_in_b64);
@@ -55,16 +55,16 @@ function certReader (cert_in_b64)
 function rawDnTest (binary)
 {
     var asn1 = 
-        new org.webpki.asn1.ASN1Object
+        new org.webpki.asn1.ASN1Encoder
           (
             org.webpki.asn1.TAGS.SEQUENCE,
-            new org.webpki.asn1.ASN1Object 
+            new org.webpki.asn1.ASN1Encoder 
               (
                 org.webpki.asn1.TAGS.SET,
-                new org.webpki.asn1.ASN1Object 
+                new org.webpki.asn1.ASN1Encoder 
                   (
                     org.webpki.asn1.TAGS.SEQUENCE,
-                    new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.OID,  new Uint8Array ([0x55, 0x04, 0x03]))
+                    new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.OID,  new Uint8Array ([0x55, 0x04, 0x03]))
                   )
                 .addComponent (binary)
               )
@@ -72,7 +72,7 @@ function rawDnTest (binary)
     .encode ();
 var java_dn =  "" +  AntCrypto.getDistinguishedName (org.webpki.util.Base64URL.encode (asn1));
 
-var json_dn = org.webpki.crypto.getDistinguishedName (new org.webpki.asn1.ParsedASN1Sequence (asn1));
+var json_dn = org.webpki.crypto.getDistinguishedName (new org.webpki.asn1.ASN1SequenceDecoder (asn1));
 if (java_dn.equals (json_dn))
 {
     console.debug ("DN=" + java_dn);
@@ -85,7 +85,7 @@ else
 
 function asn1DnTest (utf8)
 {
-    rawDnTest (new org.webpki.asn1.ASN1Object (org.webpki.asn1.TAGS.UTF8STRING, utf8).encode ());
+    rawDnTest (new org.webpki.asn1.ASN1Encoder (org.webpki.asn1.TAGS.UTF8STRING, utf8).encode ());
 }
 
 function dnTest (unicode_argument)
