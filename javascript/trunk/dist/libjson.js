@@ -1771,7 +1771,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
             {
                 org.webpki.util._error ("An \"" + org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON + "\" object lack a \"" + org.webpki.json.JSONSignatureDecoder.TYPE_JSON + "\" property");
             }
-            this._extensions[this._extensions.length] = ext_obj;
+            this._extensions.push (ext_obj);
         }
         while (ext_arr_reader.hasMore ());
     }
@@ -1782,7 +1782,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
     {
         if (save[i].name != org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
         {
-            new_list[new_list.length] = save[i];
+            new_list.push (save[i]);
         }
     }
     signature.root.property_list = new_list;
