@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.Base64URL;
@@ -34,14 +36,15 @@ public class RequestServlet extends HttpServlet
         logger.info ("JSON Signature Verification Entered");
         ReadSignature doc = new ReadSignature ();
         doc.recurseObject (JSONParser.parse (signed_json));
-        request.getSession ().setAttribute (JCS_ARGUMENT, signed_json);
         HTML.printResultPage (response,
             "<table>"  +
             "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Verification Result<br>&nbsp;</td></tr>" +
             "<tr><td align=\"left\">" + HTML.newLines2HTML (doc.getResult ()) + "</td></tr>" +
             "<tr><td align=\"left\">Received Message:</td></tr>" +
-            "<tr><td align=\"left\"><iframe src=\"" + ServletUtil.getContextURL (request) + "/iframe\" width=\"800\" height=\"500\">NO FRAMES?</iframe></td></tr>" +
-            "</table></td></td>");
+            "<tr><td align=\"left\">" + HTML.fancyBox ("verify", 
+                                                       new String (JSONObjectWriter.parseAndFormat (signed_json, JSONOutputFormats.PRETTY_HTML), "UTF-8")) +
+            "</td></tr>" +
+            "</table>");
       }
     
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
