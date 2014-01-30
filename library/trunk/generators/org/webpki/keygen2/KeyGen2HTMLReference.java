@@ -661,7 +661,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
-                           "Entries written in <i>italics</i> represent sub objects, while the other entries consitute of the actual messages.");
+                           "Entries written in <i>italics</i> like <a href=\"#" + GENERATED_KEYS_JSON + "\"><i>" + GENERATED_KEYS_JSON + "</i></a> " +
+                           "represent sub objects, while the other entries such as <a href=\"#" + INVOCATION_REQUEST_JSON  + "\">" + INVOCATION_REQUEST_JSON + "</a> " +
+                           "consitute of the actual messages.");
         
         json.setAppendixMode ();
         
