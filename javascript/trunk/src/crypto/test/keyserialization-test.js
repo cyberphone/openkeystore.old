@@ -252,6 +252,22 @@ var b233_key =
       }\
   }';
 
+var k256_key =
+'{\
+   "PublicKey":\
+    {\
+      "EC":\
+        {\
+          "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",\
+          "X": "DEejDAk3C45AzHUHD3yRynG4eFdOpqL7UhtnyDcCi8Q",\
+          "Y": "MfFLAToyWCoY-muwZmjsQWPn73J4_-I5rTz_rTPt78Q"\
+        }\
+    }\
+}';
+
+var k256_key_spki = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEDEejDAk3C45AzHUHD3yRynG4eFdOpqL7UhtnyDcCi\
+8Qx8UsBOjJYKhj6a7BmaOxBY-fvcnj_4jmtPP-tM-3vxA';
+
 var b233_key_spki = 'MFIwEAYHKoZIzj0CAQYFK4EEABsDPgAEAP2_Y-mMTM0vqpOqdHWP1gn-f9OIMhW\
 lcHR5-jxoAJKLZXznUzWyiuWfHKNfmJIdtq6TKKxtJZTayXtk';
 
@@ -340,6 +356,8 @@ deserializeTest (p256_key_spki, p256_key_xml);
 deserializeTest (p384_key_spki, p384_key);
 
 deserializeTest (p521_key_spki, p521_key);
+
+deserializeTest (k256_key_spki, k256_key);
 
 deserializeTest (brainpool256_key_spki, brainpool256_key);
 
