@@ -174,7 +174,7 @@ org.webpki.asn1.ASN1Encoder = function (/* byte */tag, /* ASN1Encoder or Uint8Ar
     return this.components[index];
 };
 
-/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype.getASN1EncoderIDRawData = function ()
+/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype.getASN1ObjectIDRawData = function ()
 {
     return this._getBodyData (org.webpki.asn1.TAGS.OID);
 };

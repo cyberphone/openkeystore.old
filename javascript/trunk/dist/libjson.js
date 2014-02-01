@@ -2771,7 +2771,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
     {
         org.webpki.util._error ("Algorithm ID sequence must be two elements");        
     }
-    var public_key_type = algorithm_id.getComponent (0).getASN1EncoderIDRawData ();
+    var public_key_type = algorithm_id.getComponent (0).getASN1ObjectIDRawData ();
     var encapsulated_key = outer_sequence.getComponent (1).getASN1BitString (true);
     if ((this.rsa_flag = org.webpki.util.ByteArray.equals (public_key_type, org.webpki.crypto.RSA_ALGORITHM_OID)))
     {
@@ -2790,7 +2790,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
         {
             org.webpki.util._error ("EC uncompressed parameter expected");        
         }
-        var ec_curve = algorithm_id.getComponent (1).getASN1EncoderIDRawData ();
+        var ec_curve = algorithm_id.getComponent (1).getASN1ObjectIDRawData ();
         for (var i = 3; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
         {
             if (org.webpki.util.ByteArray.equals (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i], ec_curve))
@@ -2893,7 +2893,7 @@ console.debug ("Weird, drop it");
             return null;
         }
         // Now it seems that we can try to do something sensible!
-        var attr_name = attr.getComponent (0).getASN1EncoderIDRawData ();
+        var attr_name = attr.getComponent (0).getASN1ObjectIDRawData ();
         var non_symbolic = true;
         for (var i = 1; i < org.webpki.crypto.X500_ATTRIBUTES.length; i += 2)
         {
@@ -3126,7 +3126,7 @@ org.webpki.asn1.ASN1Encoder = function (/* byte */tag, /* ASN1Encoder or Uint8Ar
     return this.components[index];
 };
 
-/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype.getASN1EncoderIDRawData = function ()
+/* Uint8Array */org.webpki.asn1.ASN1Decoder.prototype.getASN1ObjectIDRawData = function ()
 {
     return this._getBodyData (org.webpki.asn1.TAGS.OID);
 };
