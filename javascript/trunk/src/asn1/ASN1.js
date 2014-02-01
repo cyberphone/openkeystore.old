@@ -19,7 +19,7 @@
 /*                            ASN1                                */
 /*================================================================*/
 
-//* Ultra-light ASN.1 library
+//* Ultra-light ASN.1 library in JavaScript
 
 org.webpki.asn1.TAGS =
 {
@@ -50,7 +50,7 @@ org.webpki.asn1.LIBRARY_LIMIT = 50000;  // 50k of ASN.1 is all we care of
 org.webpki.asn1.ASN1Encoder = function (/* byte */tag, /* ASN1Encoder or Uint8Array */argument)
 {
     this.components = [];  /* ASN1Encoder or Uint8Array */
-    this.components[0] = argument;
+    this.components.push (argument);
     this.tag = tag;
     return this;
 };
@@ -140,14 +140,9 @@ org.webpki.asn1.ASN1Encoder = function (/* byte */tag, /* ASN1Encoder or Uint8Ar
             new_der = new Uint8Array (new_der.subarray (chunk));
         }
     }
-    if (this.tag != org.webpki.asn1.TAGS.NULL &&
-        this.tag != org.webpki.asn1.TAGS.SEQUENCE &&
-        this.tag != org.webpki.asn1.TAGS.SET)
+    else if (length == 0 && this.tag != org.webpki.asn1.TAGS.NULL)
     {
-        if (this.body.length == 0)
-        {
-            org.webpki.util._error ("Zero-length body not permitted for tag: " + this.tag);
-        }
+        org.webpki.util._error ("Zero-length body not permitted for tag: " + this.tag);
     }
     return this;
 };
