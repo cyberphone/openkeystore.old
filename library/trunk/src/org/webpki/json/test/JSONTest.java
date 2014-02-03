@@ -29,7 +29,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.Date;
@@ -373,9 +372,11 @@ public class JSONTest
         assertFalse (simpleObjectType ("false").getBoolean ("name"));
         assertTrue (simpleArrayType   ("null").getIfNULL ());
         assertTrue (simpleObjectType  ("null").getIfNULL ("name"));
-        assertFalse ((or = simpleObjectType ("3")).getIfNULL ("name"));
+        or = simpleObjectType ("3");
+        assertFalse (or.getIfNULL ("name"));
         assertTrue (or.getInt ("name") == 3);
-        assertFalse ((ar = simpleArrayType ("3")).getIfNULL ());
+        ar = simpleArrayType ("3");
+        assertFalse (ar.getIfNULL ());
         assertTrue (ar.getInt () == 3);
         assertTrue ((ar = simpleArrayType ("null")).getIfNULL ());
         expected_error = PARSER_ERR.ARRAY_LIMIT;
