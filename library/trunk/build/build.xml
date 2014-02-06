@@ -95,7 +95,7 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help dist doc testkg2 testsks pkcs12import sks-service."/>
+    <echo message="Targets: help dist doc testkeygen2 testsks pkcs12import sks-service."/>
   </target>
 	
   <!-- .NET assumes that NAnt is installed, together with Windows SDK 7.1 and .NET 4 -->
@@ -277,7 +277,6 @@
       <packageset dir="${temp_dir}">
         <include name="org/**"/>
         <exclude name="org/**/test/**"/>
-        <exclude name="org/**/kg2xml/**"/>
         <exclude name="org/**/wasp/**"/>
         <exclude name="org/**/sks/ws/**"/>
         <exclude name="org/**/sks/twolayer/**"/>
@@ -287,17 +286,6 @@
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2014 WebPKI.org.</i>]]></bottom>
     </javadoc>
-    <java fork="yes"
-          classname="org.webpki.tools.XSD2HTMLPrinter"
-          failonerror="true">
-        <classpath>
-            <fileset dir="${dist_dir}">
-               <include name="${webpki-libext}"/>
-             </fileset>
-        </classpath>
-    	<redirector output="${doc_dir}/keygen2schema.html"/>
-        <arg value="${src_dir}/org/webpki/kg2xml/keygen2.xsd"/>
-    </java>
     <antcall target="dockeygen2"/>
     <antcall target="docjcs"/>
     </target>
@@ -436,12 +424,6 @@
   </target>
 
   <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
-  <target name="testkg2xml">
-    <antcall target="_test">
-       <param name="test.class" value="org.webpki.kg2xml.test.KeyGen2Test"/>
-     </antcall>
-  </target>
-
   <target name="testkeygen2">
     <antcall target="_test">
        <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
