@@ -302,11 +302,14 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             DeviceInfo device_info = keygen2_activity.sks.getDeviceInfo ();
             InvocationResponseEncoder invocation_response =  new InvocationResponseEncoder (keygen2_activity.invocation_request);
 
-            BitmapFactory.Options bmo = new BitmapFactory.Options ();
-            bmo.inScaled = false;
-            Bitmap default_icon = BitmapFactory.decodeResource (keygen2_activity.getResources (), R.drawable.certview_logo_na, bmo);
-            default_icon.setDensity (Bitmap.DENSITY_NONE);
-            invocation_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
+            if (keygen2_activity.invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.LOGOTYPES.LIST))
+              {
+                BitmapFactory.Options bmo = new BitmapFactory.Options ();
+                bmo.inScaled = false;
+                Bitmap default_icon = BitmapFactory.decodeResource (keygen2_activity.getResources (), R.drawable.certview_logo_na, bmo);
+                default_icon.setDensity (Bitmap.DENSITY_NONE);
+                invocation_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
+              }
 
             keygen2_activity.postJSONData (keygen2_activity.invocation_request.getSubmitURL (), invocation_response, false);
 
