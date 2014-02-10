@@ -19,14 +19,11 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.LinkedHashMap;
 
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
-import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -47,8 +44,6 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
     
     ECPublicKey client_ephemeral_key;
     
-    LinkedHashMap<String,LinkedHashSet<String>> client_attribute_values = new LinkedHashMap<String,LinkedHashSet<String>> ();
-
     byte[] attestation;
     
     X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
@@ -57,60 +52,10 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
 
     JSONSignatureDecoder signature;
 
-
-    public String getServerSessionID ()
-      {
-        return server_session_id;
-      }
-
-    
-    public String getClientSessionID ()
-      {
-        return client_session_id;
-      }
-
-
-    public Date getServerTime ()
-      {
-        return server_time;
-      }
-
-    
-    public Date getClientTime ()
-      {
-        return client_time;
-      }
-
-    
-    public ECPublicKey getClientEphemeralKey ()
-      {
-        return client_ephemeral_key;
-      }
-
-
-    public byte[] getAttestation ()
-      {
-        return attestation;
-      }
-
-
     public X509Certificate[] getDeviceCertificatePath ()
       {
         return device_certificate_path;
       }
-    
-
-    public byte[] getServerCertificateFingerprint ()
-      {
-        return server_certificate_fingerprint;
-      }
-
-
-    public LinkedHashMap<String,LinkedHashSet<String>> getClientAttributeValues ()
-      {
-        return client_attribute_values;
-      }
-
 
     @Override
     protected void readJSONData (JSONObjectReader rd) throws IOException
@@ -141,27 +86,6 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         if (rd.hasProperty (DEVICE_CERTIFICATE_JSON))
           {
             device_certificate_path = rd.getObject (DEVICE_CERTIFICATE_JSON).getX509CertificatePath ();
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional client attributes
-        /////////////////////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader type_rd : getObjectArrayConditional (rd, CLIENT_ATTRIBUTES_JSON))
-          {
-            String type = type_rd.getString (TYPE_JSON);
-            LinkedHashSet<String> set = new LinkedHashSet<String> ();
-            JSONArrayReader values = type_rd.getArray (VALUES_JSON);
-            while (values.hasMore ())
-              {
-                if (!set.add (values.getString ()))
-                  {
-                    throw new IOException ("Duplicate value for: " + type);
-                  }
-              }
-            if (client_attribute_values.put (type, set) != null)
-              {
-                throw new IOException ("Duplicate: " + type);
-              }
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

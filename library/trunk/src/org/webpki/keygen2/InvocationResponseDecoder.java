@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Vector;
+import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONObjectReader;
 
@@ -28,30 +28,11 @@ public class InvocationResponseDecoder extends KeyGen2Validator
   {
     private static final long serialVersionUID = 1L;
 
-    String server_session_id;
-    
     byte[] nonce;  // For VMs
+    
+    LinkedHashMap<String,ServerState.CapabilityBase> received_capabilities = new LinkedHashMap<String,ServerState.CapabilityBase> ();
 
-    Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
-
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
-    public String getServerSessionID ()
-      {
-        return server_session_id;
-      }
-
-
-    public ImagePreference[] getImagesPreferences ()
-      {
-        return image_preferences.toArray (new ImagePreference[0]);
-      }
-
+    String server_session_id;
     
     @Override
     protected void readJSONData (JSONObjectReader rd) throws IOException
@@ -63,19 +44,33 @@ public class InvocationResponseDecoder extends KeyGen2Validator
         
         nonce = rd.getBinaryConditional (NONCE_JSON);
 
-        BasicCapabilities.read (rd, basic_capabilities, false);
-        
         //////////////////////////////////////////////////////////////////////////
-        // Get the optional image preferences
+        // Get the optional client capabilities
         //////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader ip : getObjectArrayConditional (rd, IMAGE_PREFERENCES_JSON))
+        for (JSONObjectReader cc : getObjectArrayConditional (rd, CLIENT_CAPABILITIES_JSON))
           {
-            ImagePreference im_pref = new ImagePreference ();
-            im_pref.type = getURI (ip, TYPE_JSON);
-            im_pref.mime_type = ip.getString (MIME_TYPE_JSON);
-            im_pref.width = ip.getInt (WIDTH_JSON);
-            im_pref.height = ip.getInt (HEIGHT_JSON);
-            image_preferences.add (im_pref);
+            String type = cc.getString (TYPE_JSON);
+            ServerState.CapabilityBase capability = null;
+            if (cc.hasProperty (SUPPORTED_JSON))
+              {
+                capability = new ServerState.Feature (cc.getBoolean (SUPPORTED_JSON));
+              }
+            else if (cc.hasProperty (VALUES_JSON))
+              {
+                capability = new ServerState.Values (KeyGen2Validator.getNonEmptyList (cc, VALUES_JSON));
+              }
+            else
+              {
+                JSONObjectReader or = cc.getObject (IMAGE_ATTRIBUTES_JSON);
+                capability = new ServerState.ImagePreference (or.getString (MIME_TYPE_JSON),
+                                                              or.getInt (WIDTH_JSON),
+                                                              or.getInt (HEIGHT_JSON));
+              }
+            capability.type = type;
+            if (received_capabilities.put (type, capability) != null)
+              {
+                KeyGen2Validator.bad ("Duplicated capability URI: " + type);
+              }
           }
       }
 

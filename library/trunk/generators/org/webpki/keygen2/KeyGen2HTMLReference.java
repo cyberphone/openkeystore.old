@@ -31,6 +31,7 @@ import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
+import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -68,7 +69,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (10);
             sign ("Invocation", "Protocol invocation. During this step the user should be alerted by a browser-defined dialog " +
                   "telling what is supposed to happen giving as well as providing an option aborting the process. "+
-                  "In addition, the issuer <i>may</i> perform an SKS capability query.");
+                  "In addition, the issuer <i>may</i> perform a client platform capability query.");
             bar (14);
             sign ("ProvisioningInitialization", "Creation of a <i>shared session key</i> securing the rest of the interactions between the issuer and the SKS. " +
                   "To support future updates of provisioned credentials, the issuer <i>may</i> also provide a " + json.globalLinkRef (PROVISIONING_INITIALIZATION_REQUEST_JSON, KEY_MANAGEMENT_KEY_JSON) + ".");
@@ -247,61 +248,6 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           }
       }
 
-    static class BasicCapabilityQuery implements JSONBaseHTML.Extender
-      {
-        String tag;
-        String description;
-        
-        BasicCapabilityQuery (String tag, String description)
-          {
-            this.tag = tag;
-            this.description = description;
-          }
-
-        @Override
-        public Column execute (Column column) throws IOException
-          {
-            return column
-              .newRow ()
-                .newColumn ()
-                  .addProperty (BasicCapabilities.tagName (tag, true))
-                  .addArrayList (URI_LIST, 1)
-                .newColumn ()
-                  .setType (WEBPKI_DATA_TYPES.URI)
-                .newColumn ()
-                  .setUsage (false)
-                .newColumn ()
-                  .addString (description);
-          }
-      }
-
-    static class BasicCapabilitySupport implements JSONBaseHTML.Extender
-      {
-        String tag;
-        
-        BasicCapabilitySupport (String tag)
-          {
-            this.tag = tag;
-          }
-
-        @Override
-        public Column execute (Column column) throws IOException
-          {
-            return column
-              .newRow ()
-                .newColumn ()
-                  .addProperty (BasicCapabilities.tagName (tag, false))
-                  .addArrayList (URI_LIST, 1)
-                .newColumn ()
-                  .setType (WEBPKI_DATA_TYPES.URI)
-                .newColumn ()
-                  .setUsage (false)
-                .newColumn ()
-                  .addString ("The result from <code>" + BasicCapabilities.tagName (tag, true) + 
-                              "</code>.  If there are no matches, this property <b>must not</b> be present.");
-          }
-      }
-
     static class OptionalArrayList implements JSONBaseHTML.Extender
       {
         String name;
@@ -366,7 +312,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 .newColumn ()
                   .setUsage (false)
                 .newColumn ()
-                  .addString ("<i>Optional</i> X509-based signature covering the request. See ")
+                  .addString ("<i>Optional</i> X.509-based signature covering the request. See ")
                   .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
                   .addString (".");
           }
@@ -668,11 +614,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.setAppendixMode ();
         
         json.sampleRun (KeyGen2HTMLReference.class,
-                        "In the following KeyGen2 sample run the client (platform) " +
-                        "suggests a suitable image size for logotypes associated with keys." + LINE_SEPARATOR +
+                        "In the following KeyGen2 sample run the issuer queries the client (platform) " +
+                        "for a suitable image size for logotypes associated with keys." + LINE_SEPARATOR +
                         "Then the issuer requests that the client (SKS) creates an RSA 2048-bit key " +
                         "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
-                        "Finally, the issuer provides a certificate and and a logotype to go with it." + LINE_SEPARATOR +
+                        "Finally, the issuer provides a certificate and the logotype to go with it." + LINE_SEPARATOR +
                         "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
                         new String[]{"InvocationRequest.json",
                                      "InvocationResponse.json",
@@ -690,7 +636,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2013-12-31", "0.2", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2014-02-10", "0.3", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
@@ -748,14 +694,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("The <code>" + PRIVACY_ENABLED_JSON +
-                          "</code> flag serves two purposes:<ul>" +
-                          "<li>Give the user a chance to cancel the provisioning operation " +
-                          "if the privacy implications of the standard mode are unacceptable.<br>" +
-                          "See SKS &quot;Privacy Enabled Mode&quot;.</li>" +
-                          "<li style=\"padding-top:4pt\">Activate the correct mode during ")
+                          "</code> flag is used to set mode during ")
                .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
                .addString (".<br>See <code>SKS:createProvisioningSession." + PRIVACY_ENABLED_JSON +
-                           "</code>.</li></ul>Note: The default value is <code>false</code>.")
+                           "</code>." + LINE_SEPARATOR + "Note: The default value is <code>false</code>.")
           .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
                                                    "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation."))
           .newExtensionRow (new OptionalArrayList (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
@@ -768,18 +710,33 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                          "If <code>" +
                          KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
                          "the provisioning client is supposed to use the system's 'native' keystore."))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms.  See SKS &quot;Algorithm Support&quot;."))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects." + LINE_SEPARATOR))
-            .addString ("Note that extensions may refer to <code>SKS:addExtension</code> as well as to non-SKS items such as ")
-            .addPropertyLink (VIRTUAL_MACHINE_JSON, PROVISIONING_INITIALIZATION_REQUEST_JSON)
-            .addString ("." + LINE_SEPARATOR +
-                        "Another possible use of this feature is for signaling support for extensions in the protocol itself while keeping the name-space etc. intact.")
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
-                         "If the client has support for " +
-                         "such attributes it should request the user's permission to disclose them." + LINE_SEPARATOR +
-                         "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode." + LINE_SEPARATOR +
-                         "The following client attribute URIs are pre-defined:<ul>" + clientAttributes () +
-                         "</ul>"))
+          .newRow ()
+            .newColumn ()
+              .addProperty (CLIENT_CAPABILITY_QUERY_JSON)
+              .addArrayList (URI_LIST, 1)
+            .newColumn ()
+              .setType (WEBPKI_DATA_TYPES.URI)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("<i>Optional</i>: List of URIs signifying client (platform) capabilities. " +
+                          "The response (")
+              .addPropertyLink (CLIENT_CAPABILITIES_JSON, INVOCATION_RESPONSE_JSON)
+              .addString (") <b>must</b> contain the same URIs (in any order). " + LINE_SEPARATOR +
+                         "Note that capabilities may refer to algorithms or specific extensions (see <code>SKS:addExtension</code>), as well as to non-SKS items such as ")
+              .addPropertyLink (VIRTUAL_ENVIRONMENT_JSON, PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addString ("." + LINE_SEPARATOR +
+                          "Another possible use of this feature is for signaling support for extensions " +
+                          "in the protocol itself while keeping the name-space etc. intact." + LINE_SEPARATOR +
+                          "<i>If requested capabilities are considered as privacy sensitive, a conforming implementation " +
+                          "should ask for the user's permission to disclose them</i>." + LINE_SEPARATOR +
+                          "Device-specific data like IMEI numbers <b>must not</b> be requested in the ") 
+              .addPropertyLink (PRIVACY_ENABLED_JSON, INVOCATION_REQUEST_JSON)
+              .addString (" mode." + LINE_SEPARATOR +
+                          "For quering ")
+              .addPropertyLink (VALUES_JSON, CLIENT_CAPABILITIES_JSON)
+              .addString (" the following client attribute URIs are pre-defined:<ul>" + clientAttributes () +
+                          "</ul>")
           .newExtensionRow (new OptionalSignature ());
   
         preAmble (INVOCATION_RESPONSE_JSON)
@@ -806,19 +763,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<i>Optional</i> 1-32 byte nonce. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
               .addString (".")
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_ALGORITHM))
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_EXTENSION))
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI))
-          .newExtensionRow (new OptionalArrayObject (IMAGE_PREFERENCES_JSON,
+          .newExtensionRow (new OptionalArrayObject (CLIENT_CAPABILITIES_JSON,
                                                      1,
-                                                     "List of client image preferences that the server may use for creating suitable "))
-            .addLink (LOGOTYPES_JSON)
-            .addString (".  Known logotypes include:<ul>" + getLogotypes () + "</ul>" +
-                        "Logotypes should not have framing borders or extra margins " +
-                        "unless these are integral parts of the actual logotype image. " + 
-                        "Logotypes should render nicely on light backgrounds. " +
-                        "Shadows should be avoided since the icon viewer itself may add such. " +
-                        "Support for PNG files is <i>mandatory</i>.");
+                                                     "List of capabilities including algorithms, specific features, " +
+                                                     "dynamic or static data, and preferred image sizes."));
 
         preAmble (PROVISIONING_INITIALIZATION_REQUEST_JSON)
           .newExtensionRow (new ServerSessionID ())
@@ -868,53 +816,34 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                               false,
                                               "See <code>SKS:createProvisioningSession." +
                                               KEY_MANAGEMENT_KEY_JSON + "</code>."))
-          .newRow ()
-            .newColumn ()
-              .addProperty (REQUESTED_CLIENT_ATTRIBUTES_JSON)
-              .addArrayList (URI_LIST, 1)
-            .newColumn ()
-              .setType (WEBPKI_DATA_TYPES.URI)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("<i>Optional</i>: List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
-              .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
-              .addString ("." + LINE_SEPARATOR + "Note that it is an <i>error</i> requesting an attribute not specified during ")
-              .addLink (INVOCATION_REQUEST_JSON)
-              .addString (".")
-          .newExtensionRow (new LinkedObject (VIRTUAL_MACHINE_JSON,
+          .newExtensionRow (new LinkedObject (VIRTUAL_ENVIRONMENT_JSON,
                                               false,
-                          "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
+                          "The <code>" + VIRTUAL_ENVIRONMENT_JSON + "</code> option is intended to support BYOD " +
                           "use-cases where the provisioning process bootstraps an alternative " +
                           "environment and associated policies." + LINE_SEPARATOR +
                           "Since the exact nature of such an environment is platform-dependent, it is necessary " +
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
-              .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
+              .addString (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
               .addLink (INVOCATION_REQUEST_JSON)
-              .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;&quot;")
-              .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
-              .addString ("&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
-                          KeyGen2URIs.FEATURE.VIRTUAL_MACHINE +
-                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
-                          "http://extreme-vm.com/type.3&quot;,<br>" +
-                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
-                          "http://cool-but-obscure-vm.com/x" +
-                          "&quot;<br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR +
-                          "where the two latter URIs represent different, potentially supported environment types." + LINE_SEPARATOR +
+              .addString (":" + LINE_SEPARATOR + "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITY_QUERY_JSON +
+                          "&quot;:&nbsp;[&quot;" +
+                          KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT +
+                          "&quot;]</code>" + LINE_SEPARATOR +
                           "A possible ")
               .addLink (INVOCATION_RESPONSE_JSON)
               .addString (" could be:" + LINE_SEPARATOR +
-                          "<code>&nbsp;&nbsp;&quot;")
-              .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, false))
-              .addString ("&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
-                          KeyGen2URIs.FEATURE.VIRTUAL_MACHINE +
-                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
-                          "http://extreme-vm.com/type.3" +
-                          "&quot;<br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
-                          "If an environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
+                          "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITIES_JSON +
+                          "&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                          "&quot;" + TYPE_JSON + "&quot;:&nbsp;" +
+                          "&quot;" +
+                          KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT +
+                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + VALUES_JSON +
+                          "&quot;:&nbsp;[&quot;http://extreme-vm.com/type.3" +
+                          "&quot;]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]</code>" + LINE_SEPARATOR + 
+                          "If a virtual environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
                           "Note that the <code>" +
-                          VIRTUAL_MACHINE_JSON +
+                          VIRTUAL_ENVIRONMENT_JSON +
                           "</code> option presumes that the <code>" +
                           PROVISIONING_INITIALIZATION_REQUEST_JSON +
                           "</code> is <i>signed</i>.")
@@ -992,18 +921,6 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
               .addString (" object. " + LINE_SEPARATOR + 
                           "This property is mandatory for HTTPS connections.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (CLIENT_ATTRIBUTES_JSON)
-              .addArrayLink (CLIENT_ATTRIBUTES_JSON, 1)
-            .newColumn ()
-              .setType (WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("<i>Optional</i>: List of client attribute types and values. See ")
-              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
-              .addString (".")
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                                               true,
                                               "Symmetric key signature covering the entire response. See <code>" +
@@ -1197,7 +1114,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                             1,
                             "<i>Optional:</i> List of the previous generation of key management keys."));
 
-        json.addSubItemTable (VIRTUAL_MACHINE_JSON)
+        json.addSubItemTable (VIRTUAL_ENVIRONMENT_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (TYPE_JSON)
@@ -1206,7 +1123,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.URI)
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine specific type URI like <code>&quot;http://extreme-vm.com/type.3&quot;</code>.")
+              .addString ("Virtual environment specific type URI like <code>&quot;http://extreme-vm.com/type.3&quot;</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (CONFIGURATION_JSON)
@@ -1215,7 +1132,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine specific configuration (setup) data.")
+              .addString ("Virtual environment specific configuration (setup) data.")
           .newRow ()
             .newColumn ()
               .addProperty (FRIENDLY_NAME_JSON)
@@ -1223,7 +1140,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine friendly name.");
+              .addString ("Virtual environment friendly name.");
 
         json.addSubItemTable (LOOKUP_SPECIFIERS_JSON)
           .newRow ()
@@ -1887,7 +1804,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("Encrypted key material.  See <code>SKS:import* </code> methods<code>." + ENCRYPTED_KEY_JSON + "</code>.")
           .newExtensionRow (new MAC ("import* </code>methods<code>"));
 
-        json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
+        json.addSubItemTable (CLIENT_CAPABILITIES_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (TYPE_JSON)
@@ -1896,28 +1813,44 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                .setType (WEBPKI_DATA_TYPES.URI)
             .newColumn ()
             .newColumn ()
-              .addString ("Client attribute type URI.")
+              .addString ("Client capability type URI.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (SUPPORTED_JSON)
+              .addSymbolicValue (SUPPORTED_JSON)
+            .newColumn ()
+               .setType (WEBPKI_DATA_TYPES.BOOLEAN)
+            .newColumn ()
+              .setChoice (true, 3)
+            .newColumn ()
+              .addString ("For non-parametric queries like algorithms this property tells if the type is supported or not. " + LINE_SEPARATOR +
+                          "Unknown or unsupported query types <b>must</b> always return this attribute with the argument <code>false</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (VALUES_JSON)
-              .addArrayList (VALUES_JSON, 0)
+              .addArrayList (VALUES_JSON, 1)
             .newColumn ()
             .newColumn ()
             .newColumn ()
-              .addString ("List of attributes associated with <code>" + TYPE_JSON + "</code>.");
-
-        json.addSubItemTable (IMAGE_PREFERENCES_JSON)
+              .addString ("List of attribute data associated with <code>" + TYPE_JSON + "</code>.")
           .newRow ()
             .newColumn ()
-              .addProperty (TYPE_JSON)
-              .addSymbolicValue (TYPE_JSON)
+              .addProperty (IMAGE_ATTRIBUTES_JSON)
+              .addLink (IMAGE_ATTRIBUTES_JSON)
             .newColumn ()
-               .setType (WEBPKI_DATA_TYPES.URI)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("Image type URI. See ")
-              .addLink (INVOCATION_RESPONSE_JSON)
-              .addString (".")
+              .addString ("List of client image preferences that the issuer may use for creating suitable ")
+              .addLink (LOGOTYPES_JSON)
+              .addString (".  Known logotypes include:<ul>" + getLogotypes () + "</ul>" +
+                          "Logotypes should not have framing borders or extra margins " +
+                          "unless these are integral parts of the actual logotype image. " + 
+                          "Logotypes should render nicely on light backgrounds. " +
+                          "Shadows should be avoided since the icon viewer itself may add such. " +
+                          "Support for PNG files is <i>mandatory</i>.");
+
+        json.addSubItemTable (IMAGE_ATTRIBUTES_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (MIME_TYPE_JSON)
@@ -1925,9 +1858,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
             .newColumn ()
-              .addString ("Image MIME type. See ")
-              .addLink (INVOCATION_RESPONSE_JSON)
-              .addString (".")
+              .addString ("Image MIME type.")
           .newRow ()
             .newColumn ()
               .addProperty (WIDTH_JSON)
@@ -1936,9 +1867,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                .setType (WEBPKI_DATA_TYPES.INT)
             .newColumn ()
             .newColumn ()
-              .addString ("Image width. See ")
-              .addLink (INVOCATION_RESPONSE_JSON)
-              .addString (".")
+              .addString ("Image width.")
           .newRow ()
             .newColumn ()
               .addProperty (HEIGHT_JSON)
@@ -1947,9 +1876,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                .setType (WEBPKI_DATA_TYPES.INT)
             .newColumn ()
             .newColumn ()
-              .addString ("Image height. See ")
-              .addLink (INVOCATION_RESPONSE_JSON)
-              .addString (".");
+              .addString ("Image height.");
 
         json.addSubItemTable (DEVICE_CERTIFICATE_JSON)
           .newRow ()

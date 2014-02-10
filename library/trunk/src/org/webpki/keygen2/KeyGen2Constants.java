@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131201";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20140210";
 
     // JSON properties
 
@@ -34,7 +34,9 @@ public interface KeyGen2Constants
 
     String CHALLENGE_JSON                            = "Challenge";
 
-    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
+    String CLIENT_CAPABILITIES_JSON                  = "ClientCapabilities";
+
+    String CLIENT_CAPABILITY_QUERY_JSON              = "ClientCapabilityQuery";
 
     String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
@@ -90,7 +92,7 @@ public interface KeyGen2Constants
 
     String ID_JSON                                   = "ID";
 
-    String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
+    String IMAGE_ATTRIBUTES_JSON                     = "ImageAttributes";
     
     String IMPORT_PRIVATE_KEY_JSON                   = "ImportPrivateKey";
 
@@ -170,8 +172,6 @@ public interface KeyGen2Constants
 
     String PUK_POLICY_SPECIFIERS_JSON                = "PUKPolicySpecifiers";       
 
-    String REQUESTED_CLIENT_ATTRIBUTES_JSON          = "RequestedClientAttributes";
-
     String RETRY_LIMIT_JSON                          = "RetryLimit";
 
     String SEARCH_FILTER_JSON                        = "SearchFilter";
@@ -196,6 +196,8 @@ public interface KeyGen2Constants
 
     String SUBMIT_URL_JSON                           = "SubmitURL";
 
+    String SUPPORTED_JSON                            = "Supported";
+
     String TRUST_ANCHOR_JSON                         = "TrustAnchor";
 
     String TYPE_JSON                                 = "Type";
@@ -212,7 +214,7 @@ public interface KeyGen2Constants
 
     String VALUES_JSON                               = "Values";
 
-    String VIRTUAL_MACHINE_JSON                      = "VirtualMachine";
+    String VIRTUAL_ENVIRONMENT_JSON                  = "VirtualEnvironment";
 
     String WIDTH_JSON                                = "Width";
 

@@ -106,18 +106,6 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
 
     String server_session_id;
 
-    public String getServerSessionID ()
-      {
-        return server_session_id;
-      }
-
-
-    public String getClientSessionID ()
-      {
-        return client_session_id;
-      }
-
-
     public LookupResult[] getLookupResults ()
       {
         return lookup_results.toArray (new LookupResult[0]);

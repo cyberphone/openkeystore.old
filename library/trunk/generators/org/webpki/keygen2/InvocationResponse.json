@@ -1,11 +1,15 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20140210",
     "@qualifier": "InvocationResponse",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
-    "ImagePreferences": 
+    "ClientCapabilities": 
         [{
              "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
-             "MimeType": "image/png",
-             "Width": 94,
-             "Height": 74
-         }]}
+             "ImageAttributes": 
+                 {
+                     "MimeType": "image/png",
+                     "Width": 94,
+                     "Height": 74
+                 }
+         }]
+}

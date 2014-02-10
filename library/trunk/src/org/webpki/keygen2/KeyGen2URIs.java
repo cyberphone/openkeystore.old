@@ -44,6 +44,6 @@ public interface KeyGen2URIs
 
     public interface FEATURE
       {
-        String VIRTUAL_MACHINE             = "http://xmlns.webpki.org/keygen2/feature#vm";
+        String VIRTUAL_ENVIRONMENT         = "http://xmlns.webpki.org/keygen2/feature#ve";
       }
   }

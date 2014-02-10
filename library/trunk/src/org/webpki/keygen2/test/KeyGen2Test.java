@@ -81,7 +81,6 @@ import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
-import org.webpki.keygen2.BasicCapabilities;
 import org.webpki.keygen2.KeyGen2Constants;
 import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
@@ -193,8 +192,6 @@ public class KeyGen2Test
     
     boolean set_private_key;
     
-    boolean set_logotype;
-    
     boolean encrypted_extension;
     
     boolean standard_extension;
@@ -205,7 +202,7 @@ public class KeyGen2Test
     
     boolean brain_pool;
     
-    boolean virtual_machine;
+    boolean virtual_environment;
     
     boolean get_client_attributes;
     
@@ -254,7 +251,6 @@ public class KeyGen2Test
     static final String ACME_INDUSTRIES = "Acme Industries";
     
     static final String SPECIFIC_VM = "http://platforms.extreme-vm.com/type.3";
-    static final String FOR_THE_CLIENT_UNKNOWN_VM = "http://cool-but-obscure-vm.com/x";
     static final byte[] VM_CONFIG_DATA = {0,1,2,3};  // In real file probably a bit bigger...
     
     static X509Certificate server_certificate;
@@ -479,7 +475,7 @@ public class KeyGen2Test
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
-        InvocationRequestDecoder platform_req;
+        InvocationRequestDecoder invocation_request;
 
         CredentialDiscoveryRequestDecoder cre_disc_req;
         
@@ -576,23 +572,21 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] invocationResponse (byte[] json_data) throws IOException
           {
-            platform_req = (InvocationRequestDecoder) client_xml_cache.parse (json_data);
-            assertTrue ("Languages", platform_req.getOptionalLanguageList () == null ^ languages);
-            assertTrue ("Key containers", platform_req.getOptionalKeyContainerList () == null ^ key_container_list);
+            invocation_request = (InvocationRequestDecoder) client_xml_cache.parse (json_data);
+            assertTrue ("Languages", invocation_request.getOptionalLanguageList () == null ^ languages);
+            assertTrue ("Key containers", invocation_request.getOptionalKeyContainerList () == null ^ key_container_list);
             if (set_abort_url)
               {
-                assertTrue ("Abort URL", platform_req.getOptionalAbortURL ().equals (ABORT_URL));
+                assertTrue ("Abort URL", invocation_request.getOptionalAbortURL ().equals (ABORT_URL));
               }
             else
               {
-                assertTrue ("Abort URL", platform_req.getOptionalAbortURL () == null);
+                assertTrue ("Abort URL", invocation_request.getOptionalAbortURL () == null);
               }
             device_info = sks.getDeviceInfo ();
-            InvocationResponseEncoder platform_response = new InvocationResponseEncoder (platform_req);
-            BasicCapabilities basic_capabilties_response = platform_response.getBasicCapabilities ();
-            BasicCapabilities basic_capabilties_request = platform_req.getBasicCapabilities ();
+            InvocationResponseEncoder invocation_response = new InvocationResponseEncoder (invocation_request);
             Vector<String> matches = new Vector<String> ();
-            for (String want : basic_capabilties_request.getAlgorithms ())
+            for (String want : invocation_request.getQueriedCapabilities ())
               {
                 for (String have : device_info.getSupportedAlgorithms ())
                   {
@@ -605,31 +599,31 @@ public class KeyGen2Test
               }
             for (String algorithm : matches)
               {
-                basic_capabilties_response.addAlgorithm (algorithm);
+                invocation_response.addSupportedFeature (algorithm);
               }
-            for (String client_attribute : basic_capabilties_request.getClientAttributes ())
+            if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
               {
-                if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER) || client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
-                  {
-                    basic_capabilties_response.addClientAttribute (client_attribute);
-                  }
+                invocation_response.addClientValues (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER,
+                                                     new String []{"490154203237518"});
               }
-            if (image_prefs)
+            if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
               {
-                platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
+                invocation_response.addClientValues (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS,
+                                                     new String[]{"fe80::4465:62dc:5fa5:4766%10", "192.168.0.202"});
               }
-            for (String extension : basic_capabilties_request.getExtensions ())
+            if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.LOGOTYPES.CARD))
               {
-                if (extension.equals (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE))
-                  {
-                    basic_capabilties_response.addExtension (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE);
-                    basic_capabilties_response.addExtension (SPECIFIC_VM);
-                    byte[] nonce = new byte[16];
-                    new SecureRandom ().nextBytes (nonce);
-                    platform_response.setNonce (nonce);
-                  }
+                invocation_response.addImagePreference (KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
               }
-            return platform_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+            if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT))
+              {
+                invocation_response.addClientValues (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT,
+                                                     new String []{SPECIFIC_VM});
+                byte[] nonce = new byte[16];
+                new SecureRandom ().nextBytes (nonce);
+                invocation_response.setNonce (nonce);
+              }
+            return invocation_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -640,11 +634,11 @@ public class KeyGen2Test
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (json_data);
             scanForKeyManagementKeyUpdates (prov_sess_req.getKeyManagementKeyUpdateHolderRoot ());
             assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
-            assertFalse ("VM", virtual_machine ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualMachineFriendlyName ()));
+            assertFalse ("VM", virtual_environment ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualEnvironmentFriendlyName ()));
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
-                                                 platform_req.getPrivacyEnabledFlag(),
+                                                 invocation_request.getPrivacyEnabledFlag(),
                                                  prov_sess_req.getServerSessionID (),
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
@@ -660,23 +654,10 @@ public class KeyGen2Test
                                                                  sess.getClientSessionID (),
                                                                  client_time,
                                                                  sess.getSessionAttestation (),
-                                                                 platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
+                                                                 invocation_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
                 prov_init_response.setServerCertificate (server_certificate);
-              }
-
-            for (String client_attribute : prov_sess_req.getClientAttributes ())
-              {
-                if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
-                  {
-                    prov_init_response.setClientAttributeValue (client_attribute, "490154203237518");
-                  }
-                else if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
-                  {
-                    prov_init_response.setClientAttributeValue (client_attribute, "fe80::4465:62dc:5fa5:4766%10")
-                                      .setClientAttributeValue (client_attribute, "192.168.0.202");
-                  }
               }
 
             prov_init_response.setResponseSigner (new SymKeySignerInterface ()
@@ -1004,31 +985,34 @@ public class KeyGen2Test
               {
                 invocation_request.setAbortURL (ABORT_URL);
               }
-            BasicCapabilities basic_capabilities = invocation_request.getBasicCapabilities ();
             if (ask_for_4096)
               {
-                basic_capabilities.addAlgorithm (KeyAlgorithms.RSA4096.getURI ())
-                                  .addAlgorithm (KeyAlgorithms.RSA2048.getURI ());
+                server_state.addFeatureQuery (KeyAlgorithms.RSA4096.getURI ())
+                            .addFeatureQuery (KeyAlgorithms.RSA2048.getURI ());
               }
             if (ask_for_exponent)
               {
-                basic_capabilities.addAlgorithm (KeyAlgorithms.RSA2048_EXP.getURI ());
+                server_state.addFeatureQuery (KeyAlgorithms.RSA2048_EXP.getURI ());
+              }
+            if (image_prefs)
+              {
+                server_state.addImageAttributesQuery (KeyGen2URIs.LOGOTYPES.CARD)
+                            .addImageAttributesQuery (KeyGen2URIs.LOGOTYPES.LIST);
+                
               }
             if (get_client_attributes)
               {
-                basic_capabilities.addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
-                                  .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
-                                  .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+                server_state.addValuesQuery (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
+                            .addValuesQuery (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
+                            .addValuesQuery (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
               }
             if (plain_unlock_key != null)
               {
                 invocation_request.setAction (Action.UNLOCK);
               }
-            if (virtual_machine)
+            if (virtual_environment)
               {
-                basic_capabilities.addExtension (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE);
-                basic_capabilities.addExtension (SPECIFIC_VM);
-                basic_capabilities.addExtension (FOR_THE_CLIENT_UNKNOWN_VM);
+                server_state.addValuesQuery (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
                 invocation_request.setRequestSigner (signer);
@@ -1041,29 +1025,21 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            InvocationResponseDecoder platform_response = (InvocationResponseDecoder) server_xml_cache.parse (json_data);
-            server_state.update (platform_response);
-            BasicCapabilities basic_capabilties = platform_response.getBasicCapabilities ();
+            InvocationResponseDecoder invocation_response = (InvocationResponseDecoder) server_xml_cache.parse (json_data);
+            server_state.update (invocation_response);
             if (ask_for_exponent)
               {
-                ask_for_exponent = false;
-                for (String algorithm : basic_capabilties.getAlgorithms ())
+                if (server_state.isFeatureSupported (KeyAlgorithms.RSA2048_EXP.getURI ()))
                   {
-                    if (algorithm.equals (KeyAlgorithms.RSA2048_EXP.getURI ()))
-                      {
-                        ask_for_exponent = true;
-                      }
+                    ask_for_exponent = true;
                   }
               }
             if (ask_for_4096)
               {
                 ask_for_4096 = false;
-                for (String algorithm : basic_capabilties.getAlgorithms ())
+                if (server_state.isFeatureSupported (KeyAlgorithms.RSA4096.getURI ()))
                   {
-                    if (algorithm.equals (KeyAlgorithms.RSA4096.getURI ()))
-                      {
-                        ask_for_4096 = true;
-                      }
+                    ask_for_4096 = true;
                   }
               }
 
@@ -1079,9 +1055,9 @@ public class KeyGen2Test
                        .update (update_key.server_km);
                   }
               }
-            if (virtual_machine)
+            if (virtual_environment)
               {
-                prov_init_request.setVirtualMachine (VM_CONFIG_DATA, SPECIFIC_VM, ACME_INDUSTRIES);
+                prov_init_request.setVirtualEnvironment (VM_CONFIG_DATA, SPECIFIC_VM, ACME_INDUSTRIES);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
                 prov_init_request.setRequestSigner (signer);
@@ -1220,9 +1196,10 @@ public class KeyGen2Test
               {
                 kp.addExtension ("http://host/ee", new byte[]{0,5});
               }
-            if (set_logotype)
+            ServerState.ImagePreference im_pref = server_state.getImagePreference (KeyGen2URIs.LOGOTYPES.CARD); 
+            if (im_pref != null)
               {
-                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, "image/png"));
+                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, im_pref.getMimeType ()));
               }
             if (export_protection != null)
               {
@@ -1302,7 +1279,7 @@ public class KeyGen2Test
                             cert_spec.setKeyUsageBit (KeyUsageBits.KEY_ENCIPHERMENT);
                           }
                       }
-                    String extra = get_client_attributes ? ", SerialNumber=" + server_state.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";
+                    String extra = get_client_attributes ? ", SerialNumber=" + server_state.getValuesCapability (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)[0] : "";
                     cert_spec.setSubject ("CN=KeyGen2 " + _name.getMethodName() + ", E=john.doe@example.com" +
                                           (otp ? ", OU=OTP Key" : extra));
                     otp = false;
@@ -1536,7 +1513,6 @@ public class KeyGen2Test
             writeOption ("Delete Protection", delete_protection != null);
             writeOption ("Export Protection", export_protection != null);
             writeOption ("Private Key Import", set_private_key);
-            writeOption ("Logotype Option", set_logotype);
             writeOption ("Updatable Session", updatable);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
@@ -1549,7 +1525,7 @@ public class KeyGen2Test
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
             writeOption ("Abort URL option", set_abort_url);
-            writeOption ("Virtual Machine option", virtual_machine);
+            writeOption ("Virtual Environment option", virtual_environment);
             server = new Server ();
             client = new Client ();
             byte[] json;
@@ -1753,14 +1729,6 @@ public class KeyGen2Test
                                                                       null,
                                                                       USER_DEFINED_PIN, TEST_STRING),
                                                      MACAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
-      }
-
-    @Test
-    public void Logotype () throws Exception
-      {
-        Doer doer = new Doer ();
-        set_logotype = true;
-        doer.perform ();
       }
 
    @Test
@@ -2083,10 +2051,10 @@ public class KeyGen2Test
       }
 
     @Test
-    public void VirtualMachine () throws Exception
+    public void VirtualEnvironment () throws Exception
       {
         Doer doer = new Doer ();
-        virtual_machine = true;
+        virtual_environment = true;
         doer.perform ();
       }
 

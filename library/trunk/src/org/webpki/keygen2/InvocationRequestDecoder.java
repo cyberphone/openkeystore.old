@@ -18,7 +18,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.webpki.crypto.KeyContainerTypes;
 
@@ -29,6 +31,10 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 public class InvocationRequestDecoder extends ClientDecoder
   {
     private static final long serialVersionUID = 1L;
+    
+    enum CAPABILITY {UNDEFINED, URI_FEATURE, VALUES, IMAGE_ATTRIBUTES};
+    
+    LinkedHashMap<String,CAPABILITY> queried_capabilities = new LinkedHashMap<String,CAPABILITY> ();   
 
     Action action;
 
@@ -46,11 +52,9 @@ public class InvocationRequestDecoder extends ClientDecoder
       }
 
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-    
-    public BasicCapabilities getBasicCapabilities ()
+    public Set<String> getQueriedCapabilities ()
       {
-        return basic_capabilities;
+        return queried_capabilities.keySet ();
       }
 
 
@@ -117,7 +121,17 @@ public class InvocationRequestDecoder extends ClientDecoder
             abort_url = getURL (rd, ABORT_URL_JSON);
           }
 
-        BasicCapabilities.read (rd, basic_capabilities, true);
+        String[] capability_uris = KeyGen2Validator.getURIListConditional (rd, CLIENT_CAPABILITY_QUERY_JSON);
+        if (capability_uris != null)
+          {
+            for (String uri : capability_uris)
+              {
+                if (queried_capabilities.put (uri, CAPABILITY.UNDEFINED) != null)
+                  {
+                    KeyGen2Validator.bad ("Duplicate capability URI: " + uri);
+                  }
+              }
+          }
       }
 
     @Override

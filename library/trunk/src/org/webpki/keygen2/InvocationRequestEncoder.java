@@ -49,8 +49,8 @@ public class InvocationRequestEncoder extends ServerEncoder
     // Constructors
 
     public InvocationRequestEncoder (ServerState server_state,
-                                              String submit_url,
-                                              String server_session_id) throws IOException
+                                     String submit_url,
+                                     String server_session_id) throws IOException
       {
         server_state.checkState (true, ProtocolPhase.INVOCATION);
         this.server_state = server_state;
@@ -63,11 +63,6 @@ public class InvocationRequestEncoder extends ServerEncoder
         this.server_session_id = server_state.server_session_id = server_session_id;
       }
     
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return server_state.basic_capabilities;
-      }
-   
     public void setAction (Action action)
       {
         this.action = action;
@@ -101,8 +96,14 @@ public class InvocationRequestEncoder extends ServerEncoder
         setOptionalStringArray (wr, PREFERREDD_LANGUAGES_JSON, server_state.language_list);
 
         setOptionalStringArray (wr, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, server_state.key_container_list);
-
-        BasicCapabilities.write (wr, server_state.basic_capabilities, true);
+        
+        setOptionalStringArray (wr,
+                                CLIENT_CAPABILITY_QUERY_JSON,
+                                server_state.queried_capabilities.isEmpty () 
+                                         ?
+                                null 
+                                         :
+                                server_state.queried_capabilities.keySet ().toArray (new String[0]));
       }
 
     @Override

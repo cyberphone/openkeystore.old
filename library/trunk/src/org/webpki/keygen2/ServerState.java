@@ -30,7 +30,6 @@ import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
@@ -826,6 +825,7 @@ public class ServerState implements Serializable
             return this;
           }
 
+
         public BiometricProtection getBiometricProtection ()
           {
             return biometric_protection;
@@ -1068,10 +1068,124 @@ public class ServerState implements Serializable
 
     ServerCryptoInterface server_crypto_interface;
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
+    enum CAPABILITY {UNDEFINED, URI_FEATURE, VALUES, IMAGE_ATTRIBUTES};
     
-    LinkedHashMap<String,LinkedHashSet<String>> client_attribute_values;
+    LinkedHashMap<String,CAPABILITY> queried_capabilities = new LinkedHashMap<String,CAPABILITY> ();   
 
+    static abstract class CapabilityBase implements Serializable
+      {
+        private static final long serialVersionUID = 1L;
+
+        String type;
+        
+        CAPABILITY capability = CAPABILITY.URI_FEATURE;
+        
+        boolean supported = true;
+        
+        public String getType ()
+          {
+            return type;
+          }
+  
+        boolean isSupported ()
+          {
+            return supported;
+          }
+      }
+    
+    public static class ImagePreference extends CapabilityBase
+      {
+        private static final long serialVersionUID = 1L;
+
+        String mime_type;
+        int width;
+        int height;
+  
+        ImagePreference (String mime_type, int width, int height)
+          {
+            this.mime_type = mime_type;
+            this.width = width;
+            this.height = height;
+            super.capability = CAPABILITY.IMAGE_ATTRIBUTES;
+          }
+  
+        public String getMimeType ()
+          {
+            return mime_type;
+          }
+  
+        public int getWidth ()
+          {
+            return width;
+          }
+  
+        public int getHeight ()
+          {
+            return height;
+          }
+      }
+  
+    static class Values extends CapabilityBase
+      {
+        private static final long serialVersionUID = 1L;
+
+        String[] values;
+        
+        Values (String[] values)
+          {
+  
+            this.values = values;
+            super.capability = CAPABILITY.VALUES;
+          }
+        
+        public String[] getValues ()
+          {
+            return values;
+          }
+      }
+    
+    static class Feature extends CapabilityBase
+      {
+        private static final long serialVersionUID = 1L;
+
+        Feature (boolean supported)
+          {
+            this.supported = supported;
+          }
+      }
+
+    LinkedHashMap<String,CapabilityBase> received_capabilities;
+
+    CapabilityBase getCapability (String type_uri, CAPABILITY what) throws IOException
+      {
+        CapabilityBase capability = received_capabilities.get (type_uri);
+        if (capability != null && capability.isSupported ())
+          {
+            if (capability.capability != what)
+              {
+                bad ("Type error for capability: " + type_uri);
+              }
+            return capability;
+          }
+        return null;
+      }
+
+    public ImagePreference getImagePreference (String image_type_uri) throws IOException
+      {
+        return (ImagePreference) getCapability (image_type_uri, CAPABILITY.IMAGE_ATTRIBUTES);
+      }
+    
+    public String[] getValuesCapability (String values_type_uri) throws IOException
+      {
+        Values values = (Values) getCapability (values_type_uri, CAPABILITY.VALUES);
+        return values == null ? null : values.getValues (); 
+      }
+  
+    public boolean isFeatureSupported (String feature_type_uri) throws IOException
+      {
+        return getCapability (feature_type_uri, CAPABILITY.URI_FEATURE) != null;
+      }
+    
     ProtocolPhase current_phase = ProtocolPhase.INVOCATION;
     
     boolean request_phase = true;
@@ -1093,8 +1207,6 @@ public class ServerState implements Serializable
     short mac_sequence_counter;
 
     LinkedHashMap<String,Key> requested_keys = new LinkedHashMap<String,Key> ();
-
-    Vector<ImagePreference> image_preferences; 
 
     String server_session_id;
 
@@ -1118,7 +1230,7 @@ public class ServerState implements Serializable
     
     byte[] saved_close_challenge;
     
-    byte[] vm_nonce;
+    byte[] ve_nonce;
     
     X509Certificate device_certificate;
     
@@ -1249,7 +1361,32 @@ public class ServerState implements Serializable
         this.server_crypto_interface = server_crypto_interface;
       }
 
+    ServerState addQuery (String type_uri, CAPABILITY what) throws IOException
+      {
+        CAPABILITY existing = queried_capabilities.get (type_uri);
+        if (existing != null)
+          {
+            throw new IOException ("Duplicate request URI: " + type_uri);
+          }
+        queried_capabilities.put (type_uri, what);
+        return this;
+      }
+
+    public ServerState addFeatureQuery (String feature_type_uri) throws IOException
+      {
+        return addQuery (feature_type_uri, CAPABILITY.URI_FEATURE);
+      }
     
+    public ServerState addValuesQuery (String values_type_uri) throws IOException
+      {
+        return addQuery (values_type_uri, CAPABILITY.VALUES);
+      }
+
+    public ServerState addImageAttributesQuery (String image_type_uri) throws IOException
+      {
+        return addQuery (image_type_uri, CAPABILITY.IMAGE_ATTRIBUTES);
+      }
+
     void checkState (boolean request, ProtocolPhase expected) throws IOException
       {
         if (request ^ request_phase)
@@ -1268,10 +1405,25 @@ public class ServerState implements Serializable
       {
         checkState (false, ProtocolPhase.INVOCATION);
         current_phase = ProtocolPhase.PROVISIONING_INITIALIZATION;
-        basic_capabilities.checkCapabilities (invocation_response.basic_capabilities);
-        basic_capabilities = invocation_response.basic_capabilities;
-        image_preferences = invocation_response.image_preferences;
-        vm_nonce = invocation_response.nonce;
+        if (queried_capabilities.size () != invocation_response.received_capabilities.size ())
+          {
+            bad ("Differing length of queried versus received capabilities");
+          }
+        received_capabilities = invocation_response.received_capabilities;
+        for (String capability : queried_capabilities.keySet ())
+          {
+            CAPABILITY queried = queried_capabilities.get (capability);
+            CapabilityBase received = received_capabilities.get (capability);
+            if (received == null)
+              {
+                bad ("Missing capability: " + capability);
+              }
+            if (received.supported && queried != received.capability)
+              {
+                bad ("Non-matching capability for URI: " + capability);
+              }
+          }
+        ve_nonce = invocation_response.nonce;
       }
 
 
@@ -1283,7 +1435,6 @@ public class ServerState implements Serializable
             client_session_id = prov_init_response.client_session_id;
             device_certificate = prov_init_response.device_certificate_path == null ? null : prov_init_response.device_certificate_path[0];
             client_ephemeral_key = prov_init_response.client_ephemeral_key;
-            client_attribute_values = prov_init_response.client_attribute_values;
 
             MacGenerator kdf = new MacGenerator ();
             kdf.addString (client_session_id);
@@ -1314,7 +1465,7 @@ public class ServerState implements Serializable
                 (server_certificate != null && !ArrayUtil.compare (prov_init_response.server_certificate_fingerprint, 
                                                                    HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
               {
-                throw new IOException ("Attribute '" + SERVER_CERT_FP_JSON + "' is missing or is invalid");
+                bad ("Attribute '" + SERVER_CERT_FP_JSON + "' is missing or is invalid");
               }
             prov_init_response.signature.verify (new JSONSymKeyVerifier (new SymKeyVerifierInterface()
               {
@@ -1406,40 +1557,8 @@ public class ServerState implements Serializable
       {
         return device_certificate;
       }
+   
 
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
-
-    public LinkedHashMap<String,LinkedHashSet<String>> getClientAttributeValues ()
-      {
-        return client_attribute_values;
-      }
-
-
-    public ImagePreference[] getImagePreferences ()
-      {
-        return image_preferences.toArray (new ImagePreference[0]);
-      }
-
-    
-    public ImagePreference[] getImagePreferences (String type)
-      {
-        Vector<ImagePreference> matching = new Vector<ImagePreference> ();
-        for (ImagePreference impref : image_preferences)
-          {
-            if (impref.type.equals (type))
-              {
-                matching.add (impref);
-              }
-          }
-        return matching.toArray (new ImagePreference[0]);
-      }
-
-    
     public void addPostDeleteKey (String old_client_session_id,
                                   String old_server_session_id,
                                   X509Certificate old_key,

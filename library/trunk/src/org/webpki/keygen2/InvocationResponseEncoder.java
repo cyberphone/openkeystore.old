@@ -33,7 +33,7 @@ package org.webpki.keygen2;
  */
 import java.io.IOException;
 
-import java.util.Vector;
+import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
@@ -48,34 +48,65 @@ public class InvocationResponseEncoder extends JSONEncoder
     String server_session_id;
     
     byte[] nonce;  // For VMs
-
-    Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
-
-
-    public InvocationResponseEncoder addImagePreference (String type_url,
-                                                                  String mime_type,
-                                                                  int width,
-                                                                  int height)
+    
+    LinkedHashMap<String,InvocationRequestDecoder.CAPABILITY> queried_capabilities;   
+    
+    LinkedHashMap<String,String[]> returned_values = new LinkedHashMap<String,String[]> ();
+    
+    class ImageAttributes
       {
-        ImagePreference im_pref = new ImagePreference ();
-        im_pref.type = type_url;
+        String mime_type;
+        int width;
+        int height;
+      }
+
+    LinkedHashMap<String,ImageAttributes> image_preferences = new LinkedHashMap<String,ImageAttributes> ();
+
+    void addCapability (String type_uri, InvocationRequestDecoder.CAPABILITY capability) throws IOException
+      {
+        InvocationRequestDecoder.CAPABILITY current = queried_capabilities.get (type_uri);
+        if (current == null || current != InvocationRequestDecoder.CAPABILITY.UNDEFINED)
+          {
+            KeyGen2Validator.bad ("State error for URI: " + type_uri);
+          }
+        queried_capabilities.put (type_uri, capability);
+      }
+
+    public InvocationResponseEncoder addImagePreference (String type_uri,
+                                                         String mime_type,
+                                                         int width,
+                                                         int height) throws IOException
+      {
+        addCapability (type_uri, InvocationRequestDecoder.CAPABILITY.IMAGE_ATTRIBUTES);
+        ImageAttributes im_pref = new ImageAttributes ();
         im_pref.mime_type = mime_type;
         im_pref.width = width;
         im_pref.height = height;
-        image_preferences.add (im_pref);
+        image_preferences.put (type_uri, im_pref);
         return this;
       }
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-
-    public BasicCapabilities getBasicCapabilities ()
+    public InvocationResponseEncoder addSupportedFeature (String type_uri) throws IOException
       {
-        return basic_capabilities;
+        addCapability (type_uri, InvocationRequestDecoder.CAPABILITY.URI_FEATURE);
+        return this;
+      }
+
+    public InvocationResponseEncoder addClientValues (String type_uri, String[] values) throws IOException
+      {
+        addCapability (type_uri, InvocationRequestDecoder.CAPABILITY.VALUES);
+        if (values.length == 0)
+          {
+            KeyGen2Validator.bad ("Zero length array not allowed, URI: " + type_uri);
+          }
+        returned_values.put (type_uri, values);
+        return this;
       }
 
     public InvocationResponseEncoder (InvocationRequestDecoder decoder)
       {
         this.server_session_id = decoder.server_session_id;
+        this.queried_capabilities = decoder.queried_capabilities;
       }
     
     public void setNonce (byte[] nonce)
@@ -97,23 +128,34 @@ public class InvocationResponseEncoder extends JSONEncoder
           }
 
         ////////////////////////////////////////////////////////////////////////
-        // Basic capabilities
+        // Optional client capabilities
         ////////////////////////////////////////////////////////////////////////
-        BasicCapabilities.write (wr, basic_capabilities, false);
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional image preferences
-        ////////////////////////////////////////////////////////////////////////
-        if (!image_preferences.isEmpty ())
+        if (!queried_capabilities.isEmpty ())
           {
-            JSONArrayWriter array = wr.setArray (IMAGE_PREFERENCES_JSON);
-            for (ImagePreference im_pref : image_preferences)
+            JSONArrayWriter aw = wr.setArray (CLIENT_CAPABILITIES_JSON);
+            for (String uri : queried_capabilities.keySet ())
               {
-                array.setObject ()
-                  .setString (TYPE_JSON, im_pref.type)
-                  .setString (MIME_TYPE_JSON, im_pref.mime_type)
-                  .setInt (WIDTH_JSON, im_pref.width)
-                  .setInt (HEIGHT_JSON, im_pref.height);
+                JSONObjectWriter ow = aw.setObject ().setString (TYPE_JSON, uri);
+                boolean supported = false;
+                switch (queried_capabilities.get (uri))
+                  {
+                    case IMAGE_ATTRIBUTES:
+                      ImageAttributes im_pref = image_preferences.get (uri);
+                      ow.setObject (IMAGE_ATTRIBUTES_JSON)
+                           .setString (MIME_TYPE_JSON, im_pref.mime_type)
+                           .setInt (WIDTH_JSON, im_pref.width)
+                           .setInt (HEIGHT_JSON, im_pref.height);
+                      break;
+
+                    case VALUES:
+                      ow.setStringArray (VALUES_JSON, returned_values.get (uri));
+                      break;
+
+                    case URI_FEATURE:
+                      supported = true;
+                    default:
+                      ow.setBoolean (SUPPORTED_JSON, supported);
+                  }
               }
           }
       }

@@ -126,18 +126,12 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
       }
 
     
-    public String getVirtualMachineFriendlyName ()
+    public String getVirtualEnvironmentFriendlyName ()
       {
-        return virtual_machine_friendly_name;
+        return virtual_environment_friendly_name;
       }
 
 
-    public String[] getClientAttributes ()
-      {
-        return client_attributes.toArray (new String[0]);
-      }
- 
-    
     private void scanForUpdateKeys (JSONObjectReader rd, KeyManagementKeyUpdateHolder kmk) throws IOException
       {
         if (rd.hasProperty (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON))
@@ -168,13 +162,11 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     
     ECPublicKey server_ephemeral_key;
     
-    byte[] virtual_machine_data;
+    byte[] virtual_environment_data;
 
-    String virtual_machine_type;
+    String virtual_environment_type;
 
-    String virtual_machine_friendly_name;  // Optional, defined => Virtual machine defined
-    
-    Vector<String> client_attributes = new Vector<String> ();
+    String virtual_environment_friendly_name;  // Optional, defined => Virtual environment defined
     
     int session_life_time;
 
@@ -217,32 +209,20 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional requested client attribute URIs
+        // Get the optional virtual environment
         /////////////////////////////////////////////////////////////////////////////////////////
-        String[] attrs = rd.getStringArrayConditional (REQUESTED_CLIENT_ATTRIBUTES_JSON);
-        if (attrs != null)
-          {
-            for (String attr : attrs)
-              {
-                client_attributes.add (attr);
-              }
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional virtual machine
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasProperty (VIRTUAL_MACHINE_JSON))
+        if (rd.hasProperty (VIRTUAL_ENVIRONMENT_JSON))
           {
             //TODO
             rd.getBinaryConditional (NONCE_JSON);
             if (!rd.hasProperty (JSONSignatureDecoder.SIGNATURE_JSON))
               {
-                throw new IOException ("Virtual Machine requests must be signed");
+                throw new IOException ("Virtual Environment requests must be signed");
               }
-            JSONObjectReader vmrd = rd.getObject (VIRTUAL_MACHINE_JSON);
-            virtual_machine_data = vmrd.getBinary (CONFIGURATION_JSON);
-            virtual_machine_type = vmrd.getString (TYPE_JSON);
-            virtual_machine_friendly_name = vmrd.getString (FRIENDLY_NAME_JSON);
+            JSONObjectReader vmrd = rd.getObject (VIRTUAL_ENVIRONMENT_JSON);
+            virtual_environment_data = vmrd.getBinary (CONFIGURATION_JSON);
+            virtual_environment_type = vmrd.getString (TYPE_JSON);
+            virtual_environment_friendly_name = vmrd.getString (FRIENDLY_NAME_JSON);
           }
       }
 

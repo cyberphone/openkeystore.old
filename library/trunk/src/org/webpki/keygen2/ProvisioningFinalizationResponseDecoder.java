@@ -32,12 +32,6 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
     
     byte[] attestation;
 
-
-    public byte[] getAttestation ()
-      {
-        return attestation;
-      }
-    
     @Override
     protected void readJSONData (JSONObjectReader rd) throws IOException
       {

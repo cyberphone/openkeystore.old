@@ -19,8 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import java.security.GeneralSecurityException;
 
@@ -31,7 +29,6 @@ import java.security.interfaces.ECPublicKey;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
-import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSymKeySigner;
@@ -53,8 +50,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     
     ECPublicKey client_ephemeral_key;
     
-    HashMap<String,HashSet<String>> client_attribute_values = new HashMap<String,HashSet<String>> ();
-
     byte[] attestation;
     
     X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
@@ -64,16 +59,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     JSONSymKeySigner session_signature;
 
 
-    void addClientAttributeValueClient (String type, String value)
-      {
-        HashSet<String> set = client_attribute_values.get (type);
-        if (set == null)
-          {
-            client_attribute_values.put (type, set = new HashSet<String> ());
-          }
-        set.add (value);
-      }
-    
     // Constructors
 
     public ProvisioningInitializationResponseEncoder (ProvisioningInitializationRequestDecoder prov_init_req,
@@ -103,13 +88,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
           {
             throw new IOException (gse);
           }
-      }
-
-
-    public ProvisioningInitializationResponseEncoder setClientAttributeValue (String type, String value)
-      {
-        addClientAttributeValueClient (type, value);
-        return this;
       }
 
 
@@ -155,24 +133,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         if (server_certificate_fingerprint != null)
           {
             wr.setBinary (SERVER_CERT_FP_JSON, server_certificate_fingerprint);
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ClientAttributes
-        ////////////////////////////////////////////////////////////////////////
-        if (!client_attribute_values.isEmpty ())
-          {
-            JSONArrayWriter types = wr.setArray (CLIENT_ATTRIBUTES_JSON);
-            for (String type : client_attribute_values.keySet ())
-              {
-                JSONObjectWriter entry = types.setObject ();
-                entry.setString (TYPE_JSON, type);
-                JSONArrayWriter values = entry.setArray (VALUES_JSON);
-                for (String value : client_attribute_values.get (type))
-                  {
-                    values.setString (value);
-                  }
-              }
           }
 
         ////////////////////////////////////////////////////////////////////////

@@ -108,13 +108,9 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         this.submit_url = server_state.issuer_uri = submit_url;
         this.session_life_time = server_state.session_life_time = session_life_time;
         this.session_key_limit = server_state.session_key_limit = session_key_limit;
-        nonce = server_state.vm_nonce;
+        nonce = server_state.ve_nonce;
         server_session_id = server_state.server_session_id;
         server_ephemeral_key = server_state.server_ephemeral_key = server_state.generateEphemeralKey ();
-        for (String client_attribute : server_state.basic_capabilities.client_attributes)
-          {
-            client_attributes.add (client_attribute);
-          }
       }
 
 
@@ -124,11 +120,11 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
       }
 
 
-    public void setVirtualMachine (byte[] vm_data, String type, String friendly_name)
+    public void setVirtualEnvironment (byte[] ve_data, String type, String friendly_name)
       {
-        virtual_machine_data = vm_data;
-        virtual_machine_type = type;
-        virtual_machine_friendly_name = friendly_name;
+        virtual_environment_data = ve_data;
+        virtual_environment_type = type;
+        virtual_environment_friendly_name = friendly_name;
       }
 
 
@@ -169,13 +165,11 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
     
     ECPublicKey server_ephemeral_key;
     
-    byte[] virtual_machine_data;
+    byte[] virtual_environment_data;
 
-    String virtual_machine_type;
+    String virtual_environment_type;
 
-    String virtual_machine_friendly_name;  // Optional, defined => Virtual machine defined
-    
-    Vector<String> client_attributes = new Vector<String> ();
+    String virtual_environment_friendly_name;  // Optional, defined => Virtual environment defined
     
     int session_life_time;
 
@@ -184,9 +178,9 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
     @Override
     void checkIfSignatureIsRequired () throws IOException
       {
-        if (virtual_machine_data != null)
+        if (virtual_environment_data != null)
           {
-            bad ("\"" + VIRTUAL_MACHINE_JSON + "\" requires a signed request");
+            bad ("\"" + VIRTUAL_ENVIRONMENT_JSON + "\" requires a signed request");
           }
       }
 
@@ -227,7 +221,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         wr.setObject (SERVER_EPHEMERAL_KEY_JSON).setPublicKey (server_ephemeral_key);
 
         ////////////////////////////////////////////////////////////////////////
-        // Key management key
+        // Optional key management key
         ////////////////////////////////////////////////////////////////////////
         if (kmk_root != null)
           {
@@ -237,22 +231,14 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
           }
 
         ////////////////////////////////////////////////////////////////////////
-        // Possible client attributes we are interested in
+        // Optional request for a virtual environment
         ////////////////////////////////////////////////////////////////////////
-        if (!client_attributes.isEmpty ())
+        if (virtual_environment_data != null)
           {
-            wr.setStringArray (REQUESTED_CLIENT_ATTRIBUTES_JSON, client_attributes.toArray (new String[0]));
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // We request a VM as well
-        ////////////////////////////////////////////////////////////////////////
-        if (virtual_machine_data != null)
-          {
-            wr.setObject (VIRTUAL_MACHINE_JSON)
-              .setString (TYPE_JSON, virtual_machine_type)
-              .setBinary (CONFIGURATION_JSON, virtual_machine_data)
-              .setString (FRIENDLY_NAME_JSON, virtual_machine_friendly_name);
+            wr.setObject (VIRTUAL_ENVIRONMENT_JSON)
+              .setString (TYPE_JSON, virtual_environment_type)
+              .setBinary (CONFIGURATION_JSON, virtual_environment_data)
+              .setString (FRIENDLY_NAME_JSON, virtual_environment_friendly_name);
           }
 
         ////////////////////////////////////////////////////////////////////////
