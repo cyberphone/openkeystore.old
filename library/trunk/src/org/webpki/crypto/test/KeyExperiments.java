@@ -16,17 +16,15 @@
  */
 package org.webpki.crypto.test;
 
+import java.io.IOException;
 import java.math.BigInteger;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -35,6 +33,8 @@ import javax.crypto.KeyAgreement;
 
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64URL;
 
 public class KeyExperiments
   {
@@ -113,12 +113,22 @@ public class KeyExperiments
     
             BigInteger  k1 = new BigInteger(ka1.generateSecret());
             BigInteger  k2 = new BigInteger(ka2.generateSecret());
+            byte[] Z = k2.toByteArray ();
+            while (Z.length < (key_alg.getPublicKeySizeInBits () + 7)/8)
+              {
+                Z = ArrayUtil.add (new byte[]{0}, Z);
+              }
     
             if (!k1.equals(k2))
               {
                 throw new RuntimeException (key_alg + " 2-way test failed");
               }
             System.out.println ("ECDH worked for key algorithm: " + key_alg);
+            System.out.println ("\nECPublicKey1=" + Base64URL.encode (kp1.getPublic ().getEncoded ()) +
+                                "\nECPrivateKey1=" + Base64URL.encode (kp1.getPrivate ().getEncoded ()) +
+                                "\nECPublicKey2=" + Base64URL.encode (kp2.getPublic ().getEncoded ()) +
+                                "\nECPrivateKey2=" + Base64URL.encode (kp2.getPrivate ().getEncoded ()) +
+                                "\nZ=" + Base64URL.encode (Z));
           }
         signverify (kp1, null);
         signverify (kp2, key_alg.getRecommendedSignatureAlgorithm ());
