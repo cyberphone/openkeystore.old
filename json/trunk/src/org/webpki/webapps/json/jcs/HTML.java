@@ -284,7 +284,7 @@ public class HTML
                "        }\n\n" +
                "    }" 
                   : 
-               "  crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
+               "  crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-256\"}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
                "                               false,\n" +
                "                               [\"sign\", \"verify\"]).then (function (key)\n" +
                "    {\n" +
@@ -357,8 +357,7 @@ public class HTML
               outputSignature () +
               "    }" 
                 :
-              "  crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\",\n" +
-              "                      hash: {name:\"SHA-256\"}},\n" +
+              "  crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\"},\n" +
               "                      privKey,\n" +
               "                      signatureWriter.beginSignature (new JCSSigner ())).then (function (signature)\n" +
               "    {\n" +
