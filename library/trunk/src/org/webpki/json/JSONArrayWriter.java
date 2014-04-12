@@ -29,7 +29,7 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * For writing array elements.
+ * Writes array elements.
  */
 public class JSONArrayWriter implements Serializable
   {

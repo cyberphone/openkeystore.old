@@ -39,9 +39,9 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Class that writes formatted JSON data to a DOM-like tree.
+ * Writes formatted JSON data to a DOM-like tree.
  * <p>
- * It also performs canonicalization when reading and writing enveloped signatures.
+ * It also performs canonicalization fur usage with JCS (Javascript Cleatexy Signatures).
  * 
  */
 public class JSONObjectWriter implements Serializable

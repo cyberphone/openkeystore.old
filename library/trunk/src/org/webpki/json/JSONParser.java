@@ -23,7 +23,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 /**
- * Parses a JSON object into a DOM-like tree.
+ * Parses a JSON object given as a string into a DOM-like tree.
  * 
  */
 public class JSONParser
