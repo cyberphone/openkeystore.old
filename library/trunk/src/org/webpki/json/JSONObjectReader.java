@@ -29,6 +29,8 @@ import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
+import java.util.regex.Pattern;
+
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
@@ -40,6 +42,8 @@ import org.webpki.util.ISODateTime;
 public class JSONObjectReader implements Serializable
   {
     private static final long serialVersionUID = 1L;
+
+    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]+|0)[\\.][0-9]+");
 
     JSONObject root;
 
@@ -55,10 +59,7 @@ public class JSONObjectReader implements Serializable
           {
             throw new IOException ("Property \"" + name + "\" is missing");
           }
-        if (!expected_type.isCompatible (value.type))
-          {
-            throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected_type.toString ());
-          }
+        JSONTypes.compatibilityTest (expected_type, value);
         root.read_flag.add (name);
         return value;
       }
@@ -99,14 +100,33 @@ public class JSONObjectReader implements Serializable
         return Base64URL.decode (getString (name));
       }
 
+    static BigInteger parseBigInteger (String value) throws IOException
+      {
+        if (JSONParser.INTEGER_PATTERN.matcher (value).matches ())
+          {
+            return new BigInteger (value);
+          }
+        throw new IOException ("Malformed \"BigInteger\": " + value);
+      }
+
+    static BigDecimal parseBigDecimal (String value) throws IOException
+      {
+        if (JSONParser.INTEGER_PATTERN.matcher (value).matches () ||
+            DECIMAL_PATTERN.matcher (value).matches ())
+          {
+            return new BigDecimal (value);
+          }
+        throw new IOException ("Malformed \"BigDecimal\": " + value);
+      }
+
     public BigInteger getBigInteger (String name) throws IOException
       {
-        return new BigInteger (getString (name, JSONTypes.INTEGER));
+        return parseBigInteger (getString (name));
       }
 
     public BigDecimal getBigDecimal (String name) throws IOException
       {
-        return new BigDecimal (getString (name, JSONTypes.DECIMAL));
+        return parseBigDecimal (getString (name));
       }
 
     public double getDouble (String name) throws IOException
@@ -173,23 +193,14 @@ public class JSONObjectReader implements Serializable
         return hasProperty (name) ? getStringArray (name) : null;
       }
 
-    Vector<JSONValue> getArray (String name, JSONTypes expected) throws IOException
-      {
-        JSONValue value = getProperty (name, JSONTypes.ARRAY);
-        @SuppressWarnings("unchecked")
-        Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
-        if (!array.isEmpty () && array.firstElement ().type != expected)
-          {
-            throw new IOException ("Array type mismatch for \"" + name + "\"");
-          }
-        return array;
-      }
-
-    String [] getSimpleArray (String name, JSONTypes expected) throws IOException
+    String [] getSimpleArray (String name, JSONTypes expected_type) throws IOException
       {
         Vector<String> array = new Vector<String> ();
-        for (JSONValue value : getArray (name, expected))
+        @SuppressWarnings("unchecked")
+        Vector<JSONValue> array_elements = ((Vector<JSONValue>) getProperty (name, JSONTypes.ARRAY).value);
+        for (JSONValue value : array_elements)
           {
+            JSONTypes.compatibilityTest (expected_type, value);
             array.add ((String)value.value);
           }
         return array.toArray (new String[0]);

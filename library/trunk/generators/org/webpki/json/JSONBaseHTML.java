@@ -295,8 +295,11 @@ public class JSONBaseHTML
             INT     ("int",    "<i>number</i>",                           null,
                      "Unsigned four-byte integer"),
                      
-            BIGINT  ("bigint", "<i>number</i>",                           null,
-                     "Big integer"),
+            BIGINT  ("bigint", "<i>string</i>",                           null,
+                     "Base10-encoded integer with arbitrary precision"),
+                     
+            BIGDEC  ("decimal", "<i>string</i>",                          null,
+                     "Decimal type compatible with Java's BigDecimal"),
                      
             STRING  ("string", "<i>string</i>",                           null,
                      "Arbitrary string"),
@@ -311,7 +314,7 @@ public class JSONBaseHTML
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           REF_XMLDSIG,
-                     "Base64URL-encoded positive integer. Note that leading zero-valued bytes <b>must</b> be discarded"),
+                     "Base64URL-encoded positive integer with arbitrary precision. Note that leading zero-valued bytes <b>must</b> be discarded"),
                      
             DATE    ("date",   "<i>string</i>",                           null,
                      "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
@@ -1436,7 +1439,7 @@ public class JSONBaseHTML
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.SERIAL_NUMBER_JSON)
-              .addUnquotedValue (JSONSignatureDecoder.SERIAL_NUMBER_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.SERIAL_NUMBER_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.BIGINT)
             .newColumn ()

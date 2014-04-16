@@ -70,12 +70,12 @@ public class JSONArrayWriter implements Serializable
 
     public JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
       {
-        return add (JSONTypes.INTEGER, value.toString ());
+        return setString (value.toString ());
       }
 
     public JSONArrayWriter setBigInteger (BigInteger value) throws IOException
       {
-        return add (JSONTypes.INTEGER, value.toString ());
+        return setString (value.toString ());
       }
 
     public JSONArrayWriter setDouble (double value) throws IOException

@@ -134,12 +134,12 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
+        return setString (name, value.toString ());
       }
 
     public JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
+        return setString (name, value.toString ());
       }
 
     public JSONObjectWriter setBoolean (String name, boolean value) throws IOException

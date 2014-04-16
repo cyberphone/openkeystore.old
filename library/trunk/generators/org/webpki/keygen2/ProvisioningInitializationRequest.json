@@ -1,5 +1,5 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20140210",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20140415",
     "@qualifier": "ProvisioningInitializationRequest",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "SubmitURL": "https://issuer.example.com/provsess",

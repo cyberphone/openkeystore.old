@@ -16,47 +16,34 @@
  */
 package org.webpki.json;
 
+import java.io.IOException;
+
 /**
  * Basic JSON types read by the parser.
  *
  */
 public enum JSONTypes 
   {
-    NULL    (false, null),
-    BOOLEAN (false, null),
-    INTEGER (false, null),
-    DECIMAL (false, new JSONTypes[]{INTEGER}),
-    DOUBLE  (false, new JSONTypes[]{INTEGER, DECIMAL}),
-    STRING  (false, null),
-    ARRAY   (true,  null),
-    OBJECT  (true,  null);
+    NULL    (false),
+    BOOLEAN (false),
+    INTEGER (false),
+    DOUBLE  (false),
+    STRING  (false),
+    ARRAY   (true),
+    OBJECT  (true);
     
     boolean complex;
-    JSONTypes[] sub_types;  // Also accepted during "get"
     
-    JSONTypes (boolean complex, JSONTypes[] sub_types)
+    JSONTypes (boolean complex)
       {
         this.complex = complex;
-        this.sub_types = sub_types;
       }
-    
-    boolean isCompatible (JSONTypes actual)
+
+    static void compatibilityTest (JSONTypes expected_type, JSONValue value) throws IOException
       {
-        boolean is_compatible = true;
-        if (actual != this)
+        if (expected_type != value.type && (expected_type != JSONTypes.DOUBLE || value.type != JSONTypes.INTEGER))
           {
-            is_compatible = false;
-            if (sub_types != null)
-              {
-                for (JSONTypes alt_type : sub_types)
-                  {
-                    if (alt_type == actual)
-                      {
-                        is_compatible = true;
-                      }
-                  }
-              }
+            throw new IOException ("Incompatible types, expected: " + expected_type + " actual: " + value.type);
           }
-        return is_compatible;
       }
   }

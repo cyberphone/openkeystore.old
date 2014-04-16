@@ -61,10 +61,7 @@ public class JSONArrayReader implements Serializable
       {
         inRangeCheck ();
         JSONValue value = array.elementAt (index++);
-        if (!expected_type.isCompatible (value.type))
-          {
-            throw new IOException ("Incompatible request: " + expected_type + " versus " + value.type);
-          }
+        JSONTypes.compatibilityTest (expected_type, value);
         return value.value;
       }
 
@@ -85,12 +82,12 @@ public class JSONArrayReader implements Serializable
 
     public BigInteger getBigInteger () throws IOException
       {
-        return new BigInteger ((String) get (JSONTypes.INTEGER));
+        return JSONObjectReader.parseBigInteger (getString ());
       }
 
     public BigDecimal getBigDecimal () throws IOException
       {
-        return new BigDecimal ((String) get (JSONTypes.DECIMAL));
+        return JSONObjectReader.parseBigDecimal (getString ());
       }
 
     public GregorianCalendar getDateTime () throws IOException

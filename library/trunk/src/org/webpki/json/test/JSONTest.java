@@ -307,6 +307,11 @@ public class JSONTest
                                   .append ('}').toString ());
       }
 
+    JSONObjectReader simpleObjectType2  (String string) throws IOException
+      {
+        return simpleObjectType ('"' + string + '"');
+      }
+
     JSONArrayReader simpleArrayType (String string) throws IOException
       {
         return JSONParser.parse (new StringBuffer ("{\"name\":[")
@@ -314,6 +319,11 @@ public class JSONTest
                                    .append ("]}").toString ()).getArray ("name");
       }
     
+    JSONArrayReader simpleArrayType2 (String string) throws IOException
+      {
+        return simpleArrayType ('"' + string + '"');
+      }
+
     static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", " +
                                      "\"@qualifier\" : \"Escaper\", " +
                                      "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
@@ -347,31 +357,31 @@ public class JSONTest
       {
         JSONArrayReader ar; 
         JSONObjectReader or; 
-        assertTrue (simpleArrayType   ("10  ").getInt () == 10);
-        assertTrue (simpleObjectType  ("10  ").getInt ("name") == 10);
-        assertTrue (simpleArrayType   ("4").getInt () == 4);
-        assertTrue (simpleObjectType  ("4").getInt ("name") == 4);
-        assertTrue (simpleArrayType   ("40000000000000000").getBigInteger ().equals (new BigInteger ("40000000000000000")));
-        assertTrue (simpleObjectType  ("40000000000000000").getBigInteger ("name").equals (new BigInteger ("40000000000000000")));
-        assertTrue (simpleArrayType   ("40000000000000000").getBigDecimal ().equals (new BigDecimal ("40000000000000000")));
-        assertTrue (simpleObjectType  ("40000000000000000").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000")));
-        assertTrue (simpleArrayType   ("40000000000000000.45").getBigDecimal ().equals (new BigDecimal ("40000000000000000.45")));
-        assertTrue (simpleObjectType  ("40000000000000000.45").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000.45")));
-        assertTrue (simpleArrayType   ("0.0").getBigDecimal ().equals (new BigDecimal ("0.0")));
-        assertTrue (simpleObjectType  ("0.0").getBigDecimal ("name").equals (new BigDecimal ("0.0")));
-        assertTrue (simpleArrayType   ("40000000000000000").getDouble () == new Double ("40000000000000000"));
-        assertTrue (simpleObjectType  ("40000000000000000").getDouble ("name") == new Double ("40000000000000000"));
-        assertTrue (simpleArrayType   ("40000000000000000.45").getDouble () == 40000000000000000.45);
-        assertTrue (simpleObjectType  ("40000000000000000.45").getDouble ("name") == 40000000000000000.45);
-        assertTrue (simpleArrayType   ("40.45e10").getDouble () == 40.45e10);
-        assertTrue (simpleObjectType  ("40.45e10").getDouble ("name") == 40.45e10);
-        assertTrue (simpleArrayType   ("   true   ").getBoolean ());
-        assertTrue (simpleArrayType   ("true").getBoolean ());
-        assertTrue (simpleObjectType  ("true").getBoolean ("name"));
-        assertFalse (simpleArrayType  ("false").getBoolean ());
-        assertFalse (simpleObjectType ("false").getBoolean ("name"));
-        assertTrue (simpleArrayType   ("null").getIfNULL ());
-        assertTrue (simpleObjectType  ("null").getIfNULL ("name"));
+        assertTrue  (simpleArrayType   ("10  ").getInt () == 10);
+        assertTrue  (simpleObjectType  ("10  ").getInt ("name") == 10);
+        assertTrue  (simpleArrayType   ("4").getInt () == 4);
+        assertTrue  (simpleObjectType  ("4").getInt ("name") == 4);
+        assertTrue  (simpleArrayType2  ("40000000000000000").getBigInteger ().equals (new BigInteger ("40000000000000000")));
+        assertTrue  (simpleObjectType2 ("40000000000000000").getBigInteger ("name").equals (new BigInteger ("40000000000000000")));
+        assertTrue  (simpleArrayType2  ("40000000000000000").getBigDecimal ().equals (new BigDecimal ("40000000000000000")));
+        assertTrue  (simpleObjectType2 ("40000000000000000").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000")));
+        assertTrue  (simpleArrayType2  ("40000000000000000.45").getBigDecimal ().equals (new BigDecimal ("40000000000000000.45")));
+        assertTrue  (simpleObjectType2 ("40000000000000000.45").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000.45")));
+        assertTrue  (simpleArrayType2  ("0.0").getBigDecimal ().equals (new BigDecimal ("0.0")));
+        assertTrue  (simpleObjectType2 ("0.0").getBigDecimal ("name").equals (new BigDecimal ("0.0")));
+        assertTrue  (simpleArrayType   ("40000000000000000").getDouble () == new Double ("40000000000000000"));
+        assertTrue  (simpleObjectType  ("40000000000000000").getDouble ("name") == new Double ("40000000000000000"));
+        assertTrue  (simpleArrayType   ("40000000000000000.45").getDouble () == 40000000000000000.45);
+        assertTrue  (simpleObjectType  ("40000000000000000.45").getDouble ("name") == 40000000000000000.45);
+        assertTrue  (simpleArrayType   ("40.45e10").getDouble () == 40.45e10);
+        assertTrue  (simpleObjectType  ("40.45e10").getDouble ("name") == 40.45e10);
+        assertTrue  (simpleArrayType   ("   true   ").getBoolean ());
+        assertTrue  (simpleArrayType   ("true").getBoolean ());
+        assertTrue  (simpleObjectType  ("true").getBoolean ("name"));
+        assertFalse (simpleArrayType   ("false").getBoolean ());
+        assertFalse (simpleObjectType  ("false").getBoolean ("name"));
+        assertTrue  (simpleArrayType   ("null").getIfNULL ());
+        assertTrue  (simpleObjectType  ("null").getIfNULL ("name"));
         or = simpleObjectType ("3");
         assertFalse (or.getIfNULL ("name"));
         assertTrue (or.getInt ("name") == 3);
@@ -464,6 +474,27 @@ public class JSONTest
         booleanValues (true);
         booleanValues (false);
         blobValues ();
+        simpleArrays ();
+      }
+
+    private void simpleArrays () throws Exception
+      {
+        JSONObjectWriter ow = new JSONObjectWriter ();
+        ow.setArray ("arr").setString ("f").setBoolean (false);
+        JSONObjectReader or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+        try
+          {
+            or.getStringArray ("arr");
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e, "Incompatible types, expected: STRING actual: BOOLEAN");
+          }
+        ow = new JSONObjectWriter ();
+        ow.setArray ("arr").setString ("f").setString ("hgh");
+        or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+        assertTrue (or.getStringArray ("arr").length == 2);
       }
 
     private void blobValues () throws IOException

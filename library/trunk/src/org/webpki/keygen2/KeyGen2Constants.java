@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20140210";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20140415";
 
     // JSON properties
 

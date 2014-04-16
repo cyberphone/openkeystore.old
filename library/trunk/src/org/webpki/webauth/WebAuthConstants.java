@@ -19,7 +19,7 @@ package org.webpki.webauth;
 
 public interface WebAuthConstants
   {
-    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20131021#";
+    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20140415";
     
     int MAX_ID_LENGTH          = 32;
 
