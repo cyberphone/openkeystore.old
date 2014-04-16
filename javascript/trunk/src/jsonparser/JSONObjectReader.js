@@ -24,6 +24,8 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     this.root = root;
 };
 
+org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+|0)[\\.][0-9]+)$");
+
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
 {
     /* JSONValue */var value = this.root._getProperty (name);
@@ -31,12 +33,7 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     {
         org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
-    if (!expected_type.isCompatible (value.type))
-    {
-        org.webpki.util._error ("Type mismatch for \"" + name +
-                           "\": Read=" + org.webpki.json.JSONTypes.getName (value.type) +
-                           ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
-    }
+    org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     this.root.read_flag[name] = true;
     return value;
 };
@@ -79,14 +76,24 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 
 /* public BigInteger */org.webpki.json.JSONObjectReader.prototype.getBigInteger = function (/* String */name)
 {
-    return org.webpki.math.BigInteger.fromString (this._getString (name, org.webpki.json.JSONTypes.INTEGER));
+    return org.webpki.math.BigInteger.fromString (this.getString (name));
+};
+
+/* String */org.webpki.json.JSONObjectReader.parseBigDecimal = function (/* String */value)
+{
+    if (org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) ||
+        org.webpki.json.JSONObjectReader.DECIMAL_PATTERN.test (value))
+    {
+       return value;
+    }
+    org.webpki.util._error ("Malformed \"BigDecimal\": " + value);
 };
 
 // No real support for BigDecimal but at least text parsing is performed
 
 /* public BigDecimal */org.webpki.json.JSONObjectReader.prototype.getBigDecimal = function (/* String */name)
 {
-    return this._getString (name, org.webpki.json.JSONTypes.DECIMAL);
+    return org.webpki.json.JSONObjectReader.parseBigDecimal (this.getString (name));
 };
 
 
@@ -150,23 +157,14 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
     return this.hasProperty (name) ? this.getStringArray (name) : null;
 };
 
-/* JSONValue[] */org.webpki.json.JSONObjectReader.prototype._getArray = function (/* String */name, /* JSONTypes */expected)
-{
-    /* JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
-    /* JSONValue[] */var array = /* JSONValue[] */value.value;
-    if (array.length > 0 && array[0].type != expected)
-    {
-        org.webpki.util._error ("Array type mismatch for \"" + name + "\"");
-    }
-    return array;
-};
-
-/* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* JSONTypes */expected)
+/* String [] */org.webpki.json.JSONObjectReader.prototype._getSimpleArray = function (/* String */name, /* JSONTypes */expected_type)
 {
     /* String[] */var array = [];
-    var in_arr = this._getArray (name, expected);
+    /* JSONValue */var value = this._getProperty (name, org.webpki.json.JSONTypes.ARRAY);
+    var in_arr = /* JSONValue[] */value.value;
     for (var i = 0; i < in_arr.length; i++)
     {
+        org.webpki.json.JSONTypes._compatibilityTest (expected_type, in_arr[i]);
         array[i] = in_arr[i].value;
     }
     return array;

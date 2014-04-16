@@ -69,7 +69,6 @@ function loopa (o)
 }
 
 loopa (jo1);
-console.debug (org.webpki.json.JSONTypes.DOUBLE.isCompatible(org.webpki.json.JSONTypes.OBJECT));
 
 loopa (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
         0.00e4 , "bool": true, "arr":[5,7]}}').root);
@@ -237,6 +236,30 @@ if (!org.webpki.util.ByteArray.equals (org.webpki.util.ByteArray.convertStringTo
                                        new Uint8Array ([0x41, 0xE2, 0x82, 0xAC, 0xC3,0x85])))
 {
     throw "UTF 8";
+}
+
+newobjec = new org.webpki.json.JSONObjectWriter ();
+newobjec.setBigDecimal ("b1","5656656565656");
+newobjec.setBigDecimal ("b2","565.6656565656");
+try
+{
+    newobjec.setBigDecimal ("b3","565.6.656565656");
+    throw "should bomb";
+}
+catch (err)
+{
+}
+newobjec.setArray ("arr").setString ("gg").setBoolean (true);
+newobjec.setArray ("arr2").setString ("gg").setString ("true");
+reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+reader.getStringArray ("arr2");
+try
+{
+    reader.getStringArray ("arr");
+    throw "should bomb";
+}
+catch (err)
+{
 }
 
 console.debug ("Successful");

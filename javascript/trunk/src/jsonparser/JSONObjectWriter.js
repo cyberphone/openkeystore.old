@@ -127,21 +127,6 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     return value.toString ();
 };
 
-/* String */org.webpki.json.JSONObjectWriter._bigDecimalTest = function (/* BigDecimal */value)
-{
-    if (typeof value != "string")
-    {
-        org.webpki.util._error ("Bad big decimal type " + (typeof value));
-    }
-    if (!org.webpki.json.JSONParser.INTEGER_PATTERN.test (value) &&
-        (!org.webpki.json.JSONParser.DECIMAL_INITIAL_PATTERN.test (value) || 
-         org.webpki.json.JSONParser.DECIMAL_2DOUBLE_PATTERN.test (value)))
-    {
-        org.webpki.util._error ("Bad big decimal syntax: " + value);
-    }
-    return value;
-};
-
 /* String */org.webpki.json.JSONObjectWriter._boolTest = function (/* boolean */value)
 {
     if (typeof value != "boolean")
@@ -160,14 +145,14 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigInteger = function (/* String */name, /* BigInteger */value)
 {
-    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, value.toString ()));
+    return this.setString (name, value.toString ());
 };
 
 // No real support for BigDecimal but at least text parsing is performed
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBigDecimal = function (/* String */name, /* BigDecimal */value)
 {
-    return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value)));
+    return this.setString (name, org.webpki.json.JSONObjectReader.parseBigDecimal (value));
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
@@ -448,8 +433,8 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
         for (var i = 0; i < array.length; i++)
         {
             var json_value = array[i];
-            if (first_type.isComplex () != json_value.type.isComplex () ||
-                    (first_type.isComplex () && first_type != json_value.type))
+            if (first_type.complex != json_value.type.complex ||
+                    (first_type.complex && first_type != json_value.type))
 
             {
                 mixed = true;
@@ -489,7 +474,7 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
             {
                 var json_value = array[i];
                 /* JSONValue[] */var sub_array = json_value.value;
-                /* boolean */var extra_pretty = sub_array.length == 0 || !sub_array[0].type.isComplex ();
+                /* boolean */var extra_pretty = sub_array.length == 0 || !sub_array[0].type.complex;
                 if (next)
                 {
                     this.buffer += ',';

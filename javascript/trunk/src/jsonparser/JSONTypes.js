@@ -23,43 +23,31 @@ org.webpki.json.JSONTypes =
 {
     NULL:
     {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.NULL; }
+        complex : false
     },
     BOOLEAN:
     {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.BOOLEAN; }
+        complex : false
     },
     INTEGER:
     {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.INTEGER; }
-    },
-    DECIMAL:
-    {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+        complex : false
     },
     DOUBLE:
     {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.DOUBLE || o == org.webpki.json.JSONTypes.DECIMAL || o == org.webpki.json.JSONTypes.INTEGER; }
+        complex : false
     },
     STRING:
     {
-        isComplex    : function () { return false;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.STRING; }
+        complex : false
     },
     ARRAY:
     {
-        isComplex    : function () { return true;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.ARRAY; }
+        complex : true
     },
     OBJECT:
     {
-        isComplex    : function () { return true;},
-        isCompatible : function (o) { return o == org.webpki.json.JSONTypes.OBJECT; }
+        complex : true
     }
 };
 
@@ -73,5 +61,16 @@ org.webpki.json.JSONTypes.getName = function (json_type)
         }
     }
     return "UNKNOWN!";
+};
+
+org.webpki.json.JSONTypes._compatibilityTest = function (/* JSONTypes */expected_type, /* JSONValue */value)
+{
+    if (expected_type != value.type && 
+        (expected_type != org.webpki.json.JSONTypes.DOUBLE || value.type != org.webpki.json.JSONTypes.INTEGER))
+    {
+        org.webpki.util._error ("Incompatible types, expected: " + 
+                                org.webpki.json.JSONTypes.getName (expected_type) + 
+                                " actual: " + org.webpki.json.JSONTypes.getName (value.type));
+    }
 };
 

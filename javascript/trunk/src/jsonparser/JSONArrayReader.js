@@ -42,12 +42,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     this._inRangeCheck ();
     /* JSONValue */var value = this.array[this.index++];
-    if (!expected_type.isCompatible (value.type))
-    {
-        org.webpki.util._error ("Incompatible request: " +
-                "Read=" + org.webpki.json.JSONTypes.getName (value.type) +
-                ", Expected=" + org.webpki.json.JSONTypes.getName (expected_type));
-    }
+    org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     return value.value;
 };
 
@@ -68,14 +63,14 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 
 /* public BigInteger */org.webpki.json.JSONArrayReader.prototype.getBigInteger = function ()
 {
-    return org.webpki.math.BigInteger.fromString (this._get (org.webpki.json.JSONTypes.INTEGER));
+    return org.webpki.math.BigInteger.fromString (this.getString ());
 };
 
 //No real support for BigDecimal but at least text parsing is performed
 
 /* public BigDecimal */org.webpki.json.JSONArrayReader.prototype.getBigDecimal = function ()
 {
-    return this._get (org.webpki.json.JSONTypes.DECIMAL);
+    return org.webpki.json.JSONObjectReader.parseBigDecimal (this.getString ());
 };
 
 /* public Date */org.webpki.json.JSONArrayReader.prototype.getDateTime = function ()

@@ -49,12 +49,12 @@ org.webpki.json.JSONArrayWriter = function (optional_array)
 
 /* public JSONArrayWriter */ org.webpki.json.JSONArrayWriter.prototype.setBigDecimal = function (/* BigDecimal */value)
 {
-    return this._add (org.webpki.json.JSONTypes.DECIMAL, org.webpki.json.JSONObjectWriter._bigDecimalTest (value));
+    return this.setString (org.webpki.json.JSONObjectReader.parseBigDecimal (value));
 };
 
 /* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setBigInteger = function (/* BigInteger */value)
 {
-    return this._add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
+    return this.setString (value.toString ());
 };
 
 /* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setDouble = function (/* double */value)
