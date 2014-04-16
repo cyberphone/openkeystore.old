@@ -4,6 +4,7 @@
     <property name="lib.common" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
 
     <!-- set global properties for this build -->
+    <property name="javascript_dir" value="../javascript"/>
     <property name="src.dir" value="src"/>
     <property name="temp.class.dir" value="${ejbca.tmp.path}/classes"/>
     <property name="temp.resource.dir" value="${ejbca.tmp.path}/resources"/>
@@ -52,6 +53,7 @@
         <war jarfile="${dist.mod.dir}/${servlet-war}" webxml="web.xml">
             <classes dir="${temp.class.dir}"/>
             <fileset dir="web"/>
+            <fileset dir="${javascript_dir}/dist" includes="libjson.js"/>
         </war>
 
         <!-- Update application.xml -->

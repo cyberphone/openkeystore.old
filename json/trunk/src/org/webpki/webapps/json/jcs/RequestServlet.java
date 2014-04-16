@@ -38,7 +38,7 @@ public class RequestServlet extends HttpServlet
         doc.recurseObject (JSONParser.parse (signed_json));
         HTML.printResultPage (response,
             "<table>"  +
-            "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Verification Result<br>&nbsp;</td></tr>" +
+            "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Successful Verification!<br>&nbsp;</td></tr>" +
             "<tr><td align=\"left\">" + HTML.newLines2HTML (doc.getResult ()) + "</td></tr>" +
             "<tr><td align=\"left\">Received Message:</td></tr>" +
             "<tr><td align=\"left\">" + HTML.fancyBox ("verify", 
