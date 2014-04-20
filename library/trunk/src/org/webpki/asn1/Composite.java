@@ -37,7 +37,7 @@ public abstract class Composite extends BaseASN1Object
      * Create object.
      */
     @SuppressWarnings("unchecked")
-    Composite(int tagClass, int tagNumber, Vector components)
+    Composite(int tagClass, int tagNumber, Vector<BaseASN1Object> components)
       {
         this(tagClass, tagNumber);
         this.components = (Vector<BaseASN1Object>)components.clone();

@@ -17,7 +17,6 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -26,7 +25,6 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SKSAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 
@@ -1096,7 +1094,7 @@ public class JSONBaseHTML
         new References ();
       }
 
-    public void sampleRun (Class parent, String header, String[] files) throws IOException
+    public void sampleRun (@SuppressWarnings("rawtypes") Class parent, String header, String[] files) throws IOException
       {
         StringBuffer s = addParagraphObject ("Sample Run").append (header);
         JSONObjectWriter.html_indent = 2;
