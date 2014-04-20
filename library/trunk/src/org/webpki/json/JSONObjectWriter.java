@@ -598,6 +598,7 @@ import org.webpki.json.JSONSignatureDecoder;
         indent--;
       }
 
+    @SuppressWarnings("fallthrough")
     void printSimpleValue (JSONValue value, boolean property)
       {
         String string = (String) value.value;
