@@ -3,7 +3,7 @@
     "@qualifier": "ProvisioningInitializationRequest",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "SubmitURL": "https://issuer.example.com/provsess",
-    "ServerTime": "2014-02-10T16:33:30+01:00",
+    "ServerTime": "2014-04-22T16:33:30+01:00",
     "SessionKeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#session.1",
     "SessionKeyLimit": 20,
     "SessionLifeTime": 300,
