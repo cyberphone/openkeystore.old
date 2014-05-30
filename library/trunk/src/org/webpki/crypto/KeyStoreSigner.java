@@ -45,12 +45,13 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
     private boolean extended_certpath;
 
 
-    private void testKey (String key_alias) throws IOException, GeneralSecurityException
+    private KeyStoreSigner testKey (String key_alias) throws IOException, GeneralSecurityException
       {
         if (!signer_cert_keystore.isKeyEntry (key_alias))
           {
             throw new IOException ("Specified certficate does not have a private key: " + key_alias);
           }
+        return this;
       }
 
 
@@ -131,9 +132,10 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public void setAuthorityInfoAccessCAIssuersHandler (AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler)
+    public KeyStoreSigner setAuthorityInfoAccessCAIssuersHandler (AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler)
       {
         this.aia_caissuer_handler = aia_caissuer_handler;
+        return this;
       }
 
 
@@ -160,7 +162,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public void setKey (String in_key_alias, String password) throws IOException
+    public KeyStoreSigner setKey (String in_key_alias, String password) throws IOException
       {
         key_alias = in_key_alias;
         try
@@ -193,6 +195,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
               }
             private_key = (PrivateKey)signer_cert_keystore.getKey (key_alias, 
                                                                    password == null ? null : password.toCharArray ());
+            return this;
           }
         catch (UnrecoverableKeyException e)
           {
@@ -205,8 +208,9 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public void setExtendedCertPath (boolean flag)
+    public KeyStoreSigner setExtendedCertPath (boolean flag)
       {
         extended_certpath = flag;
+        return this;
       }
   }
