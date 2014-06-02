@@ -111,7 +111,7 @@
         <isset property="nant.verbose"/>
       </not>
   	</condition>
-    <exec executable="nant.bat"
+    <exec executable="nant.exe"
   	      failonerror="true">
         <arg value="build"/>
         <arg value="-nologo"/>
@@ -233,7 +233,7 @@
   	<condition property="dotnet.tools.available">
   	   <and>
  	   	 <os family="windows"/>
-  	   	<available file="nant.bat" type="file">
+  	   	<available file="nant.exe" type="file">
            <filepath>
   	         <pathelement path="${env.Path}"/>
   	       </filepath>
