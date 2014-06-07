@@ -127,7 +127,6 @@ public class WSCreator extends XMLObjectWrapper
         String package_name;
         String path;
         boolean next;
-        boolean schema_validation;
         String jserver_support_code = "";
 
         abstract String decoration ();
@@ -139,7 +138,6 @@ public class WSCreator extends XMLObjectWrapper
         Package (DOMReaderHelper rd, String elem, WSCreator owner, boolean dot_net) throws IOException
           {
             rd.getNext (elem);
-            schema_validation = attr.getBooleanConditional ("SchemaValidation");
             String canonicalized_class_name = attr.getString ("ClassName");
             boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
             dot_net_partial = attr.getBooleanConditional ("Partial", true);
@@ -1689,10 +1687,6 @@ public class WSCreator extends XMLObjectWrapper
         pck.writePackage ();
         pck.writeImports ();
         write (jfile, "\n" + pck.class_header);
-        if (pck.schema_validation)
-          {
-            write (jfile, "@com.sun.xml.ws.developer.SchemaValidation\n");
-          }
         if (pck.jserver_support_code.length () > 0)
           {
             pck.next = true;

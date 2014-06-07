@@ -94,9 +94,6 @@
          <!-- Imports -->
          <xs:attribute name="Imports" type="wsc:importList" use="optional"/>
 
-         <!-- SUN Special -->
-         <xs:attribute name="SchemaValidation" type="xs:boolean" use="optional" default="true"/>
-
          <!-- Main -->
          <xs:attribute name="AddMain" type="xs:boolean" use="optional" default="true"/>
 

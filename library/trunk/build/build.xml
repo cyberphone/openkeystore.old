@@ -139,13 +139,6 @@
   	</java>
   </target>
 	
-  <target name="_jdk7wsfix" if="${jdk7}">
-    <replace summary="true" dir="${temp_dir}" value="@com.sun.xml.internal.ws.developer.SchemaValidation">
-       <include name="**/*.java"/>
-       <replacetoken><![CDATA[@com.sun.xml.ws.developer.SchemaValidation]]></replacetoken>
-     </replace>
-  </target>
-
   <target name="wsgen" depends="_ws-check" if="wsgen.required">
   	<echo message="SKS WS needed updates"/>
     <fixcrlf srcdir="."
@@ -217,7 +210,6 @@
         <include name="org/webpki/sks/ws/**/*.java"/>
       </fileset>
     </copy>
-  	<antcall target="_jdk7wsfix"/>
 
   	<!-- Compile sks-ws java code from ${temp_dir} into ${temp_dir} -->
     <javac debug="${debug}"

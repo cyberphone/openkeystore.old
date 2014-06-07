@@ -75,7 +75,6 @@ import org.webpki.util.DebugFormatter;
  * SKS-using applications.  The Web Service can be connected
  * to any conformant SKS implementation.
  */ 
-@com.sun.xml.ws.developer.SchemaValidation
 @WebService(serviceName="SKSWS",
             targetNamespace="http://xmlns.webpki.org/sks/v1.00",
             name="SKSWS.Interface",
