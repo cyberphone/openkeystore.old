@@ -520,6 +520,24 @@ public class JSONBaseHTML
           }
       }
 
+    public static class SampleRun
+      {
+        String json_file;
+        String optional_table_comment_HTML;
+        
+        public SampleRun (String json_file)
+          {
+            this (json_file, null);
+          }
+
+        public SampleRun (String json_file, String optional_table_comment_HTML)
+          {
+            this.json_file = json_file;
+            this.optional_table_comment_HTML = optional_table_comment_HTML;
+          }
+      
+      }
+
     public interface Extender
       {
         ProtocolObject.Row.Column execute (ProtocolObject.Row.Column column) throws IOException;
@@ -926,11 +944,11 @@ public class JSONBaseHTML
                  ".tftable {border-collapse: collapse}\n" +
                  ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
                  ".tftable tr {background-color:#FFFFE0}\n" +
-                 ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
+                 ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:arial,verdana,helvetica}\n" +
                  "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
-                 "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-                 "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}");
+                 "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}\n" +
+                 "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}\n" +
+                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}\n");
         html.append (external_styles)
          .append("</style></head><body style=\"margin:15pt\">" +
                  "<div style=\"position:absolute;top:5pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
@@ -1094,15 +1112,15 @@ public class JSONBaseHTML
         new References ();
       }
 
-    public void sampleRun (@SuppressWarnings("rawtypes") Class parent, String header, String[] files) throws IOException
+    public void sampleRun (@SuppressWarnings("rawtypes") Class parent, String header, SampleRun[] sample_messages) throws IOException
       {
         StringBuffer s = addParagraphObject ("Sample Run").append (header);
         JSONObjectWriter.html_indent = 2;
         s.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
         boolean next = false;
-        for (String file : files)
+        for (SampleRun sample_message : sample_messages)
           {
-            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (file)));
+            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (sample_message.json_file)));
             if (next)
               {
                 s.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
@@ -1118,6 +1136,13 @@ public class JSONBaseHTML
              .append ("</th></tr><tr><td><code>")
              .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
              .append ("</code></td></tr>");
+            if (sample_message.optional_table_comment_HTML != null)
+              {
+                s.append ("<tr><td style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")
+                 .append (sample_message.optional_table_comment_HTML)
+                 .append ("</td></tr>");
+                next = false;
+              }
           }
         s.append ("</table>");
       }
@@ -1493,5 +1518,24 @@ public class JSONBaseHTML
       {
         curr_toc_seq = 0;
         appendix_mode = true;
+      }
+
+    private boolean has_already_out_dialog_styles;
+    
+    public String createDialog (String header, String content)
+      {
+        if (!has_already_out_dialog_styles)
+          {
+            has_already_out_dialog_styles = true;
+            addGlobalStyle (".dlgbtn {border-radius:3pt;border-color:grey;border-style:solid;border-width:2pt;background-color:lightgrey;padding:2pt 4pt 2pt 4pt;margin-bottom:2pt;display:inline-block}\n" +
+                            ".dlgtext {border-color:black;border-style:solid;border-width:1pt;padding:2pt 4pt 2pt 4pt;font-weight:bold;font-family:\"Courier New\",courier,helvetica}\n" +
+                            ".dlgtbl {padding:0px;margin-top:10pt;margin-bottom:10pt;margin-left:auto;margin-right:auto;border-color:grey;border-style:solid;border-width:1pt;border-spacing:0px;box-shadow:3pt 3pt 3pt #D0D0D0}\n" +
+                            ".dlgtbl td {background-color:white;border-width:0px}\n");
+          }
+        return 
+          "<table class=\"dlgtbl\"><tr><td colspan=\"2\" style=\"text-align:center;font-size:14pt;font-family:arial,verdana,helvetica;background-color:lightblue;border-width:0pt 0pt 1pt 0pt\">" +
+          header + "</td></tr>" + content +
+          "<tr><td><div class=\"dlgbtn\">Cancel</div></td><td style=\"text-align:right\"><div class=\"dlgbtn\">&nbsp;&nbsp;OK&nbsp;&nbsp;</div></td></tr>" +
+          "</table>";      
       }
   }

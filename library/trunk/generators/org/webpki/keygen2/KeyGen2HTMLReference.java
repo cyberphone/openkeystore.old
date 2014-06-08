@@ -33,6 +33,8 @@ import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+import org.webpki.json.JSONBaseHTML.SampleRun;
+
 import org.webpki.json.JSONSignatureDecoder;
 
 import org.webpki.sks.SecureKeyStore;
@@ -620,14 +622,26 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                         "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
                         "Finally, the issuer provides a certificate and the logotype to go with it." + LINE_SEPARATOR +
                         "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
-                        new String[]{"InvocationRequest.json",
-                                     "InvocationResponse.json",
-                                     "ProvisioningInitializationRequest.json",
-                                     "ProvisioningInitializationResponse.json",
-                                     "KeyCreationRequest.json",
-                                     "KeyCreationResponse.json",
-                                     "ProvisioningFinalizationRequest.json",
-                                     "ProvisioningFinalizationResponse.json"});
+                        new SampleRun[]{new SampleRun ("InvocationRequest.json", "After the browser has received this message, a dialog like the following is " +
+                                                                                 "shown to user:" +
+                                                                                  json.createDialog ("Credential Enrollment",
+ "<tr><td colspan=\"2\">The following provider wants to create a<br>login credential for you:</td></tr>" +
+ "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>")),
+                                        new SampleRun ("InvocationResponse.json"),
+                                        new SampleRun ("ProvisioningInitializationRequest.json"),
+                                        new SampleRun ("ProvisioningInitializationResponse.json"),
+                                        new SampleRun ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
+                                                                                  "shown to user:" +
+                                                                                  json.createDialog ("PIN Code Assignment",
+"<tr><td colspan=\"2\">Set and memorize a PIN for the<br>login credential:</td></tr>" +
+"<tr><td colspan=\"2\" style=\"padding-top:0px\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>" +
+"<tr><td colspan=\"2\">Repeat PIN:</td></tr>" +
+"<tr><td colspan=\"2\" style=\"padding-top:0px;padding-bottom:15pt\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>") +
+"When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key-pair is created and the public part of the<br>key-pair is sent to the server for certification as shown " +
+"in the response below:"),
+                                        new SampleRun ("KeyCreationResponse.json"),
+                                        new SampleRun ("ProvisioningFinalizationRequest.json"),
+                                        new SampleRun ("ProvisioningFinalizationResponse.json")});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
                           .append (json.createReference (JSONBaseHTML.REF_DSKPP))
@@ -636,7 +650,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2014-04-15", "0.4", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2014-06-08", "0.5", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
