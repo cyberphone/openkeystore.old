@@ -616,20 +616,21 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.setAppendixMode ();
         
         json.sampleRun (KeyGen2HTMLReference.class,
-                        "In the following KeyGen2 sample run the issuer queries the client (platform) " +
-                        "for a suitable image size for logotypes associated with keys." + LINE_SEPARATOR +
-                        "Then the issuer requests that the client (SKS) creates an RSA 2048-bit key " +
+                        "In the following KeyGen2 sample run the issuer requests that the client (SKS) creates an RSA 2048-bit key " +
                         "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
-                        "Finally, the issuer provides a certificate and the logotype to go with it." + LINE_SEPARATOR +
+                        "Finally, the issuer provides a certificate and a platform-adapted logotype." + LINE_SEPARATOR +
                         "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
-                        new SampleRun[]{new SampleRun ("InvocationRequest.json", "After the browser has received this message, a dialog like the following is " +
+                        new SampleRun[]{new SampleRun ("InvocationRequest.json", "After a <i>compatible</i> browser has received this message, a dialog like the following is " +
                                                                                  "shown to user:" +
                                                                                   json.createDialog ("Credential Enrollment",
  "<tr><td colspan=\"2\">The following provider wants to create a<br>login credential for you:</td></tr>" +
- "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>")),
-                                        new SampleRun ("InvocationResponse.json"),
-                                        new SampleRun ("ProvisioningInitializationRequest.json"),
-                                        new SampleRun ("ProvisioningInitializationResponse.json"),
+ "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>") +
+ "If the user accepts the request, the following response is sent to the server at the address specified by " + json.globalLinkRef (INVOCATION_REQUEST_JSON, SUBMIT_URL_JSON) + ":"),
+                                        new SampleRun ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
+                                        new SampleRun ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
+ "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
+                                        new SampleRun ("ProvisioningInitializationResponse.json", "After the previous exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
+ "which is used for securing the<br>rest of the session through MAC- and encryption-operations. In the sample a request for creating a key is returned to the client:"),
                                         new SampleRun ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
                                                                                   "shown to user:" +
                                                                                   json.createDialog ("PIN Code Assignment",
@@ -639,9 +640,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 "<tr><td colspan=\"2\" style=\"padding-top:0px;padding-bottom:15pt\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>") +
 "When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key-pair is created and the public part of the<br>key-pair is sent to the server for certification as shown " +
 "in the response below:"),
-                                        new SampleRun ("KeyCreationResponse.json"),
-                                        new SampleRun ("ProvisioningFinalizationRequest.json"),
-                                        new SampleRun ("ProvisioningFinalizationResponse.json")});
+                                        new SampleRun ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype:"),
+                                        new SampleRun ("ProvisioningFinalizationRequest.json", "This is the final message which will only be sent to the server if the previous steps were successful:"),
+                                        new SampleRun ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next.")});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
                           .append (json.createReference (JSONBaseHTML.REF_DSKPP))
@@ -650,7 +651,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2014-06-08", "0.5", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2014-06-09", "0.5", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
