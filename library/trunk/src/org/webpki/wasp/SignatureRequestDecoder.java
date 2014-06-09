@@ -22,7 +22,7 @@ import java.util.Vector;
 
 import org.w3c.dom.Element;
 
-import org.webpki.util.MimeTypedObject;
+import org.webpki.util.MIMETypedObject;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -116,7 +116,7 @@ public class SignatureRequestDecoder extends SignatureRequest
       }
 
 
-    public class BaseDocument implements MimeTypedObject
+    public class BaseDocument implements MIMETypedObject
       {
         Object user_object;
 
@@ -155,7 +155,7 @@ public class SignatureRequestDecoder extends SignatureRequest
             return data;
           }
 
-        public String getMimeType ()
+        public String getMIMEType ()
           {
             return mime_type;
           }

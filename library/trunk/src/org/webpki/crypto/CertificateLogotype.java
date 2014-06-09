@@ -16,17 +16,17 @@
  */
 package org.webpki.crypto;
 
-import org.webpki.util.MimeTypedObject;
+import org.webpki.util.MIMETypedObject;
 
 
-public class CertificateLogotype implements MimeTypedObject
+public class CertificateLogotype implements MIMETypedObject
   {
     private byte[] data;
 
     private String mime_type;
 
 
-    public String getMimeType ()
+    public String getMIMEType ()
       {
         return mime_type;
       }

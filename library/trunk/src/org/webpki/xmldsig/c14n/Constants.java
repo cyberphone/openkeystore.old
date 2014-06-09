@@ -69,8 +69,8 @@ public class Constants {
    public static final String _ATT_TYPE                   = "Type";
    /** Tag of Attr Id**/
    public static final String _ATT_ID                     = "Id";
-   /** Tag of Attr MimeType**/
-   public static final String _ATT_MIMETYPE               = "MimeType";
+   /** Tag of Attr MIMEType**/
+   public static final String _ATT_MIMETYPE               = "MIMEType";
    /** Tag of Attr Encoding**/
    public static final String _ATT_ENCODING               = "Encoding";
    /** Tag of Attr Target**/

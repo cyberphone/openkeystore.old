@@ -191,7 +191,7 @@ public class CertSpec
         logo.hash_alg = HashAlgorithms.SHA1;
         logo.uris.add (uri);
         logo.index = index;
-        logo.mime_type = dref.getMimeType ();
+        logo.mime_type = dref.getMIMEType ();
         logotypes.add (logo);
       }
 

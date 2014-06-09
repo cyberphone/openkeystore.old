@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 
-public class ImageData implements MimeTypedObject, Serializable
+public class ImageData implements MIMETypedObject, Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -44,7 +44,7 @@ public class ImageData implements MimeTypedObject, Serializable
       }
 
 
-    public String getMimeType () throws IOException
+    public String getMIMEType () throws IOException
       {
         return mime_type;
       }

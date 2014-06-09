@@ -39,7 +39,7 @@ public class CertificateLogotypeDescriptor
       }
 
 
-    public String getMimeType ()
+    public String getMIMEType ()
       {
         return mime_type;
       }
@@ -75,7 +75,7 @@ public class CertificateLogotypeDescriptor
         if (isSupported ())
           {
             URLDereferencer dref = new URLDereferencer (uri);
-            if (dref.getMimeType ().equals (mime_type))
+            if (dref.getMIMEType ().equals (mime_type))
               {
                 if (ArrayUtil.compare (HashAlgorithms.SHA1.digest (dref.getData ()), sha1_data))
                   {

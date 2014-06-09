@@ -22,7 +22,7 @@ import java.io.Serializable;
 import org.webpki.net.HTTPSWrapper;
 
 
-public class URLDereferencer implements MimeTypedObject, Serializable
+public class URLDereferencer implements MIMETypedObject, Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -51,7 +51,7 @@ public class URLDereferencer implements MimeTypedObject, Serializable
       }
 
 
-    public String getMimeType () throws IOException
+    public String getMIMEType () throws IOException
       {
         return ct;
       }

@@ -26,7 +26,7 @@ import java.security.SecureRandom;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import org.webpki.util.MimeTypedObject;
+import org.webpki.util.MIMETypedObject;
 import org.webpki.util.URLDereferencer;
 
 import org.webpki.wasp.prof.xds.XDSProfileRequestEncoder;
@@ -265,9 +265,9 @@ public class SignatureRequestEncoder extends SignatureRequest
       }
 
 
-    public String addDocumentFromMTO (TargetContainer target, MimeTypedObject mto, String meta_data) throws IOException
+    public String addDocumentFromMTO (TargetContainer target, MIMETypedObject mto, String meta_data) throws IOException
       {
-        return addDocument (mto.getData (), target, mto.getMimeType (), meta_data);
+        return addDocument (mto.getData (), target, mto.getMIMEType (), meta_data);
       }
 
 

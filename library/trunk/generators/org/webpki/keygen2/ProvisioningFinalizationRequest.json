@@ -15,7 +15,7 @@
              "Logotypes": 
                  [{
                       "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
-                      "MimeType": "image/png",
+                      "MIMEType": "image/png",
                       "ExtensionData": "RBgoJkiaJk_IsZAEZUBsZAEZFg....NVBAMTC0RlbW8gU3ViIENBMBTEzMM1oDTM4",
                       "MAC": "uQ5IuLRDpbSkpfU9FHe1grrQ_FXUBfsxsk6HqspjuCU"
                   }]

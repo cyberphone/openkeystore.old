@@ -52,13 +52,13 @@ public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAI
                           {
                             X509Certificate[] temp_path = null;
                             URLDereferencer dref = new URLDereferencer (uri);
-                            if (dref.getMimeType ().equals ("application/x-x509-ca-cert") || 
-                                dref.getMimeType ().equals ("application/pkix-cert"))
+                            if (dref.getMIMEType ().equals ("application/x-x509-ca-cert") || 
+                                dref.getMIMEType ().equals ("application/pkix-cert"))
                               {
                                 temp_path = new X509Certificate[] {CertificateUtil.getCertificateFromBlob (dref.getData ())};
                               }
-                            else if (dref.getMimeType ().equals ("application/x-pkcs7-certificates") ||
-                                     dref.getMimeType ().equals ("application/pkcs7-mime"))
+                            else if (dref.getMIMEType ().equals ("application/x-pkcs7-certificates") ||
+                                     dref.getMIMEType ().equals ("application/pkcs7-mime"))
                               {
                                 temp_path = CertificateUtil.getSortedPathFromPKCS7Bag (dref.getData ());
                               }

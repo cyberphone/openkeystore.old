@@ -7,7 +7,7 @@
              "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
              "ImageAttributes": 
                  {
-                     "MimeType": "image/png",
+                     "MIMEType": "image/png",
                      "Width": 94,
                      "Height": 74
                  }

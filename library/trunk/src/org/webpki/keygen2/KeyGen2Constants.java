@@ -140,7 +140,7 @@ public interface KeyGen2Constants
 
     String MAX_LENGTH_JSON                           = "MaxLength";
 
-    String MIME_TYPE_JSON                            = "MimeType";
+    String MIME_TYPE_JSON                            = "MIMEType";
 
     String MIN_LENGTH_JSON                           = "MinLength";
 

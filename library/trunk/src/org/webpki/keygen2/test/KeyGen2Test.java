@@ -1199,7 +1199,7 @@ public class KeyGen2Test
             ServerState.ImagePreference im_pref = server_state.getImagePreference (KeyGen2URIs.LOGOTYPES.CARD); 
             if (im_pref != null)
               {
-                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, im_pref.getMimeType ()));
+                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, im_pref.getMIMEType ()));
               }
             if (export_protection != null)
               {

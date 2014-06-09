@@ -56,7 +56,7 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.MimeTypedObject;
+import org.webpki.util.MIMETypedObject;
 
 public class ServerState implements Serializable
   {
@@ -250,9 +250,9 @@ public class ServerState implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
-        MimeTypedObject logotype;
+        MIMETypedObject logotype;
 
-        Logotype (String type, MimeTypedObject logotype)
+        Logotype (String type, MIMETypedObject logotype)
           {
             super (type);
             this.logotype = logotype;
@@ -273,13 +273,13 @@ public class ServerState implements Serializable
         @Override
         public String getQualifier () throws IOException
           {
-            return logotype.getMimeType ();
+            return logotype.getMIMEType ();
           }
 
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setString (MIME_TYPE_JSON, logotype.getMimeType ());
+            wr.setString (MIME_TYPE_JSON, logotype.getMIMEType ());
             wr.setBinary (EXTENSION_DATA_JSON, logotype.getData ());
           }
 
@@ -642,7 +642,7 @@ public class ServerState implements Serializable
             return this;
           }
 
-        public Key addLogotype (String type, MimeTypedObject logotype) throws IOException
+        public Key addLogotype (String type, MIMETypedObject logotype) throws IOException
           {
             addExtension (new Logotype (type, logotype));
             return this;
@@ -1109,7 +1109,7 @@ public class ServerState implements Serializable
             super.capability = CAPABILITY.IMAGE_ATTRIBUTES;
           }
   
-        public String getMimeType ()
+        public String getMIMEType ()
           {
             return mime_type;
           }
