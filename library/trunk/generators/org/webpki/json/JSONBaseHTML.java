@@ -177,7 +177,7 @@ public class JSONBaseHTML
     
     String externalWebReference (String url)
       {
-        return "<a target=\"_blank\" title=\"External link opened in a new windows\" href=\"" + url + "\">" + url + "</a>";
+        return "<a target=\"_blank\" title=\"External link opened in a new window\" href=\"" + url + "\"><span style=\"white-space: nowrap\">" + url + "</span></a>";
       }
     
     StringBuffer external_styles = new StringBuffer ();
@@ -216,9 +216,9 @@ public class JSONBaseHTML
             externalWebReference ("http://www.w3.org/TR/xmlenc-core1/"));
 
         addReferenceEntry (REF_JCS,
-            "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress, " +
+            "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">January&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.53, April&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
