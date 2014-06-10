@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.math.BigInteger;
 
@@ -28,6 +29,7 @@ import java.security.Signature;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -42,7 +44,7 @@ import org.webpki.crypto.KeyAlgorithms;
 /**
  * Decoder for JSON signatures.
  */
-public class JSONSignatureDecoder
+public class JSONSignatureDecoder implements Serializable
   {
     private static final long serialVersionUID = 1L;
 

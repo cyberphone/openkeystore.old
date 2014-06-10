@@ -1,10 +1,10 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20140415",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20140609",
     "@qualifier": "ProvisioningInitializationResponse",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
-    "ServerTime": "2014-04-22T16:33:30+01:00",
-    "ClientTime": "2014-04-22T16:33:30+01:00",
+    "ServerTime": "2014-06-10T16:33:30+01:00",
+    "ClientTime": "2014-06-10T16:33:30+01:00",
     "SessionAttestation": "KMUpOesC8nDTLpu8PppsSGg1j....WiwvUcVpbNudbY14lLks8RQuwoiU",
     "ClientEphemeralKey": 
         {
