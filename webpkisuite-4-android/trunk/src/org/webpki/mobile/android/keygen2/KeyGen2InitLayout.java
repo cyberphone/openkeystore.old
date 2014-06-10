@@ -28,8 +28,8 @@ public class KeyGen2InitLayout extends FrameLayout
   {
     public static final int PADDING = 20;
 
-    static final int HOST_IMAGE    = 0;
-    static final int ACCEPT_TEXT   = 1;
+    static final int ACCEPT_TEXT   = 0;
+    static final int HOST_IMAGE    = 1;
     static final int CANCEL_BUTTON = 2;
     static final int OK_BUTTON     = 3;
 
@@ -89,10 +89,10 @@ public class KeyGen2InitLayout extends FrameLayout
     protected void onLayout (boolean changed, int l, int t, int r, int b)
       {
         int height = 0;
-        int width = getChildAt (HOST_IMAGE).getMeasuredWidth ();
-        getChildAt (HOST_IMAGE).layout ((r - l - width) / 2, height + PADDING + 5, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING + 5);
-        width = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
-        getChildAt (ACCEPT_TEXT).layout ((r - l - width) / 2, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING * 2, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + PADDING * 2);
+        int width = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
+        getChildAt (ACCEPT_TEXT).layout ((r - l - width) / 2, height + PADDING, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING);
+        width = getChildAt (HOST_IMAGE).getMeasuredWidth ();
+        getChildAt (HOST_IMAGE).layout ((r - l - width) / 2, height+ getChildAt (ACCEPT_TEXT).getMeasuredHeight () + (PADDING * 3)/2, (r - l - width) / 2 + width, height + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + (PADDING * 3)/2); 
         width = getChildAt (CANCEL_BUTTON).getMeasuredWidth ();
         getChildAt (CANCEL_BUTTON).layout (PADDING, b - t - getChildAt (CANCEL_BUTTON).getMeasuredHeight () - PADDING, PADDING + width, b - t - PADDING);
         getChildAt (OK_BUTTON).layout (r - l - width - PADDING, b - t - getChildAt (OK_BUTTON).getMeasuredHeight () - PADDING, r - l - PADDING, b - t - PADDING);
