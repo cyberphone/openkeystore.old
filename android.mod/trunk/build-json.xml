@@ -83,7 +83,7 @@
         <exclude name="**/keygen2/ServerCryptoInterface.java"/>
          <exclude name="**/webauth/*RequestEncoder.java"/>
         <exclude name="**/webauth/*ResponseDecoder.java"/>
-        </fileset>
+      </fileset>
     </copy>
 
     <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
@@ -121,15 +121,13 @@
     <!-- Create the distribution directory -->
     <mkdir dir="${dist_dir}" />
     
-    <!-- Create Android class library -->
-    <jar jarfile="${dist_dir}/${target-name}-android.mod.jar">
-      <fileset dir="${class_dir}"/>
-      <fileset dir="${temp_dir}">
-          <exclude name="**/*.java"/>
+    <!-- Create Android java library -->
+    <zip destfile="${dist_dir}/${target-name}-android.mod.zip">
+      <zipfileset dir="${temp_dir}">
           <exclude name="**/*.html"/>
           <exclude name="**/doc-files/*"/>
-       </fileset>
-    </jar>
+       </zipfileset>
+    </zip>
   </target>
 
   <target name="clean">
