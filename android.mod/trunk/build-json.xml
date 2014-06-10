@@ -19,7 +19,7 @@
     <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
     <delete file="${dd}/${android-json-src}.zip" failonerror="false"/>
-    <copy todir="${temp_dir}/org/webpki/android">
+    <copy todir="${temp_dir}/org/webpki">
       <fileset dir="${webpki_src_dir}/org/webpki">
         <exclude name="**/.svn/**"/>
         <exclude name="**/test/**"/>
@@ -42,10 +42,6 @@
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
       </fileset>
     </copy>
-    <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
-       <include name="**/*"/>
-       <replacetoken><![CDATA[org.webpki.]]></replacetoken>
-     </replace>
     <delete dir="${class_dir}"/>
     <mkdir dir="${class_dir}" />
     <javac debug="${debug}" srcdir="${temp_dir}" destdir="${class_dir}" includeAntRuntime="false"/>
@@ -59,7 +55,7 @@
     <mkdir dir="${temp_dir}"/>
     <mkdir dir="${class_dir}" />
 
-    <copy todir="${temp_dir}/org/webpki/android" preservelastmodified="true">
+    <copy todir="${temp_dir}/org/webpki" preservelastmodified="true">
       <fileset dir="${webpki_src_dir}/org/webpki">
         <exclude name="**/test/**"/>
         <exclude name="**/infocard/**"/>
@@ -81,17 +77,12 @@
         <exclude name="**/keygen2/ServerState.java"/>
         <exclude name="**/keygen2/ServerEncoder.java"/>
         <exclude name="**/keygen2/ServerCryptoInterface.java"/>
-         <exclude name="**/webauth/*RequestEncoder.java"/>
+        <exclude name="**/webauth/*RequestEncoder.java"/>
         <exclude name="**/webauth/*ResponseDecoder.java"/>
       </fileset>
     </copy>
 
-    <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
-       <include name="**/*"/>
-       <replacetoken><![CDATA[org.webpki.]]></replacetoken>
-     </replace>
-
-    <replaceregexp file="${temp_dir}/org/webpki/android/crypto/KeyStoreReader.java"
+    <replaceregexp file="${temp_dir}/org/webpki/crypto/KeyStoreReader.java"
         match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
         replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
         flags="s"/>
@@ -100,7 +91,7 @@
         match="&quot;SunX509&quot;"
         replace="&quot;X509&quot;"
         flags="g">
-        <fileset dir="${temp_dir}/org/webpki/android/">
+        <fileset dir="${temp_dir}/org/webpki/">
           <include name="**/*.java"/>
         </fileset>
     </replaceregexp>
@@ -109,7 +100,7 @@
         match="&quot;JKS&quot;"
         replace="&quot;BKS&quot;"
         flags="g">
-        <fileset dir="${temp_dir}/org/webpki/android/">
+        <fileset dir="${temp_dir}/org/webpki/">
           <include name="**/*.java"/>
         </fileset>
     </replaceregexp>
