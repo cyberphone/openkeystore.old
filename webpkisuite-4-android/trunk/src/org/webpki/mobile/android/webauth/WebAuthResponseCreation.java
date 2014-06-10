@@ -26,14 +26,14 @@ import android.os.AsyncTask;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.SKSException;
 
-import org.webpki.android.webauth.AuthenticationResponseEncoder;
+import org.webpki.webauth.AuthenticationResponseEncoder;
 
-import org.webpki.android.crypto.AsymSignatureAlgorithms;
-import org.webpki.android.crypto.SignerInterface;
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignerInterface;
 
-import org.webpki.android.json.JSONX509Signer;
+import org.webpki.json.JSONX509Signer;
 
 /**
  * This worker class creates the actual authentication response.

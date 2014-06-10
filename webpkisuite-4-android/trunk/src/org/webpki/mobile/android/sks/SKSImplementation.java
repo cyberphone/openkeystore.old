@@ -60,16 +60,16 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.webpki.android.sks.DeviceInfo;
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.EnumeratedProvisioningSession;
-import org.webpki.android.sks.Extension;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.KeyData;
-import org.webpki.android.sks.KeyProtectionInfo;
-import org.webpki.android.sks.ProvisioningSession;
-import org.webpki.android.sks.SKSException;
-import org.webpki.android.sks.SecureKeyStore;
+import org.webpki.sks.DeviceInfo;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.Extension;
+import org.webpki.sks.KeyAttributes;
+import org.webpki.sks.KeyData;
+import org.webpki.sks.KeyProtectionInfo;
+import org.webpki.sks.ProvisioningSession;
+import org.webpki.sks.SKSException;
+import org.webpki.sks.SecureKeyStore;
 
 import android.util.Log;
 

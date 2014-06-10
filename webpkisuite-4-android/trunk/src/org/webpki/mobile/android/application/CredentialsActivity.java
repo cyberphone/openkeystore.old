@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.KeyAttributes;
+import org.webpki.sks.SKSException;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;

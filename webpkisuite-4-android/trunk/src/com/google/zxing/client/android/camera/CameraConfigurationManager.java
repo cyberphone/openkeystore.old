@@ -27,11 +27,7 @@ import android.view.WindowManager;
 
 import com.google.zxing.client.android.PreferencesActivity;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * A class which deals with reading, parsing, and setting the camera parameters which are used to

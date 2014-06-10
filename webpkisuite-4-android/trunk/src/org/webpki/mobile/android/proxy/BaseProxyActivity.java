@@ -45,12 +45,12 @@ import android.util.Log;
 
 import org.apache.http.HttpStatus;
 
-import org.webpki.android.json.JSONDecoder;
-import org.webpki.android.json.JSONDecoderCache;
-import org.webpki.android.json.JSONEncoder;
-import org.webpki.android.json.JSONOutputFormats;
+import org.webpki.json.JSONDecoder;
+import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONOutputFormats;
 
-import org.webpki.android.net.HTTPSWrapper;
+import org.webpki.net.HTTPSWrapper;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;

@@ -45,28 +45,28 @@ import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
 import org.webpki.mobile.android.R;
 
-import org.webpki.android.crypto.MACAlgorithms;
-import org.webpki.android.crypto.SymKeySignerInterface;
+import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.SymKeySignerInterface;
 
-import org.webpki.android.json.JSONDecoder;
+import org.webpki.json.JSONDecoder;
 
-import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
-import org.webpki.android.keygen2.CredentialDiscoveryResponseEncoder;
-import org.webpki.android.keygen2.KeyCreationRequestDecoder;
-import org.webpki.android.keygen2.KeyGen2URIs;
-import org.webpki.android.keygen2.InvocationResponseEncoder;
-import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
-import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
+import org.webpki.keygen2.CredentialDiscoveryRequestDecoder;
+import org.webpki.keygen2.CredentialDiscoveryResponseEncoder;
+import org.webpki.keygen2.KeyCreationRequestDecoder;
+import org.webpki.keygen2.KeyGen2URIs;
+import org.webpki.keygen2.InvocationResponseEncoder;
+import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
+import org.webpki.keygen2.ProvisioningInitializationResponseEncoder;
 
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.EnumeratedProvisioningSession;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.AppUsage;
-import org.webpki.android.sks.Grouping;
-import org.webpki.android.sks.KeyProtectionInfo;
-import org.webpki.android.sks.PassphraseFormat;
-import org.webpki.android.sks.ProvisioningSession;
-import org.webpki.android.sks.DeviceInfo;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyAttributes;
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.KeyProtectionInfo;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.ProvisioningSession;
+import org.webpki.sks.DeviceInfo;
 
 /**
  * This worker class creates the SKS/KeyGen2 SessionKey.
@@ -133,6 +133,9 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 
                         case BINARY:
                           error = "PINs must be a hexadecimal string";
+                          break;
+
+                        default:
                           break;
                       }
                   }

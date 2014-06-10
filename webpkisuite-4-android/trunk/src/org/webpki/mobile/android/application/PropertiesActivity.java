@@ -16,9 +16,9 @@
  */
 package org.webpki.mobile.android.application;
 
-import org.webpki.android.crypto.DeviceID;
+import org.webpki.crypto.DeviceID;
 
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.SKSException;
 
 import org.webpki.mobile.android.R;
 

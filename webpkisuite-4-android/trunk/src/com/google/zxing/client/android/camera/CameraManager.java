@@ -160,7 +160,7 @@ public final class CameraManager {
   }
 
   /**
-   * Convenience method for {@link org.webpki.android.qrcode.QRIDActivity}
+   * Convenience method for {@link org.webpki.qrcode.QRIDActivity}
    */
   public synchronized void setTorch(boolean newSetting) {
     if (newSetting != configManager.getTorchState(camera)) {

@@ -20,9 +20,9 @@ import java.io.ObjectInputStream;
 
 import java.util.Vector;
 
-import org.webpki.android.json.JSONObjectWriter;
-import org.webpki.android.json.JSONOutputFormats;
-import org.webpki.android.json.JSONParser;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
 
 import org.webpki.mobile.android.R;
 

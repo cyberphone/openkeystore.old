@@ -16,7 +16,7 @@
  */
 package org.webpki.mobile.android.sks;
 
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.SKSException;
 
 public interface SKSError
   {

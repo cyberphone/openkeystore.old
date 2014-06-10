@@ -24,9 +24,9 @@ import org.webpki.mobile.android.R;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
-import org.webpki.android.keygen2.KeyCreationRequestDecoder;
-import org.webpki.android.keygen2.InvocationRequestDecoder;
-import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
+import org.webpki.keygen2.KeyCreationRequestDecoder;
+import org.webpki.keygen2.InvocationRequestDecoder;
+import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
 
 public class KeyGen2Activity extends BaseProxyActivity
   {

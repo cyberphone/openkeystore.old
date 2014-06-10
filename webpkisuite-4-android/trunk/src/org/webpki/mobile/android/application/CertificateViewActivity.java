@@ -29,14 +29,14 @@ import android.app.Activity;
 
 import android.content.Intent;
 
-import org.webpki.android.asn1.ASN1ObjectID;
+import org.webpki.asn1.ASN1ObjectID;
 
-import org.webpki.android.crypto.CertificateInfo;
-import org.webpki.android.crypto.CertificateUtil;
+import org.webpki.crypto.CertificateInfo;
+import org.webpki.crypto.CertificateUtil;
 
-import org.webpki.android.util.HTMLEncoder;
-import org.webpki.android.util.ArrayUtil;
-import org.webpki.android.util.DebugFormatter;
+import org.webpki.util.HTMLEncoder;
+import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 import org.webpki.mobile.android.R;
 

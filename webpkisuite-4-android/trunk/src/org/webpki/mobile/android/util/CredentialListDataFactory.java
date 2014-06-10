@@ -19,13 +19,13 @@ package org.webpki.mobile.android.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.webpki.android.keygen2.KeyGen2URIs;
+import org.webpki.keygen2.KeyGen2URIs;
 
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.EnumeratedProvisioningSession;
-import org.webpki.android.sks.Extension;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.Extension;
+import org.webpki.sks.KeyAttributes;
+import org.webpki.sks.SKSException;
 
 import org.webpki.mobile.android.R;
 

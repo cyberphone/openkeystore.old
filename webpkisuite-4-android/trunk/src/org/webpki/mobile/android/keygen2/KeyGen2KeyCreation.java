@@ -25,20 +25,20 @@ import android.os.AsyncTask;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
-import org.webpki.android.util.ArrayUtil;
+import org.webpki.util.ArrayUtil;
 
-import org.webpki.android.crypto.HashAlgorithms;
+import org.webpki.crypto.HashAlgorithms;
 
-import org.webpki.android.keygen2.KeyCreationRequestDecoder;
-import org.webpki.android.keygen2.KeyCreationResponseEncoder;
-import org.webpki.android.keygen2.ProvisioningFinalizationRequestDecoder;
-import org.webpki.android.keygen2.ProvisioningFinalizationResponseEncoder;
+import org.webpki.keygen2.KeyCreationRequestDecoder;
+import org.webpki.keygen2.KeyCreationResponseEncoder;
+import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
+import org.webpki.keygen2.ProvisioningFinalizationResponseEncoder;
 
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.EnumeratedProvisioningSession;
-import org.webpki.android.sks.KeyData;
-import org.webpki.android.sks.PatternRestriction;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.KeyAttributes;
+import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyData;
+import org.webpki.sks.PatternRestriction;
 
 /**
  * This worker class creates keys.

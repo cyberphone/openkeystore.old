@@ -24,10 +24,10 @@ import org.webpki.mobile.android.R;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
-import org.webpki.android.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 
-import org.webpki.android.webauth.AuthenticationRequestDecoder;
+import org.webpki.webauth.AuthenticationRequestDecoder;
 
 public class WebAuthActivity extends BaseProxyActivity
   {

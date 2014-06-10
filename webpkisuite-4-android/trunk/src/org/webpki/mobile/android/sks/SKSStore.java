@@ -40,7 +40,7 @@ import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 import org.spongycastle.x509.X509V3CertificateGenerator;
 
-import org.webpki.android.sks.SKSException;
+import org.webpki.sks.SKSException;
 
 import android.content.Context;
 

@@ -42,15 +42,15 @@ import java.security.interfaces.RSAPublicKey;
 
 import org.webpki.mobile.android.R;
 
-import org.webpki.android.sks.AppUsage;
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.KeyAttributes;
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.KeyAttributes;
 
-import org.webpki.android.crypto.AsymSignatureAlgorithms;
-import org.webpki.android.crypto.CertificateFilter;
-import org.webpki.android.crypto.KeyContainerTypes;
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateFilter;
+import org.webpki.crypto.KeyContainerTypes;
 
-import org.webpki.android.webauth.AuthenticationRequestDecoder;
+import org.webpki.webauth.AuthenticationRequestDecoder;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
