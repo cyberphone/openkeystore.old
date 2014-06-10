@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.webpki.mobile.android"
-    android:versionCode="7"
-    android:versionName="1.07">
+    android:versionCode="8"
+    android:versionName="1.08">
 
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="16"/>
 
@@ -23,8 +23,8 @@
             android:taskAffinity=".application.PropertiesActivity"
             android:name=".application.PropertiesActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_properties">
-            <intent-filter android:label="@string/title_activity_webpki">
+            android:label="@string/title_activity_webpki">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
