@@ -629,8 +629,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                         new SampleRun ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
                                         new SampleRun ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
  "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
-                                        new SampleRun ("ProvisioningInitializationResponse.json", "After the previous exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
- "which is used for securing the<br>rest of the session through MAC- and encryption-operations. In the sample a request for creating a key is returned to the client:"),
+                                        new SampleRun ("ProvisioningInitializationResponse.json", "After these messages exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
+ "which is used for securing the<br>rest of the session through MAC- and encryption-operations." +
+ "<br>&nbsp;<br>SKS API Reference: <code>createProvisioningSession</code>.<br>&nbsp;<br>" +
+ "In the sample a request for creating a key is subsequently returned to the client:"),
                                         new SampleRun ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
                                                                                   "shown to user:" +
                                                                                   json.createDialog ("PIN Code Assignment",
@@ -639,9 +641,12 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 "<tr><td colspan=\"2\">Repeat PIN:</td></tr>" +
 "<tr><td colspan=\"2\" style=\"padding-top:0px;padding-bottom:15pt\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>") +
 "When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key-pair is created and the public part of the<br>key-pair is sent to the server for certification as shown " +
-"in the response below:"),
-                                        new SampleRun ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype:"),
-                                        new SampleRun ("ProvisioningFinalizationRequest.json", "This is the final message which will only be sent to the server if the previous steps were successful:"),
+"in the response below." +
+"<br>&nbsp;<br>SKS API References: <code>createPINPolicy</code>, <code>createKeyEntry</code>."),
+                                        new SampleRun ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype." +
+"<br>&nbsp;<br>SKS API References: <code>setCertificatePath</code>, <code>addExtension</code>."),
+                                        new SampleRun ("ProvisioningFinalizationRequest.json", "The finalization message which will only be sent to the server if the previous steps were successful." +
+"<br>&nbsp;<br>SKS API Reference: <code>closeProvisioningSession</code>."),
                                         new SampleRun ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next.")});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
@@ -939,7 +944,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                                               true,
                                               "Symmetric key signature covering the entire response. See <code>" +
-                                              "SKS:createProvisioningSession</code>." + LINE_SEPARATOR +
+                                              "SKS:signProvisioningSessionData</code>." + LINE_SEPARATOR +
                                               "Note that the value of "))
           .addPropertyLink (JSONSignatureDecoder.KEY_ID_JSON, JSONSignatureDecoder.KEY_INFO_JSON)
           .addString (" property is <i>ignored</i>. ");
