@@ -1239,7 +1239,11 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature key information placeholder.");
+              .addString ("Signature key information placeholder." + 
+                          Types.LINE_SEPARATOR +
+                          "The designated key <b>must</b> be compatible with ")
+              .addPropertyLink (JSONSignatureDecoder.ALGORITHM_JSON, JSONSignatureDecoder.SIGNATURE_JSON)
+              .addString (".");
         if (extension_option != null)
           {
             row_interface = row_interface
@@ -1310,11 +1314,7 @@ public class JSONBaseHTML
                   .addString (createReference (REF_X509))
                   .addString (" certificate path stored in a PEM ")
                   .addString (createReference (REF_PEM))
-                  .addString (" file accessible via an HTTP&nbsp;URL." + 
-                              Types.LINE_SEPARATOR +
-                              "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
-                  .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-                  .addString (".")
+                  .addString (" file accessible via an HTTP&nbsp;URL.")
                   .addString (url_option);
               }
         row_interface
@@ -1330,10 +1330,8 @@ public class JSONBaseHTML
               .addString ("Sorted X.509 ")
               .addString (createReference (REF_X509))
               .addString (" certificate path where the <i>first</i> array element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
-                          "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." + Types.LINE_SEPARATOR +
-                          "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
-              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addString (".")   .newRow ()
+                          "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
+          .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
               .addLink (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
