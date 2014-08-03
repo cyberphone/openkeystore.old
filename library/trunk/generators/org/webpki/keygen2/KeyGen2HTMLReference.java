@@ -603,7 +603,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> should terminate the process " +
                                     "and display an error dialog telling the user what happened." + LINE_SEPARATOR +
-                                    "<i>Server-side</i> errors should return an <i>HTML page</i> containing an appropriate error description for the user.&nbsp; The " +
+                                    "<i>Server-side</i> errors should return an <i>HTML page</i> containing an appropriate error description for the user. The " +
                                     "return of an HTML page instead of a KeyGen2 object should immediately abort the current operation." + LINE_SEPARATOR +
                                     "All errors should abort the associated, potentially active SKS provisioning session (see <code>abortProvisioningSession</code>).");
         
@@ -615,11 +615,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphSubObject ("Deferred Issuance").append ("To reduce costs for credential issuers, they may require subscribers' " +
                                     "filling in a form on the web with user data followed by a KeyGen2 sequence which terminates after " +
                                     json.globalLinkRef (KEY_CREATION_RESPONSE_JSON) + 
-                                    ".&nbsp; This <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
+                                    ". This <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
                                     "After the issuer in some way have verified the user's claimed data (and typically also the SKS <code>Device&nbsp;ID</code>), " +
                                     "the certification process is <i>resumed</i> by relaunching the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
                                     " (with " + json.globalLinkRef (INVOCATION_REQUEST_JSON, ACTION_JSON) + 
-                                    " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to user via mail, SMS, QR-code or NFC.&nbsp; The KeyGen2 proxy <b>must</b> after reception of the " +
+                                    " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to user via mail, SMS, QR-code or NFC. The KeyGen2 proxy <b>must</b> after reception of the " +
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON, SERVER_SESSION_ID_JSON) + ".");
 
