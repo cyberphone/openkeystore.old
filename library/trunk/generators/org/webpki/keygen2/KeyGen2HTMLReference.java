@@ -33,7 +33,7 @@ import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-import org.webpki.json.JSONBaseHTML.SampleRun;
+import org.webpki.json.JSONBaseHTML.ProtocolStep;
 
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -90,6 +90,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
                       ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
+                      "KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json</code>."  + LINE_SEPARATOR +
                       "Not elaborated on here is the result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
                       " because it is anticipated to be a custom HTML page, typically telling the user that the operation succeeded.");
           }
@@ -600,11 +601,27 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addParagraphSubObject ("Invocation").append ("TBD");
 
-        json.addParagraphSubObject ("Error Handling").append ("TBD");
+        json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> should terminate the process " +
+                                    "and display an error dialog telling the user what happened." + LINE_SEPARATOR +
+                                    "<i>Server-side</i> errors should return an <i>HTML page</i> containing an appropriate error description for the user.&nbsp; The " +
+                                    "return of an HTML page instead of a KeyGen2 object should immediately abort the current operation." + LINE_SEPARATOR +
+                                    "All errors should abort the associated, potentially active SKS provisioning session (see <code>abortProvisioningSession</code>).");
         
-        json.addParagraphSubObject ("Key Management Operations").append ("TBD");
+        json.addParagraphSubObject ("Key Management Operations").append ("KeyGen2 provides built-in support for the SKS key-management operations " +
+                                    "<code>postUnlockKey</code>, <code>postDeleteKey</code>, <code>postUpdateKey</code> and <code>postCloneKeyProtection</code>." + LINE_SEPARATOR +
+                                    "In the case the exact key is not known in advance, you <b>must</b> include a key discovery sequence as described in " +
+                                    json.createReference (JSONBaseHTML.REF_SKS) + " <i>Appendix D, Remote Key Lookup</i>."); 
 
-        json.addParagraphSubObject ("Deferred Issuance").append ("TBD");
+        json.addParagraphSubObject ("Deferred Issuance").append ("To reduce costs for credential issuers, they may require subscribers' " +
+                                    "filling in a form on the web with user data followed by a KeyGen2 sequence which terminates after " +
+                                    json.globalLinkRef (KEY_CREATION_RESPONSE_JSON) + 
+                                    ".&nbsp; This <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
+                                    "After the issuer in some way have verified the user's claimed data (and typically also the SKS <code>Device&nbsp;ID</code>), " +
+                                    "the certification process is <i>resumed</i> by relaunching the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
+                                    " (with " + json.globalLinkRef (INVOCATION_REQUEST_JSON, ACTION_JSON) + 
+                                    " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to user via mail, SMS, QR-code or NFC.&nbsp; The KeyGen2 proxy <b>must</b> after reception of the " +
+                                    json.globalLinkRef (INVOCATION_REQUEST_JSON) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
+                                    json.globalLinkRef (INVOCATION_REQUEST_JSON, SERVER_SESSION_ID_JSON) + ".");
 
         json.addDataTypesDescription ("");
         
@@ -620,20 +637,20 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                         "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
                         "Finally, the issuer provides a certificate and a platform-adapted logotype." + LINE_SEPARATOR +
                         "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
-                        new SampleRun[]{new SampleRun ("InvocationRequest.json", "After a <i>compatible</i> browser has received this message, a dialog like the following is " +
+                        new ProtocolStep[]{new ProtocolStep ("InvocationRequest.json", "After a <i>compatible</i> browser has received this message, a dialog like the following is " +
                                                                                  "shown to user:" +
                                                                                   json.createDialog ("Credential Enrollment",
  "<tr><td colspan=\"2\">The following provider wants to create a<br>login credential for you:</td></tr>" +
  "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>") +
  "If the user accepts the request, the following response is sent to the server at the address specified by " + json.globalLinkRef (INVOCATION_REQUEST_JSON, SUBMIT_URL_JSON) + ":"),
-                                        new SampleRun ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
-                                        new SampleRun ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
+                        new ProtocolStep ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
+                        new ProtocolStep ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
  "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
-                                        new SampleRun ("ProvisioningInitializationResponse.json", "After these messages exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
+                        new ProtocolStep ("ProvisioningInitializationResponse.json", "After these messages exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
  "which is used for securing the<br>rest of the session through MAC- and encryption-operations." +
  "<br>&nbsp;<br>SKS API Reference: <code>createProvisioningSession</code>.<br>&nbsp;<br>" +
  "In the sample a request for creating a key is subsequently returned to the client:"),
-                                        new SampleRun ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
+                        new ProtocolStep ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
                                                                                   "shown to user:" +
                                                                                   json.createDialog ("PIN Code Assignment",
 "<tr><td colspan=\"2\">Set and memorize a PIN for the<br>login credential:</td></tr>" +
@@ -643,11 +660,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 "When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key-pair is created and the public part of the<br>key-pair is sent to the server for certification as shown " +
 "in the response below." +
 "<br>&nbsp;<br>SKS API References: <code>createPINPolicy</code>, <code>createKeyEntry</code>."),
-                                        new SampleRun ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype." +
+                        new ProtocolStep ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype." +
 "<br>&nbsp;<br>SKS API References: <code>setCertificatePath</code>, <code>addExtension</code>."),
-                                        new SampleRun ("ProvisioningFinalizationRequest.json", "The finalization message which will only be sent to the server if the previous steps were successful." +
+                        new ProtocolStep ("ProvisioningFinalizationRequest.json", "The finalization message which will only be sent to the server if the previous steps were successful." +
 "<br>&nbsp;<br>SKS API Reference: <code>closeProvisioningSession</code>."),
-                                        new SampleRun ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next.")});
+                        new ProtocolStep ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next.")});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
                           .append (json.createReference (JSONBaseHTML.REF_DSKPP))
@@ -656,7 +673,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2014-06-09", "0.5", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2014-08-03", "0.6", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 

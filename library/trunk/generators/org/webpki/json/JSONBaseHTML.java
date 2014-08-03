@@ -108,27 +108,27 @@ public class JSONBaseHTML
 
         public String getPrefix ()
           {
-            StringBuffer s = new StringBuffer ();
+            StringBuffer buffer = new StringBuffer ();
             if (prefix_on)
               {
                 if (appendix)
                   {
-                    s.append ("Appendix ")
+                    buffer.append ("Appendix ")
                      .append ((char) (('A' - 1) + sequence));
                   }
                 else
                   {
-                    s.append (String.valueOf (sequence));
+                    buffer.append (String.valueOf (sequence));
                   }
                 if (indented)
                   {
-                    s.append (".")
+                    buffer.append (".")
                      .append (String.valueOf (sub_seq));
                   }
-                s.append (appendix ? ':' : '.')
+                buffer.append (appendix ? ':' : '.')
                  .append ("&nbsp;");
               }
-            return s.toString ();
+            return buffer.toString ();
           }
 
         String PrefixPlusLink ()
@@ -297,7 +297,7 @@ public class JSONBaseHTML
                      "Base10-encoded integer with arbitrary precision"),
                      
             BIGDEC  ("decimal", "<i>string</i>",                          null,
-                     "Decimal type compatible with Java's BigDecimal"),
+                     "Decimal type compatible with Java'buffer BigDecimal"),
                      
             STRING  ("string", "<i>string</i>",                           null,
                      "Arbitrary string"),
@@ -394,13 +394,13 @@ public class JSONBaseHTML
         @Override
         String getHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"margin-top:10pt\">" +
+            StringBuffer buffer = new StringBuffer ("<table class=\"tftable\" style=\"margin-top:10pt\">" +
                       "<tr><th>Type</th><th>Mapping</th><th>Description</th></tr>");
             for (Types.WEBPKI_DATA_TYPES type : Types.WEBPKI_DATA_TYPES.values ())
               {
                 if (type.isUsed ())
                   {
-                    s.append ("<tr id=\"" + LINK_PREFIX)
+                    buffer.append ("<tr id=\"" + LINK_PREFIX)
                      .append (type.getDataType ())
                      .append ("\"><td style=\"text-align:center\">")
                      .append (type.getDataType ())
@@ -411,7 +411,7 @@ public class JSONBaseHTML
                      .append ("</td></tr>");
                   }
               }
-            return s.append ("</table><div>Note that &quot;Type&quot; refers to the element type for arrays." + Types.LINE_SEPARATOR + "</div>").toString ();
+            return buffer.append ("</table><div>Note that &quot;Type&quot; refers to the element type for arrays." + Types.LINE_SEPARATOR + "</div>").toString ();
           }
       }
 
@@ -441,12 +441,12 @@ public class JSONBaseHTML
         @Override
         String getHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"width:" + PAGE_WIDTH + "\">");
+            StringBuffer buffer = new StringBuffer ("<table class=\"tftable\" style=\"width:" + PAGE_WIDTH + "\">");
             for (ProtocolObject protocol_object : protocol_objects)
               {
-                s.append (protocol_object.getObjectHTML ());
+                buffer.append (protocol_object.getObjectHTML ());
               }
-            return s.append ("</table>").toString ();
+            return buffer.append ("</table>").toString ();
           }
       }
 
@@ -460,13 +460,13 @@ public class JSONBaseHTML
         @Override
         String getHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"width:600pt\"><tr><th>Reference</th><th>Description</th></tr>");
+            StringBuffer buffer = new StringBuffer ("<table class=\"tftable\" style=\"width:600pt\"><tr><th>Reference</th><th>Description</th></tr>");
             for (String reference : new TreeSet<String>(references.keySet()).toArray (new String[0]))
               {
                 Reference r = references.get (reference);
                 if (r.referenced)
                   {
-                    s.append ("<tr><td id=\"")
+                    buffer.append ("<tr><td id=\"")
                      .append ("Reference.")
                      .append (reference)
                      .append ("\" style=\"white-space:nowrap\">")
@@ -476,7 +476,7 @@ public class JSONBaseHTML
                      .append ("</td></tr>");
                   }
               }
-            return s.append ("</table>").toString ();
+            return buffer.append ("</table>").toString ();
           }
       }
 
@@ -490,7 +490,7 @@ public class JSONBaseHTML
         @Override
         String getHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<div><span style=\"font-size:" + 
+            StringBuffer buffer = new StringBuffer ("<div><span style=\"font-size:" + 
                 CHAPTER_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
                 "Table of Contents</span>" +
                 "<table style=\"margin-left:20pt;margin-top:5pt\">");
@@ -500,10 +500,10 @@ public class JSONBaseHTML
                 if (toc.get (toc_entry).appendix && new_tab)
                   {
                     new_tab = false;
-                    s.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
+                    buffer.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
                   }
                 TOCEntry te = toc.get (toc_entry);
-                s.append ("<tr style=\"white-space: nowrap\">")
+                buffer.append ("<tr style=\"white-space: nowrap\">")
                  .append (te.indented ? "<td></td><td style=\"width:15pt\"></td>" : te.PrefixPlusLink ())
                  .append (te.indented ? te.PrefixPlusLink () : "")
                  .append ("<td colspan=\"")
@@ -516,21 +516,21 @@ public class JSONBaseHTML
                  .append (te.getEndItalic ())
                  .append ("</a></td></tr>");
               }
-            return s.append ("</table></div>").toString ();
+            return buffer.append ("</table></div>").toString ();
           }
       }
 
-    public static class SampleRun
+    public static class ProtocolStep
       {
         String json_file;
         String optional_table_comment_HTML;
         
-        public SampleRun (String json_file)
+        public ProtocolStep (String json_file)
           {
             this (json_file, null);
           }
 
-        public SampleRun (String json_file, String optional_table_comment_HTML)
+        public ProtocolStep (String json_file, String optional_table_comment_HTML)
           {
             this.json_file = json_file;
             this.optional_table_comment_HTML = optional_table_comment_HTML;
@@ -809,26 +809,26 @@ public class JSONBaseHTML
 
         String getObjectHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica;background-color:white\">");
+            StringBuffer buffer = new StringBuffer ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica;background-color:white\">");
             boolean next = false;
             for (String protocol : protocols)
               {
                 if (next)
                   {
-                    s.append (", &nbsp;");
+                    buffer.append (", &nbsp;");
                   }
                 else
                   {
                     next = true;
                   }
-                s.append ("<span id=\"")
+                buffer.append ("<span id=\"")
                     .append (makeLink (protocol))
                     .append ("\">")
                     .append (main_object ? "" : "<i>")
                     .append (protocol)
                     .append (main_object ? "</span>" : "</i></span>");
               }
-            s.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>" + REQUIRED_COLUMN + "</th><th>Comment</th></tr>");
+            buffer.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>" + REQUIRED_COLUMN + "</th><th>Comment</th></tr>");
             int i = 0;
             int supress = 0;
             for (Row row : rows)
@@ -838,7 +838,7 @@ public class JSONBaseHTML
                     supress = row.depth;
                   }
                 i++;
-                s.append ("<tr>");
+                buffer.append ("<tr>");
                 if (row.columns.size () != 4)
                   {
                     throw new IOException ("Wrong number of colums for row: " + i);
@@ -856,7 +856,7 @@ public class JSONBaseHTML
                             if (row.set_group)
                               {
                                 standard = false;
-                                s.append ("<td style=\"text-align:center\" rowspan=\"")
+                                buffer.append ("<td style=\"text-align:center\" rowspan=\"")
                                  .append (supress)
                                  .append ("\">");
                               }
@@ -869,22 +869,22 @@ public class JSONBaseHTML
                       }
                     if (output == standard)
                       {
-                        s.append (q == 1 ? "<td style=\"white-space:nowrap\" id=\"" + row.property_link + "\">" : (q < 4 ? "<td style=\"text-align:center\">" : "<td>"));
+                        buffer.append (q == 1 ? "<td style=\"white-space:nowrap\" id=\"" + row.property_link + "\">" : (q < 4 ? "<td style=\"text-align:center\">" : "<td>"));
                       }
                     if (output)
                       {
-                        s.append (column.column).append ("</td>");
+                        buffer.append (column.column).append ("</td>");
                       }
                   }
-                s.append ("</tr>");
+                buffer.append ("</tr>");
               }
             if (notes != null)
               {
-                s.append ("<tr><td colspan=\"4\" style=\"background-color:white;border-width:0px;padding:10pt 0pt 0pt 0pt\">")
+                buffer.append ("<tr><td colspan=\"4\" style=\"background-color:white;border-width:0px;padding:10pt 0pt 0pt 0pt\">")
                  .append (notes)
                  .append ("</td></tr>");
               }
-            return s.toString ();
+            return buffer.toString ();
           }
 
         @Override
@@ -1000,7 +1000,7 @@ public class JSONBaseHTML
     StringBuffer addParagraphObject (String header, boolean top_level) throws IOException
       {
         Paragraph p = new Paragraph ();
-        StringBuffer s = new StringBuffer ("<div style=\"width:" + PAGE_WIDTH + "\">");
+        StringBuffer buffer = new StringBuffer ("<div style=\"width:" + PAGE_WIDTH + "\">");
         if (header != null)
           {
             if (top_level)
@@ -1023,14 +1023,14 @@ public class JSONBaseHTML
               {
                 throw new IOException ("Duplicate TOC: " + header);
               }
-            s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
+            buffer.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
              .append (te.link)
              .append ("\"><span style=\"font-size:" + (top_level ? CHAPTER_FONT_SIZE : SECTION_FONT_SIZE) + "\">")
              .append (te.getPrefix ())
              .append (header)
              .append ("</span></div>");
           }
-        return p.local_html = s;
+        return p.local_html = buffer;
       }
 
     public void niceSquare (String html_in_div, int bottom_margin) throws IOException
@@ -1044,16 +1044,16 @@ public class JSONBaseHTML
 
     String makeLink (String header)
       {
-        StringBuffer s = new StringBuffer ();
+        StringBuffer buffer = new StringBuffer ();
         for (char c : header.toCharArray ())
           {
             if (c == ' ')
               {
                 c = '_';
               }
-            s.append (c);
+            buffer.append (c);
           }
-        return s.toString ();
+        return buffer.toString ();
       }
 
     public void addDataTypesDescription (String intro) throws IOException
@@ -1074,7 +1074,7 @@ public class JSONBaseHTML
 
     public static String enumerateAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter, boolean reference)
       {
-        StringBuffer s = new StringBuffer ("<ul>");
+        StringBuffer buffer = new StringBuffer ("<ul>");
         for (SKSAlgorithms algorithm : algorithms)
           {
             if (filter && algorithm instanceof KeyAlgorithms && !((KeyAlgorithms)algorithm).isECKey ())
@@ -1089,21 +1089,21 @@ public class JSONBaseHTML
               {
                 continue;
               }
-            s.append ("<li><code")
+            buffer.append ("<li><code")
              .append ((algorithm.isMandatorySKSAlgorithm () || reference) ? ">" : " style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">")
              .append (algorithm.getURI ())
              .append ("</code></li>");
           }
-        return s.append ("</ul>").toString ();
+        return buffer.append ("</ul>").toString ();
       }
 
     String protocol_table_header;
     
     public StringBuffer addProtocolTableEntry (String header) throws IOException
       {
-        StringBuffer s = addParagraphObject (protocol_table_header = header);
+        StringBuffer buffer = addParagraphObject (protocol_table_header = header);
         new ProtocolTable ();
-        return s;
+        return buffer;
       }
 
     public void addReferenceTable () throws IOException
@@ -1112,39 +1112,44 @@ public class JSONBaseHTML
         new References ();
       }
 
-    public void sampleRun (@SuppressWarnings("rawtypes") Class parent, String header, SampleRun[] sample_messages) throws IOException
+    public void renderProtocolSteps (@SuppressWarnings("rawtypes") Class parent, StringBuffer buffer, ProtocolStep[] protocol_steps) throws IOException
       {
-        StringBuffer s = addParagraphObject ("Sample Run").append (header);
         JSONObjectWriter.html_indent = 2;
-        s.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
+        buffer.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
         boolean next = false;
-        for (SampleRun sample_message : sample_messages)
+        for (ProtocolStep protocol_step : protocol_steps)
           {
-            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (sample_message.json_file)));
+            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (protocol_step.json_file)));
             if (next)
               {
-                s.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
+                buffer.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
               }
             else
               {
                 next = true;
               }
-            s.append ("<tr><th id=\"Sample.")
-             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
-             .append ("\">")
-             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
-             .append ("</th></tr><tr><td><code>")
-             .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
-             .append ("</code></td></tr>");
-            if (sample_message.optional_table_comment_HTML != null)
+            buffer.append ("<tr><th id=\"Sample.")
+                  .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
+                  .append ("\">")
+                  .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
+                  .append ("</th></tr><tr><td><code>")
+                  .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
+                  .append ("</code></td></tr>");
+            if (protocol_step.optional_table_comment_HTML != null)
               {
-                s.append ("<tr><td style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")
-                 .append (sample_message.optional_table_comment_HTML)
-                 .append ("</td></tr>");
+                buffer.append ("<tr><td style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")
+                      .append (protocol_step.optional_table_comment_HTML)
+                      .append ("</td></tr>");
                 next = false;
               }
           }
-        s.append ("</table>");
+        buffer.append ("</table>");
+      }
+
+    public void sampleRun (@SuppressWarnings("rawtypes") Class parent, String header, ProtocolStep[] protocol_steps) throws IOException
+      {
+        StringBuffer buffer = addParagraphObject ("Sample Run").append (header);
+        renderProtocolSteps (parent, buffer, protocol_steps);
       }
 
     public String globalLinkRef (String name)
