@@ -90,7 +90,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
                       ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
-                      "KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json</code>."  + LINE_SEPARATOR +
+                      "KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json;&nbsp;charset=utf-8</code>."  + LINE_SEPARATOR +
                       "Not elaborated on here is the result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
                       " because it is anticipated to be a custom HTML page, typically telling the user that the operation succeeded.");
           }
@@ -408,31 +408,31 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             "Regular expression matching the subject in the <i>end-entity certificate</i>. " + 
             "Subject names are assumed to be expressed in LDAP " + json.createReference (JSONBaseHTML.REF_LDAP_NAME) + " notation.");
         createOption (CertificateFilter.CF_EMAIL_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>." + LINE_SEPARATOR +
-                            "Note that both RFC&nbsp;822 subject attributes and <code>subjectAltName</code> fields are in scope.");
+            "Note that both RFC&nbsp;822 subject attributes and <code>subjectAltName</code> fields are in scope.");
         createOption (CertificateFilter.CF_POLICY_RULES, WEBPKI_DATA_TYPES.STRING, true,
-                            "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
-                            "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
-                            "Policy OIDs encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> <b>must</b> be <i>ignored</i>.");
+             "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
+             "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
+             "Policy OIDs encountered in <i>end-entity certificates</i> that " +
+             "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (CertificateFilter.CF_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
-                            "List of X.509 key usage flags using the notation <code>&quot;" +
-                            KeyUsageBits.DIGITAL_SIGNATURE.getX509Name () + "&quot;</code> and <code style=\"white-space:nowrap\">&quot;-" +
-                            KeyUsageBits.DATA_ENCIPHERMENT.getX509Name () + "&quot;</code> " +
-                            "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
-                            "Key usage flags encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>. " + LINE_SEPARATOR +
-                            "The set of permitted flags include:" + getKeyUsageBits ());
+             "List of X.509 key usage flags using the notation <code>&quot;" +
+             KeyUsageBits.DIGITAL_SIGNATURE.getX509Name () + "&quot;</code> and <code style=\"white-space:nowrap\">&quot;-" +
+             KeyUsageBits.DATA_ENCIPHERMENT.getX509Name () + "&quot;</code> " +
+             "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
+             "Key usage flags encountered in <i>end-entity certificates</i> that " +
+             "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>. " + LINE_SEPARATOR +
+             "The set of permitted flags include:" + getKeyUsageBits ());
         createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
-                            "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
-                            "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
-                            "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
+             "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
+             "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
+             "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
+             "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued before this date." + LINE_SEPARATOR +
-                            "Note that you can combine this criterion with an <code>" + 
-                            ISSUED_AFTER_JSON + "</code> criterion using an earlier date, effectively creating a time window.");
+             "Note that you can combine this criterion with an <code>" + 
+             ISSUED_AFTER_JSON + "</code> criterion using an earlier date, effectively creating a time window.");
         createOption (ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued after this date.");
         createOption (GROUPING_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createPINPolicy." + GROUPING_JSON + "</code> attribute." + LINE_SEPARATOR +
-                            "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
+             "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
         createOption (APP_USAGE_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createKeyEntry." + APP_USAGE_JSON + "</code> attribute.");
       }
 
