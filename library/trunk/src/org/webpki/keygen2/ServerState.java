@@ -903,9 +903,9 @@ public class ServerState implements Serializable
         
      
         public Key setClonedKeyProtection (String old_client_session_id, 
-                                                     String old_server_session_id,
-                                                     X509Certificate old_key,
-                                                     PublicKey key_management_key) throws IOException
+                                           String old_server_session_id,
+                                           X509Certificate old_key,
+                                           PublicKey key_management_key) throws IOException
           {
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
@@ -917,9 +917,9 @@ public class ServerState implements Serializable
           }
 
         public Key setUpdatedKey (String old_client_session_id, 
-                                            String old_server_session_id,
-                                            X509Certificate old_key,
-                                            PublicKey key_management_key) throws IOException
+                                  String old_server_session_id,
+                                  X509Certificate old_key,
+                                  PublicKey key_management_key) throws IOException
           { 
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
@@ -930,7 +930,11 @@ public class ServerState implements Serializable
             return this;
           }
 
-        Key (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
+        Key (AppUsage app_usage,
+             KeySpecifier key_specifier,
+             PINPolicy pin_policy,
+             byte[] preset_pin,
+             boolean device_pin_protection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
