@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -25,6 +26,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SKSAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 
@@ -84,6 +86,8 @@ public class JSONBaseHTML
     public static final String REF_FIPS186             = "FIPS-186-4";
 
     public static final String REF_WEBPKI_FOR_ANDROID  = "W4A";
+
+    public static final String REF_WEBIDL              = "WEBIDL";
 
     String file_name;
     String subsystem_name;
@@ -226,6 +230,11 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
+
+        addReferenceEntry (REF_WEBIDL, "C. McCormack, " +
+            "\"Web IDL\", W3C Candidate Recommendation, " +
+            "April&nbsp;2012. <br>" +
+            externalWebReference ("http://www.w3.org/TR/2012/CR-WebIDL-20120419/"));
 
        addReferenceEntry (REF_JOSE,
             "Jones, M. et al, Work in progress, " +
@@ -1541,4 +1550,49 @@ public class JSONBaseHTML
           "<tr><td><div class=\"dlgbtn\">Cancel</div></td><td style=\"text-align:right\"><div class=\"dlgbtn\">&nbsp;&nbsp;OK&nbsp;&nbsp;</div></td></tr>" +
           "</table>";      
       }
+
+    public String addInvocationText (String protocol_name, Class<? extends JSONDecoder> invocation_class) throws IOException
+      {
+        JSONDecoder decoder = null;
+        try
+          {
+            decoder = invocation_class.newInstance ();
+          }
+        catch (InstantiationException e)
+          {
+            throw new IOException (e);
+          }
+        catch (IllegalAccessException e)
+          {
+            throw new IOException (e);
+          }
+        return
+          "Invocation of " + protocol_name + " relies on a generic browser extension interface according to the following " +
+          "Web&nbsp;IDL " +
+          createReference (JSONBaseHTML.REF_WEBIDL) +
+          " definition:" +
+          "<div style=\"padding:10pt 0pt 15pt 20pt\"><code>" +
+          "interface WebPKI {<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
+          "&nbsp;&nbsp;// Verify if named JSON object is supported</code><code><br>" +
+          "&nbsp;&nbsp;boolean isSupported(DOMString context, DOMString qualifier);<br>" +
+          "&nbsp;<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
+          "&nbsp;&nbsp;// Invoke with full JSON object given as a string. Returns false if object is not supported</code><code><br>" +
+          "&nbsp;&nbsp;boolean invoke(DOMString invocationObject);<br>" +
+          "};<br>" +
+          "&nbsp;<br>" +
+          "partial interface Window {<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
+          "&nbsp;&nbsp;// This interface extends the &quot;window&quot; object</code><code><br>" +
+          "&nbsp;&nbsp;readonly attribute WebPKI webpki;<br>" +
+          "};</code></div>The JavaScript (presumably embedded in an HTML page) below shows how to use the interface:" +
+          "<div style=\"padding:10pt 0pt 15pt 20pt\"><code>" +
+          "if (!window.webpki.invoke('{&quot;</code><code style=\"color:" + JSONObjectWriter.html_keyword_color + "\">" + 
+          JSONDecoderCache.CONTEXT_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.html_string_color + "\">"+ decoder.getContext () + "</code><code>&quot;,' +<br>" +
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
+          "&quot;</code><code style=\"color:" + JSONObjectWriter.html_keyword_color + "\">" + 
+          JSONDecoderCache.QUALIFIER_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.html_string_color + "\">" + decoder.getQualifier () + "</code><code>&quot;,' +<br>" +
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
+          "</code><i>Other properties associated with the request object</i><code>}') {<br>" +
+          "&nbsp;&nbsp;alert('Not supported');<br>" +
+          "};</code></div>Note that properties do not have to be ordered and that whitespace between elements is ignored.";
+       }
   }

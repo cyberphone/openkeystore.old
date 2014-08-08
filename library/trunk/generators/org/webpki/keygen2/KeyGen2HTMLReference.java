@@ -428,8 +428,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
              "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
              "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued before this date." + LINE_SEPARATOR +
-             "Note that you can combine this criterion with an <code>" + 
-             ISSUED_AFTER_JSON + "</code> criterion using an earlier date, effectively creating a time window.");
+             "Note that you can combine this condition with an <code>" + 
+             ISSUED_AFTER_JSON + "</code> condition using an earlier date, effectively creating a time window.");
         createOption (ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued after this date.");
         createOption (GROUPING_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createPINPolicy." + GROUPING_JSON + "</code> attribute." + LINE_SEPARATOR +
              "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
@@ -599,7 +599,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         new ProtocolDescription (json.addParagraphObject ("Protocol Description")).execute ();
         
-        json.addParagraphSubObject ("Invocation").append ("TBD");
+        json.addParagraphSubObject ("Invocation").append (json.addInvocationText ("KeyGen2",
+                                                          InvocationRequestDecoder.class));
 
         json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> should terminate the process " +
                                     "and display an error dialog telling the user what happened." + LINE_SEPARATOR +
@@ -673,7 +674,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2014-08-03", "0.6", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2014-08-08", "0.7", "First official release");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
@@ -1208,8 +1209,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("<i>Optional</i> additional search criterions." + LINE_SEPARATOR +
-                          "Note that at least one search criterion <b>must</b> be specified if this option is used.")
+              .addString ("<i>Optional</i> additional search conditions." + LINE_SEPARATOR +
+                          "Note that at least one search condition <b>must</b> be specified if this option is used. The result of each condition is combined through a logical AND operation.")
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                             true,
                             "Signature using a key management key signature covering the lookup specifier. " +
