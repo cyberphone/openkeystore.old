@@ -52,6 +52,11 @@ public class JSONObjectReader implements Serializable
         this.root = root;
       }
 
+    public void checkForUnread () throws IOException
+      {
+        JSONObject.checkForUnread (root);
+      }
+
     JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
       {
         JSONValue value = root.properties.get (name);

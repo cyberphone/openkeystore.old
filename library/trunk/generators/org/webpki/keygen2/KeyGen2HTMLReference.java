@@ -48,6 +48,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
   {
     static final String KEYGEN2_NAME_SPACE            = "KeyGen2 name space/version indicator.";
     static final String OBJECT_ID                     = "Actual KeyGen2 message type.";
+    
+    static final String SECTION_TERMINATION_MESSAGE   = "Termination Message";
+    static final String SECTION_HTTP_DEPENDENCIES     = "HTTP Dependencies";
 
     static JSONBaseHTML json;
     static RowInterface row;
@@ -90,9 +93,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
                       ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
-                      "KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json;&nbsp;charset=utf-8</code>."  + LINE_SEPARATOR +
-                      "Not elaborated on here is the result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
-                      " because it is anticipated to be a custom HTML page, typically telling the user that the operation succeeded.");
+                      "The result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
+                      " is anticipated to be a custom " + 
+                      json.globalLinkRef (SECTION_TERMINATION_MESSAGE) +
+                      ", typically telling the user that the operation succeeded.");
           }
 
         private void sign (String protcol_step, String description)
@@ -602,25 +606,34 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphSubObject ("Invocation").append (json.addInvocationText ("KeyGen2",
                                                           InvocationRequestDecoder.class));
 
-        json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> should terminate the process " +
+        json.addParagraphSubObject (SECTION_HTTP_DEPENDENCIES).append ("KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json;&nbsp;charset=utf-8</code>."  + LINE_SEPARATOR +
+                                    "Since KeyGen2 is to be regarded as an intrinsic part of the browser, HTTP cookies <b>must</b> be handled as for other HTTP requests.");
+
+        json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> <b>must</b> terminate the session " +
                                     "and display an error dialog telling the user what happened." + LINE_SEPARATOR +
-                                    "<i>Server-side</i> errors should return an <i>HTML page</i> containing an appropriate error description for the user. The " +
-                                    "return of an HTML page instead of a KeyGen2 object should immediately abort the current operation." + LINE_SEPARATOR +
-                                    "All errors should abort the associated, potentially active SKS provisioning session (see <code>abortProvisioningSession</code>).");
+                                    "<i>Server-side</i> errors <b>must</b> abort the current server operation and return an appropriate " +
+                                    json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + " to the user. If the KeyGen2 proxy at this stage is rather expecting a KeyGen2 protocol object (see " +
+                                    json.globalLinkRef (SECTION_HTTP_DEPENDENCIES) + "), the client session <b>must</b> be terminated." + LINE_SEPARATOR +
+                                    "Whenever a KeyGen2 client session is aborted, the proxy <i>should</i> also abort the associated, potentially active SKS provisioning session (see <code>abortProvisioningSession</code>).");
         
         json.addParagraphSubObject ("Key Management Operations").append ("KeyGen2 provides built-in support for the SKS key-management operations " +
                                     "<code>postUnlockKey</code>, <code>postDeleteKey</code>, <code>postUpdateKey</code> and <code>postCloneKeyProtection</code>." + LINE_SEPARATOR +
                                     "In the case the exact key is not known in advance, you <b>must</b> include a key discovery sequence as described in " +
                                     json.createReference (JSONBaseHTML.REF_SKS) + " <i>Appendix D, Remote Key Lookup</i>."); 
 
-        json.addParagraphSubObject ("Deferred Issuance").append ("To reduce costs for credential issuers, they may require subscribers' " +
-                                    "filling in a form on the web with user data followed by a KeyGen2 sequence which terminates after " +
+        json.addParagraphSubObject (SECTION_TERMINATION_MESSAGE).append ("When a KeyGen2 protocol sequence terminates (like when the proxy has sent a " +
+                                    json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) + " object to the server), " +
+                                    "the browser <b>must</b> return to its &quot;normal&quot; state, ready for receiving a matching HTTP body containing a HTML page or similar."  + LINE_SEPARATOR +
+                                    "Note that returned data <b>must</b> target the same <code>window</code> object which was used during invocation.");
+
+        json.addParagraphSubObject ("Deferred Issuance").append ("To reduce costs for credential issuers, they may require users' " +
+                                    "filling in forms on the web with user-related information followed by a KeyGen2 sequence terminating (see " + json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + ") after " +
                                     json.globalLinkRef (KEY_CREATION_RESPONSE_JSON) + 
-                                    ". This <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
+                                    ". This mode <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
                                     "After the issuer in some way have verified the user's claimed data (and typically also the SKS <code>Device&nbsp;ID</code>), " +
                                     "the certification process is <i>resumed</i> by relaunching the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
                                     " (with " + json.globalLinkRef (INVOCATION_REQUEST_JSON, ACTION_JSON) + 
-                                    " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to user via mail, SMS, QR-code or NFC. The KeyGen2 proxy <b>must</b> after reception of the " +
+                                    " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to the user via mail, SMS, QR-code or NFC. The KeyGen2 proxy <b>must</b> after reception of the " +
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON, SERVER_SESSION_ID_JSON) + ".");
 
@@ -665,7 +678,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 "<br>&nbsp;<br>SKS API References: <code>setCertificatePath</code>, <code>addExtension</code>."),
                         new ProtocolStep ("ProvisioningFinalizationRequest.json", "The finalization message which will only be sent to the server if the previous steps were successful." +
 "<br>&nbsp;<br>SKS API Reference: <code>closeProvisioningSession</code>."),
-                        new ProtocolStep ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next.")});
+                        new ProtocolStep ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next. " +
+"See " + json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + ".")});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
                           .append (json.createReference (JSONBaseHTML.REF_DSKPP))

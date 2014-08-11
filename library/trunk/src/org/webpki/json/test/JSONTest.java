@@ -610,6 +610,25 @@ public class JSONTest
           }
       }
 
+    @Test
+    public void UnreadProperties () throws Exception
+      {
+        JSONObjectWriter ow = new JSONObjectWriter ();
+        ow.setInt ("intv", 3);
+        ow.setInt ("intb", 3);
+        JSONObjectReader or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
+        try
+          {
+            or.getInt ("intb");
+            or.checkForUnread ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Property \"intv\" was never read");
+          }
+      }
+    
     static final String p521_jcs =
       "{" +
       "  \"PublicKey\": " +

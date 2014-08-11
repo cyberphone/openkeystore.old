@@ -1160,15 +1160,32 @@ public class JSONBaseHTML
         StringBuffer buffer = addParagraphObject ("Sample Run").append (header);
         renderProtocolSteps (parent, buffer, protocol_steps);
       }
+    
+    String makeName (String name)
+      {
+        StringBuffer s = new StringBuffer ();
+        for (char c : name.toCharArray ())
+          {
+            if (c == ' ')
+              {
+                s.append ("&nbsp;");
+              }
+            else
+              {
+                s.append (c);
+              }
+          }
+        return s.toString ();
+      }
 
     public String globalLinkRef (String name)
       {
-        return "<a href=\"#" + name + "\">" + name +"</a>"; 
+        return "<a href=\"#" + makeLink (name) + "\">" + makeName (name) +"</a>"; 
       }
 
     public String globalLinkRef (String parent, String name)
       {
-        return "<a href=\"#" + parent + "." + name + "\">" + name +"</a>"; 
+        return "<a href=\"#" + makeLink(parent) + "." + makeLink (name) + "\">" + makeName (name) +"</a>"; 
       }
 
     String brackit (String string)

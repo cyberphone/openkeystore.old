@@ -81,7 +81,7 @@ public class JSONDecoderCache implements Serializable
             decoder.readJSONData (reader);
             if (check_for_unread)
               {
-                checkForUnread (reader.root);
+                reader.checkForUnread ();
               }
             return decoder;
           }
@@ -92,33 +92,6 @@ public class JSONDecoderCache implements Serializable
         catch (IllegalAccessException e)
           {
             throw new IOException (e);
-          }
-      }
-
-    @SuppressWarnings("unchecked")
-    void checkForUnread (JSONObject json_object) throws IOException
-      {
-        for (String name : json_object.properties.keySet ())
-          {
-            JSONValue value = json_object.properties.get (name);
-            if (!json_object.read_flag.contains (name))
-              {
-                throw new IOException ("Property \"" + name + "\" was never read");
-              }
-            if (value.type == JSONTypes.OBJECT)
-              {
-                checkForUnread ((JSONObject)value.value);
-              }
-            else if (value.type == JSONTypes.ARRAY)
-              {
-                for (JSONValue object : (Vector<JSONValue>)value.value)
-                  {
-                    if (object.type == JSONTypes.OBJECT)
-                      {
-                        checkForUnread ((JSONObject)object.value);
-                      }
-                  }
-              }
           }
       }
 
