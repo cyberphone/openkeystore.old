@@ -15,6 +15,11 @@
  *
  */
 
+function checkException (err)
+{
+    if (!(err instanceof org.webpki.util.Error)) throw "Strange";
+}
+ 
 var jo = new org.webpki.json.JSONObject ();
 jo._setProperty("one", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
 jo._setProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "hi"));
@@ -228,6 +233,7 @@ try
 }
 catch (err)
 {
+  checkException (err);
 }
 newobjec.setupForRewrite ("dri");
 newobjec.setString ("dri", "blih");
@@ -248,6 +254,7 @@ try
 }
 catch (err)
 {
+  checkException (err);
 }
 newobjec.setArray ("arr").setString ("gg").setBoolean (true);
 newobjec.setArray ("arr2").setString ("gg").setString ("true");
@@ -260,8 +267,21 @@ try
 }
 catch (err)
 {
+  checkException (err);
 }
 
+newobjec = new org.webpki.json.JSONObjectWriter ();
+newobjec.setInt ("int",3);
+reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+try
+{
+    reader.checkForUnread ();
+    throw "should bomb";
+}
+catch (err)
+{
+  checkException (err);
+}
 console.debug ("Successful");
 
 

@@ -25,6 +25,34 @@ org.webpki.json.JSONObject = function ()
     this.read_flag = new Object ();
 };
 
+/*void */org.webpki.json.JSONObject._checkForUnread = function (json_object)
+{
+    for (var i = 0; i < json_object.property_list.length; i++)
+    {
+        var name = json_object.property_list[i].name;
+        var value = json_object.property_list[i].value;
+        if (!json_object.read_flag[name])
+        {
+            org.webpki.util._error ('Property "' + name + '" was never read');
+        }
+        if (value.type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            org.webpki.json.JSONObject._checkForUnread (value.value);
+        }
+        else if (value.type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            for (var q = 0; q < value.value.length; q++)
+            {
+                var object = value.value[q];
+                if (object.type == org.webpki.json.JSONTypes.OBJECT)
+                {
+                    org.webpki.json.JSONObject._checkForUnread (object.value);
+                }
+            }
+        }
+    }
+};
+
 /* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
     if (!(value instanceof org.webpki.json.JSONValue))

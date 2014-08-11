@@ -26,6 +26,11 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 
 org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+|0)[\\.][0-9]+)$");
 
+/* void */org.webpki.json.JSONObjectReader.prototype.checkForUnread = function ()
+{
+    org.webpki.json.JSONObject._checkForUnread (this.root);
+};
+
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
 {
     /* JSONValue */var value = this.root._getProperty (name);

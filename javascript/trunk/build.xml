@@ -1,4 +1,4 @@
-<project name="WEBPKI.ORG library" default="help" basedir=".">
+<project name="WEBPKI.ORG javascript" default="help" basedir=".">
 
   <!-- set global properties for this build -->
 

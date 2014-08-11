@@ -268,34 +268,6 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     this.cache[object_id] = object_class;
 };
 
-/*void */org.webpki.json.JSONDecoderCache._checkForUnread = function (json_object)
-{
-    for (var i = 0; i < json_object.property_list.length; i++)
-    {
-        var name = json_object.property_list[i].name;
-        var value = json_object.property_list[i].value;
-        if (!json_object.read_flag[name])
-        {
-            org.webpki.util._error ('Property "' + name + '" was never read');
-        }
-        if (value.type == org.webpki.json.JSONTypes.OBJECT)
-        {
-            org.webpki.json.JSONDecoderCache._checkForUnread (value.value);
-        }
-        else if (value.type == org.webpki.json.JSONTypes.ARRAY)
-        {
-            for (var q = 0; q < value.value.length; q++)
-            {
-                var object = value.value[q];
-                if (object.type == org.webpki.json.JSONTypes.OBJECT)
-                {
-                    org.webpki.json.JSONDecoderCache._checkForUnread (object.value);
-                }
-            }
-        }
-    }
-};
-
 /* deserialized JSON object */org.webpki.json.JSONDecoderCache.prototype.parse = function (raw_json_document)
 {
     var json_object_reader = org.webpki.json.JSONParser.parse (raw_json_document);
@@ -315,7 +287,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     object._root = json_object_reader.root;
     if (this.check_for_unread)
     {
-        org.webpki.json.JSONDecoderCache._checkForUnread (object._root);
+        org.webpki.json.JSONObject._checkForUnread (object._root);
     }
     return object;
 };
@@ -333,6 +305,34 @@ org.webpki.json.JSONObject = function ()
 {
     this.property_list = [];
     this.read_flag = new Object ();
+};
+
+/*void */org.webpki.json.JSONObject._checkForUnread = function (json_object)
+{
+    for (var i = 0; i < json_object.property_list.length; i++)
+    {
+        var name = json_object.property_list[i].name;
+        var value = json_object.property_list[i].value;
+        if (!json_object.read_flag[name])
+        {
+            org.webpki.util._error ('Property "' + name + '" was never read');
+        }
+        if (value.type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            org.webpki.json.JSONObject._checkForUnread (value.value);
+        }
+        else if (value.type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            for (var q = 0; q < value.value.length; q++)
+            {
+                var object = value.value[q];
+                if (object.type == org.webpki.json.JSONTypes.OBJECT)
+                {
+                    org.webpki.json.JSONObject._checkForUnread (object.value);
+                }
+            }
+        }
+    }
 };
 
 /* void */org.webpki.json.JSONObject.prototype._setProperty = function (/* String */name, /* JSONValue */value)
@@ -399,6 +399,11 @@ org.webpki.json.JSONObjectReader = function (/* JSONObject */root)
 };
 
 org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+|0)[\\.][0-9]+)$");
+
+/* void */org.webpki.json.JSONObjectReader.prototype.checkForUnread = function ()
+{
+    org.webpki.json.JSONObject._checkForUnread (this.root);
+};
 
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
 {
