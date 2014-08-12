@@ -741,11 +741,11 @@ public class JSONBaseHTML
                 private void link (String href, String name, String style) throws IOException
                   {
                     addString ("<a href=\"#")
-                      .addString (href)
+                      .addString (makeLink (href))
                       .addString ("\"")
                       .addString (style)
                       .addString (">")
-                      .addString (name)
+                      .addString (makeName (name))
                       .addString ("</a>");
                   }
 
@@ -1051,7 +1051,7 @@ public class JSONBaseHTML
                                  .append ("</td></tr></table>");
       }
 
-    String makeLink (String header)
+    static String makeLink (String header)
       {
         StringBuffer buffer = new StringBuffer ();
         for (char c : header.toCharArray ())
@@ -1161,7 +1161,7 @@ public class JSONBaseHTML
         renderProtocolSteps (parent, buffer, protocol_steps);
       }
     
-    String makeName (String name)
+    static String makeName (String name)
       {
         StringBuffer s = new StringBuffer ();
         for (char c : name.toCharArray ())

@@ -51,6 +51,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
     
     static final String SECTION_TERMINATION_MESSAGE   = "Termination Message";
     static final String SECTION_HTTP_DEPENDENCIES     = "HTTP Dependencies";
+    static final String SECTION_DEFERRED_ISSUANCE     = "Deferred Issuance";
 
     static JSONBaseHTML json;
     static RowInterface row;
@@ -626,7 +627,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     "the browser <b>must</b> return to its &quot;normal&quot; state, ready for receiving a matching HTTP body containing a HTML page or similar."  + LINE_SEPARATOR +
                                     "Note that returned data <b>must</b> target the same <code>window</code> object which was used during invocation.");
 
-        json.addParagraphSubObject ("Deferred Issuance").append ("To reduce costs for credential issuers, they may require users' " +
+        json.addParagraphSubObject (SECTION_DEFERRED_ISSUANCE).append ("To reduce costs for credential issuers, they may require users' " +
                                     "filling in forms on the web with user-related information followed by a KeyGen2 sequence terminating (see " + json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + ") after " +
                                     json.globalLinkRef (KEY_CREATION_RESPONSE_JSON) + 
                                     ". This mode <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
@@ -718,8 +719,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted ")
                .addLink (KEY_CREATION_RESPONSE_JSON)
                .addString (".  See ")
-               .addPropertyLink (DEFERRED_ISSUANCE_JSON, KEY_CREATION_REQUEST_JSON)
-               .addString (". A confirming client should after this call only accept a ")
+               .addLink (SECTION_DEFERRED_ISSUANCE)
+               .addString (". A confirming client <b>must</b> after responding with ") 
+               .addLink (INVOCATION_RESPONSE_JSON)
+               .addString (" only accept a ")
                .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
                .addString ("</li>" +
                            "<li><code>" + Action.UNLOCK.getJSONName () +
