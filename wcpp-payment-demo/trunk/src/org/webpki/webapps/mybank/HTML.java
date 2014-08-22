@@ -34,6 +34,8 @@ public class HTML
     static final int PAYMENT_LOADING_SIZE           = 48;
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
+
+    static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
     static final String PAYMENT_API_INIT             = "INIT";
 	
@@ -451,6 +453,7 @@ public class HTML
         "        document.getElementById ('main').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
         "    }\n" +
+        "    document.getElementById ('busy').style.visibility = 'hidden';\n" +
         "}\n\n" +
         "function checkNoErrors () {\n" +
         "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
@@ -494,7 +497,7 @@ public class HTML
         "function initPayment () {\n" +
         "    if (checkNoErrors ()) {\n" +
 		"        window.addEventListener('message', receiveMessage, false);\n" +
-        "        checkTiming (3000);\n" +
+        "        checkTiming (" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        console.debug ('init payment window');\n" +
         "        window.parent.postMessage ('" + PAYMENT_API_INIT + "', window.document.referrer);\n" +
         "   }\n" +
@@ -599,7 +602,8 @@ public class HTML
 			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
 			"        setTimeout(function(){\n" +
 			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal (), event.origin);\n" +
-			"        }, 4000);\n" +
+//			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
+			"        }, 1000);\n" +
 			"    }\n" +
 			"}\n");
 
