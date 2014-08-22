@@ -37,9 +37,8 @@ function checkOut () {
     }
 }
 
-function isNumberKey (evt) {
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    return !(charCode > 31 && (charCode < 48 || charCode > 57));
+function isNumberKey (event) {
+    return event.charCode > 47 && event.charCode < 58;
 }
 
 function getTotal () {
