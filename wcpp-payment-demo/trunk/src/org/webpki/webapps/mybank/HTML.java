@@ -599,7 +599,7 @@ public class HTML
 			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
 			"        setTimeout(function(){\n" +
 			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal (), event.origin);\n" +
-			"        }, 1000);\n" +
+			"        }, 4000);\n" +
 			"    }\n" +
 			"}\n");
 
