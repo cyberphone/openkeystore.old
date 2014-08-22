@@ -524,8 +524,7 @@ public class HTML
 					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"text\" name=\"" + 
 					       prod_entry + 
 					       "\" value=\"0\" style=\"text-align:right;width:30pt;\" " +
-					       "oninput=\"updateInput (" + temp_counter + ", this);\" " +
-					       "onkeypress=\"return isNumberKey (event);\"/></td>" +
+					       "oninput=\"updateInput (" + temp_counter + ", this);\"/></td>" +
 					   "</tr>" +
 					   "<tr>" +
 		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits (this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
@@ -560,10 +559,6 @@ public class HTML
             "        alert ('Nothing ordered!');\n" +
             "    }\n" +
 	        "}\n\n" +
-	        "function isNumberKey (evt) {\n" +
-		    "    var charCode = (evt.which) ? evt.which : evt.keyCode;\n" +
-		    "    return !(charCode > 31 && (charCode < 48 || charCode > 57));\n" +
-		    "}\n\n" +
 		    "function getTotal () {\n" +
 	        "    var total = 0;\n" +
 	        "    for (var i = 0; i < shopping_cart.length; i++) {\n" +
@@ -579,6 +574,7 @@ public class HTML
 	        "}\n\n" +
 	        "function updateInput (index, control) {\n" +
 	        "    if (shopping_enabled) {\n" +
+	        "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
 	        "        shopping_cart[index].units = control.value;\n" +
 	        "        updateTotal ();\n" +
 	        "    }\n" +
@@ -621,6 +617,7 @@ public class HTML
              "</table></td></tr>");
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0;\"></iframe>';\n\n" +
+				"var numeric_only = new RegExp ('^[0-9]+$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
 				"var payment_status = '" + PAYMENT_API_INIT + "';\n" +
