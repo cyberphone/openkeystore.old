@@ -41,7 +41,7 @@ public class HTML
 	
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
-	    "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
+	    "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
 	    "<title>WebCrypto++ Bank Demo</title>"+
 	    "<style type=\"text/css\">html {overflow:auto}\n"+
@@ -615,7 +615,7 @@ public class HTML
        		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
                    productEntry (imageURL ("product-car.png", context), "Sports Car", 8599900) + 
                    productEntry (imageURL ("product-icecream.png", context), "Ice Cream", 325) + 
-       		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;ound:white\"></td></tr>" +
+       		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
                "<tr><td align=\"center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
