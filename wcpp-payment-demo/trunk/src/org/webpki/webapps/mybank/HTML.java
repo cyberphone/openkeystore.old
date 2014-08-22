@@ -2,13 +2,10 @@ package org.webpki.webapps.mybank;
 
 import java.io.IOException;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64;
 
 public class HTML
   {
@@ -513,7 +510,7 @@ public class HTML
 	private static String productEntry (String image_url, String name, int price_mult_100)
 	  {
 		String prod_entry = "p" + temp_counter;
-		String s = "<tr style=\"text-align:center\"><td><img src=\"" + image_url +
+		String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + image_url +
 				   "\"></td><td>" + name + "</td><td style=\"text-align:right\">" + price  (price_mult_100) +
 				   "</td><td><form>" +
 					   "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
@@ -540,13 +537,7 @@ public class HTML
 		return "$" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
 	  }
 	
-	private static String imageURL (String main_path, ServletContext context) throws IOException
-	  {
-		return "data:image/png;base64," +
-            new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (context.getResourceAsStream ("/images/" + main_path)));		
-	  }
-
-	public static void merchantPage (HttpServletResponse response, ServletContext context) throws IOException, ServletException
+	public static void merchantPage (HttpServletResponse response) throws IOException, ServletException
 	  {
 		temp_counter = 0;
 		temp_string = new StringBuffer (
@@ -609,8 +600,8 @@ public class HTML
                "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Merchant<br>&nbsp;</td></tr>" +
                "<tr><td><table class=\"tftable\">" +
        		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
-                   productEntry (imageURL ("product-car.png", context), "Sports Car", 8599900) + 
-                   productEntry (imageURL ("product-icecream.png", context), "Ice Cream", 325) + 
+                   productEntry ("product-car.png", "Sports Car", 8599900) + 
+                   productEntry ("product-icecream.png", "Ice Cream", 325) + 
        		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
                "<tr><td align=\"center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
