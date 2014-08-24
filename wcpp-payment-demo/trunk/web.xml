@@ -11,15 +11,9 @@
     </context-param>
 
     <context-param>
-        <description>URL to Merchant1</description>
-        <param-name>merchant1_url</param-name>
+        <description>URL to Merchant</description>
+        <param-name>merchant_url</param-name>
         <param-value>http://merchant.com:8080/mybank/merchant</param-value>
-    </context-param>
-
-    <context-param>
-        <description>URL to Merchant2</description>
-        <param-name>merchant2_url</param-name>
-        <param-value>http://localhost:8080/merchant</param-value>
     </context-param>
 
     <listener>
@@ -37,8 +31,8 @@
     </servlet>
 
     <servlet>
-        <servlet-name>VerifyServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.VerifyServlet</servlet-class>
+        <servlet-name>CardServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.mybank.CardServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -61,8 +55,8 @@
     </servlet-mapping>
     
     <servlet-mapping>
-        <servlet-name>VerifyServlet</servlet-name>
-        <url-pattern>/verify</url-pattern>
+        <servlet-name>CardServlet</servlet-name>
+        <url-pattern>/cards</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

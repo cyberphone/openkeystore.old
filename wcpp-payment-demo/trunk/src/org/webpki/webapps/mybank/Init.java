@@ -15,8 +15,7 @@ public class Init implements ServletContextListener
     static Logger logger = Logger.getLogger (Init.class.getName ());
     
     static String bank_url;
-    static String merchant1_url;
-    static String merchant2_url;
+    static String merchant_url;
 
     @Override
     public void contextDestroyed (ServletContextEvent event)
@@ -31,8 +30,7 @@ public class Init implements ServletContextListener
     	try 
     	  {
 			bank_url = properties.getPropertyString ("bank_url");
-		    merchant1_url = properties.getPropertyString ("merchant1_url");
-		    merchant2_url = properties.getPropertyString ("merchant2_url");
+		    merchant_url = properties.getPropertyString ("merchant_url");
 		  }
     	catch (IOException e)
     	  {

@@ -1,11 +1,17 @@
 package org.webpki.webapps.mybank;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.webpki.util.Base64;
 
 public class HTML
   {
@@ -14,33 +20,29 @@ public class HTML
     static final String SIGNUP_BAD_COLOR    = "#F78181";
 	static final String BOX_SHADDOW         = "box-shadow:5px 5px 5px #C0C0C0";
 	static final String KG2_DEVID_BASE      = "Field";
-	static final String HOME = "><a href=\"home\" title=\"Home\" style=\"position:absolute;top:15px;right:15px;z-index:5;visibility:visible\">Home</a";
-
-    static final String STATIC_BOX = "word-wrap:break-word;width:800pt;background:#F8F8F8;";
-    static final String COMMON_BOX = "border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0";
 
     static final String TEXT_BOX   = "background:#FFFFD0;width:805pt;";
     
-    static final String SAMPLE_DATA = "{\n" + 
-                                      "  &quot;Statement&quot;: &quot;Hello signed world!&quot;,\n" +
-                                      "  &quot;OtherProperties&quot;: [2000, true]\n" +
-                                      "}";
-    
+   
     static final int PAYMENT_WINDOW_WIDTH           = 300;
     static final int PAYMENT_WINDOW_HEIGHT          = 300;
     static final int PAYMENT_LOADING_SIZE           = 48;
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
 
+    static final int PAYMENT_CARD_WIDTH             = 150;
+    static final int PAYMENT_CARD_HEIGHT            = 80;
+
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
     static final String PAYMENT_API_INIT             = "INIT";
+    static final String PAYMENT_API_FINAL            = "FINAL";
 	
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
 	    "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
-	    "<title>WebCrypto++ Bank Demo</title>"+
+	    "<title>WebCrypto++ Payment Demo</title>"+
 	    "<style type=\"text/css\">html {overflow:auto}\n"+
 	    ".tftable {border-collapse: collapse}\n" +
 	    ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
@@ -155,38 +157,26 @@ public class HTML
         return value;
       }
 
-    public static String fancyBox (String id, String content)
-      {
-        return "<div id=\"" + id + "\" style=\"" + STATIC_BOX + COMMON_BOX + "\">" + content + "</div>";
-      }
-
     public static void homePage (HttpServletResponse response) throws IOException, ServletException
       {
         HTML.output (response, HTML.getHTML (null,
                 null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-                "<table style=\"max-width=\"300px\">" +
+                "<table style=\"max-width:600px\">" +
                    "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + Init.bank_url + "/initcards\">Initialize payment cards</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + Init.merchant1_url + "\">Go to Merchant #1</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + Init.merchant2_url + "\">Go to Merchant #2</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++ Documentation</a></td></tr>" +
-                 "</table></td></tr>"));
-      }
-
-    private static String webCryptoGenerateJS ()
-      {
-        return
-        "          document.getElementById ('pub.key').innerHTML = fancyDiv ('Generated public key in JCS format',\n" +
-        "              new org.webpki.json.JSONObjectWriter ().setPublicKey (publicKeyInX509Format).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_HTML)) +\n" +
-        "              '<br>&nbsp;<br>Editable sample data in JSON Format:<br>' + \n" +
-        "              '<textarea style=\"margin-top:3pt;margin-left:0pt;padding:10px;background:#FFFFD0;min-width:805pt;border-width:1px;border-style:solid;border-color:grey;box-shadow:3pt 3pt 3pt #D0D0D0\" ' +\n" +
-        "              'rows=\"5\" maxlength=\"1000\" id=\"json.text\">" + javaScript (SAMPLE_DATA) + "</textarea>' +\n" +
-        "              '<p><input type=\"button\" value=\"Sign Sample Data\" onClick=\"signSampleData ()\"/></p><p id=\"sign.res\"><p>';\n";
-
+                   "<tr><td align=\"left\">This site contains a demo of what a true WebCrypto++ implementation " +
+                   "could offer for <span style=\"color:red\">decentralized payment systems</span>.</td></tr>" +
+                   "<tr><td align=\"left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
+                   "and that <span style=\"color:red\">payment card logotypes are personalized</span> since they "+
+                   "comes from the user's local key-store.</td></tr>" +
+                   "<tr><td align=\"left\">Although the demo is a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
+                   "the IFRAME solution and cross-domain communication should be pretty close to that of a real system.</td></tr>" +
+                   "<tr><td align=\"center\"><table cellspacing=\"10\">" +
+                   "<tr align=\"left\"><td><a href=\"" + Init.bank_url + "/cards\">Initialize Payment Cards</a></td><td><i>Mandatory</i> First Step</td></tr>" +
+                   "<tr align=\"left\"><td><a href=\"" + Init.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
+                   "<tr align=\"left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++</a></td><td>The Specification</td></tr>" +
+                   "<tr align=\"left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-payment-demo\">Source Code</a></td><td>For Nerds...</td></tr>" +
+                 "</table></td></tr></table></td></tr>"));
       }
 
     private static String javaScript (String string)
@@ -206,230 +196,6 @@ public class HTML
         return s.toString ();
       }
 
-    public static void webCryptoPage (HttpServletResponse response, String verify_base, boolean msie_flag) throws IOException, ServletException
-      {
-        StringBuffer html = new StringBuffer (
-            "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title></head>\n" +
-            "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\">\n" +
-            "<h3>WebCrypto / JCS Demo</h3>\n\n" +
-            "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n" +
-            "<div id=\"pub.key\"></div>\n\n" +
-            "<!-- WebPKI's JSON Encoder/Decoder/Validator/Signer/Verifier -->\n" +
-            "<script src=\"libjson.js\"></script>\n\n" +
-            "<script>\n\n  // ");
-        html.append (msie_flag ? 
-              "This code is tailored for MSIE 11 (early implementation)\n\nvar crypto = window.crypto || window.msCrypto;" 
-                                 : 
-              "This code is supposed to be compliant with the WebCrypto draft...")
-          .append ("\n\n" +
-        
-              "var pubKey;\n" +
-              "var privKey;\n" +
-              "var signatureWriter;\n" +
-              "var publicKeyInX509Format; // The bridge between JCS and WebCrypto\n\n" +
-    
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Nice-looking text-boxes                                              //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function fancyDiv (header, content)\n" +
-              "{\n" +
-              "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;\\\n" + 
-              "         max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + content + '</div>';\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Error message helper                                                 //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-             "function bad (id, message)\n" +
-              "{\n" +
-              "  document.getElementById (id).innerHTML = '<b style=\"color:red\">' + message + '</b>';\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Create key event handler                                             //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function createKey ()\n" +
-              "{\n" +
-              "  console.log ('Begin creating key...');\n" +
-              "  document.getElementById ('pub.key').innerHTML = '<i>Working...</i>';\n")
-            .append (msie_flag ?
-               "  var genOp = crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
-               "                                         false,\n" +
-               "                                         [\"sign\", \"verify\"]);\n\n" +
-               "  genOp.onerror = function (e)\n" +
-               "    {\n" +
-               "      bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "    }\n\n" +
-
-               "  genOp.oncomplete = function (e)\n" +
-               "    {\n" +
-               "      pubKey = e.target.result.publicKey;\n" +
-               "      privKey = e.target.result.privateKey;\n\n" +
-
-               "      var expOp = crypto.subtle.exportKey ('spki', pubKey);\n\n" +
-
-               "      expOp.onerror = function (e)\n" +
-               "        {\n" + 
-               "          bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "        }\n\n" +
-
-               "      expOp.oncomplete = function (evt)\n" +
-               "        {\n" +
-               "          publicKeyInX509Format = new Uint8Array (evt.target.result);\n" +
-               "          console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-               webCryptoGenerateJS () +
-               "        }\n\n" +
-               "    }" 
-                  : 
-               "  crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-256\"}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
-               "                               false,\n" +
-               "                               [\"sign\", \"verify\"]).then (function (key)\n" +
-               "    {\n" +
-               "      pubKey = key.publicKey;\n" +
-               "      privKey = key.privateKey;\n\n" +
-
-               "      crypto.subtle.exportKey ('spki', pubKey).then (function (key)\n" +
-               "        {\n" +
-               "          publicKeyInX509Format = new Uint8Array (key);\n" +
-               "          console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-               webCryptoGenerateJS () +
-               "        });\n" +
-               "    }).then (undefined, function ()\n" + 
-               "    {\n" + 
-               "      bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "    });");
-        html.append ("\n}\n\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "// JCS callback functions                                               //\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "var JCSSigner = function ()\n" +
-               "{\n" +
-               "};\n\n" +
-
-               "/* String */ JCSSigner.prototype.getAlgorithm = function ()\n" +
-               "{\n" +
-               "  // Every crypto-system with some self-estem defines their own algorithm IDs, right?\n" +
-               "  return 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';\n" +
-               "};\n\n" +
-
-               "/* JSONSignatureTypes */JCSSigner.prototype.getSignatureType = function ()\n" +
-               "{\n" +
-               "  return org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY;\n" +
-               "};\n\n" +
-
-               "/* Uint8Array */ JCSSigner.prototype.getPublicKey = function ()\n" +
-               "{\n" +
-               "  return publicKeyInX509Format;\n" +
-               "};\n\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "// Sign event handler                                                   //\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "function signSampleData ()\n" +
-               "{\n" +
-               "  try\n" +
-               "    {\n" +
-               "      signatureWriter = new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (document.getElementById ('json.text').value));\n" +
-               "    }\n" +
-               "  catch (err)\n" +
-               "    {\n" +
-               "      bad ('sign.res', 'JSON error: ' + err.toString ());\n" +
-               "      return;\n" +
-               "    }\n\n")
- 
-          .append (msie_flag ?
-              "  var signer = crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\",\n" +
-              "                                    hash: \"SHA-256\"},\n" +
-              "                                    privKey,\n" +
-              "                                    signatureWriter.beginSignature (new JCSSigner ()));\n\n" +
-
-              "  signer.onerror = function (evt)\n" +
-              "    {\n" +
-              "      bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
-              "    }\n\n" +
-
-              "  signer.oncomplete = function (evt)\n" +
-              "    {\n" +
-              "      var signatureValue = new Uint8Array (evt.target.result);\n" +
-              "      console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
-              outputSignature () +
-              "    }" 
-                :
-              "  crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\"},\n" +
-              "                      privKey,\n" +
-              "                      signatureWriter.beginSignature (new JCSSigner ())).then (function (signature)\n" +
-              "    {\n" +
-              "      var signatureValue = new Uint8Array (signature);\n" +
-              "      console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
-              outputSignature () +
-              "    }).then (undefined, function ()\n" + 
-              "    {\n" +
-              "      bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
-              "    });")
-         .append ("\n}\n\n" +
-              verifySignature (verify_base));
-             
-        HTML.output (response, html.append ("</script></body></html>").toString ());
-      }
-
-    private static String verifySignature (String verify_base)
-      {
-        return 
-            "//////////////////////////////////////////////////////////////////////////\n" +
-            "// Optional validation is in this demo/test happening on the server     //\n" +
-            "//////////////////////////////////////////////////////////////////////////\n" +
-            "function verifySignatureOnServer ()\n" +
-            "{\n" +
-            "  document.location.href = '" + verify_base + "' +\n" +
-            "      org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)));\n" +
-            "}\n";
-      }
-
-    private static String outputSignature ()
-      {
-        return "      document.getElementById ('sign.res').innerHTML = fancyDiv ('Signed data in JCS format',\n" +
-               "          signatureWriter.endSignature (signatureValue).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_HTML)) +\n" +
-//               "          '<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"document.location.href=\\'" + verify_base + "\\'' +\n" +
-//               "          org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED))) + '; return false\"></p>';\n";
-               "          '<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer ()\"></p>';\n";
-      }
-
-    public static void errorPage (HttpServletResponse response, String error) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-              HOME,
-                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-                "<table style=\"max-width=\"300px\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana;color:red\">Something went wrong...<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\">" + newLines2HTML (encode (error)) + "</td></tr>" +
-                 "</table></td></tr>"));
-      }
-
-    public static void printResultPage (HttpServletResponse response, String message) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-                                            HOME,
-                                             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" + message + "</td></tr>"));
-      }
-
-    public static void browserCheck (HttpServletResponse response) throws IOException, ServletException
-      {
-        HTML.output (response, "<!DOCTYPE html><html><head><title>WebCrypto and JCS Demo</title>" +
-        "</head><body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\">Finding browser..." +
-        "<script>\n" +
-        " var d = new Date();\n" +
-        " d.setTime(d.getTime()+(60*60*1000));\n" +
-        "if (window.crypto !== undefined && window.crypto.subtle !== undefined)\n" +
-        "{\n" +
-        " console.log ('WebCrypto Support');\n" +
-        " document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.STD + "; expires=' + d.toGMTString();\n" +
-        "}\n" +
-        "else if (window.crypto === undefined && window.msCrypto !== undefined)\n" +
-        "{\n" +
-        " console.log ('MSIE 11');\n" +
-        " document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.MSIE + "; expires=' + d.toGMTString();\n" +
-        "}\n" +
-        "document.location.reload ();\n" + 
-        "</script></body></html>");
-      }
-
 	public static void paymentPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
 	  {
         StringBuffer s = new StringBuffer (
@@ -445,7 +211,40 @@ public class HTML
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
-        "function bad (message) {\n" +
+        "CardEntry = function (image, type, pin) {\n" +
+        "    this.image = image;\n" +
+        "    this.type = type;\n" +
+        "    this.pin = pin;\n" +
+        "    this.matching = false;\n" +
+        "};\n" +
+        "var card_list = [];\n");
+        HttpSession session = request.getSession (false);
+        if (session != null)
+        {
+        	@SuppressWarnings("unchecked")
+			Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
+        	if (card_entries != null)
+        	{
+        		int i = 0;
+        		for (CardEntry card_entry : card_entries)
+        		{
+        			if (card_entry.active)
+        			{
+            			s.append("card_list[")
+	           			 .append (i++)
+	           			 .append("] = new CardEntry ('")
+	           			 .append(card_entry.base64_image)
+	           			 .append("', '")
+	           			 .append(card_entry.card_type.toString())
+                         .append("', '")
+                         .append(card_entry.pin == null ? CardEntry.DEFAULT_PIN : card_entry.pin)
+                         .append ("');\n");
+        			}
+        		}
+        	}
+        }
+        s.append (
+        "\nfunction bad (message) {\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById ('main').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
@@ -455,6 +254,10 @@ public class HTML
         "function checkNoErrors () {\n" +
         "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
         "       bad ('Frame size manipulated by parent');\n" +
+        "       return false;\n" +
+        "   }\n" +
+        "   if (!card_list.length) {\n" +
+        "       bad ('You appear to have no payment cards at all, please return to the Payment Demo Home and get some!');\n" +
         "       return false;\n" +
         "   }\n" +
         "   return true;\n" +
@@ -482,10 +285,34 @@ public class HTML
 		"        timeouter_handle = null;\n" +
 		"        var res = checkState (event)\n" +
 		"        if (!res) return;\n" +
-		"        console.debug ('Argument: ' + res);\n" +
         "        document.getElementById ('busy').style.visibility = 'hidden';\n" +
 		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
+        "            var amount = res.substring (0, res.indexOf ('@'));\n" +
+		"            console.debug ('Amount: ' + amount);\n" +
+        "            var found = false;\n" +
+        "            while (res.indexOf ('@') >= 0) {\n" +
+		"                res = res.substring (res.indexOf ('@') + 1);\n" +
+		"                var i = res.indexOf ('@');\n" +
+        "                card = i > 0 ? res.substring (0, i) : res;\n" +
+        "                console.debug ('Card: \"' + card + '\"');\n" + 
+        "                for (i = 0; i < card_list.length; i++) {\n" +
+        "                    if (card == card_list[i].type) {\n" +
+        "                        card_list[i].matching = true;\n" +
+        "                        found = true;\n" +
+        "                    }\n" +
+        "                }\n" +
+        "            }\n" +
+        "            if (!found) {\n" +
+        "                bad ('No matching payment card found!');\n" +
+        "                return;\n" +
+        "            }\n" +
+        "            for (var q = 0; q < card_list.length; q++) {\n" +
+        "                if (card_list[q].matching) {\n"+
+        "                    console.debug ('Matching card: ' + card_list[q].type);\n" +
+        "                }\n" +
+        "            }\n" +
         "            document.getElementById ('main').innerHTML='Payment Received!'\n" +
+        "            window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
 		"        }\n" +
 		"    } else {\n" +
 		"        bad ('Unexpected message :' + event.origin + ' ' + event.data);\n" +
@@ -518,10 +345,10 @@ public class HTML
 					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits (this.form." + prod_entry + ", 1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
 					   "</tr>" +
 					   "<tr>" +
-					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"text\" name=\"" + 
+					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
 					       prod_entry + 
-					       "\" value=\"0\" style=\"text-align:right;width:30pt;\" " +
-					       "oninput=\"updateInput (" + temp_counter + ", this);\"/></td>" +
+					       "\" value=\"0\" style=\"text-align:right\" " +
+					       "oninput=\"updateInput (" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
 					   "</tr>" +
 					   "<tr>" +
 		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits (this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
@@ -566,16 +393,16 @@ public class HTML
 	        "function updateInput (index, control) {\n" +
 	        "    if (shopping_enabled) {\n" +
 	        "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
+	        "        while (control.value.length > 1 && control.value.charAt (0) == '0') control.value = control.value.substring (1);\n" +
 	        "        shopping_cart[index].units = control.value;\n" +
 	        "        updateTotal ();\n" +
+	        "    } else {\n" +
+	        "        control.value = shopping_cart[index].units;\n" +
 	        "    }\n" +
 	        "}\n\n" +
             "function updateUnits (control, value, index) {\n" +
-	        "    if (parseInt (control.value) + value >= 0 && shopping_enabled) {\n" +
-            "        control.value = parseInt (control.value) + value;\n" +
-            "        shopping_cart[index].units = parseInt (control.value);\n" +
-	        "        updateTotal ();\n" +
-            "    }\n" +
+            "    control.value = parseInt (control.value) + value;\n" +
+            "    updateInput (index, control);\n" +
 	        "}\n\n" +
 			"function receiveMessage (event) {\n" +
 			"    console.debug (event.origin);\n" +
@@ -587,28 +414,36 @@ public class HTML
 			"    }\n" +
 			"    var res = event.data.substring (payment_status.length);\n" +
 			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
-			"        setTimeout(function(){\n" +
-			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal (), event.origin);\n" +
+			"        setTimeout(function(){\n    " +
+			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal () + '")
+		.append ('@').append(CardTypes.SUPER.toString())
+		.append ('@').append(CardTypes.COOL.toString())
+		.append ("', event.origin);\n" +
 //			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
 			"        }, 1000);\n" +
+			"        payment_status = '" + PAYMENT_API_FINAL + "';\n" +
+			"    }\n" +
+			"    else if (payment_status == '" + PAYMENT_API_FINAL + "') {\n" +
+            "        document.getElementById ('result').innerHTML = 'Yes!!!';\n" +
+ //           "        document.getElementById ('pay').innerHTML = '';\n" +
 			"    }\n" +
 			"}\n");
 
 		StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table>" +
-               "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Merchant<br>&nbsp;</td></tr>" +
-               "<tr><td><table class=\"tftable\">" +
+               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Merchant<br>&nbsp;</td></tr>" +
+               "<tr><td id=\"result\"><table class=\"tftable\">" +
        		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
                    productEntry ("product-car.png", "Sports Car", 8599900) + 
                    productEntry ("product-icecream.png", "Ice Cream", 325) + 
        		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
-               "<tr><td align=\"center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
+               "<tr><td style=\"text-align:center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0;\"></iframe>';\n\n" +
-				"var numeric_only = new RegExp ('^[0-9]+$');\n\n" +
+				"var numeric_only = new RegExp ('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
 				"var payment_status = '" + PAYMENT_API_INIT + "';\n" +
@@ -618,5 +453,36 @@ public class HTML
 		        "};\n");
 
         HTML.output (response, HTML.getHTML (temp_string.toString(), null, page_data.toString()));
+	  }
+	
+	public static void initCards (HttpServletResponse response, HttpServletRequest request, Vector<CardEntry> card_entries) throws IOException, ServletException 
+	  {
+	    StringBuffer s = new StringBuffer (
+            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
+	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
+            "<table cellpadding=\"0\" cellspacing=\"5\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Your Payment Cards<br>&nbsp;</td></tr>" +
+	        "<tr><td colspan=\"2\"><table style=\"margin-left:auto;margin-right:auto\">" +
+	        "<tr><td>Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
+	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
+	    .append ("\"></td></tr>" +
+	        "<tr><td>PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"8\" placeholder=\"Default: " + CardEntry.DEFAULT_PIN + "\" name=\"" + CardEntry.PIN_FIELD + "\" value=\"")
+        .append (card_entries.firstElement ().pin == null ? "" : encode (card_entries.firstElement ().pin))
+        .append ("\"></td></tr></table></td></tr>");
+	    for (CardEntry card_entry : card_entries)
+	      {
+	        s.append ("<tr style=\"text-align:center\"><td><input type=\"checkbox\" name=\"")
+	         .append (card_entry.card_type.toString ())
+	         .append ("\"")
+	         .append (card_entry.active ? " checked" : "")
+	         .append ("></td><td>" +
+	            "<div style=\"width:" + PAYMENT_CARD_WIDTH + "px;height:" + PAYMENT_CARD_HEIGHT +
+	               "px;background-image:url('data:image/png;base64,")
+	         .append (card_entry.base64_image)
+	         .append ("');border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3px 3px 3px #D0D0D0;\"></div>" +
+	                  "</td></tr>");
+	      }  
+	    HTML.output (response, HTML.getHTML (null, null, s.append (
+	        "<tr><td></td><td style=\"text-align:center;padding:7pt\"><input type=\"submit\" value=\"Update Card Data\"></td></tr>" +
+	        "</table></form></td></tr>").toString ()));
 	  }
   }

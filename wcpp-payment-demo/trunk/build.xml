@@ -37,6 +37,9 @@
     <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false"/>
     <war destfile="${dist_dir}/${application}" webxml="web.xml">
       <classes dir="${temp_dir}"/>
+      <classes dir="${src_dir}">
+         <include name="**/*.png"/>
+      </classes>
       <lib file="${resources_dir}/third-party-jars/bcprov-jdk16-145.jar"/>
       <lib file="${library_dir}/dist/webpki.org-libext-1.00.jar"/>
       <lib file="${library_dir}/dist/webpki.org-webutil-1.00.jar"/>
