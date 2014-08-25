@@ -1,17 +1,14 @@
 package org.webpki.webapps.mybank;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
 import java.util.Vector;
 
-import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.webpki.util.Base64;
 
 public class HTML
   {
@@ -24,11 +21,12 @@ public class HTML
     static final String TEXT_BOX   = "background:#FFFFD0;width:805pt;";
     
    
-    static final int PAYMENT_WINDOW_WIDTH           = 300;
-    static final int PAYMENT_WINDOW_HEIGHT          = 300;
+    static final int PAYMENT_WINDOW_WIDTH           = 450;
+    static final int PAYMENT_WINDOW_HEIGHT          = 250;
     static final int PAYMENT_LOADING_SIZE           = 48;
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
+    static final String PAYMENT_BORDER_COLOR        = "#306754";
 
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
@@ -185,6 +183,10 @@ public class HTML
               {
                 s.append ("\\n");
               }
+            else if (c == '\'')
+              {
+                s.append ("\\'");
+              }
             else
               {
                 s.append (c);
@@ -202,14 +204,15 @@ public class HTML
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
 	    "div {padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px}\n" +
 	    "input[type=button] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n"+
-        "</style></head><body onload=\"initPayment ()\"><div style=\"color:white;font-size:10pt;background:blue;width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div><div id=\"main\">Initializing...</div>" +
+        "</style></head><body onload=\"initPayment ()\"><div style=\"color:white;font-size:10pt;background:" +
+        PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div><div id=\"main\">Initializing...</div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
-        "CardEntry = function (image, type, pin, pan) {\n" +
-        "    this.image = image;\n" +
+        "CardEntry = function (base64_image, type, pin, pan) {\n" +
+        "    this.base64_image = base64_image;\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
         "    this.pan = pan;\n" +
@@ -276,6 +279,29 @@ public class HTML
         "   }\n" +
         "   return event.data.substring (payment_state.length + 1);\n" +
         "}\n\n" +
+        "function oneCard (card_index, add_on) {\n" +
+        "    return '<tr><td>' + '" +
+             CardEntry.CARD_DIV_1 + 
+             "' + card_list[card_index].pan + '" +
+             javaScript (CardEntry.CARD_DIV_2) +
+             "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
+             "</div></td></tr>';\n" +
+        "}\n\n" +
+        "function payDisplay (card_index) {\n" +
+        "   document.getElementById ('main').innerHTML='<table style=\"margin:auto\">" +
+            "<tr><td>You gonna pay dude!</td></tr>' + " +
+            "oneCard (card_index, '') + '</table>';\n" +
+        "}\n\n" +
+        "function cardDisplay () {\n" +
+        "    var cards = '<table style=\"margin:auto\">" +
+            "<tr><td>Select Card</td></tr>';\n" +
+        "    for (var q = 0; q < card_list.length; q++) {\n" +
+        "        if (card_list[q].matching) {\n"+
+        "            cards += oneCard (q, ';cursor:pointer\" onclick=\"payDisplay (' + q + ')');\n" +
+        "        }\n" +
+        "    }\n" +
+        "   document.getElementById ('main').innerHTML=cards + '</table>';\n" +
+       "}\n\n" +
 		"function receiveMessage (event) {\n" +
 		"    console.debug (event.origin);\n" +
 		"    console.debug (event.data);\n" +
@@ -289,7 +315,7 @@ public class HTML
 		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
         "            var amount = res.substring (0, res.indexOf ('@'));\n" +
 		"            console.debug ('Amount: ' + amount);\n" +
-        "            var found = false;\n" +
+        "            var found = 0;\n" +
         "            while (res.indexOf ('@') >= 0) {\n" +
 		"                res = res.substring (res.indexOf ('@') + 1);\n" +
 		"                var i = res.indexOf ('@');\n" +
@@ -298,7 +324,7 @@ public class HTML
         "                for (i = 0; i < card_list.length; i++) {\n" +
         "                    if (card == card_list[i].type) {\n" +
         "                        card_list[i].matching = true;\n" +
-        "                        found = true;\n" +
+        "                        found++;\n" +
         "                    }\n" +
         "                }\n" +
         "            }\n" +
@@ -311,8 +337,17 @@ public class HTML
         "                    console.debug ('Matching card: ' + card_list[q].type);\n" +
         "                }\n" +
         "            }\n" +
-        "            document.getElementById ('main').innerHTML='Payment Received!'\n" +
-        "            window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
+        "            if (found == 1) {\n" +
+        "                for (var q = 0; q < card_list.length; q++) {\n" +
+        "                    if (card_list[q].matching) {\n"+
+        "                        payDisplay (q);\n" +
+        "                        return;\n" +
+        "                    }\n" +
+        "                }\n" +
+        "            } else {\n" +
+        "                cardDisplay ();\n" +
+        "            }\n" +
+//        "            window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
 		"        }\n" +
 		"    } else {\n" +
 		"        bad ('Unexpected message :' + event.origin + ' ' + event.data);\n" +
@@ -445,7 +480,8 @@ public class HTML
                "<tr><td style=\"text-align:center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
 		temp_string.insert (0, "\nvar paycode=" + 
-	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0;\"></iframe>';\n\n" +
+	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
+	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0;\"></iframe>';\n\n" +
 				"var numeric_only = new RegExp ('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +

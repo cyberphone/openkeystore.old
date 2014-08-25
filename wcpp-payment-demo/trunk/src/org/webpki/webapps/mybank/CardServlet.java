@@ -63,7 +63,8 @@ public class CardServlet extends HttpServlet
                 do
                   {
                     g.setColor (card_type.color); 
-                    g.setFont (new Font ("Helvetica", Font.PLAIN, font_size));
+                    g.setFont (new Font ("Arial", Font.TRUETYPE_FONT, font_size));
+                    g.setRenderingHint (RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g.setRenderingHint (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g.setRenderingHint (RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                     g.setRenderingHint (RenderingHints.KEY_STROKE_CONTROL , RenderingHints.VALUE_STROKE_PURE );
