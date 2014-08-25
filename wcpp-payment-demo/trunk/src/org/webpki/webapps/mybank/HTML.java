@@ -12,15 +12,6 @@ import javax.servlet.http.HttpSession;
 
 public class HTML
   {
-    static final String SIGNUP_BGND_COLOR   = "#F4FFF1";
-	static final String SIGNUP_EDIT_COLOR   = "#FFFA91";
-    static final String SIGNUP_BAD_COLOR    = "#F78181";
-	static final String BOX_SHADDOW         = "box-shadow:5px 5px 5px #C0C0C0";
-	static final String KG2_DEVID_BASE      = "Field";
-
-    static final String TEXT_BOX   = "background:#FFFFD0;width:805pt;";
-    
-   
     static final int PAYMENT_WINDOW_WIDTH           = 450;
     static final int PAYMENT_WINDOW_HEIGHT          = 250;
     static final int PAYMENT_LOADING_SIZE           = 48;
@@ -96,23 +87,6 @@ public class HTML
           }
       }
     
-    static String newLines2HTML (String text_with_newlines)
-      {
-        StringBuffer result = new StringBuffer ();
-        for (char c : text_with_newlines.toCharArray ())
-          {
-            if (c == '\n')
-              {
-                result.append ("<br>");
-              }
-            else
-              {
-                result.append (c);
-              }
-          }
-        return result.toString ();
-      }
-    
     static String getHTML (String javascript, String bodyscript, String box)
       {
         StringBuffer s = new StringBuffer (HTML_INIT + "html, body {margin:0px;padding:0px;height:100%}</style>");
@@ -140,16 +114,6 @@ public class HTML
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
         response.getOutputStream ().write (html.getBytes ("UTF-8"));
-      }
-
-    static String getConditionalParameter (HttpServletRequest request, String name)
-      {
-        String value = request.getParameter (name);
-        if (value == null)
-          {
-            return "";
-          }
-        return value;
       }
 
     public static void homePage (HttpServletResponse response) throws IOException, ServletException
@@ -287,10 +251,19 @@ public class HTML
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td></tr>';\n" +
         "}\n\n" +
+        "function panDisplay (pan) {\n" +
+        "   var new_pan = '<tr><td>';\n" +
+        "   for (var i = 0; i < pan.length; i++) {\n" +
+        "       if (i && i % 4 == 0) new_pan += ' ';\n" +
+        "       new_pan += pan.charAt (i);\n" +
+        "   }\n" +
+        "   return new_pan + '</td></tr>';\n" +
+        "}\n\n" +
         "function payDisplay (card_index) {\n" +
-        "   document.getElementById ('main').innerHTML='<table style=\"margin:auto\">" +
-            "<tr><td>You gonna pay dude!</td></tr>' + " +
-            "oneCard (card_index, '') + '</table>';\n" +
+        "   document.getElementById ('main').innerHTML='<table style=\"text-align:center" +
+            ";position:absolute;top:60px;right:30px;z-index:5;visibility:visible\">" +
+            "<tr><td>Payment Card</td></tr>' + " +
+            "oneCard (card_index, '') + panDisplay (card_list[card_index].pan) + '</table>';\n" +
         "}\n\n" +
         "function cardDisplay () {\n" +
         "    var cards = '<table style=\"margin:auto\">" +
@@ -470,8 +443,8 @@ public class HTML
 		StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table>" +
-               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Merchant<br>&nbsp;</td></tr>" +
-               "<tr><td id=\"result\"><table class=\"tftable\">" +
+               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Demo Merchant<br>&nbsp;</td></tr>" +
+               "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
        		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
                    productEntry ("product-car.png", "Sports Car", 8599900) + 
                    productEntry ("product-icecream.png", "Ice Cream", 325) + 
