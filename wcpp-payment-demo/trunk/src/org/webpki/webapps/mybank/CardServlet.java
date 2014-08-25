@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.security.SecureRandom;
+
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -40,6 +42,14 @@ public class CardServlet extends HttpServlet
             card_entry.card_type = card_type;
             card_entry.user = user;
             card_entry.pin = pin;
+            byte[] pan = new byte[16];
+            new SecureRandom ().nextBytes (pan);
+            StringBuffer pan_text = new StringBuffer ();
+            for (byte b : pan)
+              {
+                pan_text.append ((char)(((b & 0xFF) % 10) + '0'));
+              }
+            card_entry.pan = pan_text.toString ();
             card_entries.add (card_entry);
             int width = card_type.image.getWidth (null);
             int height = card_type.image.getHeight (null);

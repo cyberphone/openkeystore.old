@@ -30,14 +30,11 @@ public class HTML
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
 
-    static final int PAYMENT_CARD_WIDTH             = 150;
-    static final int PAYMENT_CARD_HEIGHT            = 80;
-
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
     static final String PAYMENT_API_INIT             = "INIT";
     static final String PAYMENT_API_FINAL            = "FINAL";
-	
+    
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
 	    "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
@@ -211,10 +208,11 @@ public class HTML
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
-        "CardEntry = function (image, type, pin) {\n" +
+        "CardEntry = function (image, type, pin, pan) {\n" +
         "    this.image = image;\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
+        "    this.pan = pan;\n" +
         "    this.matching = false;\n" +
         "};\n" +
         "var card_list = [];\n");
@@ -238,6 +236,8 @@ public class HTML
 	           			 .append(card_entry.card_type.toString())
                          .append("', '")
                          .append(card_entry.pin == null ? CardEntry.DEFAULT_PIN : card_entry.pin)
+                         .append("', '")
+                         .append(card_entry.pan)
                          .append ("');\n");
         			}
         		}
@@ -415,10 +415,13 @@ public class HTML
 			"    var res = event.data.substring (payment_status.length);\n" +
 			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
 			"        setTimeout(function(){\n    " +
-			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal () + '")
-		.append ('@').append(CardTypes.SUPER.toString())
-		.append ('@').append(CardTypes.COOL.toString())
-		.append ("', event.origin);\n" +
+			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal () + '");
+		for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
+		  {
+		    temp_string.append ('@')
+		               .append (card_type.toString());
+		  }
+		temp_string.append ("', event.origin);\n" +
 //			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
 			"        }, 1000);\n" +
 			"        payment_status = '" + PAYMENT_API_FINAL + "';\n" +
@@ -470,19 +473,22 @@ public class HTML
         .append ("\"></td></tr></table></td></tr>");
 	    for (CardEntry card_entry : card_entries)
 	      {
-	        s.append ("<tr style=\"text-align:center\"><td><input type=\"checkbox\" name=\"")
+	        s.append ("<tr style=\"text-align:right\"><td><input type=\"checkbox\" name=\"")
 	         .append (card_entry.card_type.toString ())
-	         .append ("\"")
+	         .append ("\" title=\"This card is")
+	         .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
+             .append (" recognized by the demo merchant\"")
 	         .append (card_entry.active ? " checked" : "")
 	         .append ("></td><td>" +
-	            "<div style=\"width:" + PAYMENT_CARD_WIDTH + "px;height:" + PAYMENT_CARD_HEIGHT +
-	               "px;background-image:url('data:image/png;base64,")
+	                 CardEntry.CARD_DIV_1)
+	         .append (card_entry.active ? card_entry.pan : "Inactive Card")
+	         .append (CardEntry.CARD_DIV_2)
 	         .append (card_entry.base64_image)
-	         .append ("');border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3px 3px 3px #D0D0D0;\"></div>" +
+	         .append ("');\"></div>" +
 	                  "</td></tr>");
 	      }  
 	    HTML.output (response, HTML.getHTML (null, null, s.append (
-	        "<tr><td></td><td style=\"text-align:center;padding:7pt\"><input type=\"submit\" value=\"Update Card Data\"></td></tr>" +
+	        "<tr><td></td><td style=\"text-align:center;padding:7pt\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
 	        "</table></form></td></tr>").toString ()));
 	  }
   }
