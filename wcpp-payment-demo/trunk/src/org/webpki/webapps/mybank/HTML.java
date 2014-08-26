@@ -18,6 +18,8 @@ public class HTML
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
     static final String PAYMENT_BORDER_COLOR        = "#306754";
+    static final int PAYMENT_PAN_PADDING            = 5;
+    static final int PAYMENT_CARD_TOP_POSITION      = 80;
 
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
@@ -245,14 +247,13 @@ public class HTML
         "}\n\n" +
         "function oneCard (card_index, add_on) {\n" +
         "    return '<tr><td>' + '" +
-             CardEntry.CARD_DIV_1 + 
-             "' + card_list[card_index].pan + '" +
-             javaScript (CardEntry.CARD_DIV_2) +
+             javaScript (CardEntry.CARD_DIV) +
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td></tr>';\n" +
         "}\n\n" +
-        "function panDisplay (pan) {\n" +
-        "   var new_pan = '<tr><td>';\n" +
+        "function formatPAN (pan) {\n" +
+        "   var new_pan = '<tr><td style=\"padding-top:" + PAYMENT_PAN_PADDING +
+            "px;text-align:center\">';\n" +
         "   for (var i = 0; i < pan.length; i++) {\n" +
         "       if (i && i % 4 == 0) new_pan += ' ';\n" +
         "       new_pan += pan.charAt (i);\n" +
@@ -260,10 +261,9 @@ public class HTML
         "   return new_pan + '</td></tr>';\n" +
         "}\n\n" +
         "function payDisplay (card_index) {\n" +
-        "   document.getElementById ('main').innerHTML='<table style=\"text-align:center" +
-            ";position:absolute;top:60px;right:30px;z-index:5;visibility:visible\">" +
-            "<tr><td>Payment Card</td></tr>' + " +
-            "oneCard (card_index, '') + panDisplay (card_list[card_index].pan) + '</table>';\n" +
+        "   document.getElementById ('main').innerHTML='<table cellspacing=\"0\" cellpadding=\"0\" style=\"" +
+            "position:absolute;top:" + PAYMENT_CARD_TOP_POSITION + "px;right:30px;z-index:5;visibility:visible\">' + " +
+            "oneCard (card_index, '') + formatPAN (card_list[card_index].pan) + '</table>';\n" +
         "}\n\n" +
         "function cardDisplay () {\n" +
         "    var cards = '<table style=\"margin:auto\">" +
@@ -466,14 +466,28 @@ public class HTML
 
         HTML.output (response, HTML.getHTML (temp_string.toString(), null, page_data.toString()));
 	  }
+
+	private static String formatPAN (String pan)
+	  {
+	    StringBuffer new_pan = new StringBuffer ();
+	    for (int i = 0; i < pan.length (); i++)
+	      {
+	        if (i != 0 && ((i % 4) == 0))
+	          {
+	            new_pan.append (' ');
+	          }
+	        new_pan.append (pan.charAt (i));
+	      }
+	    return new_pan.toString ();
+	  }
 	
 	public static void initCards (HttpServletResponse response, HttpServletRequest request, Vector<CardEntry> card_entries) throws IOException, ServletException 
 	  {
 	    StringBuffer s = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
 	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
-            "<table cellpadding=\"0\" cellspacing=\"5\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Your Payment Cards<br>&nbsp;</td></tr>" +
-	        "<tr><td colspan=\"2\"><table style=\"margin-left:auto;margin-right:auto\">" +
+            "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Your Payment Cards<br>&nbsp;</td></tr>" +
+	        "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
 	        "<tr><td>Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
 	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
 	    .append ("\"></td></tr>" +
@@ -482,22 +496,23 @@ public class HTML
         .append ("\"></td></tr></table></td></tr>");
 	    for (CardEntry card_entry : card_entries)
 	      {
-	        s.append ("<tr style=\"text-align:right\"><td><input type=\"checkbox\" name=\"")
+	        s.append ("<tr><td style=\"text-align:right;padding-right:5pt\"><input type=\"checkbox\" name=\"")
 	         .append (card_entry.card_type.toString ())
-	         .append ("\" title=\"This card is")
-	         .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
-             .append (" recognized by the demo merchant\"")
+	         .append ("\" title=\"Activate/deactivate card\"")
 	         .append (card_entry.active ? " checked" : "")
-	         .append ("></td><td>" +
-	                 CardEntry.CARD_DIV_1)
-	         .append (card_entry.active ? card_entry.pan : "Inactive Card")
-	         .append (CardEntry.CARD_DIV_2)
+	         .append ("></td><td>" + CardEntry.CARD_DIV)
 	         .append (card_entry.base64_image)
-	         .append ("');\"></div>" +
-	                  "</td></tr>");
+	         .append ("');\" title=\"This card is")
+             .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
+             .append (" recognized by the demo merchant\">" +
+	                  "</div></td></tr><tr><td></td>" +
+	                  "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING +
+	                  "px;padding-bottom:10pt\">")
+             .append (card_entry.active ? formatPAN (card_entry.pan) : "<i>Inactive Card</i>")
+             .append ("</td></tr>");
 	      }  
 	    HTML.output (response, HTML.getHTML (null, null, s.append (
-	        "<tr><td></td><td style=\"text-align:center;padding:7pt\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
+	        "<tr><td></td><td style=\"text-align:center\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
 	        "</table></form></td></tr>").toString ()));
 	  }
   }

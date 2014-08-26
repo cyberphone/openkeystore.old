@@ -17,8 +17,7 @@ public class CardEntry implements Serializable
     static final int CARD_WIDTH      = 150;
     static final int CARD_HEIGHT     = 80;
     
-    static final String CARD_DIV_1   = "<div title=\"PAN=";
-    static final String CARD_DIV_2   = "\" style=\"padding:0px;margin-left:auto;margin-right:auto;width:" +
+    static final String CARD_DIV     = "<div style=\"padding:0px;margin-left:auto;margin-right:auto;width:" +
                                        CardEntry.CARD_WIDTH + "px;height:" +
                                        CardEntry.CARD_HEIGHT +
                                        "px;border-radius:8px;border-width:1px;border-style:solid;" +
