@@ -246,24 +246,22 @@ public class HTML
         "   return event.data.substring (payment_state.length + 1);\n" +
         "}\n\n" +
         "function oneCard (card_index, add_on) {\n" +
-        "    return '<tr><td>' + '" +
+        "    var card_html = '<tr><td>' + '" +
              javaScript (CardEntry.CARD_DIV) +
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
-             "</div></td></tr>';\n" +
-        "}\n\n" +
-        "function formatPAN (pan) {\n" +
-        "   var new_pan = '<tr><td style=\"padding-top:" + PAYMENT_PAN_PADDING +
+             "</div></td></tr><tr><td style=\"padding-top:" + PAYMENT_PAN_PADDING +
             "px;text-align:center\">';\n" +
+        "   var pan = card_list[card_index].pan;\n" +
         "   for (var i = 0; i < pan.length; i++) {\n" +
-        "       if (i && i % 4 == 0) new_pan += ' ';\n" +
-        "       new_pan += pan.charAt (i);\n" +
+        "       if (i && i % 4 == 0) card_html += ' ';\n" +
+        "       card_html += pan.charAt (i);\n" +
         "   }\n" +
-        "   return new_pan + '</td></tr>';\n" +
+        "   return card_html + '</td></tr>';\n" +
         "}\n\n" +
         "function payDisplay (card_index) {\n" +
         "   document.getElementById ('main').innerHTML='<table cellspacing=\"0\" cellpadding=\"0\" style=\"" +
             "position:absolute;top:" + PAYMENT_CARD_TOP_POSITION + "px;right:30px;z-index:5;visibility:visible\">' + " +
-            "oneCard (card_index, '') + formatPAN (card_list[card_index].pan) + '</table>';\n" +
+            "oneCard (card_index, '') + '</table>';\n" +
         "}\n\n" +
         "function cardDisplay () {\n" +
         "    var cards = '<table style=\"margin:auto\">" +
