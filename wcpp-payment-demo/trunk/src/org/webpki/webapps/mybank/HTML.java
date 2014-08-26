@@ -170,8 +170,10 @@ public class HTML
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
 	    "div {padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px}\n" +
 	    "input[type=button] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n"+
-        "</style></head><body onload=\"initPayment ()\"><div style=\"color:white;font-size:10pt;background:" +
-        PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div><div id=\"main\">Initializing...</div>" +
+        "</style></head><body onload=\"initPayment ()\">" +
+	    "<div style=\"color:white;font-size:10pt;background:" +
+        PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
+	    "<div id=\"main\">Initializing...</div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n" +
         "var aborted_operation = false;\n" +
