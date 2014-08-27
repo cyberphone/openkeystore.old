@@ -18,8 +18,10 @@ public class HTML
     static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
     static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
     static final String PAYMENT_BORDER_COLOR        = "#306754";
-    static final int PAYMENT_PAN_PADDING            = 5;
-    static final int PAYMENT_CARD_TOP_POSITION      = 80;
+    static final int PAYMENT_PAN_PADDING_TOP        = 5;
+    static final int PAYMENT_PAN_PADDING_BOTTOM     = 10;
+    static final int PAYMENT_CARD_HORIZ_GUTTER      = 20;
+    static final int PAYMENT_CARD_TOP_POSITION      = 25;
 
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
@@ -166,14 +168,17 @@ public class HTML
         StringBuffer s = new StringBuffer (
 	    "<!DOCTYPE html>"+
 	    "<html><head>"+
-	    "<style type=\"text/css\">html {overflow:auto}\n"+
+	    "<style type=\"text/css\">html {overflow:hidden}\n"+
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
-	    "div {padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px}\n" +
 	    "input[type=button] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n"+
         "</style></head><body onload=\"initPayment ()\">" +
-	    "<div style=\"color:white;font-size:10pt;background:" +
+	    "<div id=\"border\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        "color:white;font-size:10pt;background:" +
         PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
-	    "<div id=\"main\">Initializing...</div>" +
+	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
+        "Initializing...</div>" +
+	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
+        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;color:white;font-size:10pt;background:red;width:" + PAYMENT_WINDOW_WIDTH +"px\">Lower bar</div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n" +
         "var aborted_operation = false;\n" +
@@ -217,7 +222,7 @@ public class HTML
         s.append (
         "\nfunction bad (message) {\n" +
         "    if (!aborted_operation) {\n" +
-        "        document.getElementById ('main').innerHTML='ABORTED:<br>' + message;\n" +
+        "        document.getElementById ('activity').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
         "    }\n" +
         "    document.getElementById ('busy').style.visibility = 'hidden';\n" +
@@ -237,43 +242,60 @@ public class HTML
         "   timeouter_handle = setTimeout (function () {bad ('Timeout')}, milliseconds);\n" +
         "}\n\n" +
         "function checkState (event) {\n" +
-        "   if (event.data.indexOf (payment_state)) {\n" +
-        "       bad ('State error:' + payment_state + '<>' + event.data);\n" +
-        "       return null;\n" +
-        "   }\n" +
-        "   if (event.data.length < (payment_state.length + 2) || event.data.charAt (payment_state.length) != '=') {\n" +
-        "       bad ('Missing argument: ' + event.data);\n" +
-        "       return null;\n" +
-        "   }\n" +
-        "   return event.data.substring (payment_state.length + 1);\n" +
+        "    if (event.data.indexOf (payment_state)) {\n" +
+        "        bad ('State error:' + payment_state + '<>' + event.data);\n" +
+        "        return null;\n" +
+        "    }\n" +
+        "    if (event.data.length < (payment_state.length + 2) || event.data.charAt (payment_state.length) != '=') {\n" +
+        "        bad ('Missing argument: ' + event.data);\n" +
+        "        return null;\n" +
+        "    }\n" +
+        "    return event.data.substring (payment_state.length + 1);\n" +
         "}\n\n" +
-        "function oneCard (card_index, add_on) {\n" +
-        "    var card_html = '<tr><td>' + '" +
+        "function outputCard (card_index, add_on) {\n" +
+        "    return '<td>' + '" + 
              javaScript (CardEntry.CARD_DIV) +
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
-             "</div></td></tr><tr><td style=\"padding-top:" + PAYMENT_PAN_PADDING +
-            "px;text-align:center\">';\n" +
-        "   var pan = card_list[card_index].pan;\n" +
-        "   for (var i = 0; i < pan.length; i++) {\n" +
-        "       if (i && i % 4 == 0) card_html += ' ';\n" +
-        "       card_html += pan.charAt (i);\n" +
-        "   }\n" +
-        "   return card_html + '</td></tr>';\n" +
+             "</div></td>';\n" +
+        "}\n\n" +
+        "function outputPAN (card_index) {\n" +
+        "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
+             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;text-align:center\">';\n" +
+        "    var pan = card_list[card_index].pan;\n" +
+        "     for (var i = 0; i < pan.length; i++) {\n" +
+        "        if (i && i % 4 == 0) pan_html += ' ';\n" +
+        "        pan_html += pan.charAt (i);\n" +
+        "    }\n" +
+        "    return pan_html + '</td>';\n" +
+        "}\n\n" +
+        "function cardTableHeader (right_margin, top_margin) {\n" +
+        "    return '<table cellspacing=\"0\" cellpadding=\"0\" style=\"" +
+            "margin-left:auto;margin-right:' + right_margin + ';margin-top:' + top_margin + 'px\">';\n" +
         "}\n\n" +
         "function payDisplay (card_index) {\n" +
-        "   document.getElementById ('main').innerHTML='<table cellspacing=\"0\" cellpadding=\"0\" style=\"" +
-            "position:absolute;top:" + PAYMENT_CARD_TOP_POSITION + "px;right:30px;z-index:5;visibility:visible\">' + " +
-            "oneCard (card_index, '') + '</table>';\n" +
+        "   document.getElementById ('content').innerHTML = cardTableHeader ('30px', " +
+            PAYMENT_CARD_TOP_POSITION + ") + " +
+            "'<tr>' + outputCard (card_index, '') + '</tr>" +
+            "<tr>' + outputPAN (card_index) + '</tr></table>';\n" +
         "}\n\n" +
-        "function cardDisplay () {\n" +
-        "    var cards = '<table style=\"margin:auto\">" +
-            "<tr><td>Select Card</td></tr>';\n" +
+        "function cardDisplay (count) {\n" +
+        "    document.getElementById ('activity').innerHTML='Select Card';\n" +
+        "    var left_card = true;\n" +
+        "    var previous_card;\n" +
+        "    var cards = cardTableHeader ('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
         "    for (var q = 0; q < card_list.length; q++) {\n" +
         "        if (card_list[q].matching) {\n"+
-        "            cards += oneCard (q, ';cursor:pointer\" onclick=\"payDisplay (' + q + ')');\n" +
+        "            cards += left_card ? '<tr>' : '<td style=\"width:" + PAYMENT_CARD_HORIZ_GUTTER + "px\"></td>';\n" +
+        "            cards += outputCard (q, ';cursor:pointer\" title=\"Click to select\" onclick=\"payDisplay (' + q + ')');\n" +
+        "            cards += left_card ? '' : '</tr>';\n" +
+        "            if (left_card = !left_card) {\n" +
+        "                cards += '<tr>' + outputPAN (previous_card) + '<td></td>' + outputPAN (q) + '</tr>';\n" +
+        "            }\n" +
+        "            previous_card = q;\n" +
         "        }\n" +
         "    }\n" +
-        "   document.getElementById ('main').innerHTML=cards + '</table>';\n" +
+        "    if (!left_card) cards += '<td colspan=\"2\" rowspan=\"2\"></td><tr>' + outputPAN (previous_card) + '</tr>';\n" +
+        "    document.getElementById ('content').innerHTML = cards + '</table>';\n" +
        "}\n\n" +
 		"function receiveMessage (event) {\n" +
 		"    console.debug (event.origin);\n" +
@@ -288,7 +310,7 @@ public class HTML
 		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
         "            var amount = res.substring (0, res.indexOf ('@'));\n" +
 		"            console.debug ('Amount: ' + amount);\n" +
-        "            var found = 0;\n" +
+        "            var count = 0;\n" +
         "            while (res.indexOf ('@') >= 0) {\n" +
 		"                res = res.substring (res.indexOf ('@') + 1);\n" +
 		"                var i = res.indexOf ('@');\n" +
@@ -297,20 +319,22 @@ public class HTML
         "                for (i = 0; i < card_list.length; i++) {\n" +
         "                    if (card == card_list[i].type) {\n" +
         "                        card_list[i].matching = true;\n" +
-        "                        found++;\n" +
+        "                        count++;\n" +
         "                    }\n" +
         "                }\n" +
         "            }\n" +
-        "            if (!found) {\n" +
+        "            if (!count) {\n" +
         "                bad ('No matching payment card found!');\n" +
         "                return;\n" +
         "            }\n" +
+        "            document.getElementById ('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
+                     " - document.getElementById ('control').offsetHeight - document.getElementById ('border').offsetHeight - document.getElementById ('activity').offsetHeight) + 'px';\n" +
         "            for (var q = 0; q < card_list.length; q++) {\n" +
         "                if (card_list[q].matching) {\n"+
         "                    console.debug ('Matching card: ' + card_list[q].type);\n" +
         "                }\n" +
         "            }\n" +
-        "            if (found == 1) {\n" +
+        "            if (count == 1) {\n" +
         "                for (var q = 0; q < card_list.length; q++) {\n" +
         "                    if (card_list[q].matching) {\n"+
         "                        payDisplay (q);\n" +
@@ -318,7 +342,7 @@ public class HTML
         "                    }\n" +
         "                }\n" +
         "            } else {\n" +
-        "                cardDisplay ();\n" +
+        "                cardDisplay (count);\n" +
         "            }\n" +
 //        "            window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
 		"        }\n" +
@@ -506,8 +530,8 @@ public class HTML
              .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
              .append (" recognized by the demo merchant\">" +
 	                  "</div></td></tr><tr><td></td>" +
-	                  "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING +
-	                  "px;padding-bottom:10pt\">")
+	                  "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING_TOP +
+	                  "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px\">")
              .append (card_entry.active ? formatPAN (card_entry.pan) : "<i>Inactive Card</i>")
              .append ("</td></tr>");
 	      }  
