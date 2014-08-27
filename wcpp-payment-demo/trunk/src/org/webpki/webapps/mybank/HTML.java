@@ -47,7 +47,7 @@ public class HTML
 	    "input[type=text] {font-weight:normal;font-size:8pt;font-family:verdana,arial}\n" +
 	    "td {font-size:8pt;font-family:verdana,arial}\n" +
 	    ".smalltext {font-size:6pt;font-family:verdana,arial}\n" +
-	    "input[type=button] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
+	    "input[type='button'] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
 	    ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana}\n";
 	
 
@@ -170,7 +170,8 @@ public class HTML
 	    "<html><head>"+
 	    "<style type=\"text/css\">html {overflow:hidden}\n"+
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
-	    "input[type=button] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n"+
+	    "table {border-collapse: collapse}\n" +
+	    "td {padding: 0px}\n" +
         "</style></head><body onload=\"initPayment ()\">" +
 	    "<div id=\"border\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;font-size:10pt;background:" +
@@ -178,8 +179,10 @@ public class HTML
 	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
         "Initializing...</div>" +
 	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
-        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;color:white;font-size:10pt;background:red;width:" + PAYMENT_WINDOW_WIDTH +"px\">Lower bar</div>" +
-        "<img id=\"busy\" src=\"images/loading.gif\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+        "<div id=\"control\" style=\"font-size:10pt;z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+	    "<input type=\"button\" value=\"Cancel\" id=\"cancel\" style=\"position:relative;visibility:hidden\">" +
+        "<input type=\"button\" value=\"OK\" id=\"ok\" style=\"position:relative;visibility:hidden\"></div>" +
+        "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
@@ -269,17 +272,23 @@ public class HTML
         "    return pan_html + '</td>';\n" +
         "}\n\n" +
         "function cardTableHeader (right_margin, top_margin) {\n" +
-        "    return '<table cellspacing=\"0\" cellpadding=\"0\" style=\"" +
+        "    return '<table style=\"" +
             "margin-left:auto;margin-right:' + right_margin + ';margin-top:' + top_margin + 'px\">';\n" +
         "}\n\n" +
         "function payDisplay (card_index) {\n" +
-        "   document.getElementById ('content').innerHTML = cardTableHeader ('30px', " +
-            PAYMENT_CARD_TOP_POSITION + ") + " +
-            "'<tr>' + outputCard (card_index, '') + '</tr>" +
-            "<tr>' + outputPAN (card_index) + '</tr></table>';\n" +
+        "    document.getElementById ('ok').style.visibility = 'visible';\n" +
+//        "    document.getElementById ('ok').style.left = '10px';\n" +
+        "    document.getElementById ('cancel').style.left = '10px';\n" +
+        "    document.getElementById ('content').innerHTML = cardTableHeader ('30px', " +
+             PAYMENT_CARD_TOP_POSITION + ") + " +
+             "'<tr>' + outputCard (card_index, '') + '</tr>" +
+             "<tr>' + outputPAN (card_index) + '</tr></table>';\n" +
         "}\n\n" +
         "function cardDisplay (count) {\n" +
-        "    document.getElementById ('activity').innerHTML='Select Card';\n" +
+        "    document.getElementById ('activity').innerHTML = 'Select Card';\n" +
+        "    document.getElementById ('cancel').style.left = ((" +
+             PAYMENT_WINDOW_WIDTH +
+             " - document.getElementById ('cancel').offsetWidth) / 2) + 'px';\n" +
         "    var left_card = true;\n" +
         "    var previous_card;\n" +
         "    var cards = cardTableHeader ('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
@@ -297,6 +306,52 @@ public class HTML
         "    if (!left_card) cards += '<td colspan=\"2\" rowspan=\"2\"></td><tr>' + outputPAN (previous_card) + '</tr>';\n" +
         "    document.getElementById ('content').innerHTML = cards + '</table>';\n" +
        "}\n\n" +
+       "function processINIT (res) {\n" +
+       "    var amount = res.substring (0, res.indexOf ('@'));\n" +
+       "    console.debug ('Amount: ' + amount);\n" +
+       "    var count = 0;\n" +
+       "    while (res.indexOf ('@') >= 0) {\n" +
+       "        res = res.substring (res.indexOf ('@') + 1);\n" +
+       "        var i = res.indexOf ('@');\n" +
+       "        card = i > 0 ? res.substring (0, i) : res;\n" +
+       "        console.debug ('Card: \"' + card + '\"');\n" + 
+       "        for (i = 0; i < card_list.length; i++) {\n" +
+       "            if (card == card_list[i].type) {\n" +
+       "                card_list[i].matching = true;\n" +
+       "                count++;\n" +
+       "            }\n" +
+       "        }\n" +
+       "    }\n" +
+       "    if (!count) {\n" +
+       "        bad ('No matching payment card found!');\n" +
+       "        return;\n" +
+       "    }\n" +
+       "    document.getElementById ('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
+                    " - document.getElementById ('control').offsetHeight - document.getElementById ('border').offsetHeight - document.getElementById ('activity').offsetHeight) + 'px';\n" +
+       "    document.getElementById ('ok').style.width = document.getElementById ('cancel').offsetWidth + 'px';\n" +
+       "    document.getElementById ('cancel').style.visibility = 'visible';\n" +
+
+//    Uncomment+
+//       "    for (var q = 0; q < card_list.length; q++) {\n" +
+//       "        if (card_list[q].matching) {\n"+
+//       "            console.debug ('Matching card: ' + card_list[q].type);\n" +
+//       "        }\n" +
+//       "    }\n" +
+//    Uncomment-
+
+       "    if (count == 1) {\n" +
+       "        // Shortcut if there is only one matching card\n" +
+       "        for (var q = 0; q < card_list.length; q++) {\n" +
+       "            if (card_list[q].matching) {\n"+
+       "                payDisplay (q);\n" +
+       "                return;\n" +
+       "            }\n" +
+       "        }\n" +
+       "    } else {\n" +
+       "        cardDisplay (count);\n" +
+       "    }\n" +
+//       "    window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
+       "}\n\n" +
 		"function receiveMessage (event) {\n" +
 		"    console.debug (event.origin);\n" +
 		"    console.debug (event.data);\n" +
@@ -308,43 +363,7 @@ public class HTML
 		"        if (!res) return;\n" +
         "        document.getElementById ('busy').style.visibility = 'hidden';\n" +
 		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
-        "            var amount = res.substring (0, res.indexOf ('@'));\n" +
-		"            console.debug ('Amount: ' + amount);\n" +
-        "            var count = 0;\n" +
-        "            while (res.indexOf ('@') >= 0) {\n" +
-		"                res = res.substring (res.indexOf ('@') + 1);\n" +
-		"                var i = res.indexOf ('@');\n" +
-        "                card = i > 0 ? res.substring (0, i) : res;\n" +
-        "                console.debug ('Card: \"' + card + '\"');\n" + 
-        "                for (i = 0; i < card_list.length; i++) {\n" +
-        "                    if (card == card_list[i].type) {\n" +
-        "                        card_list[i].matching = true;\n" +
-        "                        count++;\n" +
-        "                    }\n" +
-        "                }\n" +
-        "            }\n" +
-        "            if (!count) {\n" +
-        "                bad ('No matching payment card found!');\n" +
-        "                return;\n" +
-        "            }\n" +
-        "            document.getElementById ('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
-                     " - document.getElementById ('control').offsetHeight - document.getElementById ('border').offsetHeight - document.getElementById ('activity').offsetHeight) + 'px';\n" +
-        "            for (var q = 0; q < card_list.length; q++) {\n" +
-        "                if (card_list[q].matching) {\n"+
-        "                    console.debug ('Matching card: ' + card_list[q].type);\n" +
-        "                }\n" +
-        "            }\n" +
-        "            if (count == 1) {\n" +
-        "                for (var q = 0; q < card_list.length; q++) {\n" +
-        "                    if (card_list[q].matching) {\n"+
-        "                        payDisplay (q);\n" +
-        "                        return;\n" +
-        "                    }\n" +
-        "                }\n" +
-        "            } else {\n" +
-        "                cardDisplay (count);\n" +
-        "            }\n" +
-//        "            window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
+        "            processINIT (res);\n" +
 		"        }\n" +
 		"    } else {\n" +
 		"        bad ('Unexpected message :' + event.origin + ' ' + event.data);\n" +
@@ -478,7 +497,7 @@ public class HTML
              "</table></td></tr>");
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
-	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0;\"></iframe>';\n\n" +
+	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
 				"var numeric_only = new RegExp ('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
