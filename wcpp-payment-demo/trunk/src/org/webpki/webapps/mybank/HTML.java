@@ -26,6 +26,7 @@ public class HTML
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
     static final String PAYMENT_API_INIT            = "INIT";
+    static final String PAYMENT_API_ABORT           = "ABORT";
     static final String PAYMENT_API_FINAL           = "FINAL";
     
     static final String HTML_INIT = 
@@ -180,7 +181,7 @@ public class HTML
         "Initializing...</div>" +
 	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
         "<div id=\"control\" style=\"font-size:10pt;z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-	    "<input id=\"cancel\" type=\"button\" value=\"Cancel\" style=\"position:relative;visibility:hidden\">" +
+	    "<input id=\"cancel\" type=\"button\" value=\"Cancel\" style=\"position:relative;visibility:hidden\" onclick=\"userABORT()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\"></div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n\n" +
@@ -241,7 +242,7 @@ public class HTML
         "       return false;\n" +
         "   }\n" +
         "   if (!card_list.length) {\n" +
-        "       bad('You appear to have no payment cards at all, please return to the Payment Demo Home and get some!');\n" +
+        "       bad('You appear to have no payment cards at all, please return to the <b>Payment&nbsp;Demo&nbsp;Home</b> and get some!');\n" +
         "       return false;\n" +
         "   }\n" +
         "   return true;\n" +
@@ -305,9 +306,6 @@ public class HTML
         "//\n" +
         "function displayCompatibleCards(count) {\n" +
         "    document.getElementById('activity').innerHTML = 'Select Card';\n" +
-        "    document.getElementById('cancel').style.left = ((" +
-             PAYMENT_WINDOW_WIDTH +
-             " - document.getElementById('cancel').offsetWidth) / 2) + 'px';\n" +
         "    var left_card = true;\n" +
         "    var previous_card;\n" +
         "    var cards = cardTableHeader('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
@@ -326,6 +324,15 @@ public class HTML
         "        cards += '<td colspan=\"2\" rowspan=\"2\"></td><tr>' + outputPAN(previous_card) + '</tr>';\n" +
         "    }\n" +
         "    document.getElementById('content').innerHTML = cards + '</table>';\n" +
+       "}\n\n" +
+       "//\n" +
+       "// Terminates the payment session in case of a user abort.\n" +
+       "//\n" +
+       "function userABORT() {\n" +
+       "    document.getElementById('activity').innerHTML = 'Aborting...';\n" +
+       "    document.getElementById('content').innerHTML = '';\n" +
+       "    document.getElementById('busy').style.visibility = 'visible';\n" +
+       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// Processes the payee's response to the INIT message.\n" +
@@ -350,14 +357,18 @@ public class HTML
        "            }\n" +
        "        }\n" +
        "    }\n" +
-       "    if (!count) {\n" +
-       "        bad('No matching payment card found!');\n" +
-       "        return;\n" +
-       "    }\n" +
        "    document.getElementById('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
                     " - document.getElementById('control').offsetHeight - document.getElementById('border').offsetHeight - document.getElementById('activity').offsetHeight) + 'px';\n" +
        "    document.getElementById('ok').style.width = document.getElementById('cancel').offsetWidth + 'px';\n" +
+       "    document.getElementById('cancel').style.left = ((" +
+            PAYMENT_WINDOW_WIDTH +
+            " - document.getElementById('cancel').offsetWidth) / 2) + 'px';\n" +
+       "    document.getElementById('cancel').title = 'Cancel and return to Demo Merchant';\n" +
        "    document.getElementById('cancel').style.visibility = 'visible';\n" +
+       "    if (!count) {\n" +
+       "        bad('No matching payment cards found, click \"Cancel\" to return to Demo Merchant.');\n" +
+       "        return;\n" +
+       "    }\n" +
 
 //    Uncomment+
 //       "    for (var q = 0; q < card_list.length; q++) {\n" +
@@ -460,6 +471,7 @@ public class HTML
             "    if (getTotal()) {\n" +
             "        shopping_enabled = false;\n" +
     		"        window.addEventListener('message', receivePaymentMessage, false);\n" +
+            "        save_checkout_html = document.getElementById('pay').innerHTML;\n" +
             "        document.getElementById('pay').innerHTML = paycode;\n" +
             "    } else {\n" +
             "        alert('Nothing ordered!');\n" +
@@ -495,6 +507,12 @@ public class HTML
 			"function receivePaymentMessage(event) {\n" +
 			"    console.debug (event.origin);\n" +
 			"    console.debug (event.data);\n" +
+            "    if (!event.data.indexOf('" + PAYMENT_API_ABORT + "')) {\n" +
+            "        document.getElementById('pay').innerHTML = save_checkout_html;\n" +
+            "        payment_status = '" + PAYMENT_API_INIT + "';\n" +
+            "        shopping_enabled = true;\n" +
+			"        return;\n" +
+			"    }\n" +
 			"    if (event.data.indexOf(payment_status)) {\n" +
 			"        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
 			"        payment_status = 'Failed***';\n" +
@@ -511,7 +529,7 @@ public class HTML
 		  }
 		temp_string.append ("', event.origin);\n" +
 //			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-			"        }, 1000);\n" +
+			"        }, 500);\n" +
 			"        payment_status = '" + PAYMENT_API_FINAL + "';\n" +
 			"    }\n" +
 			"    else if (payment_status == '" + PAYMENT_API_FINAL + "') {\n" +
@@ -535,6 +553,7 @@ public class HTML
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
 	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
+	            "var save_checkout_html;\n\n" +
 				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
