@@ -25,8 +25,8 @@ public class HTML
 
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
-    static final String PAYMENT_API_INIT             = "INIT";
-    static final String PAYMENT_API_FINAL            = "FINAL";
+    static final String PAYMENT_API_INIT            = "INIT";
+    static final String PAYMENT_API_FINAL           = "FINAL";
     
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
@@ -47,7 +47,7 @@ public class HTML
 	    "input[type=text] {font-weight:normal;font-size:8pt;font-family:verdana,arial}\n" +
 	    "td {font-size:8pt;font-family:verdana,arial}\n" +
 	    ".smalltext {font-size:6pt;font-family:verdana,arial}\n" +
-	    "input[type='button'] {cursor:pointer;font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
+	    "input[type='button'] {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
 	    ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana}\n";
 	
 
@@ -131,9 +131,9 @@ public class HTML
                    "could offer for <span style=\"color:red\">decentralized payment systems</span>.</td></tr>" +
                    "<tr><td align=\"left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
                    "and that <span style=\"color:red\">payment card logotypes are personalized</span> since they "+
-                   "comes from the user's local key-store.</td></tr>" +
+                   "are read from the user's local key-store.</td></tr>" +
                    "<tr><td align=\"left\">Although the demo is a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
-                   "the IFRAME solution and cross-domain communication should be pretty close to that of a real system.</td></tr>" +
+                   "the IFRAME solution and cross-domain communication using <code>postMessage()</code> should be pretty close to that of a real system.</td></tr>" +
                    "<tr><td align=\"center\"><table cellspacing=\"10\">" +
                    "<tr align=\"left\"><td><a href=\"" + Init.bank_url + "/cards\">Initialize Payment Cards</a></td><td><i>Mandatory</i> First Step</td></tr>" +
                    "<tr align=\"left\"><td><a href=\"" + Init.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
@@ -167,12 +167,12 @@ public class HTML
 	  {
         StringBuffer s = new StringBuffer (
 	    "<!DOCTYPE html>"+
-	    "<html><head>"+
+	    "<html><head><meta charset=\"UTF-8\">"+
 	    "<style type=\"text/css\">html {overflow:hidden}\n"+
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
 	    "table {border-collapse: collapse}\n" +
 	    "td {padding: 0px}\n" +
-        "</style></head><body onload=\"initPayment ()\">" +
+        "</style></head><body onload=\"initPayment()\">" +
 	    "<div id=\"border\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;font-size:10pt;background:" +
         PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
@@ -180,14 +180,19 @@ public class HTML
         "Initializing...</div>" +
 	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
         "<div id=\"control\" style=\"font-size:10pt;z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-	    "<input type=\"button\" value=\"Cancel\" id=\"cancel\" style=\"position:relative;visibility:hidden\">" +
-        "<input type=\"button\" value=\"OK\" id=\"ok\" style=\"position:relative;visibility:hidden\"></div>" +
+	    "<input id=\"cancel\" type=\"button\" value=\"Cancel\" style=\"position:relative;visibility:hidden\">" +
+        "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\"></div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
-        "<script type=\"text/javascript\">\n" +
+        "<script type=\"text/javascript\">\n\n" +
+        "////////////////////////////////////////////////////////////////////\n" +
+        "// Disclaimer: The message syntax used by this payment provider   //\n" +
+        "// in no way represents a standard or a standards proposal.       //\n" +
+        "// However, the message flow is anticipated to be usable \"as is\". //\n" +
+        "////////////////////////////////////////////////////////////////////\n\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
-        "CardEntry = function (base64_image, type, pin, pan) {\n" +
+        "CardEntry = function(base64_image, type, pin, pan) {\n" +
         "    this.base64_image = base64_image;\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
@@ -209,7 +214,7 @@ public class HTML
         			{
             			s.append("card_list[")
 	           			 .append (i++)
-	           			 .append("] = new CardEntry ('")
+	           			 .append("] = new CardEntry('")
 	           			 .append(card_entry.base64_image)
 	           			 .append("', '")
 	           			 .append(card_entry.card_type.toString())
@@ -223,98 +228,121 @@ public class HTML
         	}
         }
         s.append (
-        "\nfunction bad (message) {\n" +
+        "\nfunction bad(message) {\n" +
         "    if (!aborted_operation) {\n" +
-        "        document.getElementById ('activity').innerHTML='ABORTED:<br>' + message;\n" +
+        "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
         "    }\n" +
-        "    document.getElementById ('busy').style.visibility = 'hidden';\n" +
+        "    document.getElementById('busy').style.visibility = 'hidden';\n" +
         "}\n\n" +
-        "function checkNoErrors () {\n" +
+        "function checkNoErrors() {\n" +
         "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
-        "       bad ('Frame size manipulated by parent');\n" +
+        "       bad('Frame size manipulated by parent');\n" +
         "       return false;\n" +
         "   }\n" +
         "   if (!card_list.length) {\n" +
-        "       bad ('You appear to have no payment cards at all, please return to the Payment Demo Home and get some!');\n" +
+        "       bad('You appear to have no payment cards at all, please return to the Payment Demo Home and get some!');\n" +
         "       return false;\n" +
         "   }\n" +
         "   return true;\n" +
         "}\n\n" +
-        "function checkTiming (milliseconds) {\n" +
-        "   timeouter_handle = setTimeout (function () {bad ('Timeout')}, milliseconds);\n" +
+        "function checkTiming(milliseconds) {\n" +
+        "   timeouter_handle = setTimeout(function () {bad('Timeout')}, milliseconds);\n" +
         "}\n\n" +
-        "function checkState (event) {\n" +
-        "    if (event.data.indexOf (payment_state)) {\n" +
-        "        bad ('State error:' + payment_state + '<>' + event.data);\n" +
+        "function checkState(event) {\n" +
+        "    if (event.data.indexOf(payment_state)) {\n" +
+        "        bad('State error:' + payment_state + '<>' + event.data);\n" +
         "        return null;\n" +
         "    }\n" +
-        "    if (event.data.length < (payment_state.length + 2) || event.data.charAt (payment_state.length) != '=') {\n" +
-        "        bad ('Missing argument: ' + event.data);\n" +
+        "    if (event.data.length < (payment_state.length + 2) || event.data.charAt(payment_state.length) != '=') {\n" +
+        "        bad('Missing argument: ' + event.data);\n" +
         "        return null;\n" +
         "    }\n" +
-        "    return event.data.substring (payment_state.length + 1);\n" +
+        "    return event.data.substring(payment_state.length + 1);\n" +
         "}\n\n" +
-        "function outputCard (card_index, add_on) {\n" +
+        "function cardTableHeader(right_margin, top_margin) {\n" +
+        "    return '<table style=\"" +
+            "margin-left:auto;margin-right:' + right_margin + ';margin-top:' + top_margin + 'px\">';\n" +
+        "}\n\n" +
+        "function outputCard(card_index, add_on) {\n" +
         "    return '<td>' + '" + 
              javaScript (CardEntry.CARD_DIV) +
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td>';\n" +
         "}\n\n" +
-        "function outputPAN (card_index) {\n" +
+        "//\n" +
+        "// Although PANs (card numbers) are not really needed from the user's\n" +
+        "// point of view, they represent a legacy which should not be ignored...\n" +
+        "//\n" +
+        "function outputPAN(card_index) {\n" +
         "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
              "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;text-align:center\">';\n" +
         "    var pan = card_list[card_index].pan;\n" +
-        "     for (var i = 0; i < pan.length; i++) {\n" +
+        "    for (var i = 0; i < pan.length; i++) {\n" +
         "        if (i && i % 4 == 0) pan_html += ' ';\n" +
-        "        pan_html += pan.charAt (i);\n" +
+        "        pan_html += pan.charAt(i);\n" +
         "    }\n" +
         "    return pan_html + '</td>';\n" +
         "}\n\n" +
-        "function cardTableHeader (right_margin, top_margin) {\n" +
-        "    return '<table style=\"" +
-            "margin-left:auto;margin-right:' + right_margin + ';margin-top:' + top_margin + 'px\">';\n" +
-        "}\n\n" +
-        "function payDisplay (card_index) {\n" +
-        "    document.getElementById ('ok').style.visibility = 'visible';\n" +
-//        "    document.getElementById ('ok').style.left = '10px';\n" +
-        "    document.getElementById ('cancel').style.left = '10px';\n" +
-        "    document.getElementById ('content').innerHTML = cardTableHeader ('30px', " +
+        "//\n" +
+        "// This is the core display where the user authorizes the\n" +
+        "// actual payment process.\n" +
+        "//\n" +
+        "function displayPaymentRequest(card_index) {\n" +
+        "    document.getElementById('activity').innerHTML = 'Pay Display (TBD)';\n" +
+        "    document.getElementById('ok').style.visibility = 'visible';\n" +
+//        "    document.getElementById('ok').style.left = '10px';\n" +
+        "    document.getElementById('cancel').style.left = '10px';\n" +
+        "    document.getElementById('content').innerHTML = cardTableHeader('30px', " +
              PAYMENT_CARD_TOP_POSITION + ") + " +
-             "'<tr>' + outputCard (card_index, '') + '</tr>" +
-             "<tr>' + outputPAN (card_index) + '</tr></table>';\n" +
+             "'<tr>' + outputCard(card_index, '\" title=\"Don\\'t leave home without it!') + '</tr>" +
+             "<tr>' + outputPAN(card_index) + '</tr></table>';\n" +
         "}\n\n" +
-        "function cardDisplay (count) {\n" +
-        "    document.getElementById ('activity').innerHTML = 'Select Card';\n" +
-        "    document.getElementById ('cancel').style.left = ((" +
+        "//\n" +
+        "// Displays payee compatible cards for the user to select from.\n" +
+        "// If the card collection does not fit in payment window,\n" +
+        "// a scrollable view is created.\n" +
+        "//\n" +
+        "function displayCompatibleCards(count) {\n" +
+        "    document.getElementById('activity').innerHTML = 'Select Card';\n" +
+        "    document.getElementById('cancel').style.left = ((" +
              PAYMENT_WINDOW_WIDTH +
-             " - document.getElementById ('cancel').offsetWidth) / 2) + 'px';\n" +
+             " - document.getElementById('cancel').offsetWidth) / 2) + 'px';\n" +
         "    var left_card = true;\n" +
         "    var previous_card;\n" +
-        "    var cards = cardTableHeader ('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
+        "    var cards = cardTableHeader('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
         "    for (var q = 0; q < card_list.length; q++) {\n" +
         "        if (card_list[q].matching) {\n"+
         "            cards += left_card ? '<tr>' : '<td style=\"width:" + PAYMENT_CARD_HORIZ_GUTTER + "px\"></td>';\n" +
-        "            cards += outputCard (q, ';cursor:pointer\" title=\"Click to select\" onclick=\"payDisplay (' + q + ')');\n" +
+        "            cards += outputCard(q, ';cursor:pointer\" title=\"Click to select\" onclick=\"displayPaymentRequest(' + q + ')');\n" +
         "            cards += left_card ? '' : '</tr>';\n" +
         "            if (left_card = !left_card) {\n" +
-        "                cards += '<tr>' + outputPAN (previous_card) + '<td></td>' + outputPAN (q) + '</tr>';\n" +
+        "                cards += '<tr>' + outputPAN(previous_card) + '<td></td>' + outputPAN(q) + '</tr>';\n" +
         "            }\n" +
         "            previous_card = q;\n" +
         "        }\n" +
         "    }\n" +
-        "    if (!left_card) cards += '<td colspan=\"2\" rowspan=\"2\"></td><tr>' + outputPAN (previous_card) + '</tr>';\n" +
-        "    document.getElementById ('content').innerHTML = cards + '</table>';\n" +
+        "    if (!left_card) {\n" +
+        "        cards += '<td colspan=\"2\" rowspan=\"2\"></td><tr>' + outputPAN(previous_card) + '</tr>';\n" +
+        "    }\n" +
+        "    document.getElementById('content').innerHTML = cards + '</table>';\n" +
        "}\n\n" +
-       "function processINIT (res) {\n" +
-       "    var amount = res.substring (0, res.indexOf ('@'));\n" +
-       "    console.debug ('Amount: ' + amount);\n" +
+       "//\n" +
+       "// Processes the payee's response to the INIT message.\n" +
+       "//\n" +
+       "// Message syntax:\n" +
+       "//   Amount           Integer of the payment sum multiplied by 100\n" +
+       "//   {@CardType}...   1-n card types recognized by the payee\n" +
+       "//\n" +
+       "function processINIT(response) {\n" +
+       "    var amount = response.substring(0, response.indexOf('@'));\n" +
+       "    console.debug('Amount: ' + amount);\n" +
        "    var count = 0;\n" +
-       "    while (res.indexOf ('@') >= 0) {\n" +
-       "        res = res.substring (res.indexOf ('@') + 1);\n" +
-       "        var i = res.indexOf ('@');\n" +
-       "        card = i > 0 ? res.substring (0, i) : res;\n" +
-       "        console.debug ('Card: \"' + card + '\"');\n" + 
+       "    while (response.indexOf('@') >= 0) {\n" +
+       "        response = response.substring(response.indexOf('@') + 1);\n" +
+       "        var i = response.indexOf('@');\n" +
+       "        card = i > 0 ? response.substring(0, i) : response;\n" +
+       "        console.debug('Merchant Recognized Card: \"' + card + '\"');\n" + 
        "        for (i = 0; i < card_list.length; i++) {\n" +
        "            if (card == card_list[i].type) {\n" +
        "                card_list[i].matching = true;\n" +
@@ -323,59 +351,68 @@ public class HTML
        "        }\n" +
        "    }\n" +
        "    if (!count) {\n" +
-       "        bad ('No matching payment card found!');\n" +
+       "        bad('No matching payment card found!');\n" +
        "        return;\n" +
        "    }\n" +
-       "    document.getElementById ('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
-                    " - document.getElementById ('control').offsetHeight - document.getElementById ('border').offsetHeight - document.getElementById ('activity').offsetHeight) + 'px';\n" +
-       "    document.getElementById ('ok').style.width = document.getElementById ('cancel').offsetWidth + 'px';\n" +
-       "    document.getElementById ('cancel').style.visibility = 'visible';\n" +
+       "    document.getElementById('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
+                    " - document.getElementById('control').offsetHeight - document.getElementById('border').offsetHeight - document.getElementById('activity').offsetHeight) + 'px';\n" +
+       "    document.getElementById('ok').style.width = document.getElementById('cancel').offsetWidth + 'px';\n" +
+       "    document.getElementById('cancel').style.visibility = 'visible';\n" +
 
 //    Uncomment+
 //       "    for (var q = 0; q < card_list.length; q++) {\n" +
 //       "        if (card_list[q].matching) {\n"+
-//       "            console.debug ('Matching card: ' + card_list[q].type);\n" +
+//       "            console.debug('Matching card: ' + card_list[q].type);\n" +
 //       "        }\n" +
 //       "    }\n" +
 //    Uncomment-
 
        "    if (count == 1) {\n" +
-       "        // Shortcut if there is only one matching card\n" +
+       "        // Shortcut: If there is only one matching card we\n" +
+       "        // might as well go to the payment display directly.\n" +
        "        for (var q = 0; q < card_list.length; q++) {\n" +
        "            if (card_list[q].matching) {\n"+
-       "                payDisplay (q);\n" +
+       "                displayPaymentRequest(q);\n" +
        "                return;\n" +
        "            }\n" +
        "        }\n" +
        "    } else {\n" +
-       "        cardDisplay (count);\n" +
+       "        displayCompatibleCards(count);\n" +
        "    }\n" +
-//       "    window.parent.postMessage ('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
+//       "    window.parent.postMessage('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
        "}\n\n" +
-		"function receiveMessage (event) {\n" +
-		"    console.debug (event.origin);\n" +
-		"    console.debug (event.data);\n" +
+       "//\n" +
+       "// The payment application always query the payee for data.\n" +
+       "// There is a timeout associated each request.\n" +
+       "//\n" +
+		"function receivePayeeResponse(event) {\n" +
+		"    console.debug(event.origin);\n" +
+		"    console.debug(event.data);\n" +
 		"    if (aborted_operation) return;\n" +
 		"    if (timeouter_handle) {\n" +
-		"        clearTimeout (timeouter_handle);\n" +
+		"        clearTimeout(timeouter_handle);\n" +
 		"        timeouter_handle = null;\n" +
-		"        var res = checkState (event)\n" +
-		"        if (!res) return;\n" +
-        "        document.getElementById ('busy').style.visibility = 'hidden';\n" +
+		"        var response = checkState(event)\n" +
+		"        if (!response) return;\n" +
+        "        document.getElementById('busy').style.visibility = 'hidden';\n" +
 		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
-        "            processINIT (res);\n" +
+        "            processINIT(response);\n" +
 		"        }\n" +
 		"    } else {\n" +
-		"        bad ('Unexpected message :' + event.origin + ' ' + event.data);\n" +
+		"        bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
 		"    }\n" +
 		"}\n\n" +
-        "function initPayment () {\n" +
-        "    if (checkNoErrors ()) {\n" +
-		"        window.addEventListener('message', receiveMessage, false);\n" +
-        "        checkTiming (" + PAYMENT_TIMEOUT_INIT + ");\n" +
-        "        console.debug ('init payment window');\n" +
-        "        window.parent.postMessage ('" + PAYMENT_API_INIT + "', window.document.referrer);\n" +
-        "   }\n" +
+		"//\n" +
+		"// When the payment module IFRAME has been loaded (by the payee),\n" +
+		"// the payment process is automatically invoked by the body.onload().\n" +
+        "//\n" +
+        "function initPayment() {\n" +
+        "    if (checkNoErrors()) {\n" +
+		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
+        "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
+        "        console.debug('init payment window');\n" +
+        "        window.parent.postMessage('" + PAYMENT_API_INIT + "', window.document.referrer);\n" +
+        "    }\n" +
         "}\n" +
         "</script>" +
         "</body></html>");
@@ -393,19 +430,19 @@ public class HTML
 				   "</td><td><form>" +
 					   "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
 					   "<tr>" +
-					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits (this.form." + prod_entry + ", 1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
+					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + prod_entry + ", 1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
 					   "</tr>" +
 					   "<tr>" +
 					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
 					       prod_entry + 
 					       "\" value=\"0\" style=\"text-align:right\" " +
-					       "oninput=\"updateInput (" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
+					       "oninput=\"updateInput(" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
 					   "</tr>" +
 					   "<tr>" +
-		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits (this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
+		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
 					   "</tr>" +
 					   "</table></form></td></tr>";
-        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new ShopEntry (" + price_mult_100 + ");\n");		
+        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new ShopEntry(" + price_mult_100 + ");\n");		
 		temp_counter++;
 		return s;
 	  }
@@ -419,54 +456,54 @@ public class HTML
 	  {
 		temp_counter = 0;
 		temp_string = new StringBuffer (
-        	"\nfunction checkOut () {\n" +
-            "    if (getTotal ()) {\n" +
+        	"\nfunction checkOut() {\n" +
+            "    if (getTotal()) {\n" +
             "        shopping_enabled = false;\n" +
-    		"        window.addEventListener('message', receiveMessage, false);\n" +
-            "        document.getElementById ('pay').innerHTML = paycode;\n" +
+    		"        window.addEventListener('message', receivePaymentMessage, false);\n" +
+            "        document.getElementById('pay').innerHTML = paycode;\n" +
             "    } else {\n" +
-            "        alert ('Nothing ordered!');\n" +
+            "        alert('Nothing ordered!');\n" +
             "    }\n" +
 	        "}\n\n" +
-		    "function getTotal () {\n" +
+		    "function getTotal() {\n" +
 	        "    var total = 0;\n" +
 	        "    for (var i = 0; i < shopping_cart.length; i++) {\n" +
 	        "        total += shopping_cart[i].price_mult_100 * shopping_cart[i].units;\n" +
             "    }\n" +
 	        "    return total;\n"+
 	        "}\n\n" +
-	        "function priceString (price_mult_100) {\n" +
-	        "    return '$' +  Math.floor (price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+	        "function priceString(price_mult_100) {\n" +
+	        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
 	        "}\n\n" +
-	        "function updateTotal () {\n" +
-            "    document.getElementById ('total').innerHTML = priceString (getTotal ());\n" +
+	        "function updateTotal(){\n" +
+            "    document.getElementById('total').innerHTML = priceString(getTotal());\n" +
 	        "}\n\n" +
-	        "function updateInput (index, control) {\n" +
+	        "function updateInput(index, control) {\n" +
 	        "    if (shopping_enabled) {\n" +
 	        "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
-	        "        while (control.value.length > 1 && control.value.charAt (0) == '0') control.value = control.value.substring (1);\n" +
+	        "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
 	        "        shopping_cart[index].units = control.value;\n" +
-	        "        updateTotal ();\n" +
+	        "        updateTotal();\n" +
 	        "    } else {\n" +
 	        "        control.value = shopping_cart[index].units;\n" +
 	        "    }\n" +
 	        "}\n\n" +
-            "function updateUnits (control, value, index) {\n" +
-            "    control.value = parseInt (control.value) + value;\n" +
-            "    updateInput (index, control);\n" +
+            "function updateUnits(control, value, index) {\n" +
+            "    control.value = parseInt(control.value) + value;\n" +
+            "    updateInput(index, control);\n" +
 	        "}\n\n" +
-			"function receiveMessage (event) {\n" +
+			"function receivePaymentMessage(event) {\n" +
 			"    console.debug (event.origin);\n" +
 			"    console.debug (event.data);\n" +
-			"    if (event.data.indexOf (payment_status)) {\n" +
-			"        console.debug ('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
+			"    if (event.data.indexOf(payment_status)) {\n" +
+			"        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
 			"        payment_status = 'Failed***';\n" +
 			"        return;\n" +
 			"    }\n" +
-			"    var res = event.data.substring (payment_status.length);\n" +
+			"    var response = event.data.substring(payment_status.length);\n" +
 			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
 			"        setTimeout(function(){\n    " +
-			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal () + '");
+			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal() + '@NEVER_HEARD_OF_CARD");
 		for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
 		  {
 		    temp_string.append ('@')
@@ -478,8 +515,8 @@ public class HTML
 			"        payment_status = '" + PAYMENT_API_FINAL + "';\n" +
 			"    }\n" +
 			"    else if (payment_status == '" + PAYMENT_API_FINAL + "') {\n" +
-            "        document.getElementById ('result').innerHTML = 'Yes!!!';\n" +
- //           "        document.getElementById ('pay').innerHTML = '';\n" +
+            "        document.getElementById('result').innerHTML = 'Yes!!!';\n" +
+ //           "        document.getElementById('pay').innerHTML = '';\n" +
 			"    }\n" +
 			"}\n");
 
@@ -498,11 +535,11 @@ public class HTML
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
 	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
-				"var numeric_only = new RegExp ('^[0-9]{1,6}$');\n\n" +
+				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
 				"var payment_status = '" + PAYMENT_API_INIT + "';\n" +
-		        "ShopEntry = function (price_mult_100) {\n" +
+		        "ShopEntry = function(price_mult_100) {\n" +
 		        "    this.price_mult_100 = price_mult_100;\n" +
 		        "    this.units = 0;\n" +
 		        "};\n");
