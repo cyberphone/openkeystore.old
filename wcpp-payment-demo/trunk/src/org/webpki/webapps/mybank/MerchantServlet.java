@@ -25,7 +25,7 @@ public class MerchantServlet extends HttpServlet
       {
         compatible_with_merchant.add (CardTypes.SUPER_CARD);
         compatible_with_merchant.add (CardTypes.COOL_CARD);
-//        compatible_with_merchant.add (CardTypes.UNUSUAL_CARD);
+  //      compatible_with_merchant.add (CardTypes.UNUSUAL_CARD);
       }
   
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
