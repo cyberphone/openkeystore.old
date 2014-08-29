@@ -21,7 +21,11 @@ public class HTML
     static final int PAYMENT_PAN_PADDING_TOP        = 5;
     static final int PAYMENT_PAN_PADDING_BOTTOM     = 10;
     static final int PAYMENT_CARD_HORIZ_GUTTER      = 20;
+    static final int PAYMENT_CARD_RIGHT_MARGIN      = 30;
     static final int PAYMENT_CARD_TOP_POSITION      = 25;
+    
+    static final int PIN_MAX_LENGTH                 = 20;
+    static final int PIN_FIELD_SIZE                 = 8;
 
     static final int PAYMENT_TIMEOUT_INIT           = 5000;
     
@@ -192,6 +196,9 @@ public class HTML
         "////////////////////////////////////////////////////////////////////\n\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
+        "var amount_to_pay = '$237.25';\n" +
+        "var caller_domain = 'openkeystore.googlecode.com';\n" +
+        "var caller_common_name = 'Demo Merchant';\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
         "CardEntry = function(base64_image, type, pin, pan) {\n" +
         "    this.base64_image = base64_image;\n" +
@@ -290,14 +297,32 @@ public class HTML
         "// actual payment process.\n" +
         "//\n" +
         "function displayPaymentRequest(card_index) {\n" +
-        "    document.getElementById('activity').innerHTML = 'Pay Display (TBD)';\n" +
+        "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
+             "<tr><td><b>Requester:</b><br>' + caller_common_name + " +
+             "'<br>[' + caller_domain + ']</td></tr>" +
+             "<tr><td style=\"padding:8pt\"><b>Amount:</b> ' + amount_to_pay + '</td></tr>" +
+             "<tr><td><b>PIN:</b> <input id=\"pin\" " +
+             "style=\"font-family:Verdana;letter-spacing:2px;background-color:#f0f0f0\" " +
+             "type=\"password\" size=\"" + PIN_FIELD_SIZE +
+             "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
+             "<table>';\n" +
+        "    document.getElementById('activity').innerHTML = '&nbsp;';\n" +
+        "    document.getElementById('ok').style.left = (" +
+             (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN * 2) +
+             " - document.getElementById('ok').offsetWidth * 2" +
+             ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
-//        "    document.getElementById('ok').style.left = '10px';\n" +
-        "    document.getElementById('cancel').style.left = '10px';\n" +
-        "    document.getElementById('content').innerHTML = cardTableHeader('30px', " +
+        "    document.getElementById('cancel').style.left = '15px';\n" +
+        "    document.getElementById('content').innerHTML = payment_details + cardTableHeader('" +
+             PAYMENT_CARD_RIGHT_MARGIN + "px', " +
              PAYMENT_CARD_TOP_POSITION + ") + " +
              "'<tr>' + outputCard(card_index, '\" title=\"Don\\'t leave home without it!') + '</tr>" +
              "<tr>' + outputPAN(card_index) + '</tr></table>';\n" +
+        "    document.getElementById('details').style.top = (" +
+             PAYMENT_WINDOW_HEIGHT + 
+             " - document.getElementById('details').offsetHeight)/2 + 'px';\n" +
+        "    document.getElementById('details').style.left = '20px';\n" +
+        "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + card_list[card_index].pin + ' :-)';\n" +
         "}\n\n" +
         "//\n" +
         "// Displays payee compatible cards for the user to select from.\n" +
@@ -590,7 +615,10 @@ public class HTML
 	        "<tr><td>Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
 	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
 	    .append ("\"></td></tr>" +
-	        "<tr><td>PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"8\" placeholder=\"Default: " + CardEntry.DEFAULT_PIN + "\" name=\"" + CardEntry.PIN_FIELD + "\" value=\"")
+	        "<tr><td>PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
+	        PIN_MAX_LENGTH + "\" placeholder=\"Default: " + 
+	        CardEntry.DEFAULT_PIN + "\" name=\"" + 
+	        CardEntry.PIN_FIELD + "\" value=\"")
         .append (card_entries.firstElement ().pin == null ? "" : encode (card_entries.firstElement ().pin))
         .append ("\"></td></tr></table></td></tr>");
 	    for (CardEntry card_entry : card_entries)
