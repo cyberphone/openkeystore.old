@@ -257,6 +257,7 @@ public class HTML
         }
         s.append (
         "\nfunction bad(message) {\n" +
+        "    console.debug ('Bad: ' + message);\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
@@ -296,11 +297,11 @@ public class HTML
         "}\n\n" +
         "function getJSONPropertyValue(json, property) {\n" +
         "    var value = json[property];\n" +
-        "    if (value == undefined) {\n" +
+        "    console.debug(property + ': ' + value);\n" +
+        "    if (value === undefined) {\n" +
         "        bad('Missing property: ' + property);\n" +
         "        return null;\n" +
         "    }\n" +
-        "    console.debug(property + ': ' + value);\n" +
         "    return value;\n" +
         "}\n\n" +
         "function cardTableHeader(right_margin, top_margin) {\n" +
@@ -429,6 +430,7 @@ public class HTML
        "    amount_to_pay = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
        "    currency = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
        "    var payee_card_types = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    if (aborted_operation) return;\n" +
        "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
        "    for (var q = 0; q < payee_card_types.length; q++) {\n" +
