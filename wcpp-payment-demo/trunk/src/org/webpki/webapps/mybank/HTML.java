@@ -23,6 +23,7 @@ public class HTML
     static final int PAYMENT_CARD_HORIZ_GUTTER      = 20;
     static final int PAYMENT_CARD_RIGHT_MARGIN      = 30;
     static final int PAYMENT_CARD_TOP_POSITION      = 25;
+    static final int PAYMENT_BUTTON_LEFT            = 15;
     
     static final int PIN_MAX_LENGTH                 = 20;
     static final int PIN_FIELD_SIZE                 = 8;
@@ -174,17 +175,20 @@ public class HTML
 	    "<!DOCTYPE html>"+
 	    "<html><head><meta charset=\"UTF-8\">"+
 	    "<style type=\"text/css\">html {overflow:hidden}\n"+
-	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white;margin:0px;padding:0px}\n" +
+	    "body {font-size:10pt;color:#000000;font-family:Arial,Verdana,Helvetica;background-color:white;margin:0px;padding:0px}\n" +
 	    "table {border-collapse: collapse}\n" +
 	    "td {padding: 0px}\n" +
         "</style></head><body onload=\"initPayment()\">" +
-	    "<div id=\"border\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
-        "color:white;font-size:10pt;background:" +
-        PAYMENT_BORDER_COLOR + ";width:" + (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
+	    "<div id=\"border\" style=\"font-family:Verdana,Arial,Helvetica;padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+	    PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        "color:white;background:" +
+        PAYMENT_BORDER_COLOR + ";width:" +
+        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
 	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
         "Initializing...</div>" +
 	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
-        "<div id=\"control\" style=\"font-size:10pt;z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
 	    "<input id=\"cancel\" type=\"button\" value=\"Cancel\" style=\"position:relative;visibility:hidden\" onclick=\"userABORT()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\"></div>" +
         "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
@@ -200,6 +204,7 @@ public class HTML
         "var caller_domain = 'openkeystore.googlecode.com';\n" +
         "var caller_common_name = 'Demo Merchant';\n" +
         "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
+        "var button_width;\n" +
         "CardEntry = function(base64_image, type, pin, pan) {\n" +
         "    this.base64_image = base64_image;\n" +
         "    this.type = type;\n" +
@@ -284,7 +289,7 @@ public class HTML
         "//\n" +
         "function outputPAN(card_index) {\n" +
         "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
-             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;text-align:center\">';\n" +
+             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:Verdana;text-align:center\">';\n" +
         "    var pan = card_list[card_index].pan;\n" +
         "    for (var i = 0; i < pan.length; i++) {\n" +
         "        if (i && i % 4 == 0) pan_html += ' ';\n" +
@@ -297,22 +302,22 @@ public class HTML
         "// actual payment process.\n" +
         "//\n" +
         "function displayPaymentRequest(card_index) {\n" +
-        "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
-             "<tr><td><b>Requester:</b><br>' + caller_common_name + " +
-             "'<br>[' + caller_domain + ']</td></tr>" +
-             "<tr><td style=\"padding:8pt\"><b>Amount:</b> ' + amount_to_pay + '</td></tr>" +
-             "<tr><td><b>PIN:</b> <input id=\"pin\" " +
+        "    var payment_details = '<table border=\"1\" id=\"details\" style=\"position:absolute;text-align:center\">" +
+             "<tr><td>" +
+                "<table>" +
+                  "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
+                  "<tr><td style=\"font-size:8pt;font-family:Verdana,Arial,Helvetica\">[' + " +
+                  "caller_domain + ']</td></tr>" +
+                "</table>" +
+             "</td></tr>" +
+             "<tr><td style=\"padding-top:11pt;padding-bottom:8pt\">Amount: ' + amount_to_pay + '</td></tr>" +
+             "<tr><td>PIN: <input id=\"pin\" " +
              "style=\"font-family:Verdana;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
         "    document.getElementById('activity').innerHTML = '&nbsp;';\n" +
-        "    document.getElementById('ok').style.left = (" +
-             (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN * 2) +
-             " - document.getElementById('ok').offsetWidth * 2" +
-             ") + 'px';\n" +
-        "    document.getElementById('ok').style.visibility = 'visible';\n" +
-        "    document.getElementById('cancel').style.left = '15px';\n" +
+        "    document.getElementById('cancel').style.left = '" + PAYMENT_BUTTON_LEFT + "px';\n" +
         "    document.getElementById('content').innerHTML = payment_details + cardTableHeader('" +
              PAYMENT_CARD_RIGHT_MARGIN + "px', " +
              PAYMENT_CARD_TOP_POSITION + ") + " +
@@ -321,7 +326,14 @@ public class HTML
         "    document.getElementById('details').style.top = (" +
              PAYMENT_WINDOW_HEIGHT + 
              " - document.getElementById('details').offsetHeight)/2 + 'px';\n" +
-        "    document.getElementById('details').style.left = '20px';\n" +
+        "    var details_left = document.getElementById('details').style.left = (" +
+             (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN) +
+             " - document.getElementById('details').offsetWidth) / 2;\n" +
+             "    document.getElementById('details').style.left = details_left + 'px';\n" +
+             "    document.getElementById('ok').style.left = (details_left + document.getElementById('details').offsetWidth" +
+             " - document.getElementById('ok').offsetWidth * 2" +
+             ") + 'px';\n" +
+        "    document.getElementById('ok').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + card_list[card_index].pin + ' :-)';\n" +
         "}\n\n" +
         "//\n" +
@@ -384,10 +396,10 @@ public class HTML
        "    }\n" +
        "    document.getElementById('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
                     " - document.getElementById('control').offsetHeight - document.getElementById('border').offsetHeight - document.getElementById('activity').offsetHeight) + 'px';\n" +
-       "    document.getElementById('ok').style.width = document.getElementById('cancel').offsetWidth + 'px';\n" +
+       "    button_width = document.getElementById('cancel').offsetWidth;\n" +
+       "    document.getElementById('ok').style.width = button_width + 'px';\n" +
        "    document.getElementById('cancel').style.left = ((" +
-            PAYMENT_WINDOW_WIDTH +
-            " - document.getElementById('cancel').offsetWidth) / 2) + 'px';\n" +
+            PAYMENT_WINDOW_WIDTH + " - button_width) / 2) + 'px';\n" +
        "    document.getElementById('cancel').title = 'Cancel and return to Demo Merchant';\n" +
        "    document.getElementById('cancel').style.visibility = 'visible';\n" +
        "    if (!count) {\n" +
