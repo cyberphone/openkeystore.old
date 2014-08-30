@@ -12,27 +12,36 @@ import javax.servlet.http.HttpSession;
 
 public class HTML
   {
-    static final int PAYMENT_WINDOW_WIDTH           = 450;
-    static final int PAYMENT_WINDOW_HEIGHT          = 250;
-    static final int PAYMENT_LOADING_SIZE           = 48;
-    static final int PAYMENT_DIV_HORIZONTAL_PADDING = 6;
-    static final int PAYMENT_DIV_VERTICAL_PADDING   = 5;
-    static final String PAYMENT_BORDER_COLOR        = "#306754";
-    static final int PAYMENT_PAN_PADDING_TOP        = 5;
-    static final int PAYMENT_PAN_PADDING_BOTTOM     = 10;
-    static final int PAYMENT_CARD_HORIZ_GUTTER      = 20;
-    static final int PAYMENT_CARD_RIGHT_MARGIN      = 30;
-    static final int PAYMENT_CARD_TOP_POSITION      = 25;
-    static final int PAYMENT_BUTTON_LEFT            = 15;
+    static final int PAYMENT_WINDOW_WIDTH            = 450;
+    static final int PAYMENT_WINDOW_HEIGHT           = 250;
+    static final int PAYMENT_LOADING_SIZE            = 48;
+    static final int PAYMENT_DIV_HORIZONTAL_PADDING  = 6;
+    static final int PAYMENT_DIV_VERTICAL_PADDING    = 5;
+    static final String PAYMENT_BORDER_COLOR         = "#306754";
+    static final int PAYMENT_PAN_PADDING_TOP         = 5;
+    static final int PAYMENT_PAN_PADDING_BOTTOM      = 10;
+    static final int PAYMENT_CARD_HORIZ_GUTTER       = 20;
+    static final int PAYMENT_CARD_RIGHT_MARGIN       = 30;
+    static final int PAYMENT_CARD_TOP_POSITION       = 25;
+    static final int PAYMENT_BUTTON_LEFT             = 15;
     
-    static final int PIN_MAX_LENGTH                 = 20;
-    static final int PIN_FIELD_SIZE                 = 8;
+    static final int PIN_MAX_LENGTH                  = 20;
+    static final int PIN_FIELD_SIZE                  = 8;
 
-    static final int PAYMENT_TIMEOUT_INIT           = 5000;
+    static final int PAYMENT_TIMEOUT_INIT            = 5000;
+
+    // Common property of all commands, argument holds verb
+    static final String PAYMENT_API_COMMAND              = "Command";
     
-    static final String PAYMENT_API_INIT            = "INIT";
-    static final String PAYMENT_API_ABORT           = "ABORT";
-    static final String PAYMENT_API_FINAL           = "FINAL";
+    static final String PAYMENT_API_INIT_COMMAND         = "INIT";
+    // Payment application received INIT data
+    static final String PAYMENT_API_INIT_REC_AMOUNT      = "Amount";
+    static final String PAYMENT_API_INIT_REC_CURRENCY    = "Currency";
+    static final String PAYMENT_API_INIT_REC_CARD_TYPES  = "CardTypes";
+    static final String PAYMENT_API_INIT_REC_COMMON_NAME = "CommonName";
+    
+    static final String PAYMENT_API_ABORT_COMMAND        = "ABORT";
+    static final String PAYMENT_API_FINAL_COMMAND        = "FINAL";
     
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
@@ -203,10 +212,11 @@ public class HTML
         "////////////////////////////////////////////////////////////////////\n\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
-        "var amount_to_pay = '$237.25';\n" +
-        "var caller_domain = 'openkeystore.googlecode.com';\n" +
-        "var caller_common_name = 'Demo Merchant';\n" +
-        "var payment_state = '" + PAYMENT_API_INIT + "';\n" +
+        "var amount_to_pay = 'UNKNOWN';\n" +
+        "var currency = 'UNKNOWN';\n" +
+        "var caller_domain = 'UNKNOWN';\n" +
+        "var caller_common_name = 'UNKNOWN';\n" +
+        "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
         "var button_width;\n" +
         "CardEntry = function(base64_image, type, pin, pan) {\n" +
         "    this.base64_image = base64_image;\n" +
@@ -267,15 +277,29 @@ public class HTML
         "   timeouter_handle = setTimeout(function () {bad('Timeout')}, milliseconds);\n" +
         "}\n\n" +
         "function checkState(event) {\n" +
-        "    if (event.data.indexOf(payment_state)) {\n" +
+        "    var json = JSON.parse(event.data);\n" +
+        "    if (json." + PAYMENT_API_COMMAND + " != payment_state) {\n" +
         "        bad('State error:' + payment_state + '<>' + event.data);\n" +
         "        return null;\n" +
         "    }\n" +
-        "    if (event.data.length < (payment_state.length + 2) || event.data.charAt(payment_state.length) != '=') {\n" +
-        "        bad('Missing argument: ' + event.data);\n" +
+        "    return json;\n" +
+        "}\n\n" +
+        "function priceString(price_mult_100) {\n" +
+        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+        "}\n\n" +
+        "function createBaseCommand(command_property_value) {\n" +
+        "    var json = {};\n" +
+        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+        "    return json;\n" +
+        "}\n\n" +
+        "function getJSONPropertyValue(json, property) {\n" +
+        "    var value = json[property];\n" +
+        "    if (value == undefined) {\n" +
+        "        bad('Missing property: ' + property);\n" +
         "        return null;\n" +
         "    }\n" +
-        "    return event.data.substring(payment_state.length + 1);\n" +
+        "    console.debug(property + ': ' + value);\n" +
+        "    return value;\n" +
         "}\n\n" +
         "function cardTableHeader(right_margin, top_margin) {\n" +
         "    return '<table style=\"" +
@@ -314,7 +338,7 @@ public class HTML
                   "caller_domain + ']</td></tr>" +
                 "</table>" +
              "</td></tr>" +
-             "<tr><td style=\"padding-top:11pt;padding-bottom:8pt\">Amount: ' + amount_to_pay + '</td></tr>" +
+             "<tr><td style=\"padding-top:11pt;padding-bottom:8pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
              "<tr><td>PIN: <input id=\"pin\" " +
              "style=\"font-family:Verdana;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
@@ -375,7 +399,8 @@ public class HTML
        "    document.getElementById('activity').innerHTML = 'Aborting...';\n" +
        "    document.getElementById('content').innerHTML = '';\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
+       "    window.parent.postMessage(JSON.stringify(createBaseCommand ('" +
+            PAYMENT_API_ABORT_COMMAND + "')), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// Called when the user authorized the payment.\n" +
@@ -386,23 +411,28 @@ public class HTML
 //       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
-       "// Processes the payee's response to the INIT message.\n" +
+       "// Processes the payee's JSON response to the INIT message.\n" +
        "//\n" +
        "// Message syntax:\n" +
-       "//   Amount           Integer of the payment sum multiplied by 100\n" +
-       "//   {@CardType}...   1-n card types recognized by the payee\n" +
+       "//   {\n" +
+       "//     \"" + PAYMENT_API_COMMAND + "\": \"" + PAYMENT_API_INIT_COMMAND + "\"\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"USD\"                Currently the only recognized\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Types\"...]   1-n card types recognized by the payee\n" +
+       "//   }\n" +
        "//\n" +
-       "function processINIT(response) {\n" +
-       "    var amount = response.substring(0, response.indexOf('@'));\n" +
-       "    console.debug('Amount: ' + amount);\n" +
+       "function processINIT(received_json) {\n" +
+       "    caller_common_name = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
+       "    amount_to_pay = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
+       "    currency = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "    var payee_card_types = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
-       "    while (response.indexOf('@') >= 0) {\n" +
-       "        response = response.substring(response.indexOf('@') + 1);\n" +
-       "        var i = response.indexOf('@');\n" +
-       "        card = i > 0 ? response.substring(0, i) : response;\n" +
-       "        console.debug('Merchant Recognized Card: \"' + card + '\"');\n" + 
+       "    for (var q = 0; q < payee_card_types.length; q++) {\n" +
        "        for (i = 0; i < card_list.length; i++) {\n" +
-       "            if (card == card_list[i].type) {\n" +
+       "            if (payee_card_types[q] == card_list[i].type) {\n" +
+       "                console.debug('Compatible Card: \"' + payee_card_types[q] + '\"');\n" + 
        "                card_list[i].matching = true;\n" +
        "                count++;\n" +
        "            }\n" +
@@ -454,11 +484,16 @@ public class HTML
 		"    if (timeouter_handle) {\n" +
 		"        clearTimeout(timeouter_handle);\n" +
 		"        timeouter_handle = null;\n" +
-		"        var response = checkState(event)\n" +
-		"        if (!response) return;\n" +
+		"        var received_json = checkState(event)\n" +
+		"        if (!received_json) return;\n" +
         "        document.getElementById('busy').style.visibility = 'hidden';\n" +
-		"        if (payment_state == '" + PAYMENT_API_INIT + "') {\n" +
-        "            processINIT(response);\n" +
+		"        if (payment_state == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "            caller_domain = event.origin;\n" +
+		"            caller_domain = caller_domain.substring(caller_domain.indexOf('://') + 3);\n" +
+        "            if (caller_domain.indexOf(':') > 0) {\n" +
+		"                caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
+		"            }\n" +
+        "            processINIT(received_json);\n" +
 		"        }\n" +
 		"    } else {\n" +
 		"        bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
@@ -473,7 +508,8 @@ public class HTML
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        console.debug('init payment window');\n" +
-        "        window.parent.postMessage('" + PAYMENT_API_INIT + "', window.document.referrer);\n" +
+        "        window.parent.postMessage(JSON.stringify(createBaseCommand ('" +
+                 PAYMENT_API_INIT_COMMAND + "')), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
         "</script>" +
@@ -555,35 +591,47 @@ public class HTML
             "    control.value = parseInt(control.value) + value;\n" +
             "    updateInput(index, control);\n" +
 	        "}\n\n" +
+	        "function createBaseCommand(command_property_value) {\n" +
+	        "    var json = {};\n" +
+	        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+	        "    return json;\n" +
+	        "}\n\n" +
 			"function receivePaymentMessage(event) {\n" +
 			"    console.debug (event.origin);\n" +
 			"    console.debug (event.data);\n" +
-            "    if (!event.data.indexOf('" + PAYMENT_API_ABORT + "')) {\n" +
+			"    var received_json = JSON.parse(event.data);\n" +
+            "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
             "        document.getElementById('pay').innerHTML = save_checkout_html;\n" +
-            "        payment_status = '" + PAYMENT_API_INIT + "';\n" +
+            "        payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
             "        shopping_enabled = true;\n" +
 			"        return;\n" +
 			"    }\n" +
-			"    if (event.data.indexOf(payment_status)) {\n" +
+			"    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
 			"        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
 			"        payment_status = 'Failed***';\n" +
 			"        return;\n" +
 			"    }\n" +
-			"    var response = event.data.substring(payment_status.length);\n" +
-			"    if (payment_status == '" + PAYMENT_API_INIT + "') {\n" +
-			"        setTimeout(function(){\n    " +
-			"        event.source.postMessage('" + PAYMENT_API_INIT + "=' + getTotal() + '@NEVER_HEARD_OF_CARD");
-		for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
-		  {
-		    temp_string.append ('@')
-		               .append (card_type.toString());
-		  }
-		temp_string.append ("', event.origin);\n" +
+			"    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+			"        setTimeout(function(){\n" +
+			"        var returned_json = createBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+            "        returned_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
+            "        returned_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
+			"        returned_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
+            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
+            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NEVER_HEARD_OF_CARD');\n");
+            for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
+              {
+                temp_string.append ("        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
+                           .append (card_type.toString())
+                           .append ("');\n");
+              }
+        temp_string.append (
+            "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
 //			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
 			"        }, 500);\n" +
-			"        payment_status = '" + PAYMENT_API_FINAL + "';\n" +
+			"        payment_status = '" + PAYMENT_API_FINAL_COMMAND + "';\n" +
 			"    }\n" +
-			"    else if (payment_status == '" + PAYMENT_API_FINAL + "') {\n" +
+			"    else if (payment_status == '" + PAYMENT_API_FINAL_COMMAND + "') {\n" +
             "        document.getElementById('result').innerHTML = 'Yes!!!';\n" +
  //           "        document.getElementById('pay').innerHTML = '';\n" +
 			"    }\n" +
@@ -608,7 +656,7 @@ public class HTML
 				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
-				"var payment_status = '" + PAYMENT_API_INIT + "';\n" +
+				"var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
 		        "ShopEntry = function(price_mult_100) {\n" +
 		        "    this.price_mult_100 = price_mult_100;\n" +
 		        "    this.units = 0;\n" +
