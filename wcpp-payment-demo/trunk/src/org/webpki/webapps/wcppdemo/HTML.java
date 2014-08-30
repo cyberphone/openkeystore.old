@@ -210,7 +210,7 @@ public class HTML
         "// in no way represents a standard or a standards proposal.       //\n" +
         "// However, the message flow is anticipated to be usable \"as is\". //\n" +
         "////////////////////////////////////////////////////////////////////\n\n" +
-//        "\"use strict\";\n" +
+        "\"use strict\";\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var amount_to_pay;\n" +
@@ -219,7 +219,8 @@ public class HTML
         "var caller_common_name;\n" +
         "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
         "var button_width;\n" +
-        "CardEntry = function(base64_image, type, pin, pan) {\n" +
+        "var webpki = {};\n" +
+        "webpki.CardEntry = function(base64_image, type, pin, pan) {\n" +
         "    this.base64_image = base64_image;\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
@@ -241,7 +242,7 @@ public class HTML
         			{
             			s.append("card_list[")
 	           			 .append (i++)
-	           			 .append("] = new CardEntry('")
+	           			 .append("] = new webpki.CardEntry('")
 	           			 .append(card_entry.base64_image)
 	           			 .append("', '")
 	           			 .append(card_entry.card_type.toString())
@@ -431,7 +432,7 @@ public class HTML
        "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
        "    for (var q = 0; q < payee_card_types.length; q++) {\n" +
-       "        for (i = 0; i < card_list.length; i++) {\n" +
+       "        for (var i = 0; i < card_list.length; i++) {\n" +
        "            if (payee_card_types[q] == card_list[i].type) {\n" +
        "                console.debug('Compatible Card: \"' + payee_card_types[q] + '\"');\n" + 
        "                card_list[i].matching = true;\n" +
@@ -541,7 +542,7 @@ public class HTML
 		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
 					   "</tr>" +
 					   "</table></form></td></tr>";
-        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new ShopEntry(" + price_mult_100 + ");\n");		
+        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new webpki.ShopEntry(" + price_mult_100 + ");\n");		
 		temp_counter++;
 		return s;
 	  }
@@ -651,7 +652,7 @@ public class HTML
                "<tr><td style=\"text-align:center\" id=\"pay\"><input style=\"font-size:10pt\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
 		temp_string.insert (0,
-//		        "\n\"use strict\";" +
+		        "\n\"use strict\";" +
                 "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
 	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
@@ -660,7 +661,8 @@ public class HTML
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
 				"var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
-		        "ShopEntry = function(price_mult_100) {\n" +
+	            "var webpki = {};\n" +
+		        "webpki.ShopEntry = function(price_mult_100) {\n" +
 		        "    this.price_mult_100 = price_mult_100;\n" +
 		        "    this.units = 0;\n" +
 		        "};\n");
