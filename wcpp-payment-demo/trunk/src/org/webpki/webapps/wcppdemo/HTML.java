@@ -210,12 +210,13 @@ public class HTML
         "// in no way represents a standard or a standards proposal.       //\n" +
         "// However, the message flow is anticipated to be usable \"as is\". //\n" +
         "////////////////////////////////////////////////////////////////////\n\n" +
+//        "\"use strict\";\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
-        "var amount_to_pay = 'UNKNOWN';\n" +
-        "var currency = 'UNKNOWN';\n" +
-        "var caller_domain = 'UNKNOWN';\n" +
-        "var caller_common_name = 'UNKNOWN';\n" +
+        "var amount_to_pay;\n" +
+        "var currency;\n" +
+        "var caller_domain;\n" +
+        "var caller_common_name;\n" +
         "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
         "var button_width;\n" +
         "CardEntry = function(base64_image, type, pin, pan) {\n" +
@@ -287,7 +288,7 @@ public class HTML
         "function priceString(price_mult_100) {\n" +
         "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
         "}\n\n" +
-        "function createBaseCommand(command_property_value) {\n" +
+        "function createJSONBaseCommand(command_property_value) {\n" +
         "    var json = {};\n" +
         "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
         "    return json;\n" +
@@ -399,7 +400,7 @@ public class HTML
        "    document.getElementById('activity').innerHTML = 'Aborting...';\n" +
        "    document.getElementById('content').innerHTML = '';\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    window.parent.postMessage(JSON.stringify(createBaseCommand ('" +
+       "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
             PAYMENT_API_ABORT_COMMAND + "')), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
@@ -419,7 +420,7 @@ public class HTML
        "//     \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
        "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"USD\"                Currently the only recognized\n" +
        "//     \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Types\"...]   1-n card types recognized by the payee\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]    1-n card types recognized by the payee\n" +
        "//   }\n" +
        "//\n" +
        "function processINIT(received_json) {\n" +
@@ -508,7 +509,7 @@ public class HTML
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        console.debug('init payment window');\n" +
-        "        window.parent.postMessage(JSON.stringify(createBaseCommand ('" +
+        "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
                  PAYMENT_API_INIT_COMMAND + "')), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
@@ -591,7 +592,7 @@ public class HTML
             "    control.value = parseInt(control.value) + value;\n" +
             "    updateInput(index, control);\n" +
 	        "}\n\n" +
-	        "function createBaseCommand(command_property_value) {\n" +
+	        "function createJSONBaseCommand(command_property_value) {\n" +
 	        "    var json = {};\n" +
 	        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
 	        "    return json;\n" +
@@ -613,7 +614,7 @@ public class HTML
 			"    }\n" +
 			"    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
 			"        setTimeout(function(){\n" +
-			"        var returned_json = createBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+			"        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
 			"        returned_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
@@ -649,7 +650,9 @@ public class HTML
                "</table></td></tr>" +
                "<tr><td style=\"text-align:center\" id=\"pay\"><input style=\"font-size:10pt\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
-		temp_string.insert (0, "\nvar paycode=" + 
+		temp_string.insert (0,
+//		        "\n\"use strict\";" +
+                "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
 	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
 	            "var save_checkout_html;\n\n" +
