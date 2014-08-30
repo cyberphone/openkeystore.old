@@ -17,31 +17,31 @@
     </context-param>
 
     <listener>
-        <listener-class>org.webpki.webapps.mybank.Init</listener-class>
+        <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>
 
     <servlet>
 	    <servlet-name>MerchantServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.MerchantServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcppdemo.MerchantServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.HomeServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>CardServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.CardServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcppdemo.CardServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>WebCryptoServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.WebCryptoServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcppdemo.WebCryptoServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>PaymentServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.mybank.PaymentServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcppdemo.PaymentServlet</servlet-class>
     </servlet>
     
     <servlet-mapping>
