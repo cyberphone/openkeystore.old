@@ -7,13 +7,13 @@
     <context-param>
         <description>URL to bank</description>
         <param-name>bank_url</param-name>
-        <param-value>http://mybank.com:8080/mybank</param-value>
+        <param-value>http://mybank.com:8080/WebCryptoPlusPlus</param-value>
     </context-param>
 
     <context-param>
         <description>URL to Merchant</description>
         <param-name>merchant_url</param-name>
-        <param-value>http://merchant.com:8080/mybank/merchant</param-value>
+        <param-value>http://merchant.com:8080/WebCryptoPlusPlus/merchant</param-value>
     </context-param>
 
     <listener>

@@ -1,7 +1,7 @@
 <project name="WebCrypto++ Payment Demo" default="build">
 
   <!-- set properties for this build -->
-  <property name="application" value="mybank.war"/>
+  <property name="application" value="WebCryptoPlusPlus.war"/>
   <property name="src_dir" value="src"/>
   <property name="temp_dir" value=".tmp"/>
   <property name="dist_dir" value="dist"/>

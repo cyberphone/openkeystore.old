@@ -44,13 +44,12 @@ public class HTML
 	    ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
 	    ".tftable tr {background-color:#FFFFE0}\n" +
 	    ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:arial,verdana,helvetica}\n" +
-	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white}\n" +
+	    "body {font-size:10pt;color:#000000;font-family:verdana,arial;background-color:white}\n" +
 	    "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
 	    "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
 	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none}\n" +
 	    "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none}\n" +
 	    "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana}\n" +
-	    "input[type=text] {font-weight:normal;font-size:8pt;font-family:verdana,arial}\n" +
 	    "td {font-size:8pt;font-family:verdana,arial}\n" +
 	    ".smalltext {font-size:6pt;font-family:verdana,arial}\n" +
 	    "input[type='button'] {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
@@ -185,13 +184,17 @@ public class HTML
         "color:white;background:" +
         PAYMENT_BORDER_COLOR + ";width:" +
         (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
-	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
+	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
+	    PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
         "Initializing...</div>" +
 	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
         "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-	    "<input id=\"cancel\" type=\"button\" value=\"Cancel\" style=\"position:relative;visibility:hidden\" onclick=\"userABORT()\">" +
-        "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\"></div>" +
-        "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+	    "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" style=\"position:relative;visibility:hidden\" onclick=\"userAbort()\">" +
+        "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
+        "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
+        ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
+        ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<script type=\"text/javascript\">\n\n" +
         "////////////////////////////////////////////////////////////////////\n" +
         "// Disclaimer: The message syntax used by this payment provider   //\n" +
@@ -254,7 +257,8 @@ public class HTML
         "       return false;\n" +
         "   }\n" +
         "   if (!card_list.length) {\n" +
-        "       bad('You appear to have no payment cards at all, please return to the <b>Payment&nbsp;Demo&nbsp;Home</b> and get some!');\n" +
+        "       bad('You appear to have no payment cards at all, please return " +
+            "to the <b>Payment&nbsp;Demo&nbsp;Home</b> and get some!  It\\'s free :-)');\n" +
         "       return false;\n" +
         "   }\n" +
         "   return true;\n" +
@@ -302,7 +306,7 @@ public class HTML
         "// actual payment process.\n" +
         "//\n" +
         "function displayPaymentRequest(card_index) {\n" +
-        "    var payment_details = '<table border=\"1\" id=\"details\" style=\"position:absolute;text-align:center\">" +
+        "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
              "<tr><td>" +
                 "<table>" +
                   "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
@@ -330,11 +334,13 @@ public class HTML
              (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN) +
              " - document.getElementById('details').offsetWidth) / 2;\n" +
              "    document.getElementById('details').style.left = details_left + 'px';\n" +
-             "    document.getElementById('ok').style.left = (details_left + document.getElementById('details').offsetWidth" +
-             " - document.getElementById('ok').offsetWidth * 2" +
-             ") + 'px';\n" +
+             "    document.getElementById('ok').style.left = ((details_left + " +
+                 "document.getElementById('pin').offsetLeft - " +
+                 "button_width) * 2 + document.getElementById('pin').offsetWidth - " +
+                 PAYMENT_BUTTON_LEFT + ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + card_list[card_index].pin + ' :-)';\n" +
+        "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "//\n" +
         "// Displays payee compatible cards for the user to select from.\n" +
@@ -365,11 +371,19 @@ public class HTML
        "//\n" +
        "// Terminates the payment session in case of a user abort.\n" +
        "//\n" +
-       "function userABORT() {\n" +
+       "function userAbort() {\n" +
        "    document.getElementById('activity').innerHTML = 'Aborting...';\n" +
        "    document.getElementById('content').innerHTML = '';\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
        "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
+       "}\n\n" +
+       "//\n" +
+       "// Called when the user authorized the payment.\n" +
+       "//\n" +
+       "function userAuthorize() {\n" +
+        "    document.getElementById('busy').style.visibility = 'visible';\n" +
+        "    alert ('not implemented');\n" +
+//       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// Processes the payee's response to the INIT message.\n" +
@@ -400,10 +414,10 @@ public class HTML
        "    document.getElementById('ok').style.width = button_width + 'px';\n" +
        "    document.getElementById('cancel').style.left = ((" +
             PAYMENT_WINDOW_WIDTH + " - button_width) / 2) + 'px';\n" +
-       "    document.getElementById('cancel').title = 'Cancel and return to Demo Merchant';\n" +
+       "    document.getElementById('cancel').title = 'Cancel and return to \"' + caller_common_name + '\"';\n" +
        "    document.getElementById('cancel').style.visibility = 'visible';\n" +
        "    if (!count) {\n" +
-       "        bad('No matching payment cards found, click \"Cancel\" to return to Demo Merchant.');\n" +
+       "        bad('No matching payment cards found, click \"Cancel\" to return to \"' + caller_common_name + '\".');\n" +
        "        return;\n" +
        "    }\n" +
 
@@ -585,7 +599,7 @@ public class HTML
                    productEntry ("product-icecream.png", "Ice Cream", 325) + 
        		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
-               "<tr><td style=\"text-align:center\" id=\"pay\"><input type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
+               "<tr><td style=\"text-align:center\" id=\"pay\"><input style=\"font-size:10pt\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
              "</table></td></tr>");
 		temp_string.insert (0, "\nvar paycode=" + 
 	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
@@ -624,10 +638,10 @@ public class HTML
 	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
             "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Your Payment Cards<br>&nbsp;</td></tr>" +
 	        "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
-	        "<tr><td>Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
+	        "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
 	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
 	    .append ("\"></td></tr>" +
-	        "<tr><td>PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
+	        "<tr><td style=\"font-size:10pt\">PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
 	        PIN_MAX_LENGTH + "\" placeholder=\"Default: " + 
 	        CardEntry.DEFAULT_PIN + "\" name=\"" + 
 	        CardEntry.PIN_FIELD + "\" value=\"")
