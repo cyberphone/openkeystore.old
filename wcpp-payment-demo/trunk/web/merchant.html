@@ -14,6 +14,7 @@ td {font-size:8pt;font-family:verdana,arial}
 input[type='button'] {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}
 .headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana}
 html, body {margin:0px;padding:0px;height:100%}</style><script type="text/javascript">
+"use strict";
 var paycode='<iframe src="payment.html" style="width:450px;height:250px;border-width:1px;border-style:solid;border-color:#306754;box-shadow:3pt 3pt 3pt #D0D0D0"></iframe>';
 
 var save_checkout_html;
@@ -23,12 +24,13 @@ var numeric_only = new RegExp('^[0-9]{1,6}$');
 var shopping_cart = [];
 var shopping_enabled = true;
 var payment_status = 'INIT';
-ShopEntry = function(price_mult_100) {
+var webpki = {};
+webpki.ShopEntry = function(price_mult_100) {
     this.price_mult_100 = price_mult_100;
     this.units = 0;
 };
-shopping_cart[1] = new ShopEntry(325);
-shopping_cart[0] = new ShopEntry(8599900);
+shopping_cart[1] = new webpki.ShopEntry(325);
+shopping_cart[0] = new webpki.ShopEntry(8599900);
 
 function checkOut() {
     if (getTotal()) {
@@ -73,7 +75,7 @@ function updateUnits(control, value, index) {
     updateInput(index, control);
 }
 
-function createBaseCommand(command_property_value) {
+function createJSONBaseCommand(command_property_value) {
     var json = {};
     json.Command = command_property_value;
     return json;
@@ -96,7 +98,7 @@ function receivePaymentMessage(event) {
     }
     if (payment_status == 'INIT') {
         setTimeout(function(){
-        var returned_json = createBaseCommand('INIT');
+        var returned_json = createJSONBaseCommand('INIT');
         returned_json.CommonName = 'Demo Merchant';
         returned_json.Currency = 'USD';
         returned_json.Amount = getTotal();
@@ -112,4 +114,4 @@ function receivePaymentMessage(event) {
         document.getElementById('result').innerHTML = 'Yes!!!';
     }
 }
-</script></head><body><div onclick="location.reload()" title="Back to the bank!" style="cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}">WebCrypto++<br><span style="font-size:8pt">Payment Demo Home</span></div><table cellpadding="0" cellspacing="0" width="100%" height="100%"><tr><td width="100%" align="center" valign="middle"><table><tr><td style="text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana">Demo Merchant<br>&nbsp;</td></tr><tr><td id="result"><table style="margin-left:auto;margin-right:auto" class="tftable"><tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr><tr style="text-align:center"><td><img src="images/product-car.png"></td><td>Sports Car</td><td style="text-align:right">$85999.00</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p0, 1, 0)" style="text-align:center;margin:0px;padding:0px" ></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p0" value="0" style="text-align:right" oninput="updateInput(0, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p0, -1, 0)" style="text-align:center;margin:0px;padding:0px" ></td></tr></table></form></td></tr><tr style="text-align:center"><td><img src="images/product-icecream.png"></td><td>Ice Cream</td><td style="text-align:right">$3.25</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p1, 1, 1)" style="text-align:center;margin:0px;padding:0px" ></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p1" value="0" style="text-align:right" oninput="updateInput(1, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p1, -1, 1)" style="text-align:center;margin:0px;padding:0px" ></td></tr></table></form></td></tr><tr><td style="border-width:1px 1px 0px 0px;background:white"></td><td style="text-align:center">Total Amount</td><td style="text-align:right" id="total">$0.00</td><td style="border-width:1px 0px 0px 1px;background:white"></td></tr></table></td></tr><tr><td style="text-align:center" id="pay"><input style="font-size:10pt" type="button" value="Checkout.." title="Paying time has come..." onclick="checkOut ()"></td></tr></table></td></tr></table></body></html>
+</script></head><body><div onclick="location.reload()" title="Reloads Merchant Application" style="cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}">WebCrypto++<br><span style="font-size:8pt">Payment Demo Home</span></div><table cellpadding="0" cellspacing="0" width="100%" height="100%"><tr><td width="100%" align="center" valign="middle"><table><tr><td style="text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana">Demo Merchant<br>&nbsp;</td></tr><tr><td id="result"><table style="margin-left:auto;margin-right:auto" class="tftable"><tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr><tr style="text-align:center"><td><img src="images/product-car.png"></td><td>Sports Car</td><td style="text-align:right">$85999.00</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p0, 1, 0)" style="text-align:center;margin:0px;padding:0px" ></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p0" value="0" style="text-align:right" oninput="updateInput(0, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p0, -1, 0)" style="text-align:center;margin:0px;padding:0px" ></td></tr></table></form></td></tr><tr style="text-align:center"><td><img src="images/product-icecream.png"></td><td>Ice Cream</td><td style="text-align:right">$3.25</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p1, 1, 1)" style="text-align:center;margin:0px;padding:0px" ></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p1" value="0" style="text-align:right" oninput="updateInput(1, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p1, -1, 1)" style="text-align:center;margin:0px;padding:0px" ></td></tr></table></form></td></tr><tr><td style="border-width:1px 1px 0px 0px;background:white"></td><td style="text-align:center">Total Amount</td><td style="text-align:right" id="total">$0.00</td><td style="border-width:1px 0px 0px 1px;background:white"></td></tr></table></td></tr><tr><td style="text-align:center" id="pay"><input style="font-size:10pt" type="button" value="Checkout.." title="Paying time has come..." onclick="checkOut ()"></td></tr></table></td></tr></table></body></html>
