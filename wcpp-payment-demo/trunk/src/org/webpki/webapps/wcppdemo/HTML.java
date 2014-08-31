@@ -34,9 +34,13 @@ public class HTML
     static final String PAYMENT_API_COMMAND              = "Command";
     
     static final String PAYMENT_API_INIT_COMMAND         = "INIT";
+    // Payment application sent INIT data
+    static final String PAYMENT_API_INIT_SND_CURRENCIES  = "Currencies";
     // Payment application received INIT data
     static final String PAYMENT_API_INIT_REC_AMOUNT      = "Amount";
     static final String PAYMENT_API_INIT_REC_CURRENCY    = "Currency";
+    static final String PAYMENT_API_INIT_REC_DATE_TIME   = "DateTime";
+    static final String PAYMENT_API_INIT_REC_TRANS_ID    = "TransactionID";
     static final String PAYMENT_API_INIT_REC_CARD_TYPES  = "CardTypes";
     static final String PAYMENT_API_INIT_REC_COMMON_NAME = "CommonName";
     
@@ -53,7 +57,7 @@ public class HTML
 	    ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
 	    ".tftable tr {background-color:#FFFFE0}\n" +
 	    ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:arial,verdana,helvetica}\n" +
-	    "body {font-size:10pt;color:#000000;font-family:verdana,arial;background-color:white}\n" +
+	    "body {font-size:10pt;color:#000000;font-family:verdana,\"Bitstream Vera Sans\",\"DejaVu Sans\",arial;background-color:white}\n" +
 	    "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
 	    "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
 	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none}\n" +
@@ -192,7 +196,7 @@ public class HTML
 	    PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
         PAYMENT_BORDER_COLOR + ";width:" +
-        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">&nbsp;</div>" +
+        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
 	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
 	    PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
@@ -215,6 +219,8 @@ public class HTML
         "var timeouter_handle = null;\n" +
         "var amount_to_pay;\n" +
         "var currency;\n" +
+        "var request_transaction_id;\n" +
+        "var request_date_time;\n" +
         "var caller_common_name;\n" +
         "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
         "var button_width;\n" +
@@ -294,7 +300,7 @@ public class HTML
         "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
         "    return json;\n" +
         "}\n\n" +
-        "function getJSONPropertyValue(json, property) {\n" +
+        "function getJSONProperty(json, property) {\n" +
         "    var value = json[property];\n" +
         "    console.debug(property + ': ' + value);\n" +
         "    if (value === undefined) {\n" +
@@ -319,7 +325,7 @@ public class HTML
         "//\n" +
         "function outputPAN(card_index) {\n" +
         "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
-             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:Verdana;text-align:center\">';\n" +
+             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:Verdana,\\'Bitstream Vera Sans\\',\\'DejaVu Sans\\',Arial;text-align:center\">';\n" +
         "    var pan = card_list[card_index].pan;\n" +
         "    for (var i = 0; i < pan.length; i++) {\n" +
         "        if (i && i % 4 == 0) pan_html += ' ';\n" +
@@ -364,11 +370,11 @@ public class HTML
         "}\n\n" +
         "//\n" +
         "// Displays payee compatible cards for the user to select from.\n" +
-        "// If the card collection does not fit in payment window,\n" +
-        "// a scrollable view is created.\n" +
+        "// If the card collection does not fit in the selection frame,\n" +
+        "// a vertically scrollable view is created.\n" +
         "//\n" +
         "function displayCompatibleCards(count) {\n" +
-        "    document.getElementById('activity').innerHTML = 'Select Card';\n" +
+        "    document.getElementById('activity').innerHTML = 'Select Card:';\n" +
         "    var left_card = true;\n" +
         "    var previous_card;\n" +
         "    var cards = cardTableHeader('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
@@ -402,27 +408,33 @@ public class HTML
        "// Called when the user authorized the payment.\n" +
        "//\n" +
        "function userAuthorize() {\n" +
-        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-        "    alert ('not implemented');\n" +
+       "    document.getElementById('busy').style.visibility = 'visible';\n" +
+       "    alert ('Not Implemented');\n" +
 //       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
+       "    document.getElementById('busy').style.visibility = 'hidden';\n" +
        "}\n\n" +
        "//\n" +
        "// Processes the payee's JSON response to the INIT message.\n" +
+       "// Note: In a genuine implementaion the request would be signed.\n" +
        "//\n" +
        "// Message syntax:\n" +
        "//   {\n" +
        "//     \"" + PAYMENT_API_COMMAND + "\": \"" + PAYMENT_API_INIT_COMMAND + "\"\n" +
        "//     \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
        "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"USD\"                Currently the only recognized\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_TRANS_ID + "\": \"String\"        Payee transaction ID\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_DATE_TIME + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
        "//     \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
        "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]    1-n card types recognized by the payee\n" +
        "//   }\n" +
        "//\n" +
        "function processINIT(received_json) {\n" +
-       "    caller_common_name = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
-       "    amount_to_pay = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
-       "    currency = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
-       "    var payee_card_types = getJSONPropertyValue(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    caller_common_name = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
+       "    amount_to_pay = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
+       "    currency = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "    var payee_card_types = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    request_date_time = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
+       "    request_transaction_id = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
        "    if (aborted_operation) return;\n" +
        "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
@@ -504,13 +516,15 @@ public class HTML
         "    if (caller_domain.indexOf('/') > 0) {\n" +
         "        caller_domain = caller_domain.substring(0, caller_domain.indexOf('/'));\n" +
         "    }\n" +
-        "    document.getElementById('border').innerHTML = 'Payment Request [' + caller_domain + ']';\n" +
+        "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        console.debug('init payment window');\n" +
-        "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
-                 PAYMENT_API_INIT_COMMAND + "')), window.document.referrer);\n" +
+        "        var json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+        "        json." + PAYMENT_API_INIT_SND_CURRENCIES + " = [];\n" +
+        "        json." + PAYMENT_API_INIT_SND_CURRENCIES + ".push('USD');\n" +
+        "        window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
         "</script>" +
@@ -618,6 +632,12 @@ public class HTML
             "        returned_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
 			"        returned_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
+			"        returned_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
+            "        var date_time = new Date().toISOString();\n" +
+			"        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+            "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+			"        }\n" +
+            "        returned_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NEVER_HEARD_OF_CARD');\n");
             for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
@@ -659,6 +679,7 @@ public class HTML
 				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
+	            "var next_transaction_id = 100000;\n" +
 				"var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
 	            "var webpki = {};\n" +
 		        "webpki.ShopEntry = function(price_mult_100) {\n" +
