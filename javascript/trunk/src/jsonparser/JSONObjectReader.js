@@ -69,7 +69,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     return this._getString (name, org.webpki.json.JSONTypes.BOOLEAN) == "true";
 };
 
-/* public GregorianCalendar */org.webpki.json.JSONObjectReader.prototype.getDateTime = function (/* String */name)
+/* public Date */org.webpki.json.JSONObjectReader.prototype.getDateTime = function (/* String */name)
 {
     return new Date (this.getString (name));
 };
