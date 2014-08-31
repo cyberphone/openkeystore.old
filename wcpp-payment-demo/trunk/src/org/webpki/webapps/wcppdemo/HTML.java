@@ -342,7 +342,7 @@ public class HTML
              "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
              "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
              "<tr><td>PIN: <input id=\"pin\" " +
-             "style=\"font-family:Verdana,Arial;letter-spacing:2px;background-color:#f0f0f0\" " +
+             "style=\"font-family:Verdana,Arial;padding-left:3px;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
