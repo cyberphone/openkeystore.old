@@ -192,7 +192,7 @@ public class HTML
 	    PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
         PAYMENT_BORDER_COLOR + ";width:" +
-        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
+        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">&nbsp;</div>" +
 	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
 	    PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
@@ -204,18 +204,17 @@ public class HTML
         "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
-        "<script type=\"text/javascript\">\n\n" +
+        "<script type=\"text/javascript\">\n" +
+        "\"use strict\";\n\n" +
         "////////////////////////////////////////////////////////////////////\n" +
-        "// Disclaimer: The message syntax used by this payment provider   //\n" +
+        "// Disclaimer: The actual messages used by this payment provider  //\n" +
         "// in no way represents a standard or a standards proposal.       //\n" +
         "// However, the message flow is anticipated to be usable \"as is\". //\n" +
         "////////////////////////////////////////////////////////////////////\n\n" +
-        "\"use strict\";\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
         "var amount_to_pay;\n" +
         "var currency;\n" +
-        "var caller_domain;\n" +
         "var caller_common_name;\n" +
         "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
         "var button_width;\n" +
@@ -334,16 +333,10 @@ public class HTML
         "//\n" +
         "function displayPaymentRequest(card_index) {\n" +
         "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
-             "<tr><td>" +
-                "<table>" +
-                  "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
-                  "<tr><td style=\"font-size:8pt;font-family:Verdana,Arial,Helvetica\">[' + " +
-                  "caller_domain + ']</td></tr>" +
-                "</table>" +
-             "</td></tr>" +
-             "<tr><td style=\"padding-top:11pt;padding-bottom:8pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
+             "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
+             "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
              "<tr><td>PIN: <input id=\"pin\" " +
-             "style=\"font-family:Verdana;letter-spacing:2px;background-color:#f0f0f0\" " +
+             "style=\"font-family:Verdana,Arial;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
@@ -492,11 +485,6 @@ public class HTML
 		"        if (!received_json) return;\n" +
         "        document.getElementById('busy').style.visibility = 'hidden';\n" +
 		"        if (payment_state == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
-        "            caller_domain = event.origin;\n" +
-		"            caller_domain = caller_domain.substring(caller_domain.indexOf('://') + 3);\n" +
-        "            if (caller_domain.indexOf(':') > 0) {\n" +
-		"                caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
-		"            }\n" +
         "            processINIT(received_json);\n" +
 		"        }\n" +
 		"    } else {\n" +
@@ -508,6 +496,12 @@ public class HTML
 		"// the payment process is automatically invoked by the body.onload().\n" +
         "//\n" +
         "function initPayment() {\n" +
+        "    var caller_domain = window.document.referrer;\n" +
+        "    caller_domain = caller_domain.substring(caller_domain.indexOf('://') + 3);\n" +
+        "    if (caller_domain.indexOf(':') > 0) {\n" +
+        "        caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
+        "    }\n" +
+        "    document.getElementById('border').innerHTML = 'Payment Request [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
