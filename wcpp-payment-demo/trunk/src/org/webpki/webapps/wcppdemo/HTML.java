@@ -501,6 +501,9 @@ public class HTML
         "    if (caller_domain.indexOf(':') > 0) {\n" +
         "        caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
         "    }\n" +
+        "    if (caller_domain.indexOf('/') > 0) {\n" +
+        "        caller_domain = caller_domain.substring(0, caller_domain.indexOf('/'));\n" +
+        "    }\n" +
         "    document.getElementById('border').innerHTML = 'Payment Request [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
