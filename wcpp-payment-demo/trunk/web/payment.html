@@ -98,7 +98,7 @@ function outputCard(card_index, add_on) {
 // point of view, they represent a legacy which should not be ignored...
 //
 function outputPAN(card_index) {
-    var pan_html = '<td style="padding-top:5px;padding-bottom:10px;font-size:8pt;font-family:Verdana,Arial;text-align:center">';
+    var pan_html = '<td style="padding-top:5px;padding-bottom:10px;font-size:8pt;font-family:Verdana,\'Bitstream Vera Sans\',Arial;text-align:center">';
     var pan = card_list[card_index].pan;
     for (var i = 0; i < pan.length; i++) {
         if (i && i % 4 == 0) pan_html += ' ';
