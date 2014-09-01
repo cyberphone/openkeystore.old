@@ -220,21 +220,37 @@ public class HTML
         "// in no way represents a standard or a standards proposal.       //\n" +
         "// However, the message flow is anticipated to be usable \"as is\". //\n" +
         "////////////////////////////////////////////////////////////////////\n\n" +
+        "var webpki = {};  // For our custom objects\n\n" +
         "var aborted_operation = false;\n" +
         "var timeouter_handle = null;\n" +
-        "var amount_to_pay;\n" +
-        "var currency;\n" +
+        "var request_amount;\n" +
         "var request_transaction_id;\n" +
         "var request_date_time;\n" +
         "var caller_common_name;\n" +
         "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
-        "var button_width;\n" +
-        "var webpki = {};\n" +
-        "webpki.CardEntry = function(base64_image, type, pin, pan) {\n" +
-        "    this.base64_image = base64_image;\n" +
+        "\nwebpki.Currency = function(iso_name,symbol,first_position) {\n" +
+        "    this.iso_name = iso_name;\n" +
+        "    this.symbol = symbol;\n" +
+        "    this.first_position = first_position;\n" +
+        "};\n" +
+        "var request_currency = null;\n" +
+        "var currency_list = [];\n");
+        for (Currencies currency : Currencies.values ())
+          {
+            s.append("currency_list.push(new webpki.Currency('")
+            .append(currency.toString())
+            .append("', '")
+            .append(currency.symbol)
+            .append("', ")
+            .append(currency.first_position)
+            .append ("));\n");
+          }
+        s.append (
+        "\nwebpki.CardEntry = function(type, pin, pan, base64_image) {\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
         "    this.pan = pan;\n" +
+        "    this.base64_image = base64_image;\n" +
         "    this.matching = false;\n" +
         "};\n" +
         "var card_list = [];\n");
@@ -245,22 +261,19 @@ public class HTML
 			Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
         	if (card_entries != null)
         	{
-        		int i = 0;
         		for (CardEntry card_entry : card_entries)
         		{
         			if (card_entry.active)
         			{
-            			s.append("card_list[")
-	           			 .append (i++)
-	           			 .append("] = new webpki.CardEntry('")
-	           			 .append(card_entry.base64_image)
-	           			 .append("', '")
+            			s.append("card_list.push(new webpki.CardEntry('")
 	           			 .append(card_entry.card_type.toString())
                          .append("', '")
                          .append(card_entry.pin == null ? CardEntry.DEFAULT_PIN : card_entry.pin)
                          .append("', '")
                          .append(card_entry.pan)
-                         .append ("');\n");
+                         .append("', '")
+                         .append(card_entry.base64_image)
+                         .append ("'));\n");
         			}
         		}
         	}
@@ -298,7 +311,8 @@ public class HTML
         "    return json;\n" +
         "}\n\n" +
         "function priceString(price_mult_100) {\n" +
-        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+        "    var price_number = Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+        "    return request_currency.first_position ? request_currency.symbol + price_number : price_number + request_currency.symbol;\n" +  
         "}\n\n" +
         "function createJSONBaseCommand(command_property_value) {\n" +
         "    var json = {};\n" +
@@ -345,7 +359,7 @@ public class HTML
         "function displayPaymentRequest(card_index) {\n" +
         "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
              "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
-             "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
+             "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(request_amount) + '</td></tr>" +
              "<tr><td>PIN: <input id=\"pin\" " +
              "style=\"font-family:" + javaScript (FONT_VERDANA) + ";padding-left:3px;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
@@ -367,7 +381,8 @@ public class HTML
              "    document.getElementById('details').style.left = details_left + 'px';\n" +
              "    document.getElementById('ok').style.left = ((details_left + " +
                  "document.getElementById('pin').offsetLeft - " +
-                 "button_width) * 2 + document.getElementById('pin').offsetWidth - " +
+                 "document.getElementById('cancel').offsetWidth) * 2 + " +
+                 "document.getElementById('pin').offsetWidth - " +
                  PAYMENT_BUTTON_LEFT + ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + card_list[card_index].pin + ' :-)';\n" +
@@ -426,7 +441,7 @@ public class HTML
        "//   {\n" +
        "//     \"" + PAYMENT_API_COMMAND + "\": \"" + PAYMENT_API_INIT_COMMAND + "\"\n" +
        "//     \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"USD\"                Currently the only recognized\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"XYZ\"                Currency in ISO notation\n" +
        "//     \"" + PAYMENT_API_INIT_REC_TRANS_ID + "\": \"String\"        Payee transaction ID\n" +
        "//     \"" + PAYMENT_API_INIT_REC_DATE_TIME + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
        "//     \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
@@ -435,8 +450,17 @@ public class HTML
        "//\n" +
        "function processINIT(received_json) {\n" +
        "    caller_common_name = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
-       "    amount_to_pay = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
-       "    currency = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "    request_amount = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
+       "    var iso_currency = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "    for (var i = 0; i < currency_list.length; i++) {\n" +
+       "        if (currency_list[i].iso_name == iso_currency) {\n"+
+       "            request_currency = currency_list[i];\n" +
+       "            break;\n" +
+       "        }\n" +
+       "    }\n" +
+       "    if (!request_currency) {\n" +
+       "        bad('Unrecognized currency: ' + iso_currency);\n" +
+       "    }\n" +
        "    var payee_card_types = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
        "    request_date_time = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
        "    request_transaction_id = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
@@ -454,7 +478,7 @@ public class HTML
        "    }\n" +
        "    document.getElementById('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
                     " - document.getElementById('control').offsetHeight - document.getElementById('border').offsetHeight - document.getElementById('activity').offsetHeight) + 'px';\n" +
-       "    button_width = document.getElementById('cancel').offsetWidth;\n" +
+       "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
        "    document.getElementById('ok').style.width = button_width + 'px';\n" +
        "    document.getElementById('cancel').style.left = ((" +
             PAYMENT_WINDOW_WIDTH + " - button_width) / 2) + 'px';\n" +
@@ -528,7 +552,9 @@ public class HTML
         "        console.debug('init payment window');\n" +
         "        var json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
         "        json." + PAYMENT_API_INIT_SND_CURRENCIES + " = [];\n" +
-        "        json." + PAYMENT_API_INIT_SND_CURRENCIES + ".push('USD');\n" +
+        "        for (var i = 0; i < currency_list.length; i++) {\n" +
+        "            json." + PAYMENT_API_INIT_SND_CURRENCIES + ".push(currency_list[i].iso_name);\n" +
+        "        }\n" +
         "        window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
