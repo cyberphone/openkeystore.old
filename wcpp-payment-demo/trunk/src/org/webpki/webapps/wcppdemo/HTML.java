@@ -213,6 +213,10 @@ public class HTML
         "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+        "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
+        "style=\"cursor:pointer;border-width:2px;border-style:solid;border-color:red;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:yellow;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        "background-image:url('images/cross.png');background-repeat:no-repeat;background-position:top right\">" +
+         "</div>" +
         "<script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
         "////////////////////////////////////////////////////////////////////\n" +
@@ -222,6 +226,8 @@ public class HTML
         "////////////////////////////////////////////////////////////////////\n\n" +
         "var webpki = {};  // For our custom objects\n\n" +
         "var aborted_operation = false;\n" +
+        "var pin_error_count = 0;\n" +
+        "var selected_card;\n" +
         "var timeouter_handle = null;\n" +
         "var request_amount;\n" +
         "var request_transaction_id;\n" +
@@ -253,6 +259,7 @@ public class HTML
         "    this.base64_image = base64_image;\n" +
         "    this.matching = false;\n" +
         "};\n" +
+        "var selected_card;\n" +
         "var card_list = [];\n");
         HttpSession session = request.getSession (false);
         if (session != null)
@@ -332,6 +339,21 @@ public class HTML
         "    return '<table style=\"" +
             "margin-left:auto;margin-right:' + right_margin + ';margin-top:' + top_margin + 'px\">';\n" +
         "}\n\n" +
+        "function disableControls(disable) {\n" +
+        "    document.getElementById('ok').disabled = disable;\n" +
+        "    document.getElementById('pin').disabled = disable;\n" +
+        "}\n\n" +
+        "function showPINError(message) {\n" +
+        "    disableControls(true);\n"+
+        "    document.getElementById('pinerror').innerHTML = message;\n" +
+        "    document.getElementById('pinerror').style.top = ((window.innerHeight - document.getElementById('pinerror').offsetHeight) / 2) + 'px';\n" +
+        "    document.getElementById('pinerror').style.left = ((window.innerWidth - document.getElementById('pinerror').offsetWidth) / 2) + 'px';\n" +
+        "    document.getElementById('pinerror').style.visibility = 'visible';\n" +
+        "}\n\n" +
+        "function closePINError() {\n" +
+        "    document.getElementById('pinerror').style.visibility = 'hidden';\n" +
+        "    disableControls(false);\n"+
+        "}\n\n" +
         "function outputCard(card_index, add_on) {\n" +
         "    return '<td>' + '" + 
              javaScript (CardEntry.CARD_DIV) +
@@ -357,6 +379,7 @@ public class HTML
         "// actual payment process.\n" +
         "//\n" +
         "function displayPaymentRequest(card_index) {\n" +
+        "    selected_card = card_list[card_index];\n" +
         "    var payment_details = '<table id=\"details\" style=\"position:absolute;text-align:center\">" +
              "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
              "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(request_amount) + '</td></tr>" +
@@ -385,7 +408,7 @@ public class HTML
                  "document.getElementById('pin').offsetWidth - " +
                  PAYMENT_BUTTON_LEFT + ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
-        "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + card_list[card_index].pin + ' :-)';\n" +
+        "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + selected_card.pin + ' :-)';\n" +
         "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "//\n" +
@@ -428,8 +451,25 @@ public class HTML
        "// Called when the user authorized the payment.\n" +
        "//\n" +
        "function userAuthorize() {\n" +
+       "    var pin = document.getElementById('pin').value;\n" +
+       "    if (pin_error_count < 3) {\n" +
+       "        if (pin.length == 0) {\n" +
+       "            showPINError('Please enter a PIN...');\n" +
+       "            return;\n" +
+       "        }\n" +
+       "        if (selected_card.pin != pin) {\n" +
+       "            if (++pin_error_count < 3) {\n" +
+       "                showPINError('Incorrect PIN,<br>attempts left: ' + (3 - pin_error_count));\n" +
+       "                return;\n" +
+       "            }\n" +
+       "        }\n" +
+       "    }\n" +
+       "    if (pin_error_count == 3) {\n" +
+       "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
+       "        return;\n" +
+       "    }\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    alert ('Not Implemented');\n" +
+       "    alert ('Not Implemented yet');\n" +
 //       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
        "    document.getElementById('busy').style.visibility = 'hidden';\n" +
        "}\n\n" +
@@ -609,7 +649,12 @@ public class HTML
             "        save_checkout_html = document.getElementById('pay').innerHTML;\n" +
             "        document.getElementById('pay').innerHTML = paycode;\n" +
             "    } else {\n" +
-            "        alert('Nothing ordered!');\n" +
+            "        document.getElementById('emptybasket').style.top = ((window.innerHeight - document.getElementById('emptybasket').offsetHeight) / 2) + 'px';\n" +
+            "        document.getElementById('emptybasket').style.left = ((window.innerWidth - document.getElementById('emptybasket').offsetWidth) / 2) + 'px';\n" +
+            "        document.getElementById('emptybasket').style.visibility = 'visible';\n" +
+            "        setTimeout(function() {\n" +
+            "            document.getElementById('emptybasket').style.visibility = 'hidden';\n" +
+            "        }, 1000);\n" +
             "    }\n" +
 	        "}\n\n" +
 		    "function getTotal() {\n" +
@@ -720,7 +765,9 @@ public class HTML
 		        "    this.units = 0;\n" +
 		        "};\n");
 
-        HTML.output (response, HTML.getHTML (temp_string.toString(), null, page_data.toString()));
+        HTML.output (response, HTML.getHTML (temp_string.toString(), 
+                                             "><div id=\"emptybasket\" style=\"border-color:grey;border-style:solid;border-width:3px;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:#f0f0f0;position:absolute;visibility:hidden;padding:5pt 10pt 5pt 10pt\">Nothing ordered yet...</div",
+                                             page_data.toString()));
 	  }
 
 	private static String formatPAN (String pan)
