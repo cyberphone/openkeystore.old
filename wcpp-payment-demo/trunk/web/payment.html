@@ -1,8 +1,8 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><style type="text/css">html {overflow:hidden}
-body {font-size:10pt;color:#000000;font-family:Arial,Verdana,Helvetica;background-color:white;margin:0px;padding:0px}
+body {font-size:10pt;color:#000000;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans';background-color:white;margin:0px;padding:0px}
 table {border-collapse: collapse}
 td {padding: 0px}
-</style></head><body onload="initPayment()"><div id="border" style="font-family:Verdana,Arial,Helvetica;padding:5px 6px 5px 6px;color:white;background:#306754;width:438px">Payment Request</div><div id="activity" style="padding:5px 6px 5px 6px">Initializing...</div><div id="content" style="overflow-y:auto;"></div><div id="control" style="z-index:3;position:absolute;bottom:0px;width:450px;padding-top:5px;padding-bottom:10pt"><input id="cancel" type="button" value="&nbsp;Cancel&nbsp;" style="position:relative;visibility:hidden" onclick="userAbort()"><input id="ok" type="button" value="OK" style="position:relative;visibility:hidden" title="Authorize Payment!" onclick="userAuthorize()"></div><img id="busy" src="images/loading.gif" alt="html5 requirement..." style="position:absolute;top:101px;left:201px;z-index:5;visibility:visible;"/><script type="text/javascript">
+</style></head><body onload="initPayment()"><div id="border" style="font-family:Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans';padding:5px 6px 5px 6px;color:white;background:#306754;width:438px">Payment Request</div><div id="activity" style="padding:5px 6px 5px 6px">Initializing...</div><div id="content" style="overflow-y:auto;"></div><div id="control" style="z-index:3;position:absolute;bottom:0px;width:450px;padding-top:5px;padding-bottom:10pt"><input id="cancel" type="button" value="&nbsp;Cancel&nbsp;" style="position:relative;visibility:hidden" onclick="userAbort()"><input id="ok" type="button" value="OK" style="position:relative;visibility:hidden" title="Authorize Payment!" onclick="userAuthorize()"></div><img id="busy" src="images/loading.gif" alt="html5 requirement..." style="position:absolute;top:101px;left:201px;z-index:5;visibility:visible;"/><script type="text/javascript">
 "use strict";
 
 ////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ function outputCard(card_index, add_on) {
 // point of view, they represent a legacy which should not be ignored...
 //
 function outputPAN(card_index) {
-    var pan_html = '<td style="padding-top:5px;padding-bottom:10px;font-size:8pt;font-family:Verdana,\'Bitstream Vera Sans\',\'DejaVu Sans\',Arial;text-align:center">';
+    var pan_html = '<td style="padding-top:5px;padding-bottom:10px;font-size:8pt;font-family:Verdana,\'Bitstream Vera Sans\',\'DejaVu Sans\',Arial,\'Liberation Sans\';text-align:center">';
     var pan = card_list[card_index].pan;
     for (var i = 0; i < pan.length; i++) {
         if (i && i % 4 == 0) pan_html += ' ';
@@ -114,7 +114,7 @@ function outputPAN(card_index) {
 // actual payment process.
 //
 function displayPaymentRequest(card_index) {
-    var payment_details = '<table id="details" style="position:absolute;text-align:center"><tr><td>Requester: ' + caller_common_name + '</td></tr><tr><td style="padding-top:10pt;padding-bottom:10pt">Amount: ' + priceString(amount_to_pay) + '</td></tr><tr><td>PIN: <input id="pin" style="font-family:Verdana,Arial;padding-left:3px;letter-spacing:2px;background-color:#f0f0f0" type="password" size="8" maxlength="20"></td></tr><table>';
+    var payment_details = '<table id="details" style="position:absolute;text-align:center"><tr><td>Requester: ' + caller_common_name + '</td></tr><tr><td style="padding-top:10pt;padding-bottom:10pt">Amount: ' + priceString(amount_to_pay) + '</td></tr><tr><td>PIN: <input id="pin" style="font-family:Verdana,\'Bitstream Vera Sans\',\'DejaVu Sans\',Arial,\'Liberation Sans\';padding-left:3px;letter-spacing:2px;background-color:#f0f0f0" type="password" size="8" maxlength="20"></td></tr><table>';
     document.getElementById('activity').innerHTML = '&nbsp;';
     document.getElementById('cancel').style.left = '15px';
     document.getElementById('content').innerHTML = payment_details + cardTableHeader('30px', 25) + '<tr>' + outputCard(card_index, '" title="Don\'t leave home without it!') + '</tr><tr>' + outputPAN(card_index) + '</tr></table>';

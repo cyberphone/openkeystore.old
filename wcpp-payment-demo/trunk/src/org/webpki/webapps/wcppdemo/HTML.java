@@ -47,26 +47,31 @@ public class HTML
     static final String PAYMENT_API_ABORT_COMMAND        = "ABORT";
     static final String PAYMENT_API_FINAL_COMMAND        = "FINAL";
     
+    static final String FONT_VERDANA = "Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans'";
+    static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
+    
     static final String HTML_INIT = 
 	    "<!DOCTYPE html>"+
 	    "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
 	    "<title>WebCrypto++ Payment Demo</title>"+
 	    "<style type=\"text/css\">html {overflow:auto}\n"+
-	    ".tftable {border-collapse: collapse}\n" +
-	    ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
+	    ".tftable {border-collapse:collapse}\n" +
+	    ".tftable th {font-size:10pt;background:" +
+	      "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
+	      "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
+	      "text-align:center;font-family:" + FONT_ARIAL + "}\n" +
 	    ".tftable tr {background-color:#FFFFE0}\n" +
-	    ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:arial,verdana,helvetica}\n" +
-	    "body {font-size:10pt;color:#000000;font-family:verdana,\"Bitstream Vera Sans\",\"DejaVu Sans\",arial;background-color:white}\n" +
-	    "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
-	    "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica}\n" +
-	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none}\n" +
-	    "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none}\n" +
-	    "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana}\n" +
-	    "td {font-size:8pt;font-family:verdana,arial}\n" +
-	    ".smalltext {font-size:6pt;font-family:verdana,arial}\n" +
-	    "input[type='button'] {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px}\n" +
-	    ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana}\n";
+	    ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
+	    "body {font-size:10pt;color:#000000;font-family:" + FONT_VERDANA + ";background-color:white}\n" +
+	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
+	    "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
+	    "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + "}\n" +
+	    "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
+        ".quantity {text-align:right;font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
+        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
+        ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n" +
+	    ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
 	
 
     static String encode (String val)
@@ -144,7 +149,7 @@ public class HTML
                 null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width:600px;\" cellpadding=\"4\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
+                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\">This site contains a demo of what a true WebCrypto++ implementation " +
                    "could offer for <span style=\"color:red\">decentralized payment systems</span>.</td></tr>" +
                    "<tr><td align=\"left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
@@ -187,11 +192,11 @@ public class HTML
 	    "<!DOCTYPE html>"+
 	    "<html><head><meta charset=\"UTF-8\">"+
 	    "<style type=\"text/css\">html {overflow:hidden}\n"+
-	    "body {font-size:10pt;color:#000000;font-family:Arial,Verdana,Helvetica;background-color:white;margin:0px;padding:0px}\n" +
+	    "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
 	    "table {border-collapse: collapse}\n" +
 	    "td {padding: 0px}\n" +
         "</style></head><body onload=\"initPayment()\">" +
-	    "<div id=\"border\" style=\"font-family:Verdana,Arial,Helvetica;padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+	    "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
 	    PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
@@ -325,7 +330,7 @@ public class HTML
         "//\n" +
         "function outputPAN(card_index) {\n" +
         "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
-             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:Verdana,\\'Bitstream Vera Sans\\',\\'DejaVu Sans\\',Arial;text-align:center\">';\n" +
+             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:" + javaScript (FONT_VERDANA) + ";text-align:center\">';\n" +
         "    var pan = card_list[card_index].pan;\n" +
         "    for (var i = 0; i < pan.length; i++) {\n" +
         "        if (i && i % 4 == 0) pan_html += ' ';\n" +
@@ -342,7 +347,7 @@ public class HTML
              "<tr><td>Requester: ' + caller_common_name + '</td></tr>" +
              "<tr><td style=\"padding-top:10pt;padding-bottom:10pt\">Amount: ' + priceString(amount_to_pay) + '</td></tr>" +
              "<tr><td>PIN: <input id=\"pin\" " +
-             "style=\"font-family:Verdana,Arial;padding-left:3px;letter-spacing:2px;background-color:#f0f0f0\" " +
+             "style=\"font-family:" + javaScript (FONT_VERDANA) + ";padding-left:3px;letter-spacing:2px;background-color:#f0f0f0\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
@@ -543,16 +548,18 @@ public class HTML
 				   "</td><td><form>" +
 					   "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
 					   "<tr>" +
-					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + prod_entry + ", 1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
+					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + 
+					   prod_entry + ", 1, " + temp_counter + ")\" class=\"updnbtn\"></td>" +
 					   "</tr>" +
 					   "<tr>" +
 					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
 					       prod_entry + 
-					       "\" value=\"0\" style=\"text-align:right\" " +
+					       "\" value=\"0\" class=\"quantity\" " +
 					       "oninput=\"updateInput(" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
 					   "</tr>" +
 					   "<tr>" +
-		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + prod_entry + ", -1, " + temp_counter + ")\" style=\"text-align:center;margin:0px;padding:0px\" ></td>" +
+		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + 
+					   prod_entry + ", -1, " + temp_counter + ")\"  class=\"updnbtn\"></td>" +
 					   "</tr>" +
 					   "</table></form></td></tr>";
         temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new webpki.ShopEntry(" + price_mult_100 + ");\n");		
@@ -661,14 +668,14 @@ public class HTML
 		StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table>" +
-               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Demo Merchant<br>&nbsp;</td></tr>" +
+               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Demo Merchant<br>&nbsp;</td></tr>" +
                "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
        		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
                    productEntry ("product-car.png", "Sports Car", 8599900) + 
                    productEntry ("product-icecream.png", "Ice Cream", 325) + 
        		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
-               "<tr><td style=\"text-align:center\" id=\"pay\"><input style=\"font-size:10pt\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut ()\"></td></tr>" +
+               "<tr><td style=\"text-align:center\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
              "</table></td></tr>");
 		temp_string.insert (0,
 		        "\n\"use strict\";" +
@@ -709,7 +716,7 @@ public class HTML
 	    StringBuffer s = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
 	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
-            "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Your Payment Cards<br>&nbsp;</td></tr>" +
+            "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Your Payment Cards<br>&nbsp;</td></tr>" +
 	        "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
 	        "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
 	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
