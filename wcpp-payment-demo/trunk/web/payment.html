@@ -148,7 +148,7 @@ function outputPAN(card_index) {
 //
 function displayPaymentRequest(card_index) {
     selected_card = card_list[card_index];
-    var payment_details = '<table id="details" style="position:absolute;text-align:center"><tr><td>Requester: ' + caller_common_name + '</td></tr><tr><td style="padding-top:10pt;padding-bottom:10pt">Amount: ' + priceString(request_amount) + '</td></tr><tr><td>PIN: <input id="pin" style="font-family:Verdana,\'Bitstream Vera Sans\',\'DejaVu Sans\',Arial,\'Liberation Sans\';padding-left:3px;letter-spacing:2px;background-color:#f0f0f0" type="password" size="8" maxlength="20"></td></tr><table>';
+    var payment_details = '<table id="details" style="position:absolute;text-align:center"><tr><td>Requester: ' + caller_common_name + '</td></tr><tr><td style="padding-top:10pt;padding-bottom:10pt">Amount: ' + priceString(request_amount) + '</td></tr><tr><td>PIN: <input id="pin" style="font-family:Arial,\'Liberation Sans\',Verdana,\'Bitstream Vera Sans\',\'DejaVu Sans\';padding-left:3px;letter-spacing:2px;background-color:#f0f0f0" type="password" size="8" maxlength="20"></td></tr><table>';
     document.getElementById('activity').innerHTML = '&nbsp;';
     document.getElementById('cancel').style.left = '15px';
     document.getElementById('content').innerHTML = payment_details + cardTableHeader('30px', 25) + '<tr>' + outputCard(card_index, '" title="Don\'t leave home without it!') + '</tr><tr>' + outputPAN(card_index) + '</tr></table>';
