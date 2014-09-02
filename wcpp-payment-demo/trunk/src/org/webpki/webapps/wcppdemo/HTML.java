@@ -214,7 +214,7 @@ public class HTML
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
-        "style=\"cursor:pointer;border-width:2px;border-style:solid;border-color:red;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:yellow;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        "style=\"line-height:14pt;cursor:pointer;border-width:2px;border-style:solid;border-color:red;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:yellow;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('images/cross.png');background-repeat:no-repeat;background-position:top right\">" +
          "</div>" +
         "<script type=\"text/javascript\">\n" +
@@ -353,6 +353,7 @@ public class HTML
         "function closePINError() {\n" +
         "    document.getElementById('pinerror').style.visibility = 'hidden';\n" +
         "    disableControls(false);\n"+
+        "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "function outputCard(card_index, add_on) {\n" +
         "    return '<td>' + '" + 
@@ -459,7 +460,7 @@ public class HTML
        "        }\n" +
        "        if (selected_card.pin != pin) {\n" +
        "            if (++pin_error_count < 3) {\n" +
-       "                showPINError('Incorrect PIN,<br>attempts left: ' + (3 - pin_error_count));\n" +
+       "                showPINError('Incorrect PIN!<br>Attempts left: ' + (3 - pin_error_count));\n" +
        "                return;\n" +
        "            }\n" +
        "        }\n" +
