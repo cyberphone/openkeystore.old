@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+    <context-param>
+        <description>URL to bank</description>
+        <param-name>bank_url</param-name>
+        <param-value>https://mobilepki.org/WebCryptoPlusPlus</param-value>
+    </context-param>
+
+    <context-param>
+        <description>URL to Merchant</description>
+        <param-name>merchant_url</param-name>
+        <param-value>https://openkeystore.googlecode.com/svn/wcpp-payment-demo/trunk/web/merchant.html</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
+     </listener>
+
+    <servlet>
+	    <servlet-name>MerchantServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.MerchantServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>HomeServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CardServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.CardServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>WebCryptoServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.WebCryptoServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PaymentServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.PaymentServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>MerchantServlet</servlet-name>
+        <url-pattern>/merchant</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HomeServlet</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>CardServlet</servlet-name>
+        <url-pattern>/cards</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>WebCryptoServlet</servlet-name>
+        <url-pattern>/webcrypto</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>PaymentServlet</servlet-name>
+        <url-pattern>/payment</url-pattern>
+    </servlet-mapping>
+    
+</web-app>

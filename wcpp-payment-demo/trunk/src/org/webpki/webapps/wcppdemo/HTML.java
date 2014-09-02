@@ -214,8 +214,9 @@ public class HTML
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
-        "style=\"line-height:14pt;cursor:pointer;border-width:2px;border-style:solid;border-color:red;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:yellow;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('images/cross.png');background-repeat:no-repeat;background-position:top right\">" +
+        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
+        PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        "background-image:url('images/cross.png');background-repeat:no-repeat;background-position:top left\">" +
          "</div>" +
         "<script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
