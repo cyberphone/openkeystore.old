@@ -162,11 +162,17 @@ public class JSONObjectWriter implements Serializable
         return setString (name, Base64URL.encode (value));
       }
 
+    public JSONObjectWriter setObject (String name, JSONObjectReader reader) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, reader.root));
+        return this;
+      }
+
     public JSONObjectWriter setObject (String name) throws IOException
       {
-        JSONObject sub_object = new JSONObject ();
-        setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
-        return new JSONObjectWriter (sub_object);
+          JSONObject sub_object = new JSONObject ();
+          setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
+          return new JSONObjectWriter (sub_object);
       }
 
     public JSONObjectWriter createContainerObject (String name) throws IOException
