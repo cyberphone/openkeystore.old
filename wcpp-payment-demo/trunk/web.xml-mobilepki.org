@@ -24,7 +24,7 @@
 	    <servlet-name>MerchantServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.MerchantServlet</servlet-class>
     </servlet>
-
+    
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
@@ -36,14 +36,15 @@
     </servlet>
 
     <servlet>
-        <servlet-name>WebCryptoServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.WebCryptoServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>PaymentServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.PaymentServlet</servlet-class>
     </servlet>
     
+    <servlet>
+	    <servlet-name>TransactServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.TransactServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>MerchantServlet</servlet-name>
         <url-pattern>/merchant</url-pattern>
@@ -60,13 +61,23 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>WebCryptoServlet</servlet-name>
-        <url-pattern>/webcrypto</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
         <servlet-name>PaymentServlet</servlet-name>
         <url-pattern>/payment</url-pattern>
     </servlet-mapping>
     
+    <servlet-mapping>
+        <servlet-name>TransactServlet</servlet-name>
+        <url-pattern>/transact</url-pattern>
+    </servlet-mapping>
+
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>The app</web-resource-name>
+        <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+      <user-data-constraint>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      </user-data-constraint>
+    </security-constraint>    
+
 </web-app>

@@ -7,18 +7,8 @@
   <property name="dist_dir" value="dist"/>
   <property name="debug" value="on"/>
   <property environment="env"/>
-  <property name="library_dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
   <property name="resources_dir" value="../resources"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
-
-  <path id="compile.classpath">
-    <fileset dir="${library_dir}">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${resources_dir}/third-party-jars">
-      <include name="*.jar"/>
-    </fileset>
-  </path>
 
   <target name="init" unless="app_path">
     <!-- Set up where application should reside --> 
@@ -32,11 +22,19 @@
    </target>
 
   <target name="_build">
-    <delete dir="${temp_dir}"/>
+	  <path id="compile.classpath">
+	    <fileset dir="${library_dir}">
+	      <include name="*.jar"/>
+	    </fileset>
+	    <fileset dir="${resources_dir}/third-party-jars">
+	      <include name="*.jar"/>
+	    </fileset>
+	  </path>
+      <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
     <javac debug="${debug}"
-           source="1.6"
-           target="1.6"
+           source="${javaversion}"
+           target="${javaversion}"
            srcdir="${src_dir}"
            destdir="${temp_dir}"
            classpathref="compile.classpath"
@@ -45,10 +43,13 @@
       <classes dir="${temp_dir}"/>
       <classes dir="${src_dir}">
          <include name="**/*.png"/>
+         <include name="**/*.gif"/>
       </classes>
       <lib file="${resources_dir}/third-party-jars/bcprov-jdk16-145.jar"/>
-      <lib file="${library_dir}/webpki.org-libext.jar"/>
-      <lib file="${library_dir}/webpki.org-webutil.jar"/>
+      <lib dir="${library_dir}">
+         <include name="webpki.org-libext*.jar"/>
+         <include name="webpki.org-webutil*.jar"/>
+      </lib>
       <fileset dir="web"/>
     </war>
   </target>
@@ -61,13 +62,17 @@
   <target name="mobilepki">
     <antcall target="_build">
        <param name="webxml" value="web.xml-mobilepki.org"/>
-     </antcall>
+       <param name="javaversion" value="1.6"/>
+       <param name="library_dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
+    </antcall>
   </target>
   	
   <target name="build">
     <antcall target="_build">
        <param name="webxml" value="web.xml"/>
-     </antcall>
+       <param name="javaversion" value="1.7"/>
+       <param name="library_dir" value="../library/dist"/>
+    </antcall>
   </target>
 
 </project>

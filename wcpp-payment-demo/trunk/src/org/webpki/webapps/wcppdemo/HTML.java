@@ -29,23 +29,27 @@ public class HTML
     static final int PIN_FIELD_SIZE                  = 8;
 
     static final int PAYMENT_TIMEOUT_INIT            = 5000;
-
+ 
     // Common property of all commands, argument holds verb
-    static final String PAYMENT_API_COMMAND              = "Command";
+    static final String PAYMENT_API_COMMAND               = "Command";
     
-    static final String PAYMENT_API_INIT_COMMAND         = "INIT";
+    static final String PAYMENT_API_INIT_COMMAND          = "INIT";
     // Payment application sent INIT data
-    static final String PAYMENT_API_INIT_SND_CURRENCIES  = "Currencies";
+    static final String PAYMENT_API_INIT_SND_CURRENCIES   = "Currencies";
     // Payment application received INIT data
-    static final String PAYMENT_API_INIT_REC_AMOUNT      = "Amount";
-    static final String PAYMENT_API_INIT_REC_CURRENCY    = "Currency";
-    static final String PAYMENT_API_INIT_REC_DATE_TIME   = "DateTime";
-    static final String PAYMENT_API_INIT_REC_TRANS_ID    = "TransactionID";
-    static final String PAYMENT_API_INIT_REC_CARD_TYPES  = "CardTypes";
-    static final String PAYMENT_API_INIT_REC_COMMON_NAME = "CommonName";
+    static final String PAYMENT_API_INIT_REC_AMOUNT       = "Amount";         //   signed (in real implementation)
+    static final String PAYMENT_API_INIT_REC_CURRENCY     = "Currency";       //                -
+    static final String PAYMENT_API_INIT_REC_DATE_TIME    = "DateTime";       //                -
+    static final String PAYMENT_API_INIT_REC_TRANS_ID     = "TransactionID";  //                -
+    static final String PAYMENT_API_INIT_REC_COMMON_NAME  = "CommonName";     //                -
+    static final String PAYMENT_API_INIT_REC_CARD_TYPES   = "CardTypes";
     
-    static final String PAYMENT_API_ABORT_COMMAND        = "ABORT";
-    static final String PAYMENT_API_FINAL_COMMAND        = "FINAL";
+    static final String PAYMENT_API_TRANSACT_COMMAND      = "TRANSACT";
+    static final String PAYMENT_API_TRANSACT_SND_URL      = "URL";            // URL to payment provider
+    static final String PAYMENT_API_TRANSACT_SND_PAN      = "PAN";            // Card number
+    static final String PAYMENT_API_TRANSACT_SND_REQUEST  = "Request";        // Payee signed request
+
+    static final String PAYMENT_API_ABORT_COMMAND         = "ABORT";
     
     static final String FONT_VERDANA = "Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans'";
     static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
@@ -210,13 +214,13 @@ public class HTML
         "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
 	    "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" style=\"position:relative;visibility:hidden\" onclick=\"userAbort()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
-        "<img id=\"busy\" src=\"images/loading.gif\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
+        "<img id=\"busy\" src=\"" + Init.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
         "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
         PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('images/cross.png');background-repeat:no-repeat;background-position:top left\">" +
+        "background-image:url('" + Init.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
          "</div>" +
         "<script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
@@ -234,7 +238,7 @@ public class HTML
         "var request_transaction_id;\n" +
         "var request_date_time;\n" +
         "var caller_common_name;\n" +
-        "var payment_state = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
+        "var json_request;\n" +
         "\nwebpki.Currency = function(iso_name,symbol,first_position) {\n" +
         "    this.iso_name = iso_name;\n" +
         "    this.symbol = symbol;\n" +
@@ -310,14 +314,6 @@ public class HTML
         "function checkTiming(milliseconds) {\n" +
         "   timeouter_handle = setTimeout(function () {bad('Timeout')}, milliseconds);\n" +
         "}\n\n" +
-        "function checkState(event) {\n" +
-        "    var json = JSON.parse(event.data);\n" +
-        "    if (json." + PAYMENT_API_COMMAND + " != payment_state) {\n" +
-        "        bad('State error:' + payment_state + '<>' + event.data);\n" +
-        "        return null;\n" +
-        "    }\n" +
-        "    return json;\n" +
-        "}\n\n" +
         "function priceString(price_mult_100) {\n" +
         "    var price_number = Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
         "    return request_currency.first_position ? request_currency.symbol + price_number : price_number + request_currency.symbol;\n" +  
@@ -327,8 +323,8 @@ public class HTML
         "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
         "    return json;\n" +
         "}\n\n" +
-        "function getJSONProperty(json, property) {\n" +
-        "    var value = json[property];\n" +
+        "function getJSONProperty(property) {\n" +
+        "    var value = json_request[property];\n" +
         "    console.debug(property + ': ' + value);\n" +
         "    if (value === undefined) {\n" +
         "        bad('Missing property: ' + property);\n" +
@@ -470,10 +466,13 @@ public class HTML
        "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
        "        return;\n" +
        "    }\n" +
+       "    disableControls(false);\n"+
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    alert ('Not Implemented yet');\n" +
-//       "    window.parent.postMessage('" + PAYMENT_API_ABORT + "', window.document.referrer);\n" +
-       "    document.getElementById('busy').style.visibility = 'hidden';\n" +
+       "    var json = createJSONBaseCommand ('" + PAYMENT_API_TRANSACT_COMMAND + "');\n" +
+       "    json." + PAYMENT_API_TRANSACT_SND_PAN + " = selected_card.pan;\n" +
+       "    json." + PAYMENT_API_TRANSACT_SND_URL + " = '" + Init.bank_url + "/transact';\n" +
+       "    json." + PAYMENT_API_TRANSACT_SND_REQUEST + " = json_request;\n" +
+       "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// Processes the payee's JSON response to the INIT message.\n" +
@@ -490,10 +489,10 @@ public class HTML
        "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]    1-n card types recognized by the payee\n" +
        "//   }\n" +
        "//\n" +
-       "function processINIT(received_json) {\n" +
-       "    caller_common_name = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
-       "    request_amount = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
-       "    var iso_currency = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "function processINIT() {\n" +
+       "    caller_common_name = getJSONProperty('" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
+       "    request_amount = getJSONProperty('" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
+       "    var iso_currency = getJSONProperty('" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
        "    for (var i = 0; i < currency_list.length; i++) {\n" +
        "        if (currency_list[i].iso_name == iso_currency) {\n"+
        "            request_currency = currency_list[i];\n" +
@@ -503,9 +502,9 @@ public class HTML
        "    if (!request_currency) {\n" +
        "        bad('Unrecognized currency: ' + iso_currency);\n" +
        "    }\n" +
-       "    var payee_card_types = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
-       "    request_date_time = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
-       "    request_transaction_id = getJSONProperty(received_json, '" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
+       "    var payee_card_types = getJSONProperty('" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    request_date_time = getJSONProperty('" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
+       "    request_transaction_id = getJSONProperty('" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
        "    if (aborted_operation) return;\n" +
        "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
@@ -551,11 +550,10 @@ public class HTML
        "    } else {\n" +
        "        displayCompatibleCards(count);\n" +
        "    }\n" +
-//       "    window.parent.postMessage('" + PAYMENT_API_FINAL + "', window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// The payment application always query the payee for data.\n" +
-       "// There is a timeout associated each request.\n" +
+       "// There is a timeout associated the (currently only) request.\n" +
        "//\n" +
 		"function receivePayeeResponse(event) {\n" +
 		"    console.debug(event.origin);\n" +
@@ -564,15 +562,14 @@ public class HTML
 		"    if (timeouter_handle) {\n" +
 		"        clearTimeout(timeouter_handle);\n" +
 		"        timeouter_handle = null;\n" +
-		"        var received_json = checkState(event)\n" +
-		"        if (!received_json) return;\n" +
-        "        document.getElementById('busy').style.visibility = 'hidden';\n" +
-		"        if (payment_state == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
-        "            processINIT(received_json);\n" +
-		"        }\n" +
-		"    } else {\n" +
-		"        bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
+        "        json_request = JSON.parse(event.data);\n" +
+        "        if (getJSONProperty('" + PAYMENT_API_COMMAND + "') == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "            document.getElementById('busy').style.visibility = 'hidden';\n" +
+        "            processINIT();\n" +
+        "            return;\n" +
+        "        }\n" +
 		"    }\n" +
+		"    bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
 		"}\n\n" +
 		"//\n" +
 		"// When the payment module IFRAME has been loaded (by the payee),\n" +
@@ -590,13 +587,13 @@ public class HTML
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
 		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
-        "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        console.debug('init payment window');\n" +
         "        var json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
         "        json." + PAYMENT_API_INIT_SND_CURRENCIES + " = [];\n" +
         "        for (var i = 0; i < currency_list.length; i++) {\n" +
         "            json." + PAYMENT_API_INIT_SND_CURRENCIES + ".push(currency_list[i].iso_name);\n" +
         "        }\n" +
+        "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
@@ -669,7 +666,7 @@ public class HTML
 	        "function priceString(price_mult_100) {\n" +
 	        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
 	        "}\n\n" +
-	        "function updateTotal(){\n" +
+	        "function updateTotal() {\n" +
             "    document.getElementById('total').innerHTML = priceString(getTotal());\n" +
 	        "}\n\n" +
 	        "function updateInput(index, control) {\n" +
@@ -730,11 +727,29 @@ public class HTML
             "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
 //			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
 			"        }, 500);\n" +
-			"        payment_status = '" + PAYMENT_API_FINAL_COMMAND + "';\n" +
+			"        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
 			"    }\n" +
-			"    else if (payment_status == '" + PAYMENT_API_FINAL_COMMAND + "') {\n" +
-            "        document.getElementById('result').innerHTML = 'Yes!!!';\n" +
- //           "        document.getElementById('pay').innerHTML = '';\n" +
+			"    else if (payment_status == '" + PAYMENT_API_TRANSACT_COMMAND + "') {\n" +
+            "        setTimeout(function(){\n" +
+			"        var url = received_json." + PAYMENT_API_TRANSACT_SND_URL + ";\n" +
+            "        if (!url) alert('failed-URL');\n" +
+            "        transaction_channel.open('POST', url, true);\n" +
+            "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
+            "        transaction_channel.onreadystatechange = function () {\n" +
+            "            if (transaction_channel.readyState == 4) {\n" +
+            "                if (transaction_channel.status == 200) {\n" +
+            "                    console.debug('TheTransaction:' + transaction_channel.responseText);\n" +
+            "                    document.getElementById('result').innerHTML = 'Yes!!!' + transaction_channel.responseText;\n" +
+            "                    document.getElementById('pay').innerHTML = '';\n" +
+            "                } else {\n" +
+            "                    alert('Invocation Errors Occured ' + transaction_channel.readyState + ' and the status is ' + transaction_channel.status);\n" +
+            "                }\n" +
+            "            } else {\n" +
+            "                console.debug('currently the application is at' + transaction_channel.readyState);\n" +
+            "            }\n" +
+            "        }\n" +
+            "        transaction_channel.send(JSON.stringify(received_json));\n" +
+            "        }, 1000);\n" +
 			"    }\n" +
 			"}\n");
 
@@ -757,6 +772,7 @@ public class HTML
 	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
 	            "var save_checkout_html;\n\n" +
 				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
+				"var transaction_channel = new XMLHttpRequest();\n\n" +
 				"var shopping_cart = [];\n" +
 	            "var shopping_enabled = true;\n" +
 	            "var next_transaction_id = 100000;\n" +
@@ -793,11 +809,13 @@ public class HTML
 	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
             "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Your Payment Cards<br>&nbsp;</td></tr>" +
 	        "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
-	        "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
+	        "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" " +
+	        "title=\"The name will be written on your cards\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
 	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
 	    .append ("\"></td></tr>" +
 	        "<tr><td style=\"font-size:10pt\">PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
-	        PIN_MAX_LENGTH + "\" placeholder=\"Default: " + 
+	        PIN_MAX_LENGTH + "\" " +
+	        "title=\"This is a DEMO so we don't complicate things :-)\" placeholder=\"Default: " + 
 	        CardEntry.DEFAULT_PIN + "\" name=\"" + 
 	        CardEntry.PIN_FIELD + "\" value=\"")
         .append (card_entries.firstElement ().pin == null ? "" : encode (card_entries.firstElement ().pin))

@@ -6,16 +6,25 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 import org.webpki.webutil.InitPropertyReader;
 
 public class Init implements ServletContextListener
   {
-    private static final long serialVersionUID = 1L;
-    
     static Logger logger = Logger.getLogger (Init.class.getName ());
     
     static String bank_url;
     static String merchant_url;
+    
+    static String cross_data_uri;
+    static String working_data_uri;
+
+    private String getDataURI (String main, String extension) throws IOException
+      {
+        byte[] image = ArrayUtil.getByteArrayFromInputStream (Init.class.getResourceAsStream (main + "." + extension));
+        return "data:image/" + extension + ";base64," + new Base64 (false).getBase64StringFromBinary (image);
+      }
 
     @Override
     public void contextDestroyed (ServletContextEvent event)
@@ -31,6 +40,9 @@ public class Init implements ServletContextListener
     	  {
 			bank_url = properties.getPropertyString ("bank_url");
 		    merchant_url = properties.getPropertyString ("merchant_url");
+		    cross_data_uri = getDataURI ("cross", "png");
+		    working_data_uri = getDataURI ("working", "gif");
+		    logger.info ("WebCrypto++ Payment Demo - Successfully Initiated");
 		  }
     	catch (IOException e)
     	  {
