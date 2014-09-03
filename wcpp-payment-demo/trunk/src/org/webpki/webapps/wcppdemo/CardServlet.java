@@ -42,6 +42,7 @@ public class CardServlet extends HttpServlet
             card_entry.card_type = card_type;
             card_entry.user = user;
             card_entry.pin = pin;
+            card_entry.transaction_url = Init.bank_url + "/transact";
             byte[] pan = new byte[16];
             new SecureRandom ().nextBytes (pan);
             StringBuffer pan_text = new StringBuffer ();

@@ -23,8 +23,8 @@ public class MerchantServlet extends HttpServlet
 
     static
       {
-        compatible_with_merchant.add (CardTypes.SUPER_CARD);
-        compatible_with_merchant.add (CardTypes.COOL_CARD);
+        compatible_with_merchant.add (CardTypes.SuperCard);
+        compatible_with_merchant.add (CardTypes.CoolCard);
   //      compatible_with_merchant.add (CardTypes.UNUSUAL_CARD);
       }
   

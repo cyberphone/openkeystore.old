@@ -1,12 +1,19 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
 
 import org.webpki.webutil.ServletUtil;
 
@@ -18,14 +25,29 @@ public class TransactServlet extends HttpServlet
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        byte[] json = ServletUtil.getData (request);
+        JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
+        JSONObjectWriter result = new JSONObjectWriter ();
+        result.setObject ("Request", json.getObject ("Request"));
+        result.setString ("TransactionID", "#4");
+        String pan = json.getString ("PAN");
+        StringBuffer payee_pan = new StringBuffer ();
+        for (int i = 0; i < pan.length (); i++)
+          {
+            if (i != 0 && ((i % 4) == 0))
+              {
+                payee_pan.append (' ');
+              }
+            payee_pan.append (i < 12 ? '*' : pan.charAt (i));
+          }
+        result.setString ("PayeePAN", payee_pan.toString ());
+        result.setString ("CardType", json.getString ("CardType"));
         String origin = request.getHeader ("Origin");
-        logger.info ("POST[" + origin + "]=" + new String (json,"UTF-8"));
+        logger.info ("POST[" + origin + "]=" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"));
         response.setContentType ("application/json; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setHeader ("Access-Control-Allow-Origin", origin);
         response.setDateHeader ("EXPIRES", 0);
-        response.getOutputStream ().write ("{\"hi\":4}".getBytes ("UTF-8"));
+        response.getOutputStream ().write (result.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
       }
 
     @Override

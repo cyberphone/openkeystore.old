@@ -31,25 +31,31 @@ public class HTML
     static final int PAYMENT_TIMEOUT_INIT            = 5000;
  
     // Common property of all commands, argument holds verb
-    static final String PAYMENT_API_COMMAND               = "Command";
+    static final String PAYMENT_API_COMMAND                = "Command";
     
-    static final String PAYMENT_API_INIT_COMMAND          = "INIT";
+    static final String PAYMENT_API_INIT_COMMAND           = "INIT";
     // Payment application sent INIT data
-    static final String PAYMENT_API_INIT_SND_CURRENCIES   = "Currencies";
+    static final String PAYMENT_API_INIT_SND_CURRENCIES    = "Currencies";
     // Payment application received INIT data
-    static final String PAYMENT_API_INIT_REC_AMOUNT       = "Amount";         //   signed (in real implementation)
-    static final String PAYMENT_API_INIT_REC_CURRENCY     = "Currency";       //                -
-    static final String PAYMENT_API_INIT_REC_DATE_TIME    = "DateTime";       //                -
-    static final String PAYMENT_API_INIT_REC_TRANS_ID     = "TransactionID";  //                -
-    static final String PAYMENT_API_INIT_REC_COMMON_NAME  = "CommonName";     //                -
-    static final String PAYMENT_API_INIT_REC_CARD_TYPES   = "CardTypes";
+    // Holder of the following properties
+    static final String PAYMENT_API_INIT_REC_REQUEST       = "Request";
+    static final String PAYMENT_API_INIT_REC_AMOUNT        = "Amount";         //   signed (in real implementation)
+    static final String PAYMENT_API_INIT_REC_CURRENCY      = "Currency";       //                -
+    static final String PAYMENT_API_INIT_REC_DATE_TIME     = "DateTime";       //                -
+    static final String PAYMENT_API_INIT_REC_TRANS_ID      = "TransactionID";  //                -
+    static final String PAYMENT_API_INIT_REC_COMMON_NAME   = "CommonName";     //                -
+     // Separate item, which we don't want in the request
+    static final String PAYMENT_API_INIT_REC_CARD_TYPES    = "CardTypes";
     
-    static final String PAYMENT_API_TRANSACT_COMMAND      = "TRANSACT";
-    static final String PAYMENT_API_TRANSACT_SND_URL      = "URL";            // URL to payment provider
-    static final String PAYMENT_API_TRANSACT_SND_PAN      = "PAN";            // Card number
-    static final String PAYMENT_API_TRANSACT_SND_REQUEST  = "Request";        // Payee signed request
+    static final String PAYMENT_API_TRANSACT_COMMAND       = "TRANSACT";
+    static final String PAYMENT_API_TRANSACT_SND_URL       = "URL";            // URL to payment provider
+    static final String PAYMENT_API_TRANSACT_SND_PAN       = "PAN";            // Card number
+    static final String PAYMENT_API_TRANSACT_SND_CARD_TYPE = "CardType";       // Card type
+    static final String PAYMENT_API_TRANSACT_SND_REQUEST   = "Request";        // Payee signed request
 
-    static final String PAYMENT_API_ABORT_COMMAND         = "ABORT";
+    static final String PAYMENT_API_TRANSACT_REC_PAYEE_PAN = "PayeePAN";       // Card number given to merchant
+
+    static final String PAYMENT_API_ABORT_COMMAND          = "ABORT";
     
     static final String FONT_VERDANA = "Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans'";
     static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
@@ -257,10 +263,11 @@ public class HTML
             .append ("));\n");
           }
         s.append (
-        "\nwebpki.CardEntry = function(type, pin, pan, base64_image) {\n" +
+        "\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image) {\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
         "    this.pan = pan;\n" +
+        "    this.transaction_url = transaction_url;\n" +
         "    this.base64_image = base64_image;\n" +
         "    this.matching = false;\n" +
         "};\n" +
@@ -283,6 +290,8 @@ public class HTML
                          .append(card_entry.pin == null ? CardEntry.DEFAULT_PIN : card_entry.pin)
                          .append("', '")
                          .append(card_entry.pan)
+                         .append("', '")
+                         .append(card_entry.transaction_url)
                          .append("', '")
                          .append(card_entry.base64_image)
                          .append ("'));\n");
@@ -466,11 +475,14 @@ public class HTML
        "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
        "        return;\n" +
        "    }\n" +
-       "    disableControls(false);\n"+
+       "    // Now we entered a critical phase and do not want to get interrupted!\n" +
+       "    disableControls(true);\n"+
+       "    document.getElementById('cancel').disabled = true;\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
        "    var json = createJSONBaseCommand ('" + PAYMENT_API_TRANSACT_COMMAND + "');\n" +
        "    json." + PAYMENT_API_TRANSACT_SND_PAN + " = selected_card.pan;\n" +
-       "    json." + PAYMENT_API_TRANSACT_SND_URL + " = '" + Init.bank_url + "/transact';\n" +
+       "    json." + PAYMENT_API_TRANSACT_SND_CARD_TYPE + " = selected_card.type;\n" +
+       "    json." + PAYMENT_API_TRANSACT_SND_URL + " = selected_card.transaction_url;\n" +
        "    json." + PAYMENT_API_TRANSACT_SND_REQUEST + " = json_request;\n" +
        "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
        "}\n\n" +
@@ -490,6 +502,8 @@ public class HTML
        "//   }\n" +
        "//\n" +
        "function processINIT() {\n" +
+       "    var payee_card_types = getJSONProperty('" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
+       "    json_request = getJSONProperty('" + PAYMENT_API_INIT_REC_REQUEST + "');\n" +
        "    caller_common_name = getJSONProperty('" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
        "    request_amount = getJSONProperty('" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
        "    var iso_currency = getJSONProperty('" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
@@ -502,7 +516,6 @@ public class HTML
        "    if (!request_currency) {\n" +
        "        bad('Unrecognized currency: ' + iso_currency);\n" +
        "    }\n" +
-       "    var payee_card_types = getJSONProperty('" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
        "    request_date_time = getJSONProperty('" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
        "    request_transaction_id = getJSONProperty('" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
        "    if (aborted_operation) return;\n" +
@@ -706,17 +719,18 @@ public class HTML
 			"    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
 			"        setTimeout(function(){\n" +
 			"        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
-			"        returned_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
-			"        returned_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
+			"        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
+            "        inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
+            "        inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
+			"        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
+			"        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
             "        var date_time = new Date().toISOString();\n" +
 			"        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
             "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
 			"        }\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
+            "        inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NEVER_HEARD_OF_CARD');\n");
+            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
             for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
               {
                 temp_string.append ("        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
@@ -738,18 +752,24 @@ public class HTML
             "        transaction_channel.onreadystatechange = function () {\n" +
             "            if (transaction_channel.readyState == 4) {\n" +
             "                if (transaction_channel.status == 200) {\n" +
-            "                    console.debug('TheTransaction:' + transaction_channel.responseText);\n" +
-            "                    document.getElementById('result').innerHTML = 'Yes!!!' + transaction_channel.responseText;\n" +
-            "                    document.getElementById('pay').innerHTML = '';\n" +
+            "                    var json_transaction = JSON.parse(transaction_channel.responseText);\n" +
+            "                    console.debug('Transaction:' + JSON.stringify(json_transaction));\n" +
+            "                    document.getElementById('result').innerHTML = '<table>" +
+            "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
+            "<tr><td>Amount: ' + priceString(getTotal()) + '</td></tr>" +
+            "<tr><td>' + json_transaction." + PAYMENT_API_TRANSACT_SND_CARD_TYPE + 
+            " + ': ' + json_transaction." + PAYMENT_API_TRANSACT_REC_PAYEE_PAN + " + '</td></tr>" +
+            "</table>';\n" +
             "                } else {\n" +
-            "                    alert('Invocation Errors Occured ' + transaction_channel.readyState + ' and the status is ' + transaction_channel.status);\n" +
+            "                    document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;\n" +
             "                }\n" +
+            "                document.getElementById('pay').innerHTML = '';\n" +
             "            } else {\n" +
             "                console.debug('currently the application is at' + transaction_channel.readyState);\n" +
             "            }\n" +
             "        }\n" +
             "        transaction_channel.send(JSON.stringify(received_json));\n" +
-            "        }, 1000);\n" +
+            "        }, 1500);\n" +
 			"    }\n" +
 			"}\n");
 

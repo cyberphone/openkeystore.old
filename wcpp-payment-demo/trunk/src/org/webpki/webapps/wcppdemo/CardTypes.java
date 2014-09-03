@@ -10,9 +10,9 @@ import javax.imageio.ImageIO;
 
 public enum CardTypes
   {
-	SUPER_CARD   ("supercard.png",   Color.BLUE), 
-	COOL_CARD    ("coolcard.png",    Color.BLACK),
-	UNUSUAL_CARD ("unusualcard.png", Color.GRAY);
+	SuperCard   ("supercard.png",   Color.BLUE), 
+	CoolCard    ("coolcard.png",    Color.BLACK),
+	UnusualCard ("unusualcard.png", Color.GRAY);
 	
 	BufferedImage image;
 	Color color;

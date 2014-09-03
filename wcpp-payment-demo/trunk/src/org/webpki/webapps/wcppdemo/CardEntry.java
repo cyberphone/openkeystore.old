@@ -24,10 +24,11 @@ public class CardEntry implements Serializable
                                        "border-color:#B0B0B0;box-shadow:3px 3px 3px #D0D0D0;" +
                                        "background-image:url('data:image/png;base64,";
 
-    String base64_image;
-    String pan;
-    String user;
-    String pin;
     CardTypes card_type;
+    String pin;
+    String pan;
+    String base64_image;
+    String transaction_url;
+    String user;
     boolean active;
   }
