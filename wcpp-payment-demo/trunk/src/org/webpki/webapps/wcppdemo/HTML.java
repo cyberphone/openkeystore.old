@@ -165,6 +165,8 @@ public class HTML
                    "<tr><td align=\"left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
                    "and that <span style=\"color:red\">payment card logotypes are personalized</span> since they "+
                    "are read from the user's local key-store.</td></tr>" +
+                   "<tr><td>By applying <span style=\"color:red\">3D Secure</span> like methods and <span style=\"color:red\">EMV tokenization</span>, there is no need for " +
+                   "handing over static credit-card information to merchants.</td></tr>" +
                    "<tr><td align=\"left\">Although the demo is a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
                    "the IFRAME solution and cross-domain communication using <code>postMessage()</code> should be pretty close to that of a real system.</td></tr>" +
                    "<tr><td align=\"center\"><table cellspacing=\"10\">" +
