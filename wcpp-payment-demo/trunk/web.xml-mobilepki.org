@@ -16,6 +16,12 @@
         <param-value>https://openkeystore.googlecode.com/svn/wcpp-payment-demo/trunk/web/merchant.html</param-value>
     </context-param>
 
+    <context-param>
+        <description>Card font name</description>
+        <param-name>card_font</param-name>
+        <param-value>DejaVue</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>

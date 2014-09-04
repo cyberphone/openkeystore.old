@@ -15,9 +15,9 @@ public enum CardTypes
     UnusualCard ("unusualcard.png", Color.GRAY);
     
     BufferedImage image;
-    Color color;
+    Color font_color;
     
-    CardTypes (String file, Color color)
+    CardTypes (String file, Color font_color)
       {
         try 
           {
@@ -27,6 +27,6 @@ public enum CardTypes
           {
             throw new RuntimeException (e);
           }
-        this.color = color;
+        this.font_color = font_color;
       }
   }

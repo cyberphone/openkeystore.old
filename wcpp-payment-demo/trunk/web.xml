@@ -16,6 +16,12 @@
         <param-value>http://merchant.com:8080/WebCryptoPlusPlus/merchant</param-value>
     </context-param>
 
+    <context-param>
+        <description>Card font name</description>
+        <param-name>card_font</param-name>
+        <param-value>Arial Unicode MS</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>

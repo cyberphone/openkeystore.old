@@ -19,6 +19,8 @@ public class Init implements ServletContextListener
     
     static String cross_data_uri;
     static String working_data_uri;
+    
+    static String card_font;
 
     private String getDataURI (String main, String extension) throws IOException
       {
@@ -42,6 +44,7 @@ public class Init implements ServletContextListener
             merchant_url = properties.getPropertyString ("merchant_url");
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
+            card_font = properties.getPropertyString ("card_font");
             logger.info ("WebCrypto++ Payment Demo - Successfully Initiated");
           }
         catch (IOException e)
