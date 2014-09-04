@@ -99,16 +99,16 @@ public class CardServlet extends HttpServlet
       {
         Vector<CardEntry> card_entries = null;
         HttpSession session = request.getSession (false);
-    	if (session != null)
-    	  {
-    	    card_entries = (Vector<CardEntry>) session.getAttribute (CardEntry.CARD_LIST);
-    	  }
-    	if (card_entries == null)
-    	  {
-    	    card_entries = initBlankCards (null, null, null);
+        if (session != null)
+          {
+            card_entries = (Vector<CardEntry>) session.getAttribute (CardEntry.CARD_LIST);
+          }
+        if (card_entries == null)
+          {
+            card_entries = initBlankCards (null, null, null);
             request.getSession (true).setAttribute (CardEntry.CARD_LIST, card_entries);
-    	  }
-    	HTML.initCards (response, request, card_entries);
+          }
+        HTML.initCards (response, request, card_entries);
       }
     
     String getArgument (HttpServletRequest request, String param) throws IOException

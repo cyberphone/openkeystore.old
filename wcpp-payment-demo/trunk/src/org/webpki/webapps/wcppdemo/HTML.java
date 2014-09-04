@@ -61,28 +61,28 @@ public class HTML
     static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
     
     static final String HTML_INIT = 
-	    "<!DOCTYPE html>"+
-	    "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
+        "<!DOCTYPE html>"+
+        "<html><head><meta charset=\"UTF-8\"><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
-	    "<title>WebCrypto++ Payment Demo</title>"+
-	    "<style type=\"text/css\">html {overflow:auto}\n"+
-	    ".tftable {border-collapse:collapse}\n" +
-	    ".tftable th {font-size:10pt;background:" +
-	      "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
-	      "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
-	      "text-align:center;font-family:" + FONT_ARIAL + "}\n" +
-	    ".tftable tr {background-color:#FFFFE0}\n" +
-	    ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
-	    "body {font-size:10pt;color:#000000;font-family:" + FONT_VERDANA + ";background-color:white}\n" +
-	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
-	    "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
-	    "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + "}\n" +
-	    "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
+        "<title>WebCrypto++ Payment Demo</title>"+
+        "<style type=\"text/css\">html {overflow:auto}\n"+
+        ".tftable {border-collapse:collapse}\n" +
+        ".tftable th {font-size:10pt;background:" +
+          "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
+          "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
+          "text-align:center;font-family:" + FONT_ARIAL + "}\n" +
+        ".tftable tr {background-color:#FFFFE0}\n" +
+        ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
+        "body {font-size:10pt;color:#000000;font-family:" + FONT_VERDANA + ";background-color:white}\n" +
+        "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
+        "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
+        "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + "}\n" +
+        "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
         ".quantity {text-align:right;font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
         ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n" +
-	    ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
-	
+        ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
+    
 
     static String encode (String val)
       {
@@ -196,29 +196,29 @@ public class HTML
         return s.toString ();
       }
 
-	public static void paymentPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
-	  {
+    public static void paymentPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
+      {
         StringBuffer s = new StringBuffer (
-	    "<!DOCTYPE html>"+
-	    "<html><head><meta charset=\"UTF-8\">"+
-	    "<style type=\"text/css\">html {overflow:hidden}\n"+
-	    "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
-	    "table {border-collapse: collapse}\n" +
-	    "td {padding: 0px}\n" +
+        "<!DOCTYPE html>"+
+        "<html><head><meta charset=\"UTF-8\">"+
+        "<style type=\"text/css\">html {overflow:hidden}\n"+
+        "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
+        "table {border-collapse: collapse}\n" +
+        "td {padding: 0px}\n" +
         "</style></head><body onload=\"initPayment()\">" +
-	    "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-	    PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
         PAYMENT_BORDER_COLOR + ";width:" +
         (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
-	    "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
+        "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-	    PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
         "Initializing...</div>" +
-	    "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
+        "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
         "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-	    "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" style=\"position:relative;visibility:hidden\" onclick=\"userAbort()\">" +
+        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" style=\"position:relative;visibility:hidden\" onclick=\"userAbort()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
         "<img id=\"busy\" src=\"" + Init.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
@@ -276,16 +276,16 @@ public class HTML
         HttpSession session = request.getSession (false);
         if (session != null)
         {
-        	@SuppressWarnings("unchecked")
-			Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
-        	if (card_entries != null)
-        	{
-        		for (CardEntry card_entry : card_entries)
-        		{
-        			if (card_entry.active)
-        			{
-            			s.append("card_list.push(new webpki.CardEntry('")
-	           			 .append(card_entry.card_type.toString())
+            @SuppressWarnings("unchecked")
+            Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
+            if (card_entries != null)
+            {
+                for (CardEntry card_entry : card_entries)
+                {
+                    if (card_entry.active)
+                    {
+                        s.append("card_list.push(new webpki.CardEntry('")
+                         .append(card_entry.card_type.toString())
                          .append("', '")
                          .append(card_entry.pin == null ? CardEntry.DEFAULT_PIN : card_entry.pin)
                          .append("', '")
@@ -295,9 +295,9 @@ public class HTML
                          .append("', '")
                          .append(card_entry.base64_image)
                          .append ("'));\n");
-        			}
-        		}
-        	}
+                    }
+                }
+            }
         }
         s.append (
         "\nfunction bad(message) {\n" +
@@ -570,25 +570,25 @@ public class HTML
        "// The payment application always query the payee for data.\n" +
        "// There is a timeout associated the (currently only) request.\n" +
        "//\n" +
-		"function receivePayeeResponse(event) {\n" +
-		"    console.debug(event.origin);\n" +
-		"    console.debug(event.data);\n" +
-		"    if (aborted_operation) return;\n" +
-		"    if (timeouter_handle) {\n" +
-		"        clearTimeout(timeouter_handle);\n" +
-		"        timeouter_handle = null;\n" +
+        "function receivePayeeResponse(event) {\n" +
+        "    console.debug(event.origin);\n" +
+        "    console.debug(event.data);\n" +
+        "    if (aborted_operation) return;\n" +
+        "    if (timeouter_handle) {\n" +
+        "        clearTimeout(timeouter_handle);\n" +
+        "        timeouter_handle = null;\n" +
         "        json_request = JSON.parse(event.data);\n" +
         "        if (getJSONProperty('" + PAYMENT_API_COMMAND + "') == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
         "            document.getElementById('busy').style.visibility = 'hidden';\n" +
         "            processINIT();\n" +
         "            return;\n" +
         "        }\n" +
-		"    }\n" +
-		"    bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
-		"}\n\n" +
-		"//\n" +
-		"// When the payment module IFRAME has been loaded (by the payee),\n" +
-		"// the payment process is automatically invoked by the body.onload().\n" +
+        "    }\n" +
+        "    bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
+        "}\n\n" +
+        "//\n" +
+        "// When the payment module IFRAME has been loaded (by the payee),\n" +
+        "// the payment process is automatically invoked by the body.onload().\n" +
         "//\n" +
         "function initPayment() {\n" +
         "    var caller_domain = window.document.referrer;\n" +
@@ -601,7 +601,7 @@ public class HTML
         "    }\n" +
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
-		"        window.addEventListener('message', receivePayeeResponse, false);\n" +
+        "        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        console.debug('init payment window');\n" +
         "        var json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
         "        json." + PAYMENT_API_INIT_SND_CURRENCIES + " = [];\n" +
@@ -615,51 +615,51 @@ public class HTML
         "</script>" +
         "</body></html>");
         HTML.output (response, s.toString());
-	  }
+      }
 
-	static StringBuffer temp_string;
-	static int temp_counter;
+    static StringBuffer temp_string;
+    static int temp_counter;
 
-	private static String productEntry (String image_url, String name, int price_mult_100)
-	  {
-		String prod_entry = "p" + temp_counter;
-		String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + image_url +
-				   "\"></td><td>" + name + "</td><td style=\"text-align:right\">" + price  (price_mult_100) +
-				   "</td><td><form>" +
-					   "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
-					   "<tr>" +
-					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + 
-					   prod_entry + ", 1, " + temp_counter + ")\" class=\"updnbtn\"></td>" +
-					   "</tr>" +
-					   "<tr>" +
-					   "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
-					       prod_entry + 
-					       "\" value=\"0\" class=\"quantity\" " +
-					       "oninput=\"updateInput(" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
-					   "</tr>" +
-					   "<tr>" +
-		               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + 
-					   prod_entry + ", -1, " + temp_counter + ")\"  class=\"updnbtn\"></td>" +
-					   "</tr>" +
-					   "</table></form></td></tr>";
-        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new webpki.ShopEntry(" + price_mult_100 + ");\n");		
-		temp_counter++;
-		return s;
-	  }
+    private static String productEntry (String image_url, String name, int price_mult_100)
+      {
+        String prod_entry = "p" + temp_counter;
+        String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + image_url +
+                   "\"></td><td>" + name + "</td><td style=\"text-align:right\">" + price  (price_mult_100) +
+                   "</td><td><form>" +
+                       "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
+                       "<tr>" +
+                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + 
+                       prod_entry + ", 1, " + temp_counter + ")\" class=\"updnbtn\"></td>" +
+                       "</tr>" +
+                       "<tr>" +
+                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
+                           prod_entry + 
+                           "\" value=\"0\" class=\"quantity\" " +
+                           "oninput=\"updateInput(" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
+                       "</tr>" +
+                       "<tr>" +
+                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + 
+                       prod_entry + ", -1, " + temp_counter + ")\"  class=\"updnbtn\"></td>" +
+                       "</tr>" +
+                       "</table></form></td></tr>";
+        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new webpki.ShopEntry(" + price_mult_100 + ");\n");        
+        temp_counter++;
+        return s;
+      }
 
-	private static String price (int price_mult_100) 
-	  {
-		return "$" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
-	  }
-	
-	public static void merchantPage (HttpServletResponse response) throws IOException, ServletException
-	  {
-		temp_counter = 0;
-		temp_string = new StringBuffer (
-        	"\nfunction checkOut() {\n" +
+    private static String price (int price_mult_100) 
+      {
+        return "$" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
+      }
+    
+    public static void merchantPage (HttpServletResponse response) throws IOException, ServletException
+      {
+        temp_counter = 0;
+        temp_string = new StringBuffer (
+            "\nfunction checkOut() {\n" +
             "    if (getTotal()) {\n" +
             "        shopping_enabled = false;\n" +
-    		"        window.addEventListener('message', receivePaymentMessage, false);\n" +
+            "        window.addEventListener('message', receivePaymentMessage, false);\n" +
             "        save_checkout_html = document.getElementById('pay').innerHTML;\n" +
             "        document.getElementById('pay').innerHTML = paycode;\n" +
             "    } else {\n" +
@@ -670,67 +670,67 @@ public class HTML
             "            document.getElementById('emptybasket').style.visibility = 'hidden';\n" +
             "        }, 1000);\n" +
             "    }\n" +
-	        "}\n\n" +
-		    "function getTotal() {\n" +
-	        "    var total = 0;\n" +
-	        "    for (var i = 0; i < shopping_cart.length; i++) {\n" +
-	        "        total += shopping_cart[i].price_mult_100 * shopping_cart[i].units;\n" +
+            "}\n\n" +
+            "function getTotal() {\n" +
+            "    var total = 0;\n" +
+            "    for (var i = 0; i < shopping_cart.length; i++) {\n" +
+            "        total += shopping_cart[i].price_mult_100 * shopping_cart[i].units;\n" +
             "    }\n" +
-	        "    return total;\n"+
-	        "}\n\n" +
-	        "function getPriceString() {\n" +
-	        "    var price_mult_100 = getTotal();\n" +
-	        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
-	        "}\n\n" +
-	        "function updateTotal() {\n" +
+            "    return total;\n"+
+            "}\n\n" +
+            "function getPriceString() {\n" +
+            "    var price_mult_100 = getTotal();\n" +
+            "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+            "}\n\n" +
+            "function updateTotal() {\n" +
             "    document.getElementById('total').innerHTML = getPriceString();\n" +
-	        "}\n\n" +
-	        "function updateInput(index, control) {\n" +
-	        "    if (shopping_enabled) {\n" +
-	        "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
-	        "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
-	        "        shopping_cart[index].units = control.value;\n" +
-	        "        updateTotal();\n" +
-	        "    } else {\n" +
-	        "        control.value = shopping_cart[index].units;\n" +
-	        "    }\n" +
-	        "}\n\n" +
+            "}\n\n" +
+            "function updateInput(index, control) {\n" +
+            "    if (shopping_enabled) {\n" +
+            "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
+            "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
+            "        shopping_cart[index].units = control.value;\n" +
+            "        updateTotal();\n" +
+            "    } else {\n" +
+            "        control.value = shopping_cart[index].units;\n" +
+            "    }\n" +
+            "}\n\n" +
             "function updateUnits(control, value, index) {\n" +
             "    control.value = parseInt(control.value) + value;\n" +
             "    updateInput(index, control);\n" +
-	        "}\n\n" +
-	        "function createJSONBaseCommand(command_property_value) {\n" +
-	        "    var json = {};\n" +
-	        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
-	        "    return json;\n" +
-	        "}\n\n" +
-			"function receivePaymentMessage(event) {\n" +
-			"    console.debug (event.origin);\n" +
-			"    console.debug (event.data);\n" +
-			"    var received_json = JSON.parse(event.data);\n" +
+            "}\n\n" +
+            "function createJSONBaseCommand(command_property_value) {\n" +
+            "    var json = {};\n" +
+            "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+            "    return json;\n" +
+            "}\n\n" +
+            "function receivePaymentMessage(event) {\n" +
+            "    console.debug (event.origin);\n" +
+            "    console.debug (event.data);\n" +
+            "    var received_json = JSON.parse(event.data);\n" +
             "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
             "        document.getElementById('pay').innerHTML = save_checkout_html;\n" +
             "        payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
             "        shopping_enabled = true;\n" +
-			"        return;\n" +
-			"    }\n" +
-			"    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
-			"        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
-			"        payment_status = 'Failed***';\n" +
-			"        return;\n" +
-			"    }\n" +
-			"    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
-			"        setTimeout(function(){\n" +
-			"        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-			"        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
+            "        return;\n" +
+            "    }\n" +
+            "    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
+            "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
+            "        payment_status = 'Failed***';\n" +
+            "        return;\n" +
+            "    }\n" +
+            "    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+            "        setTimeout(function(){\n" +
+            "        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+            "        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
             "        inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
             "        inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
-			"        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
-			"        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
+            "        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
+            "        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
             "        var date_time = new Date().toISOString();\n" +
-			"        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+            "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
             "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-			"        }\n" +
+            "        }\n" +
             "        inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
             "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
@@ -742,13 +742,13 @@ public class HTML
               }
         temp_string.append (
             "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
-//			"        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-			"        }, 500);\n" +
-			"        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
-			"    }\n" +
-			"    else if (payment_status == '" + PAYMENT_API_TRANSACT_COMMAND + "') {\n" +
+//          "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
+            "        }, 500);\n" +
+            "        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
+            "    }\n" +
+            "    else if (payment_status == '" + PAYMENT_API_TRANSACT_COMMAND + "') {\n" +
             "        setTimeout(function(){\n" +
-			"        var url = received_json." + PAYMENT_API_TRANSACT_SND_URL + ";\n" +
+            "        var url = received_json." + PAYMENT_API_TRANSACT_SND_URL + ";\n" +
             "        if (!url) alert('failed-URL');\n" +
             "        transaction_channel.open('POST', url, true);\n" +
             "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
@@ -773,95 +773,95 @@ public class HTML
             "        }\n" +
             "        transaction_channel.send(JSON.stringify(received_json));\n" +
             "        }, 1500);\n" +
-			"    }\n" +
-			"}\n");
+            "    }\n" +
+            "}\n");
 
-		StringBuffer page_data = new StringBuffer (
+        StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table>" +
                "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Demo Merchant<br>&nbsp;</td></tr>" +
                "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
-       		       "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
+                   "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
                    productEntry ("product-car.png", "Sports Car", 8599900) + 
                    productEntry ("product-icecream.png", "Ice Cream", 325) + 
-       		       "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
+                   "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
                "<tr><td style=\"text-align:center\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
              "</table></td></tr>");
-		temp_string.insert (0,
-		        "\n\"use strict\";" +
+        temp_string.insert (0,
+                "\n\"use strict\";" +
                 "\nvar paycode=" + 
-	            "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
-	            PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
-	            "var save_checkout_html;\n\n" +
-				"var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
-				"var transaction_channel = new XMLHttpRequest();\n\n" +
-				"var shopping_cart = [];\n" +
-	            "var shopping_enabled = true;\n" +
-	            "var next_transaction_id = 100000;\n" +
-				"var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
-	            "var webpki = {};\n" +
-		        "webpki.ShopEntry = function(price_mult_100) {\n" +
-		        "    this.price_mult_100 = price_mult_100;\n" +
-		        "    this.units = 0;\n" +
-		        "};\n");
+                "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
+                PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
+                "var save_checkout_html;\n\n" +
+                "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
+                "var transaction_channel = new XMLHttpRequest();\n\n" +
+                "var shopping_cart = [];\n" +
+                "var shopping_enabled = true;\n" +
+                "var next_transaction_id = 100000;\n" +
+                "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
+                "var webpki = {};\n" +
+                "webpki.ShopEntry = function(price_mult_100) {\n" +
+                "    this.price_mult_100 = price_mult_100;\n" +
+                "    this.units = 0;\n" +
+                "};\n");
 
         HTML.output (response, HTML.getHTML (temp_string.toString(), 
                                              "><div id=\"emptybasket\" style=\"border-color:grey;border-style:solid;border-width:3px;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:#f0f0f0;position:absolute;visibility:hidden;padding:5pt 10pt 5pt 10pt\">Nothing ordered yet...</div",
                                              page_data.toString()));
-	  }
+      }
 
-	private static String formatPAN (String pan)
-	  {
-	    StringBuffer new_pan = new StringBuffer ();
-	    for (int i = 0; i < pan.length (); i++)
-	      {
-	        if (i != 0 && ((i % 4) == 0))
-	          {
-	            new_pan.append (' ');
-	          }
-	        new_pan.append (pan.charAt (i));
-	      }
-	    return new_pan.toString ();
-	  }
-	
-	public static void initCards (HttpServletResponse response, HttpServletRequest request, Vector<CardEntry> card_entries) throws IOException, ServletException 
-	  {
-	    StringBuffer s = new StringBuffer (
+    private static String formatPAN (String pan)
+      {
+        StringBuffer new_pan = new StringBuffer ();
+        for (int i = 0; i < pan.length (); i++)
+          {
+            if (i != 0 && ((i % 4) == 0))
+              {
+                new_pan.append (' ');
+              }
+            new_pan.append (pan.charAt (i));
+          }
+        return new_pan.toString ();
+      }
+    
+    public static void initCards (HttpServletResponse response, HttpServletRequest request, Vector<CardEntry> card_entries) throws IOException, ServletException 
+      {
+        StringBuffer s = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-	        "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
+            "<form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">" +
             "<table cellpadding=\"0\" cellspacing=\"0\"><tr><td></td><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Your Payment Cards<br>&nbsp;</td></tr>" +
-	        "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
-	        "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" " +
-	        "title=\"The name will be written on your cards\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
-	    .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
-	    .append ("\"></td></tr>" +
-	        "<tr><td style=\"font-size:10pt\">PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
-	        PIN_MAX_LENGTH + "\" " +
-	        "title=\"This is a DEMO so we don't complicate things :-)\" placeholder=\"Default: " + 
-	        CardEntry.DEFAULT_PIN + "\" name=\"" + 
-	        CardEntry.PIN_FIELD + "\" value=\"")
+            "<tr><td colspan=\"2\"><table style=\"margin-bottom:10pt;margin-left:auto;margin-right:auto\">" +
+            "<tr><td style=\"font-size:10pt\">Name</td><td><input size=\"18\" type=\"text\" " +
+            "title=\"The name will be written on your cards\" maxlength=\"35\" placeholder=\"Name on the card\" name=\"" + CardEntry.USER_FIELD + "\" value=\"")
+        .append (card_entries.firstElement ().user == null ? "" : encode (card_entries.firstElement ().user))
+        .append ("\"></td></tr>" +
+            "<tr><td style=\"font-size:10pt\">PIN</td><td><input size=\"18\" type=\"text\" maxlength=\"" +
+            PIN_MAX_LENGTH + "\" " +
+            "title=\"This is a DEMO so we don't complicate things :-)\" placeholder=\"Default: " + 
+            CardEntry.DEFAULT_PIN + "\" name=\"" + 
+            CardEntry.PIN_FIELD + "\" value=\"")
         .append (card_entries.firstElement ().pin == null ? "" : encode (card_entries.firstElement ().pin))
         .append ("\"></td></tr></table></td></tr>");
-	    for (CardEntry card_entry : card_entries)
-	      {
-	        s.append ("<tr><td style=\"text-align:right;padding-right:5pt\"><input type=\"checkbox\" name=\"")
-	         .append (card_entry.card_type.toString ())
-	         .append ("\" title=\"Activate/deactivate card\"")
-	         .append (card_entry.active ? " checked" : "")
-	         .append ("></td><td>" + CardEntry.CARD_DIV)
-	         .append (card_entry.base64_image)
-	         .append ("');\" title=\"This card is")
+        for (CardEntry card_entry : card_entries)
+          {
+            s.append ("<tr><td style=\"text-align:right;padding-right:5pt\"><input type=\"checkbox\" name=\"")
+             .append (card_entry.card_type.toString ())
+             .append ("\" title=\"Activate/deactivate card\"")
+             .append (card_entry.active ? " checked" : "")
+             .append ("></td><td>" + CardEntry.CARD_DIV)
+             .append (card_entry.base64_image)
+             .append ("');\" title=\"This card is")
              .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
              .append (" recognized by the demo merchant\">" +
-	                  "</div></td></tr><tr><td></td>" +
-	                  "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING_TOP +
-	                  "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px\">")
+                      "</div></td></tr><tr><td></td>" +
+                      "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING_TOP +
+                      "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px\">")
              .append (card_entry.active ? formatPAN (card_entry.pan) : "<i>Inactive Card</i>")
              .append ("</td></tr>");
-	      }  
-	    HTML.output (response, HTML.getHTML (null, null, s.append (
-	        "<tr><td></td><td style=\"text-align:center\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
-	        "</table></form></td></tr>").toString ()));
-	  }
+          }  
+        HTML.output (response, HTML.getHTML (null, null, s.append (
+            "<tr><td></td><td style=\"text-align:center\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
+            "</table></form></td></tr>").toString ()));
+      }
   }

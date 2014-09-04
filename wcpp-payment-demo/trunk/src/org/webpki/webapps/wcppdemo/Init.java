@@ -34,20 +34,20 @@ public class Init implements ServletContextListener
     @Override
     public void contextInitialized (ServletContextEvent event)
       {
-    	InitPropertyReader properties = new InitPropertyReader ();
-    	properties.initProperties (event);
-    	try 
-    	  {
-			bank_url = properties.getPropertyString ("bank_url");
-		    merchant_url = properties.getPropertyString ("merchant_url");
-		    cross_data_uri = getDataURI ("cross", "png");
-		    working_data_uri = getDataURI ("working", "gif");
-		    logger.info ("WebCrypto++ Payment Demo - Successfully Initiated");
-		  }
-    	catch (IOException e)
-    	  {
-    	    logger.info("********\n" + e.getMessage() + "\n********");
-    		throw new RuntimeException (e);
-    	  }
+        InitPropertyReader properties = new InitPropertyReader ();
+        properties.initProperties (event);
+        try 
+          {
+            bank_url = properties.getPropertyString ("bank_url");
+            merchant_url = properties.getPropertyString ("merchant_url");
+            cross_data_uri = getDataURI ("cross", "png");
+            working_data_uri = getDataURI ("working", "gif");
+            logger.info ("WebCrypto++ Payment Demo - Successfully Initiated");
+          }
+        catch (IOException e)
+          {
+            logger.info("********\n" + e.getMessage() + "\n********");
+            throw new RuntimeException (e);
+          }
       }
   }

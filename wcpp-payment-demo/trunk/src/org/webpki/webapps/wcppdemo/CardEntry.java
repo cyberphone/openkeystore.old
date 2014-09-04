@@ -4,15 +4,15 @@ import java.io.Serializable;
 
 public class CardEntry implements Serializable
   {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	static final String CARD_LIST = "CardList";
-	
-	static final String PIN_FIELD  = "PIN";
-	static final String USER_FIELD = "USER";
-	
-	static final String DEFAULT_PIN = "1234";
-	static final String DEFAULT_USER = "No name defined!";
+    static final String CARD_LIST = "CardList";
+    
+    static final String PIN_FIELD  = "PIN";
+    static final String USER_FIELD = "USER";
+    
+    static final String DEFAULT_PIN = "1234";
+    static final String DEFAULT_USER = "No name defined!";
 
     static final int CARD_WIDTH      = 150;
     static final int CARD_HEIGHT     = 80;

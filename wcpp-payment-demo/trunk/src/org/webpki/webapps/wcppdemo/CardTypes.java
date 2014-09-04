@@ -10,23 +10,23 @@ import javax.imageio.ImageIO;
 
 public enum CardTypes
   {
-	SuperCard   ("supercard.png",   Color.BLUE), 
-	CoolCard    ("coolcard.png",    Color.BLACK),
-	UnusualCard ("unusualcard.png", Color.GRAY);
-	
-	BufferedImage image;
-	Color color;
-	
-	CardTypes (String file, Color color)
-	  {
-		try 
-		  {
-			image = ImageIO.read (CardTypes.class.getResourceAsStream (file));
-	      }
-		catch (IOException e)
-		  {
-			throw new RuntimeException (e);
-		  }
-		this.color = color;
-	  }
+    SuperCard   ("supercard.png",   Color.BLUE), 
+    CoolCard    ("coolcard.png",    Color.BLACK),
+    UnusualCard ("unusualcard.png", Color.GRAY);
+    
+    BufferedImage image;
+    Color color;
+    
+    CardTypes (String file, Color color)
+      {
+        try 
+          {
+            image = ImageIO.read (CardTypes.class.getResourceAsStream (file));
+          }
+        catch (IOException e)
+          {
+            throw new RuntimeException (e);
+          }
+        this.color = color;
+      }
   }
