@@ -22,13 +22,15 @@ public class TransactServlet extends HttpServlet
     private static final long serialVersionUID = 1L;
 
     static Logger logger = Logger.getLogger (TransactServlet.class.getName ());
+    
+    static int transaction_id = 164006;
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
         JSONObjectWriter result = new JSONObjectWriter ();
         result.setObject ("Request", json.getObject ("Request"));
-        result.setString ("TransactionID", "#4");
+        result.setString ("TransactionID", "#" + transaction_id++);
         String pan = json.getString ("PAN");
         StringBuffer payee_pan = new StringBuffer ();
         for (int i = 0; i < pan.length (); i++)

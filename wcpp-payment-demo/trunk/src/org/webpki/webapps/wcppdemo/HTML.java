@@ -405,8 +405,7 @@ public class HTML
         "    document.getElementById('details').style.top = (" +
              PAYMENT_WINDOW_HEIGHT + 
              " - document.getElementById('details').offsetHeight)/2 + 'px';\n" +
-        "    var details_left = document.getElementById('details').style.left = (" +
-             (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN) +
+        "    var details_left = (" + (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN) +
              " - document.getElementById('details').offsetWidth) / 2;\n" +
              "    document.getElementById('details').style.left = details_left + 'px';\n" +
              "    document.getElementById('ok').style.left = ((details_left + " +
@@ -493,12 +492,15 @@ public class HTML
        "// Message syntax:\n" +
        "//   {\n" +
        "//     \"" + PAYMENT_API_COMMAND + "\": \"" + PAYMENT_API_INIT_COMMAND + "\"\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"XYZ\"                Currency in ISO notation\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_TRANS_ID + "\": \"String\"        Payee transaction ID\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_DATE_TIME + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]    1-n card types recognized by the payee\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]        1-n card types recognized by the payee\n" +
+       "//     \"" + PAYMENT_API_INIT_REC_REQUEST + "\":                           The actual request\n" +
+       "//       {\n" +
+       "//         \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
+       "//         \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"XYZ\"                Currency in ISO notation\n" +
+       "//         \"" + PAYMENT_API_INIT_REC_TRANS_ID + "\": \"String\"        Payee transaction ID\n" +
+       "//         \"" + PAYMENT_API_INIT_REC_DATE_TIME + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
+       "//         \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
+       "//       }\n" +
        "//   }\n" +
        "//\n" +
        "function processINIT() {\n" +
@@ -676,11 +678,12 @@ public class HTML
             "    }\n" +
 	        "    return total;\n"+
 	        "}\n\n" +
-	        "function priceString(price_mult_100) {\n" +
+	        "function getPriceString() {\n" +
+	        "    var price_mult_100 = getTotal();\n" +
 	        "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
 	        "}\n\n" +
 	        "function updateTotal() {\n" +
-            "    document.getElementById('total').innerHTML = priceString(getTotal());\n" +
+            "    document.getElementById('total').innerHTML = getPriceString();\n" +
 	        "}\n\n" +
 	        "function updateInput(index, control) {\n" +
 	        "    if (shopping_enabled) {\n" +
@@ -756,7 +759,7 @@ public class HTML
             "                    console.debug('Transaction:' + JSON.stringify(json_transaction));\n" +
             "                    document.getElementById('result').innerHTML = '<table>" +
             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
-            "<tr><td>Amount: ' + priceString(getTotal()) + '</td></tr>" +
+            "<tr><td>Amount: ' + getPriceString() + '</td></tr>" +
             "<tr><td>' + json_transaction." + PAYMENT_API_TRANSACT_SND_CARD_TYPE + 
             " + ': ' + json_transaction." + PAYMENT_API_TRANSACT_REC_PAYEE_PAN + " + '</td></tr>" +
             "</table>';\n" +
@@ -765,7 +768,7 @@ public class HTML
             "                }\n" +
             "                document.getElementById('pay').innerHTML = '';\n" +
             "            } else {\n" +
-            "                console.debug('currently the application is at' + transaction_channel.readyState);\n" +
+            "                console.debug('XHR state: ' + transaction_channel.readyState);\n" +
             "            }\n" +
             "        }\n" +
             "        transaction_channel.send(JSON.stringify(received_json));\n" +
