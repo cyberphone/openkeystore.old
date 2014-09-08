@@ -1,14 +1,15 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.Vector;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
 
 public class HTML
   {
@@ -83,6 +84,16 @@ public class HTML
         ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n" +
         ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
     
+
+    static String getIframeHTML ()
+      {
+        return "<iframe src=\"" + Init.bank_url +
+               "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + 
+               "px;height:" + PAYMENT_WINDOW_HEIGHT + 
+               "px;border-width:1px;border-style:solid;border-color:" +
+               PAYMENT_BORDER_COLOR + 
+               ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>";
+      }
 
     static String encode (String val)
       {
@@ -619,33 +630,29 @@ public class HTML
         HTML.output (response, s.toString());
       }
 
-    static StringBuffer temp_string;
-    static int temp_counter;
-
-    private static String productEntry (String image_url, String name, int price_mult_100)
+    private static String productEntry (StringBuffer temp_string, ProductEntry product_entry, int index)
       {
-        String prod_entry = "p" + temp_counter;
-        String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + image_url +
-                   "\"></td><td>" + name + "</td><td style=\"text-align:right\">" + price  (price_mult_100) +
+        String prod_entry = "p" + index;
+        String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + product_entry.image_url +
+                   "\"></td><td>" + product_entry.name + "</td><td style=\"text-align:right\">" + price  (product_entry.price_mult_100) +
                    "</td><td><form>" +
                        "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
                        "<tr>" +
                        "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + 
-                       prod_entry + ", 1, " + temp_counter + ")\" class=\"updnbtn\"></td>" +
+                       prod_entry + ", 1, " + index + ")\" class=\"updnbtn\"></td>" +
                        "</tr>" +
                        "<tr>" +
                        "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
                            prod_entry + 
                            "\" value=\"0\" class=\"quantity\" " +
-                           "oninput=\"updateInput(" + temp_counter + ", this);\" autocomplete=\"off\"/></td>" +
+                           "oninput=\"updateInput(" + index + ", this);\" autocomplete=\"off\"/></td>" +
                        "</tr>" +
                        "<tr>" +
                        "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + 
-                       prod_entry + ", -1, " + temp_counter + ")\"  class=\"updnbtn\"></td>" +
+                       prod_entry + ", -1, " + index + ")\"  class=\"updnbtn\"></td>" +
                        "</tr>" +
                        "</table></form></td></tr>";
-        temp_string.insert (0, "shopping_cart[" + temp_counter + "] = new webpki.ShopEntry(" + price_mult_100 + ");\n");        
-        temp_counter++;
+        temp_string.insert (0, "shopping_cart[" + index + "] = new webpki.ShopEntry(" + product_entry.price_mult_100 + ",'" + product_entry.name + "');\n");        
         return s;
       }
 
@@ -656,14 +663,24 @@ public class HTML
     
     public static void merchantPage (HttpServletResponse response) throws IOException, ServletException
       {
-        temp_counter = 0;
-        temp_string = new StringBuffer (
+        StringBuffer temp_string = new StringBuffer (
             "\nfunction checkOut() {\n" +
-            "    if (getTotal()) {\n" +
+            "    if (getTotal()) {\n");
+        if (Init.web_crypto)
+          {
+            temp_string.append (
+            "        document.getElementById('shoppingcart').value = JSON.stringify(shopping_cart);\n" +
+            "        document.forms.shoot.submit();\n");            
+          }
+        else
+          {
+            temp_string.append (
             "        shopping_enabled = false;\n" +
             "        window.addEventListener('message', receivePaymentMessage, false);\n" +
             "        save_checkout_html = document.getElementById('pay').innerHTML;\n" +
-            "        document.getElementById('pay').innerHTML = paycode;\n" +
+            "        document.getElementById('pay').innerHTML = paycode;\n");
+          }
+        temp_string.append (
             "    } else {\n" +
             "        document.getElementById('emptybasket').style.top = ((window.innerHeight - document.getElementById('emptybasket').offsetHeight) / 2) + 'px';\n" +
             "        document.getElementById('emptybasket').style.left = ((window.innerWidth - document.getElementById('emptybasket').offsetWidth) / 2) + 'px';\n" +
@@ -691,7 +708,7 @@ public class HTML
             "    if (shopping_enabled) {\n" +
             "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
             "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
-            "        shopping_cart[index].units = control.value;\n" +
+            "        shopping_cart[index].units = parseInt(control.value);\n" +
             "        updateTotal();\n" +
             "    } else {\n" +
             "        control.value = shopping_cart[index].units;\n" +
@@ -783,18 +800,27 @@ public class HTML
             "<table>" +
                "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Demo Merchant<br>&nbsp;</td></tr>" +
                "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
-                   "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>" +
-                   productEntry ("product-car.png", "Sports Car", 8599900) + 
-                   productEntry ("product-icecream.png", "Ice Cream", 325) + 
+                   "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>");
+            int q = 0;
+            for (ProductEntry product_entry : MerchantServlet.products)
+              {
+                page_data.append (productEntry (temp_string, product_entry, q++));
+              }
+            page_data.append (
                    "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
                "<tr><td style=\"text-align:center\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
              "</table></td></tr>");
+        if (Init.web_crypto)
+          {
+            page_data.append ("<form name=\"shoot\" method=\"POST\" action=\"checkout\">" +
+                              "<input type=\"hidden\" name=\"shoppingcart\" id=\"shoppingcart\">" +
+                              "</form>");
+          }
         temp_string.insert (0,
                 "\n\"use strict\";" +
                 "\nvar paycode=" + 
-                "'<iframe src=\"" + Init.bank_url + "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + "px;height:" + PAYMENT_WINDOW_HEIGHT + "px;border-width:1px;border-style:solid;border-color:" +
-                PAYMENT_BORDER_COLOR + ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>';\n\n" +
+                "'" + getIframeHTML () + "';\n\n" +
                 "var save_checkout_html;\n\n" +
                 "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
                 "var transaction_channel = new XMLHttpRequest();\n\n" +
@@ -803,8 +829,9 @@ public class HTML
                 "var next_transaction_id = 100000;\n" +
                 "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
                 "var webpki = {};\n" +
-                "webpki.ShopEntry = function(price_mult_100) {\n" +
+                "webpki.ShopEntry = function(price_mult_100, name) {\n" +
                 "    this.price_mult_100 = price_mult_100;\n" +
+                "    this.name = name;\n" +
                 "    this.units = 0;\n" +
                 "};\n");
 
@@ -865,5 +892,91 @@ public class HTML
         HTML.output (response, HTML.getHTML (null, null, s.append (
             "<tr><td></td><td style=\"text-align:center\"><input type=\"submit\" value=\"Save Changes\" title=\"Cards only &quot;live&quot; in a web session\"></td></tr>" +
             "</table></form></td></tr>").toString ()));
+      }
+
+    public static void checkoutPage (HttpServletResponse response, JSONArrayReader ar) throws IOException, ServletException
+      {
+        StringBuffer s = new StringBuffer (
+        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
+        "<table>" +
+           "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Current Order<br>&nbsp;</td></tr>" +
+           "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
+               "<tr><th>Description</th><th>Price</th><th>Units</th></tr>");
+        int total = 0;
+        while (ar.hasMore ())
+          {
+            JSONObjectReader or = ar.getObject ();
+            int units = or.getInt ("units");
+            int price_mult_100 = or.getInt ("price_mult_100");
+            String name = or.getString ("name");
+            if (units != 0)
+              {
+                total += units * price_mult_100;
+                s.append ("<tr style=\"text-align:center\"><td>")
+                 .append (name)
+                 .append ("</td><td style=\"text-align:right\">")
+                 .append (price (price_mult_100))
+                 .append ("</td><td>")
+                 .append (units)
+                 .append ("</td></tr>");                
+              }
+          }
+        s.append (
+            "<tr><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
+         .append (price (total))
+         .append("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
+                 "</table></td></tr>" +
+                 "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\">")
+         .append (getIframeHTML ())
+         .append ("</td></tr></table></td></tr>");
+        
+     StringBuffer temp_string = new StringBuffer (
+        "\n\n\"use strict\";\n\n" +
+        "function createJSONBaseCommand(command_property_value) {\n" +
+        "    var json = {};\n" +
+        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+        "    return json;\n" +
+        "}\n\n" +
+        "function receivePaymentMessage(event) {\n" +
+        "    console.debug (event.origin);\n" +
+        "    console.debug (event.data);\n" +
+        "    var received_json = JSON.parse(event.data);\n" +
+        "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
+        "        alert ('jovisst!');\n" +
+        "        return;\n" +
+        "    }\n" +
+        "    if (received_json." + PAYMENT_API_COMMAND + " != '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
+        "        return;\n" +
+        "    }\n" +
+        "    setTimeout(function(){\n" +
+        "    var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+        "    var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
+        "    inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
+        "    inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
+        "    inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = " + total + ";\n" +
+        "    inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + " + CheckoutServlet.next_transaction_id + ";\n" +
+        "    var date_time = new Date().toISOString();\n" +
+        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+        "    }\n" +
+        "    inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
+        "    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
+        "    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
+        for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
+          {
+            temp_string.append ("    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
+                       .append (card_type.toString())
+                       .append ("');\n");
+          }
+    temp_string.append (
+        "    event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
+//      "    }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
+        "    }, 500);\n" +
+        "}\n\n" +
+        "function initPage() {\n" +
+        "    window.addEventListener('message', receivePaymentMessage, false);\n" +
+        "}\n");
+        HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
       }
   }

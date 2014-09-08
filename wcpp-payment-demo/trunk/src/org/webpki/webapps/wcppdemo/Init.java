@@ -16,6 +16,7 @@ public class Init implements ServletContextListener
     
     static String bank_url;
     static String merchant_url;
+    static boolean web_crypto;
     
     static String cross_data_uri;
     static String working_data_uri;
@@ -42,6 +43,7 @@ public class Init implements ServletContextListener
           {
             bank_url = properties.getPropertyString ("bank_url");
             merchant_url = properties.getPropertyString ("merchant_url");
+            web_crypto = properties.getPropertyBoolean ("web_crypto");
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
             card_font = properties.getPropertyString ("card_font");

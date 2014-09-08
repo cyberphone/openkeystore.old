@@ -7,19 +7,25 @@
     <context-param>
         <description>URL to bank</description>
         <param-name>bank_url</param-name>
-        <param-value>http://mybank.com:8080/WebCryptoPlusPlus</param-value>
+        <param-value>@bank-url@</param-value>
     </context-param>
 
     <context-param>
         <description>URL to Merchant</description>
         <param-name>merchant_url</param-name>
-        <param-value>http://merchant.com:8080/WebCryptoPlusPlus/merchant</param-value>
+        <param-value>@merchant-url@</param-value>
     </context-param>
 
     <context-param>
         <description>Card font name</description>
         <param-name>card_font</param-name>
-        <param-value>Arial Unicode MS</param-value>
+        <param-value>@card-font@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>WebCrypto Use</description>
+        <param-name>web_crypto</param-name>
+        <param-value>@web-crypto@</param-value>
     </context-param>
 
     <listener>
@@ -31,6 +37,11 @@
         <servlet-class>org.webpki.webapps.wcppdemo.MerchantServlet</servlet-class>
     </servlet>
     
+    <servlet>
+	    <servlet-name>CheckoutServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.CheckoutServlet</servlet-class>
+    </servlet>
+
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
@@ -56,6 +67,11 @@
         <url-pattern>/merchant</url-pattern>
     </servlet-mapping>
 
+    '<servlet-mapping>
+        <servlet-name>CheckoutServlet</servlet-name>
+        <url-pattern>/checkout</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -75,5 +91,5 @@
         <servlet-name>TransactServlet</servlet-name>
         <url-pattern>/transact</url-pattern>
     </servlet-mapping>
-    
+@security-constraints@    
 </web-app>
