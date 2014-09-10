@@ -616,13 +616,10 @@ public class HTML
         "    if (checkNoErrors()) {\n" +
         "        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        console.debug('init payment window');\n" +
-        "        var json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-        "        json." + PAYMENT_API_INIT_SND_CURRENCIES + " = [];\n" +
-        "        for (var i = 0; i < currency_list.length; i++) {\n" +
-        "            json." + PAYMENT_API_INIT_SND_CURRENCIES + ".push(currency_list[i].iso_name);\n" +
-        "        }\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
-        "        window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
+        "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
+                 PAYMENT_API_INIT_COMMAND +
+                 "')), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
         "</script>" +
@@ -928,10 +925,14 @@ public class HTML
                  "</table></td></tr>" +
                  "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\">")
          .append (getIframeHTML ())
-         .append ("</td></tr></table></td></tr>");
+         .append ("</td></tr></table></td></tr>" +
+                  "<form name=\"shoot\" method=\"POST\" action=\"authreq\">" +
+                  "<input type=\"hidden\" name=\"authreq\" id=\"authreq\">" +
+                  "</form>");
         
      StringBuffer temp_string = new StringBuffer (
         "\n\n\"use strict\";\n\n" +
+        "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n\n" +
         "function createJSONBaseCommand(command_property_value) {\n" +
         "    var json = {};\n" +
         "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
@@ -939,44 +940,67 @@ public class HTML
         "}\n\n" +
         "function receivePaymentMessage(event) {\n" +
         "    console.debug (event.origin);\n" +
-        "    console.debug (event.data);\n" +
+        "    console.debug ('Checkout:' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
         "        alert ('jovisst!');\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (received_json." + PAYMENT_API_COMMAND + " != '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
         "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
         "        return;\n" +
         "    }\n" +
-        "    setTimeout(function(){\n" +
-        "    var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-        "    var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
-        "    inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
-        "    inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
-        "    inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = " + total + ";\n" +
-        "    inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + " + CheckoutServlet.next_transaction_id + ";\n" +
-        "    var date_time = new Date().toISOString();\n" +
-        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-        "    }\n" +
-        "    inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
-        "    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
-        "    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
+        "    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "        setTimeout(function(){\n" +
+        "        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
+        "        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
+        "        inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
+        "        inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
+        "        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = " + total + ";\n" +
+        "        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + " + CheckoutServlet.next_transaction_id + ";\n" +
+        "        var date_time = new Date().toISOString();\n" +
+        "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+        "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+        "        }\n" +
+        "        inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
+        "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
+        "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
         for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
           {
-            temp_string.append ("    returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
+            temp_string.append ("        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
                        .append (card_type.toString())
                        .append ("');\n");
           }
     temp_string.append (
-        "    event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
-//      "    }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-        "    }, 500);\n" +
+        "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
+//      "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
+        "        }, 500);\n" +
+        "        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
+        "    } else {\n" +
+        "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +
+        "        document.forms.shoot.submit();\n" +
+        "    }\n" +
         "}\n\n" +
         "function initPage() {\n" +
         "    window.addEventListener('message', receivePaymentMessage, false);\n" +
         "}\n");
         HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
+      }
+
+    public static void resultPage (HttpServletResponse response, JSONObjectReader authorized_result) throws IOException, ServletException
+      {
+        StringBuffer s = new StringBuffer (
+        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table>" +
+           "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
+           "<tr><td><table>" +
+           "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
+           "<tr><td>Amount: ")
+        .append (price (authorized_result.getObject (PAYMENT_API_INIT_REC_REQUEST).getInt (PAYMENT_API_INIT_REC_AMOUNT)))
+        .append ("</td></tr><tr><td>")
+        .append (authorized_result.getString (PAYMENT_API_TRANSACT_SND_CARD_TYPE))
+        .append (": ")
+        .append (authorized_result.getString (PAYMENT_API_TRANSACT_REC_PAYEE_PAN))
+        .append ("</td></tr></table></td></tr></table></td></tr>");
+        HTML.output (response, HTML.getHTML (null, null, s.toString ()));
       }
   }

@@ -17,17 +17,18 @@ import org.webpki.json.JSONParser;
 
 import org.webpki.webutil.ServletUtil;
 
-public class TransactServlet extends HttpServlet
+public class PaymentProviderServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
 
-    static Logger logger = Logger.getLogger (TransactServlet.class.getName ());
+    static Logger logger = Logger.getLogger (PaymentProviderServlet.class.getName ());
     
     static int transaction_id = 164006;
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
+        logger.info ("Authorization Request:\n" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
         JSONObjectWriter result = new JSONObjectWriter ();
         result.setObject ("Request", json.getObject ("Request"));
         result.setString ("TransactionID", "#" + transaction_id++);
@@ -43,11 +44,13 @@ public class TransactServlet extends HttpServlet
           }
         result.setString ("PayeePAN", payee_pan.toString ());
         result.setString ("CardType", json.getString ("CardType"));
-        String origin = request.getHeader ("Origin");
-        logger.info ("POST[" + origin + "]=" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"));
+        if (!Init.web_crypto)
+          {
+            String origin = request.getHeader ("Origin");
+            response.setHeader ("Access-Control-Allow-Origin", origin);
+          }
         response.setContentType ("application/json; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
-        response.setHeader ("Access-Control-Allow-Origin", origin);
         response.setDateHeader ("EXPIRES", 0);
         response.getOutputStream ().write (result.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
       }

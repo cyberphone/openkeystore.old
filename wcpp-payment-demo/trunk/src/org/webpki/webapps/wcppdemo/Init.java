@@ -47,7 +47,7 @@ public class Init implements ServletContextListener
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
             card_font = properties.getPropertyString ("card_font");
-            logger.info ("WebCrypto++ Payment Demo - Successfully Initiated");
+            logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }
         catch (IOException e)
           {

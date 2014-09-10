@@ -43,6 +43,11 @@
     </servlet>
 
     <servlet>
+	    <servlet-name>AuthorizeRequestServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.AuthorizeRequestServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
     </servlet>
@@ -58,8 +63,8 @@
     </servlet>
     
     <servlet>
-	    <servlet-name>TransactServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.TransactServlet</servlet-class>
+	    <servlet-name>PaymentProviderServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.PaymentProviderServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -70,6 +75,11 @@
     '<servlet-mapping>
         <servlet-name>CheckoutServlet</servlet-name>
         <url-pattern>/checkout</url-pattern>
+    </servlet-mapping>
+
+    '<servlet-mapping>
+        <servlet-name>AuthorizeRequestServlet</servlet-name>
+        <url-pattern>/authreq</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -88,7 +98,7 @@
     </servlet-mapping>
     
     <servlet-mapping>
-        <servlet-name>TransactServlet</servlet-name>
+        <servlet-name>PaymentProviderServlet</servlet-name>
         <url-pattern>/transact</url-pattern>
     </servlet-mapping>
 @security-constraints@    
