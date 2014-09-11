@@ -1,18 +1,27 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+import java.io.Serializable;
+
+import java.util.Hashtable;
 import java.util.Vector;
 
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONParser;
 
 public class HTML
   {
+    static Logger logger = Logger.getLogger (HTML.class.getName ());
+
     static final int PAYMENT_WINDOW_WIDTH            = 450;
     static final int PAYMENT_WINDOW_HEIGHT           = 250;
     static final int PAYMENT_LOADING_SIZE            = 48;
@@ -30,6 +39,8 @@ public class HTML
     static final int PIN_FIELD_SIZE                  = 8;
 
     static final int PAYMENT_TIMEOUT_INIT            = 5000;
+    
+    static final String SAVED_SHOPPING_CARD          = "SSD";
  
     // Common property of all commands, argument holds verb
     static final String PAYMENT_API_COMMAND                = "Command";
@@ -93,6 +104,14 @@ public class HTML
                "px;border-width:1px;border-style:solid;border-color:" +
                PAYMENT_BORDER_COLOR + 
                ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>";
+      }
+
+    static class SavedShoppingCart implements Serializable
+      {
+        private static final long serialVersionUID = 1L;
+
+        int total;
+        Hashtable<String, Integer> items = new Hashtable<String, Integer> ();
       }
 
     static String encode (String val)
@@ -627,29 +646,46 @@ public class HTML
         HTML.output (response, s.toString());
       }
 
-    private static String productEntry (StringBuffer temp_string, ProductEntry product_entry, int index)
+    private static StringBuffer productEntry (StringBuffer temp_string, ProductEntry product_entry, SavedShoppingCart saved_shopping_cart, int index)
       {
-        String prod_entry = "p" + index;
-        String s = "<tr style=\"text-align:center\"><td><img src=\"images/" + product_entry.image_url +
-                   "\"></td><td>" + product_entry.name + "</td><td style=\"text-align:right\">" + price  (product_entry.price_mult_100) +
-                   "</td><td><form>" +
-                       "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
-                       "<tr>" +
-                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form." + 
-                       prod_entry + ", 1, " + index + ")\" class=\"updnbtn\"></td>" +
+        int units = saved_shopping_cart.items.containsKey (product_entry.sku) ? saved_shopping_cart.items.get (product_entry.sku): 0;
+        StringBuffer s = new StringBuffer (
+            "<tr style=\"text-align:center\"><td><img src=\"images/")
+        .append (product_entry.image_url)
+        .append ("\"></td><td>")
+        .append (product_entry.name)
+        .append ("</td><td style=\"text-align:right\">")
+        .append (price  (product_entry.price_mult_100))
+        .append (
+            "</td><td><form>" +
+            "<table style=\"border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate\">" +
+            "<tr>" +
+               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" class=\"updnbtn\" value=\"&#x25b2;\" title=\"More\" onclick=\"updateUnits(this.form.p")
+        .append (index)
+        .append (", 1, ")
+        .append (index)
+        .append (")\"></td>" +
+            "</tr>" +
+            "<tr>" +
+               "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"p")
+        .append (index)
+        .append ("\" value=\"")
+        .append (units)
+        .append ("\" class=\"quantity\" " +
+                           "oninput=\"updateInput(")
+        .append (index)
+        .append (", this);\" autocomplete=\"off\"/></td>" +
+                 "</tr>" +
+                 "<tr>" +
+                    "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" class=\"updnbtn\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form.p")
+         .append (index)
+         .append (", -1, ")
+         .append (index)
+         .append (")\"></td>" +
                        "</tr>" +
-                       "<tr>" +
-                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input size=\"6\" type=\"text\" name=\"" + 
-                           prod_entry + 
-                           "\" value=\"0\" class=\"quantity\" " +
-                           "oninput=\"updateInput(" + index + ", this);\" autocomplete=\"off\"/></td>" +
-                       "</tr>" +
-                       "<tr>" +
-                       "<td style=\"border-width:0px;padding:0px;margin:0px\"><input type=\"button\" value=\"&#x25bc;\" title=\"Less\" onclick=\"updateUnits(this.form." + 
-                       prod_entry + ", -1, " + index + ")\"  class=\"updnbtn\"></td>" +
-                       "</tr>" +
-                       "</table></form></td></tr>";
-        temp_string.insert (0, "shopping_cart[" + index + "] = new webpki.ShopEntry(" + product_entry.price_mult_100 + ",'" + product_entry.name + "');\n");        
+                       "</table></form></td></tr>");
+        temp_string.insert (0, "shopping_cart[" + index + "] = new webpki.ShopEntry(" 
+                       + product_entry.price_mult_100 + ",'" + product_entry.name + "','" + product_entry.sku + "'," + units + ");\n");        
         return s;
       }
 
@@ -658,7 +694,7 @@ public class HTML
         return "$" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
       }
     
-    public static void merchantPage (HttpServletResponse response) throws IOException, ServletException
+    public static void merchantPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
       {
         StringBuffer temp_string = new StringBuffer (
             "\nfunction checkOut() {\n" +
@@ -799,15 +835,24 @@ public class HTML
                "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
                    "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>");
             int q = 0;
+            HttpSession session = request.getSession (false);
+            SavedShoppingCart saved_shopping_cart = session != null && session.getAttribute (SAVED_SHOPPING_CARD) != null ?
+                  (SavedShoppingCart)session.getAttribute (SAVED_SHOPPING_CARD) : new SavedShoppingCart ();
             for (ProductEntry product_entry : MerchantServlet.products)
               {
-                page_data.append (productEntry (temp_string, product_entry, q++));
+                page_data.append (productEntry (temp_string, product_entry, saved_shopping_cart, q++));
               }
             page_data.append (
-                   "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">$0.00</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
+                   "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
+                     .append (price (saved_shopping_cart.total))
+                     .append ("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                "</table></td></tr>" +
                "<tr><td style=\"text-align:center\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
              "</table></td></tr>");
+            if (session != null)
+              {
+                session.removeAttribute (SAVED_SHOPPING_CARD);
+              }
         if (Init.web_crypto)
           {
             page_data.append ("<form name=\"shoot\" method=\"POST\" action=\"checkout\">" +
@@ -826,10 +871,11 @@ public class HTML
                 "var next_transaction_id = 100000;\n" +
                 "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
                 "var webpki = {};\n" +
-                "webpki.ShopEntry = function(price_mult_100, name) {\n" +
+                "webpki.ShopEntry = function(price_mult_100, name,sku, units) {\n" +
                 "    this.price_mult_100 = price_mult_100;\n" +
                 "    this.name = name;\n" +
-                "    this.units = 0;\n" +
+                "    this.sku = sku;\n" +
+                "    this.units = units;\n" +
                 "};\n");
 
         HTML.output (response, HTML.getHTML (temp_string.toString(), 
@@ -891,14 +937,16 @@ public class HTML
             "</table></form></td></tr>").toString ()));
       }
 
-    public static void checkoutPage (HttpServletResponse response, JSONArrayReader ar) throws IOException, ServletException
+    public static void checkoutPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
       {
+        JSONArrayReader ar = JSONParser.parse (request.getParameter ("shoppingcart")).getJSONArrayReader ();
         StringBuffer s = new StringBuffer (
         "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
         "<table>" +
            "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Current Order<br>&nbsp;</td></tr>" +
            "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
                "<tr><th>Description</th><th>Price</th><th>Units</th></tr>");
+        SavedShoppingCart saved_shopping_cart = new SavedShoppingCart ();
         int total = 0;
         while (ar.hasMore ())
           {
@@ -906,8 +954,11 @@ public class HTML
             int units = or.getInt ("units");
             int price_mult_100 = or.getInt ("price_mult_100");
             String name = or.getString ("name");
+            String sku = or.getString ("sku");
             if (units != 0)
               {
+                saved_shopping_cart.items.put (sku, units);
+                logger.info ("SKU=" + sku + " Units=" + units);
                 total += units * price_mult_100;
                 s.append ("<tr style=\"text-align:center\"><td>")
                  .append (name)
@@ -918,6 +969,8 @@ public class HTML
                  .append ("</td></tr>");                
               }
           }
+        saved_shopping_cart.total = total;
+        request.getSession (true).setAttribute (SAVED_SHOPPING_CARD, saved_shopping_cart);
         s.append (
             "<tr><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
          .append (price (total))
@@ -943,7 +996,7 @@ public class HTML
         "    console.debug ('Checkout:' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
-        "        alert ('jovisst!');\n" +
+        "        document.location.href = '" + Init.merchant_url + "';\n" +
         "        return;\n" +
         "    }\n" +
         "    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +

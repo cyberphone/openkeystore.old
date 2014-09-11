@@ -22,8 +22,7 @@ public class CheckoutServlet extends HttpServlet
     
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        JSONArrayReader ar = JSONParser.parse (request.getParameter ("shoppingcart")).getJSONArrayReader ();
         logger.info ("Checkout");
-        HTML.checkoutPage (response, JSONParser.parse (request.getParameter ("shoppingcart")).getJSONArrayReader ());
+        HTML.checkoutPage (response, request);
       }
   }
