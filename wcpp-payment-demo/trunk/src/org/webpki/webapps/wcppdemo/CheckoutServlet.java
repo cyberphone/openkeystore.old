@@ -22,7 +22,23 @@ public class CheckoutServlet extends HttpServlet
     
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        logger.info ("Checkout");
-        HTML.checkoutPage (response, request);
+        JSONArrayReader ar = JSONParser.parse (request.getParameter ("shoppingcart")).getJSONArrayReader ();
+        SavedShoppingCart saved_shopping_cart = new SavedShoppingCart ();
+        int total = 0;
+        while (ar.hasMore ())
+          {
+            JSONObjectReader or = ar.getObject ();
+            int units = or.getInt ("units");
+            if (units != 0)
+              {
+                String sku = or.getString ("sku");
+                saved_shopping_cart.items.put (sku, units);
+                logger.info ("SKU=" + sku + " Units=" + units);
+                total += units * or.getInt ("price_mult_100");
+              }
+          }
+        saved_shopping_cart.total = total;
+        request.getSession (true).setAttribute (SavedShoppingCart.SAVED_SHOPPING_CART, saved_shopping_cart);
+        HTML.checkoutPage (response, saved_shopping_cart);
       }
   }
