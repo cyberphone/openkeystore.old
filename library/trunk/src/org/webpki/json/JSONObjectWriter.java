@@ -398,7 +398,7 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         if (pretty_print)
           {
-            buffer.append (html_mode ? "<br>" : "\n");
+            buffer.append (html_mode ? "<br>" : java_script_string ? "\\\n" : "\n");
           }
       }
 
@@ -791,9 +791,9 @@ import org.webpki.json.JSONSignatureDecoder;
         buffer = new StringBuffer ();
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         indent = -indent_factor;
-        pretty_print = output_format == JSONOutputFormats.PRETTY_HTML || output_format == JSONOutputFormats.PRETTY_PRINT;
-        java_script_string = output_format == JSONOutputFormats.JAVASCRIPT_STRING;
-        html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
+        pretty_print = output_format.pretty;
+        java_script_string = output_format.javascript;
+        html_mode = output_format.html;
         if (java_script_string)
           {
             buffer.append ('\'');

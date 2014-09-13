@@ -136,7 +136,7 @@ public class JSONDecoderCache implements Serializable
       {
         if (argc.length != 4)
           {
-            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.CANONICALIZED + "|" + JSONOutputFormats.JAVASCRIPT_STRING + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
+            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.CANONICALIZED + "|" + JSONOutputFormats.JS_STRING + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
             System.exit (0);
           }
         try
