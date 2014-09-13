@@ -460,7 +460,7 @@ public class DOMWriterHelper
      */
     public void addDateTime (String name, Date value)
       {
-        addString (name, ISODateTime.formatDateTime (value));
+        addString (name, ISODateTime.formatDateTime (value, false));
       }
     
 
@@ -636,7 +636,7 @@ public class DOMWriterHelper
      */
     public void setDateTimeAttribute (String name, Date value)
       {
-        setStringAttribute (name, ISODateTime.formatDateTime (value));
+        setStringAttribute (name, ISODateTime.formatDateTime (value, false));
       }
     
     // TODO: document

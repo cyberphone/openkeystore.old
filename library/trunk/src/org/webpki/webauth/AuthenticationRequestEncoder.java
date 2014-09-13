@@ -45,7 +45,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     String abort_url;                                                          // Optional
 
-    String[] language_list;                                                        // Optional
+    String[] language_list;                                                    // Optional
     
     String[] key_container_list;                                               // Optional
     
@@ -139,7 +139,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           {
             bad ("ID attributes");
           }
-        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (authenication_response.server_time.getTime ())))
+        if (!ISODateTime.formatDateTime (server_time, true).equals (ISODateTime.formatDateTime (authenication_response.server_time.getTime (), true)))
           {
             bad ("ServerTime attribute");
           }
@@ -186,7 +186,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           {
             server_time = new Date ();
           }
-        wr.setDateTime (SERVER_TIME_JSON, server_time);
+        wr.setDateTime (SERVER_TIME_JSON, server_time, true);  // Server UTC
 
         wr.setString (SUBMIT_URL_JSON, submit_url);
 

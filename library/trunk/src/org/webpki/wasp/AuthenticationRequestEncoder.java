@@ -215,7 +215,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
           {
             bad ("ID attributes");
           }
-        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (areresp.server_time.getTime ())))
+        if (!ISODateTime.formatDateTime (server_time, true).equals (ISODateTime.formatDateTime (areresp.server_time.getTime (), true)))
           {
             bad ("ServerTime attribute");
           }

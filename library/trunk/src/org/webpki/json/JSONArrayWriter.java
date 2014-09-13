@@ -93,9 +93,9 @@ public class JSONArrayWriter implements Serializable
         return add (JSONTypes.NULL, "null");
       }
 
-    public JSONArrayWriter setDateTime (Date date_time) throws IOException
+    public JSONArrayWriter setDateTime (Date date_time, boolean force_utc) throws IOException
       {
-        return setString (ISODateTime.formatDateTime (date_time));
+        return setString (ISODateTime.formatDateTime (date_time, force_utc));
       }
 
     public JSONArrayWriter setBinary (byte[] value) throws IOException 

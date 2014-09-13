@@ -207,7 +207,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
           {
             server_time = new Date ();
           }
-        wr.setDateTime (SERVER_TIME_JSON, server_time);
+        wr.setDateTime (SERVER_TIME_JSON, server_time, true); // Server is UTC
 
         wr.setString (SESSION_KEY_ALGORITHM_JSON, server_state.provisioning_session_algorithm);
 

@@ -114,7 +114,7 @@ abstract class ServerEncoder extends JSONEncoder
       {
         if (date_time != null)
           {
-            wr.setDateTime (name, date_time);
+            wr.setDateTime (name, date_time, true);  // Server UTC
           }
       }
   }

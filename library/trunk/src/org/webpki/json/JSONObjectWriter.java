@@ -152,9 +152,9 @@ public class JSONObjectWriter implements Serializable
         return setProperty (name, new JSONValue (JSONTypes.NULL, "null"));
       }
 
-    public JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
+    public JSONObjectWriter setDateTime (String name, Date date_time, boolean force_utc) throws IOException
       {
-        return setString (name, ISODateTime.formatDateTime (date_time));
+        return setString (name, ISODateTime.formatDateTime (date_time, force_utc));
       }
 
     public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
@@ -165,6 +165,12 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setObject (String name, JSONObjectReader reader) throws IOException
       {
         setProperty (name, new JSONValue (JSONTypes.OBJECT, reader.root));
+        return this;
+      }
+
+    public JSONObjectWriter setObject (String name, JSONObjectWriter writer) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
         return this;
       }
 

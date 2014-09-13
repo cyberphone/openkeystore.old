@@ -183,7 +183,7 @@ public class Sign
     
     public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        wr.setDateTime ("Now", new Date ());
+        wr.setDateTime ("Now", new Date (), false);
         JSONObjectWriter payment_request = wr.setObject ("PaymentRequest");
         payment_request.setString ("Currency", "USD");
         payment_request.setBigDecimal ("VAT", new BigDecimal ("1.45"));

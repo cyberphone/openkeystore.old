@@ -233,10 +233,10 @@ public class JSONTest
       {
         value = new Date ((value.getTime () / 1000) * 1000);
         JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setDateTime (value);
+        or.setArray ("name").setDateTime (value, false);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDateTime ().getTime ().equals (value));
         or = new JSONObjectWriter ();
-        or.setDateTime ("name", value);
+        or.setDateTime ("name", value, false);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime ().equals (value));
       }
 
@@ -746,5 +746,28 @@ public class JSONTest
         serializeKey (p521_spki, p521_jcs);
         serializeKey (p521_spki, p521_jcs_xml);
         serializeKey (rsa_spki, rsa_jcs);
+      }
+
+    @Test
+    public void ObjectInclusion () throws Exception
+      {
+        JSONObjectWriter ow = new JSONObjectWriter ();
+        ow.setString ("Yes", "No");
+        JSONObjectWriter ow2 = ow.setObject ("Yay");
+        JSONArrayWriter aw = ow2.setArray ("Arr");
+        aw.setInt (2);
+        aw.setString ("Blah");
+        byte[] json = ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
+        ow = new JSONObjectWriter ();
+        ow.setString ("Yes", "No");
+        ow2 = new JSONObjectWriter ();
+        aw = ow2.setArray ("Arr");
+        aw.setInt (2);
+        aw.setString ("Blah");
+        assertTrue ("Writer added", ArrayUtil.compare (json, ow.setObject ("Yay", ow2).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        JSONObjectReader or = JSONParser.parse (json).getObject ("Yay");
+        ow = new JSONObjectWriter ();
+        ow.setString ("Yes", "No");
+        assertTrue ("Reader added", ArrayUtil.compare (json, ow.setObject ("Yay", or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
       }
   }
