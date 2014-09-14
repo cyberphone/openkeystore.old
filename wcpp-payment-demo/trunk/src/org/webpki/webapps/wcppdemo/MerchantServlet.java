@@ -16,6 +16,8 @@ public class MerchantServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
+    static final String COMMON_NAME = "Demo Merchant";
+    
     static Logger logger = Logger.getLogger (MerchantServlet.class.getName ());
     
     static Set<CardTypes> compatible_with_merchant = EnumSet.noneOf (CardTypes.class);

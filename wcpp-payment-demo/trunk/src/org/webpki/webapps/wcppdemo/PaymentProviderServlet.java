@@ -1,20 +1,19 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet
@@ -27,23 +26,33 @@ public class PaymentProviderServlet extends HttpServlet
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
-        logger.info ("Authorization Request:\n" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-        JSONObjectWriter result = new JSONObjectWriter ();
-        result.setObject ("Request", json.getObject ("Request"));
-        result.setString ("TransactionID", "#" + transaction_id++);
-        String pan = json.getString ("PAN");
-        StringBuffer payee_pan = new StringBuffer ();
-        for (int i = 0; i < pan.length (); i++)
+        JSONObjectWriter result = JSONProperties.createJSONBaseObject (Messages.TRANS_RES);
+        try
           {
-            if (i != 0 && ((i % 4) == 0))
+            JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
+            logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
+            result.setObject (HTML.PAYMENT_REQUEST_JSON, json.getObject (HTML.PAYMENT_REQUEST_JSON));
+            result.setString (HTML.TRANSACTION_ID_JSON, "#" + transaction_id++);
+            String pan = json.getString (HTML.PAN_JSON);
+            StringBuffer payee_pan = new StringBuffer ();
+            for (int i = 0; i < pan.length (); i++)
               {
-                payee_pan.append (' ');
+                if (i != 0 && ((i % 4) == 0))
+                  {
+                    payee_pan.append (' ');
+                  }
+                payee_pan.append (i < 12 ? '*' : pan.charAt (i));
               }
-            payee_pan.append (i < 12 ? '*' : pan.charAt (i));
+            result.setString (HTML.PAYEE_PAN_JSON, payee_pan.toString ());
+            result.setString (HTML.CARD_TYPE_JSON, json.getString (HTML.CARD_TYPE_JSON));
+//            json.checkForUnread ();
           }
-        result.setString ("PayeePAN", payee_pan.toString ());
-        result.setString ("CardType", json.getString ("CardType"));
+        catch (Exception e)
+          {
+            result = JSONProperties.createJSONBaseObject (Messages.TRANS_RES);
+            result.setString (HTML.ERROR_JSON, e.getMessage ());
+            logger.log (Level.SEVERE, e.getMessage ());
+          }
         if (!Init.web_crypto)
           {
             String origin = request.getHeader ("Origin");

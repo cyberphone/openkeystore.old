@@ -1,18 +1,19 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.Vector;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 
-public class HTML
+public class HTML extends JSONProperties
   {
     static final int PAYMENT_WINDOW_WIDTH            = 450;
     static final int PAYMENT_WINDOW_HEIGHT           = 250;
@@ -31,33 +32,6 @@ public class HTML
     static final int PIN_FIELD_SIZE                  = 8;
 
     static final int PAYMENT_TIMEOUT_INIT            = 5000;
-    
-    // Common property of all commands, argument holds verb
-    static final String PAYMENT_API_COMMAND                = "Command";
-    
-    static final String PAYMENT_API_INIT_COMMAND           = "INIT";
-    // Payment application sent INIT data
-    static final String PAYMENT_API_INIT_SND_CURRENCIES    = "Currencies";
-    // Payment application received INIT data
-    // Holder of the following properties
-    static final String PAYMENT_API_INIT_REC_REQUEST       = "Request";
-    static final String PAYMENT_API_INIT_REC_AMOUNT        = "Amount";         //   signed (in real implementation)
-    static final String PAYMENT_API_INIT_REC_CURRENCY      = "Currency";       //                -
-    static final String PAYMENT_API_INIT_REC_DATE_TIME     = "DateTime";       //                -
-    static final String PAYMENT_API_INIT_REC_TRANS_ID      = "TransactionID";  //                -
-    static final String PAYMENT_API_INIT_REC_COMMON_NAME   = "CommonName";     //                -
-     // Separate item, which we don't want in the request
-    static final String PAYMENT_API_INIT_REC_CARD_TYPES    = "CardTypes";
-    
-    static final String PAYMENT_API_TRANSACT_COMMAND       = "TRANSACT";
-    static final String PAYMENT_API_TRANSACT_SND_URL       = "URL";            // URL to payment provider
-    static final String PAYMENT_API_TRANSACT_SND_PAN       = "PAN";            // Card number
-    static final String PAYMENT_API_TRANSACT_SND_CARD_TYPE = "CardType";       // Card type
-    static final String PAYMENT_API_TRANSACT_SND_REQUEST   = "Request";        // Payee signed request
-
-    static final String PAYMENT_API_TRANSACT_REC_PAYEE_PAN = "PayeePAN";       // Card number given to merchant
-
-    static final String PAYMENT_API_ABORT_COMMAND          = "ABORT";
     
     static final String FONT_VERDANA = "Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans'";
     static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
@@ -150,7 +124,7 @@ public class HTML
           }
         s.append ("><div onclick=\"document.location.href='")
          .append (Init.bank_url)
-         .append ("'\" title=\"Back to the bank!\" style=\"cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}\">" +
+         .append ("'\" title=\"Back to the bank!\" style=\"cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0}\">" +
          "WebCrypto++<br><span style=\"font-size:8pt\">Payment Demo Home</span></div>" + "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
          .append (box)
          .append ("</table></body></html>");
@@ -189,7 +163,7 @@ public class HTML
                  "</table></td></tr></table></td></tr>"));
       }
 
-    private static String javaScript (String string)
+    static String javaScript (String string)
       {
         StringBuffer s = new StringBuffer ();
         for (char c : string.toCharArray ())
@@ -201,6 +175,10 @@ public class HTML
             else if (c == '\'')
               {
                 s.append ("\\'");
+              }
+            else if (c == '\\')
+              {
+                s.append ("\\\\");
               }
             else
               {
@@ -255,7 +233,7 @@ public class HTML
         "var selected_card;\n" +
         "var timeouter_handle = null;\n" +
         "var request_amount;\n" +
-        "var request_transaction_id;\n" +
+        "var request_reference_id;\n" +
         "var request_date_time;\n" +
         "var caller_common_name;\n" +
         "var json_request;\n" +
@@ -314,7 +292,7 @@ public class HTML
             }
         }
         s.append (
-        "\nfunction bad(message) {\n" +
+        "\nfunction error(message) {\n" +
         "    console.debug ('Bad: ' + message);\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
@@ -324,18 +302,18 @@ public class HTML
         "}\n\n" +
         "function checkNoErrors() {\n" +
         "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
-        "       bad('Frame size manipulated by parent');\n" +
+        "       error('Frame size manipulated by parent');\n" +
         "       return false;\n" +
         "   }\n" +
         "   if (!card_list.length) {\n" +
-        "       bad('You appear to have no payment cards at all, please return " +
+        "       error('You appear to have no payment cards at all, please return " +
             "to the <b>Payment&nbsp;Demo&nbsp;Home</b> and get some!  It\\'s free :-)');\n" +
         "       return false;\n" +
         "   }\n" +
         "   return true;\n" +
         "}\n\n" +
         "function checkTiming(milliseconds) {\n" +
-        "   timeouter_handle = setTimeout(function () {bad('Timeout')}, milliseconds);\n" +
+        "   timeouter_handle = setTimeout(function () {error('Timeout')}, milliseconds);\n" +
         "}\n\n" +
         "function priceString(price_mult_100) {\n" +
         "    var price_number = Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
@@ -343,14 +321,14 @@ public class HTML
         "}\n\n" +
         "function createJSONBaseCommand(command_property_value) {\n" +
         "    var json = {};\n" +
-        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+        "    json['" + JSONDecoderCache.CONTEXT_JSON + "'] = '" + WCPP_DEMO_CONTEXT_URI + "';\n" +
+        "    json['" + JSONDecoderCache.QUALIFIER_JSON + "'] = command_property_value;\n" +
         "    return json;\n" +
         "}\n\n" +
         "function getJSONProperty(property) {\n" +
         "    var value = json_request[property];\n" +
-        "    console.debug(property + ': ' + value);\n" +
         "    if (value === undefined) {\n" +
-        "        bad('Missing property: ' + property);\n" +
+        "        error('Missing property: ' + property);\n" +
         "        return null;\n" +
         "    }\n" +
         "    return value;\n" +
@@ -465,7 +443,7 @@ public class HTML
        "    document.getElementById('content').innerHTML = '';\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
        "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
-            PAYMENT_API_ABORT_COMMAND + "')), window.document.referrer);\n" +
+            Messages.ABORT + "')), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
        "// Called when the user authorized the payment.\n" +
@@ -492,11 +470,11 @@ public class HTML
        "    disableControls(true);\n"+
        "    document.getElementById('cancel').disabled = true;\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    var json = createJSONBaseCommand ('" + PAYMENT_API_TRANSACT_COMMAND + "');\n" +
-       "    json." + PAYMENT_API_TRANSACT_SND_PAN + " = selected_card.pan;\n" +
-       "    json." + PAYMENT_API_TRANSACT_SND_CARD_TYPE + " = selected_card.type;\n" +
-       "    json." + PAYMENT_API_TRANSACT_SND_URL + " = selected_card.transaction_url;\n" +
-       "    json." + PAYMENT_API_TRANSACT_SND_REQUEST + " = json_request;\n" +
+       "    var json = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
+       "    json." + PAN_JSON + " = selected_card.pan;\n" +
+       "    json." + CARD_TYPE_JSON + " = selected_card.type;\n" +
+       "    json." + AUTHORIZATION_URL_JSON + " = selected_card.transaction_url;\n" +
+       "    json." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
        "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
@@ -505,24 +483,25 @@ public class HTML
        "//\n" +
        "// Message syntax:\n" +
        "//   {\n" +
-       "//     \"" + PAYMENT_API_COMMAND + "\": \"" + PAYMENT_API_INIT_COMMAND + "\"\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_CARD_TYPES + "\": [\"Card Type\"...]        1-n card types recognized by the payee\n" +
-       "//     \"" + PAYMENT_API_INIT_REC_REQUEST + "\":                           The actual request\n" +
+       "//     \"" + JSONDecoderCache.CONTEXT_JSON + "\": \"" + WCPP_DEMO_CONTEXT_URI + "\"\n" +
+       "//     \"" + JSONDecoderCache.QUALIFIER_JSON + "\": \"" + Messages.INVOKE + "\"\n" +
+       "//     \"" + CARD_TYPES_JSON + "\": [\"Card Type\"...]        1-n card types recognized by the payee\n" +
+       "//     \"" + PAYMENT_REQUEST_JSON + "\":                           The actual request\n" +
        "//       {\n" +
-       "//         \"" + PAYMENT_API_INIT_REC_AMOUNT + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
-       "//         \"" + PAYMENT_API_INIT_REC_CURRENCY + "\": \"XYZ\"                Currency in ISO notation\n" +
-       "//         \"" + PAYMENT_API_INIT_REC_TRANS_ID + "\": \"String\"        Payee transaction ID\n" +
-       "//         \"" + PAYMENT_API_INIT_REC_DATE_TIME + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
-       "//         \"" + PAYMENT_API_INIT_REC_COMMON_NAME + "\": \"Name\"             Common name of requester\n" +
+       "//         \"" + AMOUNT_JSON + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
+       "//         \"" + CURRENCY_JSON + "\": \"XYZ\"                Currency in ISO notation\n" +
+       "//         \"" + REFERENCE_ID_JSON + "\": \"String\"        Payee reference to order\n" +
+       "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
+       "//         \"" + COMMON_NAME_JSON + "\": \"Name\"             Common name of requester\n" +
        "//       }\n" +
        "//   }\n" +
        "//\n" +
-       "function processINIT() {\n" +
-       "    var payee_card_types = getJSONProperty('" + PAYMENT_API_INIT_REC_CARD_TYPES + "');\n" +
-       "    json_request = getJSONProperty('" + PAYMENT_API_INIT_REC_REQUEST + "');\n" +
-       "    caller_common_name = getJSONProperty('" + PAYMENT_API_INIT_REC_COMMON_NAME + "');\n" +
-       "    request_amount = getJSONProperty('" + PAYMENT_API_INIT_REC_AMOUNT + "');\n" +
-       "    var iso_currency = getJSONProperty('" + PAYMENT_API_INIT_REC_CURRENCY + "');\n" +
+       "function processInvoke() {\n" +
+       "    var payee_card_types = getJSONProperty('" + CARD_TYPES_JSON + "');\n" +
+       "    json_request = getJSONProperty('" + PAYMENT_REQUEST_JSON + "');\n" +
+       "    caller_common_name = getJSONProperty('" + COMMON_NAME_JSON + "');\n" +
+       "    request_amount = getJSONProperty('" + AMOUNT_JSON + "');\n" +
+       "    var iso_currency = getJSONProperty('" + CURRENCY_JSON + "');\n" +
        "    for (var i = 0; i < currency_list.length; i++) {\n" +
        "        if (currency_list[i].iso_name == iso_currency) {\n"+
        "            request_currency = currency_list[i];\n" +
@@ -530,10 +509,10 @@ public class HTML
        "        }\n" +
        "    }\n" +
        "    if (!request_currency) {\n" +
-       "        bad('Unrecognized currency: ' + iso_currency);\n" +
+       "        error('Unrecognized currency: ' + iso_currency);\n" +
        "    }\n" +
-       "    request_date_time = getJSONProperty('" + PAYMENT_API_INIT_REC_DATE_TIME + "');\n" +
-       "    request_transaction_id = getJSONProperty('" + PAYMENT_API_INIT_REC_TRANS_ID + "');\n" +
+       "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
+       "    request_reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
        "    if (aborted_operation) return;\n" +
        "    // Perform the card compatibility/discovery processes\n" +
        "    var count = 0;\n" +
@@ -555,7 +534,7 @@ public class HTML
        "    document.getElementById('cancel').title = 'Cancel and return to \"' + caller_common_name + '\"';\n" +
        "    document.getElementById('cancel').style.visibility = 'visible';\n" +
        "    if (!count) {\n" +
-       "        bad('No matching payment cards found, click \"Cancel\" to return to \"' + caller_common_name + '\".');\n" +
+       "        error('No matching payment cards found, click \"Cancel\" to return to \"' + caller_common_name + '\".');\n" +
        "        return;\n" +
        "    }\n" +
 
@@ -585,20 +564,20 @@ public class HTML
        "// There is a timeout associated the (currently only) request.\n" +
        "//\n" +
         "function receivePayeeResponse(event) {\n" +
-        "    console.debug(event.origin);\n" +
-        "    console.debug(event.data);\n" +
+        "    console.debug(event.origin + ' => PaymentAppFrame:\\n' + event.data);\n" +
         "    if (aborted_operation) return;\n" +
         "    if (timeouter_handle) {\n" +
         "        clearTimeout(timeouter_handle);\n" +
         "        timeouter_handle = null;\n" +
         "        json_request = JSON.parse(event.data);\n" +
-        "        if (getJSONProperty('" + PAYMENT_API_COMMAND + "') == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "        if (getJSONProperty('" + JSONDecoderCache.CONTEXT_JSON + "') == '" + WCPP_DEMO_CONTEXT_URI + "' && " +
+                 "getJSONProperty('" + JSONDecoderCache.QUALIFIER_JSON + "') == '" + Messages.INVOKE + "') {\n" +
         "            document.getElementById('busy').style.visibility = 'hidden';\n" +
-        "            processINIT();\n" +
+        "            processInvoke();\n" +
         "            return;\n" +
         "        }\n" +
         "    }\n" +
-        "    bad('Unexpected message :' + event.origin + ' ' + event.data);\n" +
+        "    error('Unexpected message: ' + event.origin + ' ' + event.data);\n" +
         "}\n\n" +
         "//\n" +
         "// When the payment module IFRAME has been loaded (by the payee),\n" +
@@ -619,7 +598,7 @@ public class HTML
         "        console.debug('init payment window');\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
-                 PAYMENT_API_INIT_COMMAND +
+                 Messages.INITIALIZE +
                  "')), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
@@ -735,42 +714,47 @@ public class HTML
             "}\n\n" +
             "function createJSONBaseCommand(command_property_value) {\n" +
             "    var json = {};\n" +
-            "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
+            "    json['" + JSONDecoderCache.CONTEXT_JSON + "'] = '" + WCPP_DEMO_CONTEXT_URI + "';\n" +
+            "    json['" + JSONDecoderCache.QUALIFIER_JSON + "'] = command_property_value;\n" +
             "    return json;\n" +
             "}\n\n" +
             "function receivePaymentMessage(event) {\n" +
-            "    console.debug (event.origin);\n" +
-            "    console.debug (event.data);\n" +
+            "    console.debug (event.origin + ' => MerchantApp:\\n' + event.data);\n" +
             "    var received_json = JSON.parse(event.data);\n" +
-            "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
+            "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
+            "        console.debug('MESSAGE ERROR: ' + event.data);\n" +
+            "        payment_status = 'Failed***';\n" +
+            "        return;\n" +
+            "    }\n" +
+            "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] == '" + Messages.ABORT + "') {\n" +
             "        document.getElementById('pay').innerHTML = save_checkout_html;\n" +
-            "        payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
+            "        payment_status = '" + Messages.INITIALIZE + "';\n" +
             "        shopping_enabled = true;\n" +
             "        return;\n" +
             "    }\n" +
-            "    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
+            "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != payment_status) {\n" +
             "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
             "        payment_status = 'Failed***';\n" +
             "        return;\n" +
             "    }\n" +
-            "    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+            "    if (payment_status == '" + Messages.INITIALIZE + "') {\n" +
             "        setTimeout(function(){\n" +
-            "        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-            "        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
-            "        inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
-            "        inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
-            "        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = getTotal();\n" +
-            "        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + next_transaction_id++;\n" +
+            "        var returned_json = createJSONBaseCommand('" + Messages.INVOKE + "');\n" +
+            "        var inner_json = returned_json." + PAYMENT_REQUEST_JSON + " = {}\n" +
+            "        inner_json." + COMMON_NAME_JSON + " = 'Demo Merchant';\n" +
+            "        inner_json." + CURRENCY_JSON + " = 'USD';\n" +
+            "        inner_json." + AMOUNT_JSON + " = getTotal();\n" +
+            "        inner_json." + REFERENCE_ID_JSON + " = '#' + next_reference_id++;\n" +
             "        var date_time = new Date().toISOString();\n" +
             "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
             "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
             "        }\n" +
-            "        inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
-            "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
+            "        inner_json." + DATE_TIME_JSON + " = date_time;\n" +
+            "        returned_json." + CARD_TYPES_JSON + " = [];\n" +
+            "        returned_json." + CARD_TYPES_JSON + ".push('NeverHeardOfCard');\n");
             for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
               {
-                temp_string.append ("        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
+                temp_string.append ("        returned_json." + CARD_TYPES_JSON + ".push('")
                            .append (card_type.toString())
                            .append ("');\n");
               }
@@ -778,11 +762,11 @@ public class HTML
             "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
 //          "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
             "        }, 500);\n" +
-            "        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
+            "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
             "    }\n" +
-            "    else if (payment_status == '" + PAYMENT_API_TRANSACT_COMMAND + "') {\n" +
+            "    else if (payment_status == '" + Messages.AUTHORIZE + "') {\n" +
             "        setTimeout(function(){\n" +
-            "        var url = received_json." + PAYMENT_API_TRANSACT_SND_URL + ";\n" +
+            "        var url = received_json." + AUTHORIZATION_URL_JSON + ";\n" +
             "        if (!url) alert('failed-URL');\n" +
             "        transaction_channel.open('POST', url, true);\n" +
             "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
@@ -790,12 +774,12 @@ public class HTML
             "            if (transaction_channel.readyState == 4) {\n" +
             "                if (transaction_channel.status == 200) {\n" +
             "                    var json_transaction = JSON.parse(transaction_channel.responseText);\n" +
-            "                    console.debug('Transaction:' + JSON.stringify(json_transaction));\n" +
+            "                    console.debug('Transaction response:\\n' + JSON.stringify(json_transaction));\n" +
             "                    document.getElementById('result').innerHTML = '<table>" +
             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
             "<tr><td>Amount: ' + getPriceString() + '</td></tr>" +
-            "<tr><td>' + json_transaction." + PAYMENT_API_TRANSACT_SND_CARD_TYPE + 
-            " + ': ' + json_transaction." + PAYMENT_API_TRANSACT_REC_PAYEE_PAN + " + '</td></tr>" +
+            "<tr><td>' + json_transaction." + CARD_TYPE_JSON + 
+            " + ': ' + json_transaction." + PAYEE_PAN_JSON + " + '</td></tr>" +
             "</table>';\n" +
             "                } else {\n" +
             "                    document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;\n" +
@@ -805,7 +789,11 @@ public class HTML
             "                console.debug('XHR state: ' + transaction_channel.readyState);\n" +
             "            }\n" +
             "        }\n" +
-            "        transaction_channel.send(JSON.stringify(received_json));\n" +
+            "        var transaction_request = createJSONBaseCommand('" + Messages.TRANS_REQ + "');\n" +
+            "        transaction_request." + PAN_JSON + " = received_json." + PAN_JSON + ";\n" +
+            "        transaction_request." + CARD_TYPE_JSON + " = received_json." + CARD_TYPE_JSON + ";\n" +
+            "        transaction_request." + PAYMENT_REQUEST_JSON + " = received_json." + PAYMENT_REQUEST_JSON + ";\n" +
+            "        transaction_channel.send(JSON.stringify(transaction_request));\n" +
             "        }, 1500);\n" +
             "    }\n" +
             "}\n");
@@ -843,8 +831,8 @@ public class HTML
                 "var transaction_channel = new XMLHttpRequest();\n\n" +
                 "var shopping_cart = [];\n" +
                 "var shopping_enabled = true;\n" +
-                "var next_transaction_id = 100000;\n" +
-                "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n" +
+                "var next_reference_id = 100000;\n" +
+                "var payment_status = '" + Messages.INITIALIZE + "';\n" +
                 "var webpki = {};\n" +
                 "webpki.ShopEntry = function(price_mult_100, name,sku, units) {\n" +
                 "    this.price_mult_100 = price_mult_100;\n" +
@@ -912,7 +900,7 @@ public class HTML
             "</table></form></td></tr>").toString ()));
       }
 
-    public static void checkoutPage (HttpServletResponse response, SavedShoppingCart saved_shopping_cart) throws IOException, ServletException
+    public static void checkoutPage (HttpServletResponse response, SavedShoppingCart saved_shopping_cart, String invoke_json) throws IOException, ServletException
       {
         StringBuffer s = new StringBuffer (
         "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
@@ -947,50 +935,28 @@ public class HTML
         
      StringBuffer temp_string = new StringBuffer (
         "\n\n\"use strict\";\n\n" +
-        "var payment_status = '" + PAYMENT_API_INIT_COMMAND + "';\n\n" +
-        "function createJSONBaseCommand(command_property_value) {\n" +
-        "    var json = {};\n" +
-        "    json." + PAYMENT_API_COMMAND + " = command_property_value;\n" +
-        "    return json;\n" +
-        "}\n\n" +
+        "var payment_status = '" + Messages.INITIALIZE + "';\n\n" +
         "function receivePaymentMessage(event) {\n" +
-        "    console.debug (event.origin);\n" +
-        "    console.debug ('Checkout:' + event.data);\n" +
+        "    console.debug (event.origin + ' = > Checkout:\\n' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
-        "    if (received_json." + PAYMENT_API_COMMAND + " == '" + PAYMENT_API_ABORT_COMMAND + "') {\n" +
+        "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
+        "        console.debug('UNDECODABLE MESSAGE');\n" +
+        "        return;\n" +
+        "    }\n" +
+        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] == '" + Messages.ABORT + "') {\n" +
         "        document.forms.restore.submit();\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (received_json." + PAYMENT_API_COMMAND + " != payment_status) {\n" +
+        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != payment_status) {\n" +
         "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (payment_status == '" + PAYMENT_API_INIT_COMMAND + "') {\n" +
+        "    if (payment_status == '" + Messages.INITIALIZE + "') {\n" +
         "        setTimeout(function(){\n" +
-        "        var returned_json = createJSONBaseCommand('" + PAYMENT_API_INIT_COMMAND + "');\n" +
-        "        var inner_json = returned_json." + PAYMENT_API_INIT_REC_REQUEST + " = {}\n" +
-        "        inner_json." + PAYMENT_API_INIT_REC_COMMON_NAME + " = 'Demo Merchant';\n" +
-        "        inner_json." + PAYMENT_API_INIT_REC_CURRENCY + " = 'USD';\n" +
-        "        inner_json." + PAYMENT_API_INIT_REC_AMOUNT + " = " + saved_shopping_cart.total + ";\n" +
-        "        inner_json." + PAYMENT_API_INIT_REC_TRANS_ID + " = '#' + " + CheckoutServlet.next_transaction_id + ";\n" +
-        "        var date_time = new Date().toISOString();\n" +
-        "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-        "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-        "        }\n" +
-        "        inner_json." + PAYMENT_API_INIT_REC_DATE_TIME + " = date_time;\n" +
-        "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + " = [];\n" +
-        "        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('NeverHeardOfCard');\n");
-        for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
-          {
-            temp_string.append ("        returned_json." + PAYMENT_API_INIT_REC_CARD_TYPES + ".push('")
-                       .append (card_type.toString())
-                       .append ("');\n");
-          }
-    temp_string.append (
-        "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
+        "        event.source.postMessage(" + invoke_json + ", event.origin);\n" +
 //      "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
         "        }, 500);\n" +
-        "        payment_status = '" + PAYMENT_API_TRANSACT_COMMAND + "';\n" +
+        "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
         "    } else {\n" +
         "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +
         "        document.forms.shoot.submit();\n" +
@@ -1002,7 +968,7 @@ public class HTML
         HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
       }
 
-    public static void resultPage (HttpServletResponse response, JSONObjectReader authorized_result) throws IOException, ServletException
+    public static void resultPage (HttpServletResponse response, JSONObjectReader authorized_result, String request) throws IOException, ServletException
       {
         StringBuffer s = new StringBuffer (
         "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table>" +
@@ -1010,12 +976,17 @@ public class HTML
            "<tr><td><table>" +
            "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
            "<tr><td>Amount: ")
-        .append (price (authorized_result.getObject (PAYMENT_API_INIT_REC_REQUEST).getInt (PAYMENT_API_INIT_REC_AMOUNT)))
+        .append (price (authorized_result.getObject (PAYMENT_REQUEST_JSON).getInt (AMOUNT_JSON)))
         .append ("</td></tr><tr><td>")
-        .append (authorized_result.getString (PAYMENT_API_TRANSACT_SND_CARD_TYPE))
+        .append (authorized_result.getString (CARD_TYPE_JSON))
         .append (": ")
-        .append (authorized_result.getString (PAYMENT_API_TRANSACT_REC_PAYEE_PAN))
+        .append (authorized_result.getString (PAYEE_PAN_JSON))
         .append ("</td></tr></table></td></tr></table></td></tr>");
-        HTML.output (response, HTML.getHTML (null, null, s.toString ()));
+        HTML.output (response, HTML.getHTML ("function listFinalExchange() {\n" +
+                                             "    console.debug('Transaction request:\\n" + request + "');\n" +
+                                             "    console.debug('Transaction result:\\n" + new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8") + "')" +
+                                             "}\n", 
+                                             "onload=\"listFinalExchange()\"", 
+                                             s.toString ()));
       }
   }
