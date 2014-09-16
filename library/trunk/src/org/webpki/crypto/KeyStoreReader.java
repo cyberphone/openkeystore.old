@@ -18,6 +18,8 @@ package org.webpki.crypto;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
@@ -27,11 +29,10 @@ public class KeyStoreReader
   {
     private KeyStoreReader () {} // No instantiation
 
-    public static KeyStore loadKeyStore (String keystore_file_name, String password) throws IOException
+    public static KeyStore loadKeyStore (byte[] buffer, String password) throws IOException
       {
         try
           {
-            byte[] buffer = ArrayUtil.readFile (keystore_file_name);
             // JKS magic number + version (2)
             byte[] jks = {(byte)0xfe, (byte)0xed, (byte)0xfe, (byte)0xed, 0, 0, 0, 2};
             String type = "JKS";
@@ -51,5 +52,15 @@ public class KeyStoreReader
           {
             throw new IOException (gse);
           }
+      }
+
+    public static KeyStore loadKeyStore (String keystore_file_name, String password) throws IOException
+      {
+        return loadKeyStore (ArrayUtil.readFile (keystore_file_name), password);
+      }
+
+    public static KeyStore loadKeyStore (InputStream input_stream, String password) throws IOException
+      {
+        return loadKeyStore (ArrayUtil.getByteArrayFromInputStream (input_stream), password);
       }
   }

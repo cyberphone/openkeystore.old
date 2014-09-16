@@ -16,13 +16,11 @@
  */
 package org.webpki.sks.test;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Security;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -36,6 +34,7 @@ import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.KeyStoreReader;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -76,10 +75,8 @@ public class PKCS12Import
             app_usage = AppUsage.valueOf (argc[6]);
             pin_caching = new Boolean (argc[7]);
           }
-        char[] password = argc[1].toCharArray ();
         CustomCryptoProvider.forcedLoad ();
-        KeyStore ks = KeyStore.getInstance ("PKCS12");
-        ks.load (new FileInputStream (argc[0]), password);
+        KeyStore ks = KeyStoreReader.loadKeyStore (argc[0], argc[1]);
         Vector<X509Certificate> cert_path = new Vector<X509Certificate> ();
         PrivateKey private_key = null;
         Enumeration<String> aliases = ks.aliases ();
@@ -88,7 +85,7 @@ public class PKCS12Import
             String alias = aliases.nextElement ();
             if (ks.isKeyEntry (alias))
               {
-                private_key = (PrivateKey) ks.getKey (alias, password);
+                private_key = (PrivateKey) ks.getKey (alias, argc[1].toCharArray ());
                 for (Certificate cert : ks.getCertificateChain (alias))
                   {
                     cert_path.add ((X509Certificate) cert);
