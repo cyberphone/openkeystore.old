@@ -27,7 +27,12 @@
         <param-name>web_crypto</param-name>
         <param-value>@web-crypto@</param-value>
     </context-param>
-
+    <context-param>
+        <description>Bank EE Certificate</description>
+        <param-name>bank_eecert</param-name>
+        <param-value>@bank-eecert@</param-value>
+    </context-param>
+    
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>

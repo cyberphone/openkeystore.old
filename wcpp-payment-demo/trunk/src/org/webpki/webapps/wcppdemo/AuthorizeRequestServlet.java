@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
@@ -35,6 +36,15 @@ public class AuthorizeRequestServlet extends HttpServlet
             transact.setObject (HTML.PAYMENT_REQUEST_JSON, payment_request);
             transact.setString (HTML.PAN_JSON, authorize_request.getString (HTML.PAN_JSON));
             transact.setString (HTML.CARD_TYPE_JSON, authorize_request.getString (HTML.CARD_TYPE_JSON));
+            if (Init.web_crypto)
+              {
+                HttpSession session = request.getSession (false);
+                if (session == null || session.getAttribute (CheckoutServlet.REQUEST_HASH_ATTR) == null)
+                  {
+                    throw new IOException ("\"" + CheckoutServlet.REQUEST_HASH_ATTR + "\" not available");
+                  }
+                transact.setBinary (JSONProperties.REQUEST_HASH_JSON, (byte[])session.getAttribute (CheckoutServlet.REQUEST_HASH_ATTR));
+              }
             HTTPSWrapper https_wrapper = new HTTPSWrapper ();
             https_wrapper.setRequireSuccess (true);
             https_wrapper.makePostRequest (url, transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED));

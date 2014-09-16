@@ -1,6 +1,7 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,11 +10,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.json.JSONDecoderCache;
+import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.KeyStoreSigner;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONX509Signer;
+
+import org.webpki.util.ArrayUtil;
+
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet
@@ -31,9 +38,18 @@ public class PaymentProviderServlet extends HttpServlet
           {
             JSONObjectReader json = JSONParser.parse (ServletUtil.getData (request));
             logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-            result.setObject (HTML.PAYMENT_REQUEST_JSON, json.getObject (HTML.PAYMENT_REQUEST_JSON));
-            result.setString (HTML.TRANSACTION_ID_JSON, "#" + transaction_id++);
-            String pan = json.getString (HTML.PAN_JSON);
+            JSONObjectReader payee = json.getObject (JSONProperties.PAYMENT_REQUEST_JSON);
+            if (Init.web_crypto)
+              {
+                if (!ArrayUtil.compare (json.getBinary (JSONProperties.REQUEST_HASH_JSON),
+                                        HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
+                  {
+                    throw new IOException ("\"" + JSONProperties.REQUEST_HASH_JSON + "\" mismatch");
+                  }
+              }
+            result.setObject (HTML.PAYMENT_REQUEST_JSON, payee);
+            result.setString (JSONProperties.TRANSACTION_ID_JSON, "#" + transaction_id++);
+            String pan = json.getString (JSONProperties.PAN_JSON);
             StringBuffer payee_pan = new StringBuffer ();
             for (int i = 0; i < pan.length (); i++)
               {
@@ -43,14 +59,18 @@ public class PaymentProviderServlet extends HttpServlet
                   }
                 payee_pan.append (i < 12 ? '*' : pan.charAt (i));
               }
-            result.setString (HTML.PAYEE_PAN_JSON, payee_pan.toString ());
-            result.setString (HTML.CARD_TYPE_JSON, json.getString (HTML.CARD_TYPE_JSON));
+            result.setString (JSONProperties.PAYEE_PAN_JSON, payee_pan.toString ());
+            result.setString (JSONProperties.CARD_TYPE_JSON, json.getString (JSONProperties.CARD_TYPE_JSON));
+            KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert, null);
+            signer.setExtendedCertPath (true);
+            signer.setKey (null, "testing");
+            result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
 //            json.checkForUnread ();
           }
         catch (Exception e)
           {
             result = JSONProperties.createJSONBaseObject (Messages.TRANS_RES);
-            result.setString (HTML.ERROR_JSON, e.getMessage ());
+            result.setString (JSONProperties.ERROR_JSON, e.getMessage ());
             logger.log (Level.SEVERE, e.getMessage ());
           }
         if (!Init.web_crypto)

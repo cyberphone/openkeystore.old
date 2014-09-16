@@ -1,17 +1,15 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.CustomCryptoProvider;
-
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectReader;
@@ -22,6 +20,8 @@ import org.webpki.json.JSONParser;
 public class CheckoutServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
+    
+    static final String REQUEST_HASH_ATTR = "REQHASH";
     
     static
       {
@@ -58,7 +58,9 @@ public class CheckoutServlet extends HttpServlet
           {
             aw.setString (card_type.toString ());
           }
-        writer.setObject (JSONProperties.PAYMENT_REQUEST_JSON, new PaymentRequest (total).serialize ());
+        JSONObjectWriter payment_request = new PaymentRequest (total).serialize ();
+        request.getSession (true).setAttribute (REQUEST_HASH_ATTR, HashAlgorithms.SHA256.digest (payment_request.serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        writer.setObject (JSONProperties.PAYMENT_REQUEST_JSON, payment_request);
         HTML.checkoutPage (response,
                            saved_shopping_cart,
                            new String (writer.serializeJSONObject (JSONOutputFormats.JS_STRING), "UTF-8"));

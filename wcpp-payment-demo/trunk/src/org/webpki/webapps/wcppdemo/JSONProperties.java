@@ -20,6 +20,8 @@ public class JSONProperties
     static final String PAN_JSON                   = "PAN";               // Card number
     static final String CARD_TYPE_JSON             = "CardType";          // Card type
     static final String PAYEE_PAN_JSON             = "PayeePAN";          // Card number given to merchant
+    static final String REQUEST_HASH_JSON          = "RequestHash";
+    static final String DOMAIN_NAME_JSON           = "DomainName";
     
     static final String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-payment-demo";
     

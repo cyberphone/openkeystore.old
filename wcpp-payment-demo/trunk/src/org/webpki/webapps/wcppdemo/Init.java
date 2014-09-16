@@ -1,13 +1,19 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
+import java.security.KeyStore;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.webpki.crypto.KeyStoreReader;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
+
 import org.webpki.webutil.InitPropertyReader;
 
 public class Init implements ServletContextListener
@@ -22,6 +28,8 @@ public class Init implements ServletContextListener
     static String working_data_uri;
     
     static String card_font;
+    
+    static KeyStore bank_eecert;
 
     private String getDataURI (String main, String extension) throws IOException
       {
@@ -47,6 +55,7 @@ public class Init implements ServletContextListener
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
             card_font = properties.getPropertyString ("card_font");
+            bank_eecert = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_eecert")), "testing");
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }
         catch (IOException e)

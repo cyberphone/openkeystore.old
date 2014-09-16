@@ -3,11 +3,17 @@
   <!-- set properties for this build -->
   <property name="application" value="WebCryptoPlusPlus.war"/>
   <property name="src_dir" value="src"/>
+  <property name="key_dir" location="keys"/>
+  <property name="bankkey" value="mybank-eecert.jks"/>
+  <property name="merchantkey" value="demomerchant-eecert.jks"/>
+  <property name="encryptionkey" value="mybank-encryption-key.jks"/>
+  <property name="clientroot" value="mybank-clientroot.jks"/>
   <property name="temp_dir" value=".tmp"/>
   <property name="dist_dir" value="dist"/>
   <property name="debug" value="on"/>
   <property environment="env"/>
-  <property name="resources_dir" value="../resources"/>
+  <property name="third_party_jars" location="../resources/third-party-jars"/>
+  <property name="webpki_jars" location="../library/dist"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
 
 	<resources id="security_constraint">
@@ -27,8 +33,16 @@
 	<property name="mobilra-enroll-proxy-port" refid="mobilra-enroll-proxy-port-id"/>
 	 -->
 
+  <condition property="storetype" value="PKCS12" else="JKS">
+    <matches pattern=".*\.p12$" string="${bankkey}"/>
+  </condition>
+
+  <condition property="keyfilext" value=".p12" else=".jks">
+    <matches pattern=".*\.p12$" string="${bankkey}"/>
+  </condition>
+  
   <target name="help">
-      <echo message="build nowebcrypto webcrypto mobilepki"/>
+      <echo message="build nowebcrypto webcrypto mobilepki createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -44,10 +58,10 @@
 
   <target name="_build">
 	  <path id="compile.classpath">
-	    <fileset dir="${library_dir}">
+	    <fileset dir="${library.dir}">
 	      <include name="*.jar"/>
 	    </fileset>
-	    <fileset dir="${resources_dir}/third-party-jars">
+	    <fileset dir="${third_party_jars}">
 	      <include name="*.jar"/>
 	    </fileset>
 	  </path>
@@ -73,7 +87,8 @@
 	  <replacefilter token="@merchant-url@" value="${merchant.url}"/>
 	  <replacefilter token="@card-font@" value="${card.font}"/>
 	  <replacefilter token="@web-crypto@" value="${web.crypto}"/>
-	  	  </replace>
+	  <replacefilter token="@bank-eecert@" value="${bankkey}"/>
+    </replace>
     <war destfile="${dist_dir}/${application}" webxml="${temp_dir}/web.xml">
       <classes dir="${temp_dir}">
          <exclude name="web.xml"/>
@@ -82,12 +97,13 @@
          <include name="**/*.png"/>
          <include name="**/*.gif"/>
       </classes>
-      <lib file="${resources_dir}/third-party-jars/bcprov-jdk16-145.jar"/>
-      <lib dir="${library_dir}">
+      <lib file="${third_party_jars}/bcprov-*.jar"/>
+      <lib dir="${library.dir}">
          <include name="webpki.org-libext*.jar"/>
          <include name="webpki.org-webutil*.jar"/>
       </lib>
       <fileset dir="web"/>
+      <zipfileset dir="${key_dir}" prefix="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
     </war>
   </target>
 
@@ -103,7 +119,7 @@
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.7"/>
-       <param name="library_dir" value="../library/dist"/>
+       <param name="library.dir" value="${webpki_jars}"/>
     </antcall>
     <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>
@@ -117,7 +133,7 @@
        <param name="card.font" value="DejaVue"/>
        <param name="web.crypto" value="false"/>
        <param name="javaversion" value="1.6"/>
-       <param name="library_dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
+       <param name="library.dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
     </antcall>
   </target>
   	
@@ -129,8 +145,73 @@
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="false"/>
        <param name="javaversion" value="1.7"/>
-       <param name="library_dir" value="../library/dist"/>
+       <param name="library.dir" value="${webpki_jars}"/>
     </antcall>
   </target>
 
+  <target name="_createcert">
+  	<java fork="yes"
+  		  classname="org.webpki.ca.CommandLineCA"
+  		  dir="${key_dir}"
+		  failonerror="true">
+  		<classpath>
+  			 <fileset dir="${webpki_jars}">
+  		        <include name="*.jar"/>
+  			 </fileset>
+  			 <fileset dir="${third_party_jars}">
+  		        <include name="*.jar"/>
+  			 </fileset>
+  			 		</classpath>
+  	    <arg line="${cmd}"/>
+  	</java>
+  </target>
+
+  <target name="_certpaymentnetwork">
+    <antcall target="_createcert">
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore payment-network-rootca${keyfilext} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore payment-network-rootca${keyfilext} -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 3"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value=" -ca/addpath all -ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${bankkey} -out/storepass testing -out/keypass testing  -sigalg RSA_SHA256 -keysize 2048"/>
+    </antcall>
+  </target>
+
+ <target name="_certmerchants">
+    <antcall target="_createcert">
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Merchant Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore merchant-network-rootca${keyfilext} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore merchant-network-rootca${keyfilext} -entity/ca -subject &quot;CN=Merchant Network Sub CA5, C=DE&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 5"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value=" -ca/addpath all -ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=Demo Merchant, serialNumber=896325, C=DE&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${merchantkey} -out/storepass testing -out/keypass testing  -sigalg RSA_SHA256 -keysize 2048"/>
+    </antcall>
+  </target>
+
+  <target name="_clientcertroot">
+    <antcall target="_createcert">
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Mybank Client Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientroot} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+  </target>
+
+  <target name="_authencryption">
+    <antcall target="_createcert">
+       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 1"/>
+    </antcall>
+  </target>
+  
+  <target name="createcerts">
+    <antcall target="_certpaymentnetwork"/>
+    <antcall target="_certmerchants"/>
+    <antcall target="_clientcertroot"/>
+    <antcall target="_authencryption"/>
+    <delete>
+  	  <fileset dir="${key_dir}">
+  		<include name="temp*"/>
+  	  </fileset>
+    </delete>    
+    </target>
+  
 </project>

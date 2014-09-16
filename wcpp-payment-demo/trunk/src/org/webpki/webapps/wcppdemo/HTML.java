@@ -1,6 +1,7 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -12,6 +13,7 @@ import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONSignatureDecoder;
 
 public class HTML extends JSONProperties
   {
@@ -120,7 +122,11 @@ public class HTML extends JSONProperties
         s.append ("</head><body");
         if (bodyscript != null)
           {
-            s.append (' ').append (bodyscript);
+            if (bodyscript.charAt (0) != '>')
+              {
+                s.append (' ');
+              }
+             s.append (bodyscript);
           }
         s.append ("><div onclick=\"document.location.href='")
          .append (Init.bank_url)
@@ -197,6 +203,7 @@ public class HTML extends JSONProperties
         "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
         "table {border-collapse: collapse}\n" +
         "td {padding: 0px}\n" +
+        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative;visibility:hidden}\n" +
         "</style></head><body onload=\"initPayment()\">" +
         "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
@@ -210,8 +217,8 @@ public class HTML extends JSONProperties
         "Initializing...</div>" +
         "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
         "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" style=\"position:relative;visibility:hidden\" onclick=\"userAbort()\">" +
-        "<input id=\"ok\" type=\"button\" value=\"OK\" style=\"position:relative;visibility:hidden\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
+        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
+        "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
         "<img id=\"busy\" src=\"" + Init.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
@@ -236,6 +243,7 @@ public class HTML extends JSONProperties
         "var request_reference_id;\n" +
         "var request_date_time;\n" +
         "var caller_common_name;\n" +
+        "var caller_domain;\n" +
         "var json_request;\n" +
         "\nwebpki.Currency = function(iso_name,symbol,first_position) {\n" +
         "    this.iso_name = iso_name;\n" +
@@ -293,7 +301,7 @@ public class HTML extends JSONProperties
         }
         s.append (
         "\nfunction error(message) {\n" +
-        "    console.debug ('Bad: ' + message);\n" +
+        "    console.debug ('Error: ' + message);\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
@@ -474,11 +482,12 @@ public class HTML extends JSONProperties
        "    json." + PAN_JSON + " = selected_card.pan;\n" +
        "    json." + CARD_TYPE_JSON + " = selected_card.type;\n" +
        "    json." + AUTHORIZATION_URL_JSON + " = selected_card.transaction_url;\n" +
+       "    json." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
        "    json." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
        "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
-       "// Processes the payee's JSON response to the INIT message.\n" +
+       "// Processes the payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n" +
        "// Note: In a genuine implementaion the request would be signed.\n" +
        "//\n" +
        "// Message syntax:\n" +
@@ -486,13 +495,14 @@ public class HTML extends JSONProperties
        "//     \"" + JSONDecoderCache.CONTEXT_JSON + "\": \"" + WCPP_DEMO_CONTEXT_URI + "\"\n" +
        "//     \"" + JSONDecoderCache.QUALIFIER_JSON + "\": \"" + Messages.INVOKE + "\"\n" +
        "//     \"" + CARD_TYPES_JSON + "\": [\"Card Type\"...]        1-n card types recognized by the payee\n" +
-       "//     \"" + PAYMENT_REQUEST_JSON + "\":                           The actual request\n" +
+       "//     \"" + PAYMENT_REQUEST_JSON + "\":                       The actual request\n" +
        "//       {\n" +
        "//         \"" + AMOUNT_JSON + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
        "//         \"" + CURRENCY_JSON + "\": \"XYZ\"                Currency in ISO notation\n" +
        "//         \"" + REFERENCE_ID_JSON + "\": \"String\"        Payee reference to order\n" +
        "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
        "//         \"" + COMMON_NAME_JSON + "\": \"Name\"             Common name of requester\n" +
+       "//         \"" + JSONSignatureDecoder.SIGNATURE_JSON + "\": \"{}\"             Signature object\n" +
        "//       }\n" +
        "//   }\n" +
        "//\n" +
@@ -584,7 +594,7 @@ public class HTML extends JSONProperties
         "// the payment process is automatically invoked by the body.onload().\n" +
         "//\n" +
         "function initPayment() {\n" +
-        "    var caller_domain = window.document.referrer;\n" +
+        "    caller_domain = window.document.referrer;\n" +
         "    caller_domain = caller_domain.substring(caller_domain.indexOf('://') + 3);\n" +
         "    if (caller_domain.indexOf(':') > 0) {\n" +
         "        caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
@@ -652,7 +662,7 @@ public class HTML extends JSONProperties
 
     private static String price (int price_mult_100) 
       {
-        return "$" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
+        return "$&#x200a;" + String.valueOf (price_mult_100 / 100) + "." + String.valueOf ((price_mult_100 % 100) / 10) + String.valueOf (price_mult_100 % 10);
       }
     
     public static void merchantPage (HttpServletResponse response, SavedShoppingCart saved_shopping_cart) throws IOException, ServletException
@@ -693,25 +703,42 @@ public class HTML extends JSONProperties
             "}\n\n" +
             "function getPriceString() {\n" +
             "    var price_mult_100 = getTotal();\n" +
-            "    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
+            "    return '"+ Currencies.USD.symbol + "' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
             "}\n\n" +
             "function updateTotal() {\n" +
             "    document.getElementById('total').innerHTML = getPriceString();\n" +
             "}\n\n" +
-            "function updateInput(index, control) {\n" +
-            "    if (shopping_enabled) {\n" +
-            "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
-            "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
-            "        shopping_cart[index].units = parseInt(control.value);\n" +
-            "        updateTotal();\n" +
-            "    } else {\n" +
-            "        control.value = shopping_cart[index].units;\n" +
-            "    }\n" +
+            "function updateInput(index, control) {\n");
+        if (Init.web_crypto)
+          {
+            temp_string.append (
+            "    if (!numeric_only.test (control.value)) control.value = '0';\n" +
+            "    while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
+            "    shopping_cart[index].units = parseInt(control.value);\n" +
+            "    updateTotal();\n");
+          }
+        else
+          {
+            temp_string.append (
+                "    if (shopping_enabled) {\n" +
+               "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
+               "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
+               "        shopping_cart[index].units = parseInt(control.value);\n" +
+               "        updateTotal();\n" +
+               "    } else {\n" +
+               "        control.value = shopping_cart[index].units;\n" +
+               "    }\n");
+          }
+        temp_string.append (
             "}\n\n" +
             "function updateUnits(control, value, index) {\n" +
             "    control.value = parseInt(control.value) + value;\n" +
             "    updateInput(index, control);\n" +
-            "}\n\n" +
+            "}\n");
+        if (!Init.web_crypto)
+          {
+            temp_string.append (
+            "\n" +
             "function createJSONBaseCommand(command_property_value) {\n" +
             "    var json = {};\n" +
             "    json['" + JSONDecoderCache.CONTEXT_JSON + "'] = '" + WCPP_DEMO_CONTEXT_URI + "';\n" +
@@ -758,7 +785,7 @@ public class HTML extends JSONProperties
                            .append (card_type.toString())
                            .append ("');\n");
               }
-        temp_string.append (
+            temp_string.append (
             "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
 //          "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
             "        }, 500);\n" +
@@ -797,6 +824,7 @@ public class HTML extends JSONProperties
             "        }, 1500);\n" +
             "    }\n" +
             "}\n");
+          }
 
         StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
@@ -814,7 +842,7 @@ public class HTML extends JSONProperties
                  .append (price (saved_shopping_cart.total))
                  .append ("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
            "</table></td></tr>" +
-           "<tr><td style=\"text-align:center\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
+           "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
          "</table></td></tr>");
         if (Init.web_crypto)
           {
@@ -823,23 +851,23 @@ public class HTML extends JSONProperties
                               "</form>");
           }
         temp_string.insert (0,
-                "\n\"use strict\";" +
-                "\nvar paycode=" + 
-                "'" + getIframeHTML () + "';\n\n" +
-                "var save_checkout_html;\n\n" +
-                "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
-                "var transaction_channel = new XMLHttpRequest();\n\n" +
-                "var shopping_cart = [];\n" +
-                "var shopping_enabled = true;\n" +
-                "var next_reference_id = 100000;\n" +
-                "var payment_status = '" + Messages.INITIALIZE + "';\n" +
-                "var webpki = {};\n" +
+                "\n\n\"use strict\";\n\n" +
+                 "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
+                (Init.web_crypto ? "" :
+                  "var paycode=" + "'" + getIframeHTML () + "';\n\n" +
+                  "var save_checkout_html;\n\n" +
+                  "var transaction_channel = new XMLHttpRequest();\n\n" +
+                  "var shopping_enabled = true;\n\n" +
+                  "var next_reference_id = 100000;\n\n" +
+                  "var payment_status = '" + Messages.INITIALIZE + "';\n\n") +
+                "var webpki = {};\n\n" +
                 "webpki.ShopEntry = function(price_mult_100, name,sku, units) {\n" +
                 "    this.price_mult_100 = price_mult_100;\n" +
                 "    this.name = name;\n" +
                 "    this.sku = sku;\n" +
                 "    this.units = units;\n" +
-                "};\n");
+                "};\n\n" +
+                "var shopping_cart = [];\n");
 
         HTML.output (response, HTML.getHTML (temp_string.toString(), 
                                              "><div id=\"emptybasket\" style=\"border-color:grey;border-style:solid;border-width:3px;text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:#f0f0f0;position:absolute;visibility:hidden;padding:5pt 10pt 5pt 10pt\">Nothing ordered yet...</div",

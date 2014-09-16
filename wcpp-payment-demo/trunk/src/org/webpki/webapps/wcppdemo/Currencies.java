@@ -2,9 +2,9 @@ package org.webpki.webapps.wcppdemo;
 
 public enum Currencies
   {
-    USD ("$",       true), 
-    EUR ("\\u20ac", false),
-    GBP ("£",       true);
+    USD ("$\\u200a",       true), 
+    EUR ("\\u200a\\u20ac", false),
+    GBP ("£\\u200a",       true);
     
     String symbol;
     boolean first_position;
