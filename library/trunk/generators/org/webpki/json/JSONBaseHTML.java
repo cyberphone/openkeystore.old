@@ -222,11 +222,11 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.53, April&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.54, September&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V0.97, December 2013.</span>");
+            ", <span style=\"white-space: nowrap\">V0.97c, August 2014.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
