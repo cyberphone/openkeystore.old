@@ -57,8 +57,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "rather than embedding the signed data.  There are (of course) pros and cons to both " +
             "approaches, but for information-rich messaging, " +
             "cleartext data at least have an advantage for documentation and debugging. " +
-            "To cope with the primary disadvantage (the dependency on " +
-            "canonicalization), this part has been extremely simplified compared to XML&nbsp;DSig.");
+            "To cope with the primary disadvantage (the potential dependency on " +
+            "canonicalization), this part has been extremely simplified compared to XML&nbsp;DSig. "+
+            "In fact, JCS doesn't actually rely on canonicalization since it doesn't serve any purpose, " +
+            "at least not in this context.");
 
         json.addParagraphObject ("Sample Signature").append (
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
@@ -110,7 +112,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "properties including possible child objects of the JSON " +
             "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> property.");
 
-        json.addParagraphObject ("Canonicalization and Signature Validation").append (
+        json.addParagraphObject ("Normalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
           .append (" containing a <code>Signature</code> property." + LINE_SEPARATOR +
@@ -118,10 +120,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "<li>The original property order <b>must</b> be preserved.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
-            "</ul>The canonicalization steps are as follows:<ul>" +
+            "</ul>The normalization steps are as follows:<ul>" +
             "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings having a value &lt;= ASCII space (0x32).</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
-            "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be normalized. " +
+            "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be adjusted as follows: " +
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
             "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
@@ -133,18 +135,18 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "trailing zero being redundant. Similar quirks are also likely to show-up in non-native JSON types " +
             "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
             "potential problems, compliant parsers need to preserve the original textual representation of " +
-            "properties internally in order to support JCS canonicalization." + LINE_SEPARATOR +
+            "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
-             JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
-            "Applied on the sample signature, a proper canonicalization implementation should return the following JSON object:" +
+             JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
+            "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
             "{&quot;Now&quot;:&quot;2013-12-23T23:25:10+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
             "iption&quot;:&quot;USB cable&quot;,&quot;SKU&quot;:&quot;TR-46565666&quot;,&quot;UnitPrice&quot;:<b style=\"color:red;background:Yellow\">4.50</b>},{&quot;Units&quot;:1,&quot;Description&quot;:&quot;4G Router&quot;,&quot;SKU&quot;:&quot;JK-56566655&quot;,<br>" +
             "&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more<br>" +
             "#ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:<br>" +
             "&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
-            "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
+            "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "\">" + 
             JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
@@ -162,7 +164,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphObject ("Multiple Signatures").append (
             "Since JSON properties are single-valued, JCS does not intrinsically support multiple signings of the same object. " +
-            "Although it would be technically feasible using an array of signature objects, this would greatly complicate canonicalization. " +
+            "Although it would be technically feasible using an array of signature objects, this would greatly complicate message normalization. " +
             "However, there is a &quot;workaround&quot; which fits most real-world scenarios needing multiple signatures and that is using wrapping signatures. " + LINE_SEPARATOR +
             "Original signed JSON object:" +
     "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
@@ -271,6 +273,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-01-21", "0.51", "Added clarification to public key parameter representation");
         json.addDocumentHistoryLine ("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "</code> option");
         json.addDocumentHistoryLine ("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
+        json.addDocumentHistoryLine ("2014-09-17", "0.54", "Changed canonicalization to normalization");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +
