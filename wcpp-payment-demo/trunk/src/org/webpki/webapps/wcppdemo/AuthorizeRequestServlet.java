@@ -9,11 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.json.JSONDecoderCache;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONX509Verifier;
 import org.webpki.net.HTTPSWrapper;
 
 public class AuthorizeRequestServlet extends HttpServlet
@@ -50,7 +51,14 @@ public class AuthorizeRequestServlet extends HttpServlet
             https_wrapper.makePostRequest (url, transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
             JSONObjectReader authorized_result = JSONParser.parse (https_wrapper.getData ());
             logger.info ("Authorized Result:\n" + new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-            HTML.resultPage (response, authorized_result, new String (transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"));
+            boolean success = true;
+            if (authorized_result.hasProperty (HTML.ERROR_JSON))
+              {
+                logger.severe (authorized_result.getString (HTML.ERROR_JSON));
+                success = false;
+              }
+            authorized_result.getSignature ().verify (new JSONX509Verifier (new KeyStoreVerifier (Init.payment_root)));
+            HTML.resultPage (response, success, authorized_result, new String (transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"));
           }
         catch (Exception e)
           {

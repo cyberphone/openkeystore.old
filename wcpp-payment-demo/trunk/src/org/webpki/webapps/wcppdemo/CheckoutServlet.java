@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
@@ -22,11 +21,6 @@ public class CheckoutServlet extends HttpServlet
     private static final long serialVersionUID = 1L;
     
     static final String REQUEST_HASH_ATTR = "REQHASH";
-    
-    static
-      {
-        CustomCryptoProvider.forcedLoad ();
-      }
     
     static Logger logger = Logger.getLogger (CheckoutServlet.class.getName ());
     

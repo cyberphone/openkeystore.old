@@ -130,7 +130,7 @@ public class HTML extends JSONProperties
           }
         s.append ("><div onclick=\"document.location.href='")
          .append (Init.bank_url)
-         .append ("'\" title=\"Back to the bank!\" style=\"cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0}\">" +
+         .append ("'\" title=\"Back to the bank!\" style=\"cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}\">" +
          "WebCrypto++<br><span style=\"font-size:8pt\">Payment Demo Home</span></div>" + "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
          .append (box)
          .append ("</table></body></html>");
@@ -274,7 +274,11 @@ public class HTML extends JSONProperties
         "var selected_card;\n" +
         "var card_list = [];\n");
         HttpSession session = request.getSession (false);
-        if (session != null)
+        if (session == null)
+          {
+            s.append ("console.debug('No web session found');\n");
+          }
+        else
         {
             @SuppressWarnings("unchecked")
             Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
@@ -996,25 +1000,32 @@ public class HTML extends JSONProperties
         HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
       }
 
-    public static void resultPage (HttpServletResponse response, JSONObjectReader authorized_result, String request) throws IOException, ServletException
+    public static void resultPage (HttpServletResponse response, boolean success, JSONObjectReader authorized_result, String request) throws IOException, ServletException
       {
-        StringBuffer s = new StringBuffer (
-        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table>" +
-           "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
-           "<tr><td><table>" +
-           "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
-           "<tr><td>Amount: ")
-        .append (price (authorized_result.getObject (PAYMENT_REQUEST_JSON).getInt (AMOUNT_JSON)))
-        .append ("</td></tr><tr><td>")
-        .append (authorized_result.getString (CARD_TYPE_JSON))
-        .append (": ")
-        .append (authorized_result.getString (PAYEE_PAN_JSON))
-        .append ("</td></tr></table></td></tr></table></td></tr>");
+        StringBuffer s = new StringBuffer ("<tr><td width=\"100%\" align=\"center\" valign=\"middle\">");
+        if (success)
+          {
+            s.append ("<table>" +
+             "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
+             "<tr><td><table>" +
+             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
+             "<tr><td>Amount: ")
+            .append (price (authorized_result.getObject (PAYMENT_REQUEST_JSON).getInt (AMOUNT_JSON)))
+            .append ("</td></tr><tr><td>")
+            .append (authorized_result.getString (CARD_TYPE_JSON))
+            .append (": ")
+            .append (authorized_result.getString (PAYEE_PAN_JSON))
+            .append ("</td></tr></table></td></tr></table>");
+          }
+        else
+          {
+            s.append ("There was a problem with your order: " + authorized_result.getString (ERROR_JSON));
+          }
         HTML.output (response, HTML.getHTML ("function listFinalExchange() {\n" +
                                              "    console.debug('Transaction request:\\n" + request + "');\n" +
                                              "    console.debug('Transaction result:\\n" + new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8") + "')" +
                                              "}\n", 
                                              "onload=\"listFinalExchange()\"", 
-                                             s.toString ()));
+                                             s.append ("</td></tr>").toString ()));
       }
   }

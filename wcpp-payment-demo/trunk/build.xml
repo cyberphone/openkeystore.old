@@ -3,11 +3,22 @@
   <!-- set properties for this build -->
   <property name="application" value="WebCryptoPlusPlus.war"/>
   <property name="src_dir" value="src"/>
+  <property name="packimage_dir" value="packaged-images"/>
+  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
+  
+  <property name="keypassword" value="foo123"/>
+  <property name="keyfilext" value=".jks"/>
   <property name="key_dir" location="keys"/>
-  <property name="bankkey" value="mybank-eecert.jks"/>
-  <property name="merchantkey" value="demomerchant-eecert.jks"/>
-  <property name="encryptionkey" value="mybank-encryption-key.jks"/>
-  <property name="clientroot" value="mybank-clientroot.jks"/>
+
+  <property name="bankkey" value="mybank-eecert"/>
+  <property name="paymentroot" value="payment-network-rootca"/>
+
+  <property name="merchantkey" value="demomerchant-eecert"/>
+  <property name="merchantroot" value="merchant-network-rootca"/>
+  
+  <property name="encryptionkey" value="mybank-encryption-key"/>
+  <property name="clientroot" value="mybank-clientroot"/>
+
   <property name="temp_dir" value=".tmp"/>
   <property name="dist_dir" value="dist"/>
   <property name="debug" value="on"/>
@@ -34,13 +45,9 @@
 	 -->
 
   <condition property="storetype" value="PKCS12" else="JKS">
-    <matches pattern=".*\.p12$" string="${bankkey}"/>
+    <matches pattern=".*\.p12$" string="${keyfilext}"/>
   </condition>
 
-  <condition property="keyfilext" value=".p12" else=".jks">
-    <matches pattern=".*\.p12$" string="${bankkey}"/>
-  </condition>
-  
   <target name="help">
       <echo message="build nowebcrypto webcrypto mobilepki createcerts"/>
   </target>
@@ -87,15 +94,15 @@
 	  <replacefilter token="@merchant-url@" value="${merchant.url}"/>
 	  <replacefilter token="@card-font@" value="${card.font}"/>
 	  <replacefilter token="@web-crypto@" value="${web.crypto}"/>
-	  <replacefilter token="@bank-eecert@" value="${bankkey}"/>
-    </replace>
+	  <replacefilter token="@key-password@" value="${keypassword}"/>
+	  <replacefilter token="@bank-eecert@" value="${bankkey}${keyfilext}"/>
+	  <replacefilter token="@merchant-eecert@" value="${merchantkey}${keyfilext}"/>
+	  <replacefilter token="@payment-root@" value="${paymentroot}.cer"/>
+	  <replacefilter token="@merchant-root@" value="${merchantroot}.cer"/>
+	</replace>
     <war destfile="${dist_dir}/${application}" webxml="${temp_dir}/web.xml">
       <classes dir="${temp_dir}">
          <exclude name="web.xml"/>
-      </classes>
-      <classes dir="${src_dir}">
-         <include name="**/*.png"/>
-         <include name="**/*.gif"/>
       </classes>
       <lib file="${third_party_jars}/bcprov-*.jar"/>
       <lib dir="${library.dir}">
@@ -103,7 +110,11 @@
          <include name="webpki.org-webutil*.jar"/>
       </lib>
       <fileset dir="web"/>
-      <zipfileset dir="${key_dir}" prefix="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
+      <zipfileset dir="${key_dir}" prefix="${class_war_path}"/>
+      <zipfileset dir="${packimage_dir}" prefix="${class_war_path}">
+         <include name="**/*.png"/>
+         <include name="**/*.gif"/>
+      </zipfileset>
     </war>
   </target>
 
@@ -162,43 +173,65 @@
   		        <include name="*.jar"/>
   			 </fileset>
   			 		</classpath>
-  	    <arg line="${cmd}"/>
+  	    <arg line="${cmd} -out/keyalias mykey"/>
   	</java>
   </target>
 
+  <target name="_getroot">
+<!--
+	  <echo message="-exportcert -keystore ${rootfile}${keyfilext} -alias mykey -storepass ${keypassword} -file ${rootfile}.cer"/>
+  -->
+
+	<exec executable="keytool" failonerror="true" dir="${key_dir}">
+	  <arg line="-exportcert -keystore ${rootfile}${keyfilext} -alias mykey -storepass ${keypassword} -file ${rootfile}.cer"/>
+	</exec>
+  </target>
+  
   <target name="_certpaymentnetwork">
     <antcall target="_createcert">
-       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore payment-network-rootca${keyfilext} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${paymentroot}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+    <antcall target="_getroot">
+       <param name="rootfile" value="${paymentroot}"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore payment-network-rootca${keyfilext} -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 3"/>
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore payment-network-rootca${keyfilext} -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256 -serial 3"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value=" -ca/addpath all -ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${bankkey} -out/storepass testing -out/keypass testing  -sigalg RSA_SHA256 -keysize 2048"/>
+       <param name="cmd" value=" -ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${bankkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword}  -sigalg RSA_SHA256 -keysize 2048"/>
     </antcall>
   </target>
 
  <target name="_certmerchants">
     <antcall target="_createcert">
-       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Merchant Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore merchant-network-rootca${keyfilext} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Merchant Network Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${merchantroot}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+    <antcall target="_getroot">
+       <param name="rootfile" value="${merchantroot}"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore merchant-network-rootca${keyfilext} -entity/ca -subject &quot;CN=Merchant Network Sub CA5, C=DE&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 5"/>
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${merchantroot}${keyfilext} -entity/ca -subject &quot;CN=Merchant Network Sub CA5, C=DE&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore temp-subca${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256 -serial 5"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value=" -ca/addpath all -ca/keypass testing -ca/storetype ${storetype} -ca/storepass testing -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=Demo Merchant, serialNumber=896325, C=DE&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${merchantkey} -out/storepass testing -out/keypass testing  -sigalg RSA_SHA256 -keysize 2048"/>
+       <param name="cmd" value=" -ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore temp-subca${keyfilext} -entity/ee -subject &quot;CN=Demo Merchant, serialNumber=896325, C=DE&quot; -validity/start 2014-01-01T00:00:00 -validity/end 2020-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${merchantkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword}  -sigalg RSA_SHA256 -keysize 2048"/>
     </antcall>
   </target>
 
   <target name="_clientcertroot">
     <antcall target="_createcert">
-       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Mybank Client Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientroot} -out/storepass testing -out/keypass testing -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+       <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Mybank Client Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientroot}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
-  </target>
+    <antcall target="_getroot">
+       <param name="rootfile" value="${clientroot}"/>
+    </antcall>
+    </target>
 
   <target name="_authencryption">
     <antcall target="_createcert">
-       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey} -out/storepass testing -out/keypass testing -keysize 2048 -sigalg RSA_SHA256 -serial 1"/>
+       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256 -serial 1"/>
+    </antcall>
+    <antcall target="_getroot">
+       <param name="rootfile" value="${encryptionkey}"/>
     </antcall>
   </target>
   

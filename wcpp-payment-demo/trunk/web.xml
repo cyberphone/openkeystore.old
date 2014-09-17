@@ -27,12 +27,37 @@
         <param-name>web_crypto</param-name>
         <param-value>@web-crypto@</param-value>
     </context-param>
+
     <context-param>
         <description>Bank EE Certificate</description>
         <param-name>bank_eecert</param-name>
         <param-value>@bank-eecert@</param-value>
     </context-param>
-    
+
+    <context-param>
+        <description>Payment Network Root Certificate</description>
+        <param-name>payment_root</param-name>
+        <param-value>@payment-root@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Merchant EE Certificate</description>
+        <param-name>merchant_eecert</param-name>
+        <param-value>@merchant-eecert@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Merchant Network Root Certificate</description>
+        <param-name>merchant_root</param-name>
+        <param-value>@merchant-root@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Key Password</description>
+        <param-name>key_password</param-name>
+        <param-value>@key-password@</param-value>
+    </context-param>
+ 
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>

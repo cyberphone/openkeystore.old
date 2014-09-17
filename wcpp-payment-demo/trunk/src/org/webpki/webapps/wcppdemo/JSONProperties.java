@@ -3,7 +3,9 @@ package org.webpki.webapps.wcppdemo;
 import java.io.IOException;
 
 import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONParser;
 
 public class JSONProperties
   {
@@ -31,5 +33,19 @@ public class JSONProperties
         writer.setString (JSONDecoderCache.CONTEXT_JSON, WCPP_DEMO_CONTEXT_URI);
         writer.setString (JSONDecoderCache.QUALIFIER_JSON, message.toString ());
         return writer;
+      }
+    
+    public static JSONObjectReader parsePaymentMessage (Messages message, byte[] raw_data) throws IOException
+      {
+        JSONObjectReader json = JSONParser.parse (raw_data);
+        if (!json.getString (JSONDecoderCache.CONTEXT_JSON).equals (WCPP_DEMO_CONTEXT_URI))
+          {
+            throw new IOException ("Unknown context: " + json.getString (JSONDecoderCache.CONTEXT_JSON));
+          }
+        if (!json.getString (JSONDecoderCache.QUALIFIER_JSON).equals (message.toString ()))
+          {
+            throw new IOException ("Unexpected qualifier: " + json.getString (JSONDecoderCache.QUALIFIER_JSON));
+          } 
+        return json;
       }
   }
