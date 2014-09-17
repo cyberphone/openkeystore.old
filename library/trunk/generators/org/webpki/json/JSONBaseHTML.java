@@ -1305,7 +1305,7 @@ public class JSONBaseHTML
                   JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the key specified in <code>" +
                   JSONSignatureDecoder.KEY_INFO_JSON +
                   "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
-                  "canonicalized JSON object.");
+                  "normalized JSON object.");
 
         row_interface = addSubItemTable (JSONSignatureDecoder.KEY_INFO_JSON)
           .newRow ()
