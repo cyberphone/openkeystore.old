@@ -116,8 +116,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "Prerequisite: A JSON object in accordance with ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
           .append (" containing a <code>Signature</code> property." + LINE_SEPARATOR +
-            "Parsing Restrictions:<ul>" +
-            "<li>The original property order <b>must</b> be preserved.</li>" +
+            "Parsing restrictions:<ul>" +
+            "<li>The original property order <b>must</b> be <i>preserved</i>.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "</ul>The normalization steps are as follows:<ul>" +
@@ -132,9 +132,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
             "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
             "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
-            "trailing zero being redundant. Similar quirks are also likely to show-up in non-native JSON types " +
-            "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
-            "potential problems, compliant parsers need to preserve the original textual representation of " +
+            "trailing zero being redundant. To cope with this " +
+            "potential problem, compliant parsers need to <i>preserve</i> the original textual representation of " +
             "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
