@@ -131,7 +131,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
             "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
             "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
-            "As an example, monetary data is often expressed like <code>4.50</code> in spite of the " +
+            "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
             "trailing zero being redundant. Similar quirks are also likely to show-up in non-native JSON types " +
             "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
             "potential problems, compliant parsers need to preserve the original textual representation of " +
