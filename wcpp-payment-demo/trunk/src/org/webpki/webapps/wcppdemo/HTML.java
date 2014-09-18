@@ -15,7 +15,7 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONSignatureDecoder;
 
-public class HTML extends JSONProperties
+public class HTML implements BaseProperties
   {
     static final int PAYMENT_WINDOW_WIDTH            = 450;
     static final int PAYMENT_WINDOW_HEIGHT           = 250;
@@ -483,11 +483,12 @@ public class HTML extends JSONProperties
        "    document.getElementById('cancel').disabled = true;\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
        "    var json = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
-       "    json." + PAN_JSON + " = selected_card.pan;\n" +
-       "    json." + CARD_TYPE_JSON + " = selected_card.type;\n" +
-       "    json." + AUTHORIZATION_URL_JSON + " = selected_card.transaction_url;\n" +
-       "    json." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
-       "    json." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
+       "    var auth = json." + AUTH_DATA_JSON + " = {};\n" +
+       "    auth." + PAN_JSON + " = selected_card.pan;\n" +
+       "    auth." + CARD_TYPE_JSON + " = selected_card.type;\n" +
+       "    auth." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
+       "    auth." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
+       "    json." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
        "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
@@ -797,7 +798,7 @@ public class HTML extends JSONProperties
             "    }\n" +
             "    else if (payment_status == '" + Messages.AUTHORIZE + "') {\n" +
             "        setTimeout(function(){\n" +
-            "        var url = received_json." + AUTHORIZATION_URL_JSON + ";\n" +
+            "        var url = received_json." + AUTH_URL_JSON + ";\n" +
             "        if (!url) alert('failed-URL');\n" +
             "        transaction_channel.open('POST', url, true);\n" +
             "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
@@ -810,7 +811,7 @@ public class HTML extends JSONProperties
             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
             "<tr><td>Amount: ' + getPriceString() + '</td></tr>" +
             "<tr><td>' + json_transaction." + CARD_TYPE_JSON + 
-            " + ': ' + json_transaction." + PAYEE_PAN_JSON + " + '</td></tr>" +
+            " + ': ' + json_transaction." + REFERENCE_PAN_JSON + " + '</td></tr>" +
             "</table>';\n" +
             "                } else {\n" +
             "                    document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;\n" +
@@ -820,10 +821,8 @@ public class HTML extends JSONProperties
             "                console.debug('XHR state: ' + transaction_channel.readyState);\n" +
             "            }\n" +
             "        }\n" +
-            "        var transaction_request = createJSONBaseCommand('" + Messages.TRANS_REQ + "');\n" +
-            "        transaction_request." + PAN_JSON + " = received_json." + PAN_JSON + ";\n" +
-            "        transaction_request." + CARD_TYPE_JSON + " = received_json." + CARD_TYPE_JSON + ";\n" +
-            "        transaction_request." + PAYMENT_REQUEST_JSON + " = received_json." + PAYMENT_REQUEST_JSON + ";\n" +
+            "        var transaction_request = createJSONBaseCommand('" + Messages.TRANSACTION_REQUEST + "');\n" +
+            "        transaction_request." + AUTH_DATA_JSON + " = received_json." + AUTH_DATA_JSON + ";\n" +
             "        transaction_channel.send(JSON.stringify(transaction_request));\n" +
             "        }, 1500);\n" +
             "    }\n" +
@@ -1014,7 +1013,7 @@ public class HTML extends JSONProperties
             .append ("</td></tr><tr><td>")
             .append (authorized_result.getString (CARD_TYPE_JSON))
             .append (": ")
-            .append (authorized_result.getString (PAYEE_PAN_JSON))
+            .append (authorized_result.getString (REFERENCE_PAN_JSON))
             .append ("</td></tr></table></td></tr></table>");
           }
         else

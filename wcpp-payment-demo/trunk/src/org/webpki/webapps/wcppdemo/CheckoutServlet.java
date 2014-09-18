@@ -1,14 +1,17 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectReader;
@@ -16,7 +19,7 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
-public class CheckoutServlet extends HttpServlet
+public class CheckoutServlet extends HttpServlet implements BaseProperties
   {
     private static final long serialVersionUID = 1L;
     
@@ -45,8 +48,8 @@ public class CheckoutServlet extends HttpServlet
           }
         saved_shopping_cart.total = total;
         request.getSession (true).setAttribute (SavedShoppingCart.SAVED_SHOPPING_CART, saved_shopping_cart);
-        JSONObjectWriter writer = JSONProperties.createJSONBaseObject (Messages.INVOKE);
-        JSONArrayWriter aw = writer.setArray (JSONProperties.CARD_TYPES_JSON);
+        JSONObjectWriter writer = Messages.createBaseMessage (Messages.INVOKE);
+        JSONArrayWriter aw = writer.setArray (CARD_TYPES_JSON);
         aw.setString ("NeverHeardOfCard");
         for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
           {
@@ -54,7 +57,7 @@ public class CheckoutServlet extends HttpServlet
           }
         JSONObjectWriter payment_request = new PaymentRequest (total).serialize ();
         request.getSession (true).setAttribute (REQUEST_HASH_ATTR, HashAlgorithms.SHA256.digest (payment_request.serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
-        writer.setObject (JSONProperties.PAYMENT_REQUEST_JSON, payment_request);
+        writer.setObject (PAYMENT_REQUEST_JSON, payment_request);
         HTML.checkoutPage (response,
                            saved_shopping_cart,
                            new String (writer.serializeJSONObject (JSONOutputFormats.JS_STRING), "UTF-8"));

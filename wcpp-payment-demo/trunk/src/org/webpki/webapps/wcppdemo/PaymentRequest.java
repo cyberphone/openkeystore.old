@@ -1,14 +1,16 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.Date;
 
 import org.webpki.crypto.KeyStoreSigner;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
-public class PaymentRequest extends JSONProperties
+public class PaymentRequest implements BaseProperties
   {
     String common_name;
     int amount;
@@ -31,17 +33,16 @@ public class PaymentRequest extends JSONProperties
 
     public JSONObjectWriter serialize () throws IOException
       {
-        JSONObjectWriter writer = new JSONObjectWriter ();
-        writer.setString (COMMON_NAME_JSON, common_name);
-        writer.setInt (AMOUNT_JSON, amount);
-        writer.setString (CURRENCY_JSON, currency.toString ());
-        writer.setString (REFERENCE_ID_JSON, reference_id);
-        writer.setDateTime (DATE_TIME_JSON, date_time, true);
         KeyStoreSigner signer = new KeyStoreSigner (Init.merchant_eecert, null);
         signer.setExtendedCertPath (true);
         signer.setKey (null, Init.key_password);
-        writer.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
-        return writer;
+        return new JSONObjectWriter ()
+                     .setString (COMMON_NAME_JSON, common_name)
+                     .setInt (AMOUNT_JSON, amount)
+                     .setString (CURRENCY_JSON, currency.toString ())
+                     .setString (REFERENCE_ID_JSON, reference_id)
+                     .setDateTime (DATE_TIME_JSON, date_time, true)
+                     .setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
       }
 
     public static PaymentRequest parseJSONData (JSONObjectReader payee) throws IOException

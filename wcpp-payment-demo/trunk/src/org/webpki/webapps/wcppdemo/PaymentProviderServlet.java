@@ -1,6 +1,9 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
+import java.security.cert.X509Certificate;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.crypto.VerifierInterface;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -25,38 +29,47 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.ServletUtil;
 
-public class PaymentProviderServlet extends HttpServlet
+public class PaymentProviderServlet extends HttpServlet implements BaseProperties
   {
     private static final long serialVersionUID = 1L;
 
     static Logger logger = Logger.getLogger (PaymentProviderServlet.class.getName ());
     
     static int transaction_id = 164006;
+    
+    private X509Certificate verifyMerchantSignature (JSONObjectReader signed_object) throws IOException
+      {
+        VerifierInterface verifier = new KeyStoreVerifier (Init.merchant_root);
+        signed_object.getSignature ().verify (new JSONX509Verifier (verifier));
+        return verifier.getSignerCertificatePath ()[0];
+      }
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        JSONObjectWriter result = JSONProperties.createJSONBaseObject (Messages.TRANS_RES);
+        JSONObjectWriter result = Messages.createBaseMessage (Messages.TRANSACTION_RESPONSE);
         try
           {
-            JSONObjectReader json = JSONProperties.parsePaymentMessage (Messages.TRANS_REQ, ServletUtil.getData (request));
-            logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-            JSONObjectReader payee = json.getObject (JSONProperties.PAYMENT_REQUEST_JSON);
-            PaymentRequest payment_request = PaymentRequest.parseJSONData (payee);
+            JSONObjectReader trans_req = Messages.parseBaseMessage (Messages.TRANSACTION_REQUEST,
+                                                                    JSONParser.parse (ServletUtil.getData (request)));
+            logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (trans_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
+            JSONObjectReader auth_data = trans_req.getObject (AUTH_DATA_JSON);
+            JSONObjectReader payee = auth_data.getObject (PAYMENT_REQUEST_JSON);
+            PaymentRequest.parseJSONData (payee);  // No DB to store in...
             if (Init.web_crypto)
               {
-                if (!ArrayUtil.compare (json.getBinary (JSONProperties.REQUEST_HASH_JSON),
+                if (!ArrayUtil.compare (trans_req.getBinary (REQUEST_HASH_JSON),
                                         HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
                   {
-                    throw new IOException ("\"" + JSONProperties.REQUEST_HASH_JSON + "\" mismatch");
+                    throw new IOException ("\"" + REQUEST_HASH_JSON + "\" mismatch");
+                  }
+                if (!verifyMerchantSignature (payee).equals (verifyMerchantSignature (trans_req)))
+                  {
+                    throw new IOException ("Non-matching outer/inner signer");
                   }
               }
             result.setObject (HTML.PAYMENT_REQUEST_JSON, payee);
-            if (Init.web_crypto)
-              {
-                payee.getSignature ().verify (new JSONX509Verifier (new KeyStoreVerifier (Init.merchant_root)));
-              }
-            result.setString (JSONProperties.TRANSACTION_ID_JSON, "#" + transaction_id++);
-            String pan = json.getString (JSONProperties.PAN_JSON);
+            result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
+            String pan = auth_data.getString (PAN_JSON);
             StringBuffer payee_pan = new StringBuffer ();
             for (int i = 0; i < pan.length (); i++)
               {
@@ -66,8 +79,9 @@ public class PaymentProviderServlet extends HttpServlet
                   }
                 payee_pan.append (i < 12 ? '*' : pan.charAt (i));
               }
-            result.setString (JSONProperties.PAYEE_PAN_JSON, payee_pan.toString ());
-            result.setString (JSONProperties.CARD_TYPE_JSON, json.getString (JSONProperties.CARD_TYPE_JSON));
+            result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
+            result.setString (CARD_TYPE_JSON, auth_data.getString (CARD_TYPE_JSON));
+            auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
             if (Init.web_crypto)
               {
                 KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert, null);
@@ -75,12 +89,12 @@ public class PaymentProviderServlet extends HttpServlet
                 signer.setKey (null, Init.key_password);
                 result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
               }
-            json.checkForUnread ();
+            trans_req.checkForUnread ();
           }
         catch (Exception e)
           {
-            result = JSONProperties.createJSONBaseObject (Messages.TRANS_RES);
-            result.setString (JSONProperties.ERROR_JSON, e.getMessage ());
+            result = Messages.createBaseMessage (Messages.TRANSACTION_RESPONSE);
+            result.setString (ERROR_JSON, e.getMessage ());
             logger.log (Level.SEVERE, e.getMessage ());
           }
         if (!Init.web_crypto)
