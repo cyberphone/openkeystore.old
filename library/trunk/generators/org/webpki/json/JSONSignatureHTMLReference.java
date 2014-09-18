@@ -66,43 +66,26 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
-"&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2013-12-23T23:25:10+01:00&quot;,<br>"+
-"&nbsp;&nbsp;&quot;PaymentRequest&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Currency&quot;:&nbsp;&quot;USD&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;VAT&quot;:&nbsp;1.45,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Specification&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Units&quot;:&nbsp;3,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Description&quot;:&nbsp;&quot;USB&nbsp;cable&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SKU&quot;:&nbsp;&quot;TR-46565666&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;UnitPrice&quot;:&nbsp;4.50<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Units&quot;:&nbsp;1,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Description&quot;:&nbsp;&quot;4G&nbsp;Router&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SKU&quot;:&nbsp;&quot;JK-56566655&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;UnitPrice&quot;:&nbsp;39.99<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;},<br>"+
-"&nbsp;&nbsp;&quot;EscapeMe&quot;:&nbsp;&quot;\\u000F\\u000aA'\\u0042\\\\\\&quot;\\/&quot;,<br>"+
-"&nbsp;&nbsp;&quot;Signature&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Algorithm&quot;:&nbsp;&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;KeyInfo&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;PublicKey&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;EC&quot;:&nbsp;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;NamedCurve&quot;:&nbsp;&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;X&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEUCIA1__ClTpOMBTCCA3oD3lzuaS3WACYR8qFDHpej5ZdEsAiEA3N5pWl2TOzzQfdtoc35S9n31mf-oP3_XBss8R8qjnvg&quot;<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
+"&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2014-09-16T10:25:17Z&quot;,<br>" +
+"&nbsp;&nbsp;&quot;EscapeMe&quot;:&nbsp;&quot;\\u000F\\nA'\\u0042\\\\\\&quot;\\/&quot;,<br>" +
+"&nbsp;&nbsp;&quot;Numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
+"&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Algorithm&quot;:&nbsp;&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;KeyInfo&quot;:<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;PublicKey&quot;:<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;EC&quot;:<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;NamedCurve&quot;:&nbsp;&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;X&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEYCIQDqFARll5SQJVq6j-YMfogRopPc2PgY84CS8Jvs4Ws-DQIhAIPovSwdjwolMKXBVC8dSO7IG9dEulwA9gAKUmRxiQtj&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
 "}</code></div>" +
 "The sample signature's payload consists of the properties above <code>Signature</code>. " +
 "Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
@@ -140,11 +123,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
              JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-            "{&quot;Now&quot;:&quot;2013-12-23T23:25:10+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
-            "iption&quot;:&quot;USB cable&quot;,&quot;SKU&quot;:&quot;TR-46565666&quot;,&quot;UnitPrice&quot;:<b style=\"color:red;background:Yellow\">4.50</b>},{&quot;Units&quot;:1,&quot;Description&quot;:&quot;4G Router&quot;,&quot;SKU&quot;:&quot;JK-56566655&quot;,<br>" +
-            "&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more<br>" +
-            "#ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:<br>" +
-            "&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
+            "{&quot;Now&quot;:&quot;2014-09-16T10:25:17Z&quot;,&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;Signature&quot;:{&quot;Algorithm&quot;:<br>" +
+            "&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xml<br>" +
+            "ns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3Lg<br>" +
+            "ZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "\">" + 
