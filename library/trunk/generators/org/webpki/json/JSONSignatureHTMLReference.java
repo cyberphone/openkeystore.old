@@ -67,7 +67,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
 "&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2014-09-16T10:25:17Z&quot;,<br>" +
-"&nbsp;&nbsp;&quot;EscapeMe&quot;:&nbsp;&quot;\\u000F\\nA'\\u0042\\\\\\&quot;\\/&quot;,<br>" +
+"&nbsp;&nbsp;&quot;EscapeMe&quot;:&nbsp;&quot;\\u000F\\u000aA'\\u0042\\\\\\&quot;\\/&quot;,<br>" +
 "&nbsp;&nbsp;&quot;Numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
 "&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
