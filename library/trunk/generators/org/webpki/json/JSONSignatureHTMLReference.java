@@ -111,7 +111,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
-            "with the exception of <code>'\"'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
+            "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
             "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
             "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
             "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
