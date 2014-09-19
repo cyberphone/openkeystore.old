@@ -99,6 +99,8 @@
 	  <replacefilter token="@merchant-eecert@" value="${merchantkey}${keyfilext}"/>
 	  <replacefilter token="@payment-root@" value="${paymentroot}.cer"/>
 	  <replacefilter token="@merchant-root@" value="${merchantroot}.cer"/>
+	  <replacefilter token="@bank-encryptionkey@" value="${encryptionkey}.cer"/>
+	  <replacefilter token="@bank-decryptionkey@" value="${encryptionkey}${keyfilext}"/>
 	</replace>
     <war destfile="${dist_dir}/${application}" webxml="${temp_dir}/web.xml">
       <classes dir="${temp_dir}">

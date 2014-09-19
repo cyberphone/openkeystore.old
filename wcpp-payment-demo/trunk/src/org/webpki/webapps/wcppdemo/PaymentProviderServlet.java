@@ -1,14 +1,11 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.security.cert.X509Certificate;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,16 +14,14 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
-
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.util.ArrayUtil;
-
+import org.webpki.util.Base64URL;
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet implements BaseProperties
@@ -52,7 +47,16 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             JSONObjectReader trans_req = Messages.parseBaseMessage (Messages.TRANSACTION_REQUEST,
                                                                     JSONParser.parse (ServletUtil.getData (request)));
             logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (trans_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-            JSONObjectReader auth_data = trans_req.getObject (AUTH_DATA_JSON);
+            JSONObjectReader encrypted_auth_data = trans_req.getObject (AUTH_DATA_JSON).getObject (ENCRYPTED_DATA_JSON);
+            JSONObjectReader auth_data = null;
+            if (Init.web_crypto)
+              {
+                auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
+              }
+            else
+              {
+                auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
+              }
             JSONObjectReader payee = auth_data.getObject (PAYMENT_REQUEST_JSON);
             PaymentRequest.parseJSONData (payee);  // No DB to store in...
             if (Init.web_crypto)

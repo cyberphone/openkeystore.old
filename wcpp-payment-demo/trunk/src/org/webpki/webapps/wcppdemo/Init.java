@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.PublicKey;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +46,8 @@ public class Init implements ServletContextListener
     static KeyStore merchant_root;
     static KeyStore payment_root;
     
-    static PublicKey bank_encryption_key;
+    static KeyStore bank_decryption_key;
+    static byte[] bank_encryption_key;
 
     private String getDataURI (String main, String extension) throws IOException
       {
@@ -89,6 +89,11 @@ public class Init implements ServletContextListener
             merchant_eecert = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("merchant_eecert")), Init.key_password);
             payment_root = getRootCertificate (properties.getPropertyString ("payment_root"));
             merchant_root = getRootCertificate (properties.getPropertyString ("merchant_root"));
+            bank_encryption_key = CertificateUtil.getCertificateFromBlob (
+                                      ArrayUtil.getByteArrayFromInputStream ( 
+                                          Init.class.getResourceAsStream (
+                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ().getEncoded ();
+            bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_decryptionkey")), Init.key_password);
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }
         catch (Exception e)

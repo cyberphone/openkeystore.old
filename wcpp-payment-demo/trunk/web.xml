@@ -29,6 +29,12 @@
     </context-param>
 
     <context-param>
+        <description>Key Password</description>
+        <param-name>key_password</param-name>
+        <param-value>@key-password@</param-value>
+    </context-param>
+ 
+    <context-param>
         <description>Bank EE Certificate</description>
         <param-name>bank_eecert</param-name>
         <param-value>@bank-eecert@</param-value>
@@ -53,11 +59,17 @@
     </context-param>
 
     <context-param>
-        <description>Key Password</description>
-        <param-name>key_password</param-name>
-        <param-value>@key-password@</param-value>
+        <description>Bank Encryption Key</description>
+        <param-name>bank_encryptionkey</param-name>
+        <param-value>@bank-encryptionkey@</param-value>
     </context-param>
- 
+
+    <context-param>
+        <description>Bank Decryption Key</description>
+        <param-name>bank_decryptionkey</param-name>
+        <param-value>@bank-decryptionkey@</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>

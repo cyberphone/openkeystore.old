@@ -18,6 +18,8 @@ public interface BaseProperties
     String REFERENCE_PAN_JSON         = "ReferencePAN";      // Truncated card number given to merchant
     String REQUEST_HASH_JSON          = "RequestHash";
     String DOMAIN_NAME_JSON           = "DomainName";
+    String ENCRYPTED_DATA_JSON        = "EncryptedData";
+    String CIPHER_TEXT_JSON           = "CipherText";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-payment-demo";
   }

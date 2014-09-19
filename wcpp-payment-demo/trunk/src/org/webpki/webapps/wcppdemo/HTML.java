@@ -303,8 +303,31 @@ public class HTML implements BaseProperties
                 }
             }
         }
-        s.append (
-        "\nfunction error(message) {\n" +
+        if (Init.web_crypto)
+          {
+            s.append ("\n// Since we have no WebCrypto++/SKS we cheat...\nvar encryption_key = new Uint8Array([");
+            boolean next = false;
+            for (byte b : Init.bank_encryption_key)
+              {
+                if (next)
+                  {
+                    s.append (',');
+                  }
+                s.append (b & 0xFF);
+                next = true;
+              }
+            s.append ("]);\n");
+          }
+        s.append ("\nvar BASE64URL = [" + 
+          "'A','B','C','D','E','F','G','H'," +
+          "'I','J','K','L','M','N','O','P'," +
+          "'Q','R','S','T','U','V','W','X'," +
+          "'Y','Z','a','b','c','d','e','f'," +
+          "'g','h','i','j','k','l','m','n'," +
+          "'o','p','q','r','s','t','u','v'," +
+          "'w','x','y','z','0','1','2','3'," +
+          "'4','5','6','7','8','9','-','_'];\n\n" +
+         "function error(message) {\n" +
         "    console.debug ('Error: ' + message);\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
@@ -370,6 +393,44 @@ public class HTML implements BaseProperties
              javaScript (CardEntry.CARD_DIV) +
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td>';\n" +
+        "}\n\n" +
+        "function binaryToBase64 (binarray) {\n" +
+        "    var encoded = new String ();\n" +
+        "    var i = 0;\n" +
+        "    var modulo3 = binarray.length % 3;\n" +
+        "    while (i < binarray.length - modulo3) {\n" +
+        "        encoded += BASE64URL[(binarray[i] >>> 2) & 0x3F];\n" +
+        "        encoded += BASE64URL[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n" +
+        "        encoded += BASE64URL[((binarray[i++] << 2) & 0x3C) | ((binarray[i] >>> 6) & 0x03)];\n" +
+        "        encoded += BASE64URL[binarray[i++] & 0x3F];\n" +
+        "    }\n" +
+        "    if (modulo3 == 1) {\n" +
+        "        encoded += BASE64URL[(binarray[i] >>> 2) & 0x3F];\n" +
+        "        encoded += BASE64URL[(binarray[i] << 4) & 0x30];\n" +
+        "    }\n" +
+        "    else if (modulo3 == 2) {\n" +
+        "        encoded += BASE64URL[(binarray[i] >>> 2) & 0x3F];\n" +
+        "        encoded += BASE64URL[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n" +
+        "        encoded += BASE64URL[(binarray[i] << 2) & 0x3C];\n" +
+        "    }\n" +
+        "    return encoded;\n" +
+        "}\n\n" +
+        "function convertStringToUTF8(string) {\n" +
+        "    var buffer = [];\n" +
+        "    for (var n = 0; n < string.length; n++) {\n" +
+        "        var c = string.charCodeAt (n);\n" +
+        "        if (c < 128) {\n" +
+        "            buffer.push (c);\n" +
+        "        } else if ((c > 127) && (c < 2048)) {\n" +
+        "            buffer.push ((c >> 6) | 0xC0);\n" +
+        "            buffer.push ((c & 0x3F) | 0x80);\n" +
+        "        } else {\n" +
+        "            buffer.push ((c >> 12) | 0xE0);\n" +
+        "            buffer.push (((c >> 6) & 0x3F) | 0x80);\n" +
+        "            buffer.push ((c & 0x3F) | 0x80);\n" +
+        "        }\n" +
+        "    }\n" +
+        "    return new Uint8Array (buffer);\n" +
         "}\n\n" +
         "//\n" +
         "// Although PANs (card numbers) are not really needed from the user's\n" +
@@ -458,9 +519,27 @@ public class HTML implements BaseProperties
             Messages.ABORT + "')), window.document.referrer);\n" +
        "}\n\n" +
        "//\n" +
+       "// This is the final part of the user authorization\n" +
+       "//\n" +
+       "function encryptAndSend (signed_auth_data) {\n" +
+       "    var authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
+       "    authorize_command." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
+       "    var encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
+       "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n" +
+       "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(signed_auth_data);\n" +
+       "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
+       "}\n" +
+       "//\n" +
        "// Called when the user authorized the payment.\n" +
        "//\n" +
        "function userAuthorize() {\n" +
+       "    // Create \"" + AUTH_DATA_JSON + "\"\n" +
+       "    var auth_data = {};\n" +
+       "    auth_data." + PAN_JSON + " = selected_card.pan;\n" +
+       "    auth_data." + CARD_TYPE_JSON + " = selected_card.type;\n" +
+       "    auth_data." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
+       "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
+       "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
        "    var pin = document.getElementById('pin').value;\n" +
        "    if (pin_error_count < 3) {\n" +
        "        if (pin.length == 0) {\n" +
@@ -482,14 +561,7 @@ public class HTML implements BaseProperties
        "    disableControls(true);\n"+
        "    document.getElementById('cancel').disabled = true;\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    var json = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
-       "    var auth = json." + AUTH_DATA_JSON + " = {};\n" +
-       "    auth." + PAN_JSON + " = selected_card.pan;\n" +
-       "    auth." + CARD_TYPE_JSON + " = selected_card.type;\n" +
-       "    auth." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
-       "    auth." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
-       "    json." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
-       "    window.parent.postMessage(JSON.stringify(json), window.document.referrer);\n" +
+       "    encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n" +
        "}\n\n" +
        "//\n" +
        "// Processes the payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n" +
@@ -499,15 +571,15 @@ public class HTML implements BaseProperties
        "//   {\n" +
        "//     \"" + JSONDecoderCache.CONTEXT_JSON + "\": \"" + WCPP_DEMO_CONTEXT_URI + "\"\n" +
        "//     \"" + JSONDecoderCache.QUALIFIER_JSON + "\": \"" + Messages.INVOKE + "\"\n" +
-       "//     \"" + CARD_TYPES_JSON + "\": [\"Card Type\"...]        1-n card types recognized by the payee\n" +
-       "//     \"" + PAYMENT_REQUEST_JSON + "\":                       The actual request\n" +
+       "//     \"" + CARD_TYPES_JSON + "\": [\"Card Type\"...]         1-n card types recognized by the payee\n" +
+       "//     \"" + PAYMENT_REQUEST_JSON + "\":                     The actual request\n" +
        "//       {\n" +
-       "//         \"" + AMOUNT_JSON + "\": nnnn                   Integer of the payment sum multiplied by 100\n" +
-       "//         \"" + CURRENCY_JSON + "\": \"XYZ\"                Currency in ISO notation\n" +
-       "//         \"" + REFERENCE_ID_JSON + "\": \"String\"        Payee reference to order\n" +
-       "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ss\"  ISO time of request\n" +
-       "//         \"" + COMMON_NAME_JSON + "\": \"Name\"             Common name of requester\n" +
-       "//         \"" + JSONSignatureDecoder.SIGNATURE_JSON + "\": \"{}\"             Signature object\n" +
+       "//         \"" + AMOUNT_JSON + "\": nnnn                    Integer of the payment sum multiplied by 100\n" +
+       "//         \"" + CURRENCY_JSON + "\": \"XYZ\"                 Currency in ISO notation\n" +
+       "//         \"" + REFERENCE_ID_JSON + "\": \"String\"           Payee reference to order\n" +
+       "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ssZ\"  ISO time of request\n" +
+       "//         \"" + COMMON_NAME_JSON + "\": \"Name\"              Common name of requester\n" +
+       "//         \"" + JSONSignatureDecoder.SIGNATURE_JSON + "\": \"{}\"                 Signature object\n" +
        "//       }\n" +
        "//   }\n" +
        "//\n" +
