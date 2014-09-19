@@ -100,7 +100,7 @@ public class JCSSample
             String unormalized_json = 
               "{\n" +
               "  \"Now\": \"2014-09-16T10:25:17Z\",\n" +
-              "  \"EscapeMe\": \"\\u000F\\u000aA'\\u0042\\\\\\\"\\/\",\n" +
+              "  \"EscapeMe\": \"\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\\"\\/\",\n" +
               "  \"Numbers\": [1e0, 4.50, 6]\n" +
               "}";
             JSONObjectReader or = JSONParser.parse (unormalized_json);
