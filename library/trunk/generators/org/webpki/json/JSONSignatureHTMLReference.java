@@ -110,13 +110,14 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
             "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
-            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character.</li>" +
+            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
+            "with the exception of <code>'\"'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
             "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
             "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
             "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
             "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
             "trailing zero being redundant. To cope with this " +
-            "potential problem, compliant parsers need to <i>preserve</i> the original textual representation of " +
+            "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
             "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
