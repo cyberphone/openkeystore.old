@@ -33,5 +33,6 @@ public class CardEntry implements Serializable
     byte[] bank_encryption_key;  // SPKI
     byte[] client_key;           // PKCS #8
     String client_certificate;   // Base64URL (X.509)
+    String cert_data;            // JCS SignatureCertificate {}
     boolean active;
   }

@@ -268,7 +268,7 @@ public class HTML implements BaseProperties
         s.append ("\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image");
         if (Init.web_crypto)
           {
-            s.append (", bank_encryption_key, client_cert, client_private_key");
+            s.append (", bank_encryption_key, client_cert, client_private_key, cert_data");
           }
         s.append (
         ") {\n" +
@@ -283,7 +283,8 @@ public class HTML implements BaseProperties
                 "    this.bank_encryption_key = bank_encryption_key;\n" +
                 "    this.client_cert_path = [];\n" +
                 "    this.client_cert_path.push(client_cert);\n" +
-                "    this.client_private_key = client_private_key;\n");
+                "    this.client_private_key = client_private_key;\n" +
+                "    this.cert_data = cert_data;\n");
           }
         s.append (
         "    this.matching = false;\n" +
@@ -325,6 +326,8 @@ public class HTML implements BaseProperties
                              .append (card_entry.client_certificate)
                              .append ("', ");
                             binArray (s, card_entry.client_key);
+                            s.append (", ")
+                             .append (card_entry.cert_data);
                           }
                         s.append ("));\n");
                     }
@@ -606,6 +609,7 @@ public class HTML implements BaseProperties
              "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
              "    var key_info = {};\n" +
              "    signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = key_info;\n" +
+             "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
              "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
          }
        s.append (
@@ -637,7 +641,9 @@ public class HTML implements BaseProperties
              "    crypto.subtle.importKey('pkcs8', selected_card.client_private_key, sign_alg, true, ['sign']).then (function (private_key) {\n" +
              "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function (signature) {\n" +
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
-             "        encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n" +
+             "        var json_auth_data = JSON.stringify(auth_data);\n" +
+             "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
+             "        encryptAndSend (convertStringToUTF8(json_auth_data));\n" +
              "    }).then (undefined, function () {error('Failed signing')});\n" +
              "    }).then (undefined, function () {error('Failed importing private key')});\n");
          }

@@ -3,6 +3,7 @@ package org.webpki.webapps.wcppdemo;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import javax.servlet.ServletContextListener;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
+import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
@@ -49,6 +51,7 @@ public class Init implements ServletContextListener
     static KeyStore client_root;
     static String client_eecert;
     static byte[] client_key;
+    static String cert_data;
 
     private String getDataURI (String main, String extension) throws IOException
       {
@@ -97,7 +100,15 @@ public class Init implements ServletContextListener
             bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_decryptionkey")), Init.key_password);
             client_root = getRootCertificate (properties.getPropertyString ("bank_client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_client_eecert")), Init.key_password);
-            client_eecert = Base64URL.encode (client.getCertificate ("mykey").getEncoded ());
+            X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
+            client_eecert = Base64URL.encode (cert.getEncoded ());
+            cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
+              .append (cert.getIssuerX500Principal ().getName ())
+              .append ("', " + JSONSignatureDecoder.SERIAL_NUMBER_JSON + ":'")
+              .append (cert.getSerialNumber ().toString ())
+              .append ("', " + JSONSignatureDecoder.SUBJECT_JSON + ":'")
+              .append (cert.getSubjectX500Principal ().getName ())
+              .append ("'}").toString ();
             client_key = client.getKey ("mykey", Init.key_password.toCharArray ()).getEncoded ();
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }

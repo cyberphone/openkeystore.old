@@ -230,7 +230,7 @@
        <param name="rootfile" value="${clientroot}"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Client, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256"/>
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Cardholder, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256"/>
     </antcall>
     </target>
 
