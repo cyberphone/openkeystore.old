@@ -1,9 +1,11 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.Vector;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -11,11 +13,11 @@ import javax.servlet.http.HttpSession;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
 
 public class HTML implements BaseProperties

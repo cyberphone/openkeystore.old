@@ -92,7 +92,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
                 VerifierInterface verifier = new KeyStoreVerifier (Init.client_root);
                 auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
-               }
+              }
             else
               {
                 auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
