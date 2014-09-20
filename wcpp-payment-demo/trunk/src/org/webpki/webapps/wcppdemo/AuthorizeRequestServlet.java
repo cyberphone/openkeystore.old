@@ -48,7 +48,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
             transact.setObject (AUTH_DATA_JSON, auth_req.getObject (AUTH_DATA_JSON));
             if (Init.web_crypto)
               {
-                KeyStoreSigner signer = new KeyStoreSigner (Init.merchant_eecert, null);
+                KeyStoreSigner signer = new KeyStoreSigner (Init.merchant_eecert_key, null);
                 signer.setExtendedCertPath (true);
                 signer.setKey (null, Init.key_password);
                 transact.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));

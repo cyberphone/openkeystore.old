@@ -30,6 +30,8 @@ public class CardEntry implements Serializable
     String base64_image;
     String transaction_url;
     String user;
-    byte[] bank_encryption_key;
+    byte[] bank_encryption_key;  // SPKI
+    byte[] client_key;           // PKCS #8
+    String client_certificate;   // Base64URL (X.509)
     boolean active;
   }

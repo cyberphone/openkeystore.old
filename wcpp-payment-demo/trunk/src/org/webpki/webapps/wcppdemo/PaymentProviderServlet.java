@@ -90,7 +90,9 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
                 auth_data = JSONParser.parse (cipher.doFinal (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON))));
                 logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-              }
+                VerifierInterface verifier = new KeyStoreVerifier (Init.client_root);
+                auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
+               }
             else
               {
                 auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
@@ -126,7 +128,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
             if (Init.web_crypto)
               {
-                KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert, null);
+                KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
                 signer.setExtendedCertPath (true);
                 signer.setKey (null, Init.key_password);
                 result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));

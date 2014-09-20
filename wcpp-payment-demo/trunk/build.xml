@@ -18,7 +18,8 @@
   
   <property name="encryptionkey" value="mybank-encryption-key"/>
   <property name="clientroot" value="mybank-clientroot"/>
-
+  <property name="clientkey" value="mybank-client-eecert"/>
+  
   <property name="temp_dir" value=".tmp"/>
   <property name="dist_dir" value="dist"/>
   <property name="debug" value="on"/>
@@ -101,6 +102,8 @@
 	  <replacefilter token="@merchant-root@" value="${merchantroot}.cer"/>
 	  <replacefilter token="@bank-encryptionkey@" value="${encryptionkey}.cer"/>
 	  <replacefilter token="@bank-decryptionkey@" value="${encryptionkey}${keyfilext}"/>
+	  <replacefilter token="@bank-client-root@" value="${clientroot}.cer"/>
+	  <replacefilter token="@bank-client-eecert@" value="${clientkey}${keyfilext}"/>
 	</replace>
     <war destfile="${dist_dir}/${application}" webxml="${temp_dir}/web.xml">
       <classes dir="${temp_dir}">
@@ -219,12 +222,15 @@
     </antcall>
   </target>
 
-  <target name="_clientcertroot">
+  <target name="_clientcert">
     <antcall target="_createcert">
        <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Mybank Client Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientroot}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
     <antcall target="_getroot">
        <param name="rootfile" value="${clientroot}"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Client, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256"/>
     </antcall>
     </target>
 
@@ -240,7 +246,7 @@
   <target name="createcerts">
     <antcall target="_certpaymentnetwork"/>
     <antcall target="_certmerchants"/>
-    <antcall target="_clientcertroot"/>
+    <antcall target="_clientcert"/>
     <antcall target="_authencryption"/>
     <delete>
   	  <fileset dir="${key_dir}">

@@ -70,6 +70,18 @@
         <param-value>@bank-decryptionkey@</param-value>
     </context-param>
 
+    <context-param>
+        <description>Bank Client Root</description>
+        <param-name>bank_client_root</param-name>
+        <param-value>@bank-client-root@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Bank Client Certificate</description>
+        <param-name>bank_client_eecert</param-name>
+        <param-value>@bank-client-eecert@</param-value>
+    </context-param>
+    
     <listener>
         <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
      </listener>
@@ -105,7 +117,7 @@
     </servlet>
     
     <servlet>
-	    <servlet-name>PaymentProviderServlet</servlet-name>
+        <servlet-name>PaymentProviderServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.PaymentProviderServlet</servlet-class>
     </servlet>
 
@@ -114,12 +126,12 @@
         <url-pattern>/merchant</url-pattern>
     </servlet-mapping>
 
-    '<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>CheckoutServlet</servlet-name>
         <url-pattern>/checkout</url-pattern>
     </servlet-mapping>
 
-    '<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>AuthorizeRequestServlet</servlet-name>
         <url-pattern>/authreq</url-pattern>
     </servlet-mapping>

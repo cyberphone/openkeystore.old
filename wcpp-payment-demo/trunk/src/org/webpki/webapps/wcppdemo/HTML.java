@@ -9,11 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
 
 public class HTML implements BaseProperties
@@ -266,7 +268,7 @@ public class HTML implements BaseProperties
         s.append ("\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image");
         if (Init.web_crypto)
           {
-            s.append (", bank_encryption_key");
+            s.append (", bank_encryption_key, client_cert, client_private_key");
           }
         s.append (
         ") {\n" +
@@ -277,7 +279,11 @@ public class HTML implements BaseProperties
         "    this.base64_image = base64_image;\n");
         if (Init.web_crypto)
           {
-            s.append ("    this.bank_encryption_key = bank_encryption_key;\n");
+            s.append (
+                "    this.bank_encryption_key = bank_encryption_key;\n" +
+                "    this.client_cert_path = [];\n" +
+                "    this.client_cert_path.push(client_cert);\n" +
+                "    this.client_private_key = client_private_key;\n");
           }
         s.append (
         "    this.matching = false;\n" +
@@ -313,18 +319,12 @@ public class HTML implements BaseProperties
                          .append ("'");
                         if (Init.web_crypto)
                           {
-                            s.append (", new Uint8Array([");
-                            boolean next = false;
-                            for (byte b : card_entry.bank_encryption_key)
-                              {
-                                if (next)
-                                  {
-                                    s.append (',');
-                                  }
-                                s.append (b & 0xFF);
-                                next = true;
-                              }
-                            s.append ("])");
+                            s.append (", ");
+                            binArray (s, card_entry.bank_encryption_key);
+                            s.append (", '")
+                             .append (card_entry.client_certificate)
+                             .append ("', ");
+                            binArray (s, card_entry.client_key);
                           }
                         s.append ("));\n");
                     }
@@ -596,8 +596,19 @@ public class HTML implements BaseProperties
        "    auth_data." + PAN_JSON + " = selected_card.pan;\n" +
        "    auth_data." + CARD_TYPE_JSON + " = selected_card.type;\n" +
        "    auth_data." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
-       "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
-       "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
+       "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n");
+       if (Init.web_crypto)
+         {
+           s.append (
+             "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
+             "    var signature_object = {};\n" +
+             "    auth_data." + JSONSignatureDecoder.SIGNATURE_JSON + " = signature_object;\n" +
+             "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+             "    var key_info = {};\n" +
+             "    signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = key_info;\n" +
+             "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
+         }
+       s.append (
        "    var pin = document.getElementById('pin').value;\n" +
        "    if (pin_error_count < 3) {\n" +
        "        if (pin.length == 0) {\n" +
@@ -618,8 +629,24 @@ public class HTML implements BaseProperties
        "    // Now we entered a critical phase and do not want to get interrupted!\n" +
        "    disableControls(true);\n"+
        "    document.getElementById('cancel').disabled = true;\n" +
-       "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n" +
+       "    document.getElementById('busy').style.visibility = 'visible';\n");
+       if (Init.web_crypto)
+         {
+           s.append (
+             "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'};\n" +
+             "    crypto.subtle.importKey('pkcs8', selected_card.client_private_key, sign_alg, true, ['sign']).then (function (private_key) {\n" +
+             "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function (signature) {\n" +
+             "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
+             "        encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n" +
+             "    }).then (undefined, function () {error('Failed signing')});\n" +
+             "    }).then (undefined, function () {error('Failed importing private key')});\n");
+         }
+       else
+         {
+           s.append (
+             "    encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n");
+         }
+       s.append (
        "}\n\n" +
        "//\n" +
        "// Processes payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n");
@@ -754,6 +781,22 @@ public class HTML implements BaseProperties
         "</script>" +
         "</body></html>");
         HTML.output (response, s.toString());
+      }
+
+    private static void binArray (StringBuffer s, byte[] bytes)
+      {
+        s.append ("new Uint8Array([");
+        boolean next = false;
+        for (byte b : bytes)
+          {
+            if (next)
+              {
+                s.append (',');
+              }
+            s.append (b & 0xFF);
+            next = true;
+          }
+        s.append ("])");
       }
 
     private static StringBuffer productEntry (StringBuffer temp_string, ProductEntry product_entry, String sku, SavedShoppingCart saved_shopping_cart, int index)

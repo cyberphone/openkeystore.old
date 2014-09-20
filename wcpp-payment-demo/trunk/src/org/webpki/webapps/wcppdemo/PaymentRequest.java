@@ -33,7 +33,7 @@ public class PaymentRequest implements BaseProperties
 
     public JSONObjectWriter serialize () throws IOException
       {
-        KeyStoreSigner signer = new KeyStoreSigner (Init.merchant_eecert, null);
+        KeyStoreSigner signer = new KeyStoreSigner (Init.merchant_eecert_key, null);
         signer.setExtendedCertPath (true);
         signer.setKey (null, Init.key_password);
         return new JSONObjectWriter ()
