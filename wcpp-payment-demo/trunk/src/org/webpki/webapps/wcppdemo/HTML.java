@@ -1,7 +1,6 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -9,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -231,7 +232,7 @@ public class HTML implements BaseProperties
         "\"use strict\";\n\n" +
         "////////////////////////////////////////////////////////////////////\n" +
         "// Disclaimer: The actual messages used by this payment provider  //\n" +
-        "// in no way represents a standard or a standards proposal.       //\n" +
+        "// in no way represent a standard or a standards proposal.        //\n" +
         "// However, the message flow is anticipated to be usable \"as is\". //\n" +
         "////////////////////////////////////////////////////////////////////\n\n" +
         "var webpki = {};  // For our custom objects\n\n" +
@@ -262,13 +263,23 @@ public class HTML implements BaseProperties
             .append(currency.first_position)
             .append ("));\n");
           }
+        s.append ("\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image");
+        if (Init.web_crypto)
+          {
+            s.append (", bank_encryption_key");
+          }
         s.append (
-        "\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image) {\n" +
+        ") {\n" +
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
         "    this.pan = pan;\n" +
         "    this.transaction_url = transaction_url;\n" +
-        "    this.base64_image = base64_image;\n" +
+        "    this.base64_image = base64_image;\n");
+        if (Init.web_crypto)
+          {
+            s.append ("    this.bank_encryption_key = bank_encryption_key;\n");
+          }
+        s.append (
         "    this.matching = false;\n" +
         "};\n" +
         "var selected_card;\n" +
@@ -279,12 +290,13 @@ public class HTML implements BaseProperties
             s.append ("console.debug('No web session found');\n");
           }
         else
-        {
+          {
             @SuppressWarnings("unchecked")
             Vector<CardEntry> card_entries = (Vector<CardEntry>) session.getAttribute(CardEntry.CARD_LIST);
             if (card_entries != null)
             {
-                for (CardEntry card_entry : card_entries)
+              s.append ("//\n// Since we have no WebCrypto++/SKS we [have to] cheat...\n//\n");
+              for (CardEntry card_entry : card_entries)
                 {
                     if (card_entry.active)
                     {
@@ -298,26 +310,28 @@ public class HTML implements BaseProperties
                          .append(card_entry.transaction_url)
                          .append("', '")
                          .append(card_entry.base64_image)
-                         .append ("'));\n");
+                         .append ("'");
+                        if (Init.web_crypto)
+                          {
+                            s.append (", new Uint8Array([");
+                            boolean next = false;
+                            for (byte b : card_entry.bank_encryption_key)
+                              {
+                                if (next)
+                                  {
+                                    s.append (',');
+                                  }
+                                s.append (b & 0xFF);
+                                next = true;
+                              }
+                            s.append ("])");
+                          }
+                        s.append ("));\n");
                     }
                 }
             }
-        }
-        if (Init.web_crypto)
-          {
-            s.append ("\n// Since we have no WebCrypto++/SKS we cheat...\nvar encryption_key = new Uint8Array([");
-            boolean next = false;
-            for (byte b : Init.bank_encryption_key)
-              {
-                if (next)
-                  {
-                    s.append (',');
-                  }
-                s.append (b & 0xFF);
-                next = true;
-              }
-            s.append ("]);\n");
-          }
+         }
+
         s.append ("\nvar BASE64URL = [" + 
           "'A','B','C','D','E','F','G','H'," +
           "'I','J','K','L','M','N','O','P'," +
@@ -525,9 +539,53 @@ public class HTML implements BaseProperties
        "    var authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
        "    authorize_command." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
        "    var encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
-       "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n" +
-       "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(signed_auth_data);\n" +
-       "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
+       "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
+       if (Init.web_crypto)
+         {
+           s.append (
+             "    var sym_alg = {name: 'AES-CBC', length: 256};\n" +
+             "    crypto.subtle.generateKey(sym_alg, true, ['encrypt', 'decrypt']).then (function(aes_key) {\n" +
+             "    var enc_alg = {\n" +
+             "        name: 'AES-CBC',\n" +
+             "        iv: window.crypto.getRandomValues(new Uint8Array(16))\n" +
+             "    };\n" +
+             "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function (main_cryptogram) {\n" +
+             "    crypto.subtle.exportKey('raw', aes_key).then (function (raw_aes_key) {\n" +
+             "    var asym_alg = {name: 'RSA-OAEP', hash: 'SHA-256'};\n" +
+             "    crypto.subtle.importKey('spki', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function (public_key) {\n" +
+             "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function (encryped_aes_key) {\n" +
+             "    crypto.subtle.exportKey('jwk', public_key).then (function (jwk_key) {\n" +
+             "        var encrypted_key = {};\n" +
+             "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI () + "';\n" +
+             "        var public_key = {};\n" +
+             "        encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = public_key;\n" +
+             "        var rsa_key = {};\n" +
+             "        public_key." + JSONSignatureDecoder.RSA_JSON + " = rsa_key;\n" +
+             "        rsa_key." + JSONSignatureDecoder.MODULUS_JSON + " = jwk_key.n;\n" +
+             "        rsa_key." + JSONSignatureDecoder.EXPONENT_JSON + " = jwk_key.e;\n" +
+             "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
+             "        encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES_CBC_P5.getURI () + "';\n" +
+             "        encrypted_data." + IV_JSON + " = binaryToBase64(enc_alg.iv);\n" +
+             "        encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
+             "        encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
+//             "        encrypted_data.BLAJ = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
+ //            "        encrypted_data.KLAJ = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
+             "        window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
+             "    }).then (undefined, function () {error('Failed exporting public key')});\n" +
+             "    }).then (undefined, function () {error('Failed encrypting using public key')});\n" +
+             "    }).then (undefined, function () {error('Failed import public key')});\n" +
+             "    }).then (undefined, function () {error('Failed exporting symmetric key')});\n" +
+             "    }).then (undefined, function () {error('Failed encrypting using symmetric key')});\n" +
+             "    }).then (undefined, function () {error('Failed generating symmetric key')});\n");
+         }
+       else
+         {
+           s.append (
+             "    // For a lame GUI-demo base64 is \"encryption\", right?\n" +
+             "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(signed_auth_data);\n" +
+             "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n");
+         }
+       s.append (
        "}\n" +
        "//\n" +
        "// Called when the user authorized the payment.\n" +
@@ -564,8 +622,12 @@ public class HTML implements BaseProperties
        "    encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n" +
        "}\n\n" +
        "//\n" +
-       "// Processes the payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n" +
-       "// Note: In a genuine implementaion the request would be signed.\n" +
+       "// Processes payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n");
+       if (!Init.web_crypto)
+         {
+           s.append ("// Note: In a genuine implementaion the \"" + PAYMENT_REQUEST_JSON + "\" object would be signed.\n");
+         }
+       s.append (
        "//\n" +
        "// Message syntax:\n" +
        "//   {\n" +
@@ -574,7 +636,7 @@ public class HTML implements BaseProperties
        "//     \"" + CARD_TYPES_JSON + "\": [\"Card Type\"...]         1-n card types recognized by the payee\n" +
        "//     \"" + PAYMENT_REQUEST_JSON + "\":                     The actual request\n" +
        "//       {\n" +
-       "//         \"" + AMOUNT_JSON + "\": nnnn                    Integer of the payment sum multiplied by 100\n" +
+       "//         \"" + AMOUNT_JSON + "\": nnnn                    Integer of the sum to pay multiplied by 100\n" +
        "//         \"" + CURRENCY_JSON + "\": \"XYZ\"                 Currency in ISO notation\n" +
        "//         \"" + REFERENCE_ID_JSON + "\": \"String\"           Payee reference to order\n" +
        "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ssZ\"  ISO time of request\n" +

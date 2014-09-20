@@ -19,6 +19,9 @@ public interface BaseProperties
     String REQUEST_HASH_JSON          = "RequestHash";
     String DOMAIN_NAME_JSON           = "DomainName";
     String ENCRYPTED_DATA_JSON        = "EncryptedData";
+    String ENCRYPTED_KEY_JSON         = "EncryptedKey";
+    String ALGORITHM_JSON             = "Algorithm";
+    String IV_JSON                    = "IV";
     String CIPHER_TEXT_JSON           = "CipherText";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-payment-demo";
