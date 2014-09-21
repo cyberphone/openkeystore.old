@@ -958,7 +958,7 @@ public class HTML implements BaseProperties
             "        setTimeout(function(){\n" +
             "        var returned_json = createJSONBaseCommand('" + Messages.INVOKE + "');\n" +
             "        var inner_json = returned_json." + PAYMENT_REQUEST_JSON + " = {}\n" +
-            "        inner_json." + COMMON_NAME_JSON + " = 'Demo Merchant';\n" +
+            "        inner_json." + COMMON_NAME_JSON + " = '" + MerchantServlet.COMMON_NAME + "';\n" +
             "        inner_json." + CURRENCY_JSON + " = 'USD';\n" +
             "        inner_json." + AMOUNT_JSON + " = getTotal();\n" +
             "        inner_json." + REFERENCE_ID_JSON + " = '#' + next_reference_id++;\n" +
@@ -1017,7 +1017,9 @@ public class HTML implements BaseProperties
         StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table>" +
-               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Demo Merchant<br>&nbsp;</td></tr>" +
+               "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">" +
+               MerchantServlet.COMMON_NAME +
+               "<br>&nbsp;</td></tr>" +
                "<tr><td id=\"result\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\">" +
                    "<tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr>");
         int q = 0;
@@ -1104,7 +1106,7 @@ public class HTML implements BaseProperties
              .append (card_entry.base64_image)
              .append ("');\" title=\"This card is")
              .append (MerchantServlet.compatible_with_merchant.contains (card_entry.card_type) ? "" : " NOT")
-             .append (" recognized by the demo merchant\">" +
+             .append (" recognized by &quot;" + MerchantServlet.COMMON_NAME + "&quot;\">" +
                       "</div></td></tr><tr><td></td>" +
                       "<td style=\"text-align:center;padding-top:" + PAYMENT_PAN_PADDING_TOP +
                       "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px\">")
