@@ -1,11 +1,9 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.Vector;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -13,7 +11,6 @@ import javax.servlet.http.HttpSession;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
-
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -598,10 +595,15 @@ public class HTML implements BaseProperties
        "function userAuthorize() {\n" +
        "    // Create \"" + AUTH_DATA_JSON + "\"\n" +
        "    var auth_data = {};\n" +
-       "    auth_data." + PAN_JSON + " = selected_card.pan;\n" +
-       "    auth_data." + CARD_TYPE_JSON + " = selected_card.type;\n" +
+       "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
        "    auth_data." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
-       "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n");
+       "    auth_data." + CARD_TYPE_JSON + " = selected_card.type;\n" +
+       "    auth_data." + PAN_JSON + " = selected_card.pan;\n" +
+       "    var date_time = new Date().toISOString();\n" +
+       "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+       "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+       "    }\n" +
+       "    auth_data." + DATE_TIME_JSON + " = date_time;\n");
        if (Init.web_crypto)
          {
            s.append (
@@ -652,7 +654,9 @@ public class HTML implements BaseProperties
        else
          {
            s.append (
-             "    encryptAndSend (convertStringToUTF8(JSON.stringify(auth_data)));\n");
+             "    var json_auth_data = JSON.stringify(auth_data);\n" +
+             "    console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
+             "    encryptAndSend (convertStringToUTF8(json_auth_data));\n");
          }
        s.append (
        "}\n\n" +
@@ -992,12 +996,16 @@ public class HTML implements BaseProperties
             "                if (transaction_channel.status == 200) {\n" +
             "                    var json_transaction = JSON.parse(transaction_channel.responseText);\n" +
             "                    console.debug('Transaction response:\\n' + JSON.stringify(json_transaction));\n" +
-            "                    document.getElementById('result').innerHTML = '<table>" +
+            "                    if (json_transaction." + ERROR_JSON + ") {\n" +
+            "                        document.getElementById('result').innerHTML = 'Errors Occured: ' + json_transaction." + ERROR_JSON + ";\n" +
+            "                    } else {\n" +
+            "                        document.getElementById('result').innerHTML = '<table>" +
             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
             "<tr><td>Amount: ' + getPriceString() + '</td></tr>" +
             "<tr><td>' + json_transaction." + CARD_TYPE_JSON + 
             " + ': ' + json_transaction." + REFERENCE_PAN_JSON + " + '</td></tr>" +
             "</table>';\n" +
+            "                    }\n" +
             "                } else {\n" +
             "                    document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;\n" +
             "                }\n" +
@@ -1008,6 +1016,13 @@ public class HTML implements BaseProperties
             "        }\n" +
             "        var transaction_request = createJSONBaseCommand('" + Messages.TRANSACTION_REQUEST + "');\n" +
             "        transaction_request." + AUTH_DATA_JSON + " = received_json." + AUTH_DATA_JSON + ";\n" +
+            "        transaction_request." + CLIENT_IP_ADDRESS_JSON + " = '220.67.0.19';\n" +
+            "        transaction_request." + TRANSACTION_ID_JSON + " = '#4545445';\n" +
+            "        var date_time = new Date().toISOString();\n" +
+            "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+            "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+            "        }\n" +
+            "        transaction_request." + DATE_TIME_JSON + " = date_time;\n" +
             "        transaction_channel.send(JSON.stringify(transaction_request));\n" +
             "        }, 1500);\n" +
             "    }\n" +
@@ -1186,30 +1201,36 @@ public class HTML implements BaseProperties
         HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
       }
 
-    public static void resultPage (HttpServletResponse response, boolean success, JSONObjectReader authorized_result, String request) throws IOException, ServletException
+    public static void resultPage (HttpServletResponse response,
+                                   String error_message,
+                                   PaymentRequest payment_request, 
+                                   String card_type,
+                                   String reference_pan,
+                                   String transaction_request,
+                                   String transaction_response) throws IOException, ServletException
       {
         StringBuffer s = new StringBuffer ("<tr><td width=\"100%\" align=\"center\" valign=\"middle\">");
-        if (success)
+        if (error_message == null)
           {
             s.append ("<table>" +
              "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
              "<tr><td><table>" +
              "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
              "<tr><td>Amount: ")
-            .append (price (authorized_result.getObject (PAYMENT_REQUEST_JSON).getInt (AMOUNT_JSON)))
+            .append (price (payment_request.amount))
             .append ("</td></tr><tr><td>")
-            .append (authorized_result.getString (CARD_TYPE_JSON))
+            .append (card_type)
             .append (": ")
-            .append (authorized_result.getString (REFERENCE_PAN_JSON))
+            .append (reference_pan)
             .append ("</td></tr></table></td></tr></table>");
           }
         else
           {
-            s.append ("There was a problem with your order: " + authorized_result.getString (ERROR_JSON));
+            s.append ("There was a problem with your order: " + error_message);
           }
         HTML.output (response, HTML.getHTML ("function listFinalExchange() {\n" +
-                                             "    console.debug('Transaction request:\\n" + request + "');\n" +
-                                             "    console.debug('Transaction result:\\n" + new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8") + "')" +
+                                             "    console.debug('Transaction request:\\n" + transaction_request + "');\n" +
+                                             "    console.debug('Transaction result:\\n" + transaction_response + "')" +
                                              "}\n", 
                                              "onload=\"listFinalExchange()\"", 
                                              s.append ("</td></tr>").toString ()));

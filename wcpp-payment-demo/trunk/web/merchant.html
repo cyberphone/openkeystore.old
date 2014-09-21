@@ -13,26 +13,35 @@ td {font-size:8pt;font-family:Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,
 .updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans';margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}
 .headline {font-weight:bolder;font-size:10pt;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'}
 html, body {margin:0px;padding:0px;height:100%}</style><script type="text/javascript">
+
 "use strict";
+
+var numeric_only = new RegExp('^[0-9]{1,6}$');
+
 var paycode='<iframe src="https://mobilepki.org/WebCryptoPlusPlus/payment" style="width:450px;height:250px;border-width:1px;border-style:solid;border-color:#306754;box-shadow:3pt 3pt 3pt #D0D0D0"></iframe>';
 
 var save_checkout_html;
 
-var numeric_only = new RegExp('^[0-9]{1,6}$');
-
 var transaction_channel = new XMLHttpRequest();
 
-var shopping_cart = [];
 var shopping_enabled = true;
-var next_transaction_id = 100000;
-var payment_status = 'INIT';
+
+var next_reference_id = 100000;
+
+var payment_status = 'Initialize';
+
 var webpki = {};
-webpki.ShopEntry = function(price_mult_100) {
+
+webpki.ShopEntry = function(price_mult_100, name,sku, units) {
     this.price_mult_100 = price_mult_100;
-    this.units = 0;
+    this.name = name;
+    this.sku = sku;
+    this.units = units;
 };
-shopping_cart[1] = new webpki.ShopEntry(325);
-shopping_cart[0] = new webpki.ShopEntry(8599900);
+
+var shopping_cart = [];
+shopping_cart[1] = new webpki.ShopEntry(325,'Ice Cream','90555',0);
+shopping_cart[0] = new webpki.ShopEntry(8599900,'Sports Car','7d688',0);
 
 function checkOut() {
     if (getTotal()) {
@@ -58,19 +67,20 @@ function getTotal() {
     return total;
 }
 
-function priceString(price_mult_100) {
-    return '$' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);
+function getPriceString() {
+    var price_mult_100 = getTotal();
+    return '$\u200a' +  Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);
 }
 
 function updateTotal() {
-    document.getElementById('total').innerHTML = priceString(getTotal());
+    document.getElementById('total').innerHTML = getPriceString();
 }
 
 function updateInput(index, control) {
     if (shopping_enabled) {
         if (!numeric_only.test (control.value)) control.value = '0';
         while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);
-        shopping_cart[index].units = control.value;
+        shopping_cart[index].units = parseInt(control.value);
         updateTotal();
     } else {
         control.value = shopping_cart[index].units;
@@ -84,33 +94,38 @@ function updateUnits(control, value, index) {
 
 function createJSONBaseCommand(command_property_value) {
     var json = {};
-    json.Command = command_property_value;
+    json['@context'] = 'http://xmlns.webpki.org/wcpp-payment-demo';
+    json['@qualifier'] = command_property_value;
     return json;
 }
 
 function receivePaymentMessage(event) {
-    console.debug (event.origin);
-    console.debug (event.data);
+    console.debug (event.origin + ' => MerchantApp:\n' + event.data);
     var received_json = JSON.parse(event.data);
-    if (received_json.Command == 'ABORT') {
+    if (received_json['@context'] != 'http://xmlns.webpki.org/wcpp-payment-demo') {
+        console.debug('MESSAGE ERROR: ' + event.data);
+        payment_status = 'Failed***';
+        return;
+    }
+    if (received_json['@qualifier'] == 'Abort') {
         document.getElementById('pay').innerHTML = save_checkout_html;
-        payment_status = 'INIT';
+        payment_status = 'Initialize';
         shopping_enabled = true;
         return;
     }
-    if (received_json.Command != payment_status) {
+    if (received_json['@qualifier'] != payment_status) {
         console.debug('STATE ERROR: ' + event.data + '/' + payment_status);
         payment_status = 'Failed***';
         return;
     }
-    if (payment_status == 'INIT') {
+    if (payment_status == 'Initialize') {
         setTimeout(function(){
-        var returned_json = createJSONBaseCommand('INIT');
-        var inner_json = returned_json.Request = {}
+        var returned_json = createJSONBaseCommand('Invoke');
+        var inner_json = returned_json.PaymentRequest = {}
         inner_json.CommonName = 'Demo Merchant';
         inner_json.Currency = 'USD';
         inner_json.Amount = getTotal();
-        inner_json.TransactionID = '#' + next_transaction_id++;
+        inner_json.ReferenceID = '#' + next_reference_id++;
         var date_time = new Date().toISOString();
         if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {
             date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';
@@ -122,11 +137,11 @@ function receivePaymentMessage(event) {
         returned_json.CardTypes.push('CoolCard');
         event.source.postMessage(JSON.stringify(returned_json), event.origin);
         }, 500);
-        payment_status = 'TRANSACT';
+        payment_status = 'Authorize';
     }
-    else if (payment_status == 'TRANSACT') {
+    else if (payment_status == 'Authorize') {
         setTimeout(function(){
-        var url = received_json.URL;
+        var url = received_json.AuthURL;
         if (!url) alert('failed-URL');
         transaction_channel.open('POST', url, true);
         transaction_channel.setRequestHeader('Content-Type', 'application/json');
@@ -134,18 +149,31 @@ function receivePaymentMessage(event) {
             if (transaction_channel.readyState == 4) {
                 if (transaction_channel.status == 200) {
                     var json_transaction = JSON.parse(transaction_channel.responseText);
-                    console.debug('Transaction:' + JSON.stringify(json_transaction));
-                    document.getElementById('result').innerHTML = '<table><tr><td style="padding-bottom:8pt">Dear customer, your order has been successfully processed!</td></tr><tr><td>Amount: ' + priceString(getTotal()) + '</td></tr><tr><td>' + json_transaction.CardType + ': ' + json_transaction.PayeePAN + '</td></tr></table>';
+                    console.debug('Transaction response:\n' + JSON.stringify(json_transaction));
+                    if (json_transaction.Error) {
+                        document.getElementById('result').innerHTML = 'Errors Occured: ' + json_transaction.Error;
+                    } else {
+                        document.getElementById('result').innerHTML = '<table><tr><td style="padding-bottom:8pt">Dear customer, your order has been successfully processed!</td></tr><tr><td>Amount: ' + getPriceString() + '</td></tr><tr><td>' + json_transaction.CardType + ': ' + json_transaction.ReferencePAN + '</td></tr></table>';
+                    }
                 } else {
                     document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;
                 }
                 document.getElementById('pay').innerHTML = '';
             } else {
-                console.debug('currently the application is at' + transaction_channel.readyState);
+                console.debug('XHR state: ' + transaction_channel.readyState);
             }
         }
-        transaction_channel.send(JSON.stringify(received_json));
+        var transaction_request = createJSONBaseCommand('TransactionRequest');
+        transaction_request.AuthData = received_json.AuthData;
+        transaction_request.ClientIPAddress = '220.67.0.19';
+        transaction_request.TransactionID = '#4545445';
+        var date_time = new Date().toISOString();
+        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {
+            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';
+        }
+        transaction_request.DateTime = date_time;
+        transaction_channel.send(JSON.stringify(transaction_request));
         }, 1500);
     }
 }
-</script></head><body ><div id="emptybasket" style="border-color:grey;border-style:solid;border-width:3px;text-align:center;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans';z-index:3;background:#f0f0f0;position:absolute;visibility:hidden;padding:5pt 10pt 5pt 10pt">Nothing ordered yet...</div><div onclick="document.location.href='https://mobilepki.org/WebCryptoPlusPlus'" title="Back to the bank!" style="cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}">WebCrypto++<br><span style="font-size:8pt">Payment Demo Home</span></div><table cellpadding="0" cellspacing="0" width="100%" height="100%"><tr><td width="100%" align="center" valign="middle"><table><tr><td style="text-align:center;font-weight:bolder;font-size:10pt;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'">Demo Merchant<br>&nbsp;</td></tr><tr><td id="result"><table style="margin-left:auto;margin-right:auto" class="tftable"><tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr><tr style="text-align:center"><td><img src="images/product-car.png"></td><td>Sports Car</td><td style="text-align:right">$85999.00</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p0, 1, 0)" class="updnbtn"></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p0" value="0" class="quantity" oninput="updateInput(0, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p0, -1, 0)"  class="updnbtn"></td></tr></table></form></td></tr><tr style="text-align:center"><td><img src="images/product-icecream.png"></td><td>Ice Cream</td><td style="text-align:right">$3.25</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p1, 1, 1)" class="updnbtn"></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p1" value="0" class="quantity" oninput="updateInput(1, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p1, -1, 1)"  class="updnbtn"></td></tr></table></form></td></tr><tr><td style="border-width:1px 1px 0px 0px;background:white"></td><td style="text-align:center">Total Amount</td><td style="text-align:right" id="total">$0.00</td><td style="border-width:1px 0px 0px 1px;background:white"></td></tr></table></td></tr><tr><td style="text-align:center" id="pay"><input class="stdbtn" type="button" value="Checkout.." title="Paying time has come..." onclick="checkOut()"></td></tr></table></td></tr></table></body></html>
+</script></head><body><div id="emptybasket" style="border-color:grey;border-style:solid;border-width:3px;text-align:center;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans';z-index:3;background:#f0f0f0;position:absolute;visibility:hidden;padding:5pt 10pt 5pt 10pt">Nothing ordered yet...</div><div onclick="document.location.href='https://mobilepki.org/WebCryptoPlusPlus'" title="Back to the bank!" style="cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}">WebCrypto++<br><span style="font-size:8pt">Payment Demo Home</span></div><table cellpadding="0" cellspacing="0" width="100%" height="100%"><tr><td width="100%" align="center" valign="middle"><table><tr><td style="text-align:center;font-weight:bolder;font-size:10pt;font-family:Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'">Demo Merchant<br>&nbsp;</td></tr><tr><td id="result"><table style="margin-left:auto;margin-right:auto" class="tftable"><tr><th>Image</th><th>Description</th><th>Price</th><th>Units</th></tr><tr style="text-align:center"><td><img src="images/product-car.png"></td><td>Sports Car</td><td style="text-align:right">$&#x200a;85999.00</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" class="updnbtn" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p0, 1, 0)"></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p0" value="0" class="quantity" oninput="updateInput(0, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" class="updnbtn" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p0, -1, 0)"></td></tr></table></form></td></tr><tr style="text-align:center"><td><img src="images/product-icecream.png"></td><td>Ice Cream</td><td style="text-align:right">$&#x200a;3.25</td><td><form><table style="border-width:0px;padding:0px;margin:0px;border-spacing:2px;border-collapse:separate"><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" class="updnbtn" value="&#x25b2;" title="More" onclick="updateUnits(this.form.p1, 1, 1)"></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input size="6" type="text" name="p1" value="0" class="quantity" oninput="updateInput(1, this);" autocomplete="off"/></td></tr><tr><td style="border-width:0px;padding:0px;margin:0px"><input type="button" class="updnbtn" value="&#x25bc;" title="Less" onclick="updateUnits(this.form.p1, -1, 1)"></td></tr></table></form></td></tr><tr><td style="border-width:1px 1px 0px 0px;background:white"></td><td style="text-align:center">Total Amount</td><td style="text-align:right" id="total">$&#x200a;0.00</td><td style="border-width:1px 0px 0px 1px;background:white"></td></tr></table></td></tr><tr><td style="text-align:center;padding-top:10pt" id="pay"><input class="stdbtn" type="button" value="Checkout.." title="Paying time has come..." onclick="checkOut()"></td></tr></table></td></tr></table></body></html>

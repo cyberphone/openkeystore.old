@@ -3,8 +3,11 @@ package org.webpki.webapps.wcppdemo;
 import java.io.IOException;
 
 import java.security.PublicKey;
+import java.security.SecureRandom;
 
 import java.security.cert.X509Certificate;
+
+import java.util.Date;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,8 +64,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
           {
             JSONObjectReader trans_req = Messages.parseBaseMessage (Messages.TRANSACTION_REQUEST,
                                                                     JSONParser.parse (ServletUtil.getData (request)));
-            logger.info ("Transaction Request:\n" + new String (new JSONObjectWriter (trans_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
+            String request_transaction_id = trans_req.getString (TRANSACTION_ID_JSON);
+            String client_ip_address = trans_req.getString (CLIENT_IP_ADDRESS_JSON);
+            trans_req.getDateTime (DATE_TIME_JSON);  // We have no DB...
+            logger.info ("Transaction Request [" + client_ip_address + "," + request_transaction_id + "]:\n" +
+                         new String (new JSONObjectWriter (trans_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
             JSONObjectReader encrypted_auth_data = trans_req.getObject (AUTH_DATA_JSON).getObject (ENCRYPTED_DATA_JSON);
+            
             JSONObjectReader auth_data = null;
             if (Init.web_crypto)
               {
@@ -97,6 +105,8 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
               {
                 auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
               }
+            auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
+            auth_data.getDateTime (DATE_TIME_JSON);  //     "-"
             JSONObjectReader payee = auth_data.getObject (PAYMENT_REQUEST_JSON);
             PaymentRequest.parseJSONData (payee);  // No DB to store in...
             if (Init.web_crypto)
@@ -110,9 +120,9 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                   {
                     throw new IOException ("Non-matching outer/inner signer");
                   }
+                
               }
             result.setObject (HTML.PAYMENT_REQUEST_JSON, payee);
-            result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
             String pan = auth_data.getString (PAN_JSON);
             StringBuffer payee_pan = new StringBuffer ();
             for (int i = 0; i < pan.length (); i++)
@@ -123,9 +133,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                   }
                 payee_pan.append (i < 12 ? '*' : pan.charAt (i));
               }
-            result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
             result.setString (CARD_TYPE_JSON, auth_data.getString (CARD_TYPE_JSON));
-            auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
+            byte[] payment_token = new byte[32];  // There must surely be a better way
+            new SecureRandom ().nextBytes (payment_token);
+            result.setBinary (PAYMENT_TOKEN_JSON, payment_token);
+            result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
+            result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
+            result.setDateTime (DATE_TIME_JSON, new Date (), true);
             if (Init.web_crypto)
               {
                 KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
@@ -133,6 +147,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 signer.setKey (null, Init.key_password);
                 result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
               }
+            auth_data.checkForUnread ();
             trans_req.checkForUnread ();
           }
         catch (Exception e)
