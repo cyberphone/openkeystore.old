@@ -56,7 +56,9 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                 throw new IOException ("\"" + CheckoutServlet.REQUEST_HASH_ATTR + "\" not available");
               }
             byte[] request_hash = (byte[])session.getAttribute (CheckoutServlet.REQUEST_HASH_ATTR);
-            transact.setBinary (REQUEST_HASH_JSON, request_hash);
+            transact.setObject (REQUEST_HASH_JSON)
+                .setString (ALGORITHM_JSON, HashAlgorithms.SHA256.getURI ())
+                .setBinary (VALUE_JSON, request_hash);
             transact.setObject (AUTH_DATA_JSON, auth_req.getObject (AUTH_DATA_JSON));
             transact.setString (CLIENT_IP_ADDRESS_JSON, request.getRemoteAddr());
             transact.setString (TRANSACTION_ID_JSON, "#" + next_transaction_id++);

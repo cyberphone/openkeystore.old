@@ -111,7 +111,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             PaymentRequest.parseJSONData (payee);  // No DB to store in...
             if (Init.web_crypto)
               {
-                if (!ArrayUtil.compare (trans_req.getBinary (REQUEST_HASH_JSON),
+                JSONObjectReader request_hash = trans_req.getObject(REQUEST_HASH_JSON);
+                HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromURI (request_hash.getString (ALGORITHM_JSON)); 
+                if (hash_alg != HashAlgorithms.SHA256)
+                  {
+                    throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
+                  }
+                if (!ArrayUtil.compare (request_hash.getBinary (VALUE_JSON),
                                         HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
                   {
                     throw new IOException ("\"" + REQUEST_HASH_JSON + "\" mismatch");
