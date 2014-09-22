@@ -1,6 +1,7 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -11,10 +12,8 @@ import javax.servlet.http.HttpSession;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONSignatureDecoder;
 
 public class HTML implements BaseProperties
@@ -63,7 +62,6 @@ public class HTML implements BaseProperties
         ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n" +
         ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
     
-
     static String getIframeHTML ()
       {
         return "<iframe src=\"" + Init.bank_url +
@@ -147,10 +145,42 @@ public class HTML implements BaseProperties
         response.getOutputStream ().write (html.getBytes ("UTF-8"));
       }
 
+    private static void binArray (StringBuffer s, byte[] bytes)
+      {
+        s.append ("new Uint8Array([");
+        boolean next = false;
+        for (byte b : bytes)
+          {
+            if (next)
+              {
+                s.append (',');
+              }
+            s.append (b & 0xFF);
+            next = true;
+          }
+        s.append ("])");
+      }
+
     public static void homePage (HttpServletResponse response) throws IOException, ServletException
       {
-        HTML.output (response, HTML.getHTML (null,
-                null,
+        String js = null;
+        if (Init.web_crypto)
+          {
+            StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n" +
+            "    if (window.crypto && window.crypto.subtle) {\n" +
+            "        window.crypto.subtle.importKey('pkcs8',");
+            binArray (s, Init.client_key);
+            s.append (
+            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, true, ['sign']).then (function (private_key) {\n" +
+            "        }).then (undefined, function () {alert('Failed trying to use WebCrypto :-(')});\n" +
+            "    } else {\n" +
+            "        alert('It seems like your browser doesn\\'t support WebCrypto :-(');\n" +
+            "    }\n" +
+            "}\n");
+            js = s.toString ();
+          }
+        HTML.output (response, HTML.getHTML (Init.web_crypto ? js : null,
+            Init.web_crypto ? "onload=\"checkWebCryptoSupport()\"" : null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width:600px;\" cellpadding=\"4\">" +
                    "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
@@ -795,22 +825,6 @@ public class HTML implements BaseProperties
         HTML.output (response, s.toString());
       }
 
-    private static void binArray (StringBuffer s, byte[] bytes)
-      {
-        s.append ("new Uint8Array([");
-        boolean next = false;
-        for (byte b : bytes)
-          {
-            if (next)
-              {
-                s.append (',');
-              }
-            s.append (b & 0xFF);
-            next = true;
-          }
-        s.append ("])");
-      }
-
     private static StringBuffer productEntry (StringBuffer temp_string, ProductEntry product_entry, String sku, SavedShoppingCart saved_shopping_cart, int index)
       {
         int units = saved_shopping_cart.items.containsKey (sku) ? saved_shopping_cart.items.get (sku): 0;
@@ -1215,8 +1229,10 @@ public class HTML implements BaseProperties
             s.append ("<table>" +
              "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
              "<tr><td><table>" +
-             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
-             "<tr><td>Amount: ")
+             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>")
+            .append ("<tr><td style=\"padding-bottom:4pt\">Our reference: ")
+            .append (payment_request.reference_id)
+            .append ("</td></tr><tr><td>Amount: ")
             .append (price (payment_request.amount))
             .append ("</td></tr><tr><td>")
             .append (card_type)
