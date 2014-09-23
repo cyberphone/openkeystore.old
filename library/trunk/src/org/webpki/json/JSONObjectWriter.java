@@ -307,7 +307,7 @@ import org.webpki.json.JSONSignatureDecoder;
  </pre>
      */
 
-    void writeFixedBinary (BigInteger value, String name, KeyAlgorithms ec) throws IOException
+    void setFixedBinary (BigInteger value, String name, KeyAlgorithms ec) throws IOException
       {
         byte[] fixed_binary = value.toByteArray ();
         if (fixed_binary.length > (ec.getPublicKeySizeInBits () + 7) / 8)
@@ -316,7 +316,7 @@ import org.webpki.json.JSONSignatureDecoder;
               {
                 throw new IOException ("Unexpected EC \"" + name + "\" value");
               }
-            writeCryptoBinary (value, name);
+            setCryptoBinary (value, name);
           }
         else
           {
@@ -328,7 +328,7 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    void writeCryptoBinary (BigInteger value, String name) throws IOException
+    void setCryptoBinary (BigInteger value, String name) throws IOException
       {
         byte[] crypto_binary = value.toByteArray ();
         if (crypto_binary[0] == 0x00)
@@ -366,8 +366,8 @@ import org.webpki.json.JSONSignatureDecoder;
           {
             JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
             RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+            rsa_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
+            rsa_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
           }
         else
           {
@@ -375,8 +375,8 @@ import org.webpki.json.JSONSignatureDecoder;
             ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
                KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            ec_key_writer.writeFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
-            ec_key_writer.writeFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
+            ec_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
+            ec_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
         return this;
       }
