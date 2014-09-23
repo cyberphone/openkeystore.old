@@ -65,23 +65,13 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
     org.webpki.util._error ("Unsupported EC curve: " + uri);
 };
 
-/* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
+/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */uri, /* Uint8Array */x, /* Uint8Array */y)
 {
-    if (original.length > required_length)
+    var params_entry = org.webpki.crypto._getECParamsFromURI (uri);
+    if (x.length != y.length || x.length != org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1])
     {
-        org.webpki.util._error ("Input data out of bounds: " + original.length);        
+       org.webpki.util._error ("Bad EC curve: " + uri + " x=" + x.length + " y=" + y.length);
     }
-    while (original.length < required_length)
-    {
-        original = org.webpki.util.ByteArray.add ([0x00], original);
-    }
-    return original;
-};
-
-/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
-{
-    var params_entry = org.webpki.crypto._getECParamsFromURI (url);
-    var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
     return new org.webpki.asn1.ASN1Encoder
       (
         org.webpki.asn1.TAGS.SEQUENCE,
@@ -111,11 +101,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
             org.webpki.util.ByteArray.add 
               (
                 [0x00, 0x04],
-                org.webpki.util.ByteArray.add
-                  (
-                    org.webpki.crypto.leftPadWithZeros (coordinate_length, x),
-                    org.webpki.crypto.leftPadWithZeros (coordinate_length, y)
-                  )
+                org.webpki.util.ByteArray.add (x, y)
               )
           )
       ).encode ();
