@@ -150,7 +150,7 @@ var p521_key =
           {\
             "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",\
             "X": "AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA",\
-            "Y": "_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek"\
+            "Y": "AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp"\
           }\
       }\
   }';
@@ -231,7 +231,7 @@ var b163_key =
           {\
             "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",\
             "X": "B0M_ADx-Ma7KuLYX1kiHkeA5be9Z",\
-            "Y": "YrAnUJj08HWJ3wnTfpWzy-S0t-c"\
+            "Y": "AGKwJ1CY9PB1id8J036Vs8vktLfn"\
           }\
       }\
   }';
@@ -246,8 +246,8 @@ var b233_key =
         "EC": \
           {\
             "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",\
-            "X": "_b9j6YxMzS-qk6p0dY_WCf5_04gyFaVwdHn6PGg",\
-            "Y": "kotlfOdTNbKK5Z8co1-Ykh22rpMorG0llNrJe2Q"\
+            "X": "AP2_Y-mMTM0vqpOqdHWP1gn-f9OIMhWlcHR5-jxo",\
+            "Y": "AJKLZXznUzWyiuWfHKNfmJIdtq6TKKxtJZTayXtk"\
           }\
       }\
   }';

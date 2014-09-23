@@ -224,7 +224,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
 };
 
-org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
+org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
     while (value.length > 1 && value[0] == 0x00)  // Could some EC parameters actually need more than one turn?
     {
@@ -299,16 +299,16 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        rsa_key_writer._writeCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
-        rsa_key_writer._writeCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+        rsa_key_writer._setCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
+        rsa_key_writer._setCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
     }
     else
     {
         /* JSONObjectWriter */var ec_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
         ec_key_writer.setString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON, this.xml_dsig_named_curve ?
                                                             org.webpki.crypto.XML_DSIG_CURVE_PREFIX + key_alg.oid : key_alg.uri);
-        ec_key_writer._writeCryptoBinary (key_alg.x, org.webpki.json.JSONSignatureDecoder.X_JSON);
-        ec_key_writer._writeCryptoBinary (key_alg.y, org.webpki.json.JSONSignatureDecoder.Y_JSON);
+        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.X_JSON, key_alg.x);
+        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON, key_alg.y);
     }
     return this;
 };

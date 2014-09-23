@@ -819,7 +819,7 @@ org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
     return this._setStringArray (name, values, org.webpki.json.JSONTypes.STRING);
 };
 
-org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uint8Array */value,  /* String */name)
+org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8Array */value,  /* String */name)
 {
     while (value.length > 1 && value[0] == 0x00)  // Could some EC parameters actually need more than one turn?
     {
@@ -894,16 +894,16 @@ org.webpki.json.JSONObjectWriter.prototype._writeCryptoBinary = function (/* Uin
     if (key_alg.rsa_flag)
     {
         /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        rsa_key_writer._writeCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
-        rsa_key_writer._writeCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+        rsa_key_writer._setCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
+        rsa_key_writer._setCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
     }
     else
     {
         /* JSONObjectWriter */var ec_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
         ec_key_writer.setString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON, this.xml_dsig_named_curve ?
                                                             org.webpki.crypto.XML_DSIG_CURVE_PREFIX + key_alg.oid : key_alg.uri);
-        ec_key_writer._writeCryptoBinary (key_alg.x, org.webpki.json.JSONSignatureDecoder.X_JSON);
-        ec_key_writer._writeCryptoBinary (key_alg.y, org.webpki.json.JSONSignatureDecoder.Y_JSON);
+        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.X_JSON, key_alg.x);
+        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON, key_alg.y);
     }
     return this;
 };
@@ -1837,7 +1837,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     }
 };
 
-/* static Uint8Array */org.webpki.json.JSONSignatureDecoder._readCryptoBinary = function (/* JSONObjectReader */rd, /* String */property)
+/* static Uint8Array */org.webpki.json.JSONSignatureDecoder._getCryptoBinary = function (/* JSONObjectReader */rd, /* String */property)
 {
     var crypto_binary = rd.getBinary (property);
     if (crypto_binary[0] == 0x00)
@@ -1854,14 +1854,14 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
         return org.webpki.crypto.encodeRSAPublicKey 
-            (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
-             org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
+            (org.webpki.json.JSONSignatureDecoder._getCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
+             org.webpki.json.JSONSignatureDecoder._getCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
     return org.webpki.crypto.encodeECPublicKey 
         (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
-         org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
-         org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
+         rd.getBinary (org.webpki.json.JSONSignatureDecoder.X_JSON),
+         rd.getBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
@@ -2635,23 +2635,13 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
     org.webpki.util._error ("Unsupported EC curve: " + uri);
 };
 
-/* Uint8Array */org.webpki.crypto.leftPadWithZeros = function (/* int */required_length, /* Unit8Array */original)
+/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */uri, /* Uint8Array */x, /* Uint8Array */y)
 {
-    if (original.length > required_length)
+    var params_entry = org.webpki.crypto._getECParamsFromURI (uri);
+    if (x.length != y.length || x.length != org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1])
     {
-        org.webpki.util._error ("Input data out of bounds: " + original.length);        
+       org.webpki.util._error ("Bad EC curve: " + uri + " x=" + x.length + " y=" + y.length);
     }
-    while (original.length < required_length)
-    {
-        original = org.webpki.util.ByteArray.add ([0x00], original);
-    }
-    return original;
-};
-
-/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */url, /* Uint8Array */x, /* Uint8Array */y)
-{
-    var params_entry = org.webpki.crypto._getECParamsFromURI (url);
-    var coordinate_length = org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1];
     return new org.webpki.asn1.ASN1Encoder
       (
         org.webpki.asn1.TAGS.SEQUENCE,
@@ -2681,11 +2671,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
             org.webpki.util.ByteArray.add 
               (
                 [0x00, 0x04],
-                org.webpki.util.ByteArray.add
-                  (
-                    org.webpki.crypto.leftPadWithZeros (coordinate_length, x),
-                    org.webpki.crypto.leftPadWithZeros (coordinate_length, y)
-                  )
+                org.webpki.util.ByteArray.add (x, y)
               )
           )
       ).encode ();

@@ -17,7 +17,7 @@
   
 
   <target name="help">
-    <echo message="Targets: parsercore decoder biginteger base64url libjson signatures antcrypto."/>
+    <echo message="Targets: parsercore decoder biginteger asn1 base64url libjson signatures keyserialization [antcrypto]."/>
   </target>
     
   <target name="clean">

@@ -131,7 +131,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     }
 };
 
-/* static Uint8Array */org.webpki.json.JSONSignatureDecoder._readCryptoBinary = function (/* JSONObjectReader */rd, /* String */property)
+/* static Uint8Array */org.webpki.json.JSONSignatureDecoder._getCryptoBinary = function (/* JSONObjectReader */rd, /* String */property)
 {
     var crypto_binary = rd.getBinary (property);
     if (crypto_binary[0] == 0x00)
@@ -148,14 +148,14 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
     {
         rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
         return org.webpki.crypto.encodeRSAPublicKey 
-            (org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
-             org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
+            (org.webpki.json.JSONSignatureDecoder._getCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON),
+             org.webpki.json.JSONSignatureDecoder._getCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON));
     }
     rd = rd.getObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
     return org.webpki.crypto.encodeECPublicKey 
         (rd.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON),
-         org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.X_JSON),
-         org.webpki.json.JSONSignatureDecoder._readCryptoBinary (rd, org.webpki.json.JSONSignatureDecoder.Y_JSON));
+         rd.getBinary (org.webpki.json.JSONSignatureDecoder.X_JSON),
+         rd.getBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
