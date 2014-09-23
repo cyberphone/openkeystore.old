@@ -222,7 +222,7 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.54, September&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.55, September&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
@@ -1429,25 +1429,31 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.X_JSON)
               .addSymbolicValue (JSONSignatureDecoder.X_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point X. Also see the ")
-              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-              .addString (" data type.")
+              .addString ("EC curve point X. The length of this field <b>must</b> " +
+                          "be the full size of a coordinate for the curve specified in the <code>" + 
+                          JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> is <code>")
+              .addString (KeyAlgorithms.NIST_P_521.getURI ())
+              .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.Y_JSON)
               .addSymbolicValue (JSONSignatureDecoder.Y_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point Y. Also see the ")        
-              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-             .addString (" data type.");
+              .addString ("EC curve point Y. The length of this field <b>must</b> " +
+                          "be the full size of a coordinate for the curve specified in the <code>" + 
+                          JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> is <code>")
+              .addString (KeyAlgorithms.NIST_P_521.getURI ())
+              .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
 
         addSubItemTable (JSONSignatureDecoder.RSA_JSON)
           .newRow ()
