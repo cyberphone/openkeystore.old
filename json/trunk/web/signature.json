@@ -1,32 +1,15 @@
 {
-  "Now": "2013-12-20T06:49:45+01:00",
-  "PaymentRequest": 
-    {
-      "Currency": "USD",
-      "VAT": 1.45,
-      "Specification": 
-        [{
-           "Units": 3,
-           "Description": "USB cable",
-           "SKU": "TR-46565666",
-           "UnitPrice": 4.50
-         },
-         {
-           "Units": 1,
-           "Description": "4G Router",
-           "SKU": "JK-56566655",
-           "UnitPrice": 39.99
-         }]
-    },
-  "EscapeMe": "\u000F\u000aA\u0042\\\"\/",
-  "Signature": 
+  "Now": "2014-09-16T10:25:17Z",
+  "EscapeMe": "\u000F\u000aA'\u0042\\\"\/",
+  "Numbers": [1e0, 4.50, 6],
+  "Signature":
     {
       "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-      "KeyInfo": 
+      "KeyInfo":
         {
-          "PublicKey": 
+          "PublicKey":
             {
-              "EC": 
+              "EC":
                 {
                   "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                   "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",
@@ -34,6 +17,6 @@
                 }
             }
         },
-      "SignatureValue": "MEYCIQDG_blO3esIy57M1K3i2nQjt60xC2PqASnab491Sj-u3QIhAP3LZBYJuyoBMtwrQzdqzLXx7h8MhqqrJch_tMvSusLm"
+      "SignatureValue": "MEYCIQDqFARll5SQJVq6j-YMfogRopPc2PgY84CS8Jvs4Ws-DQIhAIPovSwdjwolMKXBVC8dSO7IG9dEulwA9gAKUmRxiQtj"
     }
 }
