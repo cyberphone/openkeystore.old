@@ -86,7 +86,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                     throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\" :" + asym_alg.getURI ());
                   }
                 PublicKey received_public_key = encrypted_key.getPublicKey ();
-                if (!ArrayUtil.compare (Init.bank_encryption_key, received_public_key.getEncoded ()))
+                if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
                   {
                     throw new IOException ("Unexpected encryption key:\n" + received_public_key.toString ());
                   }

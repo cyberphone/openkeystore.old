@@ -3,6 +3,8 @@ package org.webpki.webapps.wcppdemo;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,11 +48,11 @@ public class Init implements ServletContextListener
     static KeyStore payment_root;
     
     static KeyStore bank_decryption_key;
-    static byte[] bank_encryption_key;
+    static PublicKey bank_encryption_key;
     
     static KeyStore client_root;
     static String client_eecert;
-    static byte[] client_key;
+    static PrivateKey client_key;
     static String cert_data;
 
     private String getDataURI (String main, String extension) throws IOException
@@ -96,7 +98,7 @@ public class Init implements ServletContextListener
             bank_encryption_key = CertificateUtil.getCertificateFromBlob (
                                       ArrayUtil.getByteArrayFromInputStream ( 
                                           Init.class.getResourceAsStream (
-                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ().getEncoded ();
+                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ();
             bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_decryptionkey")), Init.key_password);
             client_root = getRootCertificate (properties.getPropertyString ("bank_client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_client_eecert")), Init.key_password);
@@ -109,7 +111,7 @@ public class Init implements ServletContextListener
               .append ("', " + JSONSignatureDecoder.SUBJECT_JSON + ":'")
               .append (cert.getSubjectX500Principal ().getName ())
               .append ("'}").toString ();
-            client_key = client.getKey ("mykey", Init.key_password.toCharArray ()).getEncoded ();
+            client_key = (PrivateKey) client.getKey ("mykey", Init.key_password.toCharArray ());
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }
         catch (Exception e)

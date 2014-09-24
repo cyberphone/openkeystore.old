@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -168,10 +169,10 @@ public class HTML implements BaseProperties
           {
             StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n" +
             "    if (window.crypto && window.crypto.subtle) {\n" +
-            "        window.crypto.subtle.importKey('pkcs8',");
-            binArray (s, Init.client_key);
-            s.append (
-            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, true, ['sign']).then (function (private_key) {\n" +
+            "        window.crypto.subtle.importKey('jwk',")
+            .append (new JWK(Init.client_key).getJWK ())
+            .append (
+            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['sign']).then (function (private_key) {\n" +
             "        }).then (undefined, function () {alert('Failed trying to use WebCrypto :-(')});\n" +
             "    } else {\n" +
             "        alert('It seems like your browser doesn\\'t support WebCrypto :-(');\n" +
@@ -349,13 +350,13 @@ public class HTML implements BaseProperties
                          .append ("'");
                         if (Init.web_crypto)
                           {
-                            s.append (", ");
-                            binArray (s, card_entry.bank_encryption_key);
-                            s.append (", '")
-                             .append (card_entry.client_certificate)
-                             .append ("', ");
-                            binArray (s, card_entry.client_key);
                             s.append (", ")
+                             .append (new JWK(card_entry.bank_encryption_key).getJWK ())
+                             .append (", '")
+                             .append (card_entry.client_certificate)
+                             .append ("', ")
+                             .append (new JWK(card_entry.client_key).getJWK ())
+                             .append (", ")
                              .append (card_entry.cert_data);
                           }
                         s.append ("));\n");
@@ -584,7 +585,7 @@ public class HTML implements BaseProperties
              "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function (main_cryptogram) {\n" +
              "    crypto.subtle.exportKey('raw', aes_key).then (function (raw_aes_key) {\n" +
              "    var asym_alg = {name: 'RSA-OAEP', hash: 'SHA-256'};\n" +
-             "    crypto.subtle.importKey('spki', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function (public_key) {\n" +
+             "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function (public_key) {\n" +
              "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function (encryped_aes_key) {\n" +
              "    crypto.subtle.exportKey('jwk', public_key).then (function (jwk_key) {\n" +
              "        var encrypted_key = {};\n" +
@@ -672,7 +673,7 @@ public class HTML implements BaseProperties
          {
            s.append (
              "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'};\n" +
-             "    crypto.subtle.importKey('pkcs8', selected_card.client_private_key, sign_alg, true, ['sign']).then (function (private_key) {\n" +
+             "    crypto.subtle.importKey('jwk', selected_card.client_private_key, sign_alg, false, ['sign']).then (function (private_key) {\n" +
              "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function (signature) {\n" +
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
