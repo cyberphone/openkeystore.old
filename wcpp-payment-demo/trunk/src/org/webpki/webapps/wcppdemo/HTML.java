@@ -170,10 +170,10 @@ public class HTML implements BaseProperties
             StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n" +
             "    if (window.crypto && window.crypto.subtle) {\n" +
             "        window.crypto.subtle.importKey('jwk',")
-            .append (new JWK(Init.client_key).getJWK ())
+            .append (Init.client_private_key.getJWK ())
             .append (
-            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['sign']).then (function (private_key) {\n" +
-            "        }).then (undefined, function () {alert('Failed trying to use WebCrypto :-(')});\n" +
+            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['sign']).then (function(private_key) {\n" +
+            "        }).then (undefined, function() {alert('Failed trying to use WebCrypto :-(')});\n" +
             "    } else {\n" +
             "        alert('It seems like your browser doesn\\'t support WebCrypto :-(');\n" +
             "    }\n" +
@@ -351,11 +351,11 @@ public class HTML implements BaseProperties
                         if (Init.web_crypto)
                           {
                             s.append (", ")
-                             .append (new JWK(card_entry.bank_encryption_key).getJWK ())
+                             .append (card_entry.bank_encryption_key.getJWK ())
                              .append (", '")
                              .append (card_entry.client_certificate)
                              .append ("', ")
-                             .append (new JWK(card_entry.client_key).getJWK ())
+                             .append (card_entry.client_key.getJWK ())
                              .append (", ")
                              .append (card_entry.cert_data);
                           }
@@ -395,7 +395,7 @@ public class HTML implements BaseProperties
         "   return true;\n" +
         "}\n\n" +
         "function checkTiming(milliseconds) {\n" +
-        "   timeouter_handle = setTimeout(function () {error('Timeout')}, milliseconds);\n" +
+        "   timeouter_handle = setTimeout(function() {error('Timeout')}, milliseconds);\n" +
         "}\n\n" +
         "function priceString(price_mult_100) {\n" +
         "    var price_number = Math.floor(price_mult_100 / 100) + '.' +  Math.floor((price_mult_100 % 100) / 10) +  Math.floor(price_mult_100 % 10);\n" +
@@ -582,12 +582,12 @@ public class HTML implements BaseProperties
              "        name: 'AES-CBC',\n" +
              "        iv: window.crypto.getRandomValues(new Uint8Array(16))\n" +
              "    };\n" +
-             "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function (main_cryptogram) {\n" +
-             "    crypto.subtle.exportKey('raw', aes_key).then (function (raw_aes_key) {\n" +
+             "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function(main_cryptogram) {\n" +
+             "    crypto.subtle.exportKey('raw', aes_key).then (function(raw_aes_key) {\n" +
              "    var asym_alg = {name: 'RSA-OAEP', hash: 'SHA-256'};\n" +
-             "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function (public_key) {\n" +
-             "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function (encryped_aes_key) {\n" +
-             "    crypto.subtle.exportKey('jwk', public_key).then (function (jwk_key) {\n" +
+             "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
+             "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
+             "    crypto.subtle.exportKey('jwk', public_key).then (function(jwk_key) {\n" +
              "        var encrypted_key = {};\n" +
              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI () + "';\n" +
              "        var public_key = {};\n" +
@@ -604,12 +604,12 @@ public class HTML implements BaseProperties
 //             "        encrypted_data.BLAJ = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
  //            "        encrypted_data.KLAJ = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
              "        window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
-             "    }).then (undefined, function () {error('Failed exporting public key')});\n" +
-             "    }).then (undefined, function () {error('Failed encrypting using public key')});\n" +
-             "    }).then (undefined, function () {error('Failed import public key')});\n" +
-             "    }).then (undefined, function () {error('Failed exporting symmetric key')});\n" +
-             "    }).then (undefined, function () {error('Failed encrypting using symmetric key')});\n" +
-             "    }).then (undefined, function () {error('Failed generating symmetric key')});\n");
+             "    }).then (undefined, function() {error('Failed exporting public key')});\n" +
+             "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
+             "    }).then (undefined, function() {error('Failed import public key')});\n" +
+             "    }).then (undefined, function() {error('Failed exporting symmetric key')});\n" +
+             "    }).then (undefined, function() {error('Failed encrypting using symmetric key')});\n" +
+             "    }).then (undefined, function() {error('Failed generating symmetric key')});\n");
          }
        else
          {
@@ -673,14 +673,14 @@ public class HTML implements BaseProperties
          {
            s.append (
              "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'};\n" +
-             "    crypto.subtle.importKey('jwk', selected_card.client_private_key, sign_alg, false, ['sign']).then (function (private_key) {\n" +
-             "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function (signature) {\n" +
+             "    crypto.subtle.importKey('jwk', selected_card.client_private_key, sign_alg, false, ['sign']).then (function(private_key) {\n" +
+             "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
              "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
              "        encryptAndSend (convertStringToUTF8(json_auth_data));\n" +
-             "    }).then (undefined, function () {error('Failed signing')});\n" +
-             "    }).then (undefined, function () {error('Failed importing private key')});\n");
+             "    }).then (undefined, function() {error('Failed signing')});\n" +
+             "    }).then (undefined, function() {error('Failed importing private key')});\n");
          }
        else
          {
@@ -1006,7 +1006,7 @@ public class HTML implements BaseProperties
             "        if (!url) alert('failed-URL');\n" +
             "        transaction_channel.open('POST', url, true);\n" +
             "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
-            "        transaction_channel.onreadystatechange = function () {\n" +
+            "        transaction_channel.onreadystatechange = function() {\n" +
             "            if (transaction_channel.readyState == 4) {\n" +
             "                if (transaction_channel.status == 200) {\n" +
             "                    var json_transaction = JSON.parse(transaction_channel.responseText);\n" +

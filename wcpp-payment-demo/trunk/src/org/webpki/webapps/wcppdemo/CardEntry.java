@@ -1,8 +1,6 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.Serializable;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 public class CardEntry implements Serializable
   {
@@ -32,8 +30,8 @@ public class CardEntry implements Serializable
     String base64_image;
     String transaction_url;
     String user;
-    PublicKey bank_encryption_key;
-    PrivateKey client_key;        
+    JWK bank_encryption_key;
+    JWK client_key;        
     String client_certificate;   // Base64URL (X.509)
     String cert_data;            // JCS SignatureCertificate {}
     boolean active;

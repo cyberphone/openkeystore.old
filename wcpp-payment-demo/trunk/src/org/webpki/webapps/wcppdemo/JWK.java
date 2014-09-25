@@ -14,25 +14,11 @@ import org.webpki.util.Base64URL;
 
 public class JWK
   {
-    Key key;
-    public JWK (Key key)
-      {
-        this.key = key;
-      }
-
-    private String getCryptoBinary (BigInteger value, String name)
-      {
-        byte[] crypto_binary = value.toByteArray ();
-        if (crypto_binary[0] == 0x00)
-          {
-            byte[] wo_zero = new byte[crypto_binary.length - 1];
-            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
-            crypto_binary = wo_zero;
-          }
-        return name + ":'" + Base64URL.encode (crypto_binary) + "'";
-      }
+    String jwk;
     
-    public String getJWK () throws IOException
+    byte[] encoded;
+
+    public JWK (Key key) throws IOException
       {
         StringBuffer s = new StringBuffer ("{kty:");
         if (key instanceof RSAKey)
@@ -62,6 +48,29 @@ public class JWK
             throw new IOException ("NOT IMPLEMENTED");
          //   s.append ("'EC',");
           }
-        return s.append ('}').toString ();
+        jwk = s.append ('}').toString ();
+        encoded = key.getEncoded ();
+      }
+
+    private String getCryptoBinary (BigInteger value, String name)
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        return name + ":'" + Base64URL.encode (crypto_binary) + "'";
+      }
+    
+    public String getJWK ()
+      {
+        return jwk;
+      }
+
+    public byte[] getEncoded ()
+      {
+        return encoded;
       }
   }

@@ -1,11 +1,12 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,9 +17,11 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
+
 import org.webpki.webutil.InitPropertyReader;
 
 public class Init implements ServletContextListener
@@ -48,11 +51,11 @@ public class Init implements ServletContextListener
     static KeyStore payment_root;
     
     static KeyStore bank_decryption_key;
-    static PublicKey bank_encryption_key;
+    static JWK bank_encryption_key;
     
     static KeyStore client_root;
     static String client_eecert;
-    static PrivateKey client_key;
+    static JWK client_private_key;
     static String cert_data;
 
     private String getDataURI (String main, String extension) throws IOException
@@ -95,10 +98,10 @@ public class Init implements ServletContextListener
             merchant_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("merchant_eecert")), Init.key_password);
             payment_root = getRootCertificate (properties.getPropertyString ("payment_root"));
             merchant_root = getRootCertificate (properties.getPropertyString ("merchant_root"));
-            bank_encryption_key = CertificateUtil.getCertificateFromBlob (
+            bank_encryption_key = new JWK (CertificateUtil.getCertificateFromBlob (
                                       ArrayUtil.getByteArrayFromInputStream ( 
                                           Init.class.getResourceAsStream (
-                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ();
+                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ());
             bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_decryptionkey")), Init.key_password);
             client_root = getRootCertificate (properties.getPropertyString ("bank_client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_client_eecert")), Init.key_password);
@@ -111,7 +114,7 @@ public class Init implements ServletContextListener
               .append ("', " + JSONSignatureDecoder.SUBJECT_JSON + ":'")
               .append (cert.getSubjectX500Principal ().getName ())
               .append ("'}").toString ();
-            client_key = (PrivateKey) client.getKey ("mykey", Init.key_password.toCharArray ());
+            client_private_key = new JWK (client.getKey ("mykey", Init.key_password.toCharArray ()));
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
           }
         catch (Exception e)

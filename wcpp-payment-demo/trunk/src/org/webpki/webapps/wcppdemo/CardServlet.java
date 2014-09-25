@@ -44,7 +44,7 @@ public class CardServlet extends HttpServlet
             card_entry.pin = pin;
             card_entry.transaction_url = Init.bank_url + "/transact";
             card_entry.bank_encryption_key = Init.bank_encryption_key;
-            card_entry.client_key = Init.client_key;
+            card_entry.client_key = Init.client_private_key;
             card_entry.client_certificate = Init.client_eecert;
             card_entry.cert_data = Init.cert_data;
             byte[] pan = new byte[16];
