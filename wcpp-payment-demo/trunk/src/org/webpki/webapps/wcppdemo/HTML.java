@@ -172,7 +172,7 @@ public class HTML implements BaseProperties
             "        window.crypto.subtle.importKey('jwk',")
             .append (Init.client_private_key.getJWK ())
             .append (
-            ", {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['sign']).then (function(private_key) {\n" +
+            ", {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true, ['sign']).then (function(private_key) {\n" +
             "        }).then (undefined, function() {alert('Failed trying to use WebCrypto :-(')});\n" +
             "    } else {\n" +
             "        alert('It seems like your browser doesn\\'t support WebCrypto :-(');\n" +
@@ -584,7 +584,7 @@ public class HTML implements BaseProperties
              "    };\n" +
              "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function(main_cryptogram) {\n" +
              "    crypto.subtle.exportKey('raw', aes_key).then (function(raw_aes_key) {\n" +
-             "    var asym_alg = {name: 'RSA-OAEP', hash: 'SHA-256'};\n" +
+             "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
              "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
              "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
              "    crypto.subtle.exportKey('jwk', public_key).then (function(jwk_key) {\n" +
@@ -672,7 +672,7 @@ public class HTML implements BaseProperties
        if (Init.web_crypto)
          {
            s.append (
-             "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'};\n" +
+             "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
              "    crypto.subtle.importKey('jwk', selected_card.client_private_key, sign_alg, false, ['sign']).then (function(private_key) {\n" +
              "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +

@@ -158,9 +158,9 @@
   <target name="mobilepkiwc">
     <property name="application" value="wcpp2.war"/>
     <antcall target="_build">
-       <param name="security.constraints" value=""/>
-       <param name="bank.url" value="http://mobilepki.org/wcpp2"/>
-       <param name="merchant.url" value="http://test.webpki.org/wcpp2/merchant"/>
+       <param name="security.constraints" refid="security_constraint"/>
+       <param name="bank.url" value="https://mobilepki.org/wcpp2"/>
+       <param name="merchant.url" value="https://mobilepki.org/wcpp2/merchant"/>
        <param name="card.font" value="DejaVue"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.6"/>
