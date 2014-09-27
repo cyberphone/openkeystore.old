@@ -5,6 +5,12 @@
     version="2.4">
 
     <context-param>
+        <description>Bank Port Mapping (may be undefined)</description>
+        <param-name>bank_port_map</param-name>
+        <param-value>@bank-port-map@</param-value>
+    </context-param>
+
+    <context-param>
         <description>URL to bank</description>
         <param-name>bank_url</param-name>
         <param-value>@bank-url@</param-value>

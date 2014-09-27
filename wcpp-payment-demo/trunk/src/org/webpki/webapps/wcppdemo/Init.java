@@ -2,9 +2,10 @@ package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
 
+import java.net.URL;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-
 import java.security.cert.X509Certificate;
 
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ import javax.servlet.ServletContextListener;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
+
 import org.webpki.json.JSONSignatureDecoder;
 
 import org.webpki.util.ArrayUtil;
@@ -34,6 +36,7 @@ public class Init implements ServletContextListener
       }
   
     static String bank_url;
+    static String payment_url;
     static String merchant_url;
     static boolean web_crypto;
     
@@ -89,6 +92,18 @@ public class Init implements ServletContextListener
           {
             bank_url = properties.getPropertyString ("bank_url");
             merchant_url = properties.getPropertyString ("merchant_url");
+            if (properties.getPropertyString ("bank_port_map").length () > 0)
+              {
+                URL url = new URL (bank_url);
+                payment_url = new URL (url.getProtocol (),
+                                       url.getHost (),
+                                       properties.getPropertyInt ("bank_port_map"),
+                                       url.getFile ()).toExternalForm ();
+              }
+            else
+              {
+                payment_url = bank_url;
+              }
             web_crypto = properties.getPropertyBoolean ("web_crypto");
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");

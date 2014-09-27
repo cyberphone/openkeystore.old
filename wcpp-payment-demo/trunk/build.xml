@@ -88,8 +88,10 @@
            destdir="${temp_dir}"
            classpathref="compile.classpath"
            includeAntRuntime="false"/>
+    <property name="bank.port.map" value=""/>
 	<replace file="${temp_dir}/web.xml">
 	  <replacefilter token="@security-constraints@" value="${security.constraints}"/>
+	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
 	  <replacefilter token="@bank-url@" value="${bank.url}"/>
 	  <replacefilter token="@merchant-url@" value="${merchant.url}"/>
 	  <replacefilter token="@card-font@" value="${card.font}"/>
@@ -156,6 +158,7 @@
   	
   <!-- mobilepkiwc -->
   <target name="mobilepkiwc">
+    <property name="bank.port.map" value="8442"/>
     <property name="application" value="wcpp2.war"/>
     <antcall target="_build">
        <param name="security.constraints" refid="security_constraint"/>
