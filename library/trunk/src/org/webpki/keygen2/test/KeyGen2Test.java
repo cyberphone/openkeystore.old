@@ -148,6 +148,8 @@ public class KeyGen2Test
     
     boolean two_keys;
     
+    boolean custom_key_name;
+    
     boolean key_agreement;
     
     boolean server_seed;
@@ -1242,7 +1244,11 @@ public class KeyGen2Test
               }
             if (two_keys)
               {
-                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.NIST_P_256), pin_policy);
+                ServerState.Key key = server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.NIST_P_256), pin_policy);
+                if (custom_key_name)
+                  {
+                    key.setID ("MyKeyName");
+                  }
               }
 
             return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
@@ -1521,6 +1527,7 @@ public class KeyGen2Test
             writeOption ("ECC KMK", ecc_kmk);
             writeOption ("Update KMK", update_kmk);
             writeOption ("Multiple Keys", two_keys);
+            writeOption ("Custom Key Name", custom_key_name);
             writeOption ("Brainpool EC", brain_pool);
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
@@ -1651,6 +1658,16 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         pin_protection = true;
         two_keys = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void CustomNamedKey () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        two_keys = true;
+        custom_key_name = true;
         doer.perform ();
       }
 

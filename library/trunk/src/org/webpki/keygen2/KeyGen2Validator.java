@@ -36,10 +36,9 @@ import org.webpki.sks.SecureKeyStore;
 abstract class KeyGen2Validator extends JSONDecoder
   {
     private static final long serialVersionUID = 1L;
-
-    static String getID (JSONObjectReader rd, String name) throws IOException
+    
+    static String validateID (String name, String value) throws IOException
       {
-        String value = rd.getString (name);
         int l = value.length ();
         if (l == 0 || l > SecureKeyStore.MAX_LENGTH_ID_TYPE)
           {
@@ -54,6 +53,11 @@ abstract class KeyGen2Validator extends JSONDecoder
               }
           }
         return value;
+      }
+
+    static String getID (JSONObjectReader rd, String name) throws IOException
+      {
+        return validateID (name, rd.getString (name));
       }
     
     static String getURL (JSONObjectReader rd, String name) throws IOException

@@ -854,6 +854,13 @@ public class ServerState implements Serializable
             return id;
           }
         
+        public Key setID (String new_id) throws IOException
+          {
+            requested_keys.remove (id);
+            id = KeyGen2Validator.validateID (ID_JSON, new_id);
+            return addKeyToRequestList (this);
+          }
+        
 
         AppUsage app_usage;
 
@@ -1627,12 +1634,22 @@ public class ServerState implements Serializable
         return new PUKPolicy (encrypt (puk), format, retry_limit);
       }
 
+    private Key addKeyToRequestList (Key key) throws IOException
+      {
+        if (key.key_init_done)
+          {
+            bad ("Can't initialize key at this [late] stage");
+          }
+        if (requested_keys.put (key.getID (), key) != null)
+          {
+            bad ("Duplicate definition: " + key.getID ());
+          }
+        return key;
+      }
 
     private Key addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
       {
-        Key key = new Key (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
-        requested_keys.put (key.getID (), key);
-        return key;
+        return addKeyToRequestList (new Key (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection));
       }
 
 
