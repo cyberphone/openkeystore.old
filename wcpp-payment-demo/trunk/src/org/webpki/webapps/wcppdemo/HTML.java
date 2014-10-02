@@ -146,59 +146,56 @@ public class HTML implements BaseProperties
         response.getOutputStream ().write (html.getBytes ("UTF-8"));
       }
 
-    private static void binArray (StringBuffer s, byte[] bytes)
+    public static void homePage (boolean crypto_enabled, HttpServletResponse response) throws IOException, ServletException
       {
-        s.append ("new Uint8Array([");
-        boolean next = false;
-        for (byte b : bytes)
-          {
-            if (next)
-              {
-                s.append (',');
-              }
-            s.append (b & 0xFF);
-            next = true;
-          }
-        s.append ("])");
-      }
-
-    public static void homePage (HttpServletResponse response) throws IOException, ServletException
-      {
-        String js = null;
+        StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n");
         if (Init.web_crypto)
           {
-            StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n" +
+            s.append (
             "    if (window.crypto && window.crypto.subtle) {\n" +
             "        window.crypto.subtle.importKey('jwk',")
             .append (Init.client_private_key.getJWK ())
             .append (
-            ", {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true, ['sign']).then (function(private_key) {\n" +
-            "        }).then (undefined, function() {alert('Failed trying to use WebCrypto :-(')});\n" +
+            ", {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true, ['sign']).then (function(private_key) {\n            ")
+            .append (crypto_enabled ? "console.debug('Running in WebCrypto Mode!');\n" : "document.location.href = 'cryptohome';\n")
+            .append (
+            "        }).then (undefined, function() {")
+            .append (crypto_enabled ? "document.location.href = 'home'" : "console.debug('Non-WebCrypto Mode')")
+            .append (
+                "});\n" +
             "    } else {\n" +
-            "        alert('It seems like your browser doesn\\'t support WebCrypto :-(');\n" +
-            "    }\n" +
-            "}\n");
-            js = s.toString ();
+            "        ")
+            .append (crypto_enabled ? "document.location.href = 'home'" : "console.debug('Non-WebCrypto Mode')")
+            .append (";\n    }\n");
           }
-        HTML.output (response, HTML.getHTML (Init.web_crypto ? js : null,
-            Init.web_crypto ? "onload=\"checkWebCryptoSupport()\"" : null,
+        else 
+          {
+            s.append (crypto_enabled ? "    document.location.href = 'home';\n" : "    console.debug('Non-WebCrypto Mode');\n");
+          }
+        HTML.output (response, HTML.getHTML (s.append ("}\n").toString (), "onload=\"checkWebCryptoSupport()\"",
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width:600px;\" cellpadding=\"4\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\">This site contains a demo of what a true WebCrypto++ implementation " +
+                   "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Payment Demo<br>&nbsp;</td></tr>" +
+                   "<tr><td style=\"text-align:left\">This site contains a demo of what a true WebCrypto++ implementation " +
                    "could offer for <span style=\"color:red\">decentralized payment systems</span>.</td></tr>" +
-                   "<tr><td align=\"left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
+                   "<tr><td style=\"text-align:left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
                    "and that <span style=\"color:red\">payment card logotypes are personalized</span> since they "+
-                   "are read from the user's local key-store.</td></tr>" +
+                   "are read from the user's local credential-store.</td></tr>" +
                    "<tr><td>By applying <span style=\"color:red\">3D Secure</span> like methods and <span style=\"color:red\">EMV tokenization</span>, there is no need for " +
                    "handing over static credit-card information to merchants.</td></tr>" +
-                   "<tr><td align=\"left\">Although the demo is a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
+                   "<tr><td style=\"text-align:left\">For protecting the user's privacy, <span style=\"color:red\">the user's authorization-data is encrypted</span> and only readable " +
+                   "by the payment-provider who issued the specific payment card.</td></tr>" +
+                   "<tr><td style=\"text-align:left\">Although the demo is <i>partially</i> a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
                    "the IFRAME solution and cross-domain communication using <code>postMessage()</code> should be pretty close to that of a real system.</td></tr>" +
-                   "<tr><td align=\"center\"><table cellspacing=\"10\">" +
-                   "<tr align=\"left\"><td><a href=\"" + Init.bank_url + "/cards\">Initialize Payment Cards</a></td><td><i>Mandatory</i> First Step</td></tr>" +
-                   "<tr align=\"left\"><td><a href=\"" + Init.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
-                   "<tr align=\"left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++</a></td><td>The Specification</td></tr>" +
-                   "<tr align=\"left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-payment-demo\">Source Code</a></td><td>For Nerds...</td></tr>" +
+                   "<tr><td style=\"text-align:left\"><i>In case you are testing with a WebCrypto-enabled browser, the user-authorization will be signed and encrypted " +
+                   "which can viewed in a browser debugger window.</i></td></tr>" +
+                   "<tr><td align=\"center\"><table cellspacing=\"0\">" +
+                   "<tr style=\"text-align:left\"><td><a href=\"" + Init.bank_url + "/cards\">Initialize Payment Cards&nbsp;&nbsp;</a></td><td><i>Mandatory</i> First Step</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a href=\"" + Init.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
+                   "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Documentation</b></td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++</a></td><td><i>Conceptual</i> Specification</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/EMV-Tokenization-SET-3DSecure-WebCryptoPlusPlus-combo.pdf#page=4\">Demo Payment System</a></td><td>State Diagram Etc.</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-payment-demo\">Demo Source Code</a></td><td>For Nerds...</td></tr>" +
                  "</table></td></tr></table></td></tr>"));
       }
 
@@ -229,6 +226,7 @@ public class HTML implements BaseProperties
 
     public static void paymentPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
       {
+        boolean web_crypto = HomeServlet.isWebCryptoEnabled (request);
         StringBuffer s = new StringBuffer (
         "<!DOCTYPE html>"+
         "<html><head><meta charset=\"UTF-8\">"+
@@ -296,7 +294,7 @@ public class HTML implements BaseProperties
             .append ("));\n");
           }
         s.append ("\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image");
-        if (Init.web_crypto)
+        if (web_crypto)
           {
             s.append (", bank_encryption_key, client_cert, client_private_key, cert_data");
           }
@@ -307,7 +305,7 @@ public class HTML implements BaseProperties
         "    this.pan = pan;\n" +
         "    this.transaction_url = transaction_url;\n" +
         "    this.base64_image = base64_image;\n");
-        if (Init.web_crypto)
+        if (web_crypto)
           {
             s.append (
                 "    this.bank_encryption_key = bank_encryption_key;\n" +
@@ -348,7 +346,7 @@ public class HTML implements BaseProperties
                          .append("', '")
                          .append(card_entry.base64_image)
                          .append ("'");
-                        if (Init.web_crypto)
+                        if (web_crypto)
                           {
                             s.append (", ")
                              .append (card_entry.bank_encryption_key.getJWK ())
@@ -573,7 +571,7 @@ public class HTML implements BaseProperties
        "    authorize_command." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
        "    var encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
        "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
-       if (Init.web_crypto)
+       if (web_crypto)
          {
            s.append (
              "    var sym_alg = {name: 'AES-CBC', length: 256};\n" +
@@ -601,8 +599,6 @@ public class HTML implements BaseProperties
              "        encrypted_data." + IV_JSON + " = binaryToBase64(enc_alg.iv);\n" +
              "        encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
              "        encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
-//             "        encrypted_data.BLAJ = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
- //            "        encrypted_data.KLAJ = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
              "        window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
              "    }).then (undefined, function() {error('Failed exporting public key')});\n" +
              "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
@@ -635,7 +631,7 @@ public class HTML implements BaseProperties
        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
        "    }\n" +
        "    auth_data." + DATE_TIME_JSON + " = date_time;\n");
-       if (Init.web_crypto)
+       if (web_crypto)
          {
            s.append (
              "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
@@ -669,7 +665,7 @@ public class HTML implements BaseProperties
        "    disableControls(true);\n"+
        "    document.getElementById('cancel').disabled = true;\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n");
-       if (Init.web_crypto)
+       if (web_crypto)
          {
            s.append (
              "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
@@ -693,7 +689,7 @@ public class HTML implements BaseProperties
        "}\n\n" +
        "//\n" +
        "// Processes payee's JSON response to the \"" + Messages.INITIALIZE + "\" message.\n");
-       if (!Init.web_crypto)
+       if (!web_crypto)
          {
            s.append ("// Note: In a genuine implementaion the \"" + PAYMENT_REQUEST_JSON + "\" object would be signed.\n");
          }
@@ -878,22 +874,9 @@ public class HTML implements BaseProperties
       {
         StringBuffer temp_string = new StringBuffer (
             "\nfunction checkOut() {\n" +
-            "    if (getTotal()) {\n");
-        if (Init.web_crypto)
-          {
-            temp_string.append (
+            "    if (getTotal()) {\n" +
             "        document.getElementById('shoppingcart').value = JSON.stringify(shopping_cart);\n" +
-            "        document.forms.shoot.submit();\n");            
-          }
-        else
-          {
-            temp_string.append (
-            "        shopping_enabled = false;\n" +
-            "        window.addEventListener('message', receivePaymentMessage, false);\n" +
-            "        save_checkout_html = document.getElementById('pay').innerHTML;\n" +
-            "        document.getElementById('pay').innerHTML = paycode;\n");
-          }
-        temp_string.append (
+            "        document.forms.shoot.submit();\n" +           
             "    } else {\n" +
             "        document.getElementById('emptybasket').style.top = ((window.innerHeight - document.getElementById('emptybasket').offsetHeight) / 2) + 'px';\n" +
             "        document.getElementById('emptybasket').style.left = ((window.innerWidth - document.getElementById('emptybasket').offsetWidth) / 2) + 'px';\n" +
@@ -917,132 +900,16 @@ public class HTML implements BaseProperties
             "function updateTotal() {\n" +
             "    document.getElementById('total').innerHTML = getPriceString();\n" +
             "}\n\n" +
-            "function updateInput(index, control) {\n");
-        if (Init.web_crypto)
-          {
-            temp_string.append (
+            "function updateInput(index, control) {\n" +
             "    if (!numeric_only.test (control.value)) control.value = '0';\n" +
             "    while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
             "    shopping_cart[index].units = parseInt(control.value);\n" +
-            "    updateTotal();\n");
-          }
-        else
-          {
-            temp_string.append (
-                "    if (shopping_enabled) {\n" +
-               "        if (!numeric_only.test (control.value)) control.value = '0';\n" +
-               "        while (control.value.length > 1 && control.value.charAt(0) == '0') control.value = control.value.substring(1);\n" +
-               "        shopping_cart[index].units = parseInt(control.value);\n" +
-               "        updateTotal();\n" +
-               "    } else {\n" +
-               "        control.value = shopping_cart[index].units;\n" +
-               "    }\n");
-          }
-        temp_string.append (
+            "    updateTotal();\n" +
             "}\n\n" +
             "function updateUnits(control, value, index) {\n" +
             "    control.value = parseInt(control.value) + value;\n" +
             "    updateInput(index, control);\n" +
             "}\n");
-        if (!Init.web_crypto)
-          {
-            temp_string.append (
-            "\n" +
-            "function createJSONBaseCommand(command_property_value) {\n" +
-            "    var json = {};\n" +
-            "    json['" + JSONDecoderCache.CONTEXT_JSON + "'] = '" + WCPP_DEMO_CONTEXT_URI + "';\n" +
-            "    json['" + JSONDecoderCache.QUALIFIER_JSON + "'] = command_property_value;\n" +
-            "    return json;\n" +
-            "}\n\n" +
-            "function receivePaymentMessage(event) {\n" +
-            "    console.debug (event.origin + ' => MerchantApp:\\n' + event.data);\n" +
-            "    var received_json = JSON.parse(event.data);\n" +
-            "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
-            "        console.debug('MESSAGE ERROR: ' + event.data);\n" +
-            "        payment_status = 'Failed***';\n" +
-            "        return;\n" +
-            "    }\n" +
-            "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] == '" + Messages.ABORT + "') {\n" +
-            "        document.getElementById('pay').innerHTML = save_checkout_html;\n" +
-            "        payment_status = '" + Messages.INITIALIZE + "';\n" +
-            "        shopping_enabled = true;\n" +
-            "        return;\n" +
-            "    }\n" +
-            "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != payment_status) {\n" +
-            "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
-            "        payment_status = 'Failed***';\n" +
-            "        return;\n" +
-            "    }\n" +
-            "    if (payment_status == '" + Messages.INITIALIZE + "') {\n" +
-            "        setTimeout(function(){\n" +
-            "        var returned_json = createJSONBaseCommand('" + Messages.INVOKE + "');\n" +
-            "        var inner_json = returned_json." + PAYMENT_REQUEST_JSON + " = {}\n" +
-            "        inner_json." + COMMON_NAME_JSON + " = '" + MerchantServlet.COMMON_NAME + "';\n" +
-            "        inner_json." + CURRENCY_JSON + " = 'USD';\n" +
-            "        inner_json." + AMOUNT_JSON + " = getTotal();\n" +
-            "        inner_json." + REFERENCE_ID_JSON + " = '#' + next_reference_id++;\n" +
-            "        var date_time = new Date().toISOString();\n" +
-            "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-            "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-            "        }\n" +
-            "        inner_json." + DATE_TIME_JSON + " = date_time;\n" +
-            "        returned_json." + CARD_TYPES_JSON + " = [];\n" +
-            "        returned_json." + CARD_TYPES_JSON + ".push('NeverHeardOfCard');\n");
-            for (CardTypes card_type : MerchantServlet.compatible_with_merchant)
-              {
-                temp_string.append ("        returned_json." + CARD_TYPES_JSON + ".push('")
-                           .append (card_type.toString())
-                           .append ("');\n");
-              }
-            temp_string.append (
-            "        event.source.postMessage(JSON.stringify(returned_json), event.origin);\n" +
-//          "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-            "        }, 500);\n" +
-            "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
-            "    }\n" +
-            "    else if (payment_status == '" + Messages.AUTHORIZE + "') {\n" +
-            "        setTimeout(function(){\n" +
-            "        var url = received_json." + AUTH_URL_JSON + ";\n" +
-            "        if (!url) alert('failed-URL');\n" +
-            "        transaction_channel.open('POST', url, true);\n" +
-            "        transaction_channel.setRequestHeader('Content-Type', 'application/json');\n" +
-            "        transaction_channel.onreadystatechange = function() {\n" +
-            "            if (transaction_channel.readyState == 4) {\n" +
-            "                if (transaction_channel.status == 200) {\n" +
-            "                    var json_transaction = JSON.parse(transaction_channel.responseText);\n" +
-            "                    console.debug('Transaction response:\\n' + JSON.stringify(json_transaction));\n" +
-            "                    if (json_transaction." + ERROR_JSON + ") {\n" +
-            "                        document.getElementById('result').innerHTML = 'Errors Occured: ' + json_transaction." + ERROR_JSON + ";\n" +
-            "                    } else {\n" +
-            "                        document.getElementById('result').innerHTML = '<table>" +
-            "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>" +
-            "<tr><td>Amount: ' + getPriceString() + '</td></tr>" +
-            "<tr><td>' + json_transaction." + CARD_TYPE_JSON + 
-            " + ': ' + json_transaction." + REFERENCE_PAN_JSON + " + '</td></tr>" +
-            "</table>';\n" +
-            "                    }\n" +
-            "                } else {\n" +
-            "                    document.getElementById('result').innerHTML = 'Errors Occured ' + transaction_channel.readyState + ' status is ' + transaction_channel.status;\n" +
-            "                }\n" +
-            "                document.getElementById('pay').innerHTML = '';\n" +
-            "            } else {\n" +
-            "                console.debug('XHR state: ' + transaction_channel.readyState);\n" +
-            "            }\n" +
-            "        }\n" +
-            "        var transaction_request = createJSONBaseCommand('" + Messages.TRANSACTION_REQUEST + "');\n" +
-            "        transaction_request." + AUTH_DATA_JSON + " = received_json." + AUTH_DATA_JSON + ";\n" +
-            "        transaction_request." + CLIENT_IP_ADDRESS_JSON + " = '220.67.0.19';\n" +
-            "        transaction_request." + TRANSACTION_ID_JSON + " = '#4545445';\n" +
-            "        var date_time = new Date().toISOString();\n" +
-            "        if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-            "            date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-            "        }\n" +
-            "        transaction_request." + DATE_TIME_JSON + " = date_time;\n" +
-            "        transaction_channel.send(JSON.stringify(transaction_request));\n" +
-            "        }, 1500);\n" +
-            "    }\n" +
-            "}\n");
-          }
 
         StringBuffer page_data = new StringBuffer (
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
@@ -1061,25 +928,15 @@ public class HTML implements BaseProperties
                "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
                  .append (price (saved_shopping_cart.total))
                  .append ("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
-           "</table></td></tr>" +
-           "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
-         "</table></td></tr>");
-        if (Init.web_crypto)
-          {
-            page_data.append ("<form name=\"shoot\" method=\"POST\" action=\"checkout\">" +
-                              "<input type=\"hidden\" name=\"shoppingcart\" id=\"shoppingcart\">" +
-                              "</form>");
-          }
-        temp_string.insert (0,
+                          "</table></td></tr>" +
+                          "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
+                          "</table></td></tr>" +
+                          "<form name=\"shoot\" method=\"POST\" action=\"checkout\">" +
+                          "<input type=\"hidden\" name=\"shoppingcart\" id=\"shoppingcart\">" +
+                          "</form>");
+         temp_string.insert (0,
                 "\n\n\"use strict\";\n\n" +
-                 "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
-                (Init.web_crypto ? "" :
-                  "var paycode=" + "'" + getIframeHTML () + "';\n\n" +
-                  "var save_checkout_html;\n\n" +
-                  "var transaction_channel = new XMLHttpRequest();\n\n" +
-                  "var shopping_enabled = true;\n\n" +
-                  "var next_reference_id = 100000;\n\n" +
-                  "var payment_status = '" + Messages.INITIALIZE + "';\n\n") +
+                "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
                 "var webpki = {};\n\n" +
                 "webpki.ShopEntry = function(price_mult_100, name,sku, units) {\n" +
                 "    this.price_mult_100 = price_mult_100;\n" +
@@ -1207,7 +1064,9 @@ public class HTML implements BaseProperties
         "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
         "    } else {\n" +
         "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +
-        "        document.forms.shoot.submit();\n" +
+        "        setTimeout(function(){\n" +
+        "            document.forms.shoot.submit();\n" +
+        "        }, 0);\n" +
         "    }\n" +
         "}\n\n" +
         "function initPage() {\n" +

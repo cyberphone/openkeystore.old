@@ -159,11 +159,11 @@
   <!-- mobilepkiwc -->
   <target name="mobilepkiwc">
     <property name="bank.port.map" value="8442"/>
-    <property name="application" value="wcpp2.war"/>
+    <property name="application" value="WebCryptoPlusPlus.war"/>
     <antcall target="_build">
        <param name="security.constraints" refid="security_constraint"/>
-       <param name="bank.url" value="https://mobilepki.org/wcpp2"/>
-       <param name="merchant.url" value="https://mobilepki.org/wcpp2/merchant"/>
+       <param name="bank.url" value="https://mobilepki.org/WebCryptoPlusPlus"/>
+       <param name="merchant.url" value="https://test.webpki.org/WebCryptoPlusPlus/merchant"/>
        <param name="card.font" value="DejaVue"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.6"/>

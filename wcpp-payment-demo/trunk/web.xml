@@ -113,6 +113,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>WebCryptoHomeServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppdemo.WebCryptoHomeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>CardServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppdemo.CardServlet</servlet-class>
     </servlet>
@@ -146,7 +151,12 @@
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    
+
+    <servlet-mapping>
+        <servlet-name>WebCryptoHomeServlet</servlet-name>
+        <url-pattern>/cryptohome</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>CardServlet</servlet-name>
         <url-pattern>/cards</url-pattern>

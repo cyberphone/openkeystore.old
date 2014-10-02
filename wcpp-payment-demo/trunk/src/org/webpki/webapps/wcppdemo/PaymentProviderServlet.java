@@ -72,7 +72,8 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             JSONObjectReader encrypted_auth_data = trans_req.getObject (AUTH_DATA_JSON).getObject (ENCRYPTED_DATA_JSON);
             
             JSONObjectReader auth_data = null;
-            if (Init.web_crypto)
+            Thread.sleep (1000);
+            if (encrypted_auth_data.hasProperty (ALGORITHM_JSON))
               {
                 SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_auth_data.getString (ALGORITHM_JSON));
                 if (sym_alg != SymEncryptionAlgorithms.AES_CBC_P5)
@@ -109,24 +110,20 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             auth_data.getDateTime (DATE_TIME_JSON);  //     "-"
             JSONObjectReader payee = auth_data.getObject (PAYMENT_REQUEST_JSON);
             PaymentRequest.parseJSONData (payee);  // No DB to store in...
-            if (Init.web_crypto)
+            JSONObjectReader request_hash = trans_req.getObject(REQUEST_HASH_JSON);
+            HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromURI (request_hash.getString (ALGORITHM_JSON)); 
+            if (hash_alg != HashAlgorithms.SHA256)
               {
-                JSONObjectReader request_hash = trans_req.getObject(REQUEST_HASH_JSON);
-                HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromURI (request_hash.getString (ALGORITHM_JSON)); 
-                if (hash_alg != HashAlgorithms.SHA256)
-                  {
-                    throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
-                  }
-                if (!ArrayUtil.compare (request_hash.getBinary (VALUE_JSON),
-                                        HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
-                  {
-                    throw new IOException ("\"" + REQUEST_HASH_JSON + "\" mismatch");
-                  }
-                if (!verifyMerchantSignature (payee).equals (verifyMerchantSignature (trans_req)))
-                  {
-                    throw new IOException ("Non-matching outer/inner signer");
-                  }
-                
+                throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
+              }
+            if (!ArrayUtil.compare (request_hash.getBinary (VALUE_JSON),
+                                    HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
+              {
+                throw new IOException ("\"" + REQUEST_HASH_JSON + "\" mismatch");
+              }
+            if (!verifyMerchantSignature (payee).equals (verifyMerchantSignature (trans_req)))
+              {
+                throw new IOException ("Non-matching outer/inner signer");
               }
             result.setObject (HTML.PAYMENT_REQUEST_JSON, payee);
             String pan = auth_data.getString (PAN_JSON);
@@ -146,13 +143,10 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
             result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
             result.setDateTime (DATE_TIME_JSON, new Date (), true);
-            if (Init.web_crypto)
-              {
-                KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
-                signer.setExtendedCertPath (true);
-                signer.setKey (null, Init.key_password);
-                result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
-              }
+            KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
+            signer.setExtendedCertPath (true);
+            signer.setKey (null, Init.key_password);
+            result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();
           }
@@ -162,28 +156,9 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             result.setString (ERROR_JSON, e.getMessage ());
             logger.log (Level.SEVERE, e.getMessage ());
           }
-        if (!Init.web_crypto)
-          {
-            String origin = request.getHeader ("Origin");
-            response.setHeader ("Access-Control-Allow-Origin", origin);
-          }
         response.setContentType ("application/json; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
         response.getOutputStream ().write (result.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
-      }
-
-    @Override
-    public void doOptions (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        logger.info ("OPTIONS requested");
-        //The following are CORS headers. Max age informs the 
-        //browser to keep the results of this call for 1 day.
-        response.setHeader ("Access-Control-Allow-Origin", "*");
-        response.setHeader ("Access-Control-Allow-Methods", "GET, POST");
-        response.setHeader ("Access-Control-Allow-Headers", "Content-Type");
-        response.setHeader ("Access-Control-Max-Age", "86400");
-        //Tell the browser what requests we allow.
-        response.setHeader ("Allow", "GET, HEAD, POST, TRACE, OPTIONS");
       }
   }
