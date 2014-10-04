@@ -776,7 +776,7 @@ public class HTML implements BaseProperties
        "}\n\n" +
        "//\n" +
        "// The payment application always query the payee for data.\n" +
-       "// There is a timeout associated the (currently only) request.\n" +
+       "// There is a timeout associated with the (currently only) request.\n" +
        "//\n" +
         "function receivePayeeResponse(event) {\n" +
         "    console.debug(event.origin + ' => PaymentAppFrame:\\n' + event.data);\n" +
