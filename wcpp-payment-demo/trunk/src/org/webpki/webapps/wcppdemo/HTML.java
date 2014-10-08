@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
@@ -585,7 +586,7 @@ public class HTML implements BaseProperties
               "//\n" +
               "function performRSAEncryption(signed_auth_data) {\n" +
               "    var sym_alg = {name: 'AES-CBC', length: 256};\n" +
-              "    crypto.subtle.generateKey(sym_alg, true, ['encrypt', 'decrypt']).then (function(aes_key) {\n" +
+              "    crypto.subtle.generateKey(sym_alg, true, ['encrypt']).then (function(aes_key) {\n" +
               "    crypto.subtle.encrypt(encryption_algorithm, aes_key, signed_auth_data).then (function(encrypted_authorization_data) {\n" +
               "    crypto.subtle.exportKey('raw', aes_key).then (function(raw_aes_key) {\n" +
               "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
@@ -607,14 +608,33 @@ public class HTML implements BaseProperties
               "    }).then (undefined, function() {error('Failed generating symmetric key')});\n" +
               "}\n\n" +
               "//\n" +
+              "// ECDH JCS helper\n" +
+              "//\n" +
+              "function addECDHKey(name, jwk) {\n" +
+              "    var public_key = encrypted_key[name] = {};\n" +
+              "    var ec_key = public_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
+              "    var ec_params = ec_key." + JSONSignatureDecoder.EC_JSON + " = {};\n" +
+              "    ec_params." + JSONSignatureDecoder.NAMED_CURVE_JSON + " = '" + KeyAlgorithms.NIST_P_256.getURI () + "';\n" +
+              "    ec_params." + JSONSignatureDecoder.X_JSON + " = jwk.x;\n" +
+              "    ec_params." + JSONSignatureDecoder.Y_JSON + " = jwk.y;\n" +
+              "}\n\n" +
+              "//\n" +
               "// ECDH encrypted authorization\n" +
               "//\n" +
               "function performECDHEncryption(signed_auth_data) {\n" +
-              "    var alg = {name: 'ECDH', namedCurve: selected_card.bank_encryption_key.crv};\n" +
-              "    crypto.subtle.generateKey(alg, false, ['deriveKey']).then (function(key_pair) {\n" +
+              "    var gen_alg = {name: 'ECDH', namedCurve: selected_card.bank_encryption_key.crv};\n" +
+              "    crypto.subtle.generateKey(gen_alg, false, ['deriveKey']).then (function(key_pair) {\n" +
               "    crypto.subtle.exportKey('jwk', key_pair.publicKey).then (function(ephemeral_key) {\n" +
               "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, {name: 'ECDH'}, false, ['deriveKey']).then (function(public_key) {\n" +
-              "        error('NOT READY!');\n" +
+              "    var derive_alg = {name: 'ECDH', public: key_pair.publicKey};\n" +
+              "    crypto.subtle.deriveKey(derive_alg, key_pair.privateKey, {name: 'AES-CBC', length: 256}, false, ['encrypt']).then (function(aes_key) {\n" +
+              "    crypto.subtle.encrypt(encryption_algorithm, aes_key, signed_auth_data).then (function(encrypted_authorization_data) {\n" +
+              "        encrypted_key." + ALGORITHM_JSON + " = '" + ECDH_ALGORITHM_URI + "';\n" +
+              "        addECDHKey('" + PAYMENT_PROVIDER_KEY_JSON + "', selected_card.bank_encryption_key);\n" +
+              "        addECDHKey('" + EPHEMERAL_SENDER_KEY_JSON + "', ephemeral_key);\n" +
+              "        sendAuthorizationData(encrypted_authorization_data);\n" +
+              "    }).then (undefined, function() {error('Failed encrypting')});\n" +
+              "    }).then (undefined, function() {error('Failed deriving key')});\n" +
               "    }).then (undefined, function() {error('Failed import public key')});\n" +
               "    }).then (undefined, function() {error('Failed exporting public key')});\n" +
               "    }).then (undefined, function() {error('Failed generating key-pair')});\n" +

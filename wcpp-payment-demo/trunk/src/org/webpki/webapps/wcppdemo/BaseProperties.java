@@ -23,9 +23,12 @@ public interface BaseProperties
     String DOMAIN_NAME_JSON           = "DomainName";
     String ENCRYPTED_DATA_JSON        = "EncryptedData";
     String ENCRYPTED_KEY_JSON         = "EncryptedKey";
+    String PAYMENT_PROVIDER_KEY_JSON  = "PaymentProviderKey";
+    String EPHEMERAL_SENDER_KEY_JSON  = "EphemeralSenderKey";
     String ALGORITHM_JSON             = "Algorithm";
     String IV_JSON                    = "IV";
     String CIPHER_TEXT_JSON           = "CipherText";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-payment-demo";
+    String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";
   }

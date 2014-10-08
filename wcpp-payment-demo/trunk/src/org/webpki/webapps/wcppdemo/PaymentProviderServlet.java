@@ -1,24 +1,18 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
 import java.security.cert.X509Certificate;
-
 import java.util.Date;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
-
+import javax.crypto.KeyAgreement;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,17 +23,14 @@ import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.VerifierInterface;
-
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
-
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet implements BaseProperties
@@ -78,23 +69,42 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_auth_data.getString (ALGORITHM_JSON));
                 if (sym_alg != SymEncryptionAlgorithms.AES_CBC_P5)
                   {
-                    throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\" :" + sym_alg.getURI ());
+                    throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + sym_alg.getURI ());
                   }
                 JSONObjectReader encrypted_key = encrypted_auth_data.getObject (ENCRYPTED_KEY_JSON);
-                AsymEncryptionAlgorithms asym_alg = AsymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_key.getString (ALGORITHM_JSON));
-                if (asym_alg != AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P)
+                String key_encryption_algorithm = encrypted_key.getString (ALGORITHM_JSON);
+                byte[] raw_aes_key = null;
+                if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()))
                   {
-                    throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\" :" + asym_alg.getURI ());
+                    PublicKey received_public_key = encrypted_key.getPublicKey ();
+                    if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
+                      {
+                        throw new IOException ("Unexpected encryption key:\n" + received_public_key.toString ());
+                      }
+                    Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJCEName ());
+                    cipher.init (Cipher.DECRYPT_MODE, Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
+                    raw_aes_key = cipher.doFinal (encrypted_key.getBinary (CIPHER_TEXT_JSON));
                   }
-                PublicKey received_public_key = encrypted_key.getPublicKey ();
-                if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
+                else
                   {
-                    throw new IOException ("Unexpected encryption key:\n" + received_public_key.toString ());
+                    if (!key_encryption_algorithm.equals (ECDH_ALGORITHM_URI))
+                      {
+                        throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + key_encryption_algorithm);
+                      }
+                    PublicKey received_payment_provider_key = encrypted_key.getObject (PAYMENT_PROVIDER_KEY_JSON).getPublicKey ();
+                    if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_payment_provider_key.getEncoded ()))
+                      {
+                        throw new IOException ("Unexpected encryption key:\n" + received_payment_provider_key.toString ());
+                      }
+                    PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_SENDER_KEY_JSON).getPublicKey ();
+logger.info ("Public key OK");
+                    KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
+                    key_agreement.init (Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
+                    key_agreement.doPhase (ephemeral_sender_key, true);
+                    raw_aes_key = key_agreement.generateSecret ();
+logger.info ("Key agreement OK");
                   }
-                Cipher cipher = Cipher.getInstance (asym_alg.getJCEName ());
-                cipher.init (Cipher.DECRYPT_MODE, Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
-                byte[] raw_aes_key = cipher.doFinal (encrypted_key.getBinary (CIPHER_TEXT_JSON));
-                cipher = Cipher.getInstance (sym_alg.getJCEName ());
+                Cipher cipher = Cipher.getInstance (sym_alg.getJCEName ());
                 SecretKeySpec sk = new SecretKeySpec (raw_aes_key, "AES");
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
                 auth_data = JSONParser.parse (cipher.doFinal (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON))));
