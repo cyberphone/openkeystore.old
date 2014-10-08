@@ -31,6 +31,7 @@ import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
+import org.webpki.util.DebugFormatter;
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet implements BaseProperties
@@ -97,24 +98,22 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                         throw new IOException ("Unexpected encryption key:\n" + received_payment_provider_key.toString ());
                       }
                     PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_SENDER_KEY_JSON).getPublicKey ();
-logger.info ("Public key OK");
                     KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
                     key_agreement.init (Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
                     key_agreement.doPhase (ephemeral_sender_key, true);
                     raw_aes_key = key_agreement.generateSecret ();
-logger.info ("Key agreement OK");
                   }
                 Cipher cipher = Cipher.getInstance (sym_alg.getJCEName ());
                 SecretKeySpec sk = new SecretKeySpec (raw_aes_key, "AES");
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
-                auth_data = JSONParser.parse (cipher.doFinal (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON))));
+                auth_data = JSONParser.parse (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
                 logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
                 VerifierInterface verifier = new KeyStoreVerifier (Init.client_root);
                 auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
               }
             else
               {
-                auth_data = JSONParser.parse (Base64URL.decode (encrypted_auth_data.getString (CIPHER_TEXT_JSON)));
+                auth_data = JSONParser.parse (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON));
               }
             auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
             auth_data.getDateTime (DATE_TIME_JSON);  //     "-"

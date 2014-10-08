@@ -626,7 +626,7 @@ public class HTML implements BaseProperties
               "    crypto.subtle.generateKey(gen_alg, false, ['deriveKey']).then (function(key_pair) {\n" +
               "    crypto.subtle.exportKey('jwk', key_pair.publicKey).then (function(ephemeral_key) {\n" +
               "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, {name: 'ECDH'}, false, ['deriveKey']).then (function(public_key) {\n" +
-              "    var derive_alg = {name: 'ECDH', public: key_pair.publicKey};\n" +
+              "    var derive_alg = {name: 'ECDH', public: public_key};\n" +
               "    crypto.subtle.deriveKey(derive_alg, key_pair.privateKey, {name: 'AES-CBC', length: 256}, false, ['encrypt']).then (function(aes_key) {\n" +
               "    crypto.subtle.encrypt(encryption_algorithm, aes_key, signed_auth_data).then (function(encrypted_authorization_data) {\n" +
               "        encrypted_key." + ALGORITHM_JSON + " = '" + ECDH_ALGORITHM_URI + "';\n" +
