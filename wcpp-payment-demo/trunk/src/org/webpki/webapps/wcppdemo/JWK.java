@@ -1,6 +1,7 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.math.BigInteger;
 
@@ -21,7 +22,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
-public class JWK
+public class JWK implements Serializable
   {
     String jwk;
     

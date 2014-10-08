@@ -135,8 +135,8 @@
   <target name="webcrypto" depends="_init">
      <antcall target="_build">
        <param name="security.constraints" value=""/>
-       <param name="bank.url" value="http://mybank.com:8080/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="http://merchant.com:8080/WebCryptoPlusPlus/merchant"/>
+       <param name="bank.url" value="https://localhost:8443/WebCryptoPlusPlus"/>
+       <param name="merchant.url" value="https://localhost:8443/WebCryptoPlusPlus/merchant"/>
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.7"/>
