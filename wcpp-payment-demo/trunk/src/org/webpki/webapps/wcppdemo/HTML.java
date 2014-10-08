@@ -269,6 +269,10 @@ public class HTML implements BaseProperties
         "var aborted_operation = false;\n" +
         "var pin_error_count = 0;\n" +
         "var selected_card;\n" +
+        "var authorize_command;\n" +
+        "var encrypted_data;\n" +
+        "var encrypted_key;\n" +
+        "var encryption_algorithm;\n" +
         "var timeouter_handle = null;\n" +
         "var request_amount;\n" +
         "var request_reference_id;\n" +
@@ -562,50 +566,82 @@ public class HTML implements BaseProperties
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
        "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
             Messages.ABORT + "')), window.document.referrer);\n" +
-       "}\n\n" +
+       "}\n\n");
+        if (web_crypto)
+          {
+            s.append (
+              "//\n" +
+              "// Finally we send the authorization to the payee\n" +
+              "//\n" +
+              "function sendAuthorizationData(encrypted_authorization_data) {\n" +
+              "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES_CBC_P5.getURI () + "';\n" +
+              "    encrypted_data." + IV_JSON + " = binaryToBase64(encryption_algorithm.iv);\n" +
+              "    encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
+              "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encrypted_authorization_data));\n" +
+              "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
+              "}\n\n" +
+              "//\n" +
+              "// RSA encrypted authorization\n" +
+              "//\n" +
+              "function performRSAEncryption(signed_auth_data) {\n" +
+              "    var sym_alg = {name: 'AES-CBC', length: 256};\n" +
+              "    crypto.subtle.generateKey(sym_alg, true, ['encrypt', 'decrypt']).then (function(aes_key) {\n" +
+              "    crypto.subtle.encrypt(encryption_algorithm, aes_key, signed_auth_data).then (function(encrypted_authorization_data) {\n" +
+              "    crypto.subtle.exportKey('raw', aes_key).then (function(raw_aes_key) {\n" +
+              "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
+              "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
+              "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
+              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI () + "';\n" +
+              "        var public_key = {};\n" +
+              "        encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = public_key;\n" +
+              "        var rsa_key = {};\n" +
+              "        public_key." + JSONSignatureDecoder.RSA_JSON + " = rsa_key;\n" +
+              "        rsa_key." + JSONSignatureDecoder.MODULUS_JSON + " = selected_card.bank_encryption_key.n;\n" +
+              "        rsa_key." + JSONSignatureDecoder.EXPONENT_JSON + " = selected_card.bank_encryption_key.e;\n" +
+              "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
+              "        sendAuthorizationData(encrypted_authorization_data);\n" +
+              "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
+              "    }).then (undefined, function() {error('Failed import public key')});\n" +
+              "    }).then (undefined, function() {error('Failed exporting symmetric key')});\n" +
+              "    }).then (undefined, function() {error('Failed encrypting using symmetric key')});\n" +
+              "    }).then (undefined, function() {error('Failed generating symmetric key')});\n" +
+              "}\n\n" +
+              "//\n" +
+              "// ECDH encrypted authorization\n" +
+              "//\n" +
+              "function performECDHEncryption(signed_auth_data) {\n" +
+              "    var alg = {name: 'ECDH', namedCurve: selected_card.bank_encryption_key.crv};\n" +
+              "    crypto.subtle.generateKey(alg, false, ['deriveKey']).then (function(key_pair) {\n" +
+              "    crypto.subtle.exportKey('jwk', key_pair.publicKey).then (function(ephemeral_key) {\n" +
+              "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, {name: 'ECDH'}, false, ['deriveKey']).then (function(public_key) {\n" +
+              "        error('NOT READY!');\n" +
+              "    }).then (undefined, function() {error('Failed import public key')});\n" +
+              "    }).then (undefined, function() {error('Failed exporting public key')});\n" +
+              "    }).then (undefined, function() {error('Failed generating key-pair')});\n" +
+              "}\n\n");
+          }
+       s.append (
        "//\n" +
        "// This is the final part of the user authorization\n" +
        "//\n" +
-       "function encryptAndSend (signed_auth_data) {\n" +
-       "    var authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
+       "function encryptAndSend(signed_auth_data) {\n" +
+       "    authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
        "    authorize_command." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
-       "    var encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
+       "    encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
        "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
        if (web_crypto)
          {
            s.append (
-             "    var sym_alg = {name: 'AES-CBC', length: 256};\n" +
-             "    crypto.subtle.generateKey(sym_alg, true, ['encrypt', 'decrypt']).then (function(aes_key) {\n" +
-             "    var enc_alg = {\n" +
+             "    encrypted_key = {};\n" +
+             "    encryption_algorithm = {\n" +
              "        name: 'AES-CBC',\n" +
              "        iv: window.crypto.getRandomValues(new Uint8Array(16))\n" +
              "    };\n" +
-             "    crypto.subtle.encrypt(enc_alg, aes_key, signed_auth_data).then (function(main_cryptogram) {\n" +
-             "    crypto.subtle.exportKey('raw', aes_key).then (function(raw_aes_key) {\n" +
-             "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
-             "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
-             "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
-             "    crypto.subtle.exportKey('jwk', public_key).then (function(jwk_key) {\n" +
-             "        var encrypted_key = {};\n" +
-             "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI () + "';\n" +
-             "        var public_key = {};\n" +
-             "        encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = public_key;\n" +
-             "        var rsa_key = {};\n" +
-             "        public_key." + JSONSignatureDecoder.RSA_JSON + " = rsa_key;\n" +
-             "        rsa_key." + JSONSignatureDecoder.MODULUS_JSON + " = jwk_key.n;\n" +
-             "        rsa_key." + JSONSignatureDecoder.EXPONENT_JSON + " = jwk_key.e;\n" +
-             "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
-             "        encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES_CBC_P5.getURI () + "';\n" +
-             "        encrypted_data." + IV_JSON + " = binaryToBase64(enc_alg.iv);\n" +
-             "        encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
-             "        encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(main_cryptogram));\n" +
-             "        window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
-             "    }).then (undefined, function() {error('Failed exporting public key')});\n" +
-             "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
-             "    }).then (undefined, function() {error('Failed import public key')});\n" +
-             "    }).then (undefined, function() {error('Failed exporting symmetric key')});\n" +
-             "    }).then (undefined, function() {error('Failed encrypting using symmetric key')});\n" +
-             "    }).then (undefined, function() {error('Failed generating symmetric key')});\n");
+             "    if (selected_card.bank_encryption_key.kty == 'RSA') {\n" +
+             "        performRSAEncryption(signed_auth_data);\n" +
+             "    } else {\n" +
+             "        performECDHEncryption(signed_auth_data);\n" +
+             "    }\n");
          }
        else
          {

@@ -6,10 +6,19 @@ import java.math.BigInteger;
 
 import java.security.Key;
 
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 
+import java.security.spec.ECPoint;
+import java.security.spec.EllipticCurve;
+
+import org.webpki.crypto.KeyAlgorithms;
+
+import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
 public class JWK
@@ -45,11 +54,72 @@ public class JWK
           }
         else
           {
-            throw new IOException ("NOT IMPLEMENTED");
-         //   s.append ("'EC',");
+            processECPublicKey (s, key);
           }
         jwk = s.append ('}').toString ();
         encoded = key.getEncoded ();
+      }
+    
+    public JWK (ECPublicKey public_key, ECPrivateKey private_key) throws IOException
+      {
+        this (public_key);
+        StringBuffer s = new StringBuffer (jwk.substring (0, jwk.length () - 1));
+        addCoordinate (s, KeyAlgorithms.getKeyAlgorithm (public_key), "d", private_key.getS ());
+        jwk = s.append ('}').toString ();
+      }
+
+    private void processECPublicKey (StringBuffer s, Key key) throws IOException
+      {
+        ECPoint ec_point = ((ECPublicKey)key).getW ();
+        s.append ("'EC',crv:'");
+        EllipticCurve curve = ((ECKey) key).getParams ().getCurve ();
+        for (KeyAlgorithms key_alg : KeyAlgorithms.values ())
+          {
+            if (key_alg.isECKey () && key_alg.getECParameterSpec ().getCurve ().equals (curve))
+              {
+                switch (key_alg)
+                  {
+                    case NIST_P_256:
+                    case NIST_P_384:
+                    case NIST_P_521:
+                      s.append ("P-")
+                       .append (key_alg.toString ().substring (7))
+                       .append ('\'');
+                      break;
+                    default:
+                      throw new IOException ("Unsupported: " + key_alg);
+                  }
+                addCoordinate (s, key_alg, "x", ec_point.getAffineX ());
+                addCoordinate (s, key_alg, "y", ec_point.getAffineY ());
+                return;
+             }
+          }
+        throw new IOException ("No suitable EC curve");
+      }
+
+    private void addCoordinate (StringBuffer s, KeyAlgorithms ec, String name, BigInteger value) throws IOException
+      {
+        s.append (',');
+        byte[] fixed_binary = value.toByteArray ();
+        if (fixed_binary.length > (ec.getPublicKeySizeInBits () + 7) / 8)
+          {
+            if (fixed_binary[0] != 0)
+              {
+                throw new IOException ("Unexpected EC \"" + name + "\" value");
+              }
+            s.append (getCryptoBinary (value, name));
+          }
+        else
+          {
+            while (fixed_binary.length < (ec.getPublicKeySizeInBits () + 7) / 8)
+              {
+                fixed_binary = ArrayUtil.add (new byte[]{0}, fixed_binary);
+              }
+            s.append (name)
+             .append (":'")
+             .append (Base64URL.encode (fixed_binary))
+             .append ('\'');
+          }
       }
 
     private String getCryptoBinary (BigInteger value, String name)

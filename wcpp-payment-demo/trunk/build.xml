@@ -5,6 +5,8 @@
   <property name="packimage_dir" value="packaged-images"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
   
+  <property name="application" value="WebCryptoPlusPlus.war"/>
+  
   <property name="keypassword" value="foo123"/>
   <property name="keyfilext" value=".jks"/>
   <property name="key_dir" location="keys"/>
@@ -15,7 +17,8 @@
   <property name="merchantkey" value="demomerchant-eecert"/>
   <property name="merchantroot" value="merchant-network-rootca"/>
   
-  <property name="encryptionkey" value="mybank-encryption-key"/>
+  <property name="encryptionkey_rsa" value="mybank-encryption-key-rsa"/>
+  <property name="encryptionkey_ec" value="mybank-encryption-key-ec"/>
   <property name="clientroot" value="mybank-clientroot"/>
   <property name="clientkey" value="mybank-client-eecert"/>
   
@@ -49,7 +52,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build nowebcrypto webcrypto mobilepki mobilepkiwc createcerts"/>
+      <echo message="build nowebcrypto webcrypto webcryptoec mobilepki createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -89,6 +92,7 @@
            classpathref="compile.classpath"
            includeAntRuntime="false"/>
     <property name="bank.port.map" value=""/>
+    <property name="encryptionkey" value="${encryptionkey_rsa}"/>
 	<replace file="${temp_dir}/web.xml">
 	  <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
@@ -129,8 +133,7 @@
   </target>
 
   <target name="webcrypto" depends="_init">
-      <property name="application" value="WebCryptoPlusPlus.war"/>
-      <antcall target="_build">
+     <antcall target="_build">
        <param name="security.constraints" value=""/>
        <param name="bank.url" value="http://mybank.com:8080/WebCryptoPlusPlus"/>
        <param name="merchant.url" value="http://merchant.com:8080/WebCryptoPlusPlus/merchant"/>
@@ -142,24 +145,15 @@
     <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>
   
-  <!-- mobilepki -->
-  <target name="mobilepki">
-    <property name="application" value="WebCryptoPlusPlus.war"/>
-    <antcall target="_build">
-       <param name="security.constraints" refid="security_constraint"/>
-       <param name="bank.url" value="https://mobilepki.org/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="https://openkeystore.googlecode.com/svn/wcpp-payment-demo/trunk/web/merchant.html"/>
-       <param name="card.font" value="DejaVue"/>
-       <param name="web.crypto" value="false"/>
-       <param name="javaversion" value="1.6"/>
-       <param name="library.dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
-    </antcall>
+  <!-- webcryptoec -->
+  <target name="webcryptoec">
+    <property name="encryptionkey" value="${encryptionkey_ec}"/>
+    <antcall target="webcrypto"/>
   </target>
   	
-  <!-- mobilepkiwc -->
-  <target name="mobilepkiwc">
+  <!-- mobilepki -->
+  <target name="mobilepki">
     <property name="bank.port.map" value="8442"/>
-    <property name="application" value="WebCryptoPlusPlus.war"/>
     <antcall target="_build">
        <param name="security.constraints" refid="security_constraint"/>
        <param name="bank.url" value="https://mobilepki.org/WebCryptoPlusPlus"/>
@@ -172,7 +166,6 @@
   </target>
   
   <target name="build">
-    <property name="application" value="WebCryptoPlusPlus.war"/>
     <antcall target="_build">
        <param name="security.constraints" value=""/>
        <param name="bank.url" value="http://mybank.com:8080/WebCryptoPlusPlus"/>
@@ -255,12 +248,18 @@
 
   <target name="_authencryption">
     <antcall target="_createcert">
-       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256 -serial 1"/>
+       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey_rsa}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256 -serial 1"/>
     </antcall>
     <antcall target="_getroot">
-       <param name="rootfile" value="${encryptionkey}"/>
+       <param name="rootfile" value="${encryptionkey_rsa}"/>
     </antcall>
-  </target>
+    <antcall target="_createcert">
+       <param name="cmd" value="-selfsigned -entity/ee -subject &quot;CN=Mybank Encryption Key1&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${encryptionkey_ec}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -ecccurve NIST_P_256 -sigalg ECDSA_SHA256 -serial 1"/>
+    </antcall>
+    <antcall target="_getroot">
+       <param name="rootfile" value="${encryptionkey_ec}"/>
+    </antcall>
+    </target>
   
   <target name="createcerts">
     <antcall target="_certpaymentnetwork"/>
