@@ -55,9 +55,7 @@ public class HTML implements BaseProperties
         ".tftable tr {background-color:#FFFFE0}\n" +
         ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
         "body {font-size:10pt;color:#000000;font-family:" + FONT_VERDANA + ";background-color:white}\n" +
-        "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
-        "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
-        "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + "}\n" +
+        "a {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
         "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
         ".quantity {text-align:right;font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
@@ -987,10 +985,10 @@ public class HTML implements BaseProperties
                  .append ("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
                           "</table></td></tr>" +
                           "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
-                          "</table></td></tr>" +
+                          "</table>" +
                           "<form name=\"shoot\" method=\"POST\" action=\"checkout\">" +
                           "<input type=\"hidden\" name=\"shoppingcart\" id=\"shoppingcart\">" +
-                          "</form>");
+                          "</form></td></tr>");
          temp_string.insert (0,
                 "\n\n\"use strict\";\n\n" +
                 "var numeric_only = new RegExp('^[0-9]{1,6}$');\n\n" +
@@ -1088,12 +1086,12 @@ public class HTML implements BaseProperties
                  "</table></td></tr>" +
                  "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\">")
          .append (getIframeHTML ())
-         .append ("</td></tr></table></td></tr>" +
+         .append ("</td></tr></table>" +
                   "<form name=\"shoot\" method=\"POST\" action=\"authreq\">" +
                   "<input type=\"hidden\" name=\"authreq\" id=\"authreq\">" +
                   "</form>" +
                   "<form name=\"restore\" method=\"POST\" action=\"" + Init.merchant_url + "\">" +
-                  "</form>");
+                  "</form></td></tr>");
         
      StringBuffer temp_string = new StringBuffer (
         "\n\n\"use strict\";\n\n" +
