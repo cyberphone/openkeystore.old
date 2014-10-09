@@ -20,7 +20,8 @@
   <property name="encryptionkey_rsa" value="mybank-encryption-key-rsa"/>
   <property name="encryptionkey_ec" value="mybank-encryption-key-ec"/>
   <property name="clientroot" value="mybank-clientroot"/>
-  <property name="clientkey" value="mybank-client-eecert"/>
+  <property name="clientkey_rsa" value="mybank-client-key-rsa"/>
+  <property name="clientkey_ec" value="mybank-client-key-ec"/>
   
   <property name="temp_dir" value=".tmp"/>
   <property name="dist_dir" value="dist"/>
@@ -52,7 +53,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build nowebcrypto webcrypto webcryptoec mobilepki createcerts"/>
+      <echo message="build nowebcrypto webcrypto webcrypto-ecbank webcrypto-ecclient mobilepki createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -93,7 +94,8 @@
            includeAntRuntime="false"/>
     <property name="bank.port.map" value=""/>
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
-	<replace file="${temp_dir}/web.xml">
+    <property name="clientkey" value="${clientkey_rsa}"/>
+    	<replace file="${temp_dir}/web.xml">
 	  <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
 	  <replacefilter token="@bank-url@" value="${bank.url}"/>
@@ -145,12 +147,18 @@
     <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>
   
-  <!-- webcryptoec -->
-  <target name="webcryptoec">
+  <!-- webcrypto-ecbank -->
+  <target name="webcrypto-ecbank">
     <property name="encryptionkey" value="${encryptionkey_ec}"/>
     <antcall target="webcrypto"/>
   </target>
   	
+  <!-- webcrypto-ecclient -->
+  <target name="webcrypto-ecclient">
+    <property name="clientkey" value="${clientkey_ec}"/>
+    <antcall target="webcrypto"/>
+  </target>
+  
   <!-- mobilepki -->
   <target name="mobilepki">
     <property name="bank.port.map" value="8442"/>
@@ -242,7 +250,10 @@
        <param name="rootfile" value="${clientroot}"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Cardholder, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256"/>
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Cardholder, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_rsa}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA256"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=The Cardholder, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_ec}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword}  -ecccurve NIST_P_256 -sigalg RSA_SHA256"/>
     </antcall>
     </target>
 

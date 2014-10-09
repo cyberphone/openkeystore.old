@@ -1,9 +1,11 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
 import java.util.Vector;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -13,6 +15,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -150,10 +153,11 @@ public class HTML implements BaseProperties
           {
             s.append (
             "    if (window.crypto && window.crypto.subtle) {\n" +
-            "        window.crypto.subtle.importKey('jwk',")
+            "        crypto.subtle.importKey('jwk',")
             .append (Init.client_private_key.getJWK ())
-            .append (
-            ", {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true, ['sign']).then (function(private_key) {\n            ")
+            .append (", {name: '")
+            .append (Init.client_private_key.getKeyType ().equals ("EC") ? "ECDSA'" : "RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}")
+            .append ("}, true, ['sign']).then (function(private_key) {\n            ")
             .append (crypto_enabled ? "console.debug('Running in WebCrypto Mode!');\n" : "document.location.href = 'cryptohome';\n")
             .append (
             "        }).then (undefined, function() {")
@@ -677,7 +681,7 @@ public class HTML implements BaseProperties
              "    encrypted_key = {};\n" +
              "    encryption_algorithm = {\n" +
              "        name: 'AES-CBC',\n" +
-             "        iv: window.crypto.getRandomValues(new Uint8Array(16))\n" +
+             "        iv: crypto.getRandomValues(new Uint8Array(16))\n" +
              "    };\n" +
              "    if (selected_card.bank_encryption_key.kty == 'RSA') {\n" +
              "        performRSAEncryption(signed_auth_data);\n" +

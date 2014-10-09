@@ -6,7 +6,12 @@ import java.net.URL;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+
 import java.security.cert.X509Certificate;
+
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -129,8 +134,11 @@ public class Init implements ServletContextListener
               .append ("', " + JSONSignatureDecoder.SUBJECT_JSON + ":'")
               .append (cert.getSubjectX500Principal ().getName ())
               .append ("'}").toString ();
-            client_private_key = new JWK (client.getKey ("mykey", Init.key_password.toCharArray ()));
-            logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ": "Standard") + " Mode Successfully Initiated");
+            client_private_key = cert.getPublicKey () instanceof RSAPublicKey ? 
+                  new JWK (client.getKey ("mykey", Init.key_password.toCharArray ()))
+                                    :
+                  new JWK ((ECPublicKey)cert.getPublicKey (), (ECPrivateKey)client.getKey ("mykey", Init.key_password.toCharArray ()));
+            logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ClientKey=" + client_private_key.getKeyType () + " BankKey=" +  bank_encryption_key.getKeyType () : "Standard Mode") + " Successfully Initiated");
           }
         catch (Exception e)
           {

@@ -26,6 +26,8 @@ public class JWK implements Serializable
   {
     String jwk;
     
+    String key_type = "RSA";
+    
     byte[] encoded;
 
     public JWK (Key key) throws IOException
@@ -55,6 +57,7 @@ public class JWK implements Serializable
           }
         else
           {
+            key_type = "EC";
             processECPublicKey (s, key);
           }
         jwk = s.append ('}').toString ();
@@ -138,6 +141,11 @@ public class JWK implements Serializable
     public String getJWK ()
       {
         return jwk;
+      }
+
+    public String getKeyType ()
+      {
+        return key_type;
       }
 
     public byte[] getEncoded ()
