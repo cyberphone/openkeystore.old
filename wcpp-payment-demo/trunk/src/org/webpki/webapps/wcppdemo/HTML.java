@@ -720,6 +720,13 @@ public class HTML implements BaseProperties
              "    var signature_object = {};\n" +
              "    auth_data." + JSONSignatureDecoder.SIGNATURE_JSON + " = signature_object;\n" +
              "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+             "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
+             "    var key_sign_alg = key_import_alg;\n" +
+             "    if (selected_card.client_private_key.kty == 'EC') {\n" +
+             "        signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "';\n" +
+             "        key_import_alg = {name: 'ECDSA'};\n" +
+             "        key_sign_alg = {name: 'ECDSA', hash: {name: 'SHA-256'}};\n" +
+             "    }\n" +
              "    var key_info = {};\n" +
              "    signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = key_info;\n" +
              "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
@@ -750,9 +757,8 @@ public class HTML implements BaseProperties
        if (web_crypto)
          {
            s.append (
-             "    var sign_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
-             "    crypto.subtle.importKey('jwk', selected_card.client_private_key, sign_alg, false, ['sign']).then (function(private_key) {\n" +
-             "    crypto.subtle.sign (sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
+             "    crypto.subtle.importKey('jwk', selected_card.client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
+             "    crypto.subtle.sign (key_sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
              "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
