@@ -26,9 +26,15 @@ public interface BaseProperties
     String PAYMENT_PROVIDER_KEY_JSON  = "PaymentProviderKey";
     String EPHEMERAL_SENDER_KEY_JSON  = "EphemeralSenderKey";
     String ALGORITHM_JSON             = "Algorithm";
+    String HASH_ALGORITHM_JSON        = "HashAlgorithm";
+    String ALGORITHM_ID_JSON          = "AlgorithmID";
+    String PARTY_U_INFO_JSON          = "PartyUInfo";
+    String PARTY_V_INFO_JSON          = "PartyVInfo";
+    String KEY_DERIVATION_METHOD_JSON = "KeyDerivationMethod";
     String IV_JSON                    = "IV";
     String CIPHER_TEXT_JSON           = "CipherText";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-payment-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";
+    String CONCAT_ALGORITHM_URI       = "http://www.w3.org/2009/xmlenc11#ConcatKDF";
   }

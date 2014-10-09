@@ -1,20 +1,18 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
-
 import java.util.Vector;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -296,7 +294,7 @@ public class HTML implements BaseProperties
             .append(currency.first_position)
             .append ("));\n");
           }
-        s.append ("\nwebpki.CardEntry = function(type, pin, pan, transaction_url, base64_image");
+        s.append ("\nwebpki.CardEntry = function(type, pin, pan, authorization_url, base64_image");
         if (web_crypto)
           {
             s.append (", bank_encryption_key, client_cert, client_private_key, cert_data");
@@ -306,7 +304,7 @@ public class HTML implements BaseProperties
         "    this.type = type;\n" +
         "    this.pin = pin;\n" +
         "    this.pan = pan;\n" +
-        "    this.transaction_url = transaction_url;\n" +
+        "    this.authorization_url = authorization_url;\n" +
         "    this.base64_image = base64_image;\n");
         if (web_crypto)
           {
@@ -345,7 +343,7 @@ public class HTML implements BaseProperties
                          .append("', '")
                          .append(card_entry.pan)
                          .append("', '")
-                         .append(card_entry.transaction_url)
+                         .append(card_entry.authorization_url)
                          .append("', '")
                          .append(card_entry.base64_image)
                          .append ("'");
@@ -382,6 +380,16 @@ public class HTML implements BaseProperties
         "        aborted_operation = true;\n" +
         "    }\n" +
         "    document.getElementById('busy').style.visibility = 'hidden';\n" +
+        "}\n\n" +
+        "function getDomainName(url) {\n" +
+        "    url = url.substring(url.indexOf('://') + 3);\n" +
+        "    if (url.indexOf(':') > 0) {\n" +
+        "        url = url.substring(0, url.indexOf(':'));\n" +
+        "    }\n" +
+        "    if (url.indexOf('/') > 0) {\n" +
+        "        url = url.substring(0, url.indexOf('/'));\n" +
+        "    }\n" +
+        "    return url;\n" +
         "}\n\n" +
         "function checkNoErrors() {\n" +
         "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
@@ -617,6 +625,14 @@ public class HTML implements BaseProperties
               "    ec_params." + JSONSignatureDecoder.Y_JSON + " = jwk.y;\n" +
               "}\n\n" +
               "//\n" +
+              "// ECDH KDF helper\n" +
+              "//\n" +
+              "function createBitString(string) {\n" +
+              "    var utf8 = convertStringToUTF8('0' + string);\n" +
+              "    utf8[0] = 0;\n" +
+              "    return binaryToBase64(utf8);\n" +
+              "}\n\n" +
+              "//\n" +
               "// ECDH encrypted authorization\n" +
               "//\n" +
               "function performECDHEncryption(signed_auth_data) {\n" +
@@ -629,6 +645,13 @@ public class HTML implements BaseProperties
               "    crypto.subtle.deriveKey(derive_alg, key_pair.privateKey, {name: 'AES-CBC', length: 256}, false, ['encrypt']).then (function(aes_key) {\n" +
               "    crypto.subtle.encrypt(encryption_algorithm, aes_key, signed_auth_data).then (function(encrypted_authorization_data) {\n" +
               "        encrypted_key." + ALGORITHM_JSON + " = '" + ECDH_ALGORITHM_URI + "';\n" +
+              "        var concat = encrypted_key." + KEY_DERIVATION_METHOD_JSON + " = {};\n" +
+              "        concat."+ ALGORITHM_JSON + " = '" + CONCAT_ALGORITHM_URI + "';\n" +
+              "        concat."+ HASH_ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
+              "        // Demo parameters at this stage...\n" +
+              "        concat."+ ALGORITHM_ID_JSON + " = createBitString('0');\n" +
+              "        concat."+ PARTY_U_INFO_JSON + " = createBitString(caller_domain);\n" +
+              "        concat."+ PARTY_V_INFO_JSON + " = createBitString(getDomainName(selected_card.authorization_url));\n" +
               "        addECDHKey('" + PAYMENT_PROVIDER_KEY_JSON + "', selected_card.bank_encryption_key);\n" +
               "        addECDHKey('" + EPHEMERAL_SENDER_KEY_JSON + "', ephemeral_key);\n" +
               "        sendAuthorizationData(encrypted_authorization_data);\n" +
@@ -645,7 +668,7 @@ public class HTML implements BaseProperties
        "//\n" +
        "function encryptAndSend(signed_auth_data) {\n" +
        "    authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
-       "    authorize_command." + AUTH_URL_JSON + " = selected_card.transaction_url;\n" +
+       "    authorize_command." + AUTH_URL_JSON + " = selected_card.authorization_url;\n" +
        "    encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
        "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
        if (web_crypto)
@@ -762,7 +785,7 @@ public class HTML implements BaseProperties
        "//         \"" + REFERENCE_ID_JSON + "\": \"String\"           Payee reference to order\n" +
        "//         \"" + DATE_TIME_JSON + "\": \"YY-MM-DDThh:mm:ssZ\"  ISO time of request\n" +
        "//         \"" + COMMON_NAME_JSON + "\": \"Name\"              Common name of requester\n" +
-       "//         \"" + JSONSignatureDecoder.SIGNATURE_JSON + "\": \"{}\"                 Signature object\n" +
+       "//         \"" + JSONSignatureDecoder.SIGNATURE_JSON + "\": {}                   Signature object\n" +
        "//       }\n" +
        "//   }\n" +
        "//\n" +
@@ -854,14 +877,7 @@ public class HTML implements BaseProperties
         "// the payment process is automatically invoked by the body.onload().\n" +
         "//\n" +
         "function initPayment() {\n" +
-        "    caller_domain = window.document.referrer;\n" +
-        "    caller_domain = caller_domain.substring(caller_domain.indexOf('://') + 3);\n" +
-        "    if (caller_domain.indexOf(':') > 0) {\n" +
-        "        caller_domain = caller_domain.substring(0, caller_domain.indexOf(':'));\n" +
-        "    }\n" +
-        "    if (caller_domain.indexOf('/') > 0) {\n" +
-        "        caller_domain = caller_domain.substring(0, caller_domain.indexOf('/'));\n" +
-        "    }\n" +
+        "    caller_domain = getDomainName(window.document.referrer);\n" +
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
         "        window.addEventListener('message', receivePayeeResponse, false);\n" +

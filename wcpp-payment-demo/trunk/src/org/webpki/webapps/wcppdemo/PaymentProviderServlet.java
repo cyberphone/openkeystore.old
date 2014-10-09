@@ -101,7 +101,17 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                     KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
                     key_agreement.init (Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
                     key_agreement.doPhase (ephemeral_sender_key, true);
-                    raw_aes_key = key_agreement.generateSecret ();
+                    byte[] Z = key_agreement.generateSecret ();
+                    JSONObjectReader concat = encrypted_key.getObject (KEY_DERIVATION_METHOD_JSON);
+                    if (!concat.getString (ALGORITHM_JSON).equals (CONCAT_ALGORITHM_URI))
+                      {
+                        throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + concat.getString (ALGORITHM_JSON));
+                      }
+                    HashAlgorithms hash_algorithm = HashAlgorithms.getAlgorithmFromURI (concat.getString (HASH_ALGORITHM_JSON));
+                    byte[] algorithm_id = concat.getBinary (ALGORITHM_ID_JSON);
+                    byte[] party_u_info = concat.getBinary (PARTY_U_INFO_JSON);
+                    byte[] party_v_info = concat.getBinary (PARTY_V_INFO_JSON);
+                    raw_aes_key = Z;  // For now...since WebCrypto does not (yet) implement CONCAT
                   }
                 Cipher cipher = Cipher.getInstance (sym_alg.getJCEName ());
                 SecretKeySpec sk = new SecretKeySpec (raw_aes_key, "AES");

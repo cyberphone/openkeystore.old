@@ -28,7 +28,7 @@ public class CardEntry implements Serializable
     String pin;
     String pan;
     String base64_image;
-    String transaction_url;
+    String authorization_url;
     String user;
     JWK bank_encryption_key;
     JWK client_key;        
