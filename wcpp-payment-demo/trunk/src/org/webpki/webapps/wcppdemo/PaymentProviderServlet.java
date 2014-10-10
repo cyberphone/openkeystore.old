@@ -1,37 +1,50 @@
 package org.webpki.webapps.wcppdemo;
 
 import java.io.IOException;
+
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+
 import java.util.Date;
+import java.util.Vector;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.VerifierInterface;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64URL;
-import org.webpki.util.DebugFormatter;
+
 import org.webpki.webutil.ServletUtil;
 
 public class PaymentProviderServlet extends HttpServlet implements BaseProperties
@@ -162,15 +175,50 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
             result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
             result.setDateTime (DATE_TIME_JSON, new Date (), true);
-            KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
-            signer.setExtendedCertPath (true);
-            signer.setKey (null, Init.key_password);
-            result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
+            result.setSignature (new JSONX509Signer (new SignerInterface ()
+            {
+
+              @Override
+              public X509Certificate[] getCertificatePath () throws IOException
+                {
+                  try
+                    {
+                      Vector<X509Certificate> cert_path = new Vector<X509Certificate> ();
+                      for (Certificate cert : Init.bank_eecert_key.getCertificateChain ("mykey"))
+                        {
+                          cert_path.add ((X509Certificate)cert);
+                        }
+                      return cert_path.toArray (new X509Certificate[0]);
+                    }
+                  catch (GeneralSecurityException e)
+                    {
+                      throw new IOException (e);
+                    }
+                }
+
+              @Override
+              public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException
+                {
+                  try
+                    {
+                      Signature s = Signature.getInstance (sign_alg.getJCEName ());
+                      s.initSign ((PrivateKey) Init.bank_eecert_key.getKey ("mykey", Init.key_password.toCharArray ()));
+                      s.update (data);
+                      return s.sign ();
+                    }
+                  catch (GeneralSecurityException e)
+                    {
+                      throw new IOException (e);
+                    }
+                }
+              
+            }).setSignatureCertificateAttributes (true));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();
           }
         catch (Exception e)
           {
+            e.printStackTrace ();
             result = Messages.createBaseMessage (Messages.TRANSACTION_RESPONSE);
             result.setString (ERROR_JSON, e.getMessage ());
             logger.log (Level.SEVERE, e.getMessage ());
