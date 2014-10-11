@@ -19,14 +19,11 @@ package org.webpki.ca;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-
 import java.math.BigInteger;
-
 import java.util.Vector;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -34,15 +31,12 @@ import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.GeneralSecurityException;
-
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.ECGenParameterSpec;
-
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import org.webpki.asn1.cert.DistinguishedName;
-
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
@@ -772,7 +766,7 @@ public class CommandLineCA
       }
 
 
-    void certify () throws IOException
+    void certify (String sun_pkcs12) throws IOException
       {
         try
           {
@@ -996,7 +990,8 @@ public class CommandLineCA
             ///////////////////////////////////////////////////////////////
             // The final: Write the whole thing out
             ///////////////////////////////////////////////////////////////
-            KeyStore ks = KeyStore.getInstance (CMD_out_ks_type.getString ());
+            KeyStore ks = CMD_out_ks_type.getString ().equalsIgnoreCase ("jks") ?
+                            KeyStore.getInstance (CMD_out_ks_type.getString ()) : KeyStore.getInstance (CMD_out_ks_type.getString (), sun_pkcs12);
             if (CMD_out_update.found)
               {
                 ks.load (new FileInputStream (CMD_out_keystore.getString ()), CMD_out_ks_pass.toCharArray ());
@@ -1023,12 +1018,13 @@ public class CommandLineCA
       {
         try
           {
+            String sun_pkcs12 = KeyStore.getInstance ("PKCS12").getProvider ().getName ();
             CustomCryptoProvider.forcedLoad ();
             CommandLineCA clca = new CommandLineCA ();
             clca.decodeCommandLine (argv);
-            clca.certify ();
+            clca.certify (sun_pkcs12);
           }
-        catch (IOException ioe)
+        catch (Exception ioe)
           {
             System.out.println ("\n" + ioe.getMessage ());
           }
