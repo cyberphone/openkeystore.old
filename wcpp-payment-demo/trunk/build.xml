@@ -68,15 +68,15 @@
    </target>
 
   <target name="_build">
-	  <path id="compile.classpath">
-	    <fileset dir="${library.dir}">
-	      <include name="*.jar"/>
-	    </fileset>
-	    <fileset dir="${third_party_jars}">
-	      <include name="*.jar"/>
-	    </fileset>
-	  </path>
-      <delete dir="${temp_dir}"/>
+	<path id="compile.classpath">
+	  <fileset dir="${library.dir}">
+        <include name="*.jar"/>
+     </fileset>
+     <fileset dir="${third_party_jars}">
+	    <include name="*.jar"/>
+      </fileset>
+	</path>
+    <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
     <fixcrlf srcdir="${src_dir}"
        tab="remove"
@@ -95,8 +95,11 @@
     <property name="bank.port.map" value=""/>
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
     <property name="clientkey" value="${clientkey_rsa}"/>
-    	<replace file="${temp_dir}/web.xml">
-	  <replacefilter token="@security-constraints@" value="${security.constraints}"/>
+    <property name="load.bouncycastle" value="true"/>
+    <property name="third.party.jars" value="${third_party_jars}"/>
+    <replace file="${temp_dir}/web.xml">
+	  <replacefilter token="@load-bouncycastle@" value="${load.bouncycastle}"/>
+      <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
 	  <replacefilter token="@bank-url@" value="${bank.url}"/>
 	  <replacefilter token="@merchant-url@" value="${merchant.url}"/>
@@ -116,7 +119,9 @@
       <classes dir="${temp_dir}">
          <exclude name="web.xml"/>
       </classes>
-      <lib file="${third_party_jars}/bcprov-*.jar"/>
+      <lib dir="${third.party.jars}">
+         <include name="bcprov-*.jar"/>
+      </lib>
       <lib dir="${library.dir}">
          <include name="webpki.org-libext*.jar"/>
          <include name="webpki.org-webutil*.jar"/>
@@ -161,7 +166,9 @@
   
   <!-- mobilepki -->
   <target name="mobilepki">
+    <property name="load.bouncycastle" value="false"/>
     <property name="bank.port.map" value="8442"/>
+    <property name="third.party.jars" value="empty.lib"/>
     <antcall target="_build">
        <param name="security.constraints" refid="security_constraint"/>
        <param name="bank.url" value="https://mobilepki.org/WebCryptoPlusPlus"/>
@@ -203,10 +210,6 @@
   </target>
 
   <target name="_getroot">
-<!--
-	  <echo message="-exportcert -keystore ${rootfile}${keyfilext} -alias mykey -storepass ${keypassword} -file ${rootfile}.cer"/>
-  -->
-
 	<exec executable="keytool" failonerror="true" dir="${key_dir}">
 	  <arg line="-exportcert -keystore ${rootfile}${keyfilext} -alias mykey -storepass ${keypassword} -storetype ${storetype} -file ${rootfile}.cer"/>
 	</exec>

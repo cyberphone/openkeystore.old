@@ -35,11 +35,6 @@ public class Init implements ServletContextListener
   {
     static Logger logger = Logger.getLogger (Init.class.getName ());
     
-    static
-      {
-        CustomCryptoProvider.forcedLoad ();
-      }
-  
     static String bank_url;
     static String payment_url;
     static String merchant_url;
@@ -95,6 +90,10 @@ public class Init implements ServletContextListener
         properties.initProperties (event);
         try 
           {
+            if (properties.getPropertyBoolean ("load_bouncycastle"))
+              {
+                CustomCryptoProvider.forcedLoad ();
+              }
             bank_url = properties.getPropertyString ("bank_url");
             merchant_url = properties.getPropertyString ("merchant_url");
             if (properties.getPropertyString ("bank_port_map").length () > 0)

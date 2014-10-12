@@ -5,6 +5,12 @@
     version="2.4">
 
     <context-param>
+        <description>Force loading of Bouncycastle</description>
+        <param-name>load_bouncycastle</param-name>
+        <param-value>@load-bouncycastle@</param-value>
+    </context-param>
+
+    <context-param>
         <description>Bank Port Mapping (may be undefined)</description>
         <param-name>bank_port_map</param-name>
         <param-value>@bank-port-map@</param-value>
