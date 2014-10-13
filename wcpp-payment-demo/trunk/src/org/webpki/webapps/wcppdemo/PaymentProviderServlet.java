@@ -105,7 +105,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                       {
                         throw new IOException ("Unexpected encryption key:\n" + received_payment_provider_key.toString ());
                       }
-                    PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_SENDER_KEY_JSON).getPublicKey ();
+                    PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_CLIENT_KEY_JSON).getPublicKey ();
                     KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
                     key_agreement.init (Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
                     key_agreement.doPhase (ephemeral_sender_key, true);

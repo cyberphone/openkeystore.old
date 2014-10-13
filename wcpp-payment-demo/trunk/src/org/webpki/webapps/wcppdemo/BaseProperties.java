@@ -24,7 +24,7 @@ public interface BaseProperties
     String ENCRYPTED_DATA_JSON        = "EncryptedData";
     String ENCRYPTED_KEY_JSON         = "EncryptedKey";
     String PAYMENT_PROVIDER_KEY_JSON  = "PaymentProviderKey";
-    String EPHEMERAL_SENDER_KEY_JSON  = "EphemeralSenderKey";
+    String EPHEMERAL_CLIENT_KEY_JSON  = "EphemeralClientKey";
     String ALGORITHM_JSON             = "Algorithm";
     String HASH_ALGORITHM_JSON        = "HashAlgorithm";
     String ALGORITHM_ID_JSON          = "AlgorithmID";

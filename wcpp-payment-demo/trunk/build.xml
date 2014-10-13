@@ -140,28 +140,32 @@
   </target>
 
   <target name="webcrypto" depends="_init">
+     <property name="local_sc" refid="security_constraint"/>
+     <condition property="security_constraints" value="${local_sc}" else="">
+       <isset property="localhost"/>
+     </condition>
+     <condition property="bank_host" value="https://localhost:8443" else="http://mybank.com:8080">
+       <isset property="localhost"/>
+     </condition>
+     <condition property="merchant_host" value="https://localhost:8443" else="http://merchant.com:8080">
+       <isset property="localhost"/>
+     </condition>
+     <condition property="encryptionkey" value="${encryptionkey_ec}">
+       <isset property="ecbank"/>
+     </condition>
+     <condition property="clientkey" value="${clientkey_ec}">
+       <isset property="ecclient"/>
+     </condition>
      <antcall target="_build">
-       <param name="security.constraints" value=""/>
-       <param name="bank.url" value="http://mybank.com:8080/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="http://merchant.com:8080/WebCryptoPlusPlus/merchant"/>
+       <param name="security.constraints" value="${security_constraints}"/>
+       <param name="bank.url" value="${bank_host}/WebCryptoPlusPlus"/>
+       <param name="merchant.url" value="${merchant_host}/WebCryptoPlusPlus/merchant"/>
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.7"/>
        <param name="library.dir" value="${webpki_jars}"/>
     </antcall>
     <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
-  </target>
-  
-  <!-- webcrypto-ecbank -->
-  <target name="webcrypto-ecbank">
-    <property name="encryptionkey" value="${encryptionkey_ec}"/>
-    <antcall target="webcrypto"/>
-  </target>
-  	
-  <!-- webcrypto-ecclient -->
-  <target name="webcrypto-ecclient">
-    <property name="clientkey" value="${clientkey_ec}"/>
-    <antcall target="webcrypto"/>
   </target>
   
   <!-- mobilepki -->

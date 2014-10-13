@@ -657,7 +657,7 @@ public class HTML implements BaseProperties
               "        concat."+ PARTY_U_INFO_JSON + " = createBitString(caller_domain);\n" +
               "        concat."+ PARTY_V_INFO_JSON + " = createBitString(getDomainName(selected_card.authorization_url));\n" +
               "        addECDHKey('" + PAYMENT_PROVIDER_KEY_JSON + "', selected_card.bank_encryption_key);\n" +
-              "        addECDHKey('" + EPHEMERAL_SENDER_KEY_JSON + "', ephemeral_key);\n" +
+              "        addECDHKey('" + EPHEMERAL_CLIENT_KEY_JSON + "', ephemeral_key);\n" +
               "        sendAuthorizationData(encrypted_authorization_data);\n" +
               "    }).then (undefined, function() {error('Failed encrypting')});\n" +
               "    }).then (undefined, function() {error('Failed deriving key')});\n" +
