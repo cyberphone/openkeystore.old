@@ -1243,7 +1243,7 @@ public class ServerState implements Serializable
     
     byte[] ve_nonce;
     
-    X509Certificate device_certificate;
+    X509Certificate[] device_certificate_path;
     
     PostProvisioningTargetKey addPostOperation (String old_client_session_id,
                                                 String old_server_session_id,
@@ -1444,7 +1444,7 @@ public class ServerState implements Serializable
           {
             checkState (false, ProtocolPhase.PROVISIONING_INITIALIZATION);
             client_session_id = prov_init_response.client_session_id;
-            device_certificate = prov_init_response.device_certificate_path == null ? null : prov_init_response.device_certificate_path[0];
+            device_certificate_path = prov_init_response.device_certificate_path;
             client_ephemeral_key = prov_init_response.client_ephemeral_key;
 
             MacGenerator kdf = new MacGenerator ();
@@ -1459,7 +1459,7 @@ public class ServerState implements Serializable
             attestation_arguments.addString (issuer_uri);
             attestation_arguments.addArray (getDeviceID ());
             attestation_arguments.addString (provisioning_session_algorithm);
-            attestation_arguments.addBool (device_certificate == null);
+            attestation_arguments.addBool (getDeviceCertificate () == null);
             attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
             attestation_arguments.addArray (client_ephemeral_key.getEncoded ());
             attestation_arguments.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
@@ -1470,7 +1470,7 @@ public class ServerState implements Serializable
             server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                  kdf.getResult (),
                                                                  attestation_arguments.getResult (),
-                                                                 device_certificate == null ? null : device_certificate,
+                                                                 getDeviceCertificate (),
                                                                  prov_init_response.attestation);
             if (((server_certificate == null ^ prov_init_response.server_certificate_fingerprint == null)) ||
                 (server_certificate != null && !ArrayUtil.compare (prov_init_response.server_certificate_fingerprint, 
@@ -1497,7 +1497,7 @@ public class ServerState implements Serializable
 
     byte[] getDeviceID () throws GeneralSecurityException
       {
-        return device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ();
+        return getDeviceCertificate () == null ? SecureKeyStore.KDF_ANONYMOUS : getDeviceCertificate ().getEncoded ();
       }
 
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
@@ -1557,16 +1557,20 @@ public class ServerState implements Serializable
         current_phase = ProtocolPhase.DONE;
       }
 
-    
-    public String getDeviceID (boolean long_version)
+    public X509Certificate getDeviceCertificate ()
       {
-        return DeviceID.getDeviceID (device_certificate, long_version);
+        return device_certificate_path == null ? null : device_certificate_path[0];
+      }
+    
+    public String getDeviceIDString (boolean long_version)
+      {
+        return DeviceID.getDeviceID (getDeviceCertificate (), long_version);
       }
 
 
-    public X509Certificate getDeviceCertificate ()
+    public X509Certificate[] getDeviceCertificatePath ()
       {
-        return device_certificate;
+        return device_certificate_path;
       }
    
 
