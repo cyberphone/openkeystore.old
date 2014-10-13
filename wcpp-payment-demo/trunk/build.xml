@@ -95,10 +95,10 @@
     <property name="bank.port.map" value=""/>
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
     <property name="clientkey" value="${clientkey_rsa}"/>
-    <property name="load.bouncycastle" value="true"/>
+    <property name="force.bouncycastle" value="true"/>
     <property name="third.party.jars" value="${third_party_jars}"/>
     <replace file="${temp_dir}/web.xml">
-	  <replacefilter token="@load-bouncycastle@" value="${load.bouncycastle}"/>
+	  <replacefilter token="@force-bouncycastle@" value="${force.bouncycastle}"/>
       <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
 	  <replacefilter token="@bank-url@" value="${bank.url}"/>
@@ -166,7 +166,7 @@
   
   <!-- mobilepki -->
   <target name="mobilepki">
-    <property name="load.bouncycastle" value="false"/>
+    <property name="force.bouncycastle" value="false"/>
     <property name="bank.port.map" value="8442"/>
     <property name="third.party.jars" value="empty.lib"/>
     <antcall target="_build">

@@ -6,8 +6,8 @@
 
     <context-param>
         <description>Force loading of Bouncycastle</description>
-        <param-name>load_bouncycastle</param-name>
-        <param-value>@load-bouncycastle@</param-value>
+        <param-name>force_bouncycastle</param-name>
+        <param-value>@force-bouncycastle@</param-value>
     </context-param>
 
     <context-param>

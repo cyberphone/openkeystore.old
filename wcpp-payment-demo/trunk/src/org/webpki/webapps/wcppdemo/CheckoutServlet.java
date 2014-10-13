@@ -56,7 +56,7 @@ public class CheckoutServlet extends HttpServlet implements BaseProperties
             aw.setString (card_type.toString ());
           }
         JSONObjectWriter payment_request = new PaymentRequest (total).serialize ();
-        request.getSession (true).setAttribute (REQUEST_HASH_ATTR, HashAlgorithms.SHA256.digest (payment_request.serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        request.getSession (true).setAttribute (REQUEST_HASH_ATTR, HashAlgorithms.SHA256.digest (payment_request.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         writer.setObject (PAYMENT_REQUEST_JSON, payment_request);
         HTML.checkoutPage (response,
                            saved_shopping_cart,

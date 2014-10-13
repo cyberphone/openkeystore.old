@@ -144,7 +144,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
               }
             if (!ArrayUtil.compare (request_hash.getBinary (VALUE_JSON),
-                                    HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.CANONICALIZED))))
+                                    HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.NORMALIZED))))
               {
                 throw new IOException ("\"" + REQUEST_HASH_JSON + "\" mismatch");
               }
@@ -186,6 +186,6 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
         response.setContentType ("application/json; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
-        response.getOutputStream ().write (result.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+        response.getOutputStream ().write (result.serializeJSONObject (JSONOutputFormats.NORMALIZED));
       }
   }

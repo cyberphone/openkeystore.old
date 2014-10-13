@@ -6,6 +6,7 @@ import java.net.URL;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.Security;
 
 import java.security.cert.X509Certificate;
 
@@ -29,9 +30,11 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.webpki.webutil.InitPropertyReader;
 
-public class Init implements ServletContextListener
+public class Init extends InitPropertyReader implements ServletContextListener
   {
     static Logger logger = Logger.getLogger (Init.class.getName ());
     
@@ -86,44 +89,47 @@ public class Init implements ServletContextListener
     @Override
     public void contextInitialized (ServletContextEvent event)
       {
-        InitPropertyReader properties = new InitPropertyReader ();
-        properties.initProperties (event);
+        initProperties (event);
         try 
           {
-            if (properties.getPropertyBoolean ("load_bouncycastle"))
+            if (getPropertyBoolean ("force_bouncycastle"))
               {
                 CustomCryptoProvider.forcedLoad ();
               }
-            bank_url = properties.getPropertyString ("bank_url");
-            merchant_url = properties.getPropertyString ("merchant_url");
-            if (properties.getPropertyString ("bank_port_map").length () > 0)
+            else
+              {
+                Security.addProvider (new BouncyCastleProvider ());
+              }
+            bank_url = getPropertyString ("bank_url");
+            merchant_url = getPropertyString ("merchant_url");
+            if (getPropertyString ("bank_port_map").length () > 0)
               {
                 URL url = new URL (bank_url);
                 payment_url = new URL (url.getProtocol (),
                                        url.getHost (),
-                                       properties.getPropertyInt ("bank_port_map"),
+                                       getPropertyInt ("bank_port_map"),
                                        url.getFile ()).toExternalForm ();
               }
             else
               {
                 payment_url = bank_url;
               }
-            web_crypto = properties.getPropertyBoolean ("web_crypto");
+            web_crypto = getPropertyBoolean ("web_crypto");
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
-            card_font = properties.getPropertyString ("card_font");
-            key_password = properties.getPropertyString ("key_password");
-            bank_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_eecert")), Init.key_password);
-            merchant_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("merchant_eecert")), Init.key_password);
-            payment_root = getRootCertificate (properties.getPropertyString ("payment_root"));
-            merchant_root = getRootCertificate (properties.getPropertyString ("merchant_root"));
+            card_font = getPropertyString ("card_font");
+            key_password = getPropertyString ("key_password");
+            bank_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_eecert")), Init.key_password);
+            merchant_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("merchant_eecert")), Init.key_password);
+            payment_root = getRootCertificate (getPropertyString ("payment_root"));
+            merchant_root = getRootCertificate (getPropertyString ("merchant_root"));
             bank_encryption_key = new JWK (CertificateUtil.getCertificateFromBlob (
                                       ArrayUtil.getByteArrayFromInputStream ( 
                                           Init.class.getResourceAsStream (
-                                              properties.getPropertyString ("bank_encryptionkey")))).getPublicKey ());
-            bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_decryptionkey")), Init.key_password);
-            client_root = getRootCertificate (properties.getPropertyString ("bank_client_root"));
-            KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (properties.getPropertyString ("bank_client_eecert")), Init.key_password);
+                                              getPropertyString ("bank_encryptionkey")))).getPublicKey ());
+            bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_decryptionkey")), Init.key_password);
+            client_root = getRootCertificate (getPropertyString ("bank_client_root"));
+            KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_client_eecert")), Init.key_password);
             X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
             client_eecert = Base64URL.encode (cert.getEncoded ());
             cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")

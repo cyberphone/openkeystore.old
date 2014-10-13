@@ -74,7 +74,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
             transact.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             HTTPSWrapper https_wrapper = new HTTPSWrapper ();
             https_wrapper.setRequireSuccess (true);
-            https_wrapper.makePostRequest (auth_url, transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+            https_wrapper.makePostRequest (auth_url, transact.serializeJSONObject (JSONOutputFormats.NORMALIZED));
             authorized_result = Messages.parseBaseMessage (Messages.TRANSACTION_RESPONSE,
                                                            JSONParser.parse (https_wrapper.getData ()));
             logger.info ("Authorized Result:\n" + new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
@@ -87,7 +87,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                 JSONObjectReader copy = authorized_result.getObject (PAYMENT_REQUEST_JSON);
                 payment_request = PaymentRequest.parseJSONData (copy);
                 copy.getSignature ();                   // Just to keep the parser happy...
-                if (!ArrayUtil.compare (HashAlgorithms.SHA256.digest (new JSONObjectWriter (copy).serializeJSONObject (JSONOutputFormats.CANONICALIZED)),
+                if (!ArrayUtil.compare (HashAlgorithms.SHA256.digest (new JSONObjectWriter (copy).serializeJSONObject (JSONOutputFormats.NORMALIZED)),
                                         request_hash))
                   {
                     throw new IOException ("Request copy mis-match");
@@ -110,7 +110,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                          payment_request,
                          card_type, 
                          reference_pan,
-                         new String (transact.serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"),
-                         authorized_result == null ? "N/A" : new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.CANONICALIZED), "UTF-8"));
+                         new String (transact.serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8"),
+                         authorized_result == null ? "N/A" : new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8"));
       }
   }
