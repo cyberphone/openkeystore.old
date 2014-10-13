@@ -1532,8 +1532,8 @@ public class ServerState implements Serializable
             // Write key attestation data
             attestation.addString (gpk.id);
             attestation.addArray (gpk.public_key.getEncoded ());
-             if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
-                                     kp.attestation = gpk.attestation))
+            if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
+                                    kp.attestation = gpk.attestation))
               {
                 ServerState.bad ("Attestation failed for key id:" + gpk.id);
               }
