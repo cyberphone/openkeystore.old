@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 public enum JSONOutputFormats 
   {
-    CANONICALIZED     (false, false, false), 
+    NORMALIZED        (false, false, false), 
     JS_STRING         (false, true , false),
     PRETTY_JS_STRING  (true , true , false),
     PRETTY_PRINT      (true , false, false),

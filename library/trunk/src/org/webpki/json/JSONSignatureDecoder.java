@@ -93,7 +93,7 @@ public class JSONSignatureDecoder implements Serializable
     
     String algorithm_string;
     
-    byte[] canonicalized_data;
+    byte[] normalized_data;
     
     byte[] signature_value;
     
@@ -132,7 +132,7 @@ public class JSONSignatureDecoder implements Serializable
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
         JSONValue save = signature.root.properties.get (SIGNATURE_VALUE_JSON);
         signature.root.properties.remove (SIGNATURE_VALUE_JSON);
-        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.root);
+        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);
         signature.root.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {
@@ -298,7 +298,7 @@ public class JSONSignatureDecoder implements Serializable
           {
             Signature sig = Signature.getInstance (algorithm.getJCEName ());
             sig.initVerify (public_key);
-            sig.update (canonicalized_data);
+            sig.update (normalized_data);
             checkVerification (sig.verify (signature_value));
           }
         catch (GeneralSecurityException e)

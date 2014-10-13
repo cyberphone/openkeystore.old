@@ -139,7 +139,7 @@ public class Verify
       {
         if (argc.length != 1 && argc.length != 2)
           {
-            System.out.println ("\ninstance-document-file [canonicalize-debug-file|-rnnnn]");
+            System.out.println ("\ninstance-document-file [normalize-debug-file|-rnnnn]");
             System.exit (0);
           }
         try
@@ -153,7 +153,7 @@ public class Verify
                   }
                 else
                   {
-                    JSONObjectWriter.setCanonicalizationDebugFile (argc[1]);
+                    JSONObjectWriter.setNormalizationDebugFile (argc[1]);
                   }
               }
             while (count++ < repeat)

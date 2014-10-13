@@ -45,14 +45,14 @@ import org.webpki.util.ISODateTime;
 /**
  * Writes formatted JSON data to a DOM-like tree.
  * <p>
- * It also performs canonicalization fur usage with JCS (Javascript Cleatexy Signatures).
+ * It also performs normalization for usage with JCS (Javascript Clear-text Signatures).
  * 
  */
 public class JSONObjectWriter implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    static String canonicalization_debug_file;
+    static String normalization_debug_file;
 
     static final int STANDARD_INDENT = 2;
 
@@ -354,7 +354,7 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (root)));
+        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
         return this;
       }
     
@@ -796,14 +796,14 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
+    static byte[] getNormalizedSubset (JSONObject signature_object_in) throws IOException
       {
         JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
-        byte[] result = writer.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
-        if (canonicalization_debug_file != null)
+        byte[] result = writer.serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        if (normalization_debug_file != null)
           {
-            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
-            ArrayUtil.writeFile (canonicalization_debug_file,
+            byte[] other = ArrayUtil.readFile (normalization_debug_file);
+            ArrayUtil.writeFile (normalization_debug_file,
                                  ArrayUtil.add (other, 
                                                 new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
           }
@@ -847,10 +847,10 @@ import org.webpki.json.JSONSignatureDecoder;
         return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
       }
   
-    public static void setCanonicalizationDebugFile (String file) throws IOException
+    public static void setNormalizationDebugFile (String file) throws IOException
       {
-        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
-        canonicalization_debug_file = file;
+        ArrayUtil.writeFile (file, "Normalization Debug Output".getBytes ("UTF-8"));
+        normalization_debug_file = file;
       }
 
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException

@@ -96,7 +96,7 @@ public class JCSSample
                 throw new IOException ("Output file arg missing");
               }
             CustomCryptoProvider.conditionalLoad ();
-            JSONObjectWriter.setCanonicalizationDebugFile (argc[0]);
+            JSONObjectWriter.setNormalizationDebugFile (argc[0]);
             String unormalized_json = 
               "{\n" +
               "  \"Now\": \"2014-09-16T10:25:17Z\",\n" +

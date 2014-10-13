@@ -481,7 +481,7 @@ public class JSONTest
       {
         JSONObjectWriter ow = new JSONObjectWriter ();
         ow.setArray ("arr").setString ("f").setBoolean (false);
-        JSONObjectReader or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+        JSONObjectReader or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.NORMALIZED));
         try
           {
             or.getStringArray ("arr");
@@ -493,7 +493,7 @@ public class JSONTest
           }
         ow = new JSONObjectWriter ();
         ow.setArray ("arr").setString ("f").setString ("hgh");
-        or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+        or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.NORMALIZED));
         assertTrue (or.getStringArray ("arr").length == 2);
       }
 
@@ -718,8 +718,8 @@ public class JSONTest
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
         assertTrue ("Public key jcs",
-             ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.CANONICALIZED),
-                                new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+             ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.hasProperty (JSONSignatureDecoder.RSA_JSON);
         pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
@@ -757,17 +757,17 @@ public class JSONTest
         JSONArrayWriter aw = ow2.setArray ("Arr");
         aw.setInt (2);
         aw.setString ("Blah");
-        byte[] json = ow.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
+        byte[] json = ow.serializeJSONObject (JSONOutputFormats.NORMALIZED);
         ow = new JSONObjectWriter ();
         ow.setString ("Yes", "No");
         ow2 = new JSONObjectWriter ();
         aw = ow2.setArray ("Arr");
         aw.setInt (2);
         aw.setString ("Blah");
-        assertTrue ("Writer added", ArrayUtil.compare (json, ow.setObject ("Yay", ow2).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        assertTrue ("Writer added", ArrayUtil.compare (json, ow.setObject ("Yay", ow2).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader or = JSONParser.parse (json).getObject ("Yay");
         ow = new JSONObjectWriter ();
         ow.setString ("Yes", "No");
-        assertTrue ("Reader added", ArrayUtil.compare (json, ow.setObject ("Yay", or).serializeJSONObject (JSONOutputFormats.CANONICALIZED)));
+        assertTrue ("Reader added", ArrayUtil.compare (json, ow.setObject ("Yay", or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
       }
   }
