@@ -21,7 +21,7 @@
 
 org.webpki.json.JSONOutputFormats = 
 {
-    CANONICALIZED:
+    NORMALIZED:
     {
     },
     JAVASCRIPT_STRING:

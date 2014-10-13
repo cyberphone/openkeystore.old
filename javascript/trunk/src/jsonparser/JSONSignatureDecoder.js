@@ -57,7 +57,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
         }
     }
     signature.root.property_list = new_list;
-    this._canonicalized_data = org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (rd.root);
+    this._normalized_data = org.webpki.json.JSONObjectWriter._getNormalizedSubset (rd.root);
     signature.root.property_list = save;
 };
 
@@ -158,9 +158,9 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
          rd.getBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
-/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
+/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getNormalizedData = function ()
 {
-    return this._canonicalized_data;
+    return this._normalized_data;
 };
 
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureValue = function ()

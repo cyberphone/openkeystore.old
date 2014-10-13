@@ -89,7 +89,7 @@ function myVerifier (signer)
 //        console.debug (getSignatureAlgorithm ());
 //        AntCrypto.verify (signature_decoder.getSignatureAlgorithm ())
     }
-    return AntCrypto.verifySignature (org.webpki.util.Base64URL.encode (signature_decoder.getCanonicalizedData ()),
+    return AntCrypto.verifySignature (org.webpki.util.Base64URL.encode (signature_decoder.getNormalizedData ()),
                                       org.webpki.util.Base64URL.encode (signature_decoder.getSignatureValue ()),
                                       signature_decoder.getSignatureAlgorithm (),
                                       signature_key);
@@ -127,8 +127,8 @@ function signatureTest (signature_type, algorithm)
         }
         for (var i = 0; i < got.length; i++)
         {
-            if (new org.webpki.json.JSONObjectWriter (got[i]).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED) !=
-                extension_objects[i].serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED))
+            if (new org.webpki.json.JSONObjectWriter (got[i]).serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED) !=
+                extension_objects[i].serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED))
             {
                 throw "Mismatch in extensions";
             }

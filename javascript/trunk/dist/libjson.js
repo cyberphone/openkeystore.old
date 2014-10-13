@@ -662,7 +662,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     }
 };
 
-org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = false;
+org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
     
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
@@ -878,7 +878,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
         this.signature_writer._setProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON,
                                             new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     }
-    return org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (this.root);
+    return org.webpki.json.JSONObjectWriter._getNormalizedSubset (this.root);
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
@@ -1326,13 +1326,13 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
 };
 
-/* static Uint8Array */org.webpki.json.JSONObjectWriter._getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
+/* static Uint8Array */org.webpki.json.JSONObjectWriter._getNormalizedSubset = function (/*JSONObject */signature_object_in)
 {
     /* JSONObjectWriter */var writer = new org.webpki.json.JSONObjectWriter (signature_object_in);
-    /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
-    if (org.webpki.json.JSONObjectWriter.canonicalization_debug_mode)
+    /* String*/var result = writer.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED);
+    if (org.webpki.json.JSONObjectWriter.normalization_debug_mode)
     {
-        console.debug ("Canonicalization debug:\n" + result);
+        console.debug ("Normalization debug:\n" + result);
     }
     return org.webpki.util.ByteArray.convertStringToUTF8 (result);
 };
@@ -1373,9 +1373,9 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     return new org.webpki.json.JSONObjectWriter (document._root).serializeJSONObject (output_format);
 };
   
-/* public static void */org.webpki.json.JSONObjectWriter.setCanonicalizationDebugMode = function (/* boolean */flag)
+/* public static void */org.webpki.json.JSONObjectWriter.setNormalizationDebugMode = function (/* boolean */flag)
 {
-    org.webpki.json.JSONObjectWriter.canonicalization_debug_mode = flag;
+    org.webpki.json.JSONObjectWriter.normalization_debug_mode = flag;
 };
 
 /* public static string */org.webpki.json.JSONObjectWriter.parseAndFormat = function (/* String */json_string, /* JSONOutputFormats */output_format)
@@ -1389,7 +1389,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
 
 org.webpki.json.JSONOutputFormats = 
 {
-    CANONICALIZED:
+    NORMALIZED:
     {
     },
     JAVASCRIPT_STRING:
@@ -1763,7 +1763,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
         }
     }
     signature.root.property_list = new_list;
-    this._canonicalized_data = org.webpki.json.JSONObjectWriter._getCanonicalizedSubset (rd.root);
+    this._normalized_data = org.webpki.json.JSONObjectWriter._getNormalizedSubset (rd.root);
     signature.root.property_list = save;
 };
 
@@ -1864,9 +1864,9 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "Y";
          rd.getBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON));
 };
 
-/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getCanonicalizedData = function ()
+/* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getNormalizedData = function ()
 {
-    return this._canonicalized_data;
+    return this._normalized_data;
 };
 
 /* public Uint8Array */org.webpki.json.JSONSignatureDecoder.prototype.getSignatureValue = function ()

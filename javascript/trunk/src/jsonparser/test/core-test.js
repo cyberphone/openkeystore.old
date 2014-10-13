@@ -131,7 +131,7 @@ arr_writer
 .setDateTime (now)
 .setDouble (double_trouble);
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
-var json1 = newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED);
+var json1 = newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED);
 console.debug (json1);
 var reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 reader.scanAway ("nobodycared");
@@ -221,7 +221,7 @@ if (arr_reader.getString () != big_string ||
     throw "ARRAY";
 }
 
-if (newobjec.createContainerObject ("Keeper").serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)
+if (newobjec.createContainerObject ("Keeper").serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)
         != ('{"Keeper":' + json1 + '}'))
 {
     throw "Container";

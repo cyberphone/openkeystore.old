@@ -8,9 +8,9 @@ function deserializeTest (spki, jcs)
         throw "Reading JCS key failed";
     }
     /* JSONObjectWriter */var ow = new org.webpki.json.JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
-    if (ow.setPublicKey (spki_bin).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)
+    if (ow.setPublicKey (spki_bin).serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)
                  != 
-        new org.webpki.json.JSONObjectWriter (or).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED))
+        new org.webpki.json.JSONObjectWriter (or).serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED))
     {
         throw "Writing Public key failed";
     }
