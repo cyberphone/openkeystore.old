@@ -5,7 +5,8 @@
   <property name="packimage_dir" value="packaged-images"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
   
-  <property name="application" value="WebCryptoPlusPlus.war"/>
+  <property name="appcorename" value="WebCryptoPlusPlus"/>
+  <property name="application" value="${appcorename}.war"/>
   
   <property name="keypassword" value="foo123"/>
   <property name="keyfilext" value=".p12"/>
@@ -23,8 +24,6 @@
   <property name="clientkey_rsa" value="mybank-client-key-rsa"/>
   <property name="clientkey_ec" value="mybank-client-key-ec"/>
   
-  <property name="temp_dir" value=".tmp"/>
-  <property name="dist_dir" value="dist"/>
   <property name="debug" value="on"/>
   <property environment="env"/>
   <property name="third_party_jars" location="../resources/third-party-jars"/>
@@ -47,13 +46,24 @@
     <!-- 
 	<property name="mobilra-enroll-proxy-port" refid="mobilra-enroll-proxy-port-id"/>
 	 -->
-
+	<resources id="wcpp_application.xml">
+<string><![CDATA[    <!-- WebCrypto++ Demo -->
+    <module>
+        <web>
+            <web-uri>${application}</web-uri>
+            <context-root>/${appcorename}</context-root>
+        </web>
+    </module>
+</application>]]></string>
+    </resources>
+  <property name="ejbca-app-xml-mod" refid="wcpp_application.xml"/>
+	
   <condition property="storetype" value="PKCS12" else="JKS">
     <matches pattern=".*\.p12$" string="${keyfilext}"/>
   </condition>
 
   <target name="help">
-      <echo message="build nowebcrypto webcrypto webcrypto-ecbank webcrypto-ecclient mobilepki createcerts"/>
+      <echo message="build nowebcrypto webcrypto -Dlocalhost=0 -Decclient=0 -Decbank=0  mobilepki createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -64,11 +74,18 @@
     <fail message="CATALINA_HOME must be set to environment!" unless="tomcat_app_root_set"/>
 
     <!-- Set path to application.  -->
-    <property name="app_path" value="${env.CATALINA_HOME}/webpki/${application}.war"/>
-   </target>
+    <property name="dist_dir" value="dist"/>
+  </target>
+
+  <target name="_delete_tmp" unless="${ejbca.tmp.path}">
+    <delete dir="${temp_dir}"/>
+    <mkdir dir="${temp_dir}"/>
+  </target>
 
   <target name="_build">
-	<path id="compile.classpath">
+    <property name="temp_dir" value=".tmp"/>
+    <antcall target="_delete_tmp"/>
+    <path id="compile.classpath">
 	  <fileset dir="${library.dir}">
         <include name="*.jar"/>
      </fileset>
@@ -76,8 +93,7 @@
 	    <include name="*.jar"/>
       </fileset>
 	</path>
-    <delete dir="${temp_dir}"/>
-    <mkdir dir="${temp_dir}"/>
+	<property name="compile_classpath" refid="compile.classpath"/>
     <fixcrlf srcdir="${src_dir}"
        tab="remove"
        tablength="4"
@@ -90,19 +106,20 @@
            target="${javaversion}"
            srcdir="${src_dir}"
            destdir="${temp_dir}"
-           classpathref="compile.classpath"
+           classpath="${compile_classpath}"
            includeAntRuntime="false"/>
     <property name="bank.port.map" value=""/>
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
     <property name="clientkey" value="${clientkey_rsa}"/>
     <property name="force.bouncycastle" value="true"/>
     <property name="third.party.jars" value="${third_party_jars}"/>
+    <property name="webpki.jars" value="${library.dir}"/>
     <replace file="${temp_dir}/web.xml">
 	  <replacefilter token="@force-bouncycastle@" value="${force.bouncycastle}"/>
       <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
-	  <replacefilter token="@bank-url@" value="${bank.url}"/>
-	  <replacefilter token="@merchant-url@" value="${merchant.url}"/>
+	  <replacefilter token="@bank-url@" value="${bank.host}/${appcorename}"/>
+	  <replacefilter token="@merchant-url@" value="${merchant.host}/${appcorename}/merchant"/>
 	  <replacefilter token="@card-font@" value="${card.font}"/>
 	  <replacefilter token="@web-crypto@" value="${web.crypto}"/>
 	  <replacefilter token="@key-password@" value="${keypassword}"/>
@@ -122,7 +139,7 @@
       <lib dir="${third.party.jars}">
          <include name="bcprov-*.jar"/>
       </lib>
-      <lib dir="${library.dir}">
+      <lib dir="${webpki.jars}">
          <include name="webpki.org-libext*.jar"/>
          <include name="webpki.org-webutil*.jar"/>
       </lib>
@@ -144,10 +161,10 @@
      <condition property="security_constraints" value="${local_sc}" else="">
        <isset property="localhost"/>
      </condition>
-     <condition property="bank_host" value="https://localhost:8443" else="http://mybank.com:8080">
+     <condition property="bank_host" value="https://localhost:8442" else="http://mybank.com:8080">
        <isset property="localhost"/>
      </condition>
-     <condition property="merchant_host" value="https://localhost:8443" else="http://merchant.com:8080">
+     <condition property="merchant_host" value="https://localhost:8442" else="http://merchant.com:8080">
        <isset property="localhost"/>
      </condition>
      <condition property="encryptionkey" value="${encryptionkey_ec}">
@@ -158,8 +175,8 @@
      </condition>
      <antcall target="_build">
        <param name="security.constraints" value="${security_constraints}"/>
-       <param name="bank.url" value="${bank_host}/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="${merchant_host}/WebCryptoPlusPlus/merchant"/>
+       <param name="bank.host" value="${bank_host}"/>
+       <param name="merchant.host" value="${merchant_host}"/>
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.7"/>
@@ -168,27 +185,58 @@
     <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>
   
-  <!-- mobilepki -->
-  <target name="mobilepki">
+  <!-- mobilepki local for checking compilability -->
+  <target name="mobilepki-local">
+    <property name="dist_dir" value="dist"/>
     <property name="force.bouncycastle" value="false"/>
     <property name="bank.port.map" value="8442"/>
     <property name="third.party.jars" value="empty.lib"/>
+    <property name="webpki.jars" value="empty.lib"/>
+    <property name="bank_host" value="https://mobilepki.org"/>
+    <property name="merchant_host" value="https://test.webpki.org"/>
     <antcall target="_build">
        <param name="security.constraints" refid="security_constraint"/>
-       <param name="bank.url" value="https://mobilepki.org/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="https://test.webpki.org/WebCryptoPlusPlus/merchant"/>
+       <param name="bank.host" value="${bank_host}"/>
+       <param name="merchant.host" value="${merchant_host}"/>
        <param name="card.font" value="DejaVue"/>
        <param name="web.crypto" value="true"/>
        <param name="javaversion" value="1.6"/>
        <param name="library.dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
     </antcall>
   </target>
+
+  <!-- mobilepki using EJBCA plugin mode -->
+  <target name="mobilepki-ejbca">
+     <echo message="WebCrypto++ &quot;mobilepki.org&quot; Demo Plugin"/>
+     <property name="dist_dir" value="${ejbca.gen.path}"/>
+     <path id="compile.classpath.ejbca">
+	    <fileset dir="${plugin.ejbca.ant.custom.enrollment_plugin_directory}/lib.common">
+           <include name="*.jar"/>
+        </fileset>
+        <pathelement path="${ejbca.classpath}"/>
+	 </path>
+     <property name="compile_classpath" refid="compile.classpath.ejbca"/>
+     <property name="temp_dir" value="${ejbca.tmp.path}"/>
+     <antcall target="mobilepki-local"/>
+     <!-- Update application.xml -->
+     <replace file="${ejbca.app.xml}" value="${ejbca-app-xml-mod}">
+	    <replacetoken><![CDATA[</application>]]></replacetoken>
+     </replace>
+  </target>
+  
+  <target name="localhost-ejbca">
+     <echo message="WebCrypto++ &quot;localhost&quot; Demo Plugin"/>
+     <property name="bank_host" value="https://localhost:8442"/>
+     <property name="merchant_host" value="https://localhost:8442"/>
+     <property name="bank.port.map" value=""/>
+     <antcall target="mobilepki-ejbca"/>
+  </target>
   
   <target name="build">
     <antcall target="_build">
        <param name="security.constraints" value=""/>
-       <param name="bank.url" value="http://mybank.com:8080/WebCryptoPlusPlus"/>
-       <param name="merchant.url" value="http://merchant.com:8080/WebCryptoPlusPlus/merchant"/>
+       <param name="bank.host" value="http://mybank.com:8080"/>
+       <param name="merchant.host" value="http://merchant.com:8080"/>
        <param name="card.font" value="Arial Unicode MS"/>
        <param name="web.crypto" value="false"/>
        <param name="javaversion" value="1.7"/>
