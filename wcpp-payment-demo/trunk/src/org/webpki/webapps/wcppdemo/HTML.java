@@ -184,7 +184,7 @@ public class HTML implements BaseProperties
                    "are read from the user's local credential-store.</td></tr>" +
                    "<tr><td>By applying <span style=\"color:red\">3D Secure</span> like methods and <span style=\"color:red\">EMV tokenization</span>, there is no need for " +
                    "handing over static credit-card information to merchants.</td></tr>" +
-                   "<tr><td style=\"text-align:left\">For protecting the user's privacy, <span style=\"color:red\">the user's authorization-data is encrypted</span> and only readable " +
+                   "<tr><td style=\"text-align:left\">For protecting the user's privacy, <span style=\"color:red\">user-related data is encrypted</span> and only readable " +
                    "by the payment-provider who issued the specific payment card.</td></tr>" +
                    "<tr><td style=\"text-align:left\">Although the demo is <i>partially</i> a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
                    "the IFRAME solution and cross-domain communication using <code>postMessage()</code> should be pretty close to that of a real system.</td></tr>" +

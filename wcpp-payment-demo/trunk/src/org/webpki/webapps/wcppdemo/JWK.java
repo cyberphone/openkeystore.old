@@ -24,6 +24,8 @@ import org.webpki.util.Base64URL;
 
 public class JWK implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     String jwk;
     
     String key_type = "RSA";

@@ -85,11 +85,12 @@
   <target name="_build">
     <property name="temp_dir" value=".tmp"/>
     <antcall target="_delete_tmp"/>
+    <property name="third.party.jars" value="${third_party_jars}"/>
     <path id="compile.classpath">
 	  <fileset dir="${library.dir}">
         <include name="*.jar"/>
      </fileset>
-     <fileset dir="${third_party_jars}">
+     <fileset dir="${third.party.jars}">
 	    <include name="*.jar"/>
       </fileset>
 	</path>
@@ -112,7 +113,6 @@
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
     <property name="clientkey" value="${clientkey_rsa}"/>
     <property name="bouncycastle.first" value="true"/>
-    <property name="third.party.jars" value="${third_party_jars}"/>
     <property name="webpki.jars" value="${library.dir}"/>
     <replace file="${temp_dir}/web.xml">
 	  <replacefilter token="@bouncycastle-first@" value="${bouncycastle.first}"/>
