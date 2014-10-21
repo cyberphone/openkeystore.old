@@ -42,11 +42,11 @@ public class CardServlet extends HttpServlet
             card_entry.card_type = card_type;
             card_entry.user = user;
             card_entry.pin = pin;
-            card_entry.authorization_url = Init.bank_url + "/transact";
-            card_entry.bank_encryption_key = Init.bank_encryption_key;
-            card_entry.client_key = Init.client_private_key;
-            card_entry.client_certificate = Init.client_eecert;
-            card_entry.cert_data = Init.cert_data;
+            card_entry.authorization_url = WCPPService.bank_url + "/transact";
+            card_entry.bank_encryption_key = WCPPService.bank_encryption_key;
+            card_entry.client_key = WCPPService.client_private_key;
+            card_entry.client_certificate = WCPPService.client_eecert;
+            card_entry.cert_data = WCPPService.cert_data;
             byte[] pan = new byte[16];
             new SecureRandom ().nextBytes (pan);
             StringBuffer pan_text = new StringBuffer ();
@@ -68,7 +68,7 @@ public class CardServlet extends HttpServlet
                 do
                   {
                     g.setColor (card_type.font_color); 
-                    g.setFont (new Font (Init.card_font, Font.TRUETYPE_FONT, font_size));
+                    g.setFont (new Font (WCPPService.card_font, Font.TRUETYPE_FONT, font_size));
                     g.setRenderingHint (RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g.setRenderingHint (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g.setRenderingHint (RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

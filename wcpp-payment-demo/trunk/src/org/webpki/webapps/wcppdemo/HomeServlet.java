@@ -31,7 +31,7 @@ public class HomeServlet extends HttpServlet
     
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        if (Init.web_crypto)
+        if (WCPPService.web_crypto)
           {
             HttpSession session = request.getSession ();
             session.setAttribute (WEB_CRYPTO_ENABLED, new Boolean (cryptoEnabled ()));

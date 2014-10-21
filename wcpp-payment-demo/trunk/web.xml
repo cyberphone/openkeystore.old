@@ -95,7 +95,7 @@
     </context-param>
     
     <listener>
-        <listener-class>org.webpki.webapps.wcppdemo.Init</listener-class>
+        <listener-class>org.webpki.webapps.wcppdemo.WCPPService</listener-class>
      </listener>
 
     <servlet>

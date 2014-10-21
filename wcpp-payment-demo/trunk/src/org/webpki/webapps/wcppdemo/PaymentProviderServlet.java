@@ -52,7 +52,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
     
     private X509Certificate verifyMerchantSignature (JSONObjectReader signed_object) throws IOException
       {
-        VerifierInterface verifier = new KeyStoreVerifier (Init.merchant_root);
+        VerifierInterface verifier = new KeyStoreVerifier (WCPPService.merchant_root);
         signed_object.getSignature ().verify (new JSONX509Verifier (verifier));
         return verifier.getSignerCertificatePath ()[0];
       }
@@ -86,12 +86,12 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()))
                   {
                     PublicKey received_public_key = encrypted_key.getPublicKey ();
-                    if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
+                    if (!ArrayUtil.compare (WCPPService.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
                       {
                         throw new IOException ("Unexpected encryption key:\n" + received_public_key.toString ());
                       }
                     Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJCEName ());
-                    cipher.init (Cipher.DECRYPT_MODE, Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
+                    cipher.init (Cipher.DECRYPT_MODE, WCPPService.bank_decryption_key.getKey ("mykey", WCPPService.key_password.toCharArray ()));
                     raw_aes_key = cipher.doFinal (encrypted_key.getBinary (CIPHER_TEXT_JSON));
                   }
                 else
@@ -101,13 +101,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                         throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + key_encryption_algorithm);
                       }
                     PublicKey received_payment_provider_key = encrypted_key.getObject (PAYMENT_PROVIDER_KEY_JSON).getPublicKey ();
-                    if (!ArrayUtil.compare (Init.bank_encryption_key.getEncoded (), received_payment_provider_key.getEncoded ()))
+                    if (!ArrayUtil.compare (WCPPService.bank_encryption_key.getEncoded (), received_payment_provider_key.getEncoded ()))
                       {
                         throw new IOException ("Unexpected encryption key:\n" + received_payment_provider_key.toString ());
                       }
                     PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_CLIENT_KEY_JSON).getPublicKey ();
                     KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
-                    key_agreement.init (Init.bank_decryption_key.getKey ("mykey", Init.key_password.toCharArray ()));
+                    key_agreement.init (WCPPService.bank_decryption_key.getKey ("mykey", WCPPService.key_password.toCharArray ()));
                     key_agreement.doPhase (ephemeral_sender_key, true);
                     byte[] Z = key_agreement.generateSecret ();
                     JSONObjectReader concat = encrypted_key.getObject (KEY_DERIVATION_METHOD_JSON);
@@ -126,7 +126,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
                 auth_data = JSONParser.parse (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
                 logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
-                VerifierInterface verifier = new KeyStoreVerifier (Init.client_root);
+                VerifierInterface verifier = new KeyStoreVerifier (WCPPService.client_root);
                 auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
               }
             else
@@ -170,9 +170,9 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             result.setString (REFERENCE_PAN_JSON, payee_pan.toString ());
             result.setString (TRANSACTION_ID_JSON, "#" + transaction_id++);
             result.setDateTime (DATE_TIME_JSON, new Date (), true);
-            KeyStoreSigner signer = new KeyStoreSigner (Init.bank_eecert_key, null);
+            KeyStoreSigner signer = new KeyStoreSigner (WCPPService.bank_eecert_key, null);
             signer.setExtendedCertPath (true);
-            signer.setKey (null, Init.key_password);
+            signer.setKey (null, WCPPService.key_password);
             result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();

@@ -31,9 +31,9 @@ import org.webpki.util.Base64URL;
 
 import org.webpki.webutil.InitPropertyReader;
 
-public class Init extends InitPropertyReader implements ServletContextListener
+public class WCPPService extends InitPropertyReader implements ServletContextListener
   {
-    static Logger logger = Logger.getLogger (Init.class.getName ());
+    static Logger logger = Logger.getLogger (WCPPService.class.getName ());
     
     static String bank_url;
     static String payment_url;
@@ -63,7 +63,7 @@ public class Init extends InitPropertyReader implements ServletContextListener
 
     private String getDataURI (String main, String extension) throws IOException
       {
-        byte[] image = ArrayUtil.getByteArrayFromInputStream (Init.class.getResourceAsStream (main + "." + extension));
+        byte[] image = ArrayUtil.getByteArrayFromInputStream (WCPPService.class.getResourceAsStream (main + "." + extension));
         return "data:image/" + extension + ";base64," + new Base64 (false).getBase64StringFromBinary (image);
       }
     
@@ -74,7 +74,7 @@ public class Init extends InitPropertyReader implements ServletContextListener
         ks.setCertificateEntry ("mykey",
                                 CertificateUtil.getCertificateFromBlob (
                                     ArrayUtil.getByteArrayFromInputStream ( 
-                                        Init.class.getResourceAsStream (resource_name))));        
+                                        WCPPService.class.getResourceAsStream (resource_name))));        
         return ks;
       }
 
@@ -109,17 +109,17 @@ public class Init extends InitPropertyReader implements ServletContextListener
             working_data_uri = getDataURI ("working", "gif");
             card_font = getPropertyString ("card_font");
             key_password = getPropertyString ("key_password");
-            bank_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_eecert")), Init.key_password);
-            merchant_eecert_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("merchant_eecert")), Init.key_password);
+            bank_eecert_key = KeyStoreReader.loadKeyStore (WCPPService.class.getResourceAsStream (getPropertyString ("bank_eecert")), WCPPService.key_password);
+            merchant_eecert_key = KeyStoreReader.loadKeyStore (WCPPService.class.getResourceAsStream (getPropertyString ("merchant_eecert")), WCPPService.key_password);
             payment_root = getRootCertificate (getPropertyString ("payment_root"));
             merchant_root = getRootCertificate (getPropertyString ("merchant_root"));
             bank_encryption_key = new JWK (CertificateUtil.getCertificateFromBlob (
                                       ArrayUtil.getByteArrayFromInputStream ( 
-                                          Init.class.getResourceAsStream (
+                                          WCPPService.class.getResourceAsStream (
                                               getPropertyString ("bank_encryptionkey")))).getPublicKey ());
-            bank_decryption_key = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_decryptionkey")), Init.key_password);
+            bank_decryption_key = KeyStoreReader.loadKeyStore (WCPPService.class.getResourceAsStream (getPropertyString ("bank_decryptionkey")), WCPPService.key_password);
             client_root = getRootCertificate (getPropertyString ("bank_client_root"));
-            KeyStore client = KeyStoreReader.loadKeyStore (Init.class.getResourceAsStream (getPropertyString ("bank_client_eecert")), Init.key_password);
+            KeyStore client = KeyStoreReader.loadKeyStore (WCPPService.class.getResourceAsStream (getPropertyString ("bank_client_eecert")), WCPPService.key_password);
             X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
             client_eecert = Base64URL.encode (cert.getEncoded ());
             cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
@@ -130,9 +130,9 @@ public class Init extends InitPropertyReader implements ServletContextListener
               .append (cert.getSubjectX500Principal ().getName ())
               .append ("'}").toString ();
             client_private_key = cert.getPublicKey () instanceof RSAPublicKey ? 
-                  new JWK (client.getKey ("mykey", Init.key_password.toCharArray ()))
+                  new JWK (client.getKey ("mykey", WCPPService.key_password.toCharArray ()))
                                     :
-                  new JWK ((ECPublicKey)cert.getPublicKey (), (ECPrivateKey)client.getKey ("mykey", Init.key_password.toCharArray ()));
+                  new JWK ((ECPublicKey)cert.getPublicKey (), (ECPrivateKey)client.getKey ("mykey", WCPPService.key_password.toCharArray ()));
             logger.info ("WebCrypto++ Payment Demo - " + (web_crypto ? "WebCrypto ClientKey=" + client_private_key.getKeyType () + " BankKey=" +  bank_encryption_key.getKeyType () : "Standard Mode") + " Successfully Initiated");
           }
         catch (Exception e)
