@@ -52,7 +52,10 @@ class InternalObjectStream extends ObjectInputStream
     
     static Object readObject (byte[] data, Object owner) throws IOException, ClassNotFoundException
       {
-        return new InternalObjectStream (new ByteArrayInputStream (data), owner).readObject ();
+        InternalObjectStream ios = new InternalObjectStream (new ByteArrayInputStream (data), owner);
+        Object object = ios.readObject ();
+        ios.close ();
+        return object;
       }
     
     static byte[] writeObject (Object object) throws IOException

@@ -16,6 +16,9 @@
  */
 package org.webpki.tools;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import java.util.Vector;
@@ -163,20 +166,6 @@ public class XML2HTMLPrinter
         int size ()
           {
             return items.size ();
-          }
-
-        boolean hasName (String name) throws IOException
-          {
-            int i = items.size ();
-            while (--i >= 0)
-              {
-                NameValue nv = items.elementAt (i);
-                if (nv.name.equals (name))
-                  {
-                    return true;
-                  }
-              }
-            return false;
           }
 
         NameValue addNameValue () throws IOException
@@ -783,10 +772,11 @@ public class XML2HTMLPrinter
             System.out.println ("XML2HTMLPrinter [-t] xmldata\n     -t  formatted for terminal view");
             System.exit (3);
           }
-        java.io.File f = new java.io.File (argv[argv.length - 1]);
-        java.io.DataInputStream in = new java.io.DataInputStream (new java.io.FileInputStream (f));
+        File f = new File (argv[argv.length - 1]);
+        DataInputStream in = new DataInputStream (new FileInputStream (f));
         byte msg[] = new byte[(int)f.length ()];
         in.readFully (msg);
+        in.close ();
         String s = XML2HTMLPrinter.convert (new String (msg, "UTF-8"),
                                                      argv.length == 2 ? TERMINAL_MODE : HTML_MODE,
                                                      argv.length == 1);

@@ -155,6 +155,7 @@ public class DerDecoder implements ASN1Constants
         DataInputStream in = new DataInputStream(new FileInputStream (f));
         source = new byte[(int)f.length()];
         in.readFully(source);
+        in.close ();
       }
     
     public static BaseASN1Object decode(String filename) 

@@ -26,7 +26,6 @@ import java.util.GregorianCalendar;
 
 import java.security.cert.X509Certificate;
 import java.security.PublicKey;
-import java.security.GeneralSecurityException;
 
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1Null;

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
 

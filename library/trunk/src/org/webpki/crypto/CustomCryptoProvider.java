@@ -36,7 +36,6 @@ public class CustomCryptoProvider
         boolean loaded = false;
         try
           {
-            @SuppressWarnings("rawtypes")
             Provider bc = (Provider) Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider").newInstance ();
             if (Security.getProvider (bc.getName ()) == null)
               {
