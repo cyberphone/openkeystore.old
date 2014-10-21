@@ -31,7 +31,7 @@ public class AntCrypto
 
     static
     {
-    	CustomCryptoProvider.conditionalLoad ();
+    	CustomCryptoProvider.conditionalLoad (true);
     }
     
     static KeyStore getKeyStore (String algorithm) throws Exception
