@@ -19,6 +19,7 @@ package org.webpki.crypto;
 import java.security.Provider;
 import java.security.Security;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -27,43 +28,62 @@ import java.util.logging.Logger;
 public class CustomCryptoProvider
   {
     private static Logger logger = Logger.getLogger (CustomCryptoProvider.class.getCanonicalName ());
-    
-    private CustomCryptoProvider () {};
 
-    static boolean bc_flag;
-    static
+    private CustomCryptoProvider () {} // No instantiation
+
+    private static boolean loadBouncyCastle (boolean insert_first, boolean require)
       {
+        boolean loaded = false;
         try
           {
             @SuppressWarnings("rawtypes")
-            Class bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
-            try
+            Provider bc = (Provider) Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider").newInstance ();
+            if (Security.getProvider (bc.getName ()) == null)
               {
-                Security.insertProviderAt ((Provider) bc.newInstance (), 1);
-                bc_flag = true;
-                logger.info ("BouncyCastle found and loaded as the first provider");
+                try
+                  {
+                    if (insert_first)
+                      {
+                        Security.insertProviderAt (bc, 1);
+                        logger.info ("BouncyCastle successfully inserted at position #1");
+                      }
+                    else
+                      {
+                        Security.addProvider (bc);
+                        logger.info ("BouncyCastle successfully added to the list of providers");
+                      }
+                  }
+                catch (Exception e)
+                  {
+                    logger.log (Level.SEVERE, "BouncyCastle didn't load");
+                    throw new RuntimeException (e);
+                  }
               }
-            catch (Exception e)
+            else
               {
-                new RuntimeException (e);
+                logger.info ("BouncyCastle was already loaded");
               }
+            loaded = true;
           }
         catch (Exception e)
           {
-            logger.info ("BouncyCastle NOT found");
+            if (require)
+              {
+                logger.log (Level.SEVERE, "BouncyCastle was not found");
+                throw new RuntimeException (e);
+              }
+            logger.info ("BouncyCastle was not found, continue anyway");
           }
+        return loaded;
       }
 
-    public static boolean conditionalLoad ()
+    public static boolean conditionalLoad (boolean insert_first)
       {
-        return bc_flag;
+        return loadBouncyCastle (insert_first, false);
       }
 
-    public static void forcedLoad ()
+    public static void forcedLoad (boolean insert_first)
       {
-        if (!bc_flag)
-          {
-            throw new RuntimeException ("BC missing!");
-          }
+        loadBouncyCastle (insert_first, true);
       }
   }

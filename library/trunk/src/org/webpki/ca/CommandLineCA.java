@@ -1019,7 +1019,7 @@ public class CommandLineCA
         try
           {
             String sun_pkcs12 = KeyStore.getInstance ("PKCS12").getProvider ().getName ();
-            CustomCryptoProvider.forcedLoad ();
+            CustomCryptoProvider.forcedLoad (true);
             CommandLineCA clca = new CommandLineCA ();
             clca.decodeCommandLine (argv);
             clca.certify (sun_pkcs12);

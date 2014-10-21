@@ -47,7 +47,7 @@ public class DemoCode
   {
     static
       {
-        CustomCryptoProvider.forcedLoad ();
+        CustomCryptoProvider.forcedLoad (true);
       }
 
     public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException

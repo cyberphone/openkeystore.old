@@ -95,7 +95,7 @@ public class JCSSample
               {
                 throw new IOException ("Output file arg missing");
               }
-            CustomCryptoProvider.conditionalLoad ();
+            CustomCryptoProvider.conditionalLoad (true);
             JSONObjectWriter.setNormalizationDebugFile (argc[0]);
             String unormalized_json = 
               "{\n" +

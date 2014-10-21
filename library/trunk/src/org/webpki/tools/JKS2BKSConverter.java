@@ -39,7 +39,7 @@ public class JKS2BKSConverter
             System.out.println (JKS2BKSConverter.class.getName () + "  jksfile  bksfile/-same  storepass  keypass");
             System.exit (3);
           }
-        CustomCryptoProvider.forcedLoad ();
+        CustomCryptoProvider.forcedLoad (true);
         KeyStore jks = KeyStore.getInstance ("JKS");
         jks.load (new FileInputStream (argv[0]), argv[2].toCharArray ());
         KeyStore bks = KeyStore.getInstance ("BKS");

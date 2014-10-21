@@ -48,7 +48,7 @@ public class Verify
   {
     static
       {
-        CustomCryptoProvider.conditionalLoad ();
+        CustomCryptoProvider.conditionalLoad (true);
       }
 
     static int count;

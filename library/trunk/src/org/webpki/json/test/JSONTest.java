@@ -86,7 +86,7 @@ public class JSONTest
     @BeforeClass
     public static void openFile () throws Exception
       {
-        CustomCryptoProvider.forcedLoad ();
+        CustomCryptoProvider.forcedLoad (true);
       }
 
     @SuppressWarnings("serial")
@@ -637,7 +637,7 @@ public class JSONTest
       "        {" +
       "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
       "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
-      "          \"Y\": \"_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek\"" +
+      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
       "        }" +
       "    }" +
       "}";
@@ -650,7 +650,7 @@ public class JSONTest
       "        {" +
       "          \"NamedCurve\": \"urn:oid:1.3.132.0.35\"," +
       "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
-      "          \"Y\": \"_nJhyQ20ca7Nn0Zvyiq54FfCAblGK7kuduFBTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek\"" +
+      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
       "        }" +
       "    }" +
       "}";
@@ -724,18 +724,40 @@ public class JSONTest
         boolean rsa_flag = pub_key_object.hasProperty (JSONSignatureDecoder.RSA_JSON);
         pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
         String key_parm = rsa_flag ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
-        byte[] parm_bytes = ArrayUtil.add (new byte[]{0}, pub_key_object.getBinary (key_parm));
+        byte[] parm_bytes = pub_key_object.getBinary (key_parm);
+        boolean must_fail = true;
+        if (rsa_flag)
+          {
+            parm_bytes = ArrayUtil.add (new byte[]{0}, parm_bytes);
+          }
+        else if (parm_bytes[0] == 0)
+          {
+            byte[] pb_new = new byte[parm_bytes.length - 1];
+            for (int i = 0; i < pb_new.length; i++)
+              {
+                pb_new[i] = parm_bytes[i + 1];
+              }
+            parm_bytes = pb_new;
+          }
+        else
+          {
+            must_fail = false;
+          }
         JSONObjectWriter updated_pub_key_object = new JSONObjectWriter (pub_key_object);
         updated_pub_key_object.setupForRewrite (key_parm);
         updated_pub_key_object.setBinary (key_parm, parm_bytes);
         try
           {
             JSONParser.parse (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
-            fail ("Should have failed");
+            assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)
           {
-            checkException (e, "Public key parameters must not contain leading zeroes");
+            assertTrue ("Shouldn't have failed", must_fail);
+            checkException (e, rsa_flag ? 
+                "Public RSA key parameter \"" + JSONSignatureDecoder.MODULUS_JSON + "\" contains leading zeroes" 
+                                        :
+                "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not nomalized");
           }
       }
 

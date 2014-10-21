@@ -75,7 +75,7 @@ public class PKCS12Import
             app_usage = AppUsage.valueOf (argc[6]);
             pin_caching = new Boolean (argc[7]);
           }
-        CustomCryptoProvider.forcedLoad ();
+        CustomCryptoProvider.forcedLoad (true);
         KeyStore ks = KeyStoreReader.loadKeyStore (argc[0], argc[1]);
         Vector<X509Certificate> cert_path = new Vector<X509Certificate> ();
         PrivateKey private_key = null;

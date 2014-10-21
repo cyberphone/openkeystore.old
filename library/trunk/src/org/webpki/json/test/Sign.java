@@ -252,7 +252,7 @@ public class Sign
               {
                 try
                   {
-                    CustomCryptoProvider.conditionalLoad ();
+                    CustomCryptoProvider.conditionalLoad (true);
                     JSONObjectWriter wr = new JSONObjectWriter ();
                     new Sign (action, new Boolean (argc[1])).writeJSONData (wr);
                     ArrayUtil.writeFile (argc[2], wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));

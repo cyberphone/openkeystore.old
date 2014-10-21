@@ -32,7 +32,7 @@ public class AddSignature
   {
     static
       {
-        CustomCryptoProvider.conditionalLoad ();
+        CustomCryptoProvider.conditionalLoad (true);
       }
 
     static enum ACTION {SYM, EC, RSA, X509};

@@ -69,7 +69,7 @@ public class ASN1
               }
             else if (args[0].equals ("we"))
               {
-                CustomCryptoProvider.forcedLoad ();
+                CustomCryptoProvider.forcedLoad (true);
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
                 ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
                 generator.initialize (eccgen, new SecureRandom ());
@@ -78,7 +78,7 @@ public class ASN1
               }
             else if (args[0].equals ("wrs"))
               {
-                CustomCryptoProvider.forcedLoad ();
+                CustomCryptoProvider.forcedLoad (true);
                 KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
                 kpg.initialize (2048);
                 KeyPair key_pair = kpg.generateKeyPair ();

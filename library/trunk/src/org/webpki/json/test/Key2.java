@@ -134,7 +134,7 @@ public class Key2
           }
         try
           {
-            CustomCryptoProvider.conditionalLoad ();
+            CustomCryptoProvider.conditionalLoad (true);
             for (KeyAlgorithms ka : KeyAlgorithms.values ())
               {
                 if (ka.isECKey ())

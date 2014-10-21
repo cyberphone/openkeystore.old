@@ -104,7 +104,7 @@ public class SKSTest
     public static void openFile () throws Exception
       {
         standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
-        bc_loaded = CustomCryptoProvider.conditionalLoad ();
+        bc_loaded = CustomCryptoProvider.conditionalLoad (true);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         if (sks instanceof WSSpecific)
           {

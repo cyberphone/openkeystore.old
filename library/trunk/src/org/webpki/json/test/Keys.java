@@ -58,7 +58,7 @@ public class Keys
 
     static
       {
-        CustomCryptoProvider.conditionalLoad ();
+        CustomCryptoProvider.conditionalLoad (true);
       }
 
     @SuppressWarnings("serial")
