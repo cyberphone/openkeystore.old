@@ -43,9 +43,7 @@
     </security-constraint>
 ]]></string>
     </resources>
-    <!-- 
-	<property name="mobilra-enroll-proxy-port" refid="mobilra-enroll-proxy-port-id"/>
-	 -->
+
 	<resources id="wcpp_application.xml">
 <string><![CDATA[    <!-- WebCrypto++ Demo -->
     <module>
@@ -57,7 +55,7 @@
 </application>]]></string>
     </resources>
   <property name="ejbca-app-xml-mod" refid="wcpp_application.xml"/>
-	
+
   <condition property="storetype" value="PKCS12" else="JKS">
     <matches pattern=".*\.p12$" string="${keyfilext}"/>
   </condition>
