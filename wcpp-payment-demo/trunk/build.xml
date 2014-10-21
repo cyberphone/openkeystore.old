@@ -63,7 +63,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build nowebcrypto webcrypto -Dlocalhost=0 -Decclient=0 -Decbank=0  mobilepki createcerts"/>
+      <echo message="build nowebcrypto webcrypto -Dlocalhost=0 -Decclient=0 -Decbank=0  mobilepki-local zip-distribution createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -111,11 +111,11 @@
     <property name="bank.port.map" value=""/>
     <property name="encryptionkey" value="${encryptionkey_rsa}"/>
     <property name="clientkey" value="${clientkey_rsa}"/>
-    <property name="force.bouncycastle" value="true"/>
+    <property name="bouncycastle.first" value="true"/>
     <property name="third.party.jars" value="${third_party_jars}"/>
     <property name="webpki.jars" value="${library.dir}"/>
     <replace file="${temp_dir}/web.xml">
-	  <replacefilter token="@force-bouncycastle@" value="${force.bouncycastle}"/>
+	  <replacefilter token="@bouncycastle-first@" value="${bouncycastle.first}"/>
       <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@bank-port-map@" value="${bank.port.map}"/>
 	  <replacefilter token="@bank-url@" value="${bank.host}/${appcorename}"/>
@@ -188,7 +188,7 @@
   <!-- mobilepki local for checking compilability -->
   <target name="mobilepki-local">
     <property name="dist_dir" value="dist"/>
-    <property name="force.bouncycastle" value="false"/>
+    <property name="bouncycastle.first" value="false"/>
     <property name="bank.port.map" value="8442"/>
     <property name="third.party.jars" value="empty.lib"/>
     <property name="webpki.jars" value="empty.lib"/>
@@ -337,6 +337,26 @@
   		<include name="temp*"/>
   	  </fileset>
     </delete>    
-    </target>
+  </target>
   
+ <target name="zip-distribution">
+    <fail unless="dd" message="-&#10;
+***************************************************************&#10;
+ You must define a distribution directory using the -D option:&#10;
+ ant zip-distribution -Ddd=the_path_to_the_directory&#10;
+***************************************************************&#10;"/>
+	<echo message="Producing ${appcorename} .zip and .zip.SHA1 files..."/> 
+   	<delete file="${dd}/${appcorename}.zip" failonerror="false"/>
+    <zip destfile="${dd}/${appcorename}.zip">
+      <zipfileset dir="." prefix="${appcorename}">
+       	<exclude name="/**/.*"/>
+        <exclude name="/.tmp/**"/>
+       	<exclude name="**/.settings/**"/>
+       	<exclude name="**/bin/**"/>
+       	<exclude name="dist/**"/>
+      </zipfileset>
+    </zip>
+    <checksum file="${dd}/${appcorename}.zip" fileext=".SHA1" algorithm="sha1" forceOverwrite="yes"/>
+  </target>
+   
 </project>

@@ -6,7 +6,6 @@ import java.net.URL;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.Security;
 
 import java.security.cert.X509Certificate;
 
@@ -29,8 +28,6 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.webutil.InitPropertyReader;
 
@@ -92,14 +89,7 @@ public class Init extends InitPropertyReader implements ServletContextListener
         initProperties (event);
         try 
           {
-            if (getPropertyBoolean ("force_bouncycastle"))
-              {
-                CustomCryptoProvider.forcedLoad ();
-              }
-            else
-              {
-                Security.addProvider (new BouncyCastleProvider ());
-              }
+            CustomCryptoProvider.forcedLoad (getPropertyBoolean ("bouncycastle_first"));
             bank_url = getPropertyString ("bank_url");
             merchant_url = getPropertyString ("merchant_url");
             if (getPropertyString ("bank_port_map").length () > 0)
