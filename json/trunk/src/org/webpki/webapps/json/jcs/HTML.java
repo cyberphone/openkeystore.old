@@ -35,9 +35,7 @@ public class HTML
 	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white} "+
 	    "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica} "+
 	    "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica} "+
-	    "a:link {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
-	    "a:visited {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
-	    "a:active {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana} "+
+	    "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
 	    "input {font-weight:normal;font-size:8pt;font-family:verdana,arial} "+
 	    "td {font-size:8pt;font-family:verdana,arial} "+
 	    ".smalltext {font-size:6pt;font-family:verdana,arial} "+
@@ -145,7 +143,7 @@ public class HTML
     public static String fancyText (int rows, String content)
       {
         return "<textarea style=\"" + TEXT_BOX + COMMON_BOX + "\" rows=\"" + rows + 
-               "\" maxlength=\"3000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
+               "\" maxlength=\"10000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
                "</textarea>";
       }
     
@@ -383,7 +381,7 @@ public class HTML
             "function verifySignatureOnServer ()\n" +
             "{\n" +
             "  document.location.href = '" + verify_base + "' +\n" +
-            "      org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED)));\n" +
+            "      org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)));\n" +
             "}\n";
       }
 
@@ -391,8 +389,6 @@ public class HTML
       {
         return "      document.getElementById ('sign.res').innerHTML = fancyDiv ('Signed data in JCS format',\n" +
                "          signatureWriter.endSignature (signatureValue).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_HTML)) +\n" +
-//               "          '<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"document.location.href=\\'" + verify_base + "\\'' +\n" +
-//               "          org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED))) + '; return false\"></p>';\n";
                "          '<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer ()\"></p>';\n";
       }
 

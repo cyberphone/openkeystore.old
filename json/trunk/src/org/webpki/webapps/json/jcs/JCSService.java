@@ -8,11 +8,11 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-public class Init implements ServletContextListener
+public class JCSService implements ServletContextListener
   {
     private static final long serialVersionUID = 1L;
     
-    static Logger logger = Logger.getLogger (Init.class.getName ());
+    static Logger logger = Logger.getLogger (JCSService.class.getName ());
 
     StringBuffer info_string;
     
@@ -35,30 +35,6 @@ public class Init implements ServletContextListener
         info_string.append ("= ").append (info).append (" =\n");
         printHeader ();
         logger.info (info_string.toString ());
-      }
-
-    void installOptionalBCProvider ()
-      {
-        @SuppressWarnings("rawtypes")
-        Class bc = null;
-        try
-          {
-            bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
-          }
-        catch (ClassNotFoundException e)
-          {
-            printInfo ("BouncyCastle provider not in path - Using the platform provider");
-            return;
-          }
-        try
-          {
-            Security.insertProviderAt ((Provider) bc.newInstance (), 1);
-            printInfo ("Installed BouncyCastle as first provider");
-          }
-        catch (Exception e)
-          {
-            printInfo ("Failed to install BouncyCastle!");
-          }
       }
 
     @Override

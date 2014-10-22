@@ -5,7 +5,7 @@
     version="2.4">
 
     <listener>
-        <listener-class>org.webpki.webapps.json.jcs.Init</listener-class>
+        <listener-class>org.webpki.webapps.json.jcs.JCSService</listener-class>
      </listener>
 
     <servlet>
@@ -56,5 +56,15 @@
         <servlet-name>CreateServlet</servlet-name>
         <url-pattern>/create</url-pattern>
     </servlet-mapping>
-    
+
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>The app</web-resource-name>
+        <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+      <user-data-constraint>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      </user-data-constraint>
+    </security-constraint>
+
 </web-app>
