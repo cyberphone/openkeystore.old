@@ -585,7 +585,7 @@ public class HTML implements BaseProperties
               "// Finally we send the authorization to the payee\n" +
               "//\n" +
               "function sendAuthorizationData(encrypted_authorization_data) {\n" +
-              "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES_CBC_P5.getURI () + "';\n" +
+              "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES256_CBC.getURI () + "';\n" +
               "    encrypted_data." + IV_JSON + " = binaryToBase64(encryption_algorithm.iv);\n" +
               "    encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
               "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encrypted_authorization_data));\n" +

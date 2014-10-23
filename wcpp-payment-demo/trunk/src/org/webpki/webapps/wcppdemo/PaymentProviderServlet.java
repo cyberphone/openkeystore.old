@@ -76,7 +76,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             if (encrypted_auth_data.hasProperty (ALGORITHM_JSON))
               {
                 SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_auth_data.getString (ALGORITHM_JSON));
-                if (sym_alg != SymEncryptionAlgorithms.AES_CBC_P5)
+                if (sym_alg != SymEncryptionAlgorithms.AES256_CBC)
                   {
                     throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + sym_alg.getURI ());
                   }
