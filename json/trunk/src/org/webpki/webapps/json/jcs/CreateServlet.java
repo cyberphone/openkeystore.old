@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
@@ -48,9 +64,9 @@ public class CreateServlet extends HttpServlet
       {
         request.setCharacterEncoding ("UTF-8");
         String json_object = getTextArea (request);
-        MySignature.ACTION action = MySignature.ACTION.EC;
+        GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
         String key_type = request.getParameter (KEY_TYPE);
-        for (MySignature.ACTION a : MySignature.ACTION.values ())
+        for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values ())
           {
             if (a.toString ().equals (key_type))
               {
@@ -60,7 +76,7 @@ public class CreateServlet extends HttpServlet
           }
         try
           {
-            byte[] signed_json = new MySignature ().sign (new JSONObjectWriter (JSONParser.parse (json_object)), action);
+            byte[] signed_json = new GenerateSignature (action).sign (new JSONObjectWriter (JSONParser.parse (json_object)));
             response.sendRedirect (ServletUtil.getContextURL (request) + 
                                    "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
                                    Base64URL.encode (signed_json));

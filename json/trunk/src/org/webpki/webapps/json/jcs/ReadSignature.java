@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2013 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
+
 import java.math.BigInteger;
 
 import java.security.PublicKey;
@@ -35,8 +36,6 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 
-import org.webpki.json.test.Sign;
-
 import org.webpki.util.DebugFormatter;
 
 /**
@@ -47,10 +46,25 @@ public class ReadSignature
     private StringBuffer result = new StringBuffer ();
 
 
-    private String cryptoBinary (BigInteger value)
+    private String cryptoBinary (BigInteger value, KeyAlgorithms key_alg) throws IOException
       {
         byte[] crypto_binary = value.toByteArray ();
-        if (crypto_binary[0] == 0x00)
+        boolean modify = true;
+        if (key_alg.isECKey ())
+          {
+            if (crypto_binary.length > (key_alg.getPublicKeySizeInBits () + 7) / 8)
+              {
+                if (crypto_binary[0] != 0)
+                  {
+                    throw new IOException ("Unexpected EC value");
+                  }
+              }
+            else
+              {
+                modify = false;
+              }
+          }
+        if (modify && crypto_binary[0] == 0x00)
           {
             byte[] wo_zero = new byte[crypto_binary.length - 1];
             System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
@@ -95,23 +109,23 @@ public class ReadSignature
                                 asym_text.append (", Curve=").append (key_alg.getJCEName ());
                                 ECPoint ec_point = ((ECPublicKey)public_key).getW ();
                                 asym_text.append ("\nX: ")
-                                         .append (cryptoBinary (ec_point.getAffineX ()))
+                                         .append (cryptoBinary (ec_point.getAffineX (), key_alg))
                                          .append ("\nY: ")
-                                         .append (cryptoBinary (ec_point.getAffineY ()));
+                                         .append (cryptoBinary (ec_point.getAffineY (), key_alg));
                               }
                             else
                               {
                                asym_text.append ("\nModulus: ")
-                                         .append (cryptoBinary (((RSAPublicKey)public_key).getModulus ()))
+                                         .append (cryptoBinary (((RSAPublicKey)public_key).getModulus (), key_alg))
                                          .append ("\nExponent: ")
-                                         .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent ()));
+                                         .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent (), key_alg));
                               }
                             debugOutput (asym_text.toString ());
                             break;
   
                           case SYMMETRIC_KEY:
-                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (Sign.SYMMETRIC_KEY));
+                            signature.verify (new JSONSymKeyVerifier (new GenerateSignature.SymmetricOperations ()));
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (GenerateSignature.SYMMETRIC_KEY));
                             break;
   
                           default:

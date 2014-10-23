@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
@@ -10,11 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 public class HTML
   {
     static final String SIGNUP_BGND_COLOR   = "#F4FFF1";
-	static final String SIGNUP_EDIT_COLOR   = "#FFFA91";
+    static final String SIGNUP_EDIT_COLOR   = "#FFFA91";
     static final String SIGNUP_BAD_COLOR    = "#F78181";
-	static final String BOX_SHADDOW         = "box-shadow:5px 5px 5px #C0C0C0";
-	static final String KG2_DEVID_BASE      = "Field";
-	static final String HOME = "><a href=\"home\" title=\"Home\" style=\"position:absolute;top:15px;right:15px;z-index:5;visibility:visible\">Home</a";
+    static final String BOX_SHADDOW         = "box-shadow:5px 5px 5px #C0C0C0";
+    static final String KG2_DEVID_BASE      = "Field";
+    static final String HOME = "><a href=\"home\" title=\"Home\" style=\"position:absolute;top:15px;right:15px;z-index:5;visibility:visible\">Home</a";
 
     static final String STATIC_BOX = "word-wrap:break-word;width:800pt;background:#F8F8F8;";
     static final String COMMON_BOX = "border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0";
@@ -25,24 +41,24 @@ public class HTML
                                       "  &quot;Statement&quot;: &quot;Hello signed world!&quot;,\n" +
                                       "  &quot;OtherProperties&quot;: [2000, true]\n" +
                                       "}";
-	
+    
     static final String HTML_INIT = 
-	    "<!DOCTYPE html>"+
-	    "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
+        "<!DOCTYPE html>"+
+        "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
         "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
-	    "<title>JSON Signature Demo</title>"+
-	    "<style type=\"text/css\">html {overflow:auto} html, body {margin:0px;padding:0px;height:100%} "+
-	    "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white} "+
-	    "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica} "+
-	    "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica} "+
-	    "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
-	    "input {font-weight:normal;font-size:8pt;font-family:verdana,arial} "+
-	    "td {font-size:8pt;font-family:verdana,arial} "+
-	    ".smalltext {font-size:6pt;font-family:verdana,arial} "+
-	    "button {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px} "+
-	    ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana} " +
-	    "</style>";
-	
+        "<title>JSON Signature Demo</title>"+
+        "<style type=\"text/css\">html {overflow:auto} html, body {margin:0px;padding:0px;height:100%} "+
+        "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white} "+
+        "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica} "+
+        "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica} "+
+        "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
+        "input {font-weight:normal;font-size:8pt;font-family:verdana,arial} "+
+        "td {font-size:8pt;font-family:verdana,arial} "+
+        ".smalltext {font-size:6pt;font-family:verdana,arial} "+
+        "button {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px} "+
+        ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana} " +
+        "</style>";
+    
 
     static String encode (String val)
       {
@@ -143,7 +159,7 @@ public class HTML
     public static String fancyText (int rows, String content)
       {
         return "<textarea style=\"" + TEXT_BOX + COMMON_BOX + "\" rows=\"" + rows + 
-               "\" maxlength=\"10000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
+               "\" maxlength=\"100000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
                "</textarea>";
       }
     
@@ -234,137 +250,115 @@ public class HTML
               "//////////////////////////////////////////////////////////////////////////\n" +
               "// Nice-looking text-boxes                                              //\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
-              "function fancyDiv (header, content)\n" +
-              "{\n" +
-              "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;\\\n" + 
-              "         max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + content + '</div>';\n" +
+              "function fancyDiv (header, content) {\n" +
+              "    return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;\\\n" + 
+              "           max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + content + '</div>';\n" +
               "}\n\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
               "// Error message helper                                                 //\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
-             "function bad (id, message)\n" +
-              "{\n" +
-              "  document.getElementById (id).innerHTML = '<b style=\"color:red\">' + message + '</b>';\n" +
+             "function bad (id, message) {\n" +
+              "    document.getElementById (id).innerHTML = '<b style=\"color:red\">' + message + '</b>';\n" +
               "}\n\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
               "// Create key event handler                                             //\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
-              "function createKey ()\n" +
-              "{\n" +
-              "  console.log ('Begin creating key...');\n" +
-              "  document.getElementById ('pub.key').innerHTML = '<i>Working...</i>';\n")
+              "function createKey () {\n" +
+              "    console.log ('Begin creating key...');\n" +
+              "    document.getElementById ('pub.key').innerHTML = '<i>Working...</i>';\n")
             .append (msie_flag ?
-               "  var genOp = crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
-               "                                         false,\n" +
-               "                                         [\"sign\", \"verify\"]);\n\n" +
-               "  genOp.onerror = function (e)\n" +
-               "    {\n" +
-               "      bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "    }\n\n" +
-
-               "  genOp.oncomplete = function (e)\n" +
-               "    {\n" +
-               "      pubKey = e.target.result.publicKey;\n" +
-               "      privKey = e.target.result.privateKey;\n\n" +
-
-               "      var expOp = crypto.subtle.exportKey ('spki', pubKey);\n\n" +
-
-               "      expOp.onerror = function (e)\n" +
-               "        {\n" + 
-               "          bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "        }\n\n" +
-
-               "      expOp.oncomplete = function (evt)\n" +
-               "        {\n" +
-               "          publicKeyInX509Format = new Uint8Array (evt.target.result);\n" +
-               "          console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-               webCryptoGenerateJS () +
-               "        }\n\n" +
-               "    }" 
-                  : 
-               "  crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-256\"}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
-               "                               false,\n" +
-               "                               [\"sign\", \"verify\"]).then (function (key)\n" +
-               "    {\n" +
-               "      pubKey = key.publicKey;\n" +
-               "      privKey = key.privateKey;\n\n" +
-
-               "      crypto.subtle.exportKey ('spki', pubKey).then (function (key)\n" +
-               "        {\n" +
-               "          publicKeyInX509Format = new Uint8Array (key);\n" +
-               "          console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-               webCryptoGenerateJS () +
-               "        });\n" +
-               "    }).then (undefined, function ()\n" + 
-               "    {\n" + 
-               "      bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-               "    });");
-        html.append ("\n}\n\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "// JCS callback functions                                               //\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "var JCSSigner = function ()\n" +
-               "{\n" +
-               "};\n\n" +
-
-               "/* String */ JCSSigner.prototype.getAlgorithm = function ()\n" +
-               "{\n" +
-               "  // Every crypto-system with some self-estem defines their own algorithm IDs, right?\n" +
-               "  return 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';\n" +
-               "};\n\n" +
-
-               "/* JSONSignatureTypes */JCSSigner.prototype.getSignatureType = function ()\n" +
-               "{\n" +
-               "  return org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY;\n" +
-               "};\n\n" +
-
-               "/* Uint8Array */ JCSSigner.prototype.getPublicKey = function ()\n" +
-               "{\n" +
-               "  return publicKeyInX509Format;\n" +
-               "};\n\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "// Sign event handler                                                   //\n" +
-               "//////////////////////////////////////////////////////////////////////////\n" +
-               "function signSampleData ()\n" +
-               "{\n" +
-               "  try\n" +
-               "    {\n" +
-               "      signatureWriter = new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (document.getElementById ('json.text').value));\n" +
-               "    }\n" +
-               "  catch (err)\n" +
-               "    {\n" +
-               "      bad ('sign.res', 'JSON error: ' + err.toString ());\n" +
-               "      return;\n" +
-               "    }\n\n")
- 
-          .append (msie_flag ?
-              "  var signer = crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\",\n" +
-              "                                    hash: \"SHA-256\"},\n" +
-              "                                    privKey,\n" +
-              "                                    signatureWriter.beginSignature (new JCSSigner ()));\n\n" +
-
-              "  signer.onerror = function (evt)\n" +
-              "    {\n" +
-              "      bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
+              "    var genOp = crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
+              "                                         false,\n" +
+              "                                         [\"sign\", \"verify\"]);\n\n" +
+              "    genOp.onerror = function (e) {\n" +
+              "        bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
               "    }\n\n" +
 
-              "  signer.oncomplete = function (evt)\n" +
-              "    {\n" +
-              "      var signatureValue = new Uint8Array (evt.target.result);\n" +
-              "      console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
+              "    genOp.oncomplete = function (e) {\n" +
+              "        pubKey = e.target.result.publicKey;\n" +
+              "        privKey = e.target.result.privateKey;\n\n" +
+
+              "        var expOp = crypto.subtle.exportKey ('spki', pubKey);\n\n" +
+
+              "        expOp.onerror = function (e) {\n" + 
+              "            bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
+              "        }\n\n" +
+
+              "        expOp.oncomplete = function (evt) {\n" +
+              "            publicKeyInX509Format = new Uint8Array (evt.target.result);\n" +
+              "            console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
+               webCryptoGenerateJS () +
+              "        }\n\n" +
+              "    }" 
+                  : 
+              "  crypto.subtle.generateKey ({name: \"RSASSA-PKCS1-v1_5\", hash: {name: \"SHA-256\"}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
+              "                               false,\n" +
+              "                               [\"sign\", \"verify\"]).then (function (key) {\n" +
+              "      pubKey = key.publicKey;\n" +
+              "      privKey = key.privateKey;\n\n" +
+
+              "      crypto.subtle.exportKey ('spki', pubKey).then (function (key) {\n" +
+              "          publicKeyInX509Format = new Uint8Array (key);\n" +
+              "          console.log ('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
+               webCryptoGenerateJS () +
+              "        });\n" +
+              "    }).then (undefined, function () {\n" + 
+              "        bad ('pub.key', 'WebCrypto failed for unknown reasons');\n" +
+              "    });");
+        html.append ("\n}\n\n" +
+              "//////////////////////////////////////////////////////////////////////////\n" +
+              "// JCS callback functions                                               //\n" +
+              "//////////////////////////////////////////////////////////////////////////\n" +
+              "var JCSSigner = function () {\n" +
+              "};\n\n" +
+
+              "/* String */ JCSSigner.prototype.getAlgorithm = function () {\n" +
+              "    // Every crypto-system with some self-estem defines their own algorithm IDs, right?\n" +
+              "    return 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';\n" +
+              "};\n\n" +
+
+              "/* JSONSignatureTypes */JCSSigner.prototype.getSignatureType = function () {\n" +
+              "    return org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY;\n" +
+              "};\n\n" +
+
+              "/* Uint8Array */ JCSSigner.prototype.getPublicKey = function () {\n" +
+              "    return publicKeyInX509Format;\n" +
+              "};\n\n" +
+              "//////////////////////////////////////////////////////////////////////////\n" +
+              "// Sign event handler                                                   //\n" +
+              "//////////////////////////////////////////////////////////////////////////\n" +
+              "function signSampleData () {\n" +
+              "    try {\n" +
+              "        signatureWriter = new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (document.getElementById ('json.text').value));\n" +
+              "    } catch (err) {\n" +
+              "        bad ('sign.res', 'JSON error: ' + err.toString ());\n" +
+              "        return;\n" +
+              "    }\n\n")
+ 
+          .append (msie_flag ?
+              "    var signer = crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\",\n" +
+              "                                      hash: \"SHA-256\"},\n" +
+              "                                      privKey,\n" +
+              "                                      signatureWriter.beginSignature (new JCSSigner ()));\n\n" +
+
+              "    signer.onerror = function (evt) {\n" +
+              "        bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
+              "    }\n\n" +
+
+              "    signer.oncomplete = function (evt) {\n" +
+              "        var signatureValue = new Uint8Array (evt.target.result);\n" +
+              "        console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
               outputSignature () +
               "    }" 
                 :
-              "  crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\"},\n" +
-              "                      privKey,\n" +
-              "                      signatureWriter.beginSignature (new JCSSigner ())).then (function (signature)\n" +
-              "    {\n" +
-              "      var signatureValue = new Uint8Array (signature);\n" +
-              "      console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
+              "    crypto.subtle.sign ({name: \"RSASSA-PKCS1-v1_5\"},\n" +
+              "                        privKey,\n" +
+              "                        signatureWriter.beginSignature (new JCSSigner ())).then (function (signature) {\n" +
+              "        var signatureValue = new Uint8Array (signature);\n" +
+              "        console.log ('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
               outputSignature () +
-              "    }).then (undefined, function ()\n" + 
-              "    {\n" +
-              "      bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
+              "    }).then (undefined, function () {\n" +
+              "        bad ('sign.res', 'WebCrypto failed for unknown reasons');\n" +
               "    });")
          .append ("\n}\n\n" +
               verifySignature (verify_base));
@@ -378,10 +372,9 @@ public class HTML
             "//////////////////////////////////////////////////////////////////////////\n" +
             "// Optional validation is in this demo/test happening on the server     //\n" +
             "//////////////////////////////////////////////////////////////////////////\n" +
-            "function verifySignatureOnServer ()\n" +
-            "{\n" +
-            "  document.location.href = '" + verify_base + "' +\n" +
-            "      org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)));\n" +
+            "function verifySignatureOnServer () {\n" +
+            "    document.location.href = '" + verify_base + "' +\n" +
+            "        org.webpki.util.Base64URL.encode (org.webpki.util.ByteArray.convertStringToUTF8 (signatureWriter.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)));\n" +
             "}\n";
       }
 
@@ -425,11 +418,11 @@ public class HTML
                          "}") +
                      "</td></tr>" +
                "<tr><td align=\"center\"><table>" +
-                 "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.SYM + 
+                 "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
                  "</table></td></tr>" +
                "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>" +
              "</form></table></td></tr>"));
@@ -440,17 +433,15 @@ public class HTML
         HTML.output (response, "<!DOCTYPE html><html><head><title>WebCrypto and JCS Demo</title>" +
         "</head><body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\">Finding browser..." +
         "<script>\n" +
-        " var d = new Date();\n" +
-        " d.setTime(d.getTime()+(60*60*1000));\n" +
-        "if (window.crypto !== undefined && window.crypto.subtle !== undefined)\n" +
-        "{\n" +
-        " console.log ('WebCrypto Support');\n" +
-        " document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.STD + "; expires=' + d.toGMTString();\n" +
+        "var d = new Date();\n" +
+        "d.setTime(d.getTime()+(60*60*1000));\n" +
+        "if (window.crypto !== undefined && window.crypto.subtle !== undefined) {\n" +
+        "    console.log ('WebCrypto Support');\n" +
+        "    document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.STD + "; expires=' + d.toGMTString();\n" +
         "}\n" +
-        "else if (window.crypto === undefined && window.msCrypto !== undefined)\n" +
-        "{\n" +
-        " console.log ('MSIE 11');\n" +
-        " document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.MSIE + "; expires=' + d.toGMTString();\n" +
+        "else if (window.crypto === undefined && window.msCrypto !== undefined) {\n" +
+        "    console.log ('MSIE 11');\n" +
+        "    document.cookie = '" + WebCryptoServlet.BROWSER_COOKIE + "=" + WebCryptoServlet.MSIE + "; expires=' + d.toGMTString();\n" +
         "}\n" +
         "document.location.reload ();\n" + 
         "</script></body></html>");

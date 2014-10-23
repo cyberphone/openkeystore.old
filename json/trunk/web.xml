@@ -4,6 +4,30 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     version="2.4">
 
+    <context-param>
+        <description>Bouncycastle to be loaded before other providers</description>
+        <param-name>bouncycastle_first</param-name>
+        <param-value>@bouncycastle-first@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Key Password</description>
+        <param-name>key_password</param-name>
+        <param-value>@key-password@</param-value>
+    </context-param>
+ 
+    <context-param>
+        <description>Client RSA Certpath and Private Key</description>
+        <param-name>clientkey_rsa</param-name>
+        <param-value>@clientkey-rsa@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Client EC Certpath and Private Key</description>
+        <param-name>clientkey_ec</param-name>
+        <param-value>@clientkey-ec@</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.webpki.webapps.json.jcs.JCSService</listener-class>
      </listener>
