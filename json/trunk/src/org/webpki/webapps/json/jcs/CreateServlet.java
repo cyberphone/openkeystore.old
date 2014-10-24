@@ -18,17 +18,15 @@ package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-
 import org.webpki.util.Base64URL;
-
 import org.webpki.webutil.ServletUtil;
 
 public class CreateServlet extends HttpServlet
@@ -77,9 +75,13 @@ public class CreateServlet extends HttpServlet
         try
           {
             byte[] signed_json = new GenerateSignature (action).sign (new JSONObjectWriter (JSONParser.parse (json_object)));
+/*
             response.sendRedirect (ServletUtil.getContextURL (request) + 
                                    "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
                                    Base64URL.encode (signed_json));
+*/
+            RequestDispatcher rd = request.getRequestDispatcher ("request?" + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode (signed_json));
+            rd.forward (request, response); 
           }
         catch (IOException e)
           {
