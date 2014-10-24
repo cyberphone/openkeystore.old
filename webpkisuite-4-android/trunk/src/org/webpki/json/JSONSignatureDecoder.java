@@ -19,21 +19,16 @@ package org.webpki.json;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
-
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-
 import java.util.Vector;
 
 import org.webpki.crypto.SignatureAlgorithms;
@@ -98,7 +93,7 @@ public class JSONSignatureDecoder implements Serializable
     
     String algorithm_string;
     
-    byte[] canonicalized_data;
+    byte[] normalized_data;
     
     byte[] signature_value;
     
@@ -137,7 +132,7 @@ public class JSONSignatureDecoder implements Serializable
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
         JSONValue save = signature.root.properties.get (SIGNATURE_VALUE_JSON);
         signature.root.properties.remove (SIGNATURE_VALUE_JSON);
-        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.root);
+        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);
         signature.root.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {
@@ -178,12 +173,22 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    static BigInteger readCryptoBinary (JSONObjectReader rd, String property) throws IOException
+    static BigInteger getFixedBinary (JSONObjectReader rd, String property, KeyAlgorithms ec) throws IOException
+      {
+        byte[] fixed_binary = rd.getBinary (property);
+        if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
+          {
+            throw new IOException ("Public EC key parameter \"" + property + "\" is not nomalized");
+          }
+        return new BigInteger (1, fixed_binary);
+      }
+
+    static BigInteger getCryptoBinary (JSONObjectReader rd, String property) throws IOException
       {
         byte[] crypto_binary = rd.getBinary (property);
         if (crypto_binary[0] == 0x00)
           {
-            throw new IOException ("Public key parameters must not contain leading zeroes");
+            throw new IOException ("Public RSA key parameter \"" + property + "\" contains leading zeroes");
           }
         return new BigInteger (1, crypto_binary);
       }
@@ -196,14 +201,14 @@ public class JSONSignatureDecoder implements Serializable
             if (rd.hasProperty (RSA_JSON))
               {
                 rd = rd.getObject (RSA_JSON);
-                return KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (readCryptoBinary (rd, MODULUS_JSON),
-                                                                                            readCryptoBinary (rd, EXPONENT_JSON)));
+                return KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, MODULUS_JSON),
+                                                                                            getCryptoBinary (rd, EXPONENT_JSON)));
               }
             rd = rd.getObject (EC_JSON);
             String curve_name = rd.getString (NAMED_CURVE_JSON);
             KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
                                            getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
-            ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
+            ECPoint w = new ECPoint (getFixedBinary (rd, X_JSON, ec), getFixedBinary (rd, Y_JSON, ec));
             return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
           }
         catch (GeneralSecurityException e)
@@ -293,7 +298,7 @@ public class JSONSignatureDecoder implements Serializable
           {
             Signature sig = Signature.getInstance (algorithm.getJCEName ());
             sig.initVerify (public_key);
-            sig.update (canonicalized_data);
+            sig.update (normalized_data);
             checkVerification (sig.verify (signature_value));
           }
         catch (GeneralSecurityException e)

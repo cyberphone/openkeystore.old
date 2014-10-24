@@ -110,7 +110,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setString (SERVER_TIME_JSON, server_time_verbatim);
 
-        wr.setDateTime (CLIENT_TIME_JSON, client_time);
+        wr.setDateTime (CLIENT_TIME_JSON, client_time, false); // Client keeps local time
         
         wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
         

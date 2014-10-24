@@ -24,7 +24,22 @@ import java.io.IOException;
  */
 public enum JSONOutputFormats 
   {
-    CANONICALIZED, JAVASCRIPT_STRING, PRETTY_PRINT, PRETTY_HTML;
+    NORMALIZED        (false, false, false), 
+    JS_STRING         (false, true , false),
+    PRETTY_JS_STRING  (true , true , false),
+    PRETTY_PRINT      (true , false, false),
+    PRETTY_HTML       (true , false, true);
+
+    boolean pretty;
+    boolean javascript;
+    boolean html;
+    
+    JSONOutputFormats (boolean pretty, boolean javascript, boolean html)
+      {
+        this.pretty = pretty;
+        this.javascript = javascript;
+        this.html = html;
+      }
     
     public static String getOptions ()
       {

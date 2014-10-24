@@ -18,9 +18,9 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Vector;
 
 /**
  * Local support class for holding JSON objects.
@@ -48,4 +48,31 @@ class JSONObject implements Serializable
             throw new IOException ("Duplicate property: " + name);
           }
       }
-  }
+
+    @SuppressWarnings("unchecked")
+    static void checkForUnread (JSONObject json_object) throws IOException
+      {
+        for (String name : json_object.properties.keySet ())
+          {
+            JSONValue value = json_object.properties.get (name);
+            if (!json_object.read_flag.contains (name))
+              {
+                throw new IOException ("Property \"" + name + "\" was never read");
+              }
+            if (value.type == JSONTypes.OBJECT)
+              {
+                checkForUnread ((JSONObject)value.value);
+              }
+            else if (value.type == JSONTypes.ARRAY)
+              {
+                for (JSONValue object : (Vector<JSONValue>)value.value)
+                  {
+                    if (object.type == JSONTypes.OBJECT)
+                      {
+                        checkForUnread ((JSONObject)object.value);
+                      }
+                  }
+              }
+          }
+       }
+    }

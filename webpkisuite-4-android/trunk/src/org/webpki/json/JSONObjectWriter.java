@@ -23,17 +23,21 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
 
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -41,14 +45,14 @@ import org.webpki.util.ISODateTime;
 /**
  * Writes formatted JSON data to a DOM-like tree.
  * <p>
- * It also performs canonicalization fur usage with JCS (Javascript Cleatexy Signatures).
+ * It also performs normalization for usage with JCS (Javascript Clear-text Signatures).
  * 
  */
 public class JSONObjectWriter implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    static String canonicalization_debug_file;
+    static String normalization_debug_file;
 
     static final int STANDARD_INDENT = 2;
 
@@ -152,9 +156,9 @@ public class JSONObjectWriter implements Serializable
         return setProperty (name, new JSONValue (JSONTypes.NULL, "null"));
       }
 
-    public JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
+    public JSONObjectWriter setDateTime (String name, Date date_time, boolean force_utc) throws IOException
       {
-        return setString (name, ISODateTime.formatDateTime (date_time));
+        return setString (name, ISODateTime.formatDateTime (date_time, force_utc));
       }
 
     public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
@@ -162,11 +166,23 @@ public class JSONObjectWriter implements Serializable
         return setString (name, Base64URL.encode (value));
       }
 
+    public JSONObjectWriter setObject (String name, JSONObjectReader reader) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, reader.root));
+        return this;
+      }
+
+    public JSONObjectWriter setObject (String name, JSONObjectWriter writer) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
+        return this;
+      }
+
     public JSONObjectWriter setObject (String name) throws IOException
       {
-        JSONObject sub_object = new JSONObject ();
-        setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
-        return new JSONObjectWriter (sub_object);
+          JSONObject sub_object = new JSONObject ();
+          setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
+          return new JSONObjectWriter (sub_object);
       }
 
     public JSONObjectWriter createContainerObject (String name) throws IOException
@@ -291,7 +307,28 @@ import org.webpki.json.JSONSignatureDecoder;
  </pre>
      */
 
-    void writeCryptoBinary (BigInteger value, String name) throws IOException
+    void setFixedBinary (BigInteger value, String name, KeyAlgorithms ec) throws IOException
+      {
+        byte[] fixed_binary = value.toByteArray ();
+        if (fixed_binary.length > (ec.getPublicKeySizeInBits () + 7) / 8)
+          {
+            if (fixed_binary[0] != 0)
+              {
+                throw new IOException ("Unexpected EC \"" + name + "\" value");
+              }
+            setCryptoBinary (value, name);
+          }
+        else
+          {
+            while (fixed_binary.length < (ec.getPublicKeySizeInBits () + 7) / 8)
+              {
+                fixed_binary = ArrayUtil.add (new byte[]{0}, fixed_binary);
+              }
+            setBinary (name, fixed_binary);
+          }
+      }
+
+    void setCryptoBinary (BigInteger value, String name) throws IOException
       {
         byte[] crypto_binary = value.toByteArray ();
         if (crypto_binary[0] == 0x00)
@@ -317,7 +354,7 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (root)));
+        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
         return this;
       }
     
@@ -329,8 +366,8 @@ import org.webpki.json.JSONSignatureDecoder;
           {
             JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
             RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+            rsa_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
+            rsa_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
           }
         else
           {
@@ -338,8 +375,8 @@ import org.webpki.json.JSONSignatureDecoder;
             ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
                KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON);
-            ec_key_writer.writeCryptoBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON);
+            ec_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
+            ec_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
         return this;
       }
@@ -386,7 +423,7 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         if (pretty_print)
           {
-            buffer.append (html_mode ? "<br>" : "\n");
+            buffer.append (html_mode ? "<br>" : java_script_string ? "\\\n" : "\n");
           }
       }
 
@@ -759,14 +796,14 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
+    static byte[] getNormalizedSubset (JSONObject signature_object_in) throws IOException
       {
         JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
-        byte[] result = writer.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
-        if (canonicalization_debug_file != null)
+        byte[] result = writer.serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        if (normalization_debug_file != null)
           {
-            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
-            ArrayUtil.writeFile (canonicalization_debug_file,
+            byte[] other = ArrayUtil.readFile (normalization_debug_file);
+            ArrayUtil.writeFile (normalization_debug_file,
                                  ArrayUtil.add (other, 
                                                 new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
           }
@@ -779,9 +816,9 @@ import org.webpki.json.JSONSignatureDecoder;
         buffer = new StringBuffer ();
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         indent = -indent_factor;
-        pretty_print = output_format == JSONOutputFormats.PRETTY_HTML || output_format == JSONOutputFormats.PRETTY_PRINT;
-        java_script_string = output_format == JSONOutputFormats.JAVASCRIPT_STRING;
-        html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
+        pretty_print = output_format.pretty;
+        java_script_string = output_format.javascript;
+        html_mode = output_format.html;
         if (java_script_string)
           {
             buffer.append ('\'');
@@ -810,10 +847,10 @@ import org.webpki.json.JSONSignatureDecoder;
         return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
       }
   
-    public static void setCanonicalizationDebugFile (String file) throws IOException
+    public static void setNormalizationDebugFile (String file) throws IOException
       {
-        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
-        canonicalization_debug_file = file;
+        ArrayUtil.writeFile (file, "Normalization Debug Output".getBytes ("UTF-8"));
+        normalization_debug_file = file;
       }
 
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException

@@ -122,14 +122,18 @@ public class ISODateTime
         return gc;
       }
 
-    public static String formatDateTime (Date t)
+    public static String formatDateTime (Date t, boolean force_utc)
       {
         GregorianCalendar gc = new GregorianCalendar ();
         gc.setTime (t);
+        SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss");
+        if (force_utc)
+          {
+            sdf.setTimeZone (TimeZone.getTimeZone ("UTC"));
+          }
+        StringBuffer s = new StringBuffer (sdf.format (t));
         
-        StringBuffer s = new StringBuffer (new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss").format (t));
-        
-        int tzo = (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
+        int tzo = force_utc ? 0 : (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
         
         if (tzo > 0)
           {

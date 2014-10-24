@@ -97,7 +97,7 @@ public class AuthenticationResponseEncoder extends JSONEncoder
 
         wr.setString (SERVER_TIME_JSON, server_time);
 
-        wr.setDateTime (CLIENT_TIME_JSON, client_time);
+        wr.setDateTime (CLIENT_TIME_JSON, client_time, false);  // Client local time
 
         wr.setString (REQUEST_URL_JSON, request_url);
 

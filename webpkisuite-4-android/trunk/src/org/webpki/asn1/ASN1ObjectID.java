@@ -177,6 +177,7 @@ public final class ASN1ObjectID extends Simple
                 no.put(s.substring("Description = ".length(), i1 - 1), s.substring(i1 + 1, i2).replace(' ', '.'));
               }
           }
+        r.close ();
         oidToName = on;
         nameToOID = no;
       }
