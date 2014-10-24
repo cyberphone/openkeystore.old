@@ -140,7 +140,7 @@
      <property name="webpki.jars" value="empty.lib"/>
      <antcall target="_build">
         <param name="javaversion" value="1.6"/>
-        <param name="library.dir" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
+        <param name="library.dir" value="${plugin.ejbca.ant.custom.enrollment_plugin_directory}/lib.common"/>
      </antcall>
      <!-- Update application.xml -->
      <replace file="${ejbca.app.xml}" value="${ejbca-app-xml-mod}">

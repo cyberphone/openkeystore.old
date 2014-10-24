@@ -129,7 +129,9 @@ public class HTML
           {
             s.append (' ').append (bodyscript);
           }
-        s.append ("><a href=\"http://primekey.se\" title=\"PrimeKey Solutions\" style=\"position:absolute;top:15px;left:15px;z-index:5;visibility:visible\">" + "<img src=\"images/logotype.png\" border=\"0\"></a>" + "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">").append (box).append ("</table></body></html>");
+        s.append ("><div style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\">" +
+                  "<a href=\"http://webpki.org\" title=\"WebPKI.org\"><img src=\"images/webpki-logo.gif\" style=\"border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0\" alt=\"WebPKI.org logo...\"></a></div>" +
+                  "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">").append (box).append ("</table></body></html>");
         return s.toString ();
       }
     
@@ -158,7 +160,7 @@ public class HTML
 
     public static String fancyText (int rows, String content)
       {
-        return "<textarea style=\"" + TEXT_BOX + COMMON_BOX + "\" rows=\"" + rows + 
+        return "<textarea style=\"margin-top:3pt;" + TEXT_BOX + COMMON_BOX + "\" rows=\"" + rows + 
                "\" maxlength=\"100000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
                "</textarea>";
       }
@@ -228,8 +230,10 @@ public class HTML
     public static void webCryptoPage (HttpServletResponse response, String verify_base, boolean msie_flag) throws IOException, ServletException
       {
         StringBuffer html = new StringBuffer (
-            "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title></head>\n" +
-            "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\">\n" +
+            "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><style> " +
+             "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} " +
+             "</style></head>\n" +
+            "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\"" + HOME + ">\n" +
             "<h3>WebCrypto / JCS Demo</h3>\n\n" +
             "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n" +
             "<div id=\"pub.key\"></div>\n\n" +
