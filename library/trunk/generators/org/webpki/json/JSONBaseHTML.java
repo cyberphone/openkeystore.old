@@ -955,9 +955,7 @@ public class JSONBaseHTML
                  ".tftable tr {background-color:#FFFFE0}\n" +
                  ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:arial,verdana,helvetica}\n" +
                  "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
-                 "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}\n" +
-                 "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}\n" +
-                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}\n");
+                 "a {color:blue;font-family:verdana,helvetica;text-decoration:none}\n");
         html.append (external_styles)
          .append("</style></head><body style=\"margin:15pt\">" +
                  "<div style=\"position:absolute;top:5pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
