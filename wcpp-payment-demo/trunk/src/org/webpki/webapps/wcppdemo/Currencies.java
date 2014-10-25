@@ -20,7 +20,7 @@ public enum Currencies
   {
     USD ("$\\u200a",       true), 
     EUR ("\\u200a\\u20ac", false),
-    GBP ("£\\u200a",       true);
+    GBP ("\\u00a3\\u200a", true);
     
     String symbol;
     boolean first_position;
