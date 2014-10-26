@@ -76,7 +76,7 @@ public class JWK implements Serializable
         else
           {
             key_type = "EC";
-            processECPublicKey (s, key);
+            encodeECPublicKey (s, key);
           }
         jwk = s.append ('}').toString ();
         encoded = key.getEncoded ();
@@ -86,11 +86,11 @@ public class JWK implements Serializable
       {
         this (public_key);
         StringBuffer s = new StringBuffer (jwk.substring (0, jwk.length () - 1));
-        addCoordinate (s, KeyAlgorithms.getKeyAlgorithm (public_key), "d", private_key.getS ());
+        addECCoordinate (s, KeyAlgorithms.getKeyAlgorithm (public_key), "d", private_key.getS ());
         jwk = s.append ('}').toString ();
       }
 
-    private void processECPublicKey (StringBuffer s, Key key) throws IOException
+    private void encodeECPublicKey (StringBuffer s, Key key) throws IOException
       {
         ECPoint ec_point = ((ECPublicKey)key).getW ();
         s.append ("'EC',crv:'");
@@ -111,15 +111,15 @@ public class JWK implements Serializable
                     default:
                       throw new IOException ("Unsupported: " + key_alg);
                   }
-                addCoordinate (s, key_alg, "x", ec_point.getAffineX ());
-                addCoordinate (s, key_alg, "y", ec_point.getAffineY ());
+                addECCoordinate (s, key_alg, "x", ec_point.getAffineX ());
+                addECCoordinate (s, key_alg, "y", ec_point.getAffineY ());
                 return;
              }
           }
         throw new IOException ("No suitable EC curve");
       }
 
-    private void addCoordinate (StringBuffer s, KeyAlgorithms ec, String name, BigInteger value) throws IOException
+    private void addECCoordinate (StringBuffer s, KeyAlgorithms ec, String name, BigInteger value) throws IOException
       {
         s.append (',');
         byte[] fixed_binary = value.toByteArray ();
