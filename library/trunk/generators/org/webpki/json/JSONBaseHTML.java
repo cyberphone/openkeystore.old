@@ -53,7 +53,7 @@ public class JSONBaseHTML
 
     public static final String REQUIRED_COLUMN         = "Req";
     
-    public static final String REF_JSON                = "RFC4627";
+    public static final String REF_JSON                = "RFC7159";
     
     public static final String REF_X509                = "RFC5280";
 
@@ -201,11 +201,11 @@ public class JSONBaseHTML
         this.subsystem_name = subsystem_name;
 
         addReferenceEntry (REF_JSON,
-            "Crockford, D., \"The application/json Media Type for " +
-            "JavaScript Object Notation (JSON)\", RFC&nbsp;4627, July&nbsp;2006.");
+            "T. Bray, \"The JavaScript Object Notation (JSON) Data Interchange Format\"" +
+            ", RFC&nbsp;7159, March&nbsp;2014.");
 
         addReferenceEntry (REF_URI,
-            "Berners-Lee, T., Fielding, R., and L. Masinter, \"Uniform " +
+            "T. Berners-Lee, R. Fielding, L. Masinter, \"Uniform " +
             "Resource Identifier (URI): Generic Syntax\", RFC&nbsp;3986, January&nbsp;2005.");
 
         addReferenceEntry (REF_XMLDSIG,
@@ -220,11 +220,11 @@ public class JSONBaseHTML
             externalWebReference ("http://www.w3.org/TR/xmlenc-core1/"));
 
         addReferenceEntry (REF_JCS,
-            "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
+            "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
             ", <span style=\"white-space: nowrap\">V0.55, September&nbsp;2014.</span>");
 
-        addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
+        addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
             ", <span style=\"white-space: nowrap\">V0.97c, August 2014.</span>");
 
@@ -237,42 +237,42 @@ public class JSONBaseHTML
             externalWebReference ("http://www.w3.org/TR/2012/CR-WebIDL-20120419/"));
 
        addReferenceEntry (REF_JOSE,
-            "Jones, M. et al, Work in progress, " +
+            "M. Jones, et al, Work in progress, " +
             externalWebReference ("https://ietf.org/wg/jose/") +
-            ", <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+            ", <span style=\"white-space: nowrap\">October&nbsp;2014.</span>");
 
         addReferenceEntry (REF_X509,
-            "Cooper, D., Santesson, S., Farrell, S., Boeyen, S., " +
-            "Housley, R., and W. Polk, \"Internet X.509 Public Key " +
+            "D. Cooper, S. Santesson, S. Farrell, S. Boeyen, " +
+            "R. Housley, W. Polk, \"Internet X.509 Public Key " +
             "Infrastructure Certificate and Certificate Revocation List " +
             "(CRL) Profile\", RFC&nbsp;5280, May&nbsp;2008.");
 
         addReferenceEntry (REF_BASE64,
-            "Josefsson, S., \"The Base16, Base32, and Base64 Data " +
+            "S. Josefsson, \"The Base16, Base32, and Base64 Data " +
             "Encodings\", RFC&nbsp;4648, October&nbsp;2006.");
 
         addReferenceEntry (REF_PEM,
-            "Josefsson, S., \"Text Encodings of PKIX and CMS Structures\", " +
+            "S. Josefsson, \"Text Encodings of PKIX and CMS Structures\", " +
             "I-D, draft-josefsson-pkix-textual-02, October&nbsp;2013.");
 
         addReferenceEntry (REF_DSKPP,
-            "Doherty, A., Pei, M., Machani, S., and M. Nystrom, " +
+            "A. Doherty, M. Pei, S. Machani, M. Nystrom, " +
             "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", RFC&nbsp;6063, December&nbsp;2010.");
 
-        addReferenceEntry (REF_CMP, "Adams, C., Farrell, S., Kause, T., and T. Mononen, " +
+        addReferenceEntry (REF_CMP, "C. Adams, S. Farrell, T. Kause, T. Mononen, " +
              "\"Internet X.509 Public Key Infrastructure Certificate Management Protocol (CMP)\", " +
              "RFC&nbsp;4210, September&nbsp;2005.");
 
-        addReferenceEntry (REF_LDAP_NAME, "Zeilenga, K., " +
+        addReferenceEntry (REF_LDAP_NAME, "K. Zeilenga, " +
             "\"Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names\", " +
             "RFC&nbsp;4514, June&nbsp;2006.");
 
         addReferenceEntry (REF_PKCS8,
-            "Kaliski, B., \"Public-Key Cryptography Standards (PKCS) #8: " +
+            "B. Kaliski, \"Public-Key Cryptography Standards (PKCS) #8: " +
             "Private-Key Information Syntax Specification Version 1.2\", " +
             "RFC&nbsp;5208, May&nbsp;2008.");
 
-        addReferenceEntry (REF_BRAINPOOL, "Lochter, M., and J. Merkle, " +
+        addReferenceEntry (REF_BRAINPOOL, "M. Lochter, J. Merkle, " +
             "\"Elliptic Curve Cryptography (ECC) Brainpool Standard Curves and Curve Generation\", " +
             "RFC&nbsp;5639, March&nbsp;2010.");
 
