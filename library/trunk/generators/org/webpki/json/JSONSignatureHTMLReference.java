@@ -59,8 +59,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "cleartext data at least have an advantage for documentation and debugging. " +
             "To cope with the primary disadvantage (the potential dependency on " +
             "canonicalization), this part has been extremely simplified compared to XML&nbsp;DSig. "+
-            "In fact, JCS doesn't actually rely on canonicalization since it doesn't serve any purpose, " +
-            "at least not in this context.");
+            "In fact, JCS doesn't actually rely on canonicalization since it doesn't serve any purpose " +
+            "in this particular context.");
 
         json.addParagraphObject ("Sample Signature").append (
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
