@@ -3,7 +3,7 @@
 <title>WebCrypto++ Payment Demo - Messages</title>
 <style type="text/css">
  div {margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;}
- a {color:blue}
+ a {color:blue;font-family:verdana,helvetica;text-decoration:none}
 .text {padding-top:15pt}
 code {font-size:9pt;font-weight:bold;color:#606060}
 </style>
@@ -16,7 +16,8 @@ It is supposed to be read together with the
 <a href="http://webpki.org/papers/PKI/EMV-Tokenization-SET-3DSecure-WebCryptoPlusPlus-combo.pdf#page=4" target="_blank">state diagram</a>.
 Notation: <code>Payee</code> = Merchant, <code>PaymentProvider</code> = Bank.</td></tr>
 <tr><td>Note that there are three <i>independent</i> PKIs involved: The Payment Network PKI, The Payee Network PKI, The local Bank client PKI.
-In addition there are also <code>PaymentProvider</code>-specific encryption keys.</td></tr>
+In addition there are also <code>PaymentProvider</code>-specific encryption keys.
+The described system makes extensive use of the JSON Cleartext Signature <a href="https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html">[JCS]</a> scheme.</td></tr>
 <tr><td id="PaymentApplication.Initialize" class="text">State #1: When the <code>PaymentApplication</code> (IFRAME) has been properly loaded, it signals [using <code>postMessage()</code>] to the
 <code>Payee</code> holding window that it is ready.</td></tr>
 <tr><td><div>{<br>&nbsp;&nbsp;&nbsp;&nbsp;&quot;<span style="color:#606060">@context</span>&quot;:&nbsp;&quot;<span style="color:#0000C0">http://xmlns.webpki.org/wcpp-payment-demo</span>&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&quot;<span style="color:#606060">@qualifier</span>&quot;:&nbsp;&quot;<span style="color:#0000C0">Initialize</span>&quot;<br>}</div></td></tr>
