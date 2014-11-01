@@ -45,7 +45,7 @@
     </resources>
 
 	<resources id="wcpp_application.xml">
-<string><![CDATA[    <!-- WebCrypto++ Demo -->
+<string><![CDATA[    <!-- WebCrypto++ Payment Demo -->
     <module>
         <web>
             <web-uri>${application}</web-uri>
