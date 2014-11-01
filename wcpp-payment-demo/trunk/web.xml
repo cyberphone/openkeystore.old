@@ -95,47 +95,47 @@
     </context-param>
     
     <listener>
-        <listener-class>org.webpki.webapps.wcppdemo.PaymentDemoService</listener-class>
+        <listener-class>org.webpki.webapps.wcpppaymentdemo.PaymentDemoService</listener-class>
      </listener>
 
     <servlet>
 	    <servlet-name>MerchantServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.MerchantServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.MerchantServlet</servlet-class>
     </servlet>
     
     <servlet>
 	    <servlet-name>CheckoutServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.CheckoutServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.CheckoutServlet</servlet-class>
     </servlet>
 
     <servlet>
 	    <servlet-name>AuthorizeRequestServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.AuthorizeRequestServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.AuthorizeRequestServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.HomeServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.HomeServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>WebCryptoHomeServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.WebCryptoHomeServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.WebCryptoHomeServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>CardServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.CardServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.CardServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>PaymentServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.PaymentServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.PaymentServlet</servlet-class>
     </servlet>
     
     <servlet>
         <servlet-name>PaymentProviderServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppdemo.PaymentProviderServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.wcpppaymentdemo.PaymentProviderServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

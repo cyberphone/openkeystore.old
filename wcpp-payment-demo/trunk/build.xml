@@ -3,7 +3,7 @@
   <!-- set properties for this build -->
   <property name="src_dir" value="src"/>
   <property name="packimage_dir" value="packaged-images"/>
-  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/wcppdemo"/>
+  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/wcpppaymentdemo"/>
   
   <property name="appcorename" value="WebCryptoPlusPlus"/>
   <property name="application" value="${appcorename}.war"/>
