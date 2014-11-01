@@ -470,7 +470,7 @@ public class HTML implements BaseProperties
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td>';\n" +
         "}\n\n" +
-        "function binaryToBase64 (binarray) {\n" +
+        "function binaryToBase64URL (binarray) {\n" +
         "    var encoded = new String ();\n" +
         "    var i = 0;\n" +
         "    var modulo3 = binarray.length % 3;\n" +
@@ -602,9 +602,9 @@ public class HTML implements BaseProperties
               "//\n" +
               "function sendAuthorizationData(encrypted_authorization_data) {\n" +
               "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES256_CBC.getURI () + "';\n" +
-              "    encrypted_data." + IV_JSON + " = binaryToBase64(encryption_algorithm.iv);\n" +
+              "    encrypted_data." + IV_JSON + " = binaryToBase64URL(encryption_algorithm.iv);\n" +
               "    encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
-              "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encrypted_authorization_data));\n" +
+              "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64URL(new Uint8Array(encrypted_authorization_data));\n" +
               "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
               "}\n\n" +
               "//\n" +
@@ -625,7 +625,7 @@ public class HTML implements BaseProperties
               "        public_key." + JSONSignatureDecoder.RSA_JSON + " = rsa_key;\n" +
               "        rsa_key." + JSONSignatureDecoder.MODULUS_JSON + " = selected_card.bank_encryption_key.n;\n" +
               "        rsa_key." + JSONSignatureDecoder.EXPONENT_JSON + " = selected_card.bank_encryption_key.e;\n" +
-              "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64(new Uint8Array(encryped_aes_key));\n" +
+              "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64URL(new Uint8Array(encryped_aes_key));\n" +
               "        sendAuthorizationData(encrypted_authorization_data);\n" +
               "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
               "    }).then (undefined, function() {error('Failed import public key')});\n" +
@@ -650,7 +650,7 @@ public class HTML implements BaseProperties
               "function createBitString(string) {\n" +
               "    var utf8 = convertStringToUTF8('0' + string);\n" +
               "    utf8[0] = 0;\n" +
-              "    return binaryToBase64(utf8);\n" +
+              "    return binaryToBase64URL(utf8);\n" +
               "}\n\n" +
               "//\n" +
               "// ECDH encrypted authorization\n" +
@@ -709,7 +709,7 @@ public class HTML implements BaseProperties
          {
            s.append (
              "    // For a lame GUI-demo base64 is \"encryption\", right?\n" +
-             "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64(signed_auth_data);\n" +
+             "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64URL(signed_auth_data);\n" +
              "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n");
          }
        s.append (
@@ -775,7 +775,7 @@ public class HTML implements BaseProperties
            s.append (
              "    crypto.subtle.importKey('jwk', selected_card.client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
              "    crypto.subtle.sign (key_sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
-             "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64(new Uint8Array(signature));\n" +
+             "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
              "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
              "        encryptAndSend (convertStringToUTF8(json_auth_data));\n" +
