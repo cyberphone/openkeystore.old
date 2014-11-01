@@ -49,9 +49,9 @@ public class PaymentRequest implements BaseProperties
 
     public JSONObjectWriter serialize () throws IOException
       {
-        KeyStoreSigner signer = new KeyStoreSigner (WCPPService.merchant_eecert_key, null);
+        KeyStoreSigner signer = new KeyStoreSigner (PaymentDemoService.merchant_eecert_key, null);
         signer.setExtendedCertPath (true);
-        signer.setKey (null, WCPPService.key_password);
+        signer.setKey (null, PaymentDemoService.key_password);
         return new JSONObjectWriter ()
                      .setString (COMMON_NAME_JSON, common_name)
                      .setInt (AMOUNT_JSON, amount)

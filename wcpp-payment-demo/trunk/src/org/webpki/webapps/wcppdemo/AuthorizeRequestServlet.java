@@ -66,11 +66,11 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                                                                    JSONParser.parse (request.getParameter ("authreq")));
             logger.info ("Authorize Request:\n" + new String (new JSONObjectWriter (auth_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
             String auth_url = auth_req.getString (AUTH_URL_JSON);
-            if (!auth_url.startsWith (WCPPService.bank_url))
+            if (!auth_url.startsWith (PaymentDemoService.bank_url))
               {
                 throw new IOException ("Unexpected \"" + AUTH_URL_JSON + "\" :" + auth_url);
               }
-            auth_url = WCPPService.payment_url + auth_url.substring (WCPPService.bank_url.length ());
+            auth_url = PaymentDemoService.payment_url + auth_url.substring (PaymentDemoService.bank_url.length ());
             HttpSession session = request.getSession (false);
             if (session == null || session.getAttribute (CheckoutServlet.REQUEST_HASH_ATTR) == null)
               {
@@ -84,9 +84,9 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
             transact.setString (CLIENT_IP_ADDRESS_JSON, request.getRemoteAddr());
             transact.setString (TRANSACTION_ID_JSON, "#" + next_transaction_id++);
             transact.setDateTime (DATE_TIME_JSON, new Date(), true);
-            KeyStoreSigner signer = new KeyStoreSigner (WCPPService.merchant_eecert_key, null);
+            KeyStoreSigner signer = new KeyStoreSigner (PaymentDemoService.merchant_eecert_key, null);
             signer.setExtendedCertPath (true);
-            signer.setKey (null, WCPPService.key_password);
+            signer.setKey (null, PaymentDemoService.key_password);
             transact.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             HTTPSWrapper https_wrapper = new HTTPSWrapper ();
             https_wrapper.setRequireSuccess (true);
@@ -111,7 +111,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                 card_type = authorized_result.getString (CARD_TYPE_JSON);
                 reference_pan = authorized_result.getString (REFERENCE_PAN_JSON);
               }
-            authorized_result.getSignature ().verify (new JSONX509Verifier (new KeyStoreVerifier (WCPPService.payment_root)));
+            authorized_result.getSignature ().verify (new JSONX509Verifier (new KeyStoreVerifier (PaymentDemoService.payment_root)));
             authorized_result.getBinary (PAYMENT_TOKEN_JSON);   // No DB etc yet...
             authorized_result.getString (TRANSACTION_ID_JSON);  // No DB etc yet...
             authorized_result.getDateTime (DATE_TIME_JSON);     // No DB etc yet...

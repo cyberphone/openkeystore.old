@@ -81,7 +81,7 @@ public class HTML implements BaseProperties
     
     static String getIframeHTML ()
       {
-        return "<iframe src=\"" + WCPPService.bank_url +
+        return "<iframe src=\"" + PaymentDemoService.bank_url +
                "/payment\" style=\"width:" + PAYMENT_WINDOW_WIDTH + 
                "px;height:" + PAYMENT_WINDOW_HEIGHT + 
                "px;border-width:1px;border-style:solid;border-color:" +
@@ -146,7 +146,7 @@ public class HTML implements BaseProperties
              s.append (bodyscript);
           }
         s.append ("><div onclick=\"document.location.href='")
-         .append (WCPPService.bank_url)
+         .append (PaymentDemoService.bank_url)
          .append ("'\" title=\"Back to the bank!\" style=\"cursor:pointer;position:absolute;top:15px;left:15px;z-index:5;visibility:visible;padding:5pt 8pt 5pt 8pt;font-size:12pt;text-align:center;background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%);border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0;}\">" +
          "WebCrypto++<br><span style=\"font-size:8pt\">Payment Demo Home</span></div>" + "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
          .append (box)
@@ -165,14 +165,14 @@ public class HTML implements BaseProperties
     public static void homePage (boolean crypto_enabled, HttpServletResponse response) throws IOException, ServletException
       {
         StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n");
-        if (WCPPService.web_crypto)
+        if (PaymentDemoService.web_crypto)
           {
             s.append (
             "    if (window.crypto && window.crypto.subtle) {\n" +
             "        crypto.subtle.importKey('jwk',")
-            .append (WCPPService.client_private_key.getJWK ())
+            .append (PaymentDemoService.client_private_key.getJWK ())
             .append (", {name: '")
-            .append (WCPPService.client_private_key.getKeyType ().equals ("EC") ? "ECDSA'" : "RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}")
+            .append (PaymentDemoService.client_private_key.getKeyType ().equals ("EC") ? "ECDSA'" : "RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}")
             .append ("}, true, ['sign']).then (function(private_key) {\n            ")
             .append (crypto_enabled ? "console.debug('Running in WebCrypto Mode!');\n" : "document.location.href = 'cryptohome';\n")
             .append (
@@ -207,8 +207,8 @@ public class HTML implements BaseProperties
                    "<tr><td style=\"text-align:left\"><i>In case you are testing with a WebCrypto-enabled browser, the user-authorization will be signed and encrypted " +
                    "which can viewed in a browser debugger window.</i></td></tr>" +
                    "<tr><td align=\"center\"><table cellspacing=\"0\">" +
-                   "<tr style=\"text-align:left\"><td><a href=\"" + WCPPService.bank_url + "/cards\">Initialize Payment Cards&nbsp;&nbsp;</a></td><td><i>Mandatory</i> First Step</td></tr>" +
-                   "<tr style=\"text-align:left\"><td><a href=\"" + WCPPService.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a href=\"" + PaymentDemoService.bank_url + "/cards\">Initialize Payment Cards&nbsp;&nbsp;</a></td><td><i>Mandatory</i> First Step</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a href=\"" + PaymentDemoService.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
                    "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Documentation</b></td></tr>" +
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++</a></td><td><i>Conceptual</i> Specification</td></tr>" +
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/EMV-Tokenization-SET-3DSecure-WebCryptoPlusPlus-combo.pdf#page=4\">Demo Payment System</a></td><td>State Diagram Etc.</td></tr>" +
@@ -267,13 +267,13 @@ public class HTML implements BaseProperties
         "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
-        "<img id=\"busy\" src=\"" + WCPPService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
+        "<img id=\"busy\" src=\"" + PaymentDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
         ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
         "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
         PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('" + WCPPService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
+        "background-image:url('" + PaymentDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
          "</div>" +
         "<script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
@@ -1132,7 +1132,7 @@ public class HTML implements BaseProperties
                   "<form name=\"shoot\" method=\"POST\" action=\"authreq\">" +
                   "<input type=\"hidden\" name=\"authreq\" id=\"authreq\">" +
                   "</form>" +
-                  "<form name=\"restore\" method=\"POST\" action=\"" + WCPPService.merchant_url + "\">" +
+                  "<form name=\"restore\" method=\"POST\" action=\"" + PaymentDemoService.merchant_url + "\">" +
                   "</form></td></tr>");
         
      StringBuffer temp_string = new StringBuffer (
