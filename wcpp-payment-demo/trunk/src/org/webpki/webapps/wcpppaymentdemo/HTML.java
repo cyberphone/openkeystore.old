@@ -907,7 +907,7 @@ public class HTML implements BaseProperties
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
         "        window.addEventListener('message', receivePayeeResponse, false);\n" +
-        "        console.debug('init payment window');\n" +
+        "        console.debug('Init Payment Window');\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
                  Messages.INITIALIZE +
@@ -1139,7 +1139,7 @@ public class HTML implements BaseProperties
         "\n\n\"use strict\";\n\n" +
         "var payment_status = '" + Messages.INITIALIZE + "';\n\n" +
         "function receiveMessage(event) {\n" +
-        "    console.debug (event.origin + ' = > Checkout:\\n' + event.data);\n" +
+        "    console.debug (event.origin + ' = > Checkout message:\\n' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
         "        console.debug('UNDECODABLE MESSAGE');\n" +
