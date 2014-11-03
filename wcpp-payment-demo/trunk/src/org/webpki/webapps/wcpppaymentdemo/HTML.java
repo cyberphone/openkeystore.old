@@ -1138,7 +1138,7 @@ public class HTML implements BaseProperties
      StringBuffer temp_string = new StringBuffer (
         "\n\n\"use strict\";\n\n" +
         "var payment_status = '" + Messages.INITIALIZE + "';\n\n" +
-        "function receivePaymentMessage(event) {\n" +
+        "function receiveMessage(event) {\n" +
         "    console.debug (event.origin + ' = > Checkout:\\n' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
@@ -1166,10 +1166,8 @@ public class HTML implements BaseProperties
         "        }, 0);\n" +
         "    }\n" +
         "}\n\n" +
-        "function initPage() {\n" +
-        "    window.addEventListener('message', receivePaymentMessage, false);\n" +
-        "}\n");
-        HTML.output (response, HTML.getHTML (temp_string.toString (), "onload=\"initPage()\"", s.toString ()));
+        "window.addEventListener('message', receiveMessage, false);\n");
+        HTML.output (response, HTML.getHTML (temp_string.toString (), null, s.toString ()));
       }
 
     public static void resultPage (HttpServletResponse response,
