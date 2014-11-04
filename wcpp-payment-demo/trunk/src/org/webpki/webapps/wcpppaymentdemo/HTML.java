@@ -252,30 +252,7 @@ public class HTML implements BaseProperties
         "table {border-collapse: collapse}\n" +
         "td {padding: 0px}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative;visibility:hidden}\n" +
-        "</style></head><body onload=\"initPayment()\">" +
-        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
-        "color:white;background:" +
-        PAYMENT_BORDER_COLOR + ";width:" +
-        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
-        "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
-        "Initializing...</div>" +
-        "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
-        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
-        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
-        "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
-        "<img id=\"busy\" src=\"" + PaymentDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
-        ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
-        ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
-        "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
-        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('" + PaymentDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
-         "</div>" +
-        "<script type=\"text/javascript\">\n" +
+        "</style><script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
         "////////////////////////////////////////////////////////////////////\n" +
         "// Disclaimer: The actual messages used by this payment provider  //\n" +
@@ -915,7 +892,29 @@ public class HTML implements BaseProperties
         "    }\n" +
         "}\n" +
         "</script>" +
-        "</body></html>");
+        "</head><body onload=\"initPayment()\">" +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        "color:white;background:" +
+        PAYMENT_BORDER_COLOR + ";width:" +
+        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
+        "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
+        PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
+        "Initializing...</div>" +
+        "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
+        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
+        "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
+        "<img id=\"busy\" src=\"" + PaymentDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
+        ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
+        ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+        "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
+        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
+        PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        "background-image:url('" + PaymentDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
+         "</div></body></html>");
         HTML.output (response, s.toString());
       }
 
