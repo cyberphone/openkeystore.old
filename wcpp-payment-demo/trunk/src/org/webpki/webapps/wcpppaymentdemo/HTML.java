@@ -1157,7 +1157,7 @@ public class HTML implements BaseProperties
         "        setTimeout(function(){\n" +
         "        event.source.postMessage(" + invoke_json + ", event.origin);\n" +
 //      "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-        "        }, 500);\n" +
+        "        }, 500); // \"working\" simulation (it is so quick...)\n" +
         "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
         "    } else {\n" +
         "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +

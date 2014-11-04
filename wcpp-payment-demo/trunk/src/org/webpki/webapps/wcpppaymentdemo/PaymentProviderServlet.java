@@ -86,9 +86,11 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             logger.info ("Transaction Request [" + client_ip_address + "," + request_transaction_id + "]:\n" +
                          new String (new JSONObjectWriter (trans_req).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
             JSONObjectReader encrypted_auth_data = trans_req.getObject (AUTH_DATA_JSON).getObject (ENCRYPTED_DATA_JSON);
-            
-            JSONObjectReader auth_data = null;
+
+            // "working" simulation - the prototype is simply too quick :-)
             Thread.sleep (1000);
+
+            JSONObjectReader auth_data = null;
             if (encrypted_auth_data.hasProperty (ALGORITHM_JSON))
               {
                 SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_auth_data.getString (ALGORITHM_JSON));
