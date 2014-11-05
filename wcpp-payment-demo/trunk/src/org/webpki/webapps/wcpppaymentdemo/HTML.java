@@ -164,7 +164,7 @@ public class HTML implements BaseProperties
 
     public static void homePage (boolean crypto_enabled, HttpServletResponse response) throws IOException, ServletException
       {
-        StringBuffer s = new StringBuffer ("function checkWebCryptoSupport () {\n");
+        StringBuffer s = new StringBuffer ("function checkWebCryptoSupport() {\n");
         if (PaymentDemoService.web_crypto)
           {
             s.append (
@@ -371,7 +371,7 @@ public class HTML implements BaseProperties
           "'w','x','y','z','0','1','2','3'," +
           "'4','5','6','7','8','9','-','_'];\n\n" +
          "function error(message) {\n" +
-        "    console.debug ('Error: ' + message);\n" +
+        "    console.debug('Error: ' + message);\n" +
         "    if (!aborted_operation) {\n" +
         "        document.getElementById('activity').innerHTML='ABORTED:<br>' + message;\n" +
         "        aborted_operation = true;\n" +
@@ -447,8 +447,8 @@ public class HTML implements BaseProperties
              "' + card_list[card_index].base64_image + '\\')' + add_on + '\">" +
              "</div></td>';\n" +
         "}\n\n" +
-        "function binaryToBase64URL (binarray) {\n" +
-        "    var encoded = new String ();\n" +
+        "function binaryToBase64URL(binarray) {\n" +
+        "    var encoded = new String();\n" +
         "    var i = 0;\n" +
         "    var modulo3 = binarray.length % 3;\n" +
         "    while (i < binarray.length - modulo3) {\n" +
@@ -471,19 +471,19 @@ public class HTML implements BaseProperties
         "function convertStringToUTF8(string) {\n" +
         "    var buffer = [];\n" +
         "    for (var n = 0; n < string.length; n++) {\n" +
-        "        var c = string.charCodeAt (n);\n" +
+        "        var c = string.charCodeAt(n);\n" +
         "        if (c < 128) {\n" +
-        "            buffer.push (c);\n" +
+        "            buffer.push(c);\n" +
         "        } else if ((c > 127) && (c < 2048)) {\n" +
-        "            buffer.push ((c >> 6) | 0xC0);\n" +
-        "            buffer.push ((c & 0x3F) | 0x80);\n" +
+        "            buffer.push((c >> 6) | 0xC0);\n" +
+        "            buffer.push((c & 0x3F) | 0x80);\n" +
         "        } else {\n" +
-        "            buffer.push ((c >> 12) | 0xE0);\n" +
-        "            buffer.push (((c >> 6) & 0x3F) | 0x80);\n" +
-        "            buffer.push ((c & 0x3F) | 0x80);\n" +
+        "            buffer.push((c >> 12) | 0xE0);\n" +
+        "            buffer.push(((c >> 6) & 0x3F) | 0x80);\n" +
+        "            buffer.push((c & 0x3F) | 0x80);\n" +
         "        }\n" +
         "    }\n" +
-        "    return new Uint8Array (buffer);\n" +
+        "    return new Uint8Array(buffer);\n" +
         "}\n\n" +
         "//\n" +
         "// Although PANs (card numbers) are not really needed from the user's\n" +
@@ -568,7 +568,7 @@ public class HTML implements BaseProperties
        "    document.getElementById('activity').innerHTML = 'Aborting...';\n" +
        "    document.getElementById('content').innerHTML = '';\n" +
        "    document.getElementById('busy').style.visibility = 'visible';\n" +
-       "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand ('" +
+       "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" +
             Messages.ABORT + "')), window.document.referrer);\n" +
        "}\n\n");
         if (web_crypto)
@@ -664,7 +664,7 @@ public class HTML implements BaseProperties
        "// This is the final part of the user authorization\n" +
        "//\n" +
        "function encryptAndSend(signed_auth_data) {\n" +
-       "    authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
+       "    authorize_command = createJSONBaseCommand('" + Messages.AUTHORIZE + "');\n" +
        "    authorize_command." + AUTH_URL_JSON + " = selected_card.authorization_url;\n" +
        "    encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
        "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
@@ -703,7 +703,7 @@ public class HTML implements BaseProperties
        "    auth_data." + PAN_JSON + " = selected_card.pan;\n" +
        "    var date_time = new Date().toISOString();\n" +
        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-       "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+       "        date_time = date_time.substring(0, date_time.indexOf('.')) + 'Z';\n" +
        "    }\n" +
        "    auth_data." + DATE_TIME_JSON + " = date_time;\n");
        if (web_crypto)
@@ -755,7 +755,7 @@ public class HTML implements BaseProperties
              "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
              "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
-             "        encryptAndSend (convertStringToUTF8(json_auth_data));\n" +
+             "        encryptAndSend(convertStringToUTF8(json_auth_data));\n" +
              "    }).then (undefined, function() {error('Failed signing')});\n" +
              "    }).then (undefined, function() {error('Failed importing private key')});\n");
          }
@@ -764,7 +764,7 @@ public class HTML implements BaseProperties
            s.append (
              "    var json_auth_data = JSON.stringify(auth_data);\n" +
              "    console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
-             "    encryptAndSend (convertStringToUTF8(json_auth_data));\n");
+             "    encryptAndSend(convertStringToUTF8(json_auth_data));\n");
          }
        s.append (
        "}\n\n" +
@@ -874,7 +874,8 @@ public class HTML implements BaseProperties
         "        }\n" +
         "    }\n" +
         "    error('Unexpected message: ' + event.origin + ' ' + event.data);\n" +
-        "}\n\n" +
+        "}\n" +
+        "window.addEventListener('message', receivePayeeResponse, false);\n\n" +
         "//\n" +
         "// When the payment module IFRAME has been loaded (by the payee),\n" +
         "// the payment process is automatically invoked by the body.onload().\n" +
@@ -883,7 +884,6 @@ public class HTML implements BaseProperties
         "    caller_domain = getDomainName(window.document.referrer);\n" +
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
-        "        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        console.debug('Init Payment Window');\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
