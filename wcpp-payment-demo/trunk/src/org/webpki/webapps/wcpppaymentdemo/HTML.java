@@ -76,8 +76,7 @@ public class HTML implements BaseProperties
         "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
         ".quantity {text-align:right;font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "}\n" +
-        ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n" +
-        ".headline {font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "}\n";
+        ".updnbtn {vertical-align:middle;text-align:center;font-weight:normal;font-size:8px;font-family:" + FONT_VERDANA + ";margin:0px;border-spacing:0px;padding:2px 3px 2px 3px}\n";
     
     static String getIframeHTML ()
       {
@@ -1180,15 +1179,15 @@ public class HTML implements BaseProperties
           {
             s.append ("<table>" +
              "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Order Status<br>&nbsp;</td></tr>" +
-             "<tr><td><table>" +
-             "<tr><td style=\"padding-bottom:8pt\">Dear customer, your order has been successfully processed!</td></tr>")
-            .append ("<tr><td style=\"padding-bottom:4pt\">Our reference: ")
+             "<tr><td style=\"text-align:center;padding-bottom:15pt;font-size:10pt\">Dear customer, your order has been successfully processed!</td></tr>" +
+             "<tr><td><table class=\"tftable\"><tr><th>Our Reference</th><th>Amount</th><th>Card Type</th><th>Card Number</th></tr>" +
+             "<tr><td style=\"text-align:center\">")
             .append (payment_request.reference_id)
-            .append ("</td></tr><tr><td>Amount: ")
+            .append ("</td><td style=\"text-align:center\">")
             .append (price (payment_request.amount))
-            .append ("</td></tr><tr><td>")
+            .append ("</td><td style=\"text-align:center\">")
             .append (card_type)
-            .append (": ")
+            .append ("</td><td style=\"text-align:center\">")
             .append (reference_pan)
             .append ("</td></tr></table></td></tr></table>");
           }
