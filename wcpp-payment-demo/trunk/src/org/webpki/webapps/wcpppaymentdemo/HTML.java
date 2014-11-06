@@ -859,7 +859,7 @@ public class HTML implements BaseProperties
        "// The payment application always query the payee for data.\n" +
        "// There is a timeout associated with the (currently only) request.\n" +
        "//\n" +
-        "function receivePayeeResponse(event) {\n" +
+       "window.addEventListener('message', function(event) {\n" +
         "    console.debug(event.origin + ' => PaymentAppFrame:\\n' + event.data);\n" +
         "    if (aborted_operation) return;\n" +
         "    if (timeouter_handle) {\n" +
@@ -874,17 +874,16 @@ public class HTML implements BaseProperties
         "        }\n" +
         "    }\n" +
         "    error('Unexpected message: ' + event.origin + ' ' + event.data);\n" +
-        "}\n" +
-        "window.addEventListener('message', receivePayeeResponse, false);\n\n" +
+        "}, false);\n\n" +
         "//\n" +
         "// When the payment module IFRAME has been loaded (by the payee),\n" +
         "// the payment process is automatically invoked by the body.onload().\n" +
         "//\n" +
-        "function initPayment() {\n" +
+        "function initPaymentApplication() {\n" +
         "    caller_domain = getDomainName(window.document.referrer);\n" +
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
-        "        console.debug('Init Payment Window');\n" +
+        "        console.debug('Init Payment Application');\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
                  Messages.INITIALIZE +
@@ -892,7 +891,7 @@ public class HTML implements BaseProperties
         "    }\n" +
         "}\n" +
         "</script>" +
-        "</head><body onload=\"initPayment()\">" +
+        "</head><body onload=\"initPaymentApplication()\">" +
         "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
