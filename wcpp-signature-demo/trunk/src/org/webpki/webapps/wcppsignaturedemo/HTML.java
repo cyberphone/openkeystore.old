@@ -37,23 +37,23 @@ import org.webpki.util.Base64URL;
 
 public class HTML implements BaseProperties
   {
-    static final int PAYMENT_WINDOW_WIDTH            = 450;
-    static final int PAYMENT_WINDOW_HEIGHT           = 250;
-    static final int PAYMENT_LOADING_SIZE            = 48;
-    static final int PAYMENT_DIV_HORIZONTAL_PADDING  = 6;
-    static final int PAYMENT_DIV_VERTICAL_PADDING    = 5;
-    static final String PAYMENT_BORDER_COLOR         = "#306754";
-    static final int PAYMENT_PAN_PADDING_TOP         = 5;
-    static final int PAYMENT_PAN_PADDING_BOTTOM      = 10;
-    static final int PAYMENT_CARD_HORIZ_GUTTER       = 20;
-    static final int PAYMENT_CARD_RIGHT_MARGIN       = 30;
-    static final int PAYMENT_CARD_TOP_POSITION       = 25;
-    static final int PAYMENT_BUTTON_LEFT             = 15;
+    static final int SIGNATURE_WINDOW_WIDTH            = 800;
+    static final int SIGNATURE_WINDOW_HEIGHT           = 600;
+    static final int SIGNATURE_LOADING_SIZE            = 48;
+    static final int SIGNATURE_DIV_HORIZONTAL_PADDING  = 6;
+    static final int SIGNATURE_DIV_VERTICAL_PADDING    = 5;
+    static final String SIGNATURE_BORDER_COLOR         = "#306754";
+    static final int SIGNATURE_PAN_PADDING_TOP         = 5;
+    static final int SIGNATURE_PAN_PADDING_BOTTOM      = 10;
+    static final int SIGNATURE_CARD_HORIZ_GUTTER       = 20;
+    static final int SIGNATURE_CARD_RIGHT_MARGIN       = 30;
+    static final int SIGNATURE_CARD_TOP_POSITION       = 25;
+    static final int SIGNATURE_BUTTON_LEFT             = 15;
     
     static final int PIN_MAX_LENGTH                  = 20;
     static final int PIN_FIELD_SIZE                  = 8;
 
-    static final int PAYMENT_TIMEOUT_INIT            = 5000;
+    static final int SIGNATURE_TIMEOUT_INIT            = 5000;
     
     static final String FONT_VERDANA = "Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans'";
     static final String FONT_ARIAL = "Arial,'Liberation Sans',Verdana,'Bitstream Vera Sans','DejaVu Sans'";
@@ -83,10 +83,10 @@ public class HTML implements BaseProperties
       {
         return "<iframe src=\"" +
                SignatureDemoService.issuer_url +
-               "/signatureframe\" style=\"width:" + PAYMENT_WINDOW_WIDTH + 
-               "px;height:" + PAYMENT_WINDOW_HEIGHT + 
+               "/signatureframe\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
+               "px;height:" + SIGNATURE_WINDOW_HEIGHT + 
                "px;border-width:1px;border-style:solid;border-color:" +
-               PAYMENT_BORDER_COLOR + 
+               SIGNATURE_BORDER_COLOR + 
                ";box-shadow:3pt 3pt 3pt #D0D0D0\"></iframe>";
       }
 
@@ -247,26 +247,26 @@ public class HTML implements BaseProperties
         "td {padding: 0px}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative;visibility:hidden}\n" +
         "</style></head><body onload=\"initPayment()\">" +
-        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
-        PAYMENT_BORDER_COLOR + ";width:" +
-        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
-        "<div id=\"activity\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px\">" +
+        SIGNATURE_BORDER_COLOR + ";width:" +
+        (SIGNATURE_WINDOW_WIDTH - (SIGNATURE_DIV_HORIZONTAL_PADDING * 2)) +"px\">Payment Request</div>" +
+        "<div id=\"activity\" style=\"padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">" +
         "Initializing...</div>" +
         "<div id=\"content\" style=\"overflow-y:auto;\"></div>" +
-        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
-        ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
-        ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+        ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
+        ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
         "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
          "</div>" +
         "<script type=\"text/javascript\">\n" +
@@ -404,7 +404,7 @@ public class HTML implements BaseProperties
         "    return url;\n" +
         "}\n\n" +
         "function checkNoErrors() {\n" +
-        "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
+        "   if (aborted_operation || window.self.innerWidth != " + SIGNATURE_WINDOW_WIDTH + " || window.self.innerHeight != " + SIGNATURE_WINDOW_HEIGHT + ") {\n" +
         "       error('Frame size manipulated by parent');\n" +
         "       return false;\n" +
         "   }\n" +
@@ -505,8 +505,8 @@ public class HTML implements BaseProperties
         "// point of view, they represent a legacy which should not be ignored...\n" +
         "//\n" +
         "function outputPAN(card_index) {\n" +
-        "    var pan_html = '<td style=\"padding-top:" + PAYMENT_PAN_PADDING_TOP +
-             "px;padding-bottom:" + PAYMENT_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:" + javaScript (FONT_VERDANA) + ";text-align:center\">';\n" +
+        "    var pan_html = '<td style=\"padding-top:" + SIGNATURE_PAN_PADDING_TOP +
+             "px;padding-bottom:" + SIGNATURE_PAN_PADDING_BOTTOM + "px;font-size:8pt;font-family:" + javaScript (FONT_VERDANA) + ";text-align:center\">';\n" +
         "    var pan = card_list[card_index].pan;\n" +
         "    for (var i = 0; i < pan.length; i++) {\n" +
         "        if (i && i % 4 == 0) pan_html += ' ';\n" +
@@ -529,23 +529,23 @@ public class HTML implements BaseProperties
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
         "    document.getElementById('activity').innerHTML = '&nbsp;';\n" +
-        "    document.getElementById('cancel').style.left = '" + PAYMENT_BUTTON_LEFT + "px';\n" +
+        "    document.getElementById('cancel').style.left = '" + SIGNATURE_BUTTON_LEFT + "px';\n" +
         "    document.getElementById('content').innerHTML = payment_details + cardTableHeader('" +
-             PAYMENT_CARD_RIGHT_MARGIN + "px', " +
-             PAYMENT_CARD_TOP_POSITION + ") + " +
+             SIGNATURE_CARD_RIGHT_MARGIN + "px', " +
+             SIGNATURE_CARD_TOP_POSITION + ") + " +
              "'<tr>' + outputCard(card_index, '\" title=\"Don\\'t leave home without it!') + '</tr>" +
              "<tr>' + outputPAN(card_index) + '</tr></table>';\n" +
         "    document.getElementById('details').style.top = (" +
-             PAYMENT_WINDOW_HEIGHT + 
+             SIGNATURE_WINDOW_HEIGHT + 
              " - document.getElementById('details').offsetHeight)/2 + 'px';\n" +
-//        "    var details_left = (" + (PAYMENT_WINDOW_WIDTH - CardEntry.CARD_WIDTH - PAYMENT_CARD_RIGHT_MARGIN) +
+//        "    var details_left = (" + (SIGNATURE_WINDOW_WIDTH - CardEntry.CARD_WIDTH - SIGNATURE_CARD_RIGHT_MARGIN) +
              " - document.getElementById('details').offsetWidth) / 2;\n" +
              "    document.getElementById('details').style.left = details_left + 'px';\n" +
              "    document.getElementById('ok').style.left = ((details_left + " +
                  "document.getElementById('pin').offsetLeft - " +
                  "document.getElementById('cancel').offsetWidth) * 2 + " +
                  "document.getElementById('pin').offsetWidth - " +
-                 PAYMENT_BUTTON_LEFT + ") + 'px';\n" +
+                 SIGNATURE_BUTTON_LEFT + ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + selected_card.pin + ' :-)';\n" +
         "    document.getElementById('pin').focus();\n" +
@@ -559,10 +559,10 @@ public class HTML implements BaseProperties
         "    document.getElementById('activity').innerHTML = 'Select Card:';\n" +
         "    var left_card = true;\n" +
         "    var previous_card;\n" +
-        "    var cards = cardTableHeader('auto', count < 3 ? " + PAYMENT_CARD_TOP_POSITION + " : 0);\n" +
+        "    var cards = cardTableHeader('auto', count < 3 ? " + SIGNATURE_CARD_TOP_POSITION + " : 0);\n" +
         "    for (var q = 0; q < card_list.length; q++) {\n" +
         "        if (card_list[q].matching) {\n"+
-        "            cards += left_card ? '<tr>' : '<td style=\"width:" + PAYMENT_CARD_HORIZ_GUTTER + "px\"></td>';\n" +
+        "            cards += left_card ? '<tr>' : '<td style=\"width:" + SIGNATURE_CARD_HORIZ_GUTTER + "px\"></td>';\n" +
         "            cards += outputCard(q, ';cursor:pointer\" title=\"Click to select\" onclick=\"displayPaymentRequest(' + q + ')');\n" +
         "            cards += left_card ? '' : '</tr>';\n" +
         "            if (left_card = !left_card) {\n" +
@@ -790,12 +790,12 @@ public class HTML implements BaseProperties
        "            }\n" +
        "        }\n" +
        "    }\n" +
-       "    document.getElementById('content').style.height = (" + (PAYMENT_WINDOW_HEIGHT + 2) +
+       "    document.getElementById('content').style.height = (" + (SIGNATURE_WINDOW_HEIGHT + 2) +
                     " - document.getElementById('control').offsetHeight - document.getElementById('border').offsetHeight - document.getElementById('activity').offsetHeight) + 'px';\n" +
        "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
        "    document.getElementById('ok').style.width = button_width + 'px';\n" +
        "    document.getElementById('cancel').style.left = ((" +
-            PAYMENT_WINDOW_WIDTH + " - button_width) / 2) + 'px';\n" +
+            SIGNATURE_WINDOW_WIDTH + " - button_width) / 2) + 'px';\n" +
        "    document.getElementById('cancel').title = 'Cancel and return to \"' + caller_common_name + '\"';\n" +
        "    document.getElementById('cancel').style.visibility = 'visible';\n" +
        "    if (!count) {\n" +
@@ -854,7 +854,7 @@ public class HTML implements BaseProperties
         "    if (checkNoErrors()) {\n" +
         "        window.addEventListener('message', receivePayeeResponse, false);\n" +
         "        console.debug('init payment window');\n" +
-        "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
+        "        checkTiming(" + SIGNATURE_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
                  Messages.INIIALIZE +
                  "')), window.document.referrer);\n" +
@@ -940,7 +940,9 @@ public class HTML implements BaseProperties
         "function error(message) {\n" +
        "    console.debug ('Error: ' + message);\n" +
        "    if (!aborted_operation) {\n" +
-       "        document.getElementById('content').innerHTML='ABORTED:<br>' + message;\n" +
+       "        document.getElementById('content').innerHTML='<div style=\"padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+       SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+       SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">ABORTED:<br>' + message + '</div>';\n" +
        "        aborted_operation = true;\n" +
        "    }\n" +
        "    document.getElementById('busy').style.visibility = 'hidden';\n" +
@@ -956,7 +958,7 @@ public class HTML implements BaseProperties
        "    return url;\n" +
        "}\n\n" +
        "function checkNoErrors() {\n" +
-       "   if (aborted_operation || window.self.innerWidth != " + PAYMENT_WINDOW_WIDTH + " || window.self.innerHeight != " + PAYMENT_WINDOW_HEIGHT + ") {\n" +
+       "   if (aborted_operation || window.self.innerWidth != " + SIGNATURE_WINDOW_WIDTH + " || window.self.innerHeight != " + SIGNATURE_WINDOW_HEIGHT + ") {\n" +
        "       error('Frame size manipulated by parent');\n" +
        "       return false;\n" +
        "   }\n" +
@@ -1085,12 +1087,11 @@ public class HTML implements BaseProperties
         "    var docbin = decodeBase64URL(sign_obj." + DOCUMENT_JSON + ");\n" +
         "    if (aborted_operation) return;\n" +
         "    console.debug('l=' + docbin.length);\n" +
+        "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
+             " - document.getElementById('border').offsetHeight - document.getElementById('control').offsetHeight;\n" +
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(docbin)" +
-               " + '\" style=\"width:" + (PAYMENT_WINDOW_WIDTH/2) + 
-               "px;height:" + (PAYMENT_WINDOW_HEIGHT/2) + 
-               "px;border-width:1px;border-style:solid;border-color:" +
-               PAYMENT_BORDER_COLOR + 
-               "\"></iframe>';\n" +
+               " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
+               "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
         "}\n\n" +
         "window.addEventListener('message', function(event) {\n" +
         "    console.debug(event.origin + ' => SignatureFrame:\\n' + event.data);\n" +
@@ -1113,32 +1114,33 @@ public class HTML implements BaseProperties
         "    document.getElementById('border').innerHTML += ' [' + caller_domain + ']';\n" +
         "    if (checkNoErrors()) {\n" +
         "        console.debug('Init Signature Application');\n" +
-        "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
+        "        checkTiming(" + SIGNATURE_TIMEOUT_INIT + ");\n" +
         "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
                  Messages.INIIALIZE +
                  "')), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
         "</script></head><body onload=\"initSignatureApplication()\">" +
-        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
-        PAYMENT_BORDER_COLOR + ";width:" +
-        (PAYMENT_WINDOW_WIDTH - (PAYMENT_DIV_HORIZONTAL_PADDING * 2)) +"px\">Signature Request</div>" +
-        "<div id=\"content\" style=\"padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " + 
-        PAYMENT_DIV_HORIZONTAL_PADDING + "px;overflow-y:auto;\">" +
-        "Initializing...</div>" +
-        "<div id=\"control\" style=\"z-index:3;position:absolute;bottom:0px;width:" + PAYMENT_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+        SIGNATURE_BORDER_COLOR + ";width:" +
+        (SIGNATURE_WINDOW_WIDTH - (SIGNATURE_DIV_HORIZONTAL_PADDING * 2)) +"px\">Signature Request</div>" +
+        "<div id=\"content\" style=\"overflow-y:auto\">" +
+        "<div style=\"padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+        SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
+        "<div id=\"control\" style=\"border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
+        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
         "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
-        ((PAYMENT_WINDOW_HEIGHT - PAYMENT_LOADING_SIZE) / 2) + "px;left:" + 
-        ((PAYMENT_WINDOW_WIDTH - PAYMENT_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
+        ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
+        ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
         "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        PAYMENT_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
          "</div></body></html>");
              html_signature_frame = s.toString ();
@@ -1180,8 +1182,8 @@ public class HTML implements BaseProperties
         "        object_to_sign." + MIME_TYPE_JSON + " = 'text/html';\n" +
         "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray () + "';\n" +
         "        setTimeout(function(){\n" +
-        "        event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
-//      "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
+        "            event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
+//      "        }, " + (SIGNATURE_TIMEOUT_INIT + 1000) + ");\n" +
         "        }, 500);\n" +
         "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
         "    } else {\n" +
