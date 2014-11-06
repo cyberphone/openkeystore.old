@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+    <context-param>
+        <description>Bouncycastle to be loaded before other providers</description>
+        <param-name>bouncycastle_first</param-name>
+        <param-value>@bouncycastle-first@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>URL to Issuer</description>
+        <param-name>issuer_url</param-name>
+        <param-value>@issuer-url@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>URL to Relying Party</description>
+        <param-name>relying_party_url</param-name>
+        <param-value>@relying-party-url@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Card font name</description>
+        <param-name>card_font</param-name>
+        <param-value>@card-font@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Key Password</description>
+        <param-name>key_password</param-name>
+        <param-value>@key-password@</param-value>
+    </context-param>
+ 
+    <context-param>
+        <description>Client Root</description>
+        <param-name>client_root</param-name>
+        <param-value>@client-root@</param-value>
+    </context-param>
+
+    <context-param>
+        <description>Client Certificate</description>
+        <param-name>client_eecert</param-name>
+        <param-value>@client-eecert@</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>org.webpki.webapps.wcppsignaturedemo.SignatureDemoService</listener-class>
+     </listener>
+
+    <servlet>
+        <servlet-name>HomeServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.HomeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>NoWebCryptoServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.NoWebCryptoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignHTMLServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.SignHTMLServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignatureFrameServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.SignatureFrameServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>HomeServlet</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>NoWebCryptoServlet</servlet-name>
+        <url-pattern>/nowebcrypto</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignHTMLServlet</servlet-name>
+        <url-pattern>/signhtml</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignatureFrameServlet</servlet-name>
+        <url-pattern>/signatureframe</url-pattern>
+    </servlet-mapping>
+    @security-constraints@    
+</web-app>
