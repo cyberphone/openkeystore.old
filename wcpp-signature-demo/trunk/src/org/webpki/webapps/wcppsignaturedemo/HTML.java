@@ -245,7 +245,7 @@ public class HTML implements BaseProperties
         "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
         "table {border-collapse: collapse}\n" +
         "td {padding: 0px}\n" +
-        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative;visibility:hidden}\n" +
+        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative}\n" +
         "</style></head><body onload=\"initPayment()\">" +
         "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
@@ -889,7 +889,7 @@ public class HTML implements BaseProperties
         "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
         "table {border-collapse: collapse}\n" +
         "td {padding: 0px}\n" +
-        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative;visibility:hidden}\n" +
+        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative}\n" +
         "</style><script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
         "var aborted_operation = false;\n" +
@@ -1132,9 +1132,9 @@ public class HTML implements BaseProperties
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
         "<div id=\"control\" style=\"border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:5px;padding-bottom:10pt\">" +
+        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:10pt;padding-bottom:10pt\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
-        "<input id=\"ok\" type=\"button\" value=\"OK\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
+        "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
