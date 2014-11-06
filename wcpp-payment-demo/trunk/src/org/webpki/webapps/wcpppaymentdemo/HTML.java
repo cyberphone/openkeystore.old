@@ -1135,8 +1135,8 @@ public class HTML implements BaseProperties
         
      StringBuffer temp_string = new StringBuffer (
         "\n\n\"use strict\";\n\n" +
-        "var payment_status = '" + Messages.INITIALIZE + "';\n\n" +
-        "function receiveMessage(event) {\n" +
+        "var message_state = '" + Messages.INITIALIZE + "';\n\n" +
+         "window.addEventListener('message', function(event) {\n" +
         "    console.debug (event.origin + ' = > Checkout message:\\n' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
@@ -1147,24 +1147,23 @@ public class HTML implements BaseProperties
         "        document.forms.restore.submit();\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != payment_status) {\n" +
-        "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
+        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != message_state) {\n" +
+        "        console.debug('STATE ERROR: ' + event.data + '/' + message_state);\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (payment_status == '" + Messages.INITIALIZE + "') {\n" +
+        "    if (message_state == '" + Messages.INITIALIZE + "') {\n" +
         "        setTimeout(function(){\n" +
-        "        event.source.postMessage(" + invoke_json + ", event.origin);\n" +
+        "            event.source.postMessage(" + invoke_json + ", event.origin);\n" +
 //      "        }, " + (PAYMENT_TIMEOUT_INIT + 1000) + ");\n" +
-        "        }, 500); // \"working\" simulation (it is so quick...)\n" +
-        "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
+        "        }, 500); // \"working\" simulation (it is so darn quick...)\n" +
+        "        message_state = '" + Messages.AUTHORIZE + "';\n" +
         "    } else {\n" +
         "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +
         "        setTimeout(function(){\n" +
         "            document.forms.shoot.submit();\n" +
         "        }, 0);\n" +
         "    }\n" +
-        "}\n\n" +
-        "window.addEventListener('message', receiveMessage, false);\n");
+        "}, false);\n");
         HTML.output (response, HTML.getHTML (temp_string.toString (), null, s.toString ()));
       }
 
