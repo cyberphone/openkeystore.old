@@ -52,6 +52,8 @@ public interface BaseProperties
     String OBJECT_TO_SIGN_JSON        = "ObjectToSign";
     String MIME_TYPE_JSON             = "MIMEType";
     String DOCUMENT_JSON              = "Document";
+    String DOCUMENT_DATA_JSON         = "DocumentData";
+    String DOCUMENT_HASH_JSON         = "DocumentHash";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";

@@ -900,6 +900,12 @@ public class HTML implements BaseProperties
         "var caller_common_name;\n" +
         "var caller_domain;\n" +
         "var json_request;\n" +
+        "var object_to_sign;\n" +
+        "var mime_type;\n" +
+        "var document_binary;\n" +
+        "var signature_response;\n" +
+        "var document_data;\n" +
+        "var signature;\n" +
         "var BASE64URL_DECODE = [" +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
@@ -1084,20 +1090,35 @@ public class HTML implements BaseProperties
              "')), window.document.referrer);\n" +
         "}\n\n" +
         "function userSign() {\n" +
-        "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
-             Messages.SIGNATURE_RESPONSE +
-             "')), window.document.referrer);\n" +
+        "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
+        "    var date_time = new Date().toISOString();\n" +
+        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+        "    }\n" +
+        "    signature_response." + DATE_TIME_JSON + " = date_time;\n" +
+        "    document_data = signature_response." + DOCUMENT_DATA_JSON + " = {};\n" +
+        "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
+        "    var document_hash = document_data." + DOCUMENT_HASH_JSON + " = {};\n" +
+        "    document_hash." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
+        "    document_hash." + VALUE_JSON + " = 'jggjggjgjggjgjggg';\n" +
+        "    signature = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
+        "    var jwk = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
+        "    if (jwk.kty == 'RSA') {\n" +
+        "        signature." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+        "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
+        "    } else {\n" +
+        "    }\n" +
         "}\n\n" +
         "function processInvoke() {\n" +
-        "    var sign_obj = getJSONProperty('" + OBJECT_TO_SIGN_JSON + "');\n" +
+        "    object_to_sign = getJSONProperty('" + OBJECT_TO_SIGN_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
-        "    var mime_type = sign_obj." + MIME_TYPE_JSON + ";\n" +
-        "    var docbin = decodeBase64URL(sign_obj." + DOCUMENT_JSON + ");\n" +
+        "    mime_type = object_to_sign." + MIME_TYPE_JSON + ";\n" +
+        "    document_binary = decodeBase64URL(object_to_sign." + DOCUMENT_JSON + ");\n" +
         "    if (aborted_operation) return;\n" +
-        "    console.debug('l=' + docbin.length);\n" +
+        "    console.debug('l=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
              " - document.getElementById('border').offsetHeight - document.getElementById('control').offsetHeight;\n" +
-        "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(docbin)" +
+        "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(document_binary)" +
                " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
                "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
          "   document.getElementById('cancel').style.left = '15px';\n" +
