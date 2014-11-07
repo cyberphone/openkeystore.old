@@ -27,7 +27,7 @@ public enum Messages
     INIIALIZE            ("Initialize"),
     SIGNATURE_REQUEST    ("SignatureRequest"),
     ABORT                ("Abort"),
-    AUTHORIZE            ("Authorize"),
+    SIGNATURE_RESPONSE   ("SignatureResponse"),
     TRANSACTION_REQUEST  ("TransactionRequest"),
     TRANSACTION_RESPONSE ("TransactionResponse");
     

@@ -28,10 +28,8 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -676,7 +674,7 @@ public class HTML implements BaseProperties
        "// This is the final part of the user authorization\n" +
        "//\n" +
        "function encryptAndSend(signed_auth_data) {\n" +
-       "    authorize_command = createJSONBaseCommand ('" + Messages.AUTHORIZE + "');\n" +
+       "    authorize_command = createJSONBaseCommand ('" + Messages.SIGNATURE_RESPONSE + "');\n" +
        "    authorize_command." + AUTH_URL_JSON + " = selected_card.authorization_url;\n" +
        "    encrypted_data = authorize_command." + AUTH_DATA_JSON + " = {};\n" +
        "    encrypted_data = encrypted_data." + ENCRYPTED_DATA_JSON + " = {};\n");
@@ -1080,6 +1078,16 @@ public class HTML implements BaseProperties
         "    }\n" +
         "    return value;\n" +
         "}\n\n" +
+        "function userAbort() {\n" +
+        "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
+             Messages.ABORT +
+             "')), window.document.referrer);\n" +
+        "}\n\n" +
+        "function userSign() {\n" +
+        "    window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
+             Messages.SIGNATURE_RESPONSE +
+             "')), window.document.referrer);\n" +
+        "}\n\n" +
         "function processInvoke() {\n" +
         "    var sign_obj = getJSONProperty('" + OBJECT_TO_SIGN_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
@@ -1092,6 +1100,8 @@ public class HTML implements BaseProperties
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(docbin)" +
                " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
                "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
+         "   document.getElementById('cancel').style.left = '15px';\n" +
+         "   document.getElementById('control').style.visibility = 'visible';\n" +
         "}\n\n" +
         "window.addEventListener('message', function(event) {\n" +
         "    console.debug(event.origin + ' => SignatureFrame:\\n' + event.data);\n" +
@@ -1102,8 +1112,8 @@ public class HTML implements BaseProperties
         "        json_request = JSON.parse(event.data);\n" +
         "        if (getJSONProperty('" + JSONDecoderCache.CONTEXT_JSON + "') == '" + WCPP_DEMO_CONTEXT_URI + "' && " +
                  "getJSONProperty('" + JSONDecoderCache.QUALIFIER_JSON + "') == '" + Messages.SIGNATURE_REQUEST + "') {\n" +
-        "            document.getElementById('busy').style.visibility = 'hidden';\n" +
         "            processInvoke();\n" +
+        "            document.getElementById('busy').style.visibility = 'hidden';\n" +
         "            return;\n" +
         "        }\n" +
         "    }\n" +
@@ -1132,9 +1142,9 @@ public class HTML implements BaseProperties
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
         "<div id=\"control\" style=\"border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:10pt;padding-bottom:10pt\">" +
+        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:10pt;padding-bottom:10pt;visibility:hidden\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
-        "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Authorize Payment!\" onclick=\"userAuthorize()\"></div>" +
+        "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Sign Document!\" onclick=\"userSign()\"></div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
@@ -1152,7 +1162,7 @@ public class HTML implements BaseProperties
       {
         HTML.output (response, HTML.getHTML (
         "\n\n\"use strict\";\n\n" +
-        "var payment_status = '" + Messages.INIIALIZE + "';\n\n" +
+        "var message_state = '" + Messages.INIIALIZE + "';\n\n" +
         "function createJSONBaseCommand(command_property_value) {\n" +
         "    var json = {};\n" +
         "    json['" + JSONDecoderCache.CONTEXT_JSON + "'] = '" + WCPP_DEMO_CONTEXT_URI + "';\n" +
@@ -1167,14 +1177,14 @@ public class HTML implements BaseProperties
         "        return;\n" +
         "    }\n" +
         "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] == '" + Messages.ABORT + "') {\n" +
-        "        document.forms.restore.submit();\n" +
+        "        document.location.href='" + SignatureDemoService.issuer_url + "/home';\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != payment_status) {\n" +
-        "        console.debug('STATE ERROR: ' + event.data + '/' + payment_status);\n" +
+        "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != message_state) {\n" +
+        "        console.debug('STATE ERROR: ' + event.data + '/' + message_state);\n" +
         "        return;\n" +
         "    }\n" +
-        "    if (payment_status == '" + Messages.INIIALIZE + "') {\n" +
+        "    if (message_state == '" + Messages.INIIALIZE + "') {\n" +
         "        var invoke_object = createJSONBaseCommand('" + 
                  Messages.SIGNATURE_REQUEST +
                  "');\n" +
@@ -1185,9 +1195,9 @@ public class HTML implements BaseProperties
         "            event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
 //      "        }, " + (SIGNATURE_TIMEOUT_INIT + 1000) + ");\n" +
         "        }, 500);\n" +
-        "        payment_status = '" + Messages.AUTHORIZE + "';\n" +
+        "        message_state = '" + Messages.SIGNATURE_RESPONSE + "';\n" +
         "    } else {\n" +
-        "        document.getElementById('authreq').value = JSON.stringify(received_json);\n" +
+        "        document.getElementById('signature').value = JSON.stringify(received_json);\n" +
         "        setTimeout(function(){\n" +
         "            document.forms.shoot.submit();\n" +
         "        }, 0);\n" +
@@ -1196,11 +1206,22 @@ public class HTML implements BaseProperties
         "window.addEventListener('message', receiveMessage, false);\n", null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 getIframeHTML() +
-                "</td></tr>"));
+                "<form name=\"shoot\" method=\"POST\" action=\"signedresult\"><input type=\"hidden\" " +
+                "name=\"signature\" id=\"signature\"></form></td></tr>"));
       }
 
     public static void signatureFrame (HttpServletResponse response) throws IOException, ServletException
       {
         HTML.output (response, getHTMLSignatureFrameSource ());
+      }
+
+    public static void signedResult (HttpServletResponse response, String message, boolean error) throws IOException, ServletException
+      {
+        HTML.output (response, HTML.getHTML (null, null,
+                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Resulting Signature<br>&nbsp;</td></tr><tr><td>" +
+                (error ? "<span style=\"font-size:10pt;color:red\">" + encode (message) + "</span>" : 
+                  "<div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
+                  message + "</div>") +
+                "</td></tr></table></td></tr>"));
       }
   }
