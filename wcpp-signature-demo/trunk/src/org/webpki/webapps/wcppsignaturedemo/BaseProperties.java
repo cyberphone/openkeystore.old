@@ -54,6 +54,8 @@ public interface BaseProperties
     String DOCUMENT_JSON              = "Document";
     String DOCUMENT_DATA_JSON         = "DocumentData";
     String DOCUMENT_HASH_JSON         = "DocumentHash";
+    String REQUEST_DATA_JSON          = "RequestData";
+    String ORIGIN_JSON                = "Origin";
     
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";

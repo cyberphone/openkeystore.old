@@ -64,7 +64,9 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
     static KeyStore client_root;
     static String client_eecert;
     static JWK client_private_key;
-    static String cert_data;
+    static String client_cert_data;
+    
+    static int reference_id = 1000000;
     
     public static String getDataURI (String mime_type, byte[] data) throws IOException
       {
@@ -110,7 +112,7 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
             KeyStore client = KeyStoreReader.loadKeyStore (SignatureDemoService.class.getResourceAsStream (getPropertyString ("client_eecert")), SignatureDemoService.key_password);
             X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
             client_eecert = Base64URL.encode (cert.getEncoded ());
-            cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
+            client_cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
               .append (cert.getIssuerX500Principal ().getName ())
               .append ("', " + JSONSignatureDecoder.SERIAL_NUMBER_JSON + ":'")
               .append (cert.getSerialNumber ().toString ())

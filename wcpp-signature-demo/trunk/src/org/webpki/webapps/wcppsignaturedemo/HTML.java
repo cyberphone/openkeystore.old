@@ -17,6 +17,7 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
+import org.webpki.util.ISODateTime;
 
 public class HTML implements BaseProperties
   {
@@ -900,12 +902,15 @@ public class HTML implements BaseProperties
         "var caller_common_name;\n" +
         "var caller_domain;\n" +
         "var json_request;\n" +
+        "var reference_id;\n" +
         "var object_to_sign;\n" +
+        "var request_date_time;\n" +
         "var mime_type;\n" +
         "var document_binary;\n" +
+        "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
         "var signature_response;\n" +
         "var document_data;\n" +
-        "var signature;\n" +
+        "var signature_object;\n" +
         "var BASE64URL_DECODE = [" +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
@@ -1089,6 +1094,18 @@ public class HTML implements BaseProperties
              Messages.ABORT +
              "')), window.document.referrer);\n" +
         "}\n\n" +
+        "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
+        "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
+        "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
+        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = " + SignatureDemoService.client_cert_data + ";\n" +
+        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = ['" + SignatureDemoService.client_eecert + "'];\n" +
+        "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
+        "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(JSON.stringify(signature_response))).then (function(signature) {\n" +
+        "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
+        "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
+        "    }).then (undefined, function() {error('Failed signing')});\n" +
+        "    }).then (undefined, function() {error('Failed importing private key')});\n" +
+        "}\n\n" +
         "function userSign() {\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
         "    var date_time = new Date().toISOString();\n" +
@@ -1096,24 +1113,30 @@ public class HTML implements BaseProperties
         "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
         "    }\n" +
         "    signature_response." + DATE_TIME_JSON + " = date_time;\n" +
+        "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
+        "    request_data." + ORIGIN_JSON + " = window.document.referrer;\n" +
+        "    request_data." + REFERENCE_ID_JSON + " = reference_id;\n" +
+        "    request_data." + DATE_TIME_JSON + " = request_date_time;\n" +
         "    document_data = signature_response." + DOCUMENT_DATA_JSON + " = {};\n" +
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
         "    var document_hash = document_data." + DOCUMENT_HASH_JSON + " = {};\n" +
         "    document_hash." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
-        "    document_hash." + VALUE_JSON + " = 'jggjggjgjggjgjggg';\n" +
-        "    signature = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
-        "    var jwk = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
-        "    if (jwk.kty == 'RSA') {\n" +
-        "        signature." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
-        "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
-        "    } else {\n" +
-        "    }\n" +
+        "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
+        "    crypto.subtle.digest({name: 'SHA-256'}, document_binary).then (function(result) {\n" +
+        "        document_hash." + VALUE_JSON + " = binaryToBase64URL(new Uint8Array(result));\n" +
+        "        if (client_private_key.kty == 'RSA') {\n" +
+        "            createSignatureAndSend({name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "');\n" +
+        "        } else {\n" +
+        "        }\n" +
+        "    }).then (undefined, function() {error('Failed hashing document')});\n" +
         "}\n\n" +
         "function processInvoke() {\n" +
         "    object_to_sign = getJSONProperty('" + OBJECT_TO_SIGN_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
         "    mime_type = object_to_sign." + MIME_TYPE_JSON + ";\n" +
         "    document_binary = decodeBase64URL(object_to_sign." + DOCUMENT_JSON + ");\n" +
+        "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
+        "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
         "    console.debug('l=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
@@ -1209,6 +1232,8 @@ public class HTML implements BaseProperties
         "        var invoke_object = createJSONBaseCommand('" + 
                  Messages.SIGNATURE_REQUEST +
                  "');\n" +
+        "        invoke_object." + REFERENCE_ID_JSON + " = '#" +  (SignatureDemoService.reference_id++) + "';\n" +
+        "        invoke_object." + DATE_TIME_JSON + " = '" + ISODateTime.formatDateTime (new Date (), true) + "';\n" +
         "        var object_to_sign = invoke_object." + OBJECT_TO_SIGN_JSON + " = {};\n" +
         "        object_to_sign." + MIME_TYPE_JSON + " = 'text/html';\n" +
         "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray () + "';\n" +
