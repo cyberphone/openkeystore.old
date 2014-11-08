@@ -48,7 +48,7 @@ public class HTML implements BaseProperties
     static final int SIGNATURE_CARD_HORIZ_GUTTER       = 20;
     static final int SIGNATURE_CARD_RIGHT_MARGIN       = 30;
     static final int SIGNATURE_CARD_TOP_POSITION       = 25;
-    static final int SIGNATURE_BUTTON_LEFT             = 15;
+    static final int SIGNATURE_BUTTON_HORIZ_MARGIN     = 18;
     
     static final int PIN_MAX_LENGTH                  = 20;
     static final int PIN_FIELD_SIZE                  = 8;
@@ -529,7 +529,7 @@ public class HTML implements BaseProperties
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></td></tr>" +
              "<table>';\n" +
         "    document.getElementById('activity').innerHTML = '&nbsp;';\n" +
-        "    document.getElementById('cancel').style.left = '" + SIGNATURE_BUTTON_LEFT + "px';\n" +
+        "    document.getElementById('cancel').style.left = '" + SIGNATURE_BUTTON_HORIZ_MARGIN + "px';\n" +
         "    document.getElementById('content').innerHTML = payment_details + cardTableHeader('" +
              SIGNATURE_CARD_RIGHT_MARGIN + "px', " +
              SIGNATURE_CARD_TOP_POSITION + ") + " +
@@ -545,7 +545,7 @@ public class HTML implements BaseProperties
                  "document.getElementById('pin').offsetLeft - " +
                  "document.getElementById('cancel').offsetWidth) * 2 + " +
                  "document.getElementById('pin').offsetWidth - " +
-                 SIGNATURE_BUTTON_LEFT + ") + 'px';\n" +
+                 SIGNATURE_BUTTON_HORIZ_MARGIN + ") + 'px';\n" +
         "    document.getElementById('ok').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').title = 'Forgot PIN? Try with ' + selected_card.pin + ' :-)';\n" +
         "    document.getElementById('pin').focus();\n" +
@@ -889,7 +889,7 @@ public class HTML implements BaseProperties
         "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
         "table {border-collapse: collapse}\n" +
         "td {padding: 0px}\n" +
-        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:relative}\n" +
+        ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:absolute}\n" +
         "</style><script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
         "var aborted_operation = false;\n" +
@@ -1138,14 +1138,20 @@ public class HTML implements BaseProperties
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
+        "    var button_height = document.getElementById('cancel').offsetHeight;\n" +
+        "    document.getElementById('control').style.height = (button_height * 2) + 'px';\n" +
+        "    document.getElementById('cancel').style.left = '" + SIGNATURE_BUTTON_HORIZ_MARGIN + "px';\n" +
+        "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
+        "    document.getElementById('sign').style.width = button_width + 'px';\n" +
+        "    document.getElementById('sign').style.left = (" + (SIGNATURE_WINDOW_WIDTH - SIGNATURE_BUTTON_HORIZ_MARGIN) + " - button_width) + 'px';\n" +
+        "    document.getElementById('cancel').style.top = document.getElementById('sign').style.top = (Math.floor(button_height / 2)) + 'px';\n" +
+        "    document.getElementById('control').style.visibility = 'visible';\n" +
         "    console.debug('l=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
              " - document.getElementById('border').offsetHeight - document.getElementById('control').offsetHeight;\n" +
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(document_binary)" +
                " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
                "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
-         "   document.getElementById('cancel').style.left = '15px';\n" +
-         "   document.getElementById('control').style.visibility = 'visible';\n" +
         "}\n\n" +
         "window.addEventListener('message', function(event) {\n" +
         "    console.debug(event.origin + ' => SignatureFrame:\\n' + event.data);\n" +
@@ -1186,7 +1192,7 @@ public class HTML implements BaseProperties
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
         "<div id=\"control\" style=\"border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;padding-top:10pt;padding-bottom:10pt;visibility:hidden\">" +
+        SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;visibility:hidden\">" +
         "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
         "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Sign Document!\" onclick=\"userSign()\"></div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
