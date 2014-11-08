@@ -12,9 +12,9 @@
   <property name="keyfilext" value=".p12"/>
   <property name="key_dir" location="keys"/>
 
-  <property name="clientroot" value="utopia-clientroot"/>
-  <property name="clientkey_rsa" value="utopia-client-key-rsa"/>
-  <property name="clientkey_ec" value="utopia-client-key-ec"/>
+  <property name="clientroot" value="client-root"/>
+  <property name="clientkey_rsa" value="client-key-rsa"/>
+  <property name="clientkey_ec" value="client-key-ec"/>
   
   <property name="debug" value="on"/>
   <property environment="env"/>
