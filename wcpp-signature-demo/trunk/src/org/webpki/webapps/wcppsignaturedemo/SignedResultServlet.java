@@ -68,6 +68,13 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 error = true;
               }
           }
+        try
+          {
+            Thread.sleep (1000);
+          }
+        catch (InterruptedException e)
+          {
+          }
         HTML.signedResult (response, signature, error);
       }
   }

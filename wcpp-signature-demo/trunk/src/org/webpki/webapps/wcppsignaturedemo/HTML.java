@@ -207,7 +207,11 @@ public class HTML implements BaseProperties
 /*
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/EMV-Tokenization-SET-3DSecure-WebCryptoPlusPlus-combo.pdf#page=4\">Demo Payment System</a></td><td>State Diagram Etc.</td></tr>" +
 */
-                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-payment-demo\">Demo Source Code</a></td><td>For Nerds...</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-signature-demo\">Demo Source Code</a></td><td>For Nerds...</td></tr>" +
+                   "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Related Applications</b></td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://mobilepki.org/jcs\">JCS</a></td><td>JSON Cleartext Signature</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://play.google.com/store/apps/details?id=org.webpki.mobile.android\">SKS/KeyGen2</a></td><td>Android PoC</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://mobilepki.org/WebCryptoPlusPlus\">Web Payments</a></td><td>WebCrypto++ Payment Demo</td></tr>" +
                  "</table></td></tr></table></td></tr>"));
       }
 
@@ -1107,27 +1111,31 @@ public class HTML implements BaseProperties
         "    }).then (undefined, function() {error('Failed importing private key')});\n" +
         "}\n\n" +
         "function userSign() {\n" +
+        "    document.getElementById('busy').style.visibility = 'visible';\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
-        "    var date_time = new Date().toISOString();\n" +
-        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-        "    }\n" +
-        "    signature_response." + DATE_TIME_JSON + " = date_time;\n" +
         "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
         "    request_data." + ORIGIN_JSON + " = window.document.referrer;\n" +
         "    request_data." + REFERENCE_ID_JSON + " = reference_id;\n" +
         "    request_data." + DATE_TIME_JSON + " = request_date_time;\n" +
         "    document_data = signature_response." + DOCUMENT_DATA_JSON + " = {};\n" +
+        "    var date_time = new Date().toISOString();\n" +
+        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
+        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
+        "    }\n" +
+        "    signature_response." + DATE_TIME_JSON + " = date_time;\n" +
+        "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
+        "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
+        "    var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
+        "    var jcs_alg = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+        "    if (client_private_key.kty == 'EC') {\n" +
+        "        error('Not implemented yet');\n" +
+        "    }\n" +
         "    var document_hash = document_data." + DOCUMENT_HASH_JSON + " = {};\n" +
         "    document_hash." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
-        "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    crypto.subtle.digest({name: 'SHA-256'}, document_binary).then (function(result) {\n" +
         "        document_hash." + VALUE_JSON + " = binaryToBase64URL(new Uint8Array(result));\n" +
-        "        if (client_private_key.kty == 'RSA') {\n" +
-        "            createSignatureAndSend({name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "');\n" +
-        "        } else {\n" +
-        "        }\n" +
+        "        createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg);\n" +
         "    }).then (undefined, function() {error('Failed hashing document')});\n" +
         "}\n\n" +
         "function processInvoke() {\n" +
@@ -1139,16 +1147,25 @@ public class HTML implements BaseProperties
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
         "    var button_height = document.getElementById('cancel').offsetHeight;\n" +
-        "    document.getElementById('control').style.height = (button_height * 2) + 'px';\n" +
-        "    document.getElementById('cancel').style.left = '" + SIGNATURE_BUTTON_HORIZ_MARGIN + "px';\n" +
+        "    var attention_height = document.getElementById('attention').offsetHeight;\n" +
+        "    var diff = attention_height - 2 * button_height;\n" +
+        "    var control_height = (diff < 0 ? attention_height + diff : attention_height) + Math.floor(button_height / 3);\n" +
+        "    if ((attention_height & 1) != (control_height & 1)) {\n" +
+        "        control_height++;\n" +
+        "    }\n" +
+        "    document.getElementById('control').style.height = control_height + 'px';\n" +
         "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
+        "    var button_h_margin = Math.floor(button_width / 3);\n" +
+        "    document.getElementById('cancel').style.left =  + button_h_margin + 'px';\n" +
+        "    document.getElementById('attention').style.left = (" + SIGNATURE_WINDOW_WIDTH + "- 2 * button_h_margin - button_width - document.getElementById('attention').offsetWidth) + 'px';\n" +
+        "    document.getElementById('attention').style.top = Math.floor((control_height - attention_height)/2) + 'px';\n" +
         "    document.getElementById('sign').style.width = button_width + 'px';\n" +
-        "    document.getElementById('sign').style.left = (" + (SIGNATURE_WINDOW_WIDTH - SIGNATURE_BUTTON_HORIZ_MARGIN) + " - button_width) + 'px';\n" +
-        "    document.getElementById('cancel').style.top = document.getElementById('sign').style.top = (Math.floor(button_height / 2)) + 'px';\n" +
+        "    document.getElementById('sign').style.left = (" + SIGNATURE_WINDOW_WIDTH + " - button_h_margin - button_width) + 'px';\n" +
+        "    document.getElementById('cancel').style.top = document.getElementById('sign').style.top = (Math.floor((control_height - button_height) / 2)) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
         "    console.debug('l=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
-             " - document.getElementById('border').offsetHeight - document.getElementById('control').offsetHeight;\n" +
+             " - document.getElementById('border').offsetHeight - control_height;\n" +
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(document_binary)" +
                " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
                "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
@@ -1191,10 +1208,12 @@ public class HTML implements BaseProperties
         "<div style=\"padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
-        "<div id=\"control\" style=\"border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
+        "<div id=\"control\" style=\"background:#F8F8F8;border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
         SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;visibility:hidden\">" +
-        "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
-        "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Sign Document!\" onclick=\"userSign()\"></div>" +
+          "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
+          "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Sign Document!\" onclick=\"userSign()\">" +
+          "<div id=\"attention\" style=\"padding:2px 4px 2px 4px;font-size:8pt;position:absolute;border-radius:4pt;border-width:1px;border-style:solid;border-color:red;background:#FFFFE0\">By digitally signing the document above,<br>you confirm that you have read and<br>understood the implications of its content</div>" +
+        "</div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
