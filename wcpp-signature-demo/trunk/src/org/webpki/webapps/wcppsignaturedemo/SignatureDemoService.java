@@ -18,8 +18,6 @@ package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
 
-import java.net.URL;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
@@ -35,6 +33,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
@@ -56,6 +55,7 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
     
     static String cross_data_uri;
     static String working_data_uri;
+    static String mybank_data_uri;
     
     static String card_font;
 
@@ -63,6 +63,7 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
 
     static KeyStore client_root;
     static String client_eecert;
+    static String user_name;
     static JWK client_private_key;
     static String client_cert_data;
     
@@ -75,7 +76,7 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
 
     private String getDataURI (String main, String extension) throws IOException
       {
-        return getDataURI ("image/" + extension,
+        return getDataURI ("image/" + (extension.equals ("svg") ? "svg+xml" : extension),
                            ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream (main + "." + extension)));
       }
     
@@ -106,11 +107,13 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
             relying_party_url = getPropertyString ("relying_party_url");
             cross_data_uri = getDataURI ("cross", "png");
             working_data_uri = getDataURI ("working", "gif");
+            mybank_data_uri = getDataURI ("mybank", "svg");
             card_font = getPropertyString ("card_font");
             key_password = getPropertyString ("key_password");
             client_root = getRootCertificate (getPropertyString ("client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (SignatureDemoService.class.getResourceAsStream (getPropertyString ("client_eecert")), SignatureDemoService.key_password);
             X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
+            user_name = new CertificateInfo (cert).getSubjectCommonName ();
             client_eecert = Base64URL.encode (cert.getEncoded ());
             client_cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
               .append (cert.getIssuerX500Principal ().getName ())

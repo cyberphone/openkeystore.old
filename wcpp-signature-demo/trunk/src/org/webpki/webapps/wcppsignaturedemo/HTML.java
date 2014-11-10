@@ -17,6 +17,7 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
+
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -26,11 +27,14 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -1157,11 +1161,21 @@ public class HTML implements BaseProperties
         "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
         "    var button_h_margin = Math.floor(button_width / 3);\n" +
         "    document.getElementById('cancel').style.left =  + button_h_margin + 'px';\n" +
-        "    document.getElementById('attention').style.left = (" + SIGNATURE_WINDOW_WIDTH + "- 2 * button_h_margin - button_width - document.getElementById('attention').offsetWidth) + 'px';\n" +
+        "    var attention_left = " + SIGNATURE_WINDOW_WIDTH + "- 2 * button_h_margin - button_width - document.getElementById('attention').offsetWidth;\n" +
+        "    document.getElementById('attention').style.left = attention_left + 'px';\n" +
         "    document.getElementById('attention').style.top = Math.floor((control_height - attention_height)/2) + 'px';\n" +
         "    document.getElementById('sign').style.width = button_width + 'px';\n" +
         "    document.getElementById('sign').style.left = (" + SIGNATURE_WINDOW_WIDTH + " - button_h_margin - button_width) + 'px';\n" +
         "    document.getElementById('cancel').style.top = document.getElementById('sign').style.top = (Math.floor((control_height - button_height) / 2)) + 'px';\n" +
+        "    document.getElementById('keylogo').style.height = (attention_height - 2) + 'px';\n" +
+        "    var keylogo_width = Math.floor((attention_height - 2) * 1.5);\n" +
+        "    document.getElementById('keylogo').style.width = keylogo_width + 'px';\n" +
+        "    document.getElementById('keylogo').style.top = document.getElementById('attention').style.top;\n" +
+        "    var username_width = document.getElementById('username').offsetWidth;\n" +
+        "    var keylogo_left = Math.floor((attention_left - keylogo_width - username_width + button_width + button_h_margin) / 2);\n" +
+        "    document.getElementById('keylogo').style.left = keylogo_left + 'px';\n" +
+        "    document.getElementById('username').style.left = (keylogo_left + keylogo_width) + 'px';\n" +
+        "    document.getElementById('username').style.top = Math.floor((control_height - document.getElementById('username').offsetHeight) / 2) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
         "    console.debug('l=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
@@ -1210,9 +1224,13 @@ public class HTML implements BaseProperties
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
         "<div id=\"control\" style=\"background:#F8F8F8;border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
         SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;visibility:hidden\">" +
-          "<input id=\"cancel\" type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
-          "<input id=\"sign\" type=\"button\" value=\"Sign...\" class=\"stdbtn\" title=\"Sign Document!\" onclick=\"userSign()\">" +
+          "<input id=\"cancel\" title=\"Return to previous view\"  type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
+          "<input id=\"sign\" title=\"Sign document!\" type=\"button\" value=\"Sign...\" class=\"stdbtn\"onclick=\"userSign()\">" +
           "<div id=\"attention\" style=\"padding:2px 4px 2px 4px;font-size:8pt;position:absolute;border-radius:4pt;border-width:1px;border-style:solid;border-color:red;background:#FFFFE0\">By digitally signing the document above,<br>you confirm that you have read and<br>understood the implications of its content</div>" +
+          "<img id=\"keylogo\" title=\"Signature credential - Click for more information\" onclick=\"alert('Pardon, haven\\'t had the time implementing this...')\" src=\"" + 
+             SignatureDemoService.mybank_data_uri + 
+             "\" alt=\"html5 requirement...\" style=\"cursor:pointer;border-radius:4pt;background:white;position:absolute;border-width:1px;border-style:solid;border-color:black\">" + 
+          "<div id=\"username\" title=\"User &quot;Common Name&quot;\" style=\"position:absolute;padding:6pt\">" + SignatureDemoService.user_name + "</div>" +
         "</div>" +
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
