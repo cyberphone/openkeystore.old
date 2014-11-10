@@ -26,8 +26,8 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1181"
-     inkscape:window-height="757"
+     inkscape:window-width="1399"
+     inkscape:window-height="825"
      id="namedview2995"
      showgrid="false"
      inkscape:zoom="4"
@@ -263,7 +263,7 @@
          x="135.68007">Bank</tspan></text>
     <path
        style="fill:#e6e6e6;stroke:#7b7b79;stroke-width:2.89463115;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="M 26.116104,41.043544 C 28.943875,40.720895 79.871021,23.325018 79.871021,23.325018 L 135.48794,41.424313 135.35869,50.399474 25.893134,50.06213 z"
+       d="M 26.116104,39.293544 C 28.943875,38.970895 79.871021,23.325018 79.871021,23.325018 L 135.48794,39.924313 135.35869,50.399474 25.893134,50.06213 z"
        id="path3023"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccc" />
@@ -278,16 +278,22 @@
        d="m 113.75,156.375 a 5.875,5.875 0 1 1 -11.75,0 5.875,5.875 0 1 1 11.75,0 z"
        transform="matrix(1.1692457,0,0,1.1692457,-8.8823676,-36.090754)" />
     <path
-       sodipodi:nodetypes="ccccc"
+       sodipodi:nodetypes="cccc"
        inkscape:connector-curvature="0"
        id="path3835"
-       d="m 130.50378,90.489919 0.16252,7.116682 -101.172717,-0.0091 0.13454,-7.07391 z"
-       style="fill:#e6e6e6;stroke:#7b7b79;stroke-width:2.4803772;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+       d="m 28.529832,97.560706 0.134443,-7.498844 100.803375,-0.03569 0.1624,7.544184"
+       style="fill:#e6e6e6;stroke:#7b7b79;stroke-width:2.55287433;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
     <path
        style="fill:#e6e6e6;stroke:#7b7b79;stroke-width:2.63549304;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 137.90117,97.567477 0.18756,6.961563 -116.767589,-0.009 0.155278,-6.919729 z"
        id="path3837"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#e6e6e6;stroke:#7b7b79;stroke-width:2.48171234;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="M 26.878791,41.513006 134.66563,41.617188"
+       id="path3034"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>

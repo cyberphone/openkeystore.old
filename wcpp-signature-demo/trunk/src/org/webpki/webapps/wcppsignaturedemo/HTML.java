@@ -1161,9 +1161,9 @@ public class HTML implements BaseProperties
         "    var button_width = document.getElementById('cancel').offsetWidth;\n" +
         "    var button_h_margin = Math.floor(button_width / 3);\n" +
         "    document.getElementById('cancel').style.left =  + button_h_margin + 'px';\n" +
-        "    var attention_left = " + SIGNATURE_WINDOW_WIDTH + "- 2 * button_h_margin - button_width - document.getElementById('attention').offsetWidth;\n" +
+        "    var attention_left = " + SIGNATURE_WINDOW_WIDTH + " - 2 * button_h_margin - button_width - document.getElementById('attention').offsetWidth;\n" +
         "    document.getElementById('attention').style.left = attention_left + 'px';\n" +
-        "    document.getElementById('attention').style.top = Math.floor((control_height - attention_height)/2) + 'px';\n" +
+        "    document.getElementById('attention').style.top = Math.floor((control_height - attention_height) / 2) + 'px';\n" +
         "    document.getElementById('sign').style.width = button_width + 'px';\n" +
         "    document.getElementById('sign').style.left = (" + SIGNATURE_WINDOW_WIDTH + " - button_h_margin - button_width) + 'px';\n" +
         "    document.getElementById('cancel').style.top = document.getElementById('sign').style.top = (Math.floor((control_height - button_height) / 2)) + 'px';\n" +
@@ -1177,7 +1177,7 @@ public class HTML implements BaseProperties
         "    document.getElementById('username').style.left = (keylogo_left + keylogo_width) + 'px';\n" +
         "    document.getElementById('username').style.top = Math.floor((control_height - document.getElementById('username').offsetHeight) / 2) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
-        "    console.debug('l=' + document_binary.length);\n" +
+        "    console.debug('Doclen=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
              " - document.getElementById('border').offsetHeight - control_height;\n" +
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(document_binary)" +
