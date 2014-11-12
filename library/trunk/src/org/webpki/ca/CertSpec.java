@@ -20,23 +20,19 @@ import java.io.IOException;
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
-
 import java.net.InetAddress;
 
 import org.webpki.asn1.ASN1OctetString;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1IA5String;
-
 import org.webpki.asn1.cert.RelativeDistinguishedName;
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
-
 import org.webpki.util.ArrayUtil;
-
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
-
 import org.webpki.util.URLDereferencer;
 
 
@@ -74,6 +70,8 @@ public class CertSpec
     boolean aki_extension;
 
     Set<KeyUsageBits> key_usage_set = EnumSet.noneOf (KeyUsageBits.class);
+
+    Set<ExtendedKeyUsages> extended_key_usage_set = EnumSet.noneOf (ExtendedKeyUsages.class);
 
     Vector<String> cert_policy_oids = new Vector<String> ();
 
@@ -126,6 +124,12 @@ public class CertSpec
           }
         key_usage_set.add (kubit);
         has_given_key_usage = true;
+      }
+
+    
+    public void setExtendedKeyUsage (ExtendedKeyUsages eku)
+      {
+        extended_key_usage_set.add (eku);
       }
 
 

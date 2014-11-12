@@ -19,11 +19,14 @@ package org.webpki.ca;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import java.math.BigInteger;
+
 import java.util.Vector;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -31,13 +34,17 @@ import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.GeneralSecurityException;
+
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.ECGenParameterSpec;
+
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import org.webpki.asn1.cert.DistinguishedName;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
@@ -492,7 +499,24 @@ public class CommandLineCA
         return s.toString ();
       }
 
+    
+    String ExtkeyUsages ()
+      {
+        StringBuffer s = new StringBuffer ();
+        boolean comma = false;
+        for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
+          {
+            if (comma)
+              {
+                s.append (", ");
+              }
+            comma = true;
+            s.append (eku.getX509Name ());
+          }
+        return s.toString ();
+      }
 
+    
     String getKeyUsage (boolean caflag)
       {
         CertSpec cert_spec = new CertSpec ();
@@ -656,6 +680,11 @@ public class CommandLineCA
                                                 "extension/email", "e-mail-address",
                                                 "Add an e-mail address SubjectAltName (SAN) extension",
                                                 CmdFrequency.OPTIONAL_MULTIPLE);
+
+    CmdLineArgument CMD_ext_eku        = create (CmdLineArgumentGroup.GENERAL,
+                                                 "extension/eku", "extended-key-usage",
+                                                 "Add an ExtendedKeyUsage OID, select from: " + ExtkeyUsages (),
+                                                 CmdFrequency.OPTIONAL_MULTIPLE);
 
     CmdLineArgument CMD_ext_dns       = create (CmdLineArgumentGroup.GENERAL,
                                                 "extension/dns", "dns-name",
@@ -889,6 +918,14 @@ public class CommandLineCA
             for (String arg : CMD_key_usage.argvalue)
               {
                 certspec.setKeyUsageBit (KeyUsageBits.getKeyUsageBit (arg));
+              }
+
+            ///////////////////////////////////////////////////////////////
+            // Set extended key usage
+            ///////////////////////////////////////////////////////////////
+            for (String arg : CMD_ext_eku.argvalue)
+              {
+                certspec.setExtendedKeyUsage (ExtendedKeyUsages.getExtendedKeyUsage (arg));
               }
 
             ///////////////////////////////////////////////////////////////

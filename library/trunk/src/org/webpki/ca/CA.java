@@ -17,13 +17,10 @@
 package org.webpki.ca;
 
 import java.io.IOException;
-
 import java.math.BigInteger;
-
 import java.util.Vector;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
 import java.security.cert.X509Certificate;
 import java.security.PublicKey;
 
@@ -42,12 +39,11 @@ import org.webpki.asn1.ASN1Sequence;
 import org.webpki.asn1.SimpleContextSpecific;
 import org.webpki.asn1.CompositeContextSpecific;
 import org.webpki.asn1.DerDecoder;
-
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
-
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateExtensions;
@@ -256,6 +252,20 @@ public class CA
                 key_usage[1] = reverse_bits[i >> 8];
               }
             extensions.add (CertificateExtensions.KEY_USAGE, true, new ASN1BitString (key_usage));
+          }
+
+        //////////////////////////////////////////////////////
+        // Extended Key Usage
+        //////////////////////////////////////////////////////
+        if (!cert_spec.extended_key_usage_set.isEmpty ())
+          {
+            int i = 0;
+            BaseASN1Object[] ekus = new BaseASN1Object[cert_spec.extended_key_usage_set.size ()];
+            for (ExtendedKeyUsages eku : cert_spec.extended_key_usage_set.toArray (new ExtendedKeyUsages[0]))
+              {
+                ekus[i++] = new ASN1ObjectID (eku.getOID ());
+              }
+            extensions.add (CertificateExtensions.EXTENDED_KEY_USAGE, false, new ASN1Sequence (ekus));
           }
 
         //////////////////////////////////////////////////////
