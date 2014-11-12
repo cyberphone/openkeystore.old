@@ -47,6 +47,7 @@ public class HTML implements BaseProperties
     static final int SIGNATURE_DIV_HORIZONTAL_PADDING  = 6;
     static final int SIGNATURE_DIV_VERTICAL_PADDING    = 5;
     static final String SIGNATURE_BORDER_COLOR         = "#306754";
+    static final String SIGNATURE_DIALOG_COLOR         = "#F8F8F8";
     static final int SIGNATURE_PAN_PADDING_TOP         = 5;
     static final int SIGNATURE_PAN_PADDING_BOTTOM      = 10;
     static final int SIGNATURE_CARD_HORIZ_GUTTER       = 20;
@@ -915,7 +916,6 @@ public class HTML implements BaseProperties
         "var request_date_time;\n" +
         "var mime_type;\n" +
         "var document_binary;\n" +
-        "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
         "var signature_response;\n" +
         "var document_data;\n" +
         "var signature_object;\n" +
@@ -954,6 +954,11 @@ public class HTML implements BaseProperties
         "'o','p','q','r','s','t','u','v'," +
         "'w','x','y','z','0','1','2','3'," +
         "'4','5','6','7','8','9','+','/'];\n\n" +
+        "// This part would in a real WebCrypto++ implemenation be replaced by\n" +
+        "// the platform key enumeration and attribute methods\n" +
+        "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
+        "var client_cert_path = ['" + SignatureDemoService.client_eecert + "'];\n" +
+        "var client_cert_data = " + SignatureDemoService.client_cert_data + ";\n\n" +
         "function error(message) {\n" +
        "    console.debug ('Error: ' + message);\n" +
        "    if (!aborted_operation) {\n" +
@@ -1105,8 +1110,8 @@ public class HTML implements BaseProperties
         "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
         "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
         "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
-        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = " + SignatureDemoService.client_cert_data + ";\n" +
-        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = ['" + SignatureDemoService.client_eecert + "'];\n" +
+        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = client_cert_data;\n" +
+        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = client_cert_path;\n" +
         "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
         "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(JSON.stringify(signature_response))).then (function(signature) {\n" +
         "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
@@ -1114,7 +1119,23 @@ public class HTML implements BaseProperties
         "    }).then (undefined, function() {error('Failed signing')});\n" +
         "    }).then (undefined, function() {error('Failed importing private key')});\n" +
         "}\n\n" +
+        "function openCredentialDialog() {\n" +
+        "    closePINDialog();\n" +
+        "    document.getElementById('credential').style.visibility = 'visible';\n" +
+        "}\n\n" +
+        "function closeCredentialDialog() {\n" +
+        "    document.getElementById('credential').style.visibility = 'hidden';\n" +
+        "}\n\n" +
         "function userSign() {\n" +
+        "    closeCredentialDialog();\n" +
+        "    document.getElementById('sign').disabled = true;\n" +
+        "    document.getElementById('pindialog').style.visibility = 'visible';\n" +
+        "}\n\n" +
+        "function closePINDialog() {\n" +
+        "    document.getElementById('sign').disabled = false;\n" +
+        "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
+        "}\n\n" +
+        "function performSignatureOperation() {\n" +
         "    document.getElementById('busy').style.visibility = 'visible';\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
         "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
@@ -1176,6 +1197,10 @@ public class HTML implements BaseProperties
         "    document.getElementById('keylogo').style.left = keylogo_left + 'px';\n" +
         "    document.getElementById('username').style.left = (keylogo_left + keylogo_width) + 'px';\n" +
         "    document.getElementById('username').style.top = Math.floor((control_height - document.getElementById('username').offsetHeight) / 2) + 'px';\n" +
+        "    document.getElementById('pindialog').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('pindialog').offsetHeight) / 2) + 'px';\n" +
+        "    document.getElementById('pindialog').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - document.getElementById('pindialog').offsetWidth) / 2) + 'px';\n" +
+        "    document.getElementById('credential').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('credential').offsetHeight) / 2) + 'px';\n" +
+        "    document.getElementById('credential').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - document.getElementById('credential').offsetWidth) / 2) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
         "    console.debug('Doclen=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
@@ -1222,12 +1247,12 @@ public class HTML implements BaseProperties
         "<div style=\"padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px\">Initializing...</div></div>" +
-        "<div id=\"control\" style=\"background:#F8F8F8;border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
+        "<div id=\"control\" style=\"background:" + SIGNATURE_DIALOG_COLOR + ";border-width:1px 0px 0px 0px;border-style:solid;border-color:" + 
         SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;visibility:hidden\">" +
           "<input id=\"cancel\" title=\"Return to previous view\"  type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
           "<input id=\"sign\" title=\"Sign document!\" type=\"button\" value=\"Sign...\" class=\"stdbtn\"onclick=\"userSign()\">" +
           "<div id=\"attention\" style=\"padding:2px 4px 2px 4px;font-size:8pt;position:absolute;border-radius:4pt;border-width:1px;border-style:solid;border-color:red;background:#FFFFE0\">By digitally signing the document above,<br>you confirm that you have read and<br>understood the implications of its content</div>" +
-          "<img id=\"keylogo\" title=\"Signature credential - Click for more information\" onclick=\"alert('Pardon, haven\\'t had the time implementing this...')\" src=\"" + 
+          "<img id=\"keylogo\" title=\"Signature credential - Click for more information\" onclick=\"openCredentialDialog()\" src=\"" + 
              SignatureDemoService.mybank_data_uri + 
              "\" alt=\"html5 requirement...\" style=\"cursor:pointer;border-radius:4pt;background:white;position:absolute;border-width:1px;border-style:solid;border-color:black\">" + 
           "<div id=\"username\" title=\"User &quot;Common Name&quot;\" style=\"position:absolute;padding:6pt\">" + SignatureDemoService.user_name + "</div>" +
@@ -1235,11 +1260,19 @@ public class HTML implements BaseProperties
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
-        "<div id=\"pinerror\" onclick=\"closePINError()\" title=\"Click to close\" " +
+        "<div id=\"pindialog\" onclick=\"closePINDialog()\" title=\"Click to close\" " +
         "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:white;position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
+        ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
-         "</div></body></html>");
+        "</div>" +
+        "<div id=\"credential\" onclick=\"closeCredentialDialog()\" title=\"Click to close\" " +
+        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
+        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
+        ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
+        "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
+        "CRED</div>" +
+        "</body></html>");
              html_signature_frame = s.toString ();
           }
         return html_signature_frame;
