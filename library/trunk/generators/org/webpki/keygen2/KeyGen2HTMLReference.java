@@ -638,6 +638,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
                                     json.globalLinkRef (INVOCATION_REQUEST_JSON, SERVER_SESSION_ID_JSON) + ".");
 
+        json.addParagraphSubObject ("SOP Adherance").append ("The KeyGen2 proxy <b>must not</b> accept <code>SubmitURL</code> requests outside of the domain which returned the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
+                                    " message, i.e. strictly following SOP (Same Origin Policy).");
+
         json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
