@@ -28,12 +28,11 @@ import org.webpki.asn1.ASN1IA5String;
 import org.webpki.asn1.cert.RelativeDistinguishedName;
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
-import org.webpki.util.ArrayUtil;
+
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
-import org.webpki.util.URLDereferencer;
 
 
 public class CertSpec

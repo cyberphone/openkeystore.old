@@ -17,11 +17,15 @@
 package org.webpki.ca;
 
 import java.io.IOException;
+
 import java.math.BigInteger;
+
 import java.util.Vector;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
 import java.security.cert.X509Certificate;
+
 import java.security.PublicKey;
 
 import org.webpki.asn1.BaseASN1Object;
@@ -41,6 +45,7 @@ import org.webpki.asn1.CompositeContextSpecific;
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.ExtendedKeyUsages;
