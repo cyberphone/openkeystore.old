@@ -895,7 +895,7 @@ public class HTML implements BaseProperties
         "}\n" +
         "</script>" +
         "</head><body onload=\"initPaymentApplication()\">" +
-        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + PAYMENT_DIV_VERTICAL_PADDING + "px " +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + (PAYMENT_DIV_VERTICAL_PADDING - 1) + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px " + PAYMENT_DIV_VERTICAL_PADDING + "px " +
         PAYMENT_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
