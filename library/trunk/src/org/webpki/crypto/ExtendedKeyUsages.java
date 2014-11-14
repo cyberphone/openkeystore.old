@@ -47,7 +47,7 @@ public enum ExtendedKeyUsages
       {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
           {
-            if (oid.equals (eku.x509_name))
+            if (oid.equals (eku.oid))
               {
                 return eku;
               }
@@ -59,7 +59,7 @@ public enum ExtendedKeyUsages
       {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
           {
-            if (oid.equals (eku.x509_name))
+            if (oid.equals (eku.oid))
               {
                 return eku.x509_name;
               }
