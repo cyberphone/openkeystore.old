@@ -36,7 +36,6 @@ import org.webpki.util.Base64;
 import org.webpki.webutil.DefaultHTML;
 
 import org.webpki.crypto.CertificateInfo;
-import org.webpki.crypto.CertificateLogotypeDescriptor;
 
 
 @SuppressWarnings("serial")
@@ -75,29 +74,6 @@ public abstract class CertificateViewer extends HttpServlet
                   "style=\"font-weight:normal;font-size:8pt;font-family:verdana,arial\">").
         append (uri).
         append ("</a>");
-      }
-
-
-    private void printLogoDescriptors (StringBuffer s, String header, CertificateLogotypeDescriptor[] descriptors) throws IOException
-      {
-        if (descriptors != null)
-          {
-            StringBuffer uris = new StringBuffer ();
-            boolean break_it = false;
-            for (CertificateLogotypeDescriptor cltd : descriptors)
-              {
-                if (break_it)
-                  {
-                    uris.append ("<br>");
-                  }
-                else
-                  {
-                    break_it = true;
-                  }
-                insertURI (uris, cltd.getURI ());
-              }
-            add (s, header + "&nbsp;logotypes", uris.toString ());
-          }
       }
 
 
@@ -188,8 +164,6 @@ public abstract class CertificateViewer extends HttpServlet
               }
             printURIs (s, "Key&nbsp;usage", ci.getKeyUsages ());
             printURIs (s, "Extended&nbsp;key&nbsp;usage", ci.getExtendedKeyUsage ());
-            printLogoDescriptors (s, "Issuer", ci.getIssuerLogotypeDescriptors ());
-            printLogoDescriptors (s, "Subject", ci.getSubjectLogotypeDescriptors ());
             printURIs (s, "Policy&nbsp;OIDs", ci.getPolicyOIDs ());
             printURIs (s, "AIA&nbsp;CA&nbsp;issuers", ci.getAIACAIssuers ());
             printURIs (s, "OCSP&nbsp;reponders", ci.getAIAOCSPResponders ());

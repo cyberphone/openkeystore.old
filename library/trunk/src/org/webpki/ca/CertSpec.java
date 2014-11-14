@@ -79,8 +79,6 @@ public class CertSpec
 
     Vector<String> crl_dist_points = new Vector<String> ();
 
-    Vector<Logotype> logotypes = new Vector<Logotype> ();
-
     private boolean has_given_key_usage;
 
     private boolean default_key_usage;
@@ -177,26 +175,6 @@ public class CertSpec
     private void bad (String err) throws IOException
       {
         throw new IOException ("Subject DN error: " + err);
-      }
-
-    private void addLogotype (int index, String uri) throws IOException
-      {
-        URLDereferencer dref = new URLDereferencer (uri);
-        for (Logotype logo : logotypes)
-          {
-            if (logo.index == index && ArrayUtil.compare (logo.value, dref.getData ()))
-              {
-                logo.uris.add (uri);
-                return;
-              }
-          }
-        Logotype logo = new Logotype ();
-        logo.hash_value = HashAlgorithms.SHA1.digest (logo.value = dref.getData ());
-        logo.hash_alg = HashAlgorithms.SHA1;
-        logo.uris.add (uri);
-        logo.index = index;
-        logo.mime_type = dref.getMIMEType ();
-        logotypes.add (logo);
       }
 
 
@@ -324,18 +302,6 @@ public class CertSpec
     public void addCAIssuersURI (String uri)
       {
         aia_locators.add (new String[]{CertificateUtil.AIA_CA_ISSUERS, uri});
-      }
-
-
-    public void addIssuerLogotype (String uri) throws IOException
-      {
-        addLogotype (1, uri);
-      }
-
-
-    public void addSubjectLogotype (String uri) throws IOException
-      {
-        addLogotype (2, uri);
       }
 
 

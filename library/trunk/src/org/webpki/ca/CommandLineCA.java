@@ -696,18 +696,6 @@ public class CommandLineCA
                                                 "Add an IP address SubjectAltName (SAN) extension",
                                                 CmdFrequency.OPTIONAL_MULTIPLE);
 
-    CmdLineArgument CMD_ext_iss_logo  = create (CmdLineArgumentGroup.GENERAL,
-                                                "extension/issuer-logo", "uri",
-                                                "Add an issuer logotype extension.  Must be an HTTP URL " +
-                                                "to a GIF or JPEG image",
-                                                CmdFrequency.OPTIONAL_MULTIPLE);
-
-    CmdLineArgument CMD_ext_sub_logo  = create (CmdLineArgumentGroup.GENERAL,
-                                                "extension/subject-logo", "uri",
-                                                "Add a subject logotype extension.  Must be an HTTP URL " +
-                                                "to a GIF or JPEG image",
-                                                CmdFrequency.OPTIONAL_MULTIPLE);
-
     CmdLineArgument CMD_ext_ski       = create (CmdLineArgumentGroup.GENERAL,
                                                 "extension/ski", null,
                                                 "Set the SubjectKeyIdentifier (SKI) extension",
@@ -950,22 +938,6 @@ public class CommandLineCA
             for (String arg : CMD_ext_certpol.argvalue)
               {
                 certspec.addCertificatePolicyOID (arg);
-              }
-
-            ///////////////////////////////////////////////////////////////
-            // Set issuer logotype URIs
-            ///////////////////////////////////////////////////////////////
-            for (String arg : CMD_ext_iss_logo.argvalue)
-              {
-                certspec.addIssuerLogotype (arg);
-              }
-
-            ///////////////////////////////////////////////////////////////
-            // Set subject logotype URIs
-            ///////////////////////////////////////////////////////////////
-            for (String arg : CMD_ext_sub_logo.argvalue)
-              {
-                certspec.addSubjectLogotype (arg);
               }
 
             ///////////////////////////////////////////////////////////////

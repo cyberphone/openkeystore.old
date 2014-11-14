@@ -374,18 +374,6 @@ public class CA
           }
 
         //////////////////////////////////////////////////////
-        // Logotypes
-        //////////////////////////////////////////////////////
-        if (!cert_spec.logotypes.isEmpty ())
-          {
-            Vector<BaseASN1Object> entries = new Vector<BaseASN1Object> ();
-            getLogotypes (entries, cert_spec.logotypes, 1);
-            getLogotypes (entries, cert_spec.logotypes, 2);
-            extensions.add (CertificateExtensions.LOGOTYPES, new ASN1Sequence (entries.toArray (new BaseASN1Object[0])));
-          }
-
-
-        //////////////////////////////////////////////////////
         // Certificate Creation!
         //////////////////////////////////////////////////////
         BaseASN1Object[] inner = new BaseASN1Object [extensions.isEmpty () ? 7 : 8];

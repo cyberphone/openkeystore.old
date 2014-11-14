@@ -299,18 +299,6 @@ public class CertificateInfo
       }
 
 
-    public CertificateLogotypeDescriptor[] getSubjectLogotypeDescriptors () throws IOException
-      {
-        return CertificateUtil.getSubjectLogotypeDescriptors (certificate);
-      }
-
-
-    public CertificateLogotypeDescriptor[] getIssuerLogotypeDescriptors () throws IOException
-      {
-        return CertificateUtil.getIssuerLogotypeDescriptors (certificate);
-      }
-
-
     public String[] getPolicyOIDs () throws IOException
       {
         return CertificateUtil.getPolicyOIDs (certificate);

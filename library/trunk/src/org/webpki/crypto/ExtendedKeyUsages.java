@@ -43,16 +43,16 @@ public enum ExtendedKeyUsages
       }
   
 
-    public static ExtendedKeyUsages getExtendedKeyUsage (String oid) throws IOException
+    public static ExtendedKeyUsages getExtendedKeyUsage (String x509_name) throws IOException
       {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
           {
-            if (oid.equals (eku.oid))
+            if (x509_name.equals (eku.x509_name))
               {
                 return eku;
               }
           }
-        throw new IOException ("Unknown EKU: " + oid);
+        throw new IOException ("Unknown EKU: " + x509_name);
       }
 
     public static String getOptionallyTranslatedEKU (String oid) throws IOException
