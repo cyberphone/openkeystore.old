@@ -17,8 +17,9 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
-
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,16 +28,18 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
+import org.webpki.crypto.CertificateInfo;
+import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
+import org.webpki.util.DebugFormatter;
+import org.webpki.util.HTMLEncoder;
 import org.webpki.util.ISODateTime;
 
 public class HTML implements BaseProperties
@@ -885,13 +888,78 @@ public class HTML implements BaseProperties
         return Base64URL.encode (ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream ("blah.html")));
       }
     
-    private static String html_signature_frame;
+    private static String niceDate (Date date)
+      {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        sdf.setTimeZone (TimeZone.getTimeZone ("UTC"));
+        return sdf.format (date);
+      }
+
+
+    private static void addCertificateProperty (String header, String data)
+      {
+        html_signature_frame.append ("<tr valign=\"middle\" bgcolor=\"#e0e0e8\"><td>").
+                             append (header).
+                             append ("</td><td><code>").
+                             append (data).
+                             append ("<code></td></tr>");
+      }
+
+
+    private static void addURIProperties (String header, String[] inuris) throws IOException
+      {
+        if (inuris != null)
+          {
+            StringBuffer arg = new StringBuffer ();
+            boolean break_it = false;
+            for (String uri : inuris)
+              {
+                if (break_it)
+                  {
+                    arg.append ("<br>");
+                  }
+                else
+                  {
+                    break_it = true;
+                  }
+                arg.append (uri);
+              }
+            addCertificateProperty (header, arg.toString ());
+          }
+      }
+    
+    
+    private static String formatCodeString (String hex_with_spaces)
+      {
+        StringBuffer dump = new StringBuffer ();
+        for (char c : hex_with_spaces.toCharArray ())
+          {
+            if (c == '\n')
+              {
+                dump.append ("<br>");
+              }
+            else if (c == ' ')
+              {
+                dump.append ("&nbsp;");
+              }
+            else
+              {
+                dump.append (c);
+              }
+          }
+        return dump.toString ();
+      }
+
+    private static String binaryDump (byte[] binary, boolean show_text)
+      {
+        return formatCodeString (DebugFormatter.getHexDebugData (binary, show_text ? 16 : -16));
+      }
+
+    private static StringBuffer html_signature_frame;
     
     public static String getHTMLSignatureFrameSource () throws IOException
       {
-        if (html_signature_frame == null)
-          {
-            StringBuffer s = new StringBuffer (
+        html_signature_frame = new StringBuffer (
         "<!DOCTYPE html>"+
         "<html><head><meta charset=\"UTF-8\">"+
         "<style type=\"text/css\">html {overflow:hidden}\n"+
@@ -957,7 +1025,7 @@ public class HTML implements BaseProperties
         "// This part would in a real WebCrypto++ implemenation be replaced by\n" +
         "// the platform key enumeration and attribute methods\n" +
         "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
-        "var client_cert_path = ['" + SignatureDemoService.client_eecert + "'];\n" +
+        "var client_cert_path = ['" + SignatureDemoService.client_eecert_b64 + "'];\n" +
         "var client_cert_data = " + SignatureDemoService.client_cert_data + ";\n\n" +
         "function error(message) {\n" +
        "    console.debug ('Error: ' + message);\n" +
@@ -1171,6 +1239,11 @@ public class HTML implements BaseProperties
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
+        "    var border_height = document.getElementById('border').offsetHeight;\n" +
+        "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
+        "    document.getElementById('credcross').style.height = (border_height - 9) + 'px';\n" +
+        "    document.getElementById('credcross').style.top = '4px';\n" +
+        "    document.getElementById('credcross').style.left = (credential_width - border_height) + 'px';\n" +
         "    var button_height = document.getElementById('cancel').offsetHeight;\n" +
         "    var attention_height = document.getElementById('attention').offsetHeight;\n" +
         "    var diff = attention_height - 2 * button_height;\n" +
@@ -1200,11 +1273,11 @@ public class HTML implements BaseProperties
         "    document.getElementById('pindialog').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('pindialog').offsetHeight) / 2) + 'px';\n" +
         "    document.getElementById('pindialog').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - document.getElementById('pindialog').offsetWidth) / 2) + 'px';\n" +
         "    document.getElementById('credential').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('credential').offsetHeight) / 2) + 'px';\n" +
-        "    document.getElementById('credential').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - document.getElementById('credential').offsetWidth) / 2) + 'px';\n" +
+        "    document.getElementById('credential').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - credential_width) / 2) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
         "    console.debug('Doclen=' + document_binary.length);\n" +
         "    var frame_height = " + SIGNATURE_WINDOW_HEIGHT + 
-             " - document.getElementById('border').offsetHeight - control_height;\n" +
+             " - border_height - control_height;\n" +
         "    document.getElementById('content').innerHTML = '<iframe src=\"data:' + mime_type + ';base64,' + binaryToBase64STD(document_binary)" +
                " + '\" style=\"width:" + SIGNATURE_WINDOW_WIDTH + 
                "px;height:' + frame_height + 'px;border-width:0px\"></iframe>';\n" +
@@ -1237,7 +1310,7 @@ public class HTML implements BaseProperties
         "    }\n" +
         "}\n" +
         "</script></head><body onload=\"initSignatureApplication()\">" +
-        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
+        "<div id=\"border\" style=\"font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " +
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " +
         SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
         "color:white;background:" +
@@ -1266,16 +1339,58 @@ public class HTML implements BaseProperties
         ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
         "</div>" +
-        "<div id=\"credential\" onclick=\"closeCredentialDialog()\" title=\"Click to close\" " +
-        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
+        "<div id=\"credential\" " +
+          "style=\"border-width:1px;border-style:solid;border-color:" +
+               SIGNATURE_BORDER_COLOR + 
+               ";box-shadow:3pt 3pt 3pt #D0D0D0;position:absolute;visibility:hidden;z-index:3\">" +
+          "<div style=\"font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " + 
+          SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+          SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
+          "color:white;background:" +
+          SIGNATURE_BORDER_COLOR + "\">Certificate Properties<img src=\"" + SignatureDemoService.cross_data_uri + "\" id=\"credcross\" onclick=\"closeCredentialDialog()\" title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>" +
+          "<div style=\"overflow:auto;max-width:500px\">Hi&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h j jj jj j</div>" +
+/*
+        "<div" +
+        "style=\"overflow:auto;max-width:500px;max-height:300px;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
+        SIGNATURE_BORDER_COLOR + ";font-size:8pt;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
         ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
-        "CRED</div>" +
+        "<table cellspacing=\"5\" cellpadding=\"5\">");
+            CertificateInfo cert_info = new CertificateInfo (SignatureDemoService.client_eecert);
+            addCertificateProperty ("Issuer", HTMLEncoder.encode (cert_info.getIssuer ()));
+            addCertificateProperty ("Serial&nbsp;number", cert_info.getSerialNumber () + " (0x" + cert_info.getSerialNumberInHex () + ")");
+            addCertificateProperty ("Subject", HTMLEncoder.encode (cert_info.getSubject ()));
+            addCertificateProperty ("Valid&nbsp;from", niceDate (cert_info.getNotBeforeDate ()));
+            addCertificateProperty ("Valid&nbsp;to", niceDate (cert_info.getNotAfterDate ()));
+            String bc = cert_info.getBasicConstraints ();
+            if (bc != null)
+              {
+                addCertificateProperty ("Basic&nbsp;constraints", bc);
+              }
+            addURIProperties ("Key&nbsp;usage", cert_info.getKeyUsages ());
+            String[] ext_key_usages = cert_info.getExtendedKeyUsage ();
+            if (ext_key_usages != null)
+              {
+                for (int i = 0; i < ext_key_usages.length; i++)
+                  {
+                    ext_key_usages[i] = ExtendedKeyUsages.getOptionallyTranslatedEKU (ext_key_usages[i]);
+                  }
+                addURIProperties ("Extended&nbsp;key&nbsp;usage", ext_key_usages);
+              }
+            addURIProperties ("Policy&nbsp;OIDs", cert_info.getPolicyOIDs ());
+            addURIProperties ("AIA&nbsp;CA&nbsp;issuers", cert_info.getAIACAIssuers ());
+            addURIProperties ("OCSP&nbsp;reponders", cert_info.getAIAOCSPResponders ());
+            String fp = ArrayUtil.toHexString (cert_info.getCertificateHash (), 0, -1, true, ' ');
+            addCertificateProperty ("SHA1&nbsp;fingerprint", fp.substring (0, 29) + "<br>" + fp.substring (29));
+            addCertificateProperty ("Key&nbsp;algorithm", cert_info.getPublicKeyAlgorithm ());
+            addCertificateProperty ("Public&nbsp;key", binaryDump (cert_info.getPublicKeyData (), false));
+ 
+        html_signature_frame.append (
+        "</table>" +
+*/
+        "</div>" +
         "</body></html>");
-             html_signature_frame = s.toString ();
-          }
-        return html_signature_frame;
+        return html_signature_frame.toString ();
       }
 
     public static void signHTMLPage (HttpServletResponse response) throws IOException, ServletException 
@@ -1289,7 +1404,7 @@ public class HTML implements BaseProperties
         "    json['" + JSONDecoderCache.QUALIFIER_JSON + "'] = command_property_value;\n" +
         "    return json;\n" +
         "}\n\n" +
-        "function receiveMessage(event) {\n" +
+        "window.addEventListener('message', function(event) {\n" +
         "    console.debug (event.origin + ' = > Signature message:\\n' + event.data);\n" +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
@@ -1324,8 +1439,7 @@ public class HTML implements BaseProperties
         "            document.forms.shoot.submit();\n" +
         "        }, 0);\n" +
         "    }\n" +
-        "}\n" +
-        "window.addEventListener('message', receiveMessage, false);\n", null,
+        "}, false);\n", null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 getIframeHTML() +
                 "<form name=\"shoot\" method=\"POST\" action=\"signedresult\"><input type=\"hidden\" " +

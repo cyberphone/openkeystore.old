@@ -62,7 +62,8 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
     static String key_password;
 
     static KeyStore client_root;
-    static String client_eecert;
+    static String client_eecert_b64;
+    static X509Certificate client_eecert;
     static String user_name;
     static JWK client_private_key;
     static String client_cert_data;
@@ -105,27 +106,28 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
             CustomCryptoProvider.forcedLoad (getPropertyBoolean ("bouncycastle_first"));
             issuer_url = getPropertyString ("issuer_url");
             relying_party_url = getPropertyString ("relying_party_url");
-            cross_data_uri = getDataURI ("cross", "png");
+            cross_data_uri = getDataURI ("cross", "svg");
             working_data_uri = getDataURI ("working", "gif");
             mybank_data_uri = getDataURI ("mybank", "svg");
             card_font = getPropertyString ("card_font");
             key_password = getPropertyString ("key_password");
             client_root = getRootCertificate (getPropertyString ("client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (SignatureDemoService.class.getResourceAsStream (getPropertyString ("client_eecert")), SignatureDemoService.key_password);
-            X509Certificate cert = (X509Certificate) client.getCertificate ("mykey");
-            user_name = new CertificateInfo (cert).getSubjectCommonName ();
-            client_eecert = Base64URL.encode (cert.getEncoded ());
+            client_eecert = (X509Certificate) client.getCertificate ("mykey");
+            user_name = new CertificateInfo (client_eecert).getSubjectCommonName ();
+            client_eecert_b64 = Base64URL.encode (client_eecert.getEncoded ());
             client_cert_data = new StringBuffer ("{" + JSONSignatureDecoder.ISSUER_JSON + ":'")
-              .append (cert.getIssuerX500Principal ().getName ())
+              .append (client_eecert.getIssuerX500Principal ().getName ())
               .append ("', " + JSONSignatureDecoder.SERIAL_NUMBER_JSON + ":'")
-              .append (cert.getSerialNumber ().toString ())
+              .append (client_eecert.getSerialNumber ().toString ())
               .append ("', " + JSONSignatureDecoder.SUBJECT_JSON + ":'")
-              .append (cert.getSubjectX500Principal ().getName ())
+              .append (client_eecert.getSubjectX500Principal ().getName ())
               .append ("'}").toString ();
-            client_private_key = cert.getPublicKey () instanceof RSAPublicKey ? 
+            client_private_key = client_eecert.getPublicKey () instanceof RSAPublicKey ? 
                   new JWK (client.getKey ("mykey", SignatureDemoService.key_password.toCharArray ()))
                                     :
-                  new JWK ((ECPublicKey)cert.getPublicKey (), (ECPrivateKey)client.getKey ("mykey", SignatureDemoService.key_password.toCharArray ()));
+                  new JWK ((ECPublicKey)client_eecert.getPublicKey (), (ECPrivateKey)client.getKey ("mykey", SignatureDemoService.key_password.toCharArray ()));
+            HTML.getHTMLSignatureFrameSource ();
             logger.info ("WebCrypto++ Signature Demo ClientKey=" + client_private_key.getKeyType () + " Successfully Initiated");
           }
         catch (Exception e)
