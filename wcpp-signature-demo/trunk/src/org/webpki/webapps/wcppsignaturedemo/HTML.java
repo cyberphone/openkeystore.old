@@ -975,8 +975,6 @@ public class HTML implements BaseProperties
         "var aborted_operation = false;\n" +
         "var pin_error_count = 0;\n" +
         "var border_height;\n" +
-        "var selected_card;\n" +
-        "var authorize_command;\n" +
         "var timeouter_handle = null;\n" +
         "var request_reference_id;\n" +
         "var request_date_time;\n" +
@@ -1201,7 +1199,6 @@ public class HTML implements BaseProperties
         "function userSign() {\n" +
         "    closeCredentialDialog();\n" +
         "    document.getElementById('sign').disabled = true;\n" +
- //       "    document.getElementById('pinerror').innerHTML = 'Something is rotten in the state of Denmark!, Right';\n" +
         "    var pindialog_width = document.getElementById('pindialog').offsetWidth;\n" +
         "    document.getElementById('pincross').style.height = (border_height - 9"
         + ") + 'px';\n" +
@@ -1213,10 +1210,33 @@ public class HTML implements BaseProperties
         "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "function closePINDialog() {\n" +
+        "    document.getElementById('pin').innerHTML = '';\n" +
         "    document.getElementById('sign').disabled = false;\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "}\n\n" +
+        "function showPINError(message) {\n" +
+        "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
+        "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt;color:red\">' + message + '</div>';\n" +
+        "    userSign();\n" +
+        "}\n\n" +
         "function performSignatureOperation() {\n" +
+        "    var pin = document.getElementById('pin').value;\n" +
+        "    if (pin_error_count < 3) {\n" +
+        "        if (pin.length == 0) {\n" +
+        "            showPINError('Please enter a PIN...');\n" +
+        "            return;\n" +
+        "        }\n" +
+        "        if (pin != '1234') {\n" +
+        "            if (++pin_error_count < 3) {\n" +
+        "                showPINError('Incorrect PIN! Attempts left: ' + (3 - pin_error_count));\n" +
+        "                return;\n" +
+        "            }\n" +
+        "        }\n" +
+        "    }\n" +
+        "    if (pin_error_count == 3) {\n" +
+        "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
+        "        return;\n" +
+        "    }\n" +
         "    document.getElementById('busy').style.visibility = 'visible';\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
         "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
@@ -1355,7 +1375,7 @@ public class HTML implements BaseProperties
              "title=\"Try &quot;1234&quot; :-)\" style=\"font-family:" + FONT_VERDANA + ";padding-left:3px;letter-spacing:2px;background-color:white\" " +
              "type=\"password\" size=\"" + PIN_FIELD_SIZE +
              "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></div>" +
-         "<div style=\"text-align:center;padding-bottom:8pt\"><input style=\"font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "\" type=\"button\" value=\"OK\"></div>" +
+         "<div style=\"text-align:center;padding-bottom:8pt\"><input style=\"font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "\" type=\"button\" value=\"OK\" onclick=\"performSignatureOperation()\"></div>" +
         "</div>" +
         getDialogBox ("credential",
                       "credcross",
