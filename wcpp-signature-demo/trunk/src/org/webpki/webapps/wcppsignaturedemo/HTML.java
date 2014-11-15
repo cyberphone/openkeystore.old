@@ -1348,7 +1348,9 @@ public class HTML implements BaseProperties
           SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
           SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
           "color:white;background:" +
-          SIGNATURE_BORDER_COLOR + "\">Certificate Properties<img src=\"" + SignatureDemoService.cross_data_uri + "\" id=\"credcross\" onclick=\"closeCredentialDialog()\" title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>" +
+          SIGNATURE_BORDER_COLOR + "\">Certificate Properties<img src=\"" + SignatureDemoService.cross_data_uri + 
+          "\" id=\"credcross\" onclick=\"closeCredentialDialog()\" " +
+          "title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>" +
           "<div style=\"background-color:white;overflow:scroll;max-width:500px;max-height:400px\"><table>");
             CertificateInfo cert_info = new CertificateInfo (SignatureDemoService.client_eecert);
             addCertificateProperty ("Issuer", HTMLEncoder.encode (cert_info.getIssuer ()));
