@@ -331,14 +331,10 @@ public class CertificateInfo
 
     public String getBasicConstraints ()
       {
-        if (certificate.getExtensionValue ("2.5.29.19") == null)
-          {
-            return null;
-          }
         int i = certificate.getBasicConstraints ();
         if (i == -1)
           {
-            return "End-entity (EE) certificate";
+            return "End-entity certificate";
           }
         return "CA certificate, path length constraint: " +
                (i == Integer.MAX_VALUE ? "none" : String.valueOf (i));
