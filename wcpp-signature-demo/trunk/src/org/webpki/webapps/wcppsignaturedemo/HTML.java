@@ -17,11 +17,13 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -29,13 +31,14 @@ import javax.servlet.http.HttpSession;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateInfo;
-import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -971,6 +974,7 @@ public class HTML implements BaseProperties
         "\"use strict\";\n\n" +
         "var aborted_operation = false;\n" +
         "var pin_error_count = 0;\n" +
+        "var border_height;\n" +
         "var selected_card;\n" +
         "var authorize_command;\n" +
         "var timeouter_handle = null;\n" +
@@ -1197,7 +1201,16 @@ public class HTML implements BaseProperties
         "function userSign() {\n" +
         "    closeCredentialDialog();\n" +
         "    document.getElementById('sign').disabled = true;\n" +
+ //       "    document.getElementById('pinerror').innerHTML = 'Something is rotten in the state of Denmark!, Right';\n" +
+        "    var pindialog_width = document.getElementById('pindialog').offsetWidth;\n" +
+        "    document.getElementById('pincross').style.height = (border_height - 9"
+        + ") + 'px';\n" +
+        "    document.getElementById('pincross').style.top = '4px';\n" +
+        "    document.getElementById('pincross').style.left = (pindialog_width - border_height + 2) + 'px';\n" +
+        "    document.getElementById('pindialog').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('pindialog').offsetHeight) / 2) + 'px';\n" +
+        "    document.getElementById('pindialog').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - pindialog_width) / 2) + 'px';\n" +
         "    document.getElementById('pindialog').style.visibility = 'visible';\n" +
+        "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "function closePINDialog() {\n" +
         "    document.getElementById('sign').disabled = false;\n" +
@@ -1239,7 +1252,7 @@ public class HTML implements BaseProperties
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
-        "    var border_height = document.getElementById('border').offsetHeight;\n" +
+        "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
         "    document.getElementById('credcross').style.height = (border_height - 9"
         + ") + 'px';\n" +
@@ -1271,8 +1284,6 @@ public class HTML implements BaseProperties
         "    document.getElementById('keylogo').style.left = keylogo_left + 'px';\n" +
         "    document.getElementById('username').style.left = (keylogo_left + keylogo_width) + 'px';\n" +
         "    document.getElementById('username').style.top = Math.floor((control_height - document.getElementById('username').offsetHeight) / 2) + 'px';\n" +
-        "    document.getElementById('pindialog').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('pindialog').offsetHeight) / 2) + 'px';\n" +
-        "    document.getElementById('pindialog').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - document.getElementById('pindialog').offsetWidth) / 2) + 'px';\n" +
         "    document.getElementById('credential').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('credential').offsetHeight) / 2) + 'px';\n" +
         "    document.getElementById('credential').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - credential_width) / 2) + 'px';\n" +
         "    document.getElementById('control').style.visibility = 'visible';\n" +
@@ -1325,7 +1336,7 @@ public class HTML implements BaseProperties
         SIGNATURE_BORDER_COLOR + ";z-index:3;position:absolute;bottom:0px;width:" + SIGNATURE_WINDOW_WIDTH +"px;visibility:hidden\">" +
           "<input id=\"cancel\" title=\"Return to previous view\"  type=\"button\" value=\"&nbsp;Cancel&nbsp;\" class=\"stdbtn\" onclick=\"userAbort()\">" +
           "<input id=\"sign\" title=\"Sign document!\" type=\"button\" value=\"Sign...\" class=\"stdbtn\"onclick=\"userSign()\">" +
-          "<div id=\"attention\" style=\"padding:2px 4px 2px 4px;font-size:8pt;position:absolute;border-radius:4pt;border-width:1px;border-style:solid;border-color:red;background:#FFFFE0\">By digitally signing the document above,<br>you confirm that you have read and<br>understood the implications of its content</div>" +
+          "<div id=\"attention\" style=\"padding:2px 4px 2px 4px;font-size:8pt;position:absolute;border-radius:4pt;border-width:1px;border-style:solid;border-color:red;background-color:#FFFFE0\">By digitally signing the document above,<br>you confirm that you have read and<br>understood the implications of its content</div>" +
           "<img id=\"keylogo\" title=\"Signature credential - Click for more information\" onclick=\"openCredentialDialog()\" src=\"" + 
              SignatureDemoService.mybank_data_uri + 
              "\" alt=\"html5 requirement...\" style=\"cursor:pointer;border-radius:4pt;background:white;position:absolute;border-width:1px;border-style:solid;border-color:black\">" + 
@@ -1334,23 +1345,23 @@ public class HTML implements BaseProperties
         "<img id=\"busy\" src=\"" + SignatureDemoService.working_data_uri + "\" alt=\"html5 requirement...\" style=\"position:absolute;top:" + 
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
-        "<div id=\"pindialog\" onclick=\"closePINDialog()\" title=\"Click to close\" " +
-        "style=\"line-height:14pt;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";text-align:center;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
-        ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
+        getDialogBox ("pindialog",
+                      "pincross",
+                      "Enter a PIN to activate the signature key...", 
+                      "Signature PIN",
+                      "closePINDialog") +
+        "<div id=\"pinerror\"></div>" +
+        "<div style=\"text-align:center;padding:8pt 15pt 8pt 15pt\"><input id=\"pin\" " +
+             "title=\"Try &quot;1234&quot; :-)\" style=\"font-family:" + FONT_VERDANA + ";padding-left:3px;letter-spacing:2px;background-color:white\" " +
+             "type=\"password\" size=\"" + PIN_FIELD_SIZE +
+             "\" maxlength=\"" + PIN_MAX_LENGTH + "\"></div>" +
+         "<div style=\"text-align:center;padding-bottom:8pt\"><input style=\"font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + "\" type=\"button\" value=\"OK\"></div>" +
         "</div>" +
-        "<div id=\"credential\" title=\"Currently a &quot;selection&quot; of properties...\" " +
-          "style=\"border-width:1px;border-style:solid;border-color:" +
-               SIGNATURE_BORDER_COLOR + 
-               ";box-shadow:3pt 3pt 3pt #D0D0D0;position:absolute;visibility:hidden;z-index:3\">" +
-          "<div style=\"font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " + 
-          SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
-          SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
-          "color:white;background:" +
-          SIGNATURE_BORDER_COLOR + "\">Certificate Properties<img src=\"" + SignatureDemoService.cross_data_uri + 
-          "\" id=\"credcross\" onclick=\"closeCredentialDialog()\" " +
-          "title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>" +
+        getDialogBox ("credential",
+                      "credcross",
+                      "Currently a &quot;selection&quot; of properties...", 
+                      "Certificate Properties",
+                      "closeCredentialDialog") +
           "<div style=\"background-color:white;overflow:scroll;max-width:500px;max-height:400px\"><table>");
             CertificateInfo cert_info = new CertificateInfo (SignatureDemoService.client_eecert);
             addCertificateProperty ("Issuer", HTMLEncoder.encode (cert_info.getIssuer ()));
@@ -1380,12 +1391,29 @@ public class HTML implements BaseProperties
             addCertificateProperty ("SHA1&nbsp;fingerprint", fp.substring (0, 29) + "<br>" + fp.substring (29));
             addCertificateProperty ("Key&nbsp;algorithm", cert_info.getPublicKeyAlgorithm ());
             addCertificateProperty ("Public&nbsp;key", binaryDump (cert_info.getPublicKeyData (), false));
- 
-        html_signature_frame.append (
-            "</table></div>" +
-        "</div>" +
-        "</body></html>");
-        return html_signature_frame.toString ();
+            html_signature_frame.append ("</table></div></div>");
+
+        return html_signature_frame.append ("</body></html>").toString ();
+      }
+
+    private static String getDialogBox (String main_id,
+                                        String cross_id,
+                                        String title_text,
+                                        String header_text,
+                                        String close_method)
+      {
+        return 
+          "<div id=\"" + main_id + "\" title=\"" + title_text + "\" " +
+            "style=\"background-color:" + SIGNATURE_DIALOG_COLOR + ";border-width:1px;border-style:solid;border-color:" +
+                 SIGNATURE_BORDER_COLOR + 
+                 ";box-shadow:3pt 3pt 3pt #D0D0D0;position:absolute;visibility:hidden;z-index:3\">" +
+            "<div style=\"font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " + 
+            30 + "pt " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
+            SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
+            "color:white;background:" +
+            SIGNATURE_BORDER_COLOR + "\">" + header_text + "<img src=\"" + SignatureDemoService.cross_data_uri + 
+            "\" id=\"" + cross_id + "\" onclick=\"" + close_method + "()\" " +
+            "title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>";
       }
 
     public static void signHTMLPage (HttpServletResponse response) throws IOException, ServletException 
