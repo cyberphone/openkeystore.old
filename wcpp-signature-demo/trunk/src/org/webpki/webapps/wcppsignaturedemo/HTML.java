@@ -898,7 +898,7 @@ public class HTML implements BaseProperties
 
     private static void addCertificateProperty (String header, String data)
       {
-        html_signature_frame.append ("<tr valign=\"middle\" bgcolor=\"#e0e0e8\"><td>").
+        html_signature_frame.append ("<tr><td>").
                              append (header).
                              append ("</td><td><code>").
                              append (data).
@@ -964,8 +964,8 @@ public class HTML implements BaseProperties
         "<html><head><meta charset=\"UTF-8\">"+
         "<style type=\"text/css\">html {overflow:hidden}\n"+
         "body {font-size:10pt;color:#000000;font-family:" + FONT_ARIAL + ";background-color:white;margin:0px;padding:0px}\n" +
-        "table {border-collapse: collapse}\n" +
-        "td {padding: 0px}\n" +
+        "table {border-collapse:separate; border-spacing:" + SIGNATURE_DIV_HORIZONTAL_PADDING + "px " + SIGNATURE_DIV_VERTICAL_PADDING + "px}\n" +
+        "td {padding: 2pt 4pt 2pt 4pt;font-size:8pt;background-color:#e0e0e8}\n" +
         ".stdbtn {font-weight:normal;font-size:10pt;font-family:" + FONT_ARIAL + ";position:absolute}\n" +
         "</style><script type=\"text/javascript\">\n" +
         "\"use strict\";\n\n" +
@@ -1241,9 +1241,10 @@ public class HTML implements BaseProperties
         "    if (aborted_operation) return;\n" +
         "    var border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
-        "    document.getElementById('credcross').style.height = (border_height - 9) + 'px';\n" +
+        "    document.getElementById('credcross').style.height = (border_height - 9"
+        + ") + 'px';\n" +
         "    document.getElementById('credcross').style.top = '4px';\n" +
-        "    document.getElementById('credcross').style.left = (credential_width - border_height) + 'px';\n" +
+        "    document.getElementById('credcross').style.left = (credential_width - border_height + 2) + 'px';\n" +
         "    var button_height = document.getElementById('cancel').offsetHeight;\n" +
         "    var attention_height = document.getElementById('attention').offsetHeight;\n" +
         "    var diff = attention_height - 2 * button_height;\n" +
@@ -1339,7 +1340,7 @@ public class HTML implements BaseProperties
         ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
         "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
         "</div>" +
-        "<div id=\"credential\" " +
+        "<div id=\"credential\" title=\"Currently a &quot;selection&quot; of properties...\" " +
           "style=\"border-width:1px;border-style:solid;border-color:" +
                SIGNATURE_BORDER_COLOR + 
                ";box-shadow:3pt 3pt 3pt #D0D0D0;position:absolute;visibility:hidden;z-index:3\">" +
@@ -1348,14 +1349,7 @@ public class HTML implements BaseProperties
           SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
           "color:white;background:" +
           SIGNATURE_BORDER_COLOR + "\">Certificate Properties<img src=\"" + SignatureDemoService.cross_data_uri + "\" id=\"credcross\" onclick=\"closeCredentialDialog()\" title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>" +
-          "<div style=\"overflow:auto;max-width:500px\">Hi&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h&nbsp;h j jj jj j</div>" +
-/*
-        "<div" +
-        "style=\"overflow:auto;max-width:500px;max-height:300px;cursor:pointer;border-width:1px;border-style:solid;border-color:" + 
-        SIGNATURE_BORDER_COLOR + ";font-size:8pt;font-family:" + FONT_ARIAL+ ";z-index:3;background:" + SIGNATURE_DIALOG_COLOR +
-        ";position:absolute;visibility:hidden;padding:10pt 20pt 10pt 20pt;" +
-        "background-image:url('" + SignatureDemoService.cross_data_uri + "');background-repeat:no-repeat;background-position:top left\">" +
-        "<table cellspacing=\"5\" cellpadding=\"5\">");
+          "<div style=\"background-color:white;overflow:scroll;max-width:500px;max-height:400px\"><table>");
             CertificateInfo cert_info = new CertificateInfo (SignatureDemoService.client_eecert);
             addCertificateProperty ("Issuer", HTMLEncoder.encode (cert_info.getIssuer ()));
             addCertificateProperty ("Serial&nbsp;number", cert_info.getSerialNumber () + " (0x" + cert_info.getSerialNumberInHex () + ")");
@@ -1386,8 +1380,7 @@ public class HTML implements BaseProperties
             addCertificateProperty ("Public&nbsp;key", binaryDump (cert_info.getPublicKeyData (), false));
  
         html_signature_frame.append (
-        "</table>" +
-*/
+            "</table></div>" +
         "</div>" +
         "</body></html>");
         return html_signature_frame.toString ();
