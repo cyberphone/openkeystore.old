@@ -61,8 +61,8 @@
     </servlet>
 
     <servlet>
-        <servlet-name>SignHTMLServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcppsignaturedemo.SignHTMLServlet</servlet-class>
+        <servlet-name>SignatureCommandServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.SignatureCommandServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -86,8 +86,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>SignHTMLServlet</servlet-name>
-        <url-pattern>/signhtml</url-pattern>
+        <servlet-name>SignatureCommandServlet</servlet-name>
+        <url-pattern>/signcmd</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

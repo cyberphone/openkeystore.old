@@ -208,17 +208,10 @@ public class HTML implements BaseProperties
                    "<tr><td style=\"text-align:left\"><i>In case you are testing with a WebCrypto-enabled browser, the user-authorization will be signed and encrypted " +
                    "which can viewed in a browser debugger window.</i></td></tr>" +
                    "<tr><td align=\"center\"><table cellspacing=\"0\">" +
-                   "<tr style=\"text-align:left\"><td><a href=\"" + SignatureDemoService.relying_party_url + "/signhtml\">Sign HTML</a></td><td>Shop Til You Drop!</td></tr>" +
-/*
-                   "<tr style=\"text-align:left\"><td><a href=\"" + SignatureDemoService.bank_url + "/cards\">Initialize Payment Cards&nbsp;&nbsp;</a></td><td><i>Mandatory</i> First Step</td></tr>" +
-                   "<tr style=\"text-align:left\"><td><a href=\"" + SignatureDemoService.merchant_url + "\">Go To Merchant</a></td><td>Shop Til You Drop!</td></tr>" +
-*/
+                   "<tr style=\"text-align:left\"><td><a href=\"" + SignatureDemoService.relying_party_url + "/signcmd\">Sign Document</a></td><td>The Demo!</td></tr>" +
                    "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Documentation</b></td></tr>" +
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/pki-webcrypto.pdf\">WebCrypto++</a></td><td><i>Conceptual</i> Specification</td></tr>" +
-/*
-                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"http://webpki.org/papers/PKI/EMV-Tokenization-SET-3DSecure-WebCryptoPlusPlus-combo.pdf#page=4\">Demo Payment System</a></td><td>State Diagram Etc.</td></tr>" +
-*/
-                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-signature-demo\">Demo Source Code</a></td><td>For Nerds...</td></tr>" +
+                   "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://code.google.com/p/openkeystore/source/browse/#svn/wcpp-signature-demo\">Demo Source Code</a>&nbsp;&nbsp;</td><td>For Nerds...</td></tr>" +
                    "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Related Applications</b></td></tr>" +
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://mobilepki.org/jcs\">JCS</a></td><td>JSON Cleartext Signature</td></tr>" +
                    "<tr style=\"text-align:left\"><td><a target=\"_blank\" href=\"https://play.google.com/store/apps/details?id=org.webpki.mobile.android\">SKS/KeyGen2</a></td><td>Android PoC</td></tr>" +
@@ -886,9 +879,10 @@ public class HTML implements BaseProperties
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">Your Browser Doesn't Support WebCrypto :-(</td></tr>"));
       }
 
-    public static String getBinaryArray () throws IOException
+    public static String getBinaryArray (boolean html_flag) throws IOException
       {
-        return Base64URL.encode (ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream ("blah.html")));
+        return Base64URL.encode (ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream (
+            html_flag ? "blah.html" : "prov.pdf")));
       }
     
     private static String niceDate (Date date)
@@ -988,6 +982,7 @@ public class HTML implements BaseProperties
         "var document_binary;\n" +
         "var signature_response;\n" +
         "var document_data;\n" +
+        "var detached_flag;\n" +
         "var signature_object;\n" +
         "var BASE64URL_DECODE = [" +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
@@ -1210,13 +1205,12 @@ public class HTML implements BaseProperties
         "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "function closePINDialog() {\n" +
-        "    document.getElementById('pin').innerHTML = '';\n" +
         "    document.getElementById('sign').disabled = false;\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "}\n\n" +
         "function showPINError(message) {\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
-        "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt;color:red\">' + message + '</div>';\n" +
+        "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt 12pt 0pt 12pt;color:red\">' + message + '</div>';\n" +
         "    userSign();\n" +
         "}\n\n" +
         "function performSignatureOperation() {\n" +
@@ -1237,6 +1231,7 @@ public class HTML implements BaseProperties
         "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
         "        return;\n" +
         "    }\n" +
+        "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "    document.getElementById('busy').style.visibility = 'visible';\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
         "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
@@ -1272,6 +1267,7 @@ public class HTML implements BaseProperties
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    if (aborted_operation) return;\n" +
+        "    detached_flag = getJSONProperty('" + SIGNATURE_TYPE_JSON + "') == '" + SIGNATURE_TYPE_DETACHED + "';\n" +
         "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
         "    document.getElementById('credcross').style.height = (border_height - 9"
@@ -1436,7 +1432,7 @@ public class HTML implements BaseProperties
             "title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>";
       }
 
-    public static void signHTMLPage (HttpServletResponse response) throws IOException, ServletException 
+    public static void signData (HttpServletResponse response, boolean html_flag, boolean json_flag, boolean detached_flag) throws IOException, ServletException 
       {
         HTML.output (response, HTML.getHTML (
         "\n\n\"use strict\";\n\n" +
@@ -1455,7 +1451,7 @@ public class HTML implements BaseProperties
         "        return;\n" +
         "    }\n" +
         "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] == '" + Messages.ABORT + "') {\n" +
-        "        document.location.href='" + SignatureDemoService.issuer_url + "/home';\n" +
+        "        document.location.href='" + SignatureDemoService.issuer_url + "/signcmd';\n" +
         "        return;\n" +
         "    }\n" +
         "    if (received_json['" + JSONDecoderCache.QUALIFIER_JSON + "'] != message_state) {\n" +
@@ -1468,9 +1464,11 @@ public class HTML implements BaseProperties
                  "');\n" +
         "        invoke_object." + REFERENCE_ID_JSON + " = '#" +  (SignatureDemoService.reference_id++) + "';\n" +
         "        invoke_object." + DATE_TIME_JSON + " = '" + ISODateTime.formatDateTime (new Date (), true) + "';\n" +
+        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? SIGNATURE_FORMAT_JCS : SIGNATURE_FORMAT_XML) + "';\n" +
+        "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDED) + "';\n" +
         "        var object_to_sign = invoke_object." + OBJECT_TO_SIGN_JSON + " = {};\n" +
-        "        object_to_sign." + MIME_TYPE_JSON + " = 'text/html';\n" +
-        "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray () + "';\n" +
+        "        object_to_sign." + MIME_TYPE_JSON + " = '" + (html_flag ? "text/html" : "application/pdf") + "';\n" +
+        "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray (html_flag) + "';\n" +
         "        setTimeout(function(){\n" +
         "            event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
 //      "        }, " + (SIGNATURE_TIMEOUT_INIT + 1000) + ");\n" +
@@ -1502,5 +1500,24 @@ public class HTML implements BaseProperties
                   "<div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
                   message + "</div>") +
                 "</td></tr></table></td></tr>"));
+      }
+
+    public static void signatureCommandPage (HttpServletResponse response) throws IOException, ServletException
+      {
+        HTML.output (response, HTML.getHTML (null, null,
+            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Select Signature Parameters<br>&nbsp;</td></tr><tr><td>" +
+            "<form method=\"POST\" action=\"signcmd\"><table class=\"tftable\">" +
+            "<tr><td rowspan=\"2\">Document Type</td>" +
+            "<td><input type=\"radio\" name=\"doctype\" checked value=\"html\">&nbsp;HTML</td>" +
+            "</tr><tr><td><input type=\"radio\" name=\"doctype\" value=\"pdf\">&nbsp;PDF</td></tr>" +
+            "<tr><td rowspan=\"2\">Signature format</td>" +
+            "<td><input type=\"radio\" name=\"sigfmt\" checked value=\"jcs\">&nbsp;JSON (JCS)</td></tr>" +
+            "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"xml\">&nbsp;XML DSig</td></tr>" +
+            "<tr><td rowspan=\"2\">Signature Type</td>" +
+            "<td><input type=\"radio\" name=\"sigtype\" checked value=\"det\">&nbsp;Detached</td></tr>" +
+            "<tr><td><input type=\"radio\" name=\"sigtype\" value=\"emb\">&nbsp;Embedding</td></tr>" +
+            "<tr><td colspan=\"2\" style=\"text-align:center\"><input type=\"submit\" value=\"Continue..\"></td></tr>" +
+            "</table></form>" +
+            "</td></tr></table></td></tr>"));
       }
   }

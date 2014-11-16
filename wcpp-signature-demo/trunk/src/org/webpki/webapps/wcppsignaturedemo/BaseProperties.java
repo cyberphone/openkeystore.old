@@ -57,6 +57,16 @@ public interface BaseProperties
     String REQUEST_DATA_JSON          = "RequestData";
     String ORIGIN_JSON                = "Origin";
     
+    String SIGNATURE_TYPE_JSON        = "SignatureType";
+    // Argument to the above
+    String SIGNATURE_TYPE_DETACHED    = "Detached";
+    String SIGNATURE_TYPE_EMBEDDED    = "Embedded";
+    
+    String SIGNATURE_FORMAT_JSON      = "SignatureFormat";
+    // Argument to the above
+    String SIGNATURE_FORMAT_JCS       = "JCS";
+    String SIGNATURE_FORMAT_XML       = "XML";
+
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";
     String CONCAT_ALGORITHM_URI       = "http://www.w3.org/2009/xmlenc11#ConcatKDF";

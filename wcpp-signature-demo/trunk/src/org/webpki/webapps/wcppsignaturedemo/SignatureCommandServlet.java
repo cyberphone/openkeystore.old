@@ -19,17 +19,42 @@ package org.webpki.webapps.wcppsignaturedemo;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class SignHTMLServlet extends HttpServlet
+public class SignatureCommandServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
+    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+        HTML.signData (response, 
+                       getSelect (request, "doctype", "html", "pdf"),
+                       getSelect (request, "sigfmt", "jcs", "xml"),
+                       getSelect (request, "sigtype", "det", "emb"));
+      }
+
+    private boolean getSelect (HttpServletRequest request, String attribute, String true_value, String false_value) throws IOException
+      {
+        String value = request.getParameter (attribute);
+        if (value == null)
+          {
+            throw new IOException ("Missing argument: " + attribute);
+          }
+        if (value.equals (true_value))
+          {
+            return true;
+          }
+        if (!value.equals (false_value))
+          {
+            throw new IOException ("Unknown argument: " + value);
+          }
+        return false;
+      }
+
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        HTML.signHTMLPage (response);
+         HTML.signatureCommandPage (response);
       }
   }
