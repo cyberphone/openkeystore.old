@@ -126,9 +126,7 @@
       </lib>
       <fileset dir="web"/>
       <zipfileset dir="${key_dir}" prefix="${class_war_path}"/>
-      <zipfileset dir="${packimage_dir}" prefix="${class_war_path}">
-         <exclude name="*.psd"/>
-      </zipfileset>
+      <zipfileset dir="${packimage_dir}" prefix="${class_war_path}"/>
     </war>
   </target>
 
