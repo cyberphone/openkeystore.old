@@ -23,12 +23,6 @@
     </context-param>
 
     <context-param>
-        <description>Card font name</description>
-        <param-name>card_font</param-name>
-        <param-value>@card-font@</param-value>
-    </context-param>
-
-    <context-param>
         <description>Key Password</description>
         <param-name>key_password</param-name>
         <param-value>@key-password@</param-value>

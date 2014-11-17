@@ -57,8 +57,6 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
     static String working_data_uri;
     static String mybank_data_uri;
     
-    static String card_font;
-
     static String key_password;
 
     static KeyStore client_root;
@@ -68,6 +66,9 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
     static JWK client_private_key;
     static String client_cert_data;
     
+    static byte[] pdf_sample;
+    static String html_template_sample;
+    
     static int reference_id = 1000000;
     
     public static String getDataURI (String mime_type, byte[] data) throws IOException
@@ -75,10 +76,15 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
         return "data:" + mime_type + ";base64," + new Base64 (false).getBase64StringFromBinary (data);
       }
 
+    private byte[] getEmbeddedFile (String name) throws IOException
+      {
+        return ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream (name));
+      }
+
     private String getDataURI (String main, String extension) throws IOException
       {
         return getDataURI ("image/" + (extension.equals ("svg") ? "svg+xml" : extension),
-                           ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream (main + "." + extension)));
+                           getEmbeddedFile (main + "." + extension));
       }
     
     private KeyStore getRootCertificate (String resource_name) throws IOException, GeneralSecurityException
@@ -104,12 +110,16 @@ public class SignatureDemoService extends InitPropertyReader implements ServletC
         try 
           {
             CustomCryptoProvider.forcedLoad (getPropertyBoolean ("bouncycastle_first"));
+
             issuer_url = getPropertyString ("issuer_url");
             relying_party_url = getPropertyString ("relying_party_url");
+
             cross_data_uri = getDataURI ("cross", "svg");
             working_data_uri = getDataURI ("working", "gif");
             mybank_data_uri = getDataURI ("mybank", "svg");
-            card_font = getPropertyString ("card_font");
+            pdf_sample = getEmbeddedFile ("sampledoc.pdf");
+            html_template_sample = new String (getEmbeddedFile ("sampledoc.html"), "UTF-8");
+
             key_password = getPropertyString ("key_password");
             client_root = getRootCertificate (getPropertyString ("client_root"));
             KeyStore client = KeyStoreReader.loadKeyStore (SignatureDemoService.class.getResourceAsStream (getPropertyString ("client_eecert")), SignatureDemoService.key_password);

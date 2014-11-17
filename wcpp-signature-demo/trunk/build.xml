@@ -108,7 +108,6 @@
       <replacefilter token="@security-constraints@" value="${security.constraints}"/>
 	  <replacefilter token="@issuer-url@" value="${issuer.host}/${appcorename}"/>
 	  <replacefilter token="@relying-party-url@" value="${relying.party.host}/${appcorename}"/>
-	  <replacefilter token="@card-font@" value="${card.font}"/>
 	  <replacefilter token="@key-password@" value="${keypassword}"/>
 	  <replacefilter token="@client-root@" value="${clientroot}.cer"/>
 	  <replacefilter token="@client-eecert@" value="${clientkey}${keyfilext}"/>
@@ -155,7 +154,6 @@
        <param name="security.constraints" value="${security_constraints}"/>
        <param name="issuer.host" value="${issuer_host}"/>
        <param name="relying.party.host" value="${relying_party_host}"/>
-       <param name="card.font" value="Arial Unicode MS"/>
        <param name="javaversion" value="1.7"/>
        <param name="library.dir" value="${webpki_jars}"/>
     </antcall>
@@ -184,7 +182,6 @@
        <param name="security.constraints" refid="security_constraint"/>
        <param name="issuer.host" value="${issuer_host}"/>
        <param name="relying.party.host" value="${relying_party_host}"/>
-       <param name="card.font" value="DejaVue"/>
        <param name="javaversion" value="1.6"/>
        <param name="library.dir" value="${plugin.ejbca.ant.custom.enrollment_plugin_directory}/lib.common"/>
      </antcall>
@@ -206,7 +203,6 @@
        <param name="security.constraints" value=""/>
        <param name="issuer.host" value="http://mybank.com:8080"/>
        <param name="relying.party.host" value="http://merchant.com:8080"/>
-       <param name="card.font" value="Arial Unicode MS"/>
        <param name="javaversion" value="1.7"/>
        <param name="library.dir" value="${webpki_jars}"/>
     </antcall>

@@ -206,10 +206,16 @@ public class HTML implements BaseProperties
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">Your Browser Doesn't Support WebCrypto :-(</td></tr>"));
       }
 
-    public static String getBinaryArray (boolean html_flag) throws IOException
+    public static String getBinaryArray (boolean html_flag, String date_string) throws IOException
       {
-        return Base64URL.encode (ArrayUtil.getByteArrayFromInputStream (SignatureDemoService.class.getResourceAsStream (
-            html_flag ? "sampledoc.html" : "sampledoc.pdf")));
+        byte[] binary = SignatureDemoService.pdf_sample;
+        if (html_flag)
+          {
+            String temp_html = SignatureDemoService.html_template_sample.replace ("@date@", date_string.substring (0, 10));
+            temp_html = temp_html.replace ("@prev@", "201" + (char)(date_string.charAt (3) - 1));
+            binary = temp_html.getBytes ("UTF-8");
+          }
+        return Base64URL.encode (binary);
       }
     
     private static String niceDate (Date date)
@@ -304,12 +310,13 @@ public class HTML implements BaseProperties
         "var json_request;\n" +
         "var reference_id;\n" +
         "var object_to_sign;\n" +
-        "var request_date_time;\n" +
+        "var response_date_time;\n" +
         "var mime_type;\n" +
         "var document_binary;\n" +
         "var signature_response;\n" +
         "var document_data;\n" +
         "var detached_flag;\n" +
+        "var xml_flag;\n" +
         "var signature_object;\n" +
         "var BASE64URL_DECODE = [" +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
@@ -499,18 +506,6 @@ public class HTML implements BaseProperties
              Messages.ABORT +
              "')), window.document.referrer);\n" +
         "}\n\n" +
-        "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
-        "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
-        "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
-        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = client_cert_data;\n" +
-        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = client_cert_path;\n" +
-        "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
-        "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(JSON.stringify(signature_response))).then (function(signature) {\n" +
-        "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
-        "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
-        "    }).then (undefined, function() {error('Failed signing')});\n" +
-        "    }).then (undefined, function() {error('Failed importing private key')});\n" +
-        "}\n\n" +
         "function openCredentialDialog() {\n" +
         "    closePINDialog();\n" +
         "    document.getElementById('credential').style.visibility = 'visible';\n" +
@@ -540,6 +535,23 @@ public class HTML implements BaseProperties
         "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt 12pt 0pt 12pt;color:red\">' + message + '</div>';\n" +
         "    userSign();\n" +
         "}\n\n" +
+        "function createXMLSignature() {\n" +
+        "    signature_response = '<?xml version=\"1.0\" encoding=\"utf-8\"?>\\\n" +
+             "<SignatureResponse></SignatureResponse>';\n" +
+        "    window.parent.postMessage(signature_response, window.document.referrer);\n" +
+        "}\n\n" +
+        "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
+        "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
+        "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
+        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = client_cert_data;\n" +
+        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = client_cert_path;\n" +
+        "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
+        "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(JSON.stringify(signature_response))).then (function(signature) {\n" +
+        "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
+        "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
+        "    }).then (undefined, function() {error('Failed signing')});\n" +
+        "    }).then (undefined, function() {error('Failed importing private key')});\n" +
+        "}\n\n" +
         "function performSignatureOperation() {\n" +
         "    var pin = document.getElementById('pin').value;\n" +
         "    if (pin_error_count < 3) {\n" +
@@ -555,22 +567,26 @@ public class HTML implements BaseProperties
         "        }\n" +
         "    }\n" +
         "    if (pin_error_count == 3) {\n" +
-        "        showPINError('Too many PIN errors,<br>the card is blocked!');\n" +
+        "        showPINError('Too many PIN errors,<br>the key is blocked!');\n" +
         "        return;\n" +
         "    }\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "    document.getElementById('busy').style.visibility = 'visible';\n" +
+        "    response_date_time = new Date().toISOString();\n" +
+        "    if (response_date_time.indexOf('.') > 0 && response_date_time.indexOf('Z') > 0) {\n" +
+        "        response_date_time = response_date_time.substring (0, response_date_time.indexOf('.')) + 'Z';\n" +
+        "    }\n" +
+        "    if (xml_flag) {\n" +
+        "        createXMLSignature();\n" +
+        "        return;\n" +
+        "    }\n" +
         "    signature_response = createJSONBaseCommand('" + Messages.SIGNATURE_RESPONSE + "');\n" +
         "    var request_data = signature_response." + REQUEST_DATA_JSON + " = {};\n" +
         "    request_data." + ORIGIN_JSON + " = window.document.referrer;\n" +
         "    request_data." + REFERENCE_ID_JSON + " = reference_id;\n" +
         "    request_data." + DATE_TIME_JSON + " = request_date_time;\n" +
         "    document_data = signature_response." + DOCUMENT_DATA_JSON + " = {};\n" +
-        "    var date_time = new Date().toISOString();\n" +
-        "    if (date_time.indexOf('.') > 0 && date_time.indexOf('Z') > 0) {\n" +
-        "        date_time = date_time.substring (0, date_time.indexOf('.')) + 'Z';\n" +
-        "    }\n" +
-        "    signature_response." + DATE_TIME_JSON + " = date_time;\n" +
+        "    signature_response." + DATE_TIME_JSON + " = response_date_time;\n" +
         "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
         "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
@@ -598,8 +614,9 @@ public class HTML implements BaseProperties
         "    document_binary = decodeBase64URL(object_to_sign." + DOCUMENT_JSON + ");\n" +
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
-        "    if (aborted_operation) return;\n" +
         "    detached_flag = getJSONProperty('" + SIGNATURE_TYPE_JSON + "') == '" + SIGNATURE_TYPE_DETACHED + "';\n" +
+        "    xml_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_XML + "';\n" +
+        "    if (aborted_operation) return;\n" +
         "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
         "    document.getElementById('credcross').style.height = (border_height - 9"
@@ -767,6 +784,9 @@ public class HTML implements BaseProperties
 
     public static void signData (HttpServletResponse response, boolean html_flag, boolean json_flag, boolean detached_flag) throws IOException, ServletException 
       {
+        String date_string = ISODateTime.formatDateTime (new Date (), true);
+        String reference_id = "#" +  SignatureDemoService.reference_id++;
+        String mime_type = html_flag ? "text/html" : "application/pdf";
         HTML.output (response, HTML.getHTML (
         "\n\n\"use strict\";\n\n" +
         "var message_state = '" + Messages.INIIALIZE + "';\n\n" +
@@ -778,6 +798,14 @@ public class HTML implements BaseProperties
         "}\n\n" +
         "window.addEventListener('message', function(event) {\n" +
         "    console.debug (event.origin + ' = > Signature message:\\n' + event.data);\n" +
+        (json_flag ? "" :
+        "    if (message_state == '" + Messages.SIGNATURE_RESPONSE + "' && event.data.charAt(0) == '<') {\n" +
+        "        document.getElementById('signature').value = event.data;\n" +
+        "        setTimeout(function(){\n" +
+        "            document.forms.shoot.submit();\n" +
+        "        }, 0);\n" +
+        "        return;\n" +
+        "    }\n") +
         "    var received_json = JSON.parse(event.data);\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
         "        console.debug('UNDECODABLE MESSAGE');\n" +
@@ -795,13 +823,13 @@ public class HTML implements BaseProperties
         "        var invoke_object = createJSONBaseCommand('" + 
                  Messages.SIGNATURE_REQUEST +
                  "');\n" +
-        "        invoke_object." + REFERENCE_ID_JSON + " = '#" +  (SignatureDemoService.reference_id++) + "';\n" +
-        "        invoke_object." + DATE_TIME_JSON + " = '" + ISODateTime.formatDateTime (new Date (), true) + "';\n" +
+        "        invoke_object." + REFERENCE_ID_JSON + " = '" +  reference_id + "';\n" +
+        "        invoke_object." + DATE_TIME_JSON + " = '" + date_string + "';\n" +
         "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? SIGNATURE_FORMAT_JCS : SIGNATURE_FORMAT_XML) + "';\n" +
         "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDED) + "';\n" +
         "        var object_to_sign = invoke_object." + OBJECT_TO_SIGN_JSON + " = {};\n" +
-        "        object_to_sign." + MIME_TYPE_JSON + " = '" + (html_flag ? "text/html" : "application/pdf") + "';\n" +
-        "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray (html_flag) + "';\n" +
+        "        object_to_sign." + MIME_TYPE_JSON + " = '" + mime_type + "';\n" +
+        "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray (html_flag, date_string) + "';\n" +
         "        setTimeout(function(){\n" +
         "            event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
 //      "        }, " + (SIGNATURE_TIMEOUT_INIT + 1000) + ");\n" +
