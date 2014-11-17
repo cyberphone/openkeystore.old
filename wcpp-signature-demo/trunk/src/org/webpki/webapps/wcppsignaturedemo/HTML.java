@@ -850,7 +850,7 @@ public class HTML implements BaseProperties
       {
         HTML.output (response, HTML.getHTML (null, null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Resulting " + 
-                (error ? "[Invalid]" : "[Good]") +
+                (error ? "[Invalid]" : "[Valid]") +
                 " Signature<br>&nbsp;</td></tr><tr><td>" +
                 (error ? "<span style=\"font-size:10pt;color:red\">" + HTMLEncoder.encode (message) + "</span>" : 
                   "<div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
