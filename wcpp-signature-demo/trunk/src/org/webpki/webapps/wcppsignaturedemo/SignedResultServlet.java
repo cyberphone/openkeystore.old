@@ -47,6 +47,11 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
             signature = "Internal Error - Missing argument";
             error = true;
           }
+        else if (signature.startsWith ("<?xml"))
+          {
+            signature = "XML Signatures haven't yet been implemented :-(";
+            error = true;
+          }
         else
           {
             JSONObjectReader json = null;

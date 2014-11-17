@@ -150,18 +150,11 @@ public class HTML implements BaseProperties
                 "<table style=\"max-width:600px;\" cellpadding=\"4\">" +
                    "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Signature Demo<br>&nbsp;</td></tr>" +
                    "<tr><td style=\"text-align:left\">This site contains a demo of what a true WebCrypto++ implementation " +
-                   "could offer for <span style=\"color:red\">decentralized payment systems</span>.</td></tr>" +
-                   "<tr><td style=\"text-align:left\">In particular note the <span style=\"color:red\">automatic payment card discovery</span> process " +
-                   "and that <span style=\"color:red\">payment card logotypes are personalized</span> since they "+
-                   "are read from the user's local credential-store.</td></tr>" +
-                   "<tr><td>By applying <span style=\"color:red\">3D Secure</span> like methods and <span style=\"color:red\">EMV tokenization</span>, there is no need for " +
-                   "handing over static credit-card information to merchants.</td></tr>" +
-                   "<tr><td style=\"text-align:left\">For protecting the user's privacy, <span style=\"color:red\">user-related data is encrypted</span> and only readable " +
-                   "by the payment-provider who issued the specific payment card.</td></tr>" +
+                   "could offer for general purpose <span style=\"color:red\">signature systems</span>.</td></tr>" +
+                   "<tr><td style=\"text-align:left\">Because WebCrypto++ <span style=\"color:red\">shields keys</span> from direct access by relying parties, " +
+                   "you can effectively &quot;emulate&quot; existing signature plugins, but <span style=\"color:red\">without static installation</span>.</td></tr>" +
                    "<tr><td style=\"text-align:left\">Although the demo is <i>partially</i> a mockup (no &quot;polyfill&quot; in the world can replace WebCrypto++), " +
                    "the IFRAME solution and cross-domain communication using <code>postMessage()</code> should be pretty close to that of a real system.</td></tr>" +
-                   "<tr><td style=\"text-align:left\"><i>In case you are testing with a WebCrypto-enabled browser, the user-authorization will be signed and encrypted " +
-                   "which can viewed in a browser debugger window.</i></td></tr>" +
                    "<tr><td align=\"center\"><table cellspacing=\"0\">" +
                    "<tr style=\"text-align:left\"><td><a href=\"" + SignatureDemoService.relying_party_url + "/signcmd\">Sign Document</a></td><td>The Demo!</td></tr>" +
                    "<tr><td style=\"text-align:center;padding-top:15pt;padding-bottom:5pt\" colspan=\"2\"><b>Documentation</b></td></tr>" +
@@ -868,8 +861,15 @@ public class HTML implements BaseProperties
     public static void signatureCommandPage (HttpServletResponse response) throws IOException, ServletException
       {
         HTML.output (response, HTML.getHTML (null, null,
-            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Select Signature Parameters<br>&nbsp;</td></tr><tr><td>" +
-            "<form method=\"POST\" action=\"signcmd\"><table class=\"tftable\">" +
+            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Select Signature Parameters<br>&nbsp;</td></tr>" +
+            "<tr><td align=\"center\"><table><tr><td>Note that most real signature systems assume that you:<br>1) are authenticated<br>" +
+            "2) fill in a form in an interactive process<br></td></tr>" +
+            "<tr><td>Since this is outside of the actual signature application, the demo "+
+            "does<br>not implement these steps, it rather goes directly to the core " +
+            "by providing<br>already filled-in forms.<br>&nbsp;</td></tr>" +
+            "<tr><td>BTW, <span style=\"color:red\">the PIN code is 1234</span>.<br>&nbsp;</td></tr>" +
+            "</table></td></tr>" +
+            "<tr><td align=\"center\"><form method=\"POST\" action=\"signcmd\"><table class=\"tftable\">" +
             "<tr><td rowspan=\"2\">Document Type</td>" +
             "<td><input type=\"radio\" name=\"doctype\" checked value=\"html\">&nbsp;HTML</td>" +
             "</tr><tr><td><input type=\"radio\" name=\"doctype\" value=\"pdf\">&nbsp;PDF</td></tr>" +
@@ -880,7 +880,7 @@ public class HTML implements BaseProperties
             "<td><input type=\"radio\" name=\"sigtype\" checked value=\"det\">&nbsp;Detached</td></tr>" +
             "<tr><td><input type=\"radio\" name=\"sigtype\" value=\"emb\">&nbsp;Embedding</td></tr>" +
             "<tr><td colspan=\"2\" style=\"text-align:center\"><input type=\"submit\" class=\"stdbtn\" value=\"Continue..\"></td></tr>" +
-            "</table></form>" +
-            "</td></tr></table></td></tr>"));
+            "</table></form></td></tr>" +
+            "</table></td></tr>"));
       }
   }
