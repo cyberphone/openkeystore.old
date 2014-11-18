@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema targetNamespace="http://xmlns.webpki.org/wcpp-signature-demo"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           xmlns="http://xmlns.webpki.org/wcpp-signature-demo"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+   <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
+
+   <xs:element name="SignatureResponse">
+      <xs:complexType>
+         <xs:attribute name="Id" type="xs:ID" use="required"/>
+      </xs:complexType>
+   </xs:element>
+ 
+</xs:schema>

@@ -17,28 +17,25 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.ExtendedKeyUsages;
 import org.webpki.crypto.HashAlgorithms;
-
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
 import org.webpki.util.HTMLEncoder;
 import org.webpki.util.ISODateTime;
+import org.webpki.xmldsig.XMLSignatureWrapper;
 
 public class HTML implements BaseProperties
   {
@@ -528,10 +525,30 @@ public class HTML implements BaseProperties
         "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt 12pt 0pt 12pt;color:red\">' + message + '</div>';\n" +
         "    userSign();\n" +
         "}\n\n" +
+        "function createXMLReference(id, extra, data) {\n" +
+        "    return '<ds:Reference URI=\"#' + id + '\"><ds:Transforms>' + extra" +
+             " + '<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>" +
+             "</ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>" +
+             "<ds:DigestValue>' + data + '</ds:DigestValue></ds:Reference>';\n" +
+        "}\n\n" +
         "function createXMLSignature() {\n" +
-        "    signature_response = '<?xml version=\"1.0\" encoding=\"utf-8\"?>\\\n" +
-             "<SignatureResponse></SignatureResponse>';\n" +
-        "    window.parent.postMessage(signature_response, window.document.referrer);\n" +
+        "    var key_info = '<ds:KeyInfo Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
+                 " + client_cert_data." + JSONSignatureDecoder.ISSUER_JSON + 
+                 " + '</ds:X509IssuerName><ds:X509SerialNumber>'" + 
+                 " + client_cert_data." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
+                 " + '</ds:X509SerialNumber></ds:X509IssuerSerial><ds:X509Certificate>'" +
+                 " + binaryToBase64STD(decodeBase64URL(client_cert_path[0]))" +
+                 " + '</ds:X509Certificate></ds:X509Data></ds:KeyInfo>';\n" +
+             "console.debug(key_info);\n" +
+             "var ref1 = createXMLReference('sig.doc'," +
+             "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>', 'yFdt');\n" +
+             "console.debug(ref1);\n" +
+             "var ref2 = createXMLReference('sig.key','', 'yFdt');\n" +
+             "console.debug(ref2);\n" +
+        "    signature_response = '<" + Messages.SIGNATURE_RESPONSE.toString () + 
+               " Id=\"sig.doc\" xmlns=\"" + WCPP_DEMO_CONTEXT_URI + "\" xmlns:ds=\"" + XMLSignatureWrapper.XML_DSIG_NS + "\">" +
+             "</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
+        "    window.parent.postMessage('<?xml version=\"1.0\" encoding=\"UTF-8\"?>' + signature_response, window.document.referrer);\n" +
         "}\n\n" +
         "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
         "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +

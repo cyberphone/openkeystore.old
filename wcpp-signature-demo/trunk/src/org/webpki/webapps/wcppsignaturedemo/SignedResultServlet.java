@@ -19,19 +19,19 @@ package org.webpki.webapps.wcppsignaturedemo;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
-
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
+import org.webpki.tools.XML2HTMLPrinter;
+import org.webpki.xml.XMLSchemaCache;
 
 public class SignedResultServlet extends HttpServlet implements BaseProperties
   {
@@ -42,22 +42,22 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
         request.setCharacterEncoding ("UTF-8");
         String signature = request.getParameter ("signature");
         boolean error = false;
-        if (signature == null)
+        try
           {
-            signature = "Internal Error - Missing argument";
-            error = true;
-          }
-        else if (signature.startsWith ("<?xml"))
-          {
-            signature = "XML Signatures haven't yet been implemented :-(";
-            error = true;
-          }
-        else
-          {
-            JSONObjectReader json = null;
-            try
+            if (signature == null)
               {
-                json = JSONParser.parse (signature);
+                throw new IOException ("Internal Error - Missing argument");
+              }
+            if (signature.startsWith ("<?xml"))
+              {
+                XMLSchemaCache xml_schema_cache = new XMLSchemaCache ();
+                xml_schema_cache.addWrapper (XMLSignatureResponse.class);
+                XMLSignatureResponse xml_response = (XMLSignatureResponse) xml_schema_cache.parse (signature.getBytes ("UTF-8"));
+                signature = XML2HTMLPrinter.convert (signature);
+              }
+            else
+              {
+                JSONObjectReader json = JSONParser.parse (signature);
                 if (json.getObject (DOCUMENT_DATA_JSON).hasProperty (DOCUMENT_HASH_JSON))
                   {
                     JSONObjectReader document_hash = json.getObject (DOCUMENT_DATA_JSON).getObject (DOCUMENT_HASH_JSON);
@@ -67,15 +67,12 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 json.getSignature ().verify (new JSONX509Verifier (verifier));
                 signature = new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
               }
-            catch (IOException e)
-              {
-                signature = e.getMessage ();
-                error = true;
-              }
-          }
-        try
-          {
             Thread.sleep (1000);
+          }
+        catch (IOException e)
+          {
+            signature = e.getMessage ();
+            error = true;
           }
         catch (InterruptedException e)
           {
