@@ -22,6 +22,8 @@ import java.security.Signature;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
+import java.util.logging.Logger;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
@@ -35,6 +37,8 @@ import org.webpki.crypto.HashAlgorithms;
 
 abstract class XMLVerifierCore
   {
+    private static Logger logger = Logger.getLogger (XMLVerifierCore.class.getCanonicalName ());
+
     private SignedKeyInfoSpecifier KeyInfo_requirements = SignedKeyInfoSpecifier.FORBID_SIGNED_KEY_INFO;
 
     private HashAlgorithms digest_algorithm;  // Only tested for main Reference not for keyinfo types
@@ -55,7 +59,7 @@ abstract class XMLVerifierCore
         byte[] ref_cn = XPathCanonicalizer.serializeSubset (ref.element, ref.cn_alg);
         if (debug)
           {
-            System.out.println ("READ\n" + new String (ref_cn));
+            logger.info (ref.id + "=\n" + new String (ref_cn));
           }
         if (!ArrayUtil.compare (ref.digest_alg.digest(ref_cn), ref.digest_val))
           {
@@ -99,6 +103,10 @@ abstract class XMLVerifierCore
     void core_verify (XMLSignatureWrapper signature, PublicKey public_key) throws IOException, GeneralSecurityException
       {
         byte[] sign_cn = XPathCanonicalizer.serializeSubset (signature.signedinfo_object.element, signature.signedinfo_object.cn_alg);
+        if (debug)
+          {
+            logger.info (XMLSignatureWrapper.SIGNED_INFO_ELEM + "=\n" + new String (sign_cn));
+          }
         boolean success;
         if (this instanceof XMLSymKeyVerifier)
           {
