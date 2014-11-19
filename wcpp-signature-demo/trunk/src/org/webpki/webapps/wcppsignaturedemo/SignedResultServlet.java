@@ -32,6 +32,8 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.tools.XML2HTMLPrinter;
 import org.webpki.xml.XMLSchemaCache;
+import org.webpki.xmldsig.SignedKeyInfoSpecifier;
+import org.webpki.xmldsig.XMLVerifier;
 
 public class SignedResultServlet extends HttpServlet implements BaseProperties
   {
@@ -53,7 +55,11 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 XMLSchemaCache xml_schema_cache = new XMLSchemaCache ();
                 xml_schema_cache.addWrapper (XMLSignatureResponse.class);
                 XMLSignatureResponse xml_response = (XMLSignatureResponse) xml_schema_cache.parse (signature.getBytes ("UTF-8"));
-                signature = XML2HTMLPrinter.convert (signature);
+                XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (SignatureDemoService.client_root));
+ //               verifier.setDebug (true);
+                verifier.setSignedKeyInfo (SignedKeyInfoSpecifier.REQUIRE_SIGNED_KEY_INFO);
+                verifier.validateEnvelopedSignature (xml_response);
+               signature = XML2HTMLPrinter.convert (signature);
               }
             else
               {

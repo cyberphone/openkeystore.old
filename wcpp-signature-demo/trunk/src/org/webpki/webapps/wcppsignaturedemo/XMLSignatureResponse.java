@@ -16,11 +16,14 @@
  */
 package org.webpki.webapps.wcppsignaturedemo;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
@@ -30,11 +33,57 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelopedInput, BaseProperties
   {
+    XMLSignatureWrapper signature;
+    String id;
+    
+    static String schema =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+
+      "<xs:schema targetNamespace=\"" + WCPP_DEMO_CONTEXT_URI + "\" " +
+                 "xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" " +
+                 "xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" " +
+                 "xmlns=\"" + WCPP_DEMO_CONTEXT_URI + "\" " +
+                 "elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">" +
+
+         "<xs:import namespace=\"http://www.w3.org/2000/09/xmldsig#\"/>" +
+
+         "<xs:element name=\"" + Messages.SIGNATURE_RESPONSE.toString () + "\">" +
+            "<xs:complexType>" +
+               "<xs:sequence>" +
+                  "<xs:element name=\"" + REQUEST_DATA_JSON + "\">" +
+                     "<xs:complexType>" +
+                        "<xs:attribute name=\"" + DATE_TIME_JSON + "\" type=\"xs:dateTime\" use=\"required\"/>" +
+                        "<xs:attribute name=\"" + ORIGIN_JSON + "\" type=\"xs:anyURI\" use=\"required\"/>" +
+                        "<xs:attribute name=\"" + REFERENCE_ID_JSON + "\" type=\"xs:string\" use=\"required\"/>" +
+                     "</xs:complexType>" +
+                  "</xs:element>" +
+                  "<xs:element name=\"" + DOCUMENT_DATA_JSON + "\">" +
+                  "<xs:complexType>" +
+                     "<xs:choice>" +
+                        "<xs:element name=\"" + DOCUMENT_JSON + "\" type=\"xs:base64Binary\"/>" +
+                        "<xs:element name=\"" + DOCUMENT_HASH_JSON + "\">" +
+                           "<xs:complexType>" +
+                              "<xs:attribute name=\"" + ALGORITHM_JSON + "\" type=\"xs:anyURI\" use=\"required\"/>" +
+                              "<xs:attribute name=\"" + VALUE_JSON + "\" type=\"xs:base64Binary\" use=\"required\"/>" +
+                           "</xs:complexType>" +
+                        "</xs:element>" +
+                     "</xs:choice>" +
+                     "<xs:attribute name=\"" + MIME_TYPE_JSON + "\" type=\"xs:string\" use=\"required\"/>" +
+                  "</xs:complexType>" +
+               "</xs:element>" +
+                  "<xs:element ref=\"ds:" + XMLSignatureWrapper.SIGNATURE_ELEM + "\"/>" +
+               "</xs:sequence>" +
+               "<xs:attribute name=\"" + DATE_TIME_JSON + "\" type=\"xs:dateTime\" use=\"required\"/>" +
+               "<xs:attribute name=\"" + XMLSignatureWrapper.ID_ATTR + "\" type=\"xs:ID\" use=\"required\"/>" +
+            "</xs:complexType>" +
+         "</xs:element>" +
+       
+      "</xs:schema>";
+
     @Override
     public Document getEnvelopeRoot () throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+        return getRootDocument ();
       }
   
     @Override
@@ -47,15 +96,13 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
     @Override
     public String getReferenceURI () throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+         return id;
       }
   
     @Override
     public XMLSignatureWrapper getSignature () throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+        return signature;
       }
   
     @Override
@@ -72,10 +119,14 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
       }
   
     @Override
-    protected void fromXML (DOMReaderHelper arg0) throws IOException
+    protected void fromXML (DOMReaderHelper rd) throws IOException
       {
-        // TODO Auto-generated method stub
-        
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+        id = ah.getString (XMLSignatureWrapper.ID_ATTR);
+        rd.getChild ();
+        rd.getNext (REQUEST_DATA_JSON);
+        rd.getNext (DOCUMENT_DATA_JSON);
+        signature = (XMLSignatureWrapper) wrap (rd.getNext ());
       }
   
     @Override
@@ -85,10 +136,16 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
       }
   
     @Override
+    protected InputStream getResource (String name) throws IOException
+      {
+        return new ByteArrayInputStream (schema.getBytes ("UTF-8"));
+      }
+
+    @Override
     protected void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema ("XMLSignatureResponse.xsd");
+        addSchema ("dummy");  // see getResource()
       }
   
     @Override

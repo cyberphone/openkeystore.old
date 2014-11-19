@@ -525,30 +525,86 @@ public class HTML implements BaseProperties
         "    document.getElementById('pinerror').innerHTML = '<div style=\"padding:8pt 12pt 0pt 12pt;color:red\">' + message + '</div>';\n" +
         "    userSign();\n" +
         "}\n\n" +
-        "function createXMLReference(id, extra, data) {\n" +
-        "    return '<ds:Reference URI=\"#' + id + '\"><ds:Transforms>' + extra" +
-             " + '<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>" +
-             "</ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>" +
-             "<ds:DigestValue>' + data + '</ds:DigestValue></ds:Reference>';\n" +
+        "function beautifyXMLDSig(element) {\n" +
+        "    var i;\n" +
+        "    while ((i = signature_response.indexOf('></' + element + '>')) > 0) {\n" +
+        "        signature_response = signature_response.substring(0, i) + '/>' + signature_response.substring(i + element.length + 4);\n" +
+        "    }\n\n" +
         "}\n\n" +
-        "function createXMLSignature() {\n" +
-        "    var key_info = '<ds:KeyInfo Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
+        "function createXMLReference(id, extra, data, f) {\n" +
+        "    crypto.subtle.digest({name: 'SHA-256'}, convertStringToUTF8(data)).then (function(result) {\n" +
+        "        f('<ds:Reference URI=\"#' + id + '\"><ds:Transforms>' + extra" +
+        " + '<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:Transform>" +
+        "</ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"></ds:DigestMethod>" +
+        "<ds:DigestValue>' + binaryToBase64STD(new Uint8Array(result)) + '</ds:DigestValue></ds:Reference>');\n" +
+        "    }).then (undefined, function() {error('Failed hashing document')});\n" +
+        "}\n\n" +
+        "function addXMLAttribute(name, value) {\n" +
+        "    signature_response += ' ' + name + '=\"' + value + '\"';\n" +
+        "}\n\n" +
+        "function signXMLAndSend() {\n" +
+        "    signature_response += '></" + DOCUMENT_DATA_JSON + ">';\n" +
+        "    var end_tag = '</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
+        "    var start_tag = '<" + Messages.SIGNATURE_RESPONSE.toString () + " ';\n" +
+        "    var key_info1 = '<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
                  " + client_cert_data." + JSONSignatureDecoder.ISSUER_JSON + 
                  " + '</ds:X509IssuerName><ds:X509SerialNumber>'" + 
                  " + client_cert_data." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
-                 " + '</ds:X509SerialNumber></ds:X509IssuerSerial><ds:X509Certificate>'" +
+                 " + '</ds:X509SerialNumber></ds:X509IssuerSerial>';\n" +
+        "    var key_info2 = '<ds:X509Certificate>'" +
                  " + binaryToBase64STD(decodeBase64URL(client_cert_path[0]))" +
                  " + '</ds:X509Certificate></ds:X509Data></ds:KeyInfo>';\n" +
-             "console.debug(key_info);\n" +
-             "var ref1 = createXMLReference('sig.doc'," +
-             "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>', 'yFdt');\n" +
-             "console.debug(ref1);\n" +
-             "var ref2 = createXMLReference('sig.key','', 'yFdt');\n" +
-             "console.debug(ref2);\n" +
-        "    signature_response = '<" + Messages.SIGNATURE_RESPONSE.toString () + 
-               " Id=\"sig.doc\" xmlns=\"" + WCPP_DEMO_CONTEXT_URI + "\" xmlns:ds=\"" + XMLSignatureWrapper.XML_DSIG_NS + "\">" +
-             "</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
-        "    window.parent.postMessage('<?xml version=\"1.0\" encoding=\"UTF-8\"?>' + signature_response, window.document.referrer);\n" +
+             "    createXMLReference('sig.doc'," +
+             "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"></ds:Transform>', start_tag + signature_response + end_tag, function(ref1) {\n" +
+        "    createXMLReference('sig.key','', key_info1 + key_info2, function(ref2) {\n" +
+        "        var signed_info = '<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"" +
+             "http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"" +
+             "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"></ds:SignatureMethod>' + ref1 + ref2 + '</ds:SignedInfo>';\n" +
+        "        var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
+        "        var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
+        "        crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
+        "        crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(signed_info)).then (function(signature) {\n" +
+        "            signature_response += '<ds:Signature>' + signed_info + '<ds:SignatureValue>'" +
+                 " + binaryToBase64STD(new Uint8Array(signature)) + '</ds:SignatureValue>' + key_info1 + '<!-- Signer DN: \"'" +
+                 " + client_cert_data." + JSONSignatureDecoder.SUBJECT_JSON + 
+                 " + '\" -->' + key_info2 + '</ds:Signature>';\n" +
+        "            signature_response = signature_response.replace(/\\ xmlns\\:ds\\=\\\"http:\\/\\/www\\.w3\\.org\\/2000\\/09\\/xmldsig#\\\"/g,'');\n" +
+        "            beautifyXMLDSig('ds:CanonicalizationMethod');\n" +
+        "            beautifyXMLDSig('ds:Transform');\n" +
+        "            beautifyXMLDSig('ds:SignatureMethod');\n" +
+        "            beautifyXMLDSig('ds:DigestMethod');\n" +
+        "            beautifyXMLDSig('" + REQUEST_DATA_JSON + "');\n" +
+        "            beautifyXMLDSig('" + DOCUMENT_HASH_JSON + "');\n" +
+        "            window.parent.postMessage('<?xml version=\"1.0\" encoding=\"UTF-8\"?>'" +
+                     " + start_tag + 'xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" '" + 
+                     " + signature_response + end_tag, window.document.referrer);\n" +
+        "        }).then (undefined, function() {error('Failed signing')});\n" +
+        "        }).then (undefined, function() {error('Failed importing private key')});\n" +
+        "    });\n" +
+        "    });\n" +
+        "}\n\n" +
+        "function createXMLSignature() {\n" +
+        "    signature_response = 'xmlns=\"" + WCPP_DEMO_CONTEXT_URI + "\"';\n" +
+        "    addXMLAttribute ('" + DATE_TIME_JSON + "', response_date_time);\n" +
+        "    signature_response += ' Id=\"sig.doc\"><" + REQUEST_DATA_JSON + "';\n" +
+        "    addXMLAttribute ('" + DATE_TIME_JSON + "', request_date_time);\n" +
+        "    addXMLAttribute ('" + ORIGIN_JSON + "', window.document.referrer);\n" +
+        "    addXMLAttribute ('" + REFERENCE_ID_JSON + "', reference_id);\n" +
+        "    signature_response += '></" + REQUEST_DATA_JSON + "><" + DOCUMENT_DATA_JSON + "';\n" +
+        "    addXMLAttribute ('" + MIME_TYPE_JSON + "', mime_type);\n" +
+        "    if (detached_flag) {\n" +
+        "        signature_response += '><" + DOCUMENT_HASH_JSON + "';\n" +
+        "        addXMLAttribute ('" + ALGORITHM_JSON + "', '" + HashAlgorithms.SHA256.getURI () + "');\n" +
+        "        crypto.subtle.digest({name: 'SHA-256'}, document_binary).then (function(result) {\n" +
+        "            addXMLAttribute ('" + VALUE_JSON + "', binaryToBase64STD(new Uint8Array(result)));\n" +
+        "            signature_response += '></" + DOCUMENT_HASH_JSON + "';\n" +
+        "            signXMLAndSend();\n" +
+        "        }).then (undefined, function() {error('Failed hashing document')});\n" +
+        "    } else {\n" +
+        "        signature_response += '><" + DOCUMENT_JSON + ">' + binaryToBase64STD(document_binary)" +
+                 " + '</" + DOCUMENT_JSON + "';\n" +
+        "        signXMLAndSend();\n" +
+        "    }\n" +
         "}\n\n" +
         "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
         "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
