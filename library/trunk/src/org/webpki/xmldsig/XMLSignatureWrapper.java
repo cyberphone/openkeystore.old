@@ -338,7 +338,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         ReferenceObject ref = new ReferenceObject ();
         DOMAttributeReaderHelper aHelper = rd.getAttributeHelper ();
         rd.getNext (REFERENCE_ELEM);
-        ref.id = aHelper.getString (URI_ATTR).substring (1);
+        String id = aHelper.getString (URI_ATTR);
         rd.getChild ();
         rd.getNext (TRANSFORMS_ELEM);
         rd.getChild ();
@@ -349,7 +349,16 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             rd.getNext (TRANSFORM_ELEM);
             cn_alg = aHelper.getString (ALGORITHM_ATTR);
             ref.enveloped = true;
+            if (id.length () != 0)
+              {
+                id = id.substring (1);
+              }
           }
+        else
+          {
+            id = id.substring (1);
+          }
+        ref.id = id;
         ref.cn_alg = CanonicalizationAlgorithms.getAlgorithmFromURI (cn_alg);
         if (rd.hasNext ()) throw new IOException ("Redundant \"Transforms\" elements");
         rd.getChild ();

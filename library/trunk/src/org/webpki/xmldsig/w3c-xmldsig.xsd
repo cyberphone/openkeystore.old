@@ -126,7 +126,7 @@
 
    <xs:simpleType name="LocalURIType">
       <xs:restriction base="xs:anyURI">
-         <xs:pattern value="#.*"/>
+         <xs:pattern value="|#.*"/>
       </xs:restriction>
    </xs:simpleType>
 
