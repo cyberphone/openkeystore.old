@@ -23,7 +23,6 @@ import java.io.InputStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
@@ -34,7 +33,6 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelopedInput, BaseProperties
   {
     XMLSignatureWrapper signature;
-    String id;
     
     static String schema =
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
@@ -74,7 +72,6 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
                   "<xs:element ref=\"ds:" + XMLSignatureWrapper.SIGNATURE_ELEM + "\"/>" +
                "</xs:sequence>" +
                "<xs:attribute name=\"" + DATE_TIME_JSON + "\" type=\"xs:dateTime\" use=\"required\"/>" +
-               "<xs:attribute name=\"" + XMLSignatureWrapper.ID_ATTR + "\" type=\"xs:ID\" use=\"required\"/>" +
             "</xs:complexType>" +
          "</xs:element>" +
        
@@ -96,7 +93,7 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
     @Override
     public String getReferenceURI () throws IOException
       {
-         return id;
+         return "";
       }
   
     @Override
@@ -121,8 +118,6 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
     @Override
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-        id = ah.getString (XMLSignatureWrapper.ID_ATTR);
         rd.getChild ();
         rd.getNext (REQUEST_DATA_JSON);
         rd.getNext (DOCUMENT_DATA_JSON);
@@ -157,7 +152,5 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
     @Override
     protected void toXML (DOMWriterHelper arg0) throws IOException
       {
-        // TODO Auto-generated method stub
-        
       }
   }

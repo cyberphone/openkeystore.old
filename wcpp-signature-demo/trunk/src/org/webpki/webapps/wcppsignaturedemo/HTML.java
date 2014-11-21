@@ -533,7 +533,7 @@ public class HTML implements BaseProperties
         "}\n\n" +
         "function createXMLReference(id, extra, data, f) {\n" +
         "    crypto.subtle.digest({name: 'SHA-256'}, convertStringToUTF8(data)).then (function(result) {\n" +
-        "        f('<ds:Reference URI=\"#' + id + '\"><ds:Transforms>' + extra" +
+        "        f('<ds:Reference URI=\"' + id + '\"><ds:Transforms>' + extra" +
         " + '<ds:Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:Transform>" +
         "</ds:Transforms><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"></ds:DigestMethod>" +
         "<ds:DigestValue>' + binaryToBase64STD(new Uint8Array(result)) + '</ds:DigestValue></ds:Reference>');\n" +
@@ -554,9 +554,9 @@ public class HTML implements BaseProperties
         "    var key_info2 = '<ds:X509Certificate>'" +
                  " + binaryToBase64STD(decodeBase64URL(client_cert_path[0]))" +
                  " + '</ds:X509Certificate></ds:X509Data></ds:KeyInfo>';\n" +
-             "    createXMLReference('sig.doc'," +
+             "    createXMLReference(''," +
              "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"></ds:Transform>', start_tag + signature_response + end_tag, function(ref1) {\n" +
-        "    createXMLReference('sig.key','', key_info1 + key_info2, function(ref2) {\n" +
+        "    createXMLReference('#sig.key','', key_info1 + key_info2, function(ref2) {\n" +
         "        var signed_info = '<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"" +
              "http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"" +
              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"></ds:SignatureMethod>' + ref1 + ref2 + '</ds:SignedInfo>';\n" +
@@ -586,7 +586,7 @@ public class HTML implements BaseProperties
         "function createXMLSignature() {\n" +
         "    signature_response = 'xmlns=\"" + WCPP_DEMO_CONTEXT_URI + "\"';\n" +
         "    addXMLAttribute ('" + DATE_TIME_JSON + "', response_date_time);\n" +
-        "    signature_response += ' Id=\"sig.doc\"><" + REQUEST_DATA_JSON + "';\n" +
+        "    signature_response += '><" + REQUEST_DATA_JSON + "';\n" +
         "    addXMLAttribute ('" + DATE_TIME_JSON + "', request_date_time);\n" +
         "    addXMLAttribute ('" + ORIGIN_JSON + "', window.document.referrer);\n" +
         "    addXMLAttribute ('" + REFERENCE_ID_JSON + "', reference_id);\n" +
