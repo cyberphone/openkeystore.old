@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.json.JSONObjectReader;
@@ -31,6 +32,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.tools.XML2HTMLPrinter;
+import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xmldsig.SignedKeyInfoSpecifier;
 import org.webpki.xmldsig.XMLVerifier;
@@ -43,19 +45,25 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
       {
         request.setCharacterEncoding ("UTF-8");
         String signature = request.getParameter ("signature");
+        String signature_request = request.getParameter ("request");
         boolean error = false;
         try
           {
             if (signature == null)
               {
-                throw new IOException ("Internal Error - Missing argument");
+                throw new IOException ("Internal Error - Missing signature argument");
               }
+            if (signature_request == null)
+              {
+                throw new IOException ("Internal Error - Missing request argument");
+              }
+            byte[] document = JSONParser.parse (signature_request).getObject (OBJECT_TO_SIGN_JSON).getBinary (DOCUMENT_JSON);
             if (signature.startsWith ("<?xml"))
               {
                 XMLSchemaCache xml_schema_cache = new XMLSchemaCache ();
                 xml_schema_cache.addWrapper (XMLSignatureResponse.class);
                 XMLSignatureResponse xml_response = (XMLSignatureResponse) xml_schema_cache.parse (signature.getBytes ("UTF-8"));
-                XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (SignatureDemoService.client_root));
+                XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (SignatureDemoService.client_root_kestore));
  //               verifier.setDebug (true);
                 verifier.setSignedKeyInfo (SignedKeyInfoSpecifier.REQUIRE_SIGNED_KEY_INFO);
                 verifier.validateEnvelopedSignature (xml_response);
@@ -66,10 +74,17 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 JSONObjectReader json = JSONParser.parse (signature);
                 if (json.getObject (DOCUMENT_DATA_JSON).hasProperty (DOCUMENT_HASH_JSON))
                   {
-                    JSONObjectReader document_hash = json.getObject (DOCUMENT_DATA_JSON).getObject (DOCUMENT_HASH_JSON);
-                    document_hash.getBinary (VALUE_JSON);
+                    if (!ArrayUtil.compare (json.getObject (DOCUMENT_DATA_JSON).getObject (DOCUMENT_HASH_JSON).getBinary (VALUE_JSON),
+                                            HashAlgorithms.SHA256.digest (document)))
+                      {
+                        throw new IOException ("Hash verification error");                  
+                      }
                   }
-                VerifierInterface verifier = new KeyStoreVerifier (SignatureDemoService.client_root);
+                else if (!ArrayUtil.compare (json.getObject (DOCUMENT_DATA_JSON).getBinary (DOCUMENT_JSON), document))
+                  {
+                    throw new IOException ("Document verification error");                  
+                  }
+                VerifierInterface verifier = new KeyStoreVerifier (SignatureDemoService.client_root_kestore);
                 json.getSignature ().verify (new JSONX509Verifier (verifier));
                 signature = new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
               }
@@ -83,6 +98,11 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
         catch (InterruptedException e)
           {
           }
-        HTML.signedResult (response, signature, error);
+        HTML.signedResult (response, signature, signature_request, error);
+      }
+
+    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+        response.sendRedirect (SignatureDemoService.issuer_url);
       }
   }

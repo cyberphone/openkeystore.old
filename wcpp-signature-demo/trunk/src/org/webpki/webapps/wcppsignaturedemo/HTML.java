@@ -35,7 +35,6 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
 import org.webpki.util.HTMLEncoder;
 import org.webpki.util.ISODateTime;
-import org.webpki.xmldsig.XMLSignatureWrapper;
 
 public class HTML implements BaseProperties
   {
@@ -202,6 +201,7 @@ public class HTML implements BaseProperties
         if (html_flag)
           {
             String temp_html = SignatureDemoService.html_template_sample.replace ("@date@", date_string.substring (0, 10));
+            temp_html = temp_html.replace ("@logo@", SignatureDemoService.egov_log_uri);
             temp_html = temp_html.replace ("@prev@", "201" + (char)(date_string.charAt (3) - 1));
             binary = temp_html.getBytes ("UTF-8");
           }
@@ -347,7 +347,7 @@ public class HTML implements BaseProperties
         "// the platform key enumeration and attribute methods\n" +
         "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
         "var client_cert_path = ['" + SignatureDemoService.client_eecert_b64 + "'];\n" +
-        "var client_cert_data = " + SignatureDemoService.client_cert_data + ";\n\n" +
+        "var client_cert_data = " + SignatureDemoService.client_cert_data_js + ";\n\n" +
         "function error(message) {\n" +
        "    console.debug ('Error: ' + message);\n" +
        "    if (!aborted_operation) {\n" +
@@ -546,17 +546,18 @@ public class HTML implements BaseProperties
         "    signature_response += '></" + DOCUMENT_DATA_JSON + ">';\n" +
         "    var end_tag = '</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
         "    var start_tag = '<" + Messages.SIGNATURE_RESPONSE.toString () + " ';\n" +
-        "    var key_info1 = '<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
+        "    var key_info = '<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
                  " + client_cert_data." + JSONSignatureDecoder.ISSUER_JSON + 
                  " + '</ds:X509IssuerName><ds:X509SerialNumber>'" + 
                  " + client_cert_data." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
-                 " + '</ds:X509SerialNumber></ds:X509IssuerSerial>';\n" +
-        "    var key_info2 = '<ds:X509Certificate>'" +
+                 " + '</ds:X509SerialNumber></ds:X509IssuerSerial><ds:X509SubjectName>'" +
+                 " + client_cert_data." + JSONSignatureDecoder.SUBJECT_JSON +
+                 " + '</ds:X509SubjectName><ds:X509Certificate>'" +
                  " + binaryToBase64STD(decodeBase64URL(client_cert_path[0]))" +
                  " + '</ds:X509Certificate></ds:X509Data></ds:KeyInfo>';\n" +
              "    createXMLReference(''," +
              "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"></ds:Transform>', start_tag + signature_response + end_tag, function(ref1) {\n" +
-        "    createXMLReference('#sig.key','', key_info1 + key_info2, function(ref2) {\n" +
+        "    createXMLReference('#sig.key','', key_info, function(ref2) {\n" +
         "        var signed_info = '<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"" +
              "http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"" +
              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"></ds:SignatureMethod>' + ref1 + ref2 + '</ds:SignedInfo>';\n" +
@@ -565,9 +566,8 @@ public class HTML implements BaseProperties
         "        crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
         "        crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(signed_info)).then (function(signature) {\n" +
         "            signature_response += '<ds:Signature>' + signed_info + '<ds:SignatureValue>'" +
-                 " + binaryToBase64STD(new Uint8Array(signature)) + '</ds:SignatureValue>' + key_info1 + '<!-- Signer DN: \"'" +
-                 " + client_cert_data." + JSONSignatureDecoder.SUBJECT_JSON + 
-                 " + '\" -->' + key_info2 + '</ds:Signature>';\n" +
+                     " + binaryToBase64STD(new Uint8Array(signature)) + '</ds:SignatureValue>' + key_info" +
+                     " + '</ds:Signature>';\n" +
         "            signature_response = signature_response.replace(/\\ xmlns\\:ds\\=\\\"http:\\/\\/www\\.w3\\.org\\/2000\\/09\\/xmldsig#\\\"/g,'');\n" +
         "            beautifyXMLDSig('ds:CanonicalizationMethod');\n" +
         "            beautifyXMLDSig('ds:Transform');\n" +
@@ -681,7 +681,7 @@ public class HTML implements BaseProperties
         "    reference_id = getJSONProperty('" + REFERENCE_ID_JSON + "');\n" +
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    detached_flag = getJSONProperty('" + SIGNATURE_TYPE_JSON + "') == '" + SIGNATURE_TYPE_DETACHED + "';\n" +
-        "    xml_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_XML + "';\n" +
+        "    xml_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_XML_DSIG + "';\n" +
         "    if (aborted_operation) return;\n" +
         "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
@@ -886,18 +886,22 @@ public class HTML implements BaseProperties
         "        return;\n" +
         "    }\n" +
         "    if (message_state == '" + Messages.INIIALIZE + "') {\n" +
-        "        var invoke_object = createJSONBaseCommand('" + 
-                 Messages.SIGNATURE_REQUEST +
-                 "');\n" +
+        "        var invoke_object = createJSONBaseCommand('" + Messages.SIGNATURE_REQUEST + "');\n" +
         "        invoke_object." + REFERENCE_ID_JSON + " = '" +  reference_id + "';\n" +
         "        invoke_object." + DATE_TIME_JSON + " = '" + date_string + "';\n" +
-        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? SIGNATURE_FORMAT_JCS : SIGNATURE_FORMAT_XML) + "';\n" +
-        "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDED) + "';\n" +
+        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? SIGNATURE_FORMAT_JCS : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
+        "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDING) + "';\n" +
+        "        invoke_object." + SIGNATURE_ALGORITHMS_JSON + " = ['" + 
+                     AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "','" +
+                     AsymSignatureAlgorithms.RSA_SHA256.getURI () + "'];\n" +
+        "        invoke_object." + CERTIFICATE_FILTERS_JSON + " = " + SignatureDemoService.certificate_filter_js + ";\n" +
         "        var object_to_sign = invoke_object." + OBJECT_TO_SIGN_JSON + " = {};\n" +
         "        object_to_sign." + MIME_TYPE_JSON + " = '" + mime_type + "';\n" +
         "        object_to_sign." + DOCUMENT_JSON + " = '" + getBinaryArray (html_flag, date_string) + "';\n" +
+        "        var signature_request = JSON.stringify(invoke_object);\n" +
+        "        document.getElementById('request').value = signature_request;  // Demo purposes only...\n" +
         "        setTimeout(function(){\n" +
-        "            event.source.postMessage(JSON.stringify(invoke_object), event.origin);\n" +
+        "            event.source.postMessage(signature_request, event.origin);\n" +
 //      "        }, " + (SIGNATURE_TIMEOUT_INIT + 1000) + ");\n" +
         "        }, 500);\n" +
         "        message_state = '" + Messages.SIGNATURE_RESPONSE + "';\n" +
@@ -910,8 +914,10 @@ public class HTML implements BaseProperties
         "}, false);\n", null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 getIframeHTML() +
-                "<form name=\"shoot\" method=\"POST\" action=\"signedresult\"><input type=\"hidden\" " +
-                "name=\"signature\" id=\"signature\"></form></td></tr>"));
+                "<form name=\"shoot\" method=\"POST\" action=\"signedresult\">" +
+                "<input type=\"hidden\" name=\"signature\" id=\"signature\">" +
+                "<input type=\"hidden\" name=\"request\" id=\"request\">" +
+                "</form></td></tr>"));
       }
 
     public static void signatureFrame (HttpServletResponse response) throws IOException, ServletException
@@ -919,9 +925,11 @@ public class HTML implements BaseProperties
         HTML.output (response, getHTMLSignatureFrameSource ());
       }
 
-    public static void signedResult (HttpServletResponse response, String message, boolean error) throws IOException, ServletException
+    public static void signedResult (HttpServletResponse response, String message, String signature_request, boolean error) throws IOException, ServletException
       {
-        HTML.output (response, HTML.getHTML (null, null,
+        HTML.output (response, HTML.getHTML (null,
+                "><form name=\"shoot\" action=\"showrequest\" method=\"POST\"><input type=\"hidden\" name=\"request\" value=\"" + HTMLEncoder.encode (signature_request) + "\"></form>" +
+                 "<a style=\"z-order:3;position:absolute;right:10pt;top:10pt\" href=\"javascript:document.shoot.submit()\">Show Signature Request</a",
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Resulting " + 
                 (error ? "[Invalid]" : "[Valid]") +
                 " Signature<br>&nbsp;</td></tr><tr><td>" +
@@ -955,5 +963,15 @@ public class HTML implements BaseProperties
             "<tr><td colspan=\"2\" style=\"text-align:center\"><input type=\"submit\" class=\"stdbtn\" value=\"Continue..\"></td></tr>" +
             "</table></form></td></tr>" +
             "</table></td></tr>"));
+      }
+
+    public static void showSignatureRequest (HttpServletResponse response, String signature_request, boolean error) throws IOException, ServletException
+      {
+        HTML.output (response, HTML.getHTML (null,null,
+            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table><tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">Signature Request<br>&nbsp;</td></tr><tr><td>" +
+            (error ? "<span style=\"font-size:10pt;color:red\">" + HTMLEncoder.encode (signature_request) + "</span>" : 
+              "<div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
+              signature_request + "</div>") +
+            "</td></tr></table></td></tr>"));
       }
   }

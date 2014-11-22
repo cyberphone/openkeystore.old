@@ -20,10 +20,12 @@ public interface BaseProperties
   {
     String DATE_TIME_JSON             = "DateTime";
     String REFERENCE_ID_JSON          = "ReferenceID";
+    String CERTIFICATE_FILTERS_JSON   = "CertificateFilters";
     String COMMON_NAME_JSON           = "CommonName";
     String VALUE_JSON                 = "Value";
     String DOMAIN_NAME_JSON           = "DomainName";
     String ALGORITHM_JSON             = "Algorithm";
+    String SIGNATURE_ALGORITHMS_JSON  = "SignatureAlgorithms";
     String HASH_ALGORITHM_JSON        = "HashAlgorithm";
     String OBJECT_TO_SIGN_JSON        = "ObjectToSign";
     String MIME_TYPE_JSON             = "MIMEType";
@@ -36,12 +38,12 @@ public interface BaseProperties
     String SIGNATURE_TYPE_JSON        = "SignatureType";
     // Argument to the above
     String SIGNATURE_TYPE_DETACHED    = "Detached";
-    String SIGNATURE_TYPE_EMBEDDED    = "Embedded";
+    String SIGNATURE_TYPE_EMBEDDING   = "Embedding";
     
     String SIGNATURE_FORMAT_JSON      = "SignatureFormat";
     // Argument to the above
     String SIGNATURE_FORMAT_JCS       = "JCS";
-    String SIGNATURE_FORMAT_XML       = "XML";
+    String SIGNATURE_FORMAT_XML_DSIG  = "XMLDSig";
 
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";

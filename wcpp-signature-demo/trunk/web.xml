@@ -68,7 +68,12 @@
         <servlet-name>SignedResultServlet</servlet-name>
         <servlet-class>org.webpki.webapps.wcppsignaturedemo.SignedResultServlet</servlet-class>
     </servlet>
-    
+
+    <servlet>
+        <servlet-name>ShowRequestServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.wcppsignaturedemo.ShowRequestServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -92,6 +97,11 @@
     <servlet-mapping>
         <servlet-name>SignedResultServlet</servlet-name>
         <url-pattern>/signedresult</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ShowRequestServlet</servlet-name>
+        <url-pattern>/showrequest</url-pattern>
     </servlet-mapping>
     @security-constraints@    
 </web-app>
