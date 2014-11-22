@@ -298,7 +298,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                   }
                 if (sigwrap.x509IssuerName != null)
                   {
-                    throw new IOException ("This profile only allows one \"X509IssuerSerial\" element");
+                    throw new IOException ("This profile only allows one \"" + X509_ISSUER_SERIAL_ELEM + "\" element");
                   }
                 rd.getNext (X509_ISSUER_SERIAL_ELEM);
                 rd.getChild ();
@@ -306,17 +306,17 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                 sigwrap.x509SerialNumber = rd.getBigInteger (X509_SERIAL_NUMBER_ELEM);
                 rd.getParent ();
               }
-            else if (rd.hasNext (X509_ISSUER_NAME_ELEM))
+            else if (rd.hasNext (X509_SUBJECT_NAME_ELEM))
               {
                 if (sigwrap == null)
                   {
-                    throw new IOException ("Element \"" + X509_ISSUER_NAME_ELEM + "\" not allowed in this context");
+                    throw new IOException ("Element \"" + X509_SUBJECT_NAME_ELEM + "\" not allowed in this context");
                   }
                 if (sigwrap.x509SubjectName != null)
                   {
-                    throw new IOException ("This profile only allows one \"X509SubjectName\" element");
+                    throw new IOException ("This profile only allows one \"" + X509_SUBJECT_NAME_ELEM + "\" element");
                   }
-                sigwrap.x509SubjectName = rd.getString (X509_ISSUER_NAME_ELEM);
+                sigwrap.x509SubjectName = rd.getString (X509_SUBJECT_NAME_ELEM);
               }
             else if (rd.hasNext (X509_CERTIFICATE_ELEM))
               {
