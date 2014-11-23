@@ -44,6 +44,7 @@ public interface BaseProperties
     // Argument to the above
     String SIGNATURE_FORMAT_JCS       = "JCS";
     String SIGNATURE_FORMAT_XML_DSIG  = "XMLDSig";
+    String SIGNATURE_FORMAT_JWS       = "JWS";
 
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";

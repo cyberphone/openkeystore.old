@@ -17,12 +17,17 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.Signature;
+import java.security.cert.X509Certificate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
@@ -33,6 +38,8 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.tools.XML2HTMLPrinter;
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
+import org.webpki.util.Base64URL;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xmldsig.SignedKeyInfoSpecifier;
 import org.webpki.xmldsig.XMLVerifier;
@@ -69,7 +76,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 verifier.validateEnvelopedSignature (xml_response);
                signature = XML2HTMLPrinter.convert (signature);
               }
-            else
+            else if (signature.contains ("{"))
               {
                 JSONObjectReader json = JSONParser.parse (signature);
                 if (json.getObject (DOCUMENT_DATA_JSON).hasProperty (DOCUMENT_HASH_JSON))
@@ -88,6 +95,30 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 json.getSignature ().verify (new JSONX509Verifier (verifier));
                 signature = new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
               }
+            else
+              {
+                JSONObjectReader header = JSONParser.parse (Base64URL.decode (signature.substring (0, signature.indexOf ('.'))));
+                if (!header.getString ("alg").equals ("RS256"))
+                  {
+                    throw new IOException ("JWS algorithm error");
+                  }
+                X509Certificate cert = CertificateUtil.getCertificateFromBlob (new Base64().getBinaryFromBase64String (header.getArray ("x5c").getString ()));
+                byte[] signed_data = signature.substring (0, signature.lastIndexOf ('.')).getBytes ("UTF-8");
+                byte[] raw_signature = Base64URL.decode (signature.substring (signature.lastIndexOf ('.') + 1));
+                Signature sig = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
+                sig.initVerify (cert.getPublicKey ());
+                sig.update (signed_data);
+                if (!sig.verify (raw_signature))
+                  {
+                    throw new IOException ("Bad JWS signature");
+                  }
+                VerifierInterface verifier = new KeyStoreVerifier (SignatureDemoService.client_root_kestore);
+                verifier.verifyCertificatePath (new X509Certificate[]{cert});
+                JSONObjectReader payload = JSONParser.parse (Base64URL.decode (signature.substring (signature.indexOf ('.') + 1, signature.lastIndexOf ('.'))));
+                signature = "<b>Actual Response</b>:<br>" + signature +
+                "<br>&nbsp;<br><b>Decoded Header</b>:<br>" + new String (new JSONObjectWriter (header).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8") +
+                "<br>&nbsp;<br><b>Decoded Payload</b>:<br>" + new String (new JSONObjectWriter (payload).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
+              }
             Thread.sleep (1000);
           }
         catch (IOException e)
@@ -95,8 +126,13 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
             signature = e.getMessage ();
             error = true;
           }
+        catch (GeneralSecurityException e)
+          {
+             e.printStackTrace();
+          }
         catch (InterruptedException e)
           {
+             e.printStackTrace();
           }
         HTML.signedResult (response, signature, signature_request, error);
       }

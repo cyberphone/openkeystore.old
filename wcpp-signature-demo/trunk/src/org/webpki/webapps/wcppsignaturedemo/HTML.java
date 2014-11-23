@@ -307,6 +307,7 @@ public class HTML implements BaseProperties
         "var document_data;\n" +
         "var detached_flag;\n" +
         "var xml_flag;\n" +
+        "var jws_flag;\n" +
         "var signature_object;\n" +
         "var BASE64URL_DECODE = [" +
         " -1, -1, -1, -1, -1, -1, -1, -1," +
@@ -552,9 +553,12 @@ public class HTML implements BaseProperties
                  " + client_cert_data." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
                  " + '</ds:X509SerialNumber></ds:X509IssuerSerial><ds:X509SubjectName>'" +
                  " + client_cert_data." + JSONSignatureDecoder.SUBJECT_JSON +
-                 " + '</ds:X509SubjectName><ds:X509Certificate>'" +
-                 " + binaryToBase64STD(decodeBase64URL(client_cert_path[0]))" +
-                 " + '</ds:X509Certificate></ds:X509Data></ds:KeyInfo>';\n" +
+                 " + '</ds:X509SubjectName>';\n" +
+        "     for (var i = 0; i < client_cert_path.length; i++) {\n" +
+        "         key_info += '<ds:X509Certificate>'+ binaryToBase64STD(decodeBase64URL(client_cert_path[i]))" +
+                 " + '</ds:X509Certificate>';\n" +
+        "     }\n" +
+        "     key_info += '</ds:X509Data></ds:KeyInfo>';\n" +
              "    createXMLReference(''," +
              "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"></ds:Transform>', start_tag + signature_response + end_tag, function(ref1) {\n" +
         "    createXMLReference('#sig.key','', key_info, function(ref2) {\n" +
@@ -606,7 +610,27 @@ public class HTML implements BaseProperties
         "        signXMLAndSend();\n" +
         "    }\n" +
         "}\n\n" +
+        "function createJWSSignature(key_import_alg, key_signature_alg) {\n" +
+        "    var header = {}\n" +
+        "    header.alg = 'RS256';\n" +
+        "    header.x5c = []\n" +
+        "    for (var i = 0; i < client_cert_path.length; i++) {\n" +
+        "        header.x5c.push(binaryToBase64STD(decodeBase64URL(client_cert_path[i])));\n" +
+        "    }\n" +
+        "    var data2sign = binaryToBase64URL(convertStringToUTF8(JSON.stringify(header))) + '.'" +
+             " + binaryToBase64URL(convertStringToUTF8(JSON.stringify(signature_response)));\n" +
+        "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
+        "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(data2sign)).then (function(signature) {\n" +
+         "        window.parent.postMessage(data2sign + '.' + binaryToBase64URL(new Uint8Array(signature)), window.document.referrer);\n" +
+        "    }).then (undefined, function() {error('Failed signing')});\n" +
+        "    }).then (undefined, function() {error('Failed importing private key')});\n" +
+        "}\n\n" +
         "function createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg) {\n" +
+        "    if (jws_flag) {\n" +
+        "        createJWSSignature(key_import_alg, key_signature_alg);\n" +
+        "        return;\n" +
+        "    }\n" +
+        "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
         "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
         "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = client_cert_data;\n" +
@@ -653,7 +677,6 @@ public class HTML implements BaseProperties
         "    request_data." + DATE_TIME_JSON + " = request_date_time;\n" +
         "    document_data = signature_response." + DOCUMENT_DATA_JSON + " = {};\n" +
         "    signature_response." + DATE_TIME_JSON + " = response_date_time;\n" +
-        "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
         "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
         "    var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
@@ -682,6 +705,7 @@ public class HTML implements BaseProperties
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    detached_flag = getJSONProperty('" + SIGNATURE_TYPE_JSON + "') == '" + SIGNATURE_TYPE_DETACHED + "';\n" +
         "    xml_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_XML_DSIG + "';\n" +
+        "    jws_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_JWS + "';\n" +
         "    if (aborted_operation) return;\n" +
         "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
@@ -848,7 +872,7 @@ public class HTML implements BaseProperties
             "title=\"Click to close\" style=\"cursor:pointer;position:absolute\"></div>";
       }
 
-    public static void signData (HttpServletResponse response, boolean html_flag, boolean json_flag, boolean detached_flag) throws IOException, ServletException 
+    public static void signData (HttpServletResponse response, boolean html_flag, boolean json_flag, boolean jws_flag, boolean detached_flag) throws IOException, ServletException 
       {
         String date_string = ISODateTime.formatDateTime (new Date (), true);
         String reference_id = "#" +  SignatureDemoService.reference_id++;
@@ -864,7 +888,17 @@ public class HTML implements BaseProperties
         "}\n\n" +
         "window.addEventListener('message', function(event) {\n" +
         "    console.debug (event.origin + ' = > Signature message:\\n' + event.data);\n" +
-        (json_flag ? "" :
+        (json_flag ? (jws_flag ? 
+            "    if (message_state == '" + Messages.SIGNATURE_RESPONSE + "' && event.data.charAt(0) != '{') {\n" +
+            "        document.getElementById('signature').value = event.data;\n" +
+            "        setTimeout(function(){\n" +
+            "            document.forms.shoot.submit();\n" +
+            "        }, 0);\n" +
+            "        return;\n" +
+            "    }\n"
+            :
+            "")
+            :
         "    if (message_state == '" + Messages.SIGNATURE_RESPONSE + "' && event.data.charAt(0) == '<') {\n" +
         "        document.getElementById('signature').value = event.data;\n" +
         "        setTimeout(function(){\n" +
@@ -889,7 +923,7 @@ public class HTML implements BaseProperties
         "        var invoke_object = createJSONBaseCommand('" + Messages.SIGNATURE_REQUEST + "');\n" +
         "        invoke_object." + REFERENCE_ID_JSON + " = '" +  reference_id + "';\n" +
         "        invoke_object." + DATE_TIME_JSON + " = '" + date_string + "';\n" +
-        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? SIGNATURE_FORMAT_JCS : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
+        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? (jws_flag ? SIGNATURE_FORMAT_JWS : SIGNATURE_FORMAT_JCS) : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
         "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDING) + "';\n" +
         "        invoke_object." + SIGNATURE_ALGORITHMS_JSON + " = ['" + 
                      AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "','" +
@@ -954,8 +988,9 @@ public class HTML implements BaseProperties
             "<tr><td rowspan=\"2\">Document Type</td>" +
             "<td><input type=\"radio\" name=\"doctype\" checked value=\"html\">&nbsp;HTML</td>" +
             "</tr><tr><td><input type=\"radio\" name=\"doctype\" value=\"pdf\">&nbsp;PDF</td></tr>" +
-            "<tr><td rowspan=\"2\">Signature format</td>" +
+            "<tr><td rowspan=\"3\">Signature format</td>" +
             "<td><input type=\"radio\" name=\"sigfmt\" checked value=\"jcs\">&nbsp;JSON (JCS)</td></tr>" +
+            "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"jws\">&nbsp;JOSE (JWS)</td></tr>" +
             "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"xml\">&nbsp;XML DSig</td></tr>" +
             "<tr><td rowspan=\"2\">Signature Type</td>" +
             "<td><input type=\"radio\" name=\"sigtype\" checked value=\"det\">&nbsp;Detached</td></tr>" +
