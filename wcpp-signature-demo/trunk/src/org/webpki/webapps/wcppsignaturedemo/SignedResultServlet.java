@@ -115,9 +115,9 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 VerifierInterface verifier = new KeyStoreVerifier (SignatureDemoService.client_root_kestore);
                 verifier.verifyCertificatePath (new X509Certificate[]{cert});
                 JSONObjectReader payload = JSONParser.parse (Base64URL.decode (signature.substring (signature.indexOf ('.') + 1, signature.lastIndexOf ('.'))));
-                signature = "<b>Actual Response</b>:<br>" + signature +
-                "<br>&nbsp;<br><b>Decoded Header</b>:<br>" + new String (new JSONObjectWriter (header).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8") +
-                "<br>&nbsp;<br><b>Decoded Payload</b>:<br>" + new String (new JSONObjectWriter (payload).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
+                signature = "<div align=\"center\" style=\"padding-bottom:10pt\"><b>Actual Response</b></div>" + signature +
+                "<div align=\"center\" style=\"padding:20pt 0px 10pt 0px\"><b>Decoded Header</b></div>" + new String (new JSONObjectWriter (header).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8") +
+                "<div align=\"center\" style=\"padding:20pt 0px 10pt 0px\"><b>Decoded Payload</b></div>" + new String (new JSONObjectWriter (payload).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
               }
             Thread.sleep (1000);
           }
