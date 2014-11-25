@@ -145,7 +145,7 @@ public class HTML implements BaseProperties
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width:600px;\" cellpadding=\"4\">" +
                    "<tr><td style=\"text-align:center;font-weight:bolder;font-size:10pt;font-family:" + FONT_ARIAL + "\">WebCrypto++ Signature Demo<br>&nbsp;</td></tr>" +
-                   "<tr><td style=\"text-align:left\">This site contains a demo of what a true WebCrypto++ implementation " +
+                   "<tr><td style=\"text-align:left\">This application is a demo of what a true WebCrypto++ implementation " +
                    "could offer for general purpose <span style=\"color:red\">signature systems</span>.</td></tr>" +
                    "<tr><td style=\"text-align:left\">Because WebCrypto++ <span style=\"color:red\">shields keys</span> from direct access by relying parties, " +
                    "you can effectively &quot;emulate&quot; existing signature plugins, but <span style=\"color:red\">without static installation</span>.</td></tr>" +
@@ -541,10 +541,10 @@ public class HTML implements BaseProperties
         "    signature_response += ' ' + name + '=\"' + value + '\"';\n" +
         "}\n\n" +
         "function signXMLAndSend() {\n" +
-        "    // GENERATING canonicalized XML is usually quite simple, it is the RECREATING that's difficult\n" +
         "    signature_response += '></" + DOCUMENT_DATA_JSON + ">';\n" +
-        "    var end_tag = '</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
         "    var start_tag = '<" + Messages.SIGNATURE_RESPONSE.toString () + " ';\n" +
+        "    var end_tag = '</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
+        "    // GENERATING canonicalized XML is usually quite simple, it is the RECREATING that's difficult\n" +
         "    var key_info = '<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" Id=\"sig.key\"><ds:X509Data><ds:X509IssuerSerial><ds:X509IssuerName>'" +
                  " + client_cert_data." + JSONSignatureDecoder.ISSUER_JSON + 
                  " + '</ds:X509IssuerName><ds:X509SerialNumber>'" + 
@@ -961,7 +961,7 @@ public class HTML implements BaseProperties
         HTML.output (response, getHTMLSignatureFrameSource ());
       }
 
-    public static void signedResult (HttpServletResponse response, String message, String signature_request, boolean error) throws IOException, ServletException
+    public static void signedResult (HttpServletResponse response, String message, String signature_request, boolean error, String title) throws IOException, ServletException
       {
         HTML.output (response, HTML.getHTML (null,
                 "><form name=\"shoot\" action=\"showrequest\" method=\"POST\"><input type=\"hidden\" name=\"request\" value=\"" + HTMLEncoder.encode (signature_request) + "\"></form>" +
@@ -970,7 +970,7 @@ public class HTML implements BaseProperties
                 (error ? "[Invalid]" : "[Valid]") +
                 " Signature<br>&nbsp;</td></tr><tr><td>" +
                 (error ? "<span style=\"font-size:10pt;color:red\">" + HTMLEncoder.encode (message) + "</span>" : 
-                  "<div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
+                  "<div title=\"" + title + "\" style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0;\">" +
                   message + "</div>") +
                 "</td></tr></table></td></tr>"));
       }

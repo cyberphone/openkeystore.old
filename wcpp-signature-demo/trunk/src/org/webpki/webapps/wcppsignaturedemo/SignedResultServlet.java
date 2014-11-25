@@ -53,6 +53,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
         request.setCharacterEncoding ("UTF-8");
         String signature = request.getParameter ("signature");
         String signature_request = request.getParameter ("request");
+        String title = "JCS is a nice JSON signature format";
         boolean error = false;
         try
           {
@@ -67,6 +68,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
             byte[] document = JSONParser.parse (signature_request).getObject (OBJECT_TO_SIGN_JSON).getBinary (DOCUMENT_JSON);
             if (signature.startsWith ("<?xml"))
               {
+                title = "This signature must be &quot;flattened&quot; (=remove all whitespace between elements) to validate";
                 XMLSchemaCache xml_schema_cache = new XMLSchemaCache ();
                 xml_schema_cache.addWrapper (XMLSignatureResponse.class);
                 XMLSignatureResponse xml_response = (XMLSignatureResponse) xml_schema_cache.parse (signature.getBytes ("UTF-8"));
@@ -97,6 +99,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
               }
             else
               {
+                title = "JWS signatures are ugly but safe :-)";
                 JSONObjectReader header = JSONParser.parse (Base64URL.decode (signature.substring (0, signature.indexOf ('.'))));
                 if (!header.getString ("alg").equals ("RS256"))
                   {
@@ -134,7 +137,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
           {
              e.printStackTrace();
           }
-        HTML.signedResult (response, signature, signature_request, error);
+        HTML.signedResult (response, signature, signature_request, error, title);
       }
 
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
