@@ -527,10 +527,7 @@ public class HTML implements BaseProperties
         "    userSign();\n" +
         "}\n\n" +
         "function beautifyXMLDSig(element) {\n" +
-        "    var i;\n" +
-        "    while ((i = signature_response.indexOf('></' + element + '>')) > 0) {\n" +
-        "        signature_response = signature_response.substring(0, i) + '/>' + signature_response.substring(i + element.length + 4);\n" +
-        "    }\n\n" +
+        "    signature_response = signature_response.replace(new RegExp('\\>\\<\\/' + element + '\\>', 'g'), '/>');\n" +
         "}\n\n" +
         "function createXMLReference(id, extra, data, f) {\n" +
         "    crypto.subtle.digest({name: 'SHA-256'}, convertStringToUTF8(data)).then (function(result) {\n" +
@@ -544,6 +541,7 @@ public class HTML implements BaseProperties
         "    signature_response += ' ' + name + '=\"' + value + '\"';\n" +
         "}\n\n" +
         "function signXMLAndSend() {\n" +
+        "    // GENERATING canonicalized XML is usually quite simple, it is the RECREATING that's difficult\n" +
         "    signature_response += '></" + DOCUMENT_DATA_JSON + ">';\n" +
         "    var end_tag = '</" + Messages.SIGNATURE_RESPONSE.toString () + ">';\n" +
         "    var start_tag = '<" + Messages.SIGNATURE_RESPONSE.toString () + " ';\n" +
@@ -560,11 +558,12 @@ public class HTML implements BaseProperties
         "     }\n" +
         "     key_info += '</ds:X509Data></ds:KeyInfo>';\n" +
              "    createXMLReference(''," +
-             "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"></ds:Transform>', start_tag + signature_response + end_tag, function(ref1) {\n" +
-        "    createXMLReference('#sig.key','', key_info, function(ref2) {\n" +
+             "'<ds:Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\">" +
+             "</ds:Transform>', start_tag + signature_response + end_tag, function(doc_ref) {\n" +
+        "    createXMLReference('#sig.key','', key_info, function(key_ref) {\n" +
         "        var signed_info = '<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"" +
              "http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"" +
-             "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"></ds:SignatureMethod>' + ref1 + ref2 + '</ds:SignedInfo>';\n" +
+             "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"></ds:SignatureMethod>' + doc_ref + key_ref + '</ds:SignedInfo>';\n" +
         "        var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
         "        var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
         "        crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
@@ -572,6 +571,8 @@ public class HTML implements BaseProperties
         "            signature_response += '<ds:Signature>' + signed_info + '<ds:SignatureValue>'" +
                      " + binaryToBase64STD(new Uint8Array(signature)) + '</ds:SignatureValue>' + key_info" +
                      " + '</ds:Signature>';\n" +
+        "            // XML canonicalization requires a lot of ugly \"junk\" which the the following lines remove\n" +
+        "            // The verifier will have to put it back but that's the verifier's problem :-)\n" +
         "            signature_response = signature_response.replace(/\\ xmlns\\:ds\\=\\\"http:\\/\\/www\\.w3\\.org\\/2000\\/09\\/xmldsig#\\\"/g,'');\n" +
         "            beautifyXMLDSig('ds:CanonicalizationMethod');\n" +
         "            beautifyXMLDSig('ds:Transform');\n" +
@@ -579,6 +580,7 @@ public class HTML implements BaseProperties
         "            beautifyXMLDSig('ds:DigestMethod');\n" +
         "            beautifyXMLDSig('" + REQUEST_DATA_JSON + "');\n" +
         "            beautifyXMLDSig('" + DOCUMENT_HASH_JSON + "');\n" +
+        "            // End of the XML \"beautifying\" process\n" +
         "            window.parent.postMessage('<?xml version=\"1.0\" encoding=\"UTF-8\"?>'" +
                      " + start_tag + 'xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" '" + 
                      " + signature_response + end_tag, window.document.referrer);\n" +
