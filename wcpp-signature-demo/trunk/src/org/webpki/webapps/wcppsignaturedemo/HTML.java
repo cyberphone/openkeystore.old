@@ -292,6 +292,9 @@ public class HTML implements BaseProperties
         "var aborted_operation = false;\n" +
         "var pin_error_count = 0;\n" +
         "var border_height;\n" +
+        "var x_pos;\n" +
+        "var y_pos;\n" +
+        "var moving_on = false;\n" +
         "var timeouter_handle = null;\n" +
         "var request_reference_id;\n" +
         "var request_date_time;\n" +
@@ -344,11 +347,13 @@ public class HTML implements BaseProperties
         "'o','p','q','r','s','t','u','v'," +
         "'w','x','y','z','0','1','2','3'," +
         "'4','5','6','7','8','9','+','/'];\n\n" +
+        "//////////////////////////////////////////////////////////////////////////////\n" +
         "// This part would in a real WebCrypto++ implemenation be replaced by\n" +
         "// the platform key enumeration and attribute methods\n" +
         "var client_private_key = " + SignatureDemoService.client_private_key.getJWK () + ";\n" +
         "var client_cert_path = ['" + SignatureDemoService.client_eecert_b64 + "'];\n" +
-        "var client_cert_data = " + SignatureDemoService.client_cert_data_js + ";\n\n" +
+        "var client_cert_data = " + SignatureDemoService.client_cert_data_js + ";\n" +
+        "//////////////////////////////////////////////////////////////////////////////\n\n" +
         "function error(message) {\n" +
        "    console.debug ('Error: ' + message);\n" +
        "    if (!aborted_operation) {\n" +
@@ -497,27 +502,67 @@ public class HTML implements BaseProperties
              Messages.ABORT +
              "')), window.document.referrer);\n" +
         "}\n\n" +
+        "function mouseDown(ev) {\n" +
+        "    x_pos = ev.clientX;\n" +
+        "    y_pos = ev.clientY;\n" +
+        "    moving_on = true;\n" +
+        "}\n\n" +
+        "function mouseUp(ev) {\n" +
+        "    moving_on = false;\n" +
+        "}\n\n" +
+        "function mouseLeave(ev) {\n" +
+        "    moving_on = false;\n" +
+        "}\n\n" +
+        "function mouseMove(ev) {\n" +
+        "    var x = ev.clientX;\n" +
+        "    var y = ev.clientY;\n" +
+        "    var elem = document.getElementById(ev.target.id == 'pinborder' ? 'pindialog' : 'credential');\n" +
+        "    if (moving_on) {\n" +
+        "        elem.style.top = (parseInt(elem.style.top.replace('px','')) + y - y_pos) + 'px';\n" +
+        "        elem.style.left = (parseInt(elem.style.left.replace('px','')) + x - x_pos) + 'px';\n" +
+        "    }\n" +
+        "    y_pos = y;\n" +
+        "    x_pos = x;\n" +
+        "}\n" +
+        "function addDragHandlers(id) {\n" +
+        "   var elem = document.getElementById(id);\n" +
+        "   elem.addEventListener('mousedown', mouseDown);\n" +
+        "   elem.addEventListener('mouseup', mouseUp);\n" +
+        "   elem.addEventListener('mousemove', mouseMove);\n" +
+        "   elem.addEventListener('mouseleave', mouseLeave);\n" +
+        "}\n\n" +
+        "function removeDragHandlers(id) {\n" +
+        "   moving_on = false;\n" +
+        "   var elem = document.getElementById(id);\n" +
+        "   elem.removeEventListener('mousedown', mouseDown);\n" +
+        "   elem.removeEventListener('mouseup', mouseUp);\n" +
+        "   elem.removeEventListener('mousemove', mouseMove);\n" +
+        "   elem.removeEventListener('mouseleave', mouseLeave);\n" +
+        "}\n\n" +
         "function openCredentialDialog() {\n" +
         "    closePINDialog();\n" +
+        "    addDragHandlers('credborder');\n" +
         "    document.getElementById('credential').style.visibility = 'visible';\n" +
         "}\n\n" +
         "function closeCredentialDialog() {\n" +
+        "    removeDragHandlers('credborder');\n" +
         "    document.getElementById('credential').style.visibility = 'hidden';\n" +
         "}\n\n" +
         "function userSign() {\n" +
         "    closeCredentialDialog();\n" +
         "    document.getElementById('sign').disabled = true;\n" +
         "    var pindialog_width = document.getElementById('pindialog').offsetWidth;\n" +
-        "    document.getElementById('pincross').style.height = (border_height - 9"
-        + ") + 'px';\n" +
+        "    document.getElementById('pincross').style.height = (border_height - 9) + 'px';\n" +
         "    document.getElementById('pincross').style.top = '4px';\n" +
         "    document.getElementById('pincross').style.left = (pindialog_width - border_height + 2) + 'px';\n" +
         "    document.getElementById('pindialog').style.top = Math.floor((" + SIGNATURE_WINDOW_HEIGHT + " - document.getElementById('pindialog').offsetHeight) / 2) + 'px';\n" +
         "    document.getElementById('pindialog').style.left = Math.floor((" + SIGNATURE_WINDOW_WIDTH + " - pindialog_width) / 2) + 'px';\n" +
+        "    addDragHandlers('pinborder');\n" +
         "    document.getElementById('pindialog').style.visibility = 'visible';\n" +
         "    document.getElementById('pin').focus();\n" +
         "}\n\n" +
         "function closePINDialog() {\n" +
+        "    removeDragHandlers('pinborder');\n" +
         "    document.getElementById('sign').disabled = false;\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "}\n\n" +
@@ -803,6 +848,7 @@ public class HTML implements BaseProperties
         ((SIGNATURE_WINDOW_HEIGHT - SIGNATURE_LOADING_SIZE) / 2) + "px;left:" + 
         ((SIGNATURE_WINDOW_WIDTH - SIGNATURE_LOADING_SIZE) / 2) + "px;z-index:5;visibility:visible;\"/>" +
         getDialogBox ("pindialog",
+                      "pinborder",
                       "pincross",
                       "Enter a PIN to activate the signature key...", 
                       "Signature PIN",
@@ -816,6 +862,7 @@ public class HTML implements BaseProperties
              FONT_ARIAL + "\" type=\"button\"  title=\"This button activates the signature key\" value=\"Sign Document\" onclick=\"performSignatureOperation()\"></div>" +
         "</div>" +
         getDialogBox ("credential",
+                      "credborder",
                       "credcross",
                       "Currently a &quot;selection&quot; of properties...", 
                       "Certificate Properties",
@@ -855,6 +902,7 @@ public class HTML implements BaseProperties
       }
 
     private static String getDialogBox (String main_id,
+                                        String border_id,
                                         String cross_id,
                                         String title_text,
                                         String header_text,
@@ -865,7 +913,7 @@ public class HTML implements BaseProperties
             "style=\"background-color:" + SIGNATURE_DIALOG_COLOR + ";border-width:1px;border-style:solid;border-color:" +
                  SIGNATURE_BORDER_COLOR + 
                  ";box-shadow:3pt 3pt 3pt #D0D0D0;position:absolute;visibility:hidden;z-index:3\">" +
-            "<div style=\"font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " + 
+            "<div id=\"" + border_id + "\" style=\"cursor:move;font-family:" + FONT_VERDANA + ";padding:" + (SIGNATURE_DIV_VERTICAL_PADDING - 1) + "px " + 
             30 + "pt " + SIGNATURE_DIV_VERTICAL_PADDING + "px " + 
             SIGNATURE_DIV_HORIZONTAL_PADDING + "px;" +
             "color:white;background:" +
