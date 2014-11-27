@@ -379,13 +379,6 @@ public class HTML implements BaseProperties
        "       error('Frame size manipulated by parent');\n" +
        "       return false;\n" +
        "   }\n" +
-/*
-       "   if (!card_list.length) {\n" +
-       "       error('You appear to have no payment cards at all, please return " +
-           "to the <b>Payment&nbsp;Demo&nbsp;Home</b> and get some!  It\\'s free :-)');\n" +
-       "       return false;\n" +
-       "   }\n" +
-*/
        "   return true;\n" +
        "}\n\n" +
        "function checkTiming(milliseconds) {\n" +
