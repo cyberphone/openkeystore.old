@@ -64,7 +64,7 @@ public class HTML implements BaseProperties
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
         "<title>WebCrypto++ Payment Demo</title>"+
         "<style type=\"text/css\">html {overflow:auto}\n"+
-        ".tftable {border-collapse:collapse}\n" +
+        ".tftable {border-collapse:collapse;box-shadow:3pt 3pt 3pt #D0D0D0}\n" +
         ".tftable th {font-size:10pt;background:" +
           "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
           "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
@@ -1023,9 +1023,9 @@ public class HTML implements BaseProperties
             page_data.append (productEntry (temp_string, MerchantServlet.products.get (sku), sku, saved_shopping_cart, q++));
           }
         page_data.append (
-               "<tr><td style=\"border-width:1px 1px 0px 0px;background:white\"></td><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
+               "</table></tr></td><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Total Amount</th><td style=\"text-align:right\" id=\"total\">")
                  .append (price (saved_shopping_cart.total))
-                 .append ("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
+                 .append ("</td></tr>" +
                           "</table></td></tr>" +
                           "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\"><input class=\"stdbtn\" type=\"button\" value=\"Checkout..\" title=\"Paying time has come...\" onclick=\"checkOut()\"></td></tr>" +
                           "</table>" +
@@ -1123,9 +1123,9 @@ public class HTML implements BaseProperties
              .append ("</td></tr>");                
           }
         s.append (
-            "<tr><td style=\"text-align:center\">Total Amount</td><td style=\"text-align:right\" id=\"total\">")
+            "</table></td></tr><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Total Amount</th><td style=\"text-align:right\" id=\"total\">")
          .append (price (saved_shopping_cart.total))
-         .append("</td><td style=\"border-width:1px 0px 0px 1px;background:white\"></td></tr>" +
+         .append("</td></tr>" +
                  "</table></td></tr>" +
                  "<tr><td style=\"text-align:center;padding-top:10pt\" id=\"pay\">")
          .append (getIframeHTML ())
