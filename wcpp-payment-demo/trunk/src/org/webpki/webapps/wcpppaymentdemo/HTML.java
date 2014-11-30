@@ -69,8 +69,7 @@ public class HTML implements BaseProperties
           "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
           "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
           "text-align:center;font-family:" + FONT_ARIAL + "}\n" +
-        ".tftable tr {background-color:#FFFFE0}\n" +
-        ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
+        ".tftable td {background-color:#FFFFE0;font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;font-family:" + FONT_ARIAL + "}\n" +
         "body {font-size:10pt;color:#000000;font-family:" + FONT_VERDANA + ";background-color:white}\n" +
         "a {font-weight:bold;font-size:8pt;color:blue;font-family:" + FONT_ARIAL + ";text-decoration:none}\n" +
         "td {font-size:8pt;font-family:" + FONT_VERDANA + "}\n" +
@@ -1023,7 +1022,7 @@ public class HTML implements BaseProperties
             page_data.append (productEntry (temp_string, MerchantServlet.products.get (sku), sku, saved_shopping_cart, q++));
           }
         page_data.append (
-               "</table></tr></td><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Total Amount</th><td style=\"text-align:right\" id=\"total\">")
+               "</table></tr></td><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Amount to Pay</th><td style=\"text-align:right\" id=\"total\">")
                  .append (price (saved_shopping_cart.total))
                  .append ("</td></tr>" +
                           "</table></td></tr>" +
@@ -1123,7 +1122,7 @@ public class HTML implements BaseProperties
              .append ("</td></tr>");                
           }
         s.append (
-            "</table></td></tr><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Total Amount</th><td style=\"text-align:right\" id=\"total\">")
+            "</table></td></tr><tr><td style=\"padding-top:10pt\"><table style=\"margin-left:auto;margin-right:auto\" class=\"tftable\"><tr><th style=\"text-align:center\">Amount to Pay</th><td style=\"text-align:right\" id=\"total\">")
          .append (price (saved_shopping_cart.total))
          .append("</td></tr>" +
                  "</table></td></tr>" +
