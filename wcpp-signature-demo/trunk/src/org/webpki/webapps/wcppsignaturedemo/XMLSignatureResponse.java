@@ -30,7 +30,7 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xmldsig.XMLEnvelopedInput;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
-public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelopedInput, BaseProperties
+public class XMLSignatureResponse extends XMLObjectWrapper implements XMLEnvelopedInput, BaseProperties
   {
     XMLSignatureWrapper signature;
     
@@ -150,7 +150,8 @@ public class XMLSignatureResponse  extends XMLObjectWrapper implements XMLEnvelo
       }
   
     @Override
-    protected void toXML (DOMWriterHelper arg0) throws IOException
+    protected void toXML (DOMWriterHelper wr) throws IOException
       {
+        throw new IOException ("Not implemented");
       }
   }
