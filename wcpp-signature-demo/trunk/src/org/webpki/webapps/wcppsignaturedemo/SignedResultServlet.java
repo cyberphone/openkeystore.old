@@ -17,11 +17,14 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.Signature;
+
 import java.security.cert.X509Certificate;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,16 +34,21 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.tools.XML2HTMLPrinter;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
+
 import org.webpki.xml.XMLSchemaCache;
+
 import org.webpki.xmldsig.SignedKeyInfoSpecifier;
 import org.webpki.xmldsig.XMLVerifier;
 
@@ -73,7 +81,6 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 xml_schema_cache.addWrapper (XMLSignatureResponse.class);
                 XMLSignatureResponse xml_response = (XMLSignatureResponse) xml_schema_cache.parse (signature.getBytes ("UTF-8"));
                 XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (SignatureDemoService.client_root_kestore));
- //               verifier.setDebug (true);
                 verifier.setSignedKeyInfo (SignedKeyInfoSpecifier.REQUIRE_SIGNED_KEY_INFO);
                 verifier.validateEnvelopedSignature (xml_response);
                signature = XML2HTMLPrinter.convert (signature);
