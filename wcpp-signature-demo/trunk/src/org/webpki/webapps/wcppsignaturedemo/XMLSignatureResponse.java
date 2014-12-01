@@ -86,7 +86,6 @@ public class XMLSignatureResponse extends XMLObjectWrapper implements XMLEnvelop
     @Override
     public Element getInsertElem () throws IOException
       {
-        // TODO Auto-generated method stub
         return null;
       }
   
