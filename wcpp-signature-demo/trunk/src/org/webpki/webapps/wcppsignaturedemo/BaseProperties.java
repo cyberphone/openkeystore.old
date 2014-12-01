@@ -21,7 +21,6 @@ public interface BaseProperties
     String DATE_TIME_JSON             = "DateTime";
     String REFERENCE_ID_JSON          = "ReferenceID";
     String CERTIFICATE_FILTERS_JSON   = "CertificateFilters";
-    String COMMON_NAME_JSON           = "CommonName";
     String VALUE_JSON                 = "Value";
     String DOMAIN_NAME_JSON           = "DomainName";
     String ALGORITHM_JSON             = "Algorithm";
@@ -44,7 +43,7 @@ public interface BaseProperties
     // Argument to the above
     String SIGNATURE_FORMAT_JCS       = "JCS";
     String SIGNATURE_FORMAT_XML_DSIG  = "XMLDSig";
-    String SIGNATURE_FORMAT_JWS       = "JWS";
+    String SIGNATURE_FORMAT_JWS_COMP  = "JWS/C";
 
     String WCPP_DEMO_CONTEXT_URI      = "http://xmlns.webpki.org/wcpp-signature-demo";
     String ECDH_ALGORITHM_URI         = "http://www.w3.org/2009/xmlenc11#ECDH-ES";

@@ -66,7 +66,7 @@ public class HTML implements BaseProperties
 //        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
         "<title>WebCrypto++ Signature Demo</title>"+
         "<style type=\"text/css\">html {overflow:auto}\n"+
-        ".tftable {border-collapse:collapse}\n" +
+        ".tftable {border-collapse:collapse;box-shadow:3pt 3pt 3pt #D0D0D0}\n" +
         ".tftable th {font-size:10pt;background:" +
           "linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);" +
           "border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color:#a9a9a9;" +
@@ -745,7 +745,7 @@ public class HTML implements BaseProperties
         "    request_date_time = getJSONProperty('" + DATE_TIME_JSON + "');\n" +
         "    detached_flag = getJSONProperty('" + SIGNATURE_TYPE_JSON + "') == '" + SIGNATURE_TYPE_DETACHED + "';\n" +
         "    xml_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_XML_DSIG + "';\n" +
-        "    jws_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_JWS + "';\n" +
+        "    jws_flag = getJSONProperty('" + SIGNATURE_FORMAT_JSON + "') == '" + SIGNATURE_FORMAT_JWS_COMP + "';\n" +
         "    if (aborted_operation) return;\n" +
         "    border_height = document.getElementById('border').offsetHeight;\n" +
         "    var credential_width = document.getElementById('credential').offsetWidth;\n" +
@@ -966,7 +966,7 @@ public class HTML implements BaseProperties
         "        var invoke_object = createJSONBaseCommand('" + Messages.SIGNATURE_REQUEST + "');\n" +
         "        invoke_object." + REFERENCE_ID_JSON + " = '" +  reference_id + "';\n" +
         "        invoke_object." + DATE_TIME_JSON + " = '" + date_string + "';\n" +
-        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? (jws_flag ? SIGNATURE_FORMAT_JWS : SIGNATURE_FORMAT_JCS) : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
+        "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? (jws_flag ? SIGNATURE_FORMAT_JWS_COMP : SIGNATURE_FORMAT_JCS) : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
         "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDING) + "';\n" +
         "        invoke_object." + SIGNATURE_ALGORITHMS_JSON + " = ['" + 
                      AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "','" +
@@ -1028,12 +1028,13 @@ public class HTML implements BaseProperties
             "<tr><td>BTW, <span style=\"color:red\">the PIN code is 1234</span>.<br>&nbsp;</td></tr>" +
             "</table></td></tr>" +
             "<tr><td align=\"center\"><form method=\"POST\" action=\"signcmd\"><table class=\"tftable\">" +
+            "<tr><th>Parameter</th><th>Selection</th></tr>" +
             "<tr><td rowspan=\"2\">Document Type</td>" +
             "<td><input type=\"radio\" name=\"doctype\" checked value=\"html\">&nbsp;HTML</td>" +
             "</tr><tr><td><input type=\"radio\" name=\"doctype\" value=\"pdf\">&nbsp;PDF</td></tr>" +
-            "<tr><td rowspan=\"3\">Signature format</td>" +
+            "<tr><td rowspan=\"3\">Signature Format</td>" +
             "<td><input type=\"radio\" name=\"sigfmt\" checked value=\"jcs\">&nbsp;JSON (JCS)</td></tr>" +
-            "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"jws\">&nbsp;JOSE (JWS)</td></tr>" +
+            "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"jws\">&nbsp;JOSE (JWS Compact)</td></tr>" +
             "<tr><td><input type=\"radio\" name=\"sigfmt\" value=\"xml\">&nbsp;XML DSig</td></tr>" +
             "<tr><td rowspan=\"2\">Signature Type</td>" +
             "<td><input type=\"radio\" name=\"sigtype\" checked value=\"det\">&nbsp;Detached</td></tr>" +

@@ -27,9 +27,7 @@ public enum Messages
     INIIALIZE            ("Initialize"),
     SIGNATURE_REQUEST    ("SignatureRequest"),
     ABORT                ("Abort"),
-    SIGNATURE_RESPONSE   ("SignatureResponse"),
-    TRANSACTION_REQUEST  ("TransactionRequest"),
-    TRANSACTION_RESPONSE ("TransactionResponse");
+    SIGNATURE_RESPONSE   ("SignatureResponse");
     
     String json_name;
     
