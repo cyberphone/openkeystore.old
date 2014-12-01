@@ -83,7 +83,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (SignatureDemoService.client_root_kestore));
                 verifier.setSignedKeyInfo (SignedKeyInfoSpecifier.REQUIRE_SIGNED_KEY_INFO);
                 verifier.validateEnvelopedSignature (xml_response);
-               signature = XML2HTMLPrinter.convert (signature);
+                signature = XML2HTMLPrinter.convert (signature);
               }
             else if (signature.contains ("{"))
               {
