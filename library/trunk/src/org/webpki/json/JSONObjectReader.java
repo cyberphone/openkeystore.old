@@ -54,7 +54,14 @@ public class JSONObjectReader implements Serializable
 
     public void checkForUnread () throws IOException
       {
-        JSONObject.checkForUnread (root);
+        if (getJSONArrayReader () == null)
+          {
+            JSONObject.checkObjectForUnread (root);
+          }
+        else
+          {
+            JSONObject.checkArrayForUnread (root.properties.get (null), "Outer");
+          }
       }
 
     JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
@@ -65,7 +72,7 @@ public class JSONObjectReader implements Serializable
             throw new IOException ("Property \"" + name + "\" is missing");
           }
         JSONTypes.compatibilityTest (expected_type, value);
-        root.read_flag.add (name);
+        value.read_flag = true;
         return value;
       }
 
@@ -206,6 +213,7 @@ public class JSONObjectReader implements Serializable
         for (JSONValue value : array_elements)
           {
             JSONTypes.compatibilityTest (expected_type, value);
+            value.read_flag = true;
             array.add ((String)value.value);
           }
         return array.toArray (new String[0]);

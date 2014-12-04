@@ -33,7 +33,7 @@ public class JSONAsymKeyVerifier extends JSONVerifier
      * Verifier for asymmetric keys.
      * Note that you can access the received public key from {@link JSONSignatureDecoder}
      * which is useful if there are multiple keys possible.
-     * @param expected_public_key Expected public key or <code>null</code> (in which case no testing is performed)
+     * @param expected_public_key Expected public key
      * @throws IOException
      */
     public JSONAsymKeyVerifier (PublicKey expected_public_key) throws IOException
@@ -44,7 +44,7 @@ public class JSONAsymKeyVerifier extends JSONVerifier
     @Override
     void verify (JSONSignatureDecoder signature_decoder) throws IOException
       {
-        if (expected_public_key != null && !expected_public_key.equals (signature_decoder.public_key))
+        if (!expected_public_key.equals (signature_decoder.public_key))
           {
             throw new IOException ("Provided public key differs from the signature key");
           }

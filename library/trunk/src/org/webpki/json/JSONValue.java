@@ -28,6 +28,8 @@ class JSONValue implements Serializable
     JSONTypes type;
 
     Object value;  // Holds either a String, JSONObject or Vector<JSONValue>
+    
+    boolean read_flag;
 
     JSONValue (JSONTypes type, Object value)
       {

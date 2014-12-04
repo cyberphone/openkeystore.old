@@ -18,12 +18,12 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
 /**
  * Local support class for holding JSON objects.
+ * Note that outer-level arrays are (&quot;hackishly&quot;) represented as a JSON object having a single <code>null</code> property.
  */
 class JSONObject implements Serializable
   {
@@ -31,8 +31,6 @@ class JSONObject implements Serializable
 
     LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
 
-    HashSet<String> read_flag = new HashSet<String> ();
-    
     JSONObject ()
       {
       }
@@ -49,30 +47,43 @@ class JSONObject implements Serializable
           }
       }
 
-    @SuppressWarnings("unchecked")
-    static void checkForUnread (JSONObject json_object) throws IOException
+    static void checkObjectForUnread (JSONObject json_object) throws IOException
       {
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
-            if (!json_object.read_flag.contains (name))
+            if (!value.read_flag)
               {
                 throw new IOException ("Property \"" + name + "\" was never read");
               }
             if (value.type == JSONTypes.OBJECT)
               {
-                checkForUnread ((JSONObject)value.value);
+                checkObjectForUnread ((JSONObject)value.value);
               }
             else if (value.type == JSONTypes.ARRAY)
               {
-                for (JSONValue object : (Vector<JSONValue>)value.value)
-                  {
-                    if (object.type == JSONTypes.OBJECT)
-                      {
-                        checkForUnread ((JSONObject)object.value);
-                      }
-                  }
+                checkArrayForUnread (value, name);
               }
           }
        }
-    }
+
+    @SuppressWarnings("unchecked")
+    static void checkArrayForUnread (JSONValue array, String name) throws IOException
+      {
+        for (JSONValue array_element : (Vector<JSONValue>)array.value)
+          {
+            if (array_element.type == JSONTypes.OBJECT)
+              {
+                checkObjectForUnread ((JSONObject)array_element.value);
+              }
+            else if (array_element.type == JSONTypes.ARRAY)
+              {
+                checkArrayForUnread (array_element, name);
+              }
+            else if (!array_element.read_flag)
+              {
+                throw new IOException ("Value \"" + (String)array_element.value + "\" of array \"" + name + "\" was never read");
+              }
+          }
+      }
+  }

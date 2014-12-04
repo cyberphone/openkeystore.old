@@ -116,7 +116,13 @@ public class JSONTest
               {
                 test (list[i].equals (STRING_LIST_VALUE[i]));
               }
-            test (rd.getArray ("KURT").getArray ().getString ().equals (SUPER_LONG_LINE));
+            JSONArrayReader ar = rd.getArray ("KURT");
+            JSONArrayReader ar1 = ar.getArray ();
+            test (ar1.getString ().equals (SUPER_LONG_LINE));
+            test (ar1.getString ().equals ("Ty"));
+            JSONArrayReader ar2 = ar.getArray ();
+            test (ar2.getString ().equals ("lurt"));
+            test (ar2.getString ().equals ("Ty"));
             rd.getObject ("MURT").getString ("URK");
           }
   
@@ -607,6 +613,56 @@ public class JSONTest
         catch (Exception e)
           {
             checkException (e, "You cannot update array objects");
+          }
+        try
+          {
+            aw = new JSONArrayWriter ();
+            aw.setString ("hi,there");
+            aw.setObject().setBoolean ("boller", false);
+            String json = new String (aw.serializeJSONArray (JSONOutputFormats.NORMALIZED), "UTF-8");
+            assertTrue("Compare" + json, json.equals ("[\"hi,there\",{\"boller\":false}]"));
+            or = JSONParser.parse (json);
+            assertTrue("Compare", or.getJSONArrayReader ().getString ().equals ("hi,there"));
+            or.checkForUnread ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Property \"boller\" was never read");
+          }
+        try
+          {
+            aw = new JSONArrayWriter ();
+            JSONArrayWriter aw1 = aw.setArray ();
+            aw1.setString ("hi,there");
+            aw1.setObject().setBoolean ("boller1", false);
+            String json = new String (aw.serializeJSONArray (JSONOutputFormats.NORMALIZED), "UTF-8");
+            assertTrue("Compare" + json, json.equals ("[[\"hi,there\",{\"boller1\":false}]]"));
+            or = JSONParser.parse (json);
+            assertTrue("Compare", or.getJSONArrayReader ().getArray ().getString ().equals ("hi,there"));
+            or.checkForUnread ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Property \"boller1\" was never read");
+          }
+        try
+          {
+            aw = new JSONArrayWriter ();
+            JSONArrayWriter aw1 = aw.setArray ();
+            aw1.setObject().setBoolean ("boller2", false);
+            aw1.setString ("hi,there");
+            String json = new String (aw.serializeJSONArray (JSONOutputFormats.NORMALIZED), "UTF-8");
+            assertTrue("Compare" + json, json.equals ("[[{\"boller2\":false},\"hi,there\"]]"));
+            or = JSONParser.parse (json);
+            or.getJSONArrayReader ().getArray ().getObject().getBoolean ("boller2");
+            or.checkForUnread ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Value \"hi,there\" of array \"Outer\" was never read");
           }
       }
 

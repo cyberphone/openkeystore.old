@@ -45,7 +45,7 @@ import org.webpki.util.ISODateTime;
 /**
  * Writes formatted JSON data to a DOM-like tree.
  * <p>
- * It also performs normalization for usage with JCS (Javascript Clear-text Signatures).
+ * It also performs normalization for usage with JCS (JSON Cleartext Signatures).
  * 
  */
 public class JSONObjectWriter implements Serializable
