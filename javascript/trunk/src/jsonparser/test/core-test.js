@@ -14,12 +14,10 @@
  *  limitations under the License.
  *
  */
-
 function checkException (err)
 {
     if (!(err instanceof org.webpki.util.Error)) throw "Strange";
 }
- 
 var jo = new org.webpki.json.JSONObject ();
 jo._setProperty("one", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
 jo._setProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "hi"));
@@ -282,6 +280,38 @@ catch (err)
 {
   checkException (err);
 }
+var newarr = new org.webpki.json.JSONArrayWriter ();
+newarr.setInt (3);
+reader = org.webpki.json.JSONParser.parse (newarr.serializeJSONArray (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+try
+{
+    reader.checkForUnread ();
+    throw "should bomb";
+}
+catch (err)
+{
+  checkException (err);
+}
+newobjec = new org.webpki.json.JSONObjectWriter ();
+newobjec.setInt ("h",3).setArray ("iy").setString("yes");
+reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+reader.getInt("h");
+reader.getArray("iy");
+try
+{
+    reader.checkForUnread ();
+    throw "should bomb";
+}
+catch (err)
+{
+  checkException (err);
+}
+newobjec = new org.webpki.json.JSONObjectWriter ();
+newobjec.setInt ("h",3).setArray ("iy").setString("yes");
+reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+reader.getInt("h");
+reader.getArray("iy").getString ();
+reader.checkForUnread ();
 console.debug ("Successful");
 
 

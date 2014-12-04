@@ -70,6 +70,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     this._inRangeCheck ();
     /* JSONValue */var value = this.array[this.index++];
+    value.read_flag = true;
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     return value.value;
 };
@@ -111,12 +112,12 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
 };
 
- /* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
+/* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
 {
     return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
 };
 
- /* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
+/* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
 {
     if (this.getElementType () == org.webpki.json.JSONTypes.NULL)
     {
@@ -287,7 +288,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     object._root = json_object_reader.root;
     if (this.check_for_unread)
     {
-        org.webpki.json.JSONObject._checkForUnread (object._root);
+        org.webpki.json.JSONObject._checkObjectForUnread (object._root);
     }
     return object;
 };
@@ -304,33 +305,46 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
 org.webpki.json.JSONObject = function ()
 {
     this.property_list = [];
-    this.read_flag = new Object ();
 };
 
-/*void */org.webpki.json.JSONObject._checkForUnread = function (json_object)
+/*void */org.webpki.json.JSONObject._checkObjectForUnread = function (json_object)
 {
     for (var i = 0; i < json_object.property_list.length; i++)
     {
         var name = json_object.property_list[i].name;
         var value = json_object.property_list[i].value;
-        if (!json_object.read_flag[name])
+        if (!value.read_flag)
         {
             org.webpki.util._error ('Property "' + name + '" was never read');
         }
         if (value.type == org.webpki.json.JSONTypes.OBJECT)
         {
-            org.webpki.json.JSONObject._checkForUnread (value.value);
+            org.webpki.json.JSONObject._checkObjectForUnread (value.value);
         }
         else if (value.type == org.webpki.json.JSONTypes.ARRAY)
         {
-            for (var q = 0; q < value.value.length; q++)
-            {
-                var object = value.value[q];
-                if (object.type == org.webpki.json.JSONTypes.OBJECT)
-                {
-                    org.webpki.json.JSONObject._checkForUnread (object.value);
-                }
-            }
+            org.webpki.json.JSONObject._checkArrayForUnread (value, name);
+        }
+    }
+};
+
+/*void */org.webpki.json.JSONObject._checkArrayForUnread = function (array_holder, name)
+{
+    var array_list = array_holder.value;
+    for (var i = 0; i < array_list.length; i++)
+    {
+        var json_value = array_list[i];
+        if (json_value.type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            org.webpki.json.JSONObject._checkObjectForUnread (json_value.value);
+        }
+        else if (json_value.type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            org.webpki.json.JSONObject._checkArrayForUnread (json_value, name);
+        }
+        else if (!json_value.read_flag)
+        {
+            org.webpki.util._error ('Value "' + json_value.value + '" of array "' + name + '" was never read');
         }
     }
 };
@@ -359,7 +373,6 @@ org.webpki.json.JSONObject = function ()
         }
     }
     this.property_list[length] = new_property;
-    this.read_flag[name] = null;
 };
 
 /* JSONValue */org.webpki.json.JSONObject.prototype._getProperty = function (name)
@@ -383,7 +396,7 @@ org.webpki.json.JSONObject = function ()
 /* void */org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 {
     this.property_list = [];
-    var unnamed_property = new Object;
+    var unnamed_property = new Object ();
     unnamed_property.name = null;
     unnamed_property.value = array;
     this.property_list[0] = unnamed_property;
@@ -402,7 +415,14 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
 
 /* void */org.webpki.json.JSONObjectReader.prototype.checkForUnread = function ()
 {
-    org.webpki.json.JSONObject._checkForUnread (this.root);
+    if (this.root._isArray())
+    {
+        org.webpki.json.JSONObject._checkArrayForUnread (this.root.property_list[0].value, "Outer");
+    }
+    else
+    {
+        org.webpki.json.JSONObject._checkObjectForUnread (this.root);
+    }
 };
 
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
@@ -413,7 +433,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
         org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
-    this.root.read_flag[name] = true;
+    value.read_flag = true;
     return value;
 };
 
@@ -508,7 +528,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     return new org.webpki.json.JSONArrayReader (/* JSONValue[] */value.value);
 };
 
- /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name, /* String */optional_default_value)
+/* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name, /* String */optional_default_value)
 {
     if (this.hasProperty (name))
     {
@@ -545,6 +565,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     {
         org.webpki.json.JSONTypes._compatibilityTest (expected_type, in_arr[i]);
         array[i] = in_arr[i].value;
+        in_arr[i].value.read_flag = true;
     }
     return array;
 };
@@ -614,7 +635,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
 /*                        JSONObjectWriter                        */
 /*================================================================*/
 
- org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_object_or_reader)
+org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_object_or_reader)
 {
     /* int */this.STANDARD_INDENT = 2;
 
@@ -767,7 +788,6 @@ org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
     return this.setString (name, date_time.toISOString ());
 };
 
-/*
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
 {
     return this.setString (name, org.webpki.util.Base64URL.encode (value));
@@ -1351,7 +1371,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
     if (this.root._isArray ())
     {
-        this._printArray (/* JSONValue[] */this.root.property_list[0].value, false);
+        this._printArray (/* JSONValue[] */this.root.property_list[0].value.value, false);
     }
     else
     {
@@ -2073,10 +2093,11 @@ org.webpki.json.JSONTypes._compatibilityTest = function (/* JSONTypes */expected
 /*                            JSONValue                           */
 /*================================================================*/
 
- org.webpki.json.JSONValue = function (type, value)
+org.webpki.json.JSONValue = function (type, value)
 {
     this.type = type;
     this.value = value;
+    this.read_flag = false;
 };
 
 /*================================================================*/

@@ -42,6 +42,7 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     this._inRangeCheck ();
     /* JSONValue */var value = this.array[this.index++];
+    value.read_flag = true;
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     return value.value;
 };
@@ -83,12 +84,12 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
     return parseFloat (this._get (org.webpki.json.JSONTypes.DOUBLE));
 };
 
- /* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
+/* public boolean */org.webpki.json.JSONArrayReader.prototype.getBoolean = function ()
 {
     return this._get (org.webpki.json.JSONTypes.BOOLEAN) == "true";
 };
 
- /* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
+/* public boolean */org.webpki.json.JSONArrayReader.prototype.getIfNULL = function ()
 {
     if (this.getElementType () == org.webpki.json.JSONTypes.NULL)
     {

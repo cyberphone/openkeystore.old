@@ -72,7 +72,7 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
     object._root = json_object_reader.root;
     if (this.check_for_unread)
     {
-        org.webpki.json.JSONObject._checkForUnread (object._root);
+        org.webpki.json.JSONObject._checkObjectForUnread (object._root);
     }
     return object;
 };

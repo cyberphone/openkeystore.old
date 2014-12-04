@@ -28,7 +28,14 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
 
 /* void */org.webpki.json.JSONObjectReader.prototype.checkForUnread = function ()
 {
-    org.webpki.json.JSONObject._checkForUnread (this.root);
+    if (this.root._isArray())
+    {
+        org.webpki.json.JSONObject._checkArrayForUnread (this.root.property_list[0].value, "Outer");
+    }
+    else
+    {
+        org.webpki.json.JSONObject._checkObjectForUnread (this.root);
+    }
 };
 
 /* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
@@ -39,7 +46,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
         org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
-    this.root.read_flag[name] = true;
+    value.read_flag = true;
     return value;
 };
 
@@ -134,7 +141,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     return new org.webpki.json.JSONArrayReader (/* JSONValue[] */value.value);
 };
 
- /* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name, /* String */optional_default_value)
+/* public String */org.webpki.json.JSONObjectReader.prototype.getStringConditional = function (/* String */name, /* String */optional_default_value)
 {
     if (this.hasProperty (name))
     {
@@ -171,6 +178,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     {
         org.webpki.json.JSONTypes._compatibilityTest (expected_type, in_arr[i]);
         array[i] = in_arr[i].value;
+        in_arr[i].value.read_flag = true;
     }
     return array;
 };

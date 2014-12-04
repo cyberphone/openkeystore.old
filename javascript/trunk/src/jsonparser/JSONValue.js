@@ -19,8 +19,9 @@
 /*                            JSONValue                           */
 /*================================================================*/
 
- org.webpki.json.JSONValue = function (type, value)
+org.webpki.json.JSONValue = function (type, value)
 {
     this.type = type;
     this.value = value;
+    this.read_flag = false;
 };

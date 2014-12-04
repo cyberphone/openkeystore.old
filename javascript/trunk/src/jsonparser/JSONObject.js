@@ -22,33 +22,46 @@
 org.webpki.json.JSONObject = function ()
 {
     this.property_list = [];
-    this.read_flag = new Object ();
 };
 
-/*void */org.webpki.json.JSONObject._checkForUnread = function (json_object)
+/*void */org.webpki.json.JSONObject._checkObjectForUnread = function (json_object)
 {
     for (var i = 0; i < json_object.property_list.length; i++)
     {
         var name = json_object.property_list[i].name;
         var value = json_object.property_list[i].value;
-        if (!json_object.read_flag[name])
+        if (!value.read_flag)
         {
             org.webpki.util._error ('Property "' + name + '" was never read');
         }
         if (value.type == org.webpki.json.JSONTypes.OBJECT)
         {
-            org.webpki.json.JSONObject._checkForUnread (value.value);
+            org.webpki.json.JSONObject._checkObjectForUnread (value.value);
         }
         else if (value.type == org.webpki.json.JSONTypes.ARRAY)
         {
-            for (var q = 0; q < value.value.length; q++)
-            {
-                var object = value.value[q];
-                if (object.type == org.webpki.json.JSONTypes.OBJECT)
-                {
-                    org.webpki.json.JSONObject._checkForUnread (object.value);
-                }
-            }
+            org.webpki.json.JSONObject._checkArrayForUnread (value, name);
+        }
+    }
+};
+
+/*void */org.webpki.json.JSONObject._checkArrayForUnread = function (array_holder, name)
+{
+    var array_list = array_holder.value;
+    for (var i = 0; i < array_list.length; i++)
+    {
+        var json_value = array_list[i];
+        if (json_value.type == org.webpki.json.JSONTypes.OBJECT)
+        {
+            org.webpki.json.JSONObject._checkObjectForUnread (json_value.value);
+        }
+        else if (json_value.type == org.webpki.json.JSONTypes.ARRAY)
+        {
+            org.webpki.json.JSONObject._checkArrayForUnread (json_value, name);
+        }
+        else if (!json_value.read_flag)
+        {
+            org.webpki.util._error ('Value "' + json_value.value + '" of array "' + name + '" was never read');
         }
     }
 };
@@ -77,7 +90,6 @@ org.webpki.json.JSONObject = function ()
         }
     }
     this.property_list[length] = new_property;
-    this.read_flag[name] = null;
 };
 
 /* JSONValue */org.webpki.json.JSONObject.prototype._getProperty = function (name)
@@ -101,7 +113,7 @@ org.webpki.json.JSONObject = function ()
 /* void */org.webpki.json.JSONObject.prototype._setArray = function (/* JSONValue */array)
 {
     this.property_list = [];
-    var unnamed_property = new Object;
+    var unnamed_property = new Object ();
     unnamed_property.name = null;
     unnamed_property.value = array;
     this.property_list[0] = unnamed_property;

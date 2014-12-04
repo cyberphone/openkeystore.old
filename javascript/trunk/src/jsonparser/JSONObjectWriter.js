@@ -19,7 +19,7 @@
 /*                        JSONObjectWriter                        */
 /*================================================================*/
 
- org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_object_or_reader)
+org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_object_or_reader)
 {
     /* int */this.STANDARD_INDENT = 2;
 
@@ -172,7 +172,6 @@ org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
     return this.setString (name, date_time.toISOString ());
 };
 
-/*
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setBinary = function (/* String */name, /* Uint8Array */ value) 
 {
     return this.setString (name, org.webpki.util.Base64URL.encode (value));
@@ -756,7 +755,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
     if (this.root._isArray ())
     {
-        this._printArray (/* JSONValue[] */this.root.property_list[0].value, false);
+        this._printArray (/* JSONValue[] */this.root.property_list[0].value.value, false);
     }
     else
     {
