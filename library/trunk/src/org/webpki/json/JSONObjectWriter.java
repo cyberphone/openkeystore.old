@@ -796,9 +796,9 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    static byte[] getNormalizedSubset (JSONObject signature_object_in) throws IOException
+    static byte[] getNormalizedSubset (JSONObject json_object) throws IOException
       {
-        JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
+        JSONObjectWriter writer = new JSONObjectWriter (json_object);
         byte[] result = writer.serializeJSONObject (JSONOutputFormats.NORMALIZED);
         if (normalization_debug_file != null)
           {
