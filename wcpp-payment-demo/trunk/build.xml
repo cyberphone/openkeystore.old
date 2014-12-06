@@ -143,10 +143,7 @@
       </lib>
       <fileset dir="web"/>
       <zipfileset dir="${key_dir}" prefix="${class_war_path}"/>
-      <zipfileset dir="${packimage_dir}" prefix="${class_war_path}">
-         <include name="**/*.png"/>
-         <include name="**/*.gif"/>
-      </zipfileset>
+      <zipfileset dir="${packimage_dir}" prefix="${class_war_path}"/>
     </war>
   </target>
 
