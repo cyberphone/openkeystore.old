@@ -37,7 +37,7 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 
 /**
- * Decoder for JSON signatures.
+ * Decoder for JCS signatures.
  */
 public class JSONSignatureDecoder implements Serializable
   {

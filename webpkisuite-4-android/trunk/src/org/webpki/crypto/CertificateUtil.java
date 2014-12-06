@@ -38,7 +38,6 @@ import org.webpki.util.DebugFormatter;
 
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ASN1Sequence;
-import org.webpki.asn1.ASN1String;
 import org.webpki.asn1.CompositeContextSpecific;
 import org.webpki.asn1.ParseUtil;
 
@@ -107,33 +106,6 @@ public class CertificateUtil
       }
 
 
-    private static CertificateLogotypeDescriptor getLogotypeDescriptor (ASN1Sequence logo) throws IOException
-      {
-        if (logo.size () == 3 && logo.get(0) instanceof ASN1String &&
-            logo.get(1) instanceof ASN1Sequence && logo.get(2) instanceof ASN1Sequence)
-          {
-            String mime_type = ParseUtil.string (logo.get (0)).value ();
-            ASN1Sequence hashes = ParseUtil.sequence (logo.get (1));
-            for (int i = 0; i < hashes.size (); i++)
-              {
-                ASN1Sequence hash_value_pair = ParseUtil.sequence (hashes.get (i));
-                String oid = ParseUtil.oid (ParseUtil.sequence (hash_value_pair.get (0)).get (0)).oid ();
-                byte[] sha1_data = ParseUtil.octet (hash_value_pair.get (1));
-                ASN1Sequence uris = ParseUtil.sequence (logo.get (2));
-                for (int j = 0; j < uris.size (); j++)
-                  {
-                    if (uris.get(j) instanceof ASN1String)
-                      {
-                        String uri = ParseUtil.string (uris.get (j)).value ();
-                        return new CertificateLogotypeDescriptor (uri, mime_type, oid, sha1_data);
-                      }
-                  }
-              }
-          }
-        return null;
-      }
-
-
     public static String[] getKeyUsages (X509Certificate certificate) throws IOException
       {
         boolean[] key_usage = certificate.getKeyUsage ();
@@ -154,71 +126,6 @@ public class CertificateUtil
               }
           }
         return key_usage_set.toArray (new String[0]);
-      }
-
-
-    private static CertificateLogotypeDescriptor[] getLogotypeDescriptors (X509Certificate certificate,
-                                                                           int index) throws IOException
-      {
-        ASN1Sequence outer = getExtension (certificate, CertificateExtensions.LOGOTYPES);
-        if (outer == null)
-          {
-            return null;
-          }
-        for (int i = 0; i < outer.size (); i++)
-          {
-            if (ParseUtil.isCompositeContext (outer.get (i), index))
-              {
-                CompositeContextSpecific logotype_entries = ParseUtil.compositeContext (outer.get (i));
-                if (ParseUtil.isCompositeContext (logotype_entries.get (0), 0))
-                  {
-                    Vector<CertificateLogotypeDescriptor> logotypes = new Vector<CertificateLogotypeDescriptor> ();
-                    logotype_entries = ParseUtil.compositeContext (logotype_entries.get (0));
-                    for (int j = 0; j < logotype_entries.size (); j++)
-                      {
-                        if (logotype_entries.get (j) instanceof ASN1Sequence)
-                          {
-                            outer = ParseUtil.sequence (logotype_entries.get (j));
-                            if (outer.size () >= 1)
-                              {
-                                if (outer.get (0) instanceof ASN1Sequence)
-                                  {
-                                    outer = ParseUtil.sequence (outer.get (0));
-                                    if (outer.size () >= 1)
-                                      {
-                                        if (outer.get (0) instanceof ASN1Sequence)
-                                          {
-                                            CertificateLogotypeDescriptor logotype = getLogotypeDescriptor (ParseUtil.sequence (outer.get (0)));
-                                            if (logotype != null)
-                                              {
-                                                logotypes.add (logotype);
-                                              }
-                                          }
-                                      }
-                                  }
-                              }
-                          }
-                      }
-                    if (!logotypes.isEmpty ())
-                      {
-                        return logotypes.toArray (new CertificateLogotypeDescriptor[0]);
-                      }
-                  }
-              }
-          }
-        return null;
-      }
-
-
-    public static CertificateLogotypeDescriptor[] getSubjectLogotypeDescriptors (X509Certificate certificate) throws IOException
-      {
-        return getLogotypeDescriptors (certificate, 2);
-      }
-
-
-    public static CertificateLogotypeDescriptor[] getIssuerLogotypeDescriptors (X509Certificate certificate) throws IOException
-      {
-        return getLogotypeDescriptors (certificate, 1);
       }
 
 

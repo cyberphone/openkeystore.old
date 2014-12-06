@@ -61,6 +61,7 @@ public class JSONArrayReader implements Serializable
       {
         inRangeCheck ();
         JSONValue value = array.elementAt (index++);
+        value.read_flag = true;
         JSONTypes.compatibilityTest (expected_type, value);
         return value.value;
       }

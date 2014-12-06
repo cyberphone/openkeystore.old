@@ -299,18 +299,6 @@ public class CertificateInfo
       }
 
 
-    public CertificateLogotypeDescriptor[] getSubjectLogotypeDescriptors () throws IOException
-      {
-        return CertificateUtil.getSubjectLogotypeDescriptors (certificate);
-      }
-
-
-    public CertificateLogotypeDescriptor[] getIssuerLogotypeDescriptors () throws IOException
-      {
-        return CertificateUtil.getIssuerLogotypeDescriptors (certificate);
-      }
-
-
     public String[] getPolicyOIDs () throws IOException
       {
         return CertificateUtil.getPolicyOIDs (certificate);
@@ -343,14 +331,10 @@ public class CertificateInfo
 
     public String getBasicConstraints ()
       {
-        if (certificate.getExtensionValue ("2.5.29.19") == null)
-          {
-            return null;
-          }
         int i = certificate.getBasicConstraints ();
         if (i == -1)
           {
-            return "End-entity (EE) certificate";
+            return "End-entity certificate";
           }
         return "CA certificate, path length constraint: " +
                (i == Integer.MAX_VALUE ? "none" : String.valueOf (i));
