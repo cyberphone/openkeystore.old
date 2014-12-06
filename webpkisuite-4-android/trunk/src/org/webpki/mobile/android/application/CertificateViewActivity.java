@@ -17,7 +17,9 @@
 package org.webpki.mobile.android.application;
 
 import java.io.IOException;
+
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -29,10 +31,9 @@ import android.app.Activity;
 
 import android.content.Intent;
 
-import org.webpki.asn1.ASN1ObjectID;
-
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.ExtendedKeyUsages;
 
 import org.webpki.util.HTMLEncoder;
 import org.webpki.util.ArrayUtil;
@@ -138,7 +139,7 @@ public class CertificateViewActivity extends Activity
               {
                 for (int i = 0; i < ext_key_usages.length; i++)
                   {
-                    ext_key_usages[i] = ASN1ObjectID.oidName (ext_key_usages[i]);
+                    ext_key_usages[i] = ExtendedKeyUsages.getOptionallyTranslatedEKU (ext_key_usages[i]);
                   }
                 printURIs (cert_text, "Extended&nbsp;key&nbsp;usage", ext_key_usages);
               }
