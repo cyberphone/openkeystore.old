@@ -109,6 +109,6 @@ public class InvocationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return INVOCATION_REQUEST_JSON;
+        return KeyGen2Messages.INVOCATION_REQUEST.getName ();
       }
   }

@@ -17,22 +17,16 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.util.ArrayUtil;
-
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateUtil;
-
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
-
 import org.webpki.keygen2.ServerState.Key;
 import org.webpki.keygen2.ServerState.PostOperation;
 import org.webpki.keygen2.ServerState.PostProvisioningTargetKey;
@@ -258,6 +252,6 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_FINALIZATION_REQUEST_JSON;
+        return KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ();
       }
   }

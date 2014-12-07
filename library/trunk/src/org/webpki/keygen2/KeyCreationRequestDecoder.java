@@ -17,7 +17,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -30,10 +29,8 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
-
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -898,6 +895,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_REQUEST_JSON;
+        return KeyGen2Messages.KEY_CREATION_REQUEST.getName ();
       }
   }

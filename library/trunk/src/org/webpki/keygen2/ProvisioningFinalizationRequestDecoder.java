@@ -17,17 +17,12 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
-
 import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.util.ArrayUtil;
-
 import org.webpki.crypto.CertificateFilter;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 
@@ -544,6 +539,6 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_FINALIZATION_REQUEST_JSON;
+        return KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ();
       }
   }

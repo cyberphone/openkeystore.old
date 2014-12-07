@@ -17,9 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
-
 import java.security.PublicKey;
 
 import org.webpki.json.JSONArrayWriter;
@@ -91,7 +89,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_RESPONSE_JSON;
+        return KeyGen2Messages.KEY_CREATION_RESPONSE.getName ();
       }
 
     @Override

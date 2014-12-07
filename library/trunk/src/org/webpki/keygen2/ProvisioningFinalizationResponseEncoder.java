@@ -59,7 +59,7 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_FINALIZATION_RESPONSE_JSON;
+        return KeyGen2Messages.PROVISIONING_FINALIZATION_RESPONSE.getName ();
       }
 
     @Override

@@ -17,9 +17,7 @@
 package org.webpki.sks;
 
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 /**
@@ -74,6 +72,63 @@ public interface SecureKeyStore
     // Predefined PIN and PUK policy IDs for MAC operations
     ///////////////////////////////////////////////////////////////////////////////////
     String CRYPTO_STRING_NOT_AVAILABLE        = "";
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // SKS variable names. For provisioning most of them are the same in KeyGen2
+    ///////////////////////////////////////////////////////////////////////////////////
+    String VAR_APP_USAGE                      = "appUsage";
+    String VAR_AUTHORIZATION                  = "authorization";
+    String VAR_BIOMETRIC_PROTECTION           = "biometricProtection";
+    String VAR_CLIENT_EPHEMERAL_KEY           = "clientEphemeralKey";
+    String VAR_CLIENT_SESSION_ID              = "clientSessionId";
+    String VAR_CLIENT_TIME                    = "clientTime";
+    String VAR_CLOSE_ATTESTATION              = "closeAttestation";
+    String VAR_DATA                           = "data";
+    String VAR_EXTENSION_DATA                 = "extensionData";
+    String VAR_DELETE_PROTECTION              = "deleteProtection";
+    String VAR_DEVICE_PIN_PROTECTION          = "devicePinProtection";
+    String VAR_ENDORSED_ALGORITHMS            = "endorsedAlgorithms";
+    String VAR_ENABLE_PIN_CACHING             = "enablePinCaching";
+    String VAR_ENCRYPTED_KEY                  = "encryptedKey";
+    String VAR_ENCRYPTED_PUK                  = "encryptedPuk";
+    String VAR_EXPORT_PROTECTION              = "exportProtection";
+    String VAR_FORMAT                         = "format";
+    String VAR_FRIENDLY_NAME                  = "friendlyName";
+    String VAR_GROUPING                       = "grouping";
+    String VAR_ID                             = "id";
+    String VAR_INPUT_METHOD                   = "inputMethod";
+    String VAR_ISSUER_URI                     = "issuerUri";
+    String VAR_KEY_ALGORITHM                  = "keyAlgorithm";
+    String VAR_KEY_ATTESTATION                = "keyAttestation";
+    String VAR_KEY_ENTRY_ALGORITHM            = "keyEntryAlgorithm";       
+    String VAR_KEY_MANAGEMENT_KEY             = "keyManagementKey";
+    String VAR_KEY_PARAMETERS                 = "keyParameters";
+    String VAR_MAC                            = "mac";
+    String VAR_MAX_LENGTH                     = "maxLength";
+    String VAR_MIN_LENGTH                     = "minLength";
+    String VAR_NAME                           = "name";
+    String VAR_NONCE                          = "nonce";
+    String VAR_PARAMETERS                     = "parameters";
+    String VAR_PATTERN_RESTRICTIONS           = "patternRestrictions";
+    String VAR_PIN_VALUE                      = "pinValue";
+    String VAR_PRIVACY_ENABLED                = "privacyEnabled";
+    String VAR_PROPERTY                       = "property";
+    String VAR_PROPERTY_BAG                   = "propertyBag";
+    String VAR_PUBLIC_KEY                     = "publicKey";
+    String VAR_QUALIFIER                      = "qualifier";
+    String VAR_RETRY_LIMIT                    = "retryLimit";
+    String VAR_SERVER_EPHEMERAL_KEY           = "serverEphemeralKey";
+    String VAR_SERVER_SEED                    = "serverSeed";
+    String VAR_SERVER_SESSION_ID              = "serverSessionId";
+    String VAR_SERVER_TIME                    = "serverTime";
+    String VAR_SESSION_ATTESTATION            = "sessionAttestation";
+    String VAR_SESSION_KEY_ALGORITHM          = "sessionKeyAlgorithm";
+    String VAR_SESSION_KEY_LIMIT              = "sessionKeyLimit";
+    String VAR_SESSION_LIFE_TIME              = "sessionLifeTime";
+    String VAR_TYPE                           = "type";
+    String VAR_USER_MODIFIABLE                = "userModifiable";
+    String VAR_VALUE                          = "value";
+    String VAR_WRITABLE                       = "writable";
 
     ///////////////////////////////////////////////////////////////////////////////////
     // See "AppUsage" in the SKS specification
@@ -156,7 +211,7 @@ public interface SecureKeyStore
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
-    short SKS_API_LEVEL                       = 97;
+    short SKS_API_LEVEL                       = 98;
     int AES_CBC_PKCS5_PADDING                 = 32;
 
 

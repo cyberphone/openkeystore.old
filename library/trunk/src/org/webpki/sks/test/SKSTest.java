@@ -395,7 +395,7 @@ public class SKSTest
                     catch (SKSException e)
                       {
                         assertFalse ("Read only", prop.isWritable ());
-                        checkException (e, "\"Property\" not writable: " + prop.getName ());
+                        checkException (e, "\"" + SecureKeyStore.VAR_PROPERTY + "\" not writable: " + prop.getName ());
                       }
                   }
                 assertTrue ("Writables", writes == writables);
@@ -432,7 +432,7 @@ public class SKSTest
         catch (SKSException e)
           {
             assertFalse ("Should have passed...", puk_ok && pin_ok);
-            checkException (e, "Invalid \"RetryLimit\" value=" + retry_limit);
+            checkException (e, "Invalid \"" + SecureKeyStore.VAR_RETRY_LIMIT + "\" value=" + retry_limit);
           }
       }
 
@@ -446,7 +446,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Malformed \"ServerSessionID\" : " + id);
+            checkException (e, "Malformed \"" + SecureKeyStore.VAR_SERVER_SESSION_ID + "\" : " + id);
           }
         try
           {
@@ -462,7 +462,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Malformed \"ID\" : " + id);
+            checkException (e, "Malformed \"" + SecureKeyStore.VAR_ID + "\" : " + id);
           }
       }
 
@@ -790,7 +790,7 @@ public class SKSTest
         catch (SKSException e)
           {
             assertFalse ("Must not be identical", app_usage == AppUsage.AUTHENTICATION);
-            checkException (e, "Updated keys must have the same \"AppUsage\" as the target key");
+            checkException (e, "Updated keys must have the same \"" + SecureKeyStore.VAR_APP_USAGE + "\" as the target key");
           }
       }
 
@@ -943,7 +943,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "\"Parameters\" for key # do not match algorithm");
+            checkException (e, "\"" + SecureKeyStore.VAR_PARAMETERS + "\" for key # do not match algorithm");
           }
         try
           {
@@ -1079,7 +1079,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Unreferenced object \"ID\" : PIN");
+            checkException (e, "Unreferenced object \"" + SecureKeyStore.VAR_ID + "\" : PIN");
           }
       }
 
@@ -1128,7 +1128,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Unreferenced object \"ID\" : PIN");
+            checkException (e, "Unreferenced object \"" + SecureKeyStore.VAR_ID + "\" : PIN");
           }
       }
 
@@ -1161,7 +1161,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "\"PINValue\" expected to be empty");
+            checkException (e, "\"" + SecureKeyStore.VAR_PIN_VALUE + "\" expected to be empty");
           }
       }
 
@@ -2698,7 +2698,7 @@ public class SKSTest
             catch (SKSException e)
               {
                 assertFalse ("Good kmk should not throw", i == 0);
-                checkException (e, "\"Authorization\" signature did not verify for key #");
+                checkException (e, "\"" + SecureKeyStore.VAR_AUTHORIZATION + "\" signature did not verify for key #");
               }
             try
               {
@@ -2836,7 +2836,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
-                checkException (e, "Inconsistent use of the \"PrivacyEnabled\" attribute for key #");
+                checkException (e, "Inconsistent use of the \"" + SecureKeyStore.VAR_PRIVACY_ENABLED + "\" attribute for key #");
               }
           }
       }
@@ -3175,7 +3175,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Unsupported RSA key size 512 for: \"KeyManagementKey\"");
+            checkException (e, "Unsupported RSA key size 512 for: \"" + SecureKeyStore.VAR_KEY_MANAGEMENT_KEY + "\"");
           }
       }
 
@@ -3190,7 +3190,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Unsupported EC key algorithm for: \"ServerEphemeralKey\"");
+            checkException (e, "Unsupported EC key algorithm for: \"" + SecureKeyStore.VAR_SERVER_EPHEMERAL_KEY + "\"");
             ProvSess.override_server_ephemeral_key_algorithm = null;
           }
       }
@@ -3198,9 +3198,9 @@ public class SKSTest
     @Test
     public void test68 () throws Exception
       {
-        badKeySpec (KeyAlgorithms.RSA1024.getURI (), new byte[]{0,0,0,3}, "Unexpected \"KeyParameters\"");
-        badKeySpec (KeyAlgorithms.NIST_P_256.getURI (), new byte[]{0,0,0,3}, "Unexpected \"KeyParameters\"");
-        badKeySpec ("http://badcrypto/snakeoil-1", null, "Unsupported \"KeyAlgorithm\": http://badcrypto/snakeoil-1");
+        badKeySpec (KeyAlgorithms.RSA1024.getURI (), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+        badKeySpec (KeyAlgorithms.NIST_P_256.getURI (), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+        badKeySpec ("http://badcrypto/snakeoil-1", null, "Unsupported \"" + SecureKeyStore.VAR_KEY_ALGORITHM + "\": http://badcrypto/snakeoil-1");
         boolean supports_var_exp = false;
         for (String algorithm : device.device_info.getSupportedAlgorithms ())
           {
@@ -3212,9 +3212,9 @@ public class SKSTest
           }
         if (supports_var_exp)
           {
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"KeyParameters\"");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,0,0,0,0,3}, "\"KeyParameters\" length error: 9");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[0], "\"KeyParameters\" length error: 0");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,0,0,0,0,3}, "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 9");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[0], "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 0");
           }
         ProvSess sess = new ProvSess (device);
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
@@ -3375,16 +3375,16 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Duplicate \"Type\" : " + type);
+            checkException (e, "Duplicate \"" + SecureKeyStore.VAR_TYPE + "\" : " + type);
           }
         byte[] ext_data = {4,6,2,9,4};
         extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, ext_data, null);
         extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, new byte[device.device_info.getExtensionDataSize ()], null);
         extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, new byte[device.device_info.getExtensionDataSize () + 1], "Extension data exceeds " + device.device_info.getExtensionDataSize () + " bytes");
         extensionTest (SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION, null, ext_data, null);
-        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, null, ext_data, "\"Qualifier\" length error");
+        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, null, ext_data, "\"" + SecureKeyStore.VAR_QUALIFIER + "\" length error");
         extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, "image/gif", ext_data, null);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, ext_data, "\"PropertyBag\" format error: http://example.com/define");
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, ext_data, "\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: http://example.com/define");
         Property[] props = extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, null).getProperties ();
         assertTrue ("Number of props", props.length == 1);
@@ -3393,11 +3393,11 @@ public class SKSTest
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 1, 0, 5, 'v', 'a', 'l', 'u', 'e',
                        0, 4, 'l', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, null);
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 2, 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"PropertyBag\" format error: http://example.com/define");
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 2, 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: http://example.com/define");
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"PropertyBag\" format error: http://example.com/define");
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: http://example.com/define");
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, "\"PropertyBag\" format error: http://example.com/define");
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, "\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: http://example.com/define");
       }
 
     @Test
@@ -3460,7 +3460,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "\"ServerSeed\" length error: " + (SecureKeyStore.MAX_LENGTH_SERVER_SEED + 1));
+            checkException (e, "\"" + SecureKeyStore.VAR_SERVER_SEED + "\" length error: " + (SecureKeyStore.MAX_LENGTH_SERVER_SEED + 1));
           }
       }
 

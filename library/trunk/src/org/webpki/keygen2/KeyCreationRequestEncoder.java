@@ -17,14 +17,11 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Iterator;
 
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
-
 import org.webpki.keygen2.ServerState.PINPolicy;
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
@@ -146,6 +143,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_REQUEST_JSON;
+        return KeyGen2Messages.KEY_CREATION_REQUEST.getName ();
       }
   }

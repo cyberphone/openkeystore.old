@@ -17,18 +17,13 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Date;
-
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
-
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSymKeySigner;
@@ -144,7 +139,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_INITIALIZATION_RESPONSE_JSON;
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName ();
       }
 
     @Override

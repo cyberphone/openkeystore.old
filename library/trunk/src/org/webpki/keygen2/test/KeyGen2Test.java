@@ -48,6 +48,7 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import javax.crypto.KeyAgreement;
+
 import javax.security.auth.x500.X500Principal;
 
 import org.junit.After;
@@ -56,6 +57,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.BeforeClass;
+
 import org.junit.rules.TestName;
 
 import static org.junit.Assert.*;
@@ -77,11 +79,11 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
-
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
 import org.webpki.keygen2.KeyGen2Constants;
+import org.webpki.keygen2.KeyGen2Messages;
 import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
 import org.webpki.keygen2.ProvisioningFinalizationRequestEncoder;
@@ -321,10 +323,10 @@ public class KeyGen2Test
         private static final String kg2keycre = 
         "{\n" +
             "\"@context\": \"" + KeyGen2Constants.KEYGEN2_NS + "\",\n" +
-            "\"@qualifier\": \"KeyCreationRequest\",\n" +
-            "\"ServerSessionID\": \"1417ace50e9IoDMto6NHlN1JWvysvZsC\",\n" +
-            "\"ClientSessionID\": \"KzyjlYG3YurWzSr2d9O9X3y_1EUsadmE\",\n" +
-            "\"SubmitURL\": \"http://issuer.example.com/keyinit\",\n" +
+            "\"@qualifier\": \"" + KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "\",\n" +
+            "\"" + KeyGen2Constants.SERVER_SESSION_ID_JSON + "\": \"1417ace50e9IoDMto6NHlN1JWvysvZsC\",\n" +
+            "\"" + KeyGen2Constants.CLIENT_SESSION_ID_JSON + "\": \"KzyjlYG3YurWzSr2d9O9X3y_1EUsadmE\",\n" +
+            "\"" + KeyGen2Constants.SUBMIT_URL_JSON + "\": \"http://issuer.example.com/keyinit\",\n" +
             "\"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\": \"http://xmlns.webpki.org/sks/algorithm#key.1\",\n";     
         private static JSONDecoderCache json_cache;
         
@@ -358,16 +360,16 @@ public class KeyGen2Test
               {
                 grouping = Grouping.NONE;
               }
-            json.append ("\"" + KeyGen2Constants.PIN_POLICY_SPECIFIERS_JSON + "\":[{ \"Format\" :\"")
+            json.append ("\"" + KeyGen2Constants.PIN_POLICY_SPECIFIERS_JSON + "\":[{ \"" + KeyGen2Constants.FORMAT_JSON + "\" :\"")
                .append (format.getProtocolName ())
-               .append ("\", \"ID\":\"PIN.")
+               .append ("\", \"" + KeyGen2Constants.ID_JSON + "\":\"PIN.")
                .append (++pin_id)
-               .append ("\", \"Grouping\" :\"")
+               .append ("\", \"" + KeyGen2Constants.GROUPING_JSON + "\" :\"")
                .append (grouping.getProtocolName ())
                .append ("\",");
             if (patterns != null)
               {
-                json.append (" \"PatternRestrictions\" : [");
+                json.append (" \"" + KeyGen2Constants.PATTERN_RESTRICTIONS_JSON + "\" : [");
                 String blank="";
                 for (PatternRestriction pattern : patterns)
                   {
@@ -377,7 +379,7 @@ public class KeyGen2Test
                   }
                 json.append ("],");
               }
-            json.append (" \"MAC\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW_AJ-0\", \"MaxLength\":8, \"MinLength\":4, \"RetryLimit\":3,");
+            json.append (" \"" + KeyGen2Constants.MAC_JSON + "\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW_AJ-0\", \"" + KeyGen2Constants.MAX_LENGTH_JSON + "\":8, \"" + KeyGen2Constants.MIN_LENGTH_JSON + "\":4, \"" + KeyGen2Constants.RETRY_LIMIT_JSON + "\":3,");
             return this;
           }
         
@@ -388,11 +390,11 @@ public class KeyGen2Test
                 json.append ('"').append (KeyGen2Constants.KEY_ENTRY_SPECIFIERS_JSON).append ("\" :[");
               }
             if (!key_spec) json.append (',');
-            json.append ("{ \"AppUsage\":\"")
+            json.append ("{ \"" + KeyGen2Constants.APP_USAGE_JSON + "\":\"")
                .append (app_usage.getProtocolName ())
-               .append ("\", \"ID\":\"Key.")
+               .append ("\", \"" + KeyGen2Constants.ID_JSON + "\":\"Key.")
                .append (++key_id)
-               .append ("\", \"KeyAlgorithm\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"MAC\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y\"}");
+               .append ("\", \"" + KeyGen2Constants.KEY_ALGORITHM_JSON + "\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"" + KeyGen2Constants.MAC_JSON + "\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y\"}");
             key_spec = false;
             return this;
           }

@@ -17,9 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
-
 import java.security.PublicKey;
 
 import org.webpki.json.JSONObjectReader;
@@ -76,6 +74,6 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_RESPONSE_JSON;
+        return KeyGen2Messages.KEY_CREATION_RESPONSE.getName ();
       }
   }

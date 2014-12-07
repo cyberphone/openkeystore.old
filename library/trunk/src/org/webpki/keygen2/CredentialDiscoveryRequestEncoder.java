@@ -17,11 +17,8 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.security.PublicKey;
-
 import java.security.interfaces.RSAPublicKey;
-
 import java.util.Date;
 import java.util.Vector;
 
@@ -29,13 +26,10 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectWriter;
-
 import org.webpki.keygen2.ServerState.ProtocolPhase;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.Grouping;
 
@@ -224,6 +218,6 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return CREDENTIAL_DISCOVERY_REQUEST_JSON;
+        return KeyGen2Messages.CREDENTIAL_DISCOVERY_REQUEST.getName ();
       }
   }

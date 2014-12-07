@@ -17,11 +17,8 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Date;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.json.JSONObjectReader;
@@ -97,6 +94,6 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_INITIALIZATION_RESPONSE_JSON;
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName ();
       }
   }

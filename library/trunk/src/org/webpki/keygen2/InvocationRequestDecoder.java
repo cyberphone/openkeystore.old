@@ -17,13 +17,11 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.webpki.crypto.KeyContainerTypes;
-
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -137,6 +135,6 @@ public class InvocationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return INVOCATION_REQUEST_JSON;
+        return KeyGen2Messages.INVOCATION_REQUEST.getName ();
       }
   }

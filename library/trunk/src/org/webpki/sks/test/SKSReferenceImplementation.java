@@ -150,9 +150,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             //////////////////////////////////////////////////////////////////////
             if (owner.names.get (id) != null)
               {
-                owner.abort ("Duplicate \"ID\" : " + id);
+                owner.abort ("Duplicate \"" + VAR_ID + "\" : " + id);
               }
-            checkIDSyntax (id, "ID", owner);
+            checkIDSyntax (id, VAR_ID, owner);
             owner.names.put (id, false);
             this.owner = owner;
             this.id = id;
@@ -439,7 +439,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             if (provisioning.privacy_enabled ^ owner.privacy_enabled)
               {
-                provisioning.abort ("Inconsistent use of the \"PrivacyEnabled\" attribute for key #" + key_handle);
+                provisioning.abort ("Inconsistent use of the \"" + VAR_PRIVACY_ENABLED + "\" attribute for key #" + key_handle);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -457,7 +457,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                                 provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult (),
                                                                 authorization))
                   {
-                    provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
+                    provisioning.abort ("\"" + VAR_AUTHORIZATION + "\" signature did not verify for key #" + key_handle);
                   }
               }
             catch (GeneralSecurityException e)
@@ -626,7 +626,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (session_key_limit-- <= 0)
               {
-                abort ("\"SessionKeyLimit\" exceeded");
+                abort ("\"" + VAR_SESSION_KEY_LIMIT + "\" exceeded");
               }
             try
               {
@@ -709,7 +709,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (retry_limit < min || retry_limit > MAX_RETRY_LIMIT)
               {
-                abort ("Invalid \"RetryLimit\" value=" + retry_limit);
+                abort ("Invalid \"" + VAR_RETRY_LIMIT + "\" value=" + retry_limit);
               }
           }
 
@@ -1519,7 +1519,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             return alg;
           }
-        abort ("\"EndorsedAlgorithms\" for key #" + key_entry.key_handle + " does not include: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+        abort ("\"" + VAR_ENDORSED_ALGORITHMS + "\" for key #" + key_entry.key_handle + " does not include: " + input_algorithm, SKSException.ERROR_ALGORITHM);
         return null;    // For the compiler only...
       }
 
@@ -1594,7 +1594,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (target_key_entry.app_usage != new_key.app_usage)
               {
-                provisioning.abort ("Updated keys must have the same \"AppUsage\" as the target key");
+                provisioning.abort ("Updated keys must have the same \"" + VAR_APP_USAGE + "\" as the target key");
               }
           }
         else
@@ -1830,7 +1830,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ExtObject ext_obj = key_entry.extensions.get (type);
         if (ext_obj == null || ext_obj.sub_type != SUB_TYPE_PROPERTY_BAG)
           {
-            abort ("No such \"PropertyBag\" : " + type);
+            abort ("No such \"" + VAR_PROPERTY_BAG + "\" : " + type);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1850,7 +1850,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 if (ext_obj.extension_data[i] != 0x01)
                   {
-                    abort ("\"Property\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
+                    abort ("\"" + SecureKeyStore.VAR_PROPERTY + "\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
                   }
                 ext_obj.extension_data = addArrays (addArrays (Arrays.copyOfRange (ext_obj.extension_data, 0, ++i),
                                                                addArrays (new byte[]{(byte)(bin_value.length >> 8),(byte)bin_value.length}, bin_value)),
@@ -1859,7 +1859,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             i += val_len + 3;
           }
-        abort ("\"Property\" not found: " + name);
+        abort ("\"" + SecureKeyStore.VAR_PROPERTY + "\" not found: " + name);
       }
 
 
@@ -1916,7 +1916,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_ENC);
         if (parameters != null)  // Only support basic RSA yet...
           {
-            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+            abort ("\"" + VAR_PARAMETERS + "\" for key #" + key_handle + " do not match algorithm");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1969,11 +1969,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         int hash_len = (alg.mask / ALG_HASH_DIV) & ALG_HASH_MSK;
         if (hash_len > 0 && hash_len != data.length)
           {
-            abort ("Incorrect length of \"Data\": " + data.length);
+            abort ("Incorrect length of \"" + VAR_DATA + "\": " + data.length);
           }
         if (parameters != null)  // Only supports non-parameterized operations yet...
           {
-            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+            abort ("\"" + VAR_PARAMETERS + "\" for key #" + key_handle + " do not match algorithm");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2025,13 +2025,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_KA);
         if (parameters != null)  // Only support external KDFs yet...
           {
-            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+            abort ("\"" + VAR_PARAMETERS + "\" for key #" + key_handle + " do not match algorithm");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        checkECKeyCompatibility (public_key, this, "\"PublicKey\"");
+        checkECKeyCompatibility (public_key, this, "\"" + VAR_PUBLIC_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -2086,12 +2086,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (parameters != null)
               {
-                abort ("\"Parameters\" does not apply to: " + algorithm);
+                abort ("\"" + VAR_PARAMETERS + "\" does not apply to: " + algorithm);
               }
           }
         else if (parameters == null || parameters.length != 16)
           {
-            abort ("\"Parameters\" must be 16 bytes for: " + algorithm);
+            abort ("\"" + VAR_PARAMETERS + "\" must be 16 bytes for: " + algorithm);
           }
         if ((!mode || (alg.mask & ALG_AES_PAD) != 0) && data.length % 16 != 0)
           {
@@ -2172,7 +2172,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_HMAC);
         if (parameters != null)
           {
-            abort ("\"Parameters\" does not apply to: " + algorithm);
+            abort ("\"" + VAR_PARAMETERS + "\" does not apply to: " + algorithm);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2390,7 +2390,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                                    key_management_key.getEncoded (),
                                                                    authorization))
               {
-                abort ("\"Authorization\" signature did not verify for session: " + provisioning_handle);
+                abort ("\"" + VAR_AUTHORIZATION + "\" signature did not verify for session: " + provisioning_handle);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2601,7 +2601,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (!provisioning.names.get(id))
               {
-                provisioning.abort ("Unreferenced object \"ID\" : " + id);
+                provisioning.abort ("Unreferenced object \"" + VAR_ID + "\" : " + id);
               }
           }
         provisioning.names.clear ();
@@ -2849,7 +2849,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (!session_key_algorithm.equals (ALGORITHM_SESSION_ATTEST_1))
           {
-            abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
+            abort ("Unknown \"" + VAR_SESSION_KEY_ALGORITHM + "\" : " + session_key_algorithm);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2857,13 +2857,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (issuer_uri.length () == 0 || issuer_uri.length () >  MAX_LENGTH_URI)
           {
-            abort ("\"IssuerURI\" length error: " + issuer_uri.length ());
+            abort ("\"" + VAR_ISSUER_URI + "\" length error: " + issuer_uri.length ());
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check server ECDH key compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        String jce_name = checkECKeyCompatibility (server_ephemeral_key, this, "\"ServerEphemeralKey\"");
+        String jce_name = checkECKeyCompatibility (server_ephemeral_key, this, "\"" + VAR_SERVER_EPHEMERAL_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check optional key management key compatibility
@@ -2873,18 +2873,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if (key_management_key instanceof RSAPublicKey)
               {
                 checkRSAKeyCompatibility (getRSAKeySize ((RSAPublicKey)key_management_key),
-                                          ((RSAPublicKey)key_management_key).getPublicExponent (), this, "\"KeyManagementKey\"");
+                                          ((RSAPublicKey)key_management_key).getPublicExponent (), this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
             else
               {
-                checkECKeyCompatibility ((ECPublicKey)key_management_key, this, "\"KeyManagementKey\"");
+                checkECKeyCompatibility ((ECPublicKey)key_management_key, this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check ServerSessionID
         ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax (server_session_id, "ServerSessionID", this);
+        checkIDSyntax (server_session_id, VAR_SERVER_SESSION_ID, this);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
@@ -3030,7 +3030,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         if (key_entry.extensions.get (type) != null)
           {
-            key_entry.owner.abort ("Duplicate \"Type\" : " + type);
+            key_entry.owner.abort ("Duplicate \"" + VAR_TYPE + "\" : " + type);
           }
         if (extension_data.length > (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION ? 
                             MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : MAX_LENGTH_EXTENSION_DATA))
@@ -3040,7 +3040,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte[] bin_qualifier = getBinary (qualifier);
         if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) || bin_qualifier.length > MAX_LENGTH_QUALIFIER)
           {
-            key_entry.owner.abort ("\"Qualifier\" length error");
+            key_entry.owner.abort ("\"" + VAR_QUALIFIER + "\" length error");
           }
         ///////////////////////////////////////////////////////////////////////////////////
         // Property bags are checked for not being empty or incorrectly formatted
@@ -3055,7 +3055,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     ((extension_data[i++] & 0xFE) != 0) ||
                     (i += getShort (extension_data, i) + 2) > extension_data.length)
                   {
-                    key_entry.owner.abort ("\"PropertyBag\" format error: " + type);
+                    key_entry.owner.abort ("\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: " + type);
                   }
               }
             while (i != extension_data.length);
@@ -3307,16 +3307,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (!key_entry_algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
-            provisioning.abort ("Unknown \"KeyEntryAlgorithm\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
+            provisioning.abort ("Unknown \"" + VAR_KEY_ENTRY_ALGORITHM + "\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
           }
         Algorithm kalg = supported_algorithms.get (key_algorithm);
         if (kalg == null || (kalg.mask & ALG_KEY_GEN) == 0)
           {
-            provisioning.abort ("Unsupported \"KeyAlgorithm\": " + key_algorithm);
+            provisioning.abort ("Unsupported \"" + VAR_KEY_ALGORITHM + "\": " + key_algorithm);
           }
         if ((kalg.mask & ALG_KEY_PARM) == 0 ^ key_parameters == null)
           {
-            provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"KeyParameters\"");
+            provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"" + VAR_KEY_PARAMETERS + "\"");
           }
         if (server_seed == null)
           {
@@ -3324,7 +3324,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         else if (server_seed.length > MAX_LENGTH_SERVER_SEED)
           {
-            provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
+            provisioning.abort ("\"" + VAR_SERVER_SEED + "\" length error: " + server_seed.length);
           }
         provisioning.rangeTest (export_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "ExportProtection");
         provisioning.rangeTest (delete_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "DeleteProtection");
@@ -3354,7 +3354,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             if (enable_pin_caching && pin_policy.input_method != INPUT_METHOD_TRUSTED_GUI)
               {
-                provisioning.abort ("\"EnablePINCaching\" must be combined with \"trusted-gui\"");
+                provisioning.abort ("\"" + VAR_ENABLE_PIN_CACHING + "\" must be combined with \"trusted-gui\"");
               }
             pin_policy_id = pin_policy.id;
             provisioning.names.put (pin_policy_id, true); // Referenced
@@ -3367,17 +3367,17 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             pin_protection = false;
             if (enable_pin_caching)
               {
-                provisioning.abort ("\"EnablePINCaching\" without PIN");
+                provisioning.abort ("\"" + VAR_ENABLE_PIN_CACHING + "\" without PIN");
               }
             if (pin_value != null)
               {
-                provisioning.abort ("\"PINValue\" expected to be empty");
+                provisioning.abort ("\"" + VAR_PIN_VALUE + "\" expected to be empty");
               }
           }
         if (biometric_protection != BIOMETRIC_PROTECTION_NONE &&
             ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
           {
-            provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination");
+            provisioning.abort ("Invalid \"" + VAR_BIOMETRIC_PROTECTION + "\" and PIN combination");
           }
         if (pin_policy == null || pin_policy.puk_policy == null)
           {
@@ -3463,7 +3463,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 if (key_parameters.length == 0 || key_parameters.length > 8)
                   {
-                    provisioning.abort ("\"KeyParameters\" length error: " + key_parameters.length);
+                    provisioning.abort ("\"" + VAR_KEY_PARAMETERS + "\" length error: " + key_parameters.length);
                   }
                 exponent = new BigInteger (key_parameters);
               }
@@ -3558,7 +3558,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                       PIN_PATTERN_REPEATED |
                                       PIN_PATTERN_MISSING_GROUP)) != 0)
           {
-            provisioning.abort ("Invalid \"PatternRestrictions\" value=" + pattern_restrictions);
+            provisioning.abort ("Invalid \"" + VAR_PATTERN_RESTRICTIONS + "\" value=" + pattern_restrictions);
           }
         String puk_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
         PUKPolicy puk_policy = null;
@@ -3575,7 +3575,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if ((pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0 &&
             format != PASSPHRASE_FORMAT_ALPHANUMERIC && format != PASSPHRASE_FORMAT_STRING)
           {
-            provisioning.abort ("Incorrect \"Format\" for the \"missing-group\" PIN pattern policy");
+            provisioning.abort ("Incorrect \"" + VAR_FORMAT + "\" for the \"missing-group\" PIN pattern policy");
           }
         if (min_length < 1 || max_length > MAX_LENGTH_PIN_PUK || max_length < min_length)
           {

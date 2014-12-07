@@ -17,24 +17,18 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.Signature;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.util.ArrayUtil;
-
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
-
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -250,6 +244,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_INITIALIZATION_REQUEST_JSON;
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ();
       }
   }

@@ -19,46 +19,46 @@ package org.webpki.webauth;
 
 public interface WebAuthConstants
   {
-    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20140415";
+    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20141208";
     
     int MAX_ID_LENGTH          = 32;
 
 
     // JSON properties
 
-    String ABORT_URL_JSON                  = "AbortURL";
+    String ABORT_URL_JSON                  = "abortUrl";
 
-    String AUTHENTICATION_REQUEST_JSON     = "AuthenticationRequest";
+    String AUTHENTICATION_REQUEST_JSON     = "authenticationRequest";
 
-    String AUTHENTICATION_RESPONSE_JSON    = "AuthenticationResponse";
+    String AUTHENTICATION_RESPONSE_JSON    = "authenticationResponse";
 
-    String CERTIFICATE_FILTERS_JSON        = "CertificateFilters";
+    String CERTIFICATE_FILTERS_JSON        = "certificateFilters";
 
-    String CLIENT_FEATURES_JSON            = "ClientFeatures";
+    String CLIENT_FEATURES_JSON            = "clientFeatures";
 
-    String CLIENT_TIME_JSON                = "ClientTime";
+    String CLIENT_TIME_JSON                = "clientTime";
 
-    String EXPIRES_JSON                    = "Expires";
+    String EXPIRES_JSON                    = "expires";
 
-    String EXTENDED_CERT_PATH_JSON         = "ExtendedCertPath";
+    String EXTENDED_CERT_PATH_JSON         = "extendedCertPath";
 
-    String ID_JSON                         = "ID";
+    String ID_JSON                         = "id";
 
-    String PREFERRED_LANGUAGES_JSON        = "PreferredLanguages";
+    String PREFERRED_LANGUAGES_JSON        = "preferredLanguages";
 
-    String REQUESTED_CLIENT_FEATURES_JSON  = "RequestedClientFeatures";
+    String REQUESTED_CLIENT_FEATURES_JSON  = "requestedClientFeatures";
 
-    String REQUEST_URL_JSON                = "RequestURL";
+    String REQUEST_URL_JSON                = "requestUrl";
 
-    String SERVER_CERT_FP_JSON             = "ServerCertificateFingerPrint";
+    String SERVER_CERT_FP_JSON             = "serverCertificateFingerPrint";
 
-    String SERVER_TIME_JSON                = "ServerTime";
+    String SERVER_TIME_JSON                = "serverTime";
 
-    String SIGNATURE_ALGORITHMS_JSON       = "SignatureAlgorithms";
+    String SIGNATURE_ALGORITHMS_JSON       = "signatureAlgorithms";
     
-    String SUBMIT_URL_JSON                 = "SubmitURL";
+    String SUBMIT_URL_JSON                 = "submitUrl";
 
-    String TYPE_JSON                       = "Type";
+    String TYPE_JSON                       = "type";
 
-    String VALUES_JSON                     = "Values";
+    String VALUES_JSON                     = "values";
   }

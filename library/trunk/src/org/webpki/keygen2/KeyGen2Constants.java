@@ -16,207 +16,189 @@
  */
 package org.webpki.keygen2;
 
+import org.webpki.sks.SecureKeyStore;
+
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20140609";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20141208";
 
     // JSON properties
 
-    String ABORT_URL_JSON                            = "AbortURL";
+    String ABORT_URL_JSON                            = "abortUrl";
 
-    String ACTION_JSON                               = "Action";
-
-    String APP_USAGE_JSON                            = "AppUsage";
-
-    String AUTHORIZATION_JSON                        = "Authorization";
-
-    String BIOMETRIC_PROTECTION_JSON                 = "BiometricProtection";
-
-    String CHALLENGE_JSON                            = "Challenge";
-
-    String CLIENT_CAPABILITIES_JSON                  = "ClientCapabilities";
-
-    String CLIENT_CAPABILITY_QUERY_JSON              = "ClientCapabilityQuery";
-
-    String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
-
-    String CLIENT_SESSION_ID_JSON                    = "ClientSessionID";
-
-    String CLIENT_TIME_JSON                          = "ClientTime";
-
-    String CLONE_KEY_PROTECTION_JSON                 = "CloneKeyProtection";
+    String ACTION_JSON                               = "action";
     
-    String CLOSE_ATTESTATION_JSON                    = "CloseAttestation";
+    String APP_USAGE_JSON                            = SecureKeyStore.VAR_APP_USAGE;
 
-    String CONFIGURATION_JSON                        = "Configuration";
+    String AUTHORIZATION_JSON                        = SecureKeyStore.VAR_AUTHORIZATION;
 
-    String CREDENTIAL_DISCOVERY_REQUEST_JSON         = "CredentialDiscoveryRequest";
+    String BIOMETRIC_PROTECTION_JSON                 = SecureKeyStore.VAR_BIOMETRIC_PROTECTION;
 
-    String CREDENTIAL_DISCOVERY_RESPONSE_JSON        = "CredentialDiscoveryResponse";
+    String CHALLENGE_JSON                            = "challenge";
+
+    String CLIENT_CAPABILITIES_JSON                  = "clientCapabilities";
+
+    String CLIENT_CAPABILITY_QUERY_JSON              = "clientCapabilityQuery";
+
+    String CLIENT_EPHEMERAL_KEY_JSON                 = SecureKeyStore.VAR_CLIENT_EPHEMERAL_KEY;
+
+    String CLIENT_SESSION_ID_JSON                    = SecureKeyStore.VAR_CLIENT_SESSION_ID;
+
+    String CLIENT_TIME_JSON                          = SecureKeyStore.VAR_CLIENT_TIME;
+
+    String CLONE_KEY_PROTECTION_JSON                 = "cloneKeyProtection";
     
-    String EXTENSION_DATA_JSON                       = "ExtensionData";
+    String CLOSE_ATTESTATION_JSON                    = SecureKeyStore.VAR_CLOSE_ATTESTATION;
+
+    String CONFIGURATION_JSON                        = "configuration";
+
+    String EXTENSION_DATA_JSON                       = SecureKeyStore.VAR_EXTENSION_DATA;
     
-    String DEFERRED_ISSUANCE_JSON                    = "DeferredIssuance";
+    String DEFERRED_ISSUANCE_JSON                    = "deferredIssuance";
 
-    String DELETE_KEYS_JSON                          = "DeleteKeys";
+    String DELETE_KEYS_JSON                          = "deleteKeys";
     
-    String DELETE_PROTECTION_JSON                    = "DeleteProtection";
+    String DELETE_PROTECTION_JSON                    = SecureKeyStore.VAR_DELETE_PROTECTION;
 
-    String DEVICE_CERTIFICATE_JSON                   = "DeviceCertificate";
+    String DEVICE_CERTIFICATE_JSON                   = "deviceCertificate";
 
-    String DEVICE_PIN_PROTECTION_JSON                = "DevicePINProtection";
+    String DEVICE_PIN_PROTECTION_JSON                = SecureKeyStore.VAR_DEVICE_PIN_PROTECTION;
 
-    String ENDORSED_ALGORITHMS_JSON                  = "EndorsedAlgorithms";
+    String ENDORSED_ALGORITHMS_JSON                  = SecureKeyStore.VAR_ENDORSED_ALGORITHMS;
 
-    String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
+    String ENABLE_PIN_CACHING_JSON                   = SecureKeyStore.VAR_ENABLE_PIN_CACHING;
 
-    String ENCRYPTED_EXTENSIONS_JSON                 = "EncryptedExtensions";
+    String ENCRYPTED_EXTENSIONS_JSON                 = "encryptedExtensions";
 
-    String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
+    String ENCRYPTED_KEY_JSON                        = SecureKeyStore.VAR_ENCRYPTED_KEY;
 
-    String ENCRYPTED_PRESET_PIN_JSON                 = "EncryptedPresetPIN";
+    String ENCRYPTED_PRESET_PIN_JSON                 = "encryptedPresetPin";
     
-    String ENCRYPTED_PUK_JSON                        = "EncryptedPUK";
+    String ENCRYPTED_PUK_JSON                        = SecureKeyStore.VAR_ENCRYPTED_PUK;
 
-    String EXPORT_PROTECTION_JSON                    = "ExportProtection";
+    String EXPORT_PROTECTION_JSON                    = SecureKeyStore.VAR_EXPORT_PROTECTION;
 
-    String EXTENSIONS_JSON                           = "Extensions";
+    String EXTENSIONS_JSON                           = "extensions";
 
-    String FORMAT_JSON                               = "Format";
+    String FORMAT_JSON                               = SecureKeyStore.VAR_FORMAT;
 
-    String FRIENDLY_NAME_JSON                        = "FriendlyName";
+    String FRIENDLY_NAME_JSON                        = SecureKeyStore.VAR_FRIENDLY_NAME;
 
-    String GROUPING_JSON                             = "Grouping";
+    String GENERATED_KEYS_JSON                       = "generatedKeys";
 
-    String HEIGHT_JSON                               = "Height";
+    String GROUPING_JSON                             = SecureKeyStore.VAR_GROUPING;
 
-    String ID_JSON                                   = "ID";
+    String HEIGHT_JSON                               = "height";
 
-    String IMAGE_ATTRIBUTES_JSON                     = "ImageAttributes";
+    String ID_JSON                                   = SecureKeyStore.VAR_ID;
+
+    String IMAGE_ATTRIBUTES_JSON                     = "imageAttributes";
     
-    String IMPORT_PRIVATE_KEY_JSON                   = "ImportPrivateKey";
+    String IMPORT_PRIVATE_KEY_JSON                   = "importPrivateKey";
 
-    String IMPORT_SYMMETRIC_KEY_JSON                 = "ImportSymmetricKey";
+    String IMPORT_SYMMETRIC_KEY_JSON                 = "importSymmetricKey";
 
-    String INPUT_METHOD_JSON                         = "InputMethod";
+    String INPUT_METHOD_JSON                         = SecureKeyStore.VAR_INPUT_METHOD;
 
-    String INVOCATION_REQUEST_JSON                   = "InvocationRequest";
+    String ISSUED_AFTER_JSON                         = "issuedAfter";
+
+    String ISSUED_BEFORE_JSON                        = "issuedBefore";
+
+    String ISSUED_CREDENTIALS_JSON                   = "issuedCredentials";
+
+    String KEY_ALGORITHM_JSON                        = SecureKeyStore.VAR_KEY_ALGORITHM;
+
+    String KEY_ATTESTATION_JSON                      = SecureKeyStore.VAR_KEY_ATTESTATION;
+
+    String KEY_ENTRY_ALGORITHM_JSON                  = SecureKeyStore.VAR_KEY_ENTRY_ALGORITHM;       
+
+    String KEY_ENTRY_SPECIFIERS_JSON                 = "keyEntrySpecifiers";       
+
+    String KEY_MANAGEMENT_KEY_JSON                   = SecureKeyStore.VAR_KEY_MANAGEMENT_KEY;
+
+    String KEY_PARAMETERS_JSON                       = SecureKeyStore.VAR_KEY_PARAMETERS;
+
+    String LOCKED_JSON                               = "locked";
+
+    String LOGOTYPES_JSON                            = "logotypes";
+
+    String LOOKUP_RESULTS_JSON                       = "lookupResults";
+
+    String LOOKUP_SPECIFIERS_JSON                    = "lookupSpecifiers";
+
+    String MAC_JSON                                  = SecureKeyStore.VAR_MAC;
+
+    String MATCHING_CREDENTIALS_JSON                 = "matchingCredentials";
+
+    String MAX_LENGTH_JSON                           = SecureKeyStore.VAR_MAX_LENGTH;
+
+    String MIME_TYPE_JSON                            = "mimeType";
+
+    String MIN_LENGTH_JSON                           = SecureKeyStore.VAR_MIN_LENGTH;
+
+    String NAME_JSON                                 = SecureKeyStore.VAR_NAME;
+
+    String NONCE_JSON                                = SecureKeyStore.VAR_NONCE;
+
+    String PATTERN_RESTRICTIONS_JSON                 = SecureKeyStore.VAR_PATTERN_RESTRICTIONS;
+
+    String PIN_POLICY_SPECIFIERS_JSON                = "pinPolicySpecifiers";       
+
+    String PREFERREDD_LANGUAGES_JSON                 = "preferredLanguages";
+
+    String PRIVACY_ENABLED_JSON                      = SecureKeyStore.VAR_PRIVACY_ENABLED;
+
+    String PROPERTIES_JSON                           = "properties";       
+
+    String PROPERTY_BAGS_JSON                        = SecureKeyStore.VAR_PROPERTY_BAG + "s";       
+
+    String PUK_POLICY_SPECIFIERS_JSON                = "pukPolicySpecifiers";       
+
+    String RETRY_LIMIT_JSON                          = SecureKeyStore.VAR_RETRY_LIMIT;
+
+    String SEARCH_FILTER_JSON                        = "searchFilter";
+
+    String SERVER_EPHEMERAL_KEY_JSON                 = SecureKeyStore.VAR_SERVER_EPHEMERAL_KEY;
+
+    String SERVER_CERT_FP_JSON                       = "serverCertificateFingerPrint";
+
+    String SERVER_SEED_JSON                          = SecureKeyStore.VAR_SERVER_SEED;
     
-    String INVOCATION_RESPONSE_JSON                  = "InvocationResponse";
-    
-    String ISSUED_AFTER_JSON                         = "IssuedAfter";
+    String SERVER_SESSION_ID_JSON                    = SecureKeyStore.VAR_SERVER_SESSION_ID;
 
-    String ISSUED_BEFORE_JSON                        = "IssuedBefore";
+    String SERVER_TIME_JSON                          = SecureKeyStore.VAR_SERVER_TIME;
 
-    String ISSUED_CREDENTIALS_JSON                   = "IssuedCredentials";
+    String SESSION_ATTESTATION_JSON                  = SecureKeyStore.VAR_SESSION_ATTESTATION;
 
-    String KEY_ALGORITHM_JSON                        = "KeyAlgorithm";
+    String SESSION_KEY_ALGORITHM_JSON                = SecureKeyStore.VAR_SESSION_KEY_ALGORITHM;
 
-    String KEY_ATTESTATION_JSON                      = "KeyAttestation";
+    String SESSION_KEY_LIMIT_JSON                    = SecureKeyStore.VAR_SESSION_KEY_LIMIT;
 
-    String KEY_CREATION_REQUEST_JSON                 = "KeyCreationRequest";
-    
-    String KEY_CREATION_RESPONSE_JSON                = "KeyCreationResponse";
+    String SESSION_LIFE_TIME_JSON                    = SecureKeyStore.VAR_SESSION_LIFE_TIME;
 
-    String KEY_ENTRY_ALGORITHM_JSON                  = "KeyEntryAlgorithm";       
+    String SUBMIT_URL_JSON                           = "submitUrl";
 
-    String KEY_ENTRY_SPECIFIERS_JSON                 = "KeyEntrySpecifiers";       
+    String SUPPORTED_JSON                            = "supported";
 
-    String KEY_MANAGEMENT_KEY_JSON                   = "KeyManagementKey";
+    String TRUST_ANCHOR_JSON                         = "trustAnchor";
 
-    String KEY_PARAMETERS_JSON                       = "KeyParameters";
+    String TYPE_JSON                                 = SecureKeyStore.VAR_TYPE;
 
-    String LOCKED_JSON                               = "Locked";
+    String UNLOCK_KEYS_JSON                          = "unlockKeys";
 
-    String LOGOTYPES_JSON                            = "Logotypes";
+    String UPDATABLE_KEY_MANAGEMENT_KEYS_JSON        = "updatableKeyManagementKeys";
 
-    String LOOKUP_RESULTS_JSON                       = "LookupResults";
+    String UPDATE_KEY_JSON                           = "updateKey";
 
-    String LOOKUP_SPECIFIERS_JSON                    = "LookupSpecifiers";
+    String USER_MODIFIABLE_JSON                      = SecureKeyStore.VAR_USER_MODIFIABLE;
 
-    String MAC_JSON                                  = "MAC";
+    String VALUE_JSON                                = SecureKeyStore.VAR_VALUE;
 
-    String MATCHING_CREDENTIALS_JSON                 = "MatchingCredentials";
+    String VALUES_JSON                               = SecureKeyStore.VAR_VALUE + "s";
 
-    String MAX_LENGTH_JSON                           = "MaxLength";
+    String VIRTUAL_ENVIRONMENT_JSON                  = "virtualEnvironment";
 
-    String MIME_TYPE_JSON                            = "MIMEType";
+    String WIDTH_JSON                                = "width";
 
-    String MIN_LENGTH_JSON                           = "MinLength";
-
-    String NAME_JSON                                 = "Name";
-
-    String NONCE_JSON                                = "Nonce";
-
-    String PATTERN_RESTRICTIONS_JSON                 = "PatternRestrictions";
-
-    String PIN_POLICY_SPECIFIERS_JSON                = "PINPolicySpecifiers";       
-
-    String PREFERREDD_LANGUAGES_JSON                 = "PreferredLanguages";
-
-    String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
-
-    String PROPERTIES_JSON                           = "Properties";       
-
-    String PROPERTY_BAGS_JSON                        = "PropertyBags";       
-
-    String PROVISIONING_INITIALIZATION_REQUEST_JSON  = "ProvisioningInitializationRequest";
-    
-    String PROVISIONING_INITIALIZATION_RESPONSE_JSON = "ProvisioningInitializationResponse";
-
-    String PROVISIONING_FINALIZATION_REQUEST_JSON    = "ProvisioningFinalizationRequest";
-    
-    String PROVISIONING_FINALIZATION_RESPONSE_JSON   = "ProvisioningFinalizationResponse";
-
-    String GENERATED_KEYS_JSON                       = "GeneratedKeys";
-
-    String PUK_POLICY_SPECIFIERS_JSON                = "PUKPolicySpecifiers";       
-
-    String RETRY_LIMIT_JSON                          = "RetryLimit";
-
-    String SEARCH_FILTER_JSON                        = "SearchFilter";
-
-    String SERVER_EPHEMERAL_KEY_JSON                 = "ServerEphemeralKey";
-
-    String SERVER_CERT_FP_JSON                       = "ServerCertificateFingerPrint";
-
-    String SERVER_SEED_JSON                          = "ServerSeed";
-    
-    String SERVER_SESSION_ID_JSON                    = "ServerSessionID";
-
-    String SERVER_TIME_JSON                          = "ServerTime";
-
-    String SESSION_ATTESTATION_JSON                  = "SessionAttestation";
-
-    String SESSION_KEY_ALGORITHM_JSON                = "SessionKeyAlgorithm";
-
-    String SESSION_KEY_LIMIT_JSON                    = "SessionKeyLimit";
-
-    String SESSION_LIFE_TIME_JSON                    = "SessionLifeTime";
-
-    String SUBMIT_URL_JSON                           = "SubmitURL";
-
-    String SUPPORTED_JSON                            = "Supported";
-
-    String TRUST_ANCHOR_JSON                         = "TrustAnchor";
-
-    String TYPE_JSON                                 = "Type";
-
-    String UNLOCK_KEYS_JSON                          = "UnlockKeys";
-
-    String UPDATABLE_KEY_MANAGEMENT_KEYS_JSON        = "UpdatableKeyManagementKeys";
-
-    String UPDATE_KEY_JSON                           = "UpdateKey";
-
-    String USER_MODIFIABLE_JSON                      = "UserModifiable";
-
-    String VALUE_JSON                                = "Value";
-
-    String VALUES_JSON                               = "Values";
-
-    String VIRTUAL_ENVIRONMENT_JSON                  = "VirtualEnvironment";
-
-    String WIDTH_JSON                                = "Width";
-
-    String WRITABLE_JSON                             = "Writable";
+    String WRITABLE_JSON                             = SecureKeyStore.VAR_WRITABLE;
   }

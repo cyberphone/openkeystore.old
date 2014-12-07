@@ -78,13 +78,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                   "In addition, the issuer <i>may</i> perform a client platform capability query.");
             bar (14);
             sign ("ProvisioningInitialization", "Creation of a <i>shared session key</i> securing the rest of the interactions between the issuer and the SKS. " +
-                  "To support future updates of provisioned credentials, the issuer <i>may</i> also provide a " + json.globalLinkRef (PROVISIONING_INITIALIZATION_REQUEST_JSON, KEY_MANAGEMENT_KEY_JSON) + ".");
+                  "To support future updates of provisioned credentials, the issuer <i>may</i> also provide a " + json.globalLinkRef (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName (), KEY_MANAGEMENT_KEY_JSON) + ".");
             bar (14);
             sign ("CredentialDiscovery", "<i>Optional</i>: Issuer lookup of already provisioned SKS credentials. " +
                   "This is primarily used when keys need to be updated or unlocked.");
             bar (14);
             sign ("KeyCreation", "Creation of asymmetric key-pairs in the SKS. " +
-                  "If user-defined PINs are to be set, this is carried out during " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON) + ". " +
+                  "If user-defined PINs are to be set, this is carried out during " + json.globalLinkRef (KeyGen2Messages.KEY_CREATION_REQUEST.getName ()) + ". " +
                   "After key-pairs have been created the public keys are sent to the issuer for certification.");
             bar (14);
             sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes as well as " +
@@ -94,7 +94,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
                       ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
-                      "The result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
+                      "The result of the " + json.globalLinkRef (KeyGen2Messages.PROVISIONING_FINALIZATION_RESPONSE.getName ()) +
                       " is anticipated to be a custom " + 
                       json.globalLinkRef (SECTION_TERMINATION_MESSAGE) +
                       ", typically telling the user that the operation succeeded.");
@@ -300,7 +300,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 .newColumn ()
                   .addString ("See <code>SKS:createProvisioningSession." +
                               SERVER_SESSION_ID_JSON + "</code> and ")
-                  .addLink (INVOCATION_REQUEST_JSON)
+                  .addLink (KeyGen2Messages.INVOCATION_REQUEST.getName ())
                   .addString (".");
           }
       }
@@ -623,29 +623,29 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     json.createReference (JSONBaseHTML.REF_SKS) + " <i>Appendix D, Remote Key Lookup</i>."); 
 
         json.addParagraphSubObject (SECTION_TERMINATION_MESSAGE).append ("When a KeyGen2 protocol sequence terminates (like when the proxy has sent a " +
-                                    json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) + " object to the server), " +
+                                    json.globalLinkRef (KeyGen2Messages.PROVISIONING_FINALIZATION_RESPONSE.getName ()) + " object to the server), " +
                                     "the browser <b>must</b> return to its &quot;normal&quot; state, ready for receiving a matching HTTP body containing a HTML page or similar."  + LINE_SEPARATOR +
                                     "Note that returned data <b>must</b> target the same <code>window</code> object which was used during invocation.");
 
         json.addParagraphSubObject (SECTION_DEFERRED_ISSUANCE).append ("To reduce costs for credential issuers, they may require users' " +
                                     "filling in forms on the web with user-related information followed by a KeyGen2 sequence terminating (see " + json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + ") after " +
-                                    json.globalLinkRef (KEY_CREATION_RESPONSE_JSON) + 
-                                    ". This mode <b>must</b> be indicated by setting " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON, DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
+                                    json.globalLinkRef (KeyGen2Messages.KEY_CREATION_RESPONSE.getName ()) + 
+                                    ". This mode <b>must</b> be indicated by setting " + json.globalLinkRef (KeyGen2Messages.KEY_CREATION_REQUEST.getName (), DEFERRED_ISSUANCE_JSON) + " to <code>true</code>." + LINE_SEPARATOR +
                                     "After the issuer in some way have verified the user's claimed data (and typically also the SKS <code>Device&nbsp;ID</code>), " +
-                                    "the certification process is <i>resumed</i> by relaunching the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
-                                    " (with " + json.globalLinkRef (INVOCATION_REQUEST_JSON, ACTION_JSON) + 
+                                    "the certification process is <i>resumed</i> by relaunching the " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName ()) +
+                                    " (with " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName (), ACTION_JSON) + 
                                     " set to <code>" + Action.RESUME.getJSONName () + "</code>) through a URL sent to the user via mail, SMS, QR-code or NFC. The KeyGen2 proxy <b>must</b> after reception of the " +
-                                    json.globalLinkRef (INVOCATION_REQUEST_JSON) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
-                                    json.globalLinkRef (INVOCATION_REQUEST_JSON, SERVER_SESSION_ID_JSON) + ".");
+                                    json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName ()) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
+                                    json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName (), SERVER_SESSION_ID_JSON) + ".");
 
-        json.addParagraphSubObject ("SOP Adherance").append ("The KeyGen2 proxy <b>must not</b> accept <code>SubmitURL</code> requests outside of the domain which returned the " + json.globalLinkRef (INVOCATION_REQUEST_JSON) +
+        json.addParagraphSubObject ("SOP Adherance").append ("The KeyGen2 proxy <b>must not</b> accept <code>SubmitURL</code> requests outside of the domain which returned the " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName ()) +
                                     " message, i.e. strictly following SOP (Same Origin Policy).");
 
         json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
                            "Entries written in <i>italics</i> like <a href=\"#" + GENERATED_KEYS_JSON + "\"><i>" + GENERATED_KEYS_JSON + "</i></a> " +
-                           "represent sub objects, while the other entries such as <a href=\"#" + INVOCATION_REQUEST_JSON  + "\">" + INVOCATION_REQUEST_JSON + "</a> " +
+                           "represent sub objects, while the other entries such as <a href=\"#" + KeyGen2Messages.INVOCATION_REQUEST.getName ()  + "\">" + KeyGen2Messages.INVOCATION_REQUEST.getName () + "</a> " +
                            "consitute of the actual messages.");
         
         json.setAppendixMode ();
@@ -660,7 +660,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                                                                   json.createDialog ("Credential Enrollment",
  "<tr><td colspan=\"2\">The following provider wants to create a<br>login credential for you:</td></tr>" +
  "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>") +
- "If the user accepts the request, the following response is sent to the server at the address specified by " + json.globalLinkRef (INVOCATION_REQUEST_JSON, SUBMIT_URL_JSON) + ":"),
+ "If the user accepts the request, the following response is sent to the server at the address specified by " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName (), SUBMIT_URL_JSON) + ":"),
                         new ProtocolStep ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
                         new ProtocolStep ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
  "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
@@ -696,7 +696,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
-        preAmble (INVOCATION_REQUEST_JSON)
+        preAmble (KeyGen2Messages.INVOCATION_REQUEST.getName ())
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -720,17 +720,17 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "The valid constants are:<ul>" +
                           "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
                           "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted ")
-               .addLink (KEY_CREATION_RESPONSE_JSON)
+               .addLink (KeyGen2Messages.KEY_CREATION_RESPONSE.getName ())
                .addString (".  See ")
                .addLink (SECTION_DEFERRED_ISSUANCE)
                .addString (". A confirming client <b>must</b> after responding with ") 
-               .addLink (INVOCATION_RESPONSE_JSON)
+               .addLink (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
                .addString (" only accept a ")
-               .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
+               .addLink (KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ())
                .addString ("</li>" +
                            "<li><code>" + Action.UNLOCK.getJSONName () +
                            "</code> - Unlock existing keys. A conforming client should disallow ")
-               .addLink (KEY_CREATION_REQUEST_JSON)
+               .addLink (KeyGen2Messages.KEY_CREATION_REQUEST.getName ())
                .addString ("</li></ul>")
           .newRow ()
             .newColumn ()
@@ -753,7 +753,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("The <code>" + PRIVACY_ENABLED_JSON +
                           "</code> flag is used to set mode during ")
-               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+               .addLink (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
                .addString (".<br>See <code>SKS:createProvisioningSession." + PRIVACY_ENABLED_JSON +
                            "</code>." + LINE_SEPARATOR + "Note: The default value is <code>false</code>.")
           .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
@@ -779,17 +779,17 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("<i>Optional</i>: List of URIs signifying client (platform) capabilities. " +
                           "The response (")
-              .addPropertyLink (CLIENT_CAPABILITIES_JSON, INVOCATION_RESPONSE_JSON)
+              .addPropertyLink (CLIENT_CAPABILITIES_JSON, KeyGen2Messages.INVOCATION_RESPONSE.getName ())
               .addString (") <b>must</b> contain the same URIs (in any order). " + LINE_SEPARATOR +
                          "Note that capabilities may refer to algorithms or specific extensions (see <code>SKS:addExtension</code>), as well as to non-SKS items such as ")
-              .addPropertyLink (VIRTUAL_ENVIRONMENT_JSON, PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addPropertyLink (VIRTUAL_ENVIRONMENT_JSON, KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
               .addString ("." + LINE_SEPARATOR +
                           "Another possible use of this feature is for signaling support for extensions " +
                           "in the protocol itself while keeping the name-space etc. intact." + LINE_SEPARATOR +
                           "<i>If requested capabilities are considered as privacy sensitive, a conforming implementation " +
                           "should ask for the user's permission to disclose them</i>." + LINE_SEPARATOR +
                           "Device-specific data like IMEI numbers <b>must not</b> be requested in the ") 
-              .addPropertyLink (PRIVACY_ENABLED_JSON, INVOCATION_REQUEST_JSON)
+              .addPropertyLink (PRIVACY_ENABLED_JSON, KeyGen2Messages.INVOCATION_REQUEST.getName ())
               .addString (" mode." + LINE_SEPARATOR +
                           "For quering ")
               .addPropertyLink (VALUES_JSON, CLIENT_CAPABILITIES_JSON)
@@ -797,7 +797,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "</ul>")
           .newExtensionRow (new OptionalSignature ());
   
-        preAmble (INVOCATION_RESPONSE_JSON)
+        preAmble (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -807,7 +807,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("Copy of <code>" + SERVER_SESSION_ID_JSON +
                           "</code> from ")
-              .addLink (INVOCATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.INVOCATION_REQUEST.getName ())
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -819,14 +819,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("<i>Optional</i> 1-32 byte nonce. See ")
-              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
               .addString (".")
           .newExtensionRow (new OptionalArrayObject (CLIENT_CAPABILITIES_JSON,
                                                      1,
                                                      "List of capabilities including algorithms, specific features, " +
                                                      "dynamic or static data, and preferred image sizes."));
 
-        preAmble (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+        preAmble (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
           .newExtensionRow (new ServerSessionID ())
           .newExtensionRow (new SubmitURL ())
           .newRow ()
@@ -883,13 +883,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
-              .addLink (INVOCATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.INVOCATION_REQUEST.getName ())
               .addString (":" + LINE_SEPARATOR + "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITY_QUERY_JSON +
                           "&quot;:&nbsp;[&quot;" +
                           KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT +
                           "&quot;]</code>" + LINE_SEPARATOR +
                           "A possible ")
-              .addLink (INVOCATION_RESPONSE_JSON)
+              .addLink (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
               .addString (" could be:" + LINE_SEPARATOR +
                           "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITIES_JSON +
                           "&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
@@ -903,7 +903,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "Note that the <code>" +
                           VIRTUAL_ENVIRONMENT_JSON +
                           "</code> option presumes that the <code>" +
-                          PROVISIONING_INITIALIZATION_REQUEST_JSON +
+                          KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName () +
                           "</code> is <i>signed</i>.")
           .newRow ()
             .newColumn ()
@@ -917,14 +917,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<i>Optional</i> 1-32 byte nonce. The <code>" +
                            NONCE_JSON + "</code> value <b>must</b> be identical to the <code>" +
                            NONCE_JSON + "</code> specified in ")
-               .addLink (INVOCATION_RESPONSE_JSON)
+               .addLink (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
                .addString (". Also see <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>.")
           .newExtensionRow (new OptionalSignature ())
               .addString (" Note that <code>" + NONCE_JSON +
                           "</code> <b>must</b> be specified for a signed <code>" +
-                          PROVISIONING_INITIALIZATION_REQUEST_JSON + "</code>.");
+                          KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName () + "</code>.");
 
-        preAmble (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
+        preAmble (KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
@@ -935,7 +935,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Server time transferred verbatim from ")
-              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -964,7 +964,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "See <code>SKS:createProvisioningSession</code>. " +
                           "Note that this property is either required or forbidden " +
                           "depending on the value of "))
-            .addPropertyLink (PRIVACY_ENABLED_JSON, INVOCATION_REQUEST_JSON)
+            .addPropertyLink (PRIVACY_ENABLED_JSON, KeyGen2Messages.INVOCATION_REQUEST.getName ())
             .addString (".")
           .newRow ()
             .newColumn ()
@@ -976,7 +976,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("SHA256 fingerprint of the server's certificate during receival of the ")
-              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ())
               .addString (" object. " + LINE_SEPARATOR + 
                           "This property is mandatory for HTTPS connections.")
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
@@ -987,7 +987,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .addPropertyLink (JSONSignatureDecoder.KEY_ID_JSON, JSONSignatureDecoder.KEY_INFO_JSON)
           .addString (" property is <i>ignored</i>. ");
 
-        preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
+        preAmble (KeyGen2Messages.CREDENTIAL_DISCOVERY_REQUEST.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
           .newRow ()
@@ -1002,7 +1002,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.")
           .newExtensionRow (new OptionalSignature ());
   
-        preAmble (CREDENTIAL_DISCOVERY_RESPONSE_JSON)
+        preAmble (KeyGen2Messages.CREDENTIAL_DISCOVERY_RESPONSE.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
@@ -1015,7 +1015,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("List of credential lookup results. " +
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.");
 
-        preAmble (KEY_CREATION_REQUEST_JSON)
+        preAmble (KeyGen2Messages.KEY_CREATION_REQUEST.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
           .newRow ()
@@ -1038,10 +1038,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("Flag telling if the process should be suspended after ")
-              .addLink (KEY_CREATION_RESPONSE_JSON)
+              .addLink (KeyGen2Messages.KEY_CREATION_RESPONSE.getName ())
               .addString (".  Default value: <code>false</code>. " +
                           "See the <code>" + ACTION_JSON + "</code> property in ")
-              .addLink (INVOCATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.INVOCATION_REQUEST.getName ())
               .addString (".")
           .newExtensionRow (new OptionalArrayObject (PUK_POLICY_SPECIFIERS_JSON,
                                                      1,
@@ -1063,7 +1063,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               "exactly the order they are declared in this table as well " +
               "as in associated object arrays</i>.");
   
-        preAmble (KEY_CREATION_RESPONSE_JSON)
+        preAmble (KeyGen2Messages.KEY_CREATION_RESPONSE.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
@@ -1077,11 +1077,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
                           "<i>be encoded (by the SKS) and decoded (by the issuer) in exactly the same " +
                           "order (message-wise) as they are encountered in the associated</i>  <a href=\"#" +
-                           KEY_CREATION_REQUEST_JSON + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
+                           KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
                            "(including those embedded by <a href=\"#" +
-                           KEY_CREATION_REQUEST_JSON + "." + PIN_POLICY_SPECIFIERS_JSON + "\">" + PIN_POLICY_SPECIFIERS_JSON + "</a>).");
+                           KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "." + PIN_POLICY_SPECIFIERS_JSON + "\">" + PIN_POLICY_SPECIFIERS_JSON + "</a>).");
 
-        preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
+        preAmble (KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
           .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
@@ -1118,7 +1118,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                  "<b>must</b> be the final of a provisioning session both during encoding and decoding.")
           .newExtensionRow (new OptionalSignature ());
 
-        preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
+        preAmble (KeyGen2Messages.PROVISIONING_FINALIZATION_RESPONSE.getName ())
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
@@ -1300,7 +1300,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("If this property is <code>true</code> the key associated " +
                           "with the credential is locked due to multiple PIN errors. " +
                           "The default value is <code>false</code>.  See ")
-              .addPropertyLink (UNLOCK_KEYS_JSON, PROVISIONING_FINALIZATION_REQUEST_JSON)
+              .addPropertyLink (UNLOCK_KEYS_JSON, KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ())
               .addString (".");
 
         json.addSubItemTable (PUK_POLICY_SPECIFIERS_JSON)
@@ -1610,7 +1610,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("<code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
-              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.KEY_CREATION_REQUEST.getName ())
               .addString (" for a specific key.")
           .newRow ()
             .newColumn ()
@@ -1642,7 +1642,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.ID</code>")
               .addString (".<br><code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
-              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addLink (KeyGen2Messages.KEY_CREATION_REQUEST.getName ())
               .addString (" for a specific key.")
           .newRow ()
             .newColumn ()
@@ -1708,7 +1708,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                   "Note that that credential <code>" + ID_JSON +
                   "</code>s are not guaranteed to be " +
                   "supplied in the same order as during the associated " +
-                  "<a href=\"#" + KEY_CREATION_REQUEST_JSON + "\">" + KEY_CREATION_REQUEST_JSON + "</a>.");
+                  "<a href=\"#" + KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "\">" +
+                  KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "</a>.");
 
         json.addSubItemTable (new String[]{CLONE_KEY_PROTECTION_JSON,
                                            DELETE_KEYS_JSON,

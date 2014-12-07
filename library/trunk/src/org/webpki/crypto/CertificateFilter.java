@@ -38,14 +38,14 @@ import org.webpki.util.ArrayUtil;
 
 public class CertificateFilter
   {
-    public static final String CF_FINGER_PRINT          = "FingerPrint";
-    public static final String CF_ISSUER_REG_EX         = "IssuerRegEx";
-    public static final String CF_SERIAL_NUMBER         = "SerialNumber";
-    public static final String CF_SUBJECT_REG_EX        = "SubjectRegEx";
-    public static final String CF_EMAIL_REG_EX          = "EmailRegEx";
-    public static final String CF_POLICY_RULES          = "PolicyRules";
-    public static final String CF_KEY_USAGE_RULES       = "KeyUsageRules";
-    public static final String CF_EXT_KEY_USAGE_RULES   = "ExtendedKeyUsageRules";
+    public static final String CF_FINGER_PRINT          = "fingerPrint";
+    public static final String CF_ISSUER_REG_EX         = "issuerRegEx";
+    public static final String CF_SERIAL_NUMBER         = "serialNumber";
+    public static final String CF_SUBJECT_REG_EX        = "subjectRegEx";
+    public static final String CF_EMAIL_REG_EX          = "emailRegEx";
+    public static final String CF_POLICY_RULES          = "policyRules";
+    public static final String CF_KEY_USAGE_RULES       = "keyUsageRules";
+    public static final String CF_EXT_KEY_USAGE_RULES   = "extendedKeyUsageRules";
 
     // Global - Needs path expansion
 

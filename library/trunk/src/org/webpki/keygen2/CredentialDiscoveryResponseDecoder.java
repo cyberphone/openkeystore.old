@@ -17,9 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.security.cert.X509Certificate;
-
 import java.util.Vector;
 
 import org.webpki.json.JSONArrayReader;
@@ -137,6 +135,6 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
     @Override
     public String getQualifier ()
       {
-        return CREDENTIAL_DISCOVERY_RESPONSE_JSON;
+        return KeyGen2Messages.CREDENTIAL_DISCOVERY_RESPONSE.getName ();
       }
   }
