@@ -173,8 +173,12 @@ public class ReadSignature
         result.append ('\n').append (string).append ('\n');
       }
     
-    String getResult ()
+    String getResult () throws IOException
       {
-        return result.length () == 0 ? "No signature(s) found!\n" : result.toString ();
+        if (result.length () == 0)
+          {
+            throw new IOException ("No Signatures found!");
+          }
+        return result.toString ();
       }
   }

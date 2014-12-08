@@ -422,11 +422,12 @@ public class HTML
                          "}") +
                      "</td></tr>" +
                "<tr><td align=\"center\"><table>" +
-                 "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
+                 "<tr><td valign=\"middle\" rowspan=\"5\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.JOSE_FLAG + "\" checked value=\"true\">JOSE Algorithms</td><td>" +
                  "</table></td></tr>" +
                "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>" +
              "</form></table></td></tr>"));

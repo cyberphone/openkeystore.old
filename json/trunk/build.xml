@@ -177,10 +177,10 @@
        <param name="cmd" value="-selfsigned -entity/ca -subject &quot;CN=Mybank Client Root CA1, C=US&quot; -validity/start 2010-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientroot}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=Marion Anderson, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_rsa}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA512"/>
+       <param name="cmd" value="-ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=Marion Anderson, serialNumber=95673523&quot; -extension/eku clientAuth -validity/start 2014-07-10T10:00:00 -validity/end 2019-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_rsa}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword} -keysize 2048 -sigalg RSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=CN=Marion Anderson, serialNumber=95673522&quot; -validity/start 2012-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_ec}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword}  -ecccurve NIST_P_256 -sigalg RSA_SHA512"/>
+       <param name="cmd" value="-ca/addpath all -ca/keypass ${keypassword} -ca/storetype ${storetype} -ca/storepass ${keypassword} -ca/keystore ${clientroot}${keyfilext} -entity/ee -subject &quot;CN=CN=Marion Anderson, serialNumber=95673523&quot; -extension/eku clientAuth -validity/start 2014-07-10T10:00:00 -validity/end 2019-07-10T09:59:59 -out/storetype ${storetype} -out/keystore ${clientkey_ec}${keyfilext} -out/storepass ${keypassword} -out/keypass ${keypassword}  -ecccurve NIST_P_256 -sigalg RSA_SHA512"/>
     </antcall>
   </target>
   

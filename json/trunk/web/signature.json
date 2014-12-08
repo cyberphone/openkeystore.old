@@ -1,22 +1,17 @@
 {
-  "Now": "2014-09-16T10:25:17Z",
-  "EscapeMe": "\u000F\u000aA'\u0042\\\"\/",
-  "Numbers": [1e0, 4.50, 6],
-  "Signature":
+  "now": "2014-12-08T10:25:17Z",
+  "escapeMe": "\u20ac\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e0, 4.50, 6],
+  "signature":
     {
-      "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-      "KeyInfo":
+      "algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+      "publicKey":
         {
-          "PublicKey":
-            {
-              "EC":
-                {
-                  "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
-                  "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",
-                  "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
-                }
-            }
+          "type": "EC",
+          "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+          "x": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",
+          "y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
         },
-      "SignatureValue": "MEYCIQDqFARll5SQJVq6j-YMfogRopPc2PgY84CS8Jvs4Ws-DQIhAIPovSwdjwolMKXBVC8dSO7IG9dEulwA9gAKUmRxiQtj"
+      "value": "MEUCIFFbVuV-LiLiQcDq3hg56qCF9HmGzQ4Pij8D_vc3ufIcAiEAy-Ju7hf_XKkbIcYlNB5Ovte6yLlCrbGs-TuXDwupyTc"
     }
 }

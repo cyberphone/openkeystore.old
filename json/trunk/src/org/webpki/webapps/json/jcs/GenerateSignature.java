@@ -51,10 +51,13 @@ public class GenerateSignature
                                          (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
 
     ACTION action;
+    
+    boolean jose;
 
-    GenerateSignature (ACTION action)
+    GenerateSignature (ACTION action, boolean jose)
       {
         this.action = action;
+        this.jose = jose;
       }
 
     static class AsymSignatureHelper extends KeyStoreSigner implements AsymKeySignerInterface
@@ -99,6 +102,7 @@ public class GenerateSignature
 
     byte[] sign (JSONObjectWriter wr) throws IOException
       {
+        wr.setJOSEAlgorithmPreference (jose);
         if (action == ACTION.X509)
           {
             wr.setSignature (new JSONX509Signer (new AsymSignatureHelper (JCSService.clientkey_rsa).setExtendedCertPath (true)));

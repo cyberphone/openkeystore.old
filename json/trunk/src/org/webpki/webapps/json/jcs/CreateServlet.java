@@ -34,6 +34,7 @@ public class CreateServlet extends HttpServlet
     private static final long serialVersionUID = 1L;
     
     static final String KEY_TYPE = "keytype";
+    static final String JOSE_FLAG = "jose";
     
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
@@ -64,6 +65,7 @@ public class CreateServlet extends HttpServlet
         String json_object = getTextArea (request);
         GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
         String key_type = request.getParameter (KEY_TYPE);
+        boolean jose = new Boolean (request.getParameter (JOSE_FLAG));
         for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values ())
           {
             if (a.toString ().equals (key_type))
@@ -74,7 +76,7 @@ public class CreateServlet extends HttpServlet
           }
         try
           {
-            byte[] signed_json = new GenerateSignature (action).sign (new JSONObjectWriter (JSONParser.parse (json_object)));
+            byte[] signed_json = new GenerateSignature (action, jose).sign (new JSONObjectWriter (JSONParser.parse (json_object)));
 /*
             response.sendRedirect (ServletUtil.getContextURL (request) + 
                                    "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
