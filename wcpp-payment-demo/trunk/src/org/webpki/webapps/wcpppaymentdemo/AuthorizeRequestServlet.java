@@ -19,7 +19,6 @@ package org.webpki.webapps.wcpppaymentdemo;
 import java.io.IOException;
 
 import java.util.Date;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -128,5 +127,10 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                          reference_pan,
                          new String (transact.serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8"),
                          authorized_result == null ? "N/A" : new String (new JSONObjectWriter (authorized_result).serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8"));
+      }
+
+    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+         response.sendRedirect (PaymentDemoService.bank_url);
       }
   }

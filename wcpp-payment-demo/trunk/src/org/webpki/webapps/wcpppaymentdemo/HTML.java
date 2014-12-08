@@ -30,7 +30,6 @@ import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
-import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONSignatureDecoder;
@@ -597,13 +596,11 @@ public class HTML implements BaseProperties
               "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
               "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
               "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
-              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI () + "';\n" +
-              "        var public_key = {};\n" +
-              "        encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = public_key;\n" +
-              "        var rsa_key = {};\n" +
-              "        public_key." + JSONSignatureDecoder.RSA_JSON + " = rsa_key;\n" +
-              "        rsa_key." + JSONSignatureDecoder.MODULUS_JSON + " = selected_card.bank_encryption_key.n;\n" +
-              "        rsa_key." + JSONSignatureDecoder.EXPONENT_JSON + " = selected_card.bank_encryption_key.e;\n" +
+              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJOSEName () + "';\n" +
+              "        var public_key = encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
+              "        public_key." + JSONSignatureDecoder.TYPE_JSON + " = '" + JSONSignatureDecoder.RSA_PUBLIC_KEY + "';\n" +
+              "        public_key." + JSONSignatureDecoder.N_JSON + " = selected_card.bank_encryption_key.n;\n" +
+              "        public_key." + JSONSignatureDecoder.E_JSON + " = selected_card.bank_encryption_key.e;\n" +
               "        encrypted_key." + CIPHER_TEXT_JSON + " = binaryToBase64URL(new Uint8Array(encryped_aes_key));\n" +
               "        sendAuthorizationData(encrypted_authorization_data);\n" +
               "    }).then (undefined, function() {error('Failed encrypting using public key')});\n" +
@@ -618,10 +615,10 @@ public class HTML implements BaseProperties
               "function addECDHKey(name, jwk) {\n" +
               "    var public_key = encrypted_key[name] = {};\n" +
               "    var ec_key = public_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
-              "    var ec_params = ec_key." + JSONSignatureDecoder.EC_JSON + " = {};\n" +
-              "    ec_params." + JSONSignatureDecoder.NAMED_CURVE_JSON + " = '" + KeyAlgorithms.NIST_P_256.getURI () + "';\n" +
-              "    ec_params." + JSONSignatureDecoder.X_JSON + " = jwk.x;\n" +
-              "    ec_params." + JSONSignatureDecoder.Y_JSON + " = jwk.y;\n" +
+              "    ec_key." + JSONSignatureDecoder.TYPE_JSON + " = jwk.kty;\n" +
+              "    ec_key." + JSONSignatureDecoder.CURVE_JSON + " = jwk.crv;\n" +
+              "    ec_key." + JSONSignatureDecoder.X_JSON + " = jwk.x;\n" +
+              "    ec_key." + JSONSignatureDecoder.Y_JSON + " = jwk.y;\n" +
               "}\n\n" +
               "//\n" +
               "// ECDH KDF helper\n" +
@@ -722,10 +719,8 @@ public class HTML implements BaseProperties
              "        key_import_alg = {name: 'ECDSA'};\n" +
              "        key_sign_alg = {name: 'ECDSA', hash: {name: 'SHA-256'}};\n" +
              "    }\n" +
-             "    var key_info = {};\n" +
-             "    signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = key_info;\n" +
-             "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
-             "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
+             "    signature_object." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
+             "    signature_object." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
          }
        s.append (
        "    var pin = document.getElementById('pin').value;\n" +
@@ -754,7 +749,7 @@ public class HTML implements BaseProperties
            s.append (
              "    crypto.subtle.importKey('jwk', selected_card.client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
              "    crypto.subtle.sign (key_sign_alg, private_key, convertStringToUTF8(JSON.stringify(auth_data))).then (function(signature) {\n" +
-             "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
+             "        signature_object." + JSONSignatureDecoder.VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
              "        var json_auth_data = JSON.stringify(auth_data);\n" +
              "        console.debug('Unencrypted user authorization:\\n' + json_auth_data);\n" + 
              "        encryptAndSend(convertStringToUTF8(json_auth_data));\n" +

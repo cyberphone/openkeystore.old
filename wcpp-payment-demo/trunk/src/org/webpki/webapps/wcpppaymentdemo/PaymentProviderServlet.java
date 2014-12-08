@@ -93,7 +93,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             JSONObjectReader auth_data = null;
             if (encrypted_auth_data.hasProperty (ALGORITHM_JSON))
               {
-                SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromURI (encrypted_auth_data.getString (ALGORITHM_JSON));
+                SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromID (encrypted_auth_data.getString (ALGORITHM_JSON));
                 if (sym_alg != SymEncryptionAlgorithms.AES256_CBC)
                   {
                     throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + sym_alg.getURI ());
@@ -101,7 +101,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 JSONObjectReader encrypted_key = encrypted_auth_data.getObject (ENCRYPTED_KEY_JSON);
                 String key_encryption_algorithm = encrypted_key.getString (ALGORITHM_JSON);
                 byte[] raw_aes_key = null;
-                if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()))
+                if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJOSEName ()))
                   {
                     PublicKey received_public_key = encrypted_key.getPublicKey ();
                     if (!ArrayUtil.compare (PaymentDemoService.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
@@ -133,7 +133,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                       {
                         throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + concat.getString (ALGORITHM_JSON));
                       }
-                    HashAlgorithms hash_algorithm = HashAlgorithms.getAlgorithmFromURI (concat.getString (HASH_ALGORITHM_JSON));
+                    HashAlgorithms hash_algorithm = HashAlgorithms.getAlgorithmFromID (concat.getString (HASH_ALGORITHM_JSON));
                     byte[] algorithm_id = concat.getBinary (ALGORITHM_ID_JSON);
                     byte[] party_u_info = concat.getBinary (PARTY_U_INFO_JSON);
                     byte[] party_v_info = concat.getBinary (PARTY_V_INFO_JSON);
@@ -156,7 +156,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             JSONObjectReader payee = auth_data.getObject (PAYMENT_REQUEST_JSON);
             PaymentRequest.parseJSONData (payee);  // No DB to store in...
             JSONObjectReader request_hash = trans_req.getObject(REQUEST_HASH_JSON);
-            HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromURI (request_hash.getString (ALGORITHM_JSON)); 
+            HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromID (request_hash.getString (ALGORITHM_JSON)); 
             if (hash_alg != HashAlgorithms.SHA256)
               {
                 throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
