@@ -777,8 +777,8 @@ public class JSONTest
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.NORMALIZED),
                                 new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        boolean rsa_flag = pub_key_object.hasProperty (JSONSignatureDecoder.RSA_JSON);
-        pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_JSON : JSONSignatureDecoder.EC_JSON);
+        boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
+        pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_PUBLIC_KEY : JSONSignatureDecoder.RSA_PUBLIC_KEY);
         String key_parm = rsa_flag ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary (key_parm);
         boolean must_fail = true;

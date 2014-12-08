@@ -532,7 +532,7 @@ public class SKSWSImplementation
         String log_result = null;
         try
           {
-            int puk_policy_handle = getDevice (device_id).createPUKPolicy (provisioning_handle,
+            int puk_policy_handle = getDevice (device_id).createPukPolicy (provisioning_handle,
                                                                            id,
                                                                            encrypted_puk,
                                                                            format,
@@ -589,7 +589,7 @@ public class SKSWSImplementation
         String log_result = null;
         try
           {
-            int pin_policy_handle = getDevice (device_id).createPINPolicy (provisioning_handle,
+            int pin_policy_handle = getDevice (device_id).createPinPolicy (provisioning_handle,
                                                                            id,
                                                                            puk_policy_handle,
                                                                            user_defined,
@@ -1388,7 +1388,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+            getDevice (device_id).changePin (key_handle, authorization, new_pin);
           }
         catch (SKSException e)
           {
@@ -1417,7 +1417,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+            getDevice (device_id).setPin (key_handle, authorization, new_pin);
           }
         catch (SKSException e)
           {
@@ -1589,7 +1589,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            return getDevice (device_id).performHMAC (key_handle, 
+            return getDevice (device_id).performHmac (key_handle, 
                                                       algorithm,
                                                       parameters,
                                                       authorization,

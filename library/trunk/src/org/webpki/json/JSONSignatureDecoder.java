@@ -43,9 +43,17 @@ public class JSONSignatureDecoder implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
+    // Arguments
+    public static final String EC_PUBLIC_KEY              = "EC";
+    
+    public static final String RSA_PUBLIC_KEY             = "RSA";
+    
+    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
+    
+    // JSON properties
     public static final String ALGORITHM_JSON             = "algorithm";
   
-    public static final String EC_JSON                    = "ec";
+    public static final String CURVE_JSON                 = "curve";
     
     public static final String EXPONENT_JSON              = "exponent";
     
@@ -53,33 +61,25 @@ public class JSONSignatureDecoder implements Serializable
 
     public static final String ISSUER_JSON                = "issuer";
     
-    public static final String KEY_ID_JSON                = "keyID";
+    public static final String KEY_ID_JSON                = "keyId";
 
-    public static final String KEY_INFO_JSON              = "keyInfo";
-  
     public static final String MODULUS_JSON               = "modulus";
-    
-    public static final String NAMED_CURVE_JSON           = "namedCurve";
     
     public static final String PUBLIC_KEY_JSON            = "publicKey";
     
-    public static final String RSA_JSON                   = "rsa";
-  
     public static final String SERIAL_NUMBER_JSON         = "serialNumber";
     
     public static final String SIGNATURE_JSON             = "signature";
     
     public static final String SIGNATURE_CERTIFICATE_JSON = "signatureCertificate";
   
-    public static final String SIGNATURE_VALUE_JSON       = "signatureValue";
-    
-    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
-    
     public static final String SUBJECT_JSON               = "subject";
     
     public static final String TYPE_JSON                  = "type";
 
     public static final String URL_JSON                   = "url";
+    
+    public static final String VALUE_JSON                 = "value";
     
     public static final String VERSION_JSON               = "version";
     
@@ -114,7 +114,7 @@ public class JSONSignatureDecoder implements Serializable
             throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
           }
         algorithm_string = signature.getString (ALGORITHM_JSON);
-        getKeyInfo (signature.getObject (KEY_INFO_JSON));
+        getKeyInfo (signature);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
             extensions = new Vector<JSONObjectReader> ();
@@ -129,11 +129,11 @@ public class JSONSignatureDecoder implements Serializable
               }
             while (ar.hasMore ());
           }
-        signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
-        JSONValue save = signature.root.properties.get (SIGNATURE_VALUE_JSON);
-        signature.root.properties.remove (SIGNATURE_VALUE_JSON);
+        signature_value = signature.getBinary (VALUE_JSON);
+        JSONValue save = signature.root.properties.get (VALUE_JSON);
+        signature.root.properties.remove (VALUE_JSON);
         normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);
-        signature.root.properties.put (SIGNATURE_VALUE_JSON, save);
+        signature.root.properties.put (VALUE_JSON, save);
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -169,7 +169,7 @@ public class JSONSignatureDecoder implements Serializable
           }
         else
           {
-            throw new IOException ("Undecodable \"" + KEY_INFO_JSON + "\" object");
+            throw new IOException ("Missing key information");
           }
       }
 
@@ -198,18 +198,21 @@ public class JSONSignatureDecoder implements Serializable
         rd = rd.getObject (PUBLIC_KEY_JSON);
         try
           {
-            if (rd.hasProperty (RSA_JSON))
+            String type = rd.getString (TYPE_JSON);
+            if (type.equals (RSA_PUBLIC_KEY))
               {
-                rd = rd.getObject (RSA_JSON);
                 return KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, MODULUS_JSON),
                                                                                             getCryptoBinary (rd, EXPONENT_JSON)));
               }
-            rd = rd.getObject (EC_JSON);
-            String curve_name = rd.getString (NAMED_CURVE_JSON);
-            KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
-                                           getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
-            ECPoint w = new ECPoint (getFixedBinary (rd, X_JSON, ec), getFixedBinary (rd, Y_JSON, ec));
-            return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
+            else if (type.equals (EC_PUBLIC_KEY))
+              {
+                String curve_name = rd.getString (CURVE_JSON);
+                KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
+                                               getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
+                ECPoint w = new ECPoint (getFixedBinary (rd, X_JSON, ec), getFixedBinary (rd, Y_JSON, ec));
+                return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
+              }
+            throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
           }
         catch (GeneralSecurityException e)
           {
@@ -227,7 +230,7 @@ public class JSONSignatureDecoder implements Serializable
                 return key_alg;
               }
           }
-        throw new IOException ("Unknown \"" + NAMED_CURVE_JSON + "\": " + xml_dsig_curve_name);
+        throw new IOException ("Unknown \"" + CURVE_JSON + "\": " + xml_dsig_curve_name);
       }
 
     static X509Certificate[] getX509CertificatePath (JSONObjectReader rd) throws IOException

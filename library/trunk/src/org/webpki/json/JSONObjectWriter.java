@@ -344,7 +344,7 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
         signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-        signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
+        signer.writeKeyInfoData (signature_writer.setXMLDSigECCurveOption (xml_dsig_named_curve));
         if (signer.extensions != null)
           {
             Vector<JSONValue> array = new Vector<JSONValue> ();
@@ -354,7 +354,7 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
+        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
         return this;
       }
     
@@ -364,19 +364,19 @@ import org.webpki.json.JSONSignatureDecoder;
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
         if (key_alg.isRSAKey ())
           {
-            JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
+            public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
             RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            rsa_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            rsa_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+            public_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
+            public_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
           }
         else
           {
-            JSONObjectWriter ec_key_writer = public_key_writer.setObject (JSONSignatureDecoder.EC_JSON);
-            ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
+            public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
+            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, xml_dsig_named_curve ?
                KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            ec_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
-            ec_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
+            public_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
+            public_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
         return this;
       }

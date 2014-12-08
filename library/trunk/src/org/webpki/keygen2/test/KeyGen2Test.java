@@ -750,7 +750,7 @@ public class KeyGen2Test
                         if (key.isStartOfPUKPolicy ())
                           {
                             KeyCreationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
-                            puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
+                            puk_policy_handle = sks.createPukPolicy (provisioning_handle, 
                                                                      puk_policy.getID (),
                                                                      puk_policy.getEncryptedValue (),
                                                                      puk_policy.getFormat ().getSKSValue (),
@@ -758,7 +758,7 @@ public class KeyGen2Test
                                                                      puk_policy.getMAC());
                           }
                         KeyCreationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
-                        pin_policy_handle = sks.createPINPolicy (provisioning_handle,
+                        pin_policy_handle = sks.createPinPolicy (provisioning_handle,
                                                                  pin_policy.getID (),
                                                                  puk_policy_handle,
                                                                  pin_policy.getUserDefinedFlag (),
@@ -1743,7 +1743,7 @@ public class KeyGen2Test
             assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
             assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
           }
-        assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (key_handle,
+        assertTrue ("HMAC error", ArrayUtil.compare (sks.performHmac (key_handle,
                                                                       MACAlgorithms.HMAC_SHA1.getURI (),
                                                                       null,
                                                                       USER_DEFINED_PIN, TEST_STRING),

@@ -1016,7 +1016,7 @@ public class ServerState implements Serializable
 
             if (preset_pin != null)
               {
-                wr.setBinary (ENCRYPTED_PRESET_PIN_JSON, preset_pin);
+                wr.setBinary (ENCRYPTED_PIN_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)

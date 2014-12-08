@@ -2213,7 +2213,7 @@ public class SKSTest
         assertTrue ("HMAC error", ArrayUtil.compare (result, MACAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
         try
           {
-            sess.sks.performHMAC (key.key_handle, 
+            sess.sks.performHmac (key.key_handle, 
                                   MACAlgorithms.HMAC_SHA256.getURI (),
                                   null,
                                   good_pin.getBytes ("UTF-8"),
@@ -2225,7 +2225,7 @@ public class SKSTest
           }
         try
           {
-            sess.sks.performHMAC (key.key_handle,
+            sess.sks.performHmac (key.key_handle,
                                   SymEncryptionAlgorithms.AES128_CBC.getURI (),
                                   null,
                                   good_pin.getBytes ("UTF-8"), TEST_STRING);

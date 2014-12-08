@@ -1121,7 +1121,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void changePIN (int key_handle, 
+    public synchronized void changePin (int key_handle, 
                                         byte[] authorization,
                                         byte[] new_pin) throws SKSException
       {
@@ -1153,7 +1153,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void setPIN (int key_handle,
+    public synchronized void setPin (int key_handle,
                                      byte[] authorization,
                                      byte[] new_pin) throws SKSException
       {
@@ -1490,7 +1490,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized byte[] performHMAC (int key_handle,
+    public synchronized byte[] performHmac (int key_handle,
                                             String algorithm,
                                             byte[] parameters,
                                             byte[] authorization,
@@ -2600,7 +2600,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized int createPINPolicy (int provisioning_handle,
+    public synchronized int createPinPolicy (int provisioning_handle,
                                              String id,
                                              int puk_policy_handle,
                                              boolean user_defined,
@@ -2705,7 +2705,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized int createPUKPolicy (int provisioning_handle,
+    public synchronized int createPukPolicy (int provisioning_handle,
                                              String id,
                                              byte[] puk_value,
                                              byte format,

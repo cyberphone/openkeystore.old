@@ -112,7 +112,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                           byte[] mac) throws SKSException;
 
     @Override
-    native public int createPINPolicy (int provisioning_handle,
+    native public int createPinPolicy (int provisioning_handle,
                                        String id,
                                        int puk_policy_handle,
                                        boolean user_defined,
@@ -127,7 +127,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                        byte[] mac) throws SKSException;
 
     @Override
-    native public int createPUKPolicy (int provisioning_handle,
+    native public int createPukPolicy (int provisioning_handle,
                                        String id,
                                        byte[] puk_value,
                                        byte format,
@@ -172,7 +172,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                          byte[] data) throws SKSException;
 
     @Override
-    native public byte[] performHMAC (int key_handle,
+    native public byte[] performHmac (int key_handle,
                                       String algorithm,
                                       byte[] parameters,
                                       byte[] authorization,
@@ -225,12 +225,12 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                   byte[] authorization) throws SKSException;
 
     @Override
-    native public void changePIN (int key_handle, 
+    native public void changePin (int key_handle, 
                                   byte[] authorization,
                                   byte[] new_pin) throws SKSException;
 
     @Override
-    native public void setPIN (int key_handle, 
+    native public void setPin (int key_handle, 
                                byte[] authorization,
                                byte[] new_pin) throws SKSException;
 

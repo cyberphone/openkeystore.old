@@ -239,7 +239,7 @@ public class GenKey
     
     public void changePIN (String old_pin, String new_pin) throws SKSException, IOException
       {
-        prov_sess.sks.changePIN (key_handle, getConditionalAuthorization (old_pin), getConditionalAuthorization (new_pin));
+        prov_sess.sks.changePin (key_handle, getConditionalAuthorization (old_pin), getConditionalAuthorization (new_pin));
       }
     
     public byte[] signData (AsymSignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
@@ -272,7 +272,7 @@ public class GenKey
 
     public byte[] performHMAC (MACAlgorithms alg_id, String pin, byte[] data) throws SKSException
       {
-        return prov_sess.sks.performHMAC (key_handle,
+        return prov_sess.sks.performHmac (key_handle,
                                           alg_id.getURI (),
                                           null,
                                           getConditionalAuthorization (pin),
@@ -306,7 +306,7 @@ public class GenKey
 
     public void setPIN (String puk, String pin) throws SKSException
       {
-        prov_sess.sks.setPIN (key_handle, getConditionalAuthorization (puk), getConditionalAuthorization (pin));
+        prov_sess.sks.setPin (key_handle, getConditionalAuthorization (puk), getConditionalAuthorization (pin));
       }
 
     public void deleteKey (String authorization) throws SKSException

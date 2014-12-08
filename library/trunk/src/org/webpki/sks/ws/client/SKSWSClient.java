@@ -377,7 +377,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public int createPUKPolicy (int provisioning_handle,
+    public int createPukPolicy (int provisioning_handle,
                                 String id,
                                 byte[] encrypted_puk, 
                                 byte format, 
@@ -401,7 +401,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public int createPINPolicy (int provisioning_handle, 
+    public int createPinPolicy (int provisioning_handle, 
                                 String id,
                                 int puk_policy_handle,
                                 boolean user_defined,
@@ -917,7 +917,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void changePIN (int key_handle,
+    public void changePin (int key_handle,
                            byte[] authorization,
                            byte[] new_pin) throws SKSException
       {
@@ -935,7 +935,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setPIN (int key_handle,
+    public void setPin (int key_handle,
                         byte[] authorization,
                         byte[] new_pin) throws SKSException
       {
@@ -1052,7 +1052,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] performHMAC (int key_handle,
+    public byte[] performHmac (int key_handle,
                                String algorithm,
                                byte[] parameters,
                                byte[] authorization,

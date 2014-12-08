@@ -93,7 +93,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Signature Scope").append (
             "The scope of a signature (=what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
-            "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> property.");
+            "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property.");
 
         json.addParagraphObject ("Normalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
@@ -119,9 +119,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "trailing zero being redundant. To cope with this " +
             "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
             "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
-            "Note that the <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " +
+            "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
-             JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
+             JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
             "{&quot;Now&quot;:&quot;2014-09-16T10:25:17Z&quot;,&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;Signature&quot;:{&quot;Algorithm&quot;:<br>" +
@@ -130,8 +130,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "ZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "\">" + 
-            JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
+            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.VALUE_JSON + "\">" + 
+            JSONSignatureDecoder.VALUE_JSON + "</a>. " + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference (JSONBaseHTML.REF_X509) +
             "." + LINE_SEPARATOR +
@@ -178,9 +178,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
 
         json.addParagraphObject ("Usage in Applications").append ("JCS as well as the freestanding sub-objects <a href=\"#" + 
-            JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
+            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
-            JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "\">" +
+            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "\">" +
             JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
             "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))

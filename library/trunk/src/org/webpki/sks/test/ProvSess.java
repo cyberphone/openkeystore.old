@@ -558,7 +558,7 @@ public class ProvSess
         puk_policy_mac.addByte (format.getSKSValue ());
         puk_policy_mac.addShort (retry_limit);
         puk_policy.id = id;
-        puk_policy.puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
+        puk_policy.puk_policy_handle = sks.createPukPolicy (provisioning_handle, 
                                                             id,
                                                             encrypted_value, 
                                                             format.getSKSValue (), 
@@ -600,7 +600,7 @@ public class ProvSess
         pin_policy.id = id;
         pin_policy.user_defined = user_defined;
         pin_policy.format = format;
-        pin_policy.pin_policy_handle = sks.createPINPolicy (provisioning_handle,
+        pin_policy.pin_policy_handle = sks.createPinPolicy (provisioning_handle,
                                                             id, 
                                                             puk_policy_handle,
                                                             user_defined,

@@ -1261,8 +1261,8 @@ public class JSONBaseHTML
               .addString ("For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) + ".")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.KEY_INFO_JSON)
-              .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
+              .addProperty (JSONSignatureDecoder.SIGNATURE_JSON)
+              .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1292,20 +1292,19 @@ public class JSONBaseHTML
         row_interface
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
+              .addProperty (JSONSignatureDecoder.VALUE_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.VALUE_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
               .addString ("The signature value is calculated by applying the algorithm specified in <code>" +
-                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the key specified in <code>" +
-                  JSONSignatureDecoder.KEY_INFO_JSON +
-                  "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
+                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the specified key on the " +
+                  "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "normalized JSON object.");
 
-        row_interface = addSubItemTable (JSONSignatureDecoder.KEY_INFO_JSON)
+        row_interface = addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.KEY_ID_JSON)
@@ -1382,8 +1381,8 @@ public class JSONBaseHTML
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.EC_JSON)
-              .addLink (JSONSignatureDecoder.EC_JSON)
+              .addProperty (JSONSignatureDecoder.RSA_PUBLIC_KEY)
+              .addLink (JSONSignatureDecoder.RSA_PUBLIC_KEY)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1393,8 +1392,8 @@ public class JSONBaseHTML
               .addString ("EC public key.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.RSA_JSON)
-              .addLink (JSONSignatureDecoder.RSA_JSON)
+              .addProperty (JSONSignatureDecoder.RSA_PUBLIC_KEY)
+              .addLink (JSONSignatureDecoder.RSA_PUBLIC_KEY)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1402,11 +1401,11 @@ public class JSONBaseHTML
               .addString (option)
               .addString ("RSA public key. <i>Algorithm restrictions</i>: 1024-4096 bit keys appear to work just about &quot;everywhere&quot;.");
 
-        addSubItemTable (JSONSignatureDecoder.EC_JSON)
+        addSubItemTable (JSONSignatureDecoder.RSA_PUBLIC_KEY)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.NAMED_CURVE_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.NAMED_CURVE_JSON)
+              .addProperty (JSONSignatureDecoder.CURVE_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.CURVE_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.URI)
             .newColumn ()
@@ -1433,8 +1432,8 @@ public class JSONBaseHTML
               .addString (jcs)
               .addString ("EC curve point X. The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> is <code>")
+                          JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
               .addString (KeyAlgorithms.NIST_P_521.getURI ())
               .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes")
           .newRow ()
@@ -1448,12 +1447,12 @@ public class JSONBaseHTML
               .addString (jcs)
               .addString ("EC curve point Y. The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.NAMED_CURVE_JSON + "</code> is <code>")
+                          JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
               .addString (KeyAlgorithms.NIST_P_521.getURI ())
               .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
 
-        addSubItemTable (JSONSignatureDecoder.RSA_JSON)
+        addSubItemTable (JSONSignatureDecoder.RSA_PUBLIC_KEY)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.MODULUS_JSON)

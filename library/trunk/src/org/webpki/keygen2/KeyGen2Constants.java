@@ -34,7 +34,7 @@ public interface KeyGen2Constants
 
     String BIOMETRIC_PROTECTION_JSON                 = SecureKeyStore.VAR_BIOMETRIC_PROTECTION;
 
-    String CHALLENGE_JSON                            = "challenge";
+    String CHALLENGE_JSON                            = SecureKeyStore.VAR_CHALLENGE;
 
     String CLIENT_CAPABILITIES_JSON                  = "clientCapabilities";
 
@@ -72,7 +72,7 @@ public interface KeyGen2Constants
 
     String ENCRYPTED_KEY_JSON                        = SecureKeyStore.VAR_ENCRYPTED_KEY;
 
-    String ENCRYPTED_PRESET_PIN_JSON                 = "encryptedPresetPin";
+    String ENCRYPTED_PIN_JSON                        = "encryptedPin";
     
     String ENCRYPTED_PUK_JSON                        = SecureKeyStore.VAR_ENCRYPTED_PUK;
 

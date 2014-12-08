@@ -769,9 +769,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         KeyObject rk;
         PresetPIN preset = null;
         boolean save_user_defined = pin_policy.user_defined;
-        if (rd.hasProperty (ENCRYPTED_PRESET_PIN_JSON))
+        if (rd.hasProperty (ENCRYPTED_PIN_JSON))
           {
-            preset = new PresetPIN (rd, ENCRYPTED_PRESET_PIN_JSON);
+            preset = new PresetPIN (rd, ENCRYPTED_PIN_JSON);
           }
         else
           {
