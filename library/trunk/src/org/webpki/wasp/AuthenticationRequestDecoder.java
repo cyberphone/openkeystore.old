@@ -67,7 +67,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
           {
             if (HashAlgorithms.testAlgorithmURI (value))
               {
-                ap.digest_algorithm = HashAlgorithms.getAlgorithmFromURI (value);
+                ap.digest_algorithm = HashAlgorithms.getAlgorithmFromID (value);
               }
             else
               {
@@ -79,7 +79,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
           {
             if (AsymSignatureAlgorithms.testAlgorithmURI (value))
               {
-                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (value);
+                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (value);
               }
             else
               {

@@ -21,27 +21,36 @@ import java.io.IOException;
 
 public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
   {
-    RSA_PKCS_1_5           ("1.2.840.113549.1.1.1",
-                            "http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+    RSA_PKCS_1_5           ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+                            null,
+                            "1.2.840.113549.1.1.1",
                             "RSA/ECB/PKCS1Padding"),
-    RSA_OAEP_SHA1_MGF1P    (null,
-                            "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+
+    RSA_OAEP_SHA1_MGF1P    ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+                            "RSA-OAEP",
+                            null,
                             "RSA/ECB/OAEPWithSHA1AndMGF1Padding"),
-    RSA_OAEP_SHA256_MGF1P  (null,
-                            "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+
+    RSA_OAEP_SHA256_MGF1P  ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                            "RSA-OAEP-256",
+                            null,                            
                             "RSA/ECB/OAEPWithSHA256AndMGF1Padding"),
-    RSA_RAW                (null,
-                            "http://xmlns.webpki.org/sks/algorithm#rsa.raw",
+
+    RSA_RAW                ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
+                            null,
+                            null,
                             "RSA/ECB/NoPadding");
 
+    private final String         sks_id;          // As (typically) expressed in protocols
+    private final String         josename;        // Alternative JOSE name
     private final String         oid;             // As expressed in OIDs
-    private final String         uri;             // As expressed in protocols
     private final String         jcename;         // As expressed for JCE
 
-    private AsymEncryptionAlgorithms (String oid, String uri, String jcename)
+    private AsymEncryptionAlgorithms (String sks_id, String josename, String oid, String jcename)
       {
+        this.sks_id = sks_id;
+        this.josename = josename;
         this.oid = oid;
-        this.uri = uri;
         this.jcename = jcename;
       }
 
@@ -70,7 +79,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
     @Override
     public String getURI ()
       {
-        return uri;
+        return sks_id;
       }
 
 
@@ -78,6 +87,13 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
     public String getOID ()
       {
         return oid;
+      }
+
+
+    @Override
+    public String getJOSEName ()
+      {
+        return josename;
       }
 
 
@@ -94,15 +110,15 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
-    public static AsymEncryptionAlgorithms getAlgorithmFromURI (String uri) throws IOException
+    public static AsymEncryptionAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
       {
         for (AsymEncryptionAlgorithms alg : values ())
           {
-            if (uri.equals (alg.uri))
+            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
               {
                 return alg;
               }
           }
-        throw new IOException ("Unknown algorithm: " + uri);
+        throw new IOException ("Unknown algorithm: " + algorithm_id);
       }
   }

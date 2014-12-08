@@ -19,16 +19,21 @@ package org.webpki.json;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
+
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+
 import java.util.Vector;
 
 import org.webpki.crypto.SignatureAlgorithms;
@@ -55,7 +60,7 @@ public class JSONSignatureDecoder implements Serializable
   
     public static final String CURVE_JSON                 = "curve";
     
-    public static final String EXPONENT_JSON              = "exponent";
+    public static final String E_JSON                     = "e";
     
     public static final String EXTENSIONS_JSON            = "extensions";
 
@@ -63,7 +68,7 @@ public class JSONSignatureDecoder implements Serializable
     
     public static final String KEY_ID_JSON                = "keyId";
 
-    public static final String MODULUS_JSON               = "modulus";
+    public static final String N_JSON                     = "n";
     
     public static final String PUBLIC_KEY_JSON            = "publicKey";
     
@@ -145,8 +150,9 @@ public class JSONSignatureDecoder implements Serializable
               break;
 
             default:
-              algorithm = MACAlgorithms.getAlgorithmFromURI (algorithm_string);
+              algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
+        checkForUnread (signature);
       }
 
     void getKeyInfo (JSONObjectReader rd) throws IOException
@@ -193,44 +199,46 @@ public class JSONSignatureDecoder implements Serializable
         return new BigInteger (1, crypto_binary);
       }
 
+    static void checkForUnread (JSONObjectReader rd) throws IOException
+      {
+        for (String property : rd.root.properties.keySet ())
+          {
+            if (!rd.root.properties.get (property).read_flag)
+              {
+                throw new IOException ("Unexpected property: " + property);
+              }
+          }
+      }
+
     static PublicKey getPublicKey (JSONObjectReader rd) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
+        PublicKey public_key = null;
         try
           {
             String type = rd.getString (TYPE_JSON);
             if (type.equals (RSA_PUBLIC_KEY))
               {
-                return KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, MODULUS_JSON),
-                                                                                            getCryptoBinary (rd, EXPONENT_JSON)));
+                public_key = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, N_JSON),
+                                                                                                  getCryptoBinary (rd, E_JSON)));
               }
             else if (type.equals (EC_PUBLIC_KEY))
               {
-                String curve_name = rd.getString (CURVE_JSON);
-                KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
-                                               getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON));
                 ECPoint w = new ECPoint (getFixedBinary (rd, X_JSON, ec), getFixedBinary (rd, Y_JSON, ec));
-                return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
+                public_key = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
               }
-            throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
+            else
+              {
+                throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
+              }
+            checkForUnread (rd);
+            return public_key;
           }
         catch (GeneralSecurityException e)
           {
             throw new IOException (e);
           }
-      }
-
-    static KeyAlgorithms getXMLDSigNamedCurve (String xml_dsig_curve_name) throws IOException
-      {
-        String oid = xml_dsig_curve_name.substring (KeyAlgorithms.XML_DSIG_CURVE_PREFIX.length ());
-        for (KeyAlgorithms key_alg : KeyAlgorithms.values ())
-          {
-            if (oid.equals (key_alg.getECDomainOID ()))
-              {
-                return key_alg;
-              }
-          }
-        throw new IOException ("Unknown \"" + CURVE_JSON + "\": " + xml_dsig_curve_name);
       }
 
     static X509Certificate[] getX509CertificatePath (JSONObjectReader rd) throws IOException
@@ -296,7 +304,7 @@ public class JSONSignatureDecoder implements Serializable
 
     void asymmetricSignatureVerification (PublicKey public_key) throws IOException
       {
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm_string);
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string);
         try
           {
             Signature sig = Signature.getInstance (algorithm.getJCEName ());

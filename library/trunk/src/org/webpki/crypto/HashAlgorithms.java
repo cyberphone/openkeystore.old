@@ -17,7 +17,6 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
-
 import java.security.MessageDigest;
 import java.security.GeneralSecurityException;
 
@@ -29,13 +28,13 @@ public enum HashAlgorithms
     SHA384 ("http://www.w3.org/2001/04/xmldsig-more#sha384", "2.16.840.1.101.3.4.2.2", "SHA-384"),
     SHA512 ("http://www.w3.org/2001/04/xmlenc#sha512",       "2.16.840.1.101.3.4.2.3", "SHA-512");
 
-    private final String uri;       // As expressed in protocols
+    private final String sks_id;    // As (typically) expressed in protocols
     private final String oid;       // As expressed in ASN.1 messages
     private final String jcename;   // As expressed for JCE
 
-    private HashAlgorithms (String uri, String oid, String jcename)
+    private HashAlgorithms (String sks_id, String oid, String jcename)
       {
-        this.uri = uri;
+        this.sks_id = sks_id;
         this.oid = oid;
         this.jcename = jcename;
       }
@@ -43,7 +42,7 @@ public enum HashAlgorithms
 
     public String getURI ()
       {
-        return uri;
+        return sks_id;
       }
 
 
@@ -59,11 +58,11 @@ public enum HashAlgorithms
       }
 
     
-    public static boolean testAlgorithmURI (String uri)
+    public static boolean testAlgorithmURI (String sks_id)
       {
         for (HashAlgorithms alg : HashAlgorithms.values ())
           {
-            if (uri.equals (alg.uri))
+            if (sks_id.equals (alg.sks_id))
               {
                 return true;
               }
@@ -85,16 +84,16 @@ public enum HashAlgorithms
       }
 
 
-    public static HashAlgorithms getAlgorithmFromURI (String uri) throws IOException
+    public static HashAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
       {
         for (HashAlgorithms alg : values ())
           {
-            if (uri.equals (alg.uri))
+            if (algorithm_id.equals (alg.sks_id))
               {
                 return alg;
               }
           }
-        throw new IOException ("Unknown algorithm: " + uri);
+        throw new IOException ("Unknown algorithm: " + algorithm_id);
       }
 
 

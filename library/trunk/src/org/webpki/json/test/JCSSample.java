@@ -91,20 +91,21 @@ public class JCSSample
       {
         try
           {
-            if (argc.length != 1)
+            if (argc.length != 2)
               {
-                throw new IOException ("Output file arg missing");
+                throw new IOException ("Output-file jose-flag");
               }
             CustomCryptoProvider.conditionalLoad (true);
             JSONObjectWriter.setNormalizationDebugFile (argc[0]);
             String unormalized_json = 
               "{\n" +
-              "  \"Now\": \"2014-09-16T10:25:17Z\",\n" +
-              "  \"EscapeMe\": \"\\u20ac\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\\"\\/\",\n" +
-              "  \"Numbers\": [1e0, 4.50, 6]\n" +
+              "  \"now\": \"2014-12-08T10:25:17Z\",\n" +
+              "  \"escapeMe\": \"\\u20ac$\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\\"\\/\",\n" +
+              "  \"numbers\": [1e0, 4.50, 6]\n" +
               "}";
             JSONObjectReader or = JSONParser.parse (unormalized_json);
             JSONObjectWriter wr = new JSONObjectWriter (or);
+            wr.setJOSEAlgorithmPreference (new Boolean(argc[1]));
             createAsymmetricKeySignature (wr);
             String res = new String (wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
             res = unormalized_json.substring (0, unormalized_json.indexOf (']')) + res.substring (res.indexOf (']'));

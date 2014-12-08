@@ -66,34 +66,30 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
-"&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2014-09-16T10:25:17Z&quot;,<br>" +
-"&nbsp;&nbsp;&quot;EscapeMe&quot;:&nbsp;&quot;\\u000F\\u000aA'\\u0042\\\\\\&quot;\\/&quot;,<br>" +
-"&nbsp;&nbsp;&quot;Numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
-"&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+"&nbsp;&nbsp;&quot;now&quot;:&nbsp;&quot;2014-12-08T10:25:17Z&quot;,<br>" +
+"&nbsp;&nbsp;&quot;escapeMe&quot;:&nbsp;&quot;\\u20ac$\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\&quot;\\/&quot;,<br>" +
+"&nbsp;&nbsp;&quot;numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
+"&nbsp;&nbsp;&quot;signature&quot;:<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Algorithm&quot;:&nbsp;&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;KeyInfo&quot;:<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;algorithm&quot;:&nbsp;&quot;ES256&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;publicKey&quot;:<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;PublicKey&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;EC&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;NamedCurve&quot;:&nbsp;&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;X&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;type&quot;:&nbsp;&quot;EC&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;curve&quot;:&nbsp;&quot;P-256&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEYCIQDqFARll5SQJVq6j-YMfogRopPc2PgY84CS8Jvs4Ws-DQIhAIPovSwdjwolMKXBVC8dSO7IG9dEulwA9gAKUmRxiQtj&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;value&quot;:&nbsp;&quot;MEYCIQDGP3HL5aCGaMlgNlqqnPbq-Dhkli4SkfV_ZoGlhGroowIhAPlPhXOsjpPHgQ8E8M-jUQo8lfgO_GRZUJKsg_-u-aJO&quot;<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
 "}</code></div>" +
-"The sample signature's payload consists of the properties above <code>Signature</code>. " +
+"The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
 "Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
 
         json.addParagraphObject ("Signature Scope").append (
             "The scope of a signature (=what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
-            "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property.");
+            "object holding the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
+            "</code> property except for the actual <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property.");
 
         json.addParagraphObject ("Normalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
@@ -112,7 +108,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
             "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
+            "<li style=\"padding-top:4pt\">The JSON object associated with the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> now be " +
             "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
             "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
             "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
@@ -121,16 +117,22 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
-             JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
+             JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
+             "</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-            "{&quot;Now&quot;:&quot;2014-09-16T10:25:17Z&quot;,&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;Signature&quot;:{&quot;Algorithm&quot;:<br>" +
+
+            "{&quot;now&quot;:&quot;2014-12-08T10:25:17Z&quot;,&quot;escapeMe&quot;:&quot;&#x20AC;$\\u000f\\nA'B\\&quot;\\\\\\\\\\&quot;/&quot;,&quot;numbers&quot;:[1e0,4.50,6],&quot;signature&quot;:<br>" +
+            "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWW<br>" +
+            "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}<br>" +
+"jjjjjj<br>" +
+                "{&quot;Now&quot;:&quot;2014-09-16T10:25:17Z&quot;,&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;Signature&quot;:{&quot;Algorithm&quot;:<br>" +
             "&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xml<br>" +
             "ns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3Lg<br>" +
             "ZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.VALUE_JSON + "\">" + 
+            "The signature can now be validated using the method specified in <a href=\"#" + JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.VALUE_JSON + "\">" + 
             JSONSignatureDecoder.VALUE_JSON + "</a>. " + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference (JSONBaseHTML.REF_X509) +

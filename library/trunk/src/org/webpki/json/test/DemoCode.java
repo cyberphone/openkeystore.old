@@ -56,7 +56,7 @@ public class DemoCode
         JSONObjectWriter writer = new JSONObjectWriter ();
 
         // Fill it with some data
-        writer.setString ("MyProperty", "Some data");
+        writer.setString ("myProperty", "Some data");
         
         // Sign document
         writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
@@ -98,7 +98,7 @@ public class DemoCode
         json_signature.verify (new JSONAsymKeyVerifier (public_key));
         
         // Print document payload on the console
-        System.out.println ("Returned data: " + reader.getString ("MyProperty"));
+        System.out.println ("Returned data: " + reader.getString ("myProperty"));
       }
 
     public static void main (String[] argc)

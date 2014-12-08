@@ -66,7 +66,7 @@ public class KeySpecifier implements Serializable
 
     public KeySpecifier (String uri, byte[] optional_parameters) throws IOException
       {
-        this (KeyAlgorithms.getKeyAlgorithmFromURI (uri), optional_parameters);
+        this (KeyAlgorithms.getKeyAlgorithmFromID (uri), optional_parameters);
       }
 
 

@@ -366,7 +366,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         rd.getParent ();
         rd.getParent ();
         rd.getNext (DIGEST_METHOD_ELEM);
-        ref.digest_alg = HashAlgorithms.getAlgorithmFromURI (aHelper.getString (ALGORITHM_ATTR));
+        ref.digest_alg = HashAlgorithms.getAlgorithmFromID (aHelper.getString (ALGORITHM_ATTR));
         rd.getChild ();
         if (rd.hasNext ()) throw new IOException ("No \"DigestMethod\" elements allowed");
         rd.getParent ();
@@ -404,11 +404,11 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         String signature_alg = aHelper.getString (ALGORITHM_ATTR);
         if  (AsymSignatureAlgorithms.testAlgorithmURI (signature_alg))
           {
-            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (signature_alg);
+            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromID (signature_alg);
           }
         else
           {
-            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromURI (signature_alg);
+            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromID (signature_alg);
           }
         rd.getChild ();
         if (rd.hasNext ()) throw new IOException ("No \"SignatureMethod\" elements allowed");

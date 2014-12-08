@@ -687,27 +687,23 @@ public class JSONTest
     
     static final String p521_jcs =
       "{" +
-      "  \"PublicKey\": " +
+      "  \"publicKey\": " +
       "     {" +
-      "      \"EC\":" + 
-      "        {" +
-      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
-      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
-      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
-      "        }" +
+      "      \"type\": \"EC\"," + 
+      "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
+      "      \"x\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
+      "      \"y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
       "    }" +
       "}";
 
     static final String p521_jcs_xml =
       "{" +
-      "  \"PublicKey\": " +
+      "  \"publicKey\": " +
       "     {" +
-      "      \"EC\":" + 
-      "        {" +
-      "          \"NamedCurve\": \"urn:oid:1.3.132.0.35\"," +
-      "          \"X\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
-      "          \"Y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
-      "        }" +
+      "      \"type\": \"EC\"," + 
+      "      \"curve\": \"P-521\"," +
+      "      \"x\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
+      "      \"y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
       "    }" +
       "}";
 
@@ -718,16 +714,14 @@ public class JSONTest
       
     static final String rsa_jcs =
       "{" +
-      "  \"PublicKey\":" + 
+      "  \"publicKey\":" + 
       "    {" +
-      "      \"RSA\":" + 
-      "        {" +
-      "          \"Modulus\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
+      "      \"type\": \"RSA\"," + 
+      "      \"n\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
 "snMwabXH4flk5Akf21Xd1GnAy-FCZoyiORHLfSLcjs2MDPbEWbol3U70PJl3OpyG81yE4lrRXd816JqRLMBFoJXMDIPYtwqa0cEfcLVIHhI" +
 "-ktsId5WpIW-AAwYftQITGn1CarwjtVZ3_g8mlfW_G4xC43D_5LVNPQM3R7TnAP3IQ1wyntT29dpvc8_aaxOlmhwg1xhFc3smDv1R4mOo-M" +
 "Eel_TjKDaci5xsRC0VuzOp5HKyjHKHOBCF3BFcGHV_zo9Q\"," +
-      "          \"Exponent\": \"AQAB\"" + 
-      "        }" + 
+      "      \"e\": \"AQAB\"" + 
       "    }" + 
       "}";
 
@@ -739,14 +733,12 @@ public class JSONTest
 
     static final String p256_jcs =
       "{" +
-      "  \"PublicKey\":" + 
+      "  \"publicKey\":" + 
       "    {" +
-      "      \"EC\":" + 
-      "        {" +
-      "          \"NamedCurve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
-      "          \"X\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
-      "          \"Y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"" +
-      "        }" +
+      "      \"type\": \"EC\"," + 
+      "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
+      "      \"x\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
+      "      \"y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"" +
       "    }" +
       "}";
 
@@ -772,14 +764,13 @@ public class JSONTest
         JSONObjectReader or = JSONParser.parse (jcs);
         PublicKey public_key = or.getPublicKey ();
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
-        JSONObjectWriter ow = new JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
+        JSONObjectWriter ow = new JSONObjectWriter ().setJOSEAlgorithmPreference (jcs.indexOf ("\"P-") > 0);
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.NORMALIZED),
                                 new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
-        pub_key_object = pub_key_object.getObject (rsa_flag ? JSONSignatureDecoder.RSA_PUBLIC_KEY : JSONSignatureDecoder.RSA_PUBLIC_KEY);
-        String key_parm = rsa_flag ? JSONSignatureDecoder.MODULUS_JSON : JSONSignatureDecoder.Y_JSON;
+        String key_parm = rsa_flag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary (key_parm);
         boolean must_fail = true;
         if (rsa_flag)
@@ -811,7 +802,7 @@ public class JSONTest
           {
             assertTrue ("Shouldn't have failed", must_fail);
             checkException (e, rsa_flag ? 
-                "Public RSA key parameter \"" + JSONSignatureDecoder.MODULUS_JSON + "\" contains leading zeroes" 
+                "Public RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes" 
                                         :
                 "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not nomalized");
           }

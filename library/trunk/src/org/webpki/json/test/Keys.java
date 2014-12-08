@@ -99,7 +99,7 @@ public class Keys
         @Override
         protected void writeJSONData (JSONObjectWriter wr) throws IOException
           {
-            wr.setXMLDSigECCurveOption (xml_dsig_curve);
+            wr.setJOSEAlgorithmPreference (xml_dsig_curve);
             wr.setPublicKey (public_key);
           }
 

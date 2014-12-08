@@ -26,6 +26,8 @@ public interface SKSAlgorithms
     public String getOID ();
 
     public String getJCEName ();
+    
+    public String getJOSEName ();
 
     public boolean isSymmetric ();
   }

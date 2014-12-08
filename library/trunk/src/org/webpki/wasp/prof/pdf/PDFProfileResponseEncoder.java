@@ -153,7 +153,7 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
         server_time = s_req_dec.getServerTime ();
         id = s_req_dec.getID ();
         this.server_certificate_fingerprint = server_certificate_fingerprint;
-        doc_sign = new DocumentSignatures (HashAlgorithms.getAlgorithmFromURI (to_decoder.digest_algorithm),
+        doc_sign = new DocumentSignatures (HashAlgorithms.getAlgorithmFromID (to_decoder.digest_algorithm),
                                            to_decoder.document_canonicalization_algorithm,
                                            s_req_dec.getDocumentData ());
         PDFSigner ds = new PDFSigner (signer);

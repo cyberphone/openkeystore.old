@@ -17,20 +17,17 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
-
 import java.security.KeyFactory;
 import java.security.PublicKey;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECParameterSpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.X509EncodedKeySpec;
 
 public enum KeyAlgorithms implements SKSAlgorithms
   {
-    RSA1024     ("http://xmlns.webpki.org/sks/algorithm#rsa1024",
+    RSA1024     ("http://xmlns.webpki.org/sks/algorithm#rsa1024", null,
                  "RSA",
                  1024,
                  AsymSignatureAlgorithms.RSA_SHA1,
@@ -39,7 +36,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA2048     ("http://xmlns.webpki.org/sks/algorithm#rsa2048",
+    RSA2048     ("http://xmlns.webpki.org/sks/algorithm#rsa2048", null,
                  "RSA",
                  2048,
                  AsymSignatureAlgorithms.RSA_SHA256,
@@ -48,7 +45,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA3072     ("http://xmlns.webpki.org/sks/algorithm#rsa3072",
+    RSA3072     ("http://xmlns.webpki.org/sks/algorithm#rsa3072", null,
                  "RSA",
                  3072,
                  AsymSignatureAlgorithms.RSA_SHA512,
@@ -57,7 +54,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA4096     ("http://xmlns.webpki.org/sks/algorithm#rsa4096",
+    RSA4096     ("http://xmlns.webpki.org/sks/algorithm#rsa4096", null,
                  "RSA",
                  4096,
                  AsymSignatureAlgorithms.RSA_SHA512,
@@ -66,7 +63,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA1024_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa1024.exp",
+    RSA1024_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa1024.exp", null,
                  "RSA",
                  1024,
                  AsymSignatureAlgorithms.RSA_SHA1,
@@ -75,7 +72,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA2048_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa2048.exp",
+    RSA2048_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa2048.exp", null,
                  "RSA",
                  2048,
                  AsymSignatureAlgorithms.RSA_SHA256,
@@ -84,7 +81,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA3072_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa3072.exp",
+    RSA3072_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa3072.exp", null,
                  "RSA",
                  3072,
                  AsymSignatureAlgorithms.RSA_SHA512,
@@ -93,7 +90,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    RSA4096_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa4096.exp",
+    RSA4096_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa4096.exp", null,
                  "RSA",
                  4096,
                  AsymSignatureAlgorithms.RSA_SHA512,
@@ -102,7 +99,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    NIST_B_163  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",
+    NIST_B_163  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b163", null,
                  "sect163r2",
                  163,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -120,7 +117,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0x56, (byte)0x8A, (byte)0xBC, (byte)0x0F, (byte)0x05, (byte)0x53, (byte)0x78, (byte)0xB1,
                      (byte)0x30, (byte)0x8E}),
 
-    NIST_B_233  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",
+    NIST_B_233  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b233", null,
                  "sect233r1",
                  233,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
@@ -140,7 +137,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xF6, (byte)0x18, (byte)0xB8, (byte)0x4D, (byte)0xB8, (byte)0xD0, (byte)0x9C, (byte)0x81,
                      (byte)0xB4, (byte)0x99, (byte)0x3B, (byte)0x94}),
 
-    NIST_B_283  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",
+    NIST_B_283  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b283", null,
                  "sect283r1",
                  283,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
@@ -161,7 +158,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xCF, (byte)0x07, (byte)0x7D, (byte)0x84, (byte)0xEC, (byte)0x23, (byte)0xC6, (byte)0x2C,
                      (byte)0x1E, (byte)0x12, (byte)0x0D, (byte)0x95, (byte)0xFD, (byte)0xC7, (byte)0xC7, (byte)0x0C}),
 
-    NIST_P_192  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",
+    NIST_P_192  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p192", null,
                  "secp192r1",
                  192,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -180,7 +177,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xAC, (byte)0x61, (byte)0x5C, (byte)0x58, (byte)0x7C, (byte)0x98, (byte)0x25, (byte)0x82,
                      (byte)0x17, (byte)0xD7, (byte)0x69}),
 
-    NIST_P_256  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+    NIST_P_256  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256", "P-256",
                  "secp256r1",
                  256,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -201,7 +198,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
                      (byte)0x7C, (byte)0x0D, (byte)0xB2}),
 
-    NIST_P_384  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
+    NIST_P_384  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384", "P-384",
                  "secp384r1",
                  384,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
@@ -225,7 +222,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
                      (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98}),
 
-    NIST_P_521  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
+    NIST_P_521  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521", "P-521",
                  "secp521r1",
                  521,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
@@ -254,7 +251,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
                      (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96}),
                      
-     SECG_K_256 ("http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",
+     SECG_K_256 ("http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1", null,
                  "secp256k1",
                  256,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -275,7 +272,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0x5B, (byte)0xC1, (byte)0x32, (byte)0x44, (byte)0xA6, (byte)0x32, (byte)0x06, (byte)0xA9}),                       
 
     BRAINPOOL_P_256 (
-                 "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", null,
                  "brainpoolP256r1",
                  256,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -296,7 +293,8 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
                      (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
 
-    private final String uri;                        // As expressed in protocols
+    private final String sks_id;                     // As (typically) expressed in protocols
+    private final String josename;                   // As expressed in JOSE.  Only applicable EC curves
     private final String jcename;                    // As expressed for JCE
     private final int length_in_bits;                // You guessed it :-)
     private final AsymSignatureAlgorithms pref_alg;  // A sort of a "guide"
@@ -307,7 +305,8 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
     public static final String XML_DSIG_CURVE_PREFIX = "urn:oid:";
 
-    private KeyAlgorithms (String uri,
+    private KeyAlgorithms (String sks_id,
+                           String josename,
                            String jcename,
                            int length_in_bits,
                            AsymSignatureAlgorithms pref_alg,
@@ -316,7 +315,8 @@ public enum KeyAlgorithms implements SKSAlgorithms
                            String ec_domain_oid,
                            byte[] sample_public_key)
       {
-        this.uri = uri;
+        this.sks_id = sks_id;
+        this.josename = josename;
         this.jcename = jcename;
         this.length_in_bits = length_in_bits;
         this.pref_alg = pref_alg;
@@ -364,7 +364,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
     @Override
     public String getURI ()
       {
-        return uri;
+        return sks_id;
       }
 
 
@@ -375,12 +375,19 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
     
+    @Override
+    public String getJOSEName ()
+      {
+         return josename;
+      }
+
+    
     public String getECDomainOID ()
       {
         return ec_domain_oid;
       }
 
-    
+
     public boolean isECKey ()
       {
         return ec_domain_oid != null;
@@ -451,15 +458,16 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
 
-    public static KeyAlgorithms getKeyAlgorithmFromURI (String uri) throws IOException
+    public static KeyAlgorithms getKeyAlgorithmFromID (String algorithm_id) throws IOException
       {
         for (KeyAlgorithms alg : values ())
           {
-            if (uri.equals (alg.uri))
+            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
               {
                 return alg;
               }
           }
-        throw new IOException ("Unknown algorithm: " + uri);
+        throw new IOException ("Unknown algorithm: " + algorithm_id);
       }
+
   }

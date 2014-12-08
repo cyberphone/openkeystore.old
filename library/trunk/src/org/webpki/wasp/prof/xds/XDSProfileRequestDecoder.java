@@ -96,13 +96,13 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
     public HashAlgorithms getDigestAlgorithm () throws IOException
       {
-        return digest_algorithm == null ? null : HashAlgorithms.getAlgorithmFromURI (digest_algorithm);
+        return digest_algorithm == null ? null : HashAlgorithms.getAlgorithmFromID (digest_algorithm);
       }
 
 
     public AsymSignatureAlgorithms getSignatureAlgorithm () throws IOException
       {
-        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromURI (signature_algorithm);
+        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromID (signature_algorithm);
       }
 
 

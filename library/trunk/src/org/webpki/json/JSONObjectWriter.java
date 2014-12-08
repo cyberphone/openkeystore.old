@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
-
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
@@ -37,6 +36,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SKSAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
@@ -56,6 +56,8 @@ public class JSONObjectWriter implements Serializable
 
     static final int STANDARD_INDENT = 2;
 
+    boolean jose_algorithm_preference;
+    
     JSONObject root;
 
     StringBuffer buffer;
@@ -70,8 +72,6 @@ public class JSONObjectWriter implements Serializable
     
     int indent_factor;
 
-    boolean xml_dsig_named_curve;
-    
     static String html_variable_color = "#008000";
     static String html_string_color   = "#0000C0";
     static String html_property_color = "#C00000";
@@ -343,8 +343,8 @@ import org.webpki.json.JSONSignatureDecoder;
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-        signer.writeKeyInfoData (signature_writer.setXMLDSigECCurveOption (xml_dsig_named_curve));
+        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, getAlgorithmID (signer.getAlgorithm ()));
+        signer.writeKeyInfoData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
         if (signer.extensions != null)
           {
             Vector<JSONValue> array = new Vector<JSONValue> ();
@@ -358,32 +358,41 @@ import org.webpki.json.JSONSignatureDecoder;
         return this;
       }
     
+    String getAlgorithmID (SKSAlgorithms algorithm)
+      {
+        if (jose_algorithm_preference && algorithm.getJOSEName () != null)
+          {
+            return algorithm.getJOSEName ();
+          }
+        return algorithm.getURI ();
+      }
+ 
+    public JSONObjectWriter setJOSEAlgorithmPreference (boolean flag)
+      {
+        jose_algorithm_preference = flag;
+        return this;
+      }
+
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
+        
         JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
         if (key_alg.isRSAKey ())
           {
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
             RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-            public_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
-            public_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+            public_key_writer.setCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.N_JSON);
+            public_key_writer.setCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.E_JSON);
           }
         else
           {
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, xml_dsig_named_curve ?
-               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
+            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg));
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
             public_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
             public_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
-        return this;
-      }
-
-    public JSONObjectWriter setXMLDSigECCurveOption (boolean flag)
-      {
-        xml_dsig_named_curve = flag;
         return this;
       }
 

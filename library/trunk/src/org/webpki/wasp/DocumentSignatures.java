@@ -181,7 +181,7 @@ public class DocumentSignatures
         rd.getNext (DOC_SIGN_ELEM);
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         DocumentSignatures ds = 
-             new DocumentSignatures (HashAlgorithms.getAlgorithmFromURI (ah.getString (DIGEST_ALG_ATTR)),
+             new DocumentSignatures (HashAlgorithms.getAlgorithmFromID (ah.getString (DIGEST_ALG_ATTR)),
                                                                          ah.getString (CN_ALG_ATTR));
         rd.getChild ();
         while (rd.hasNext ())
