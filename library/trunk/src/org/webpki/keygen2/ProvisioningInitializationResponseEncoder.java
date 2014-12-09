@@ -119,7 +119,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            wr.setObject (DEVICE_CERTIFICATE_JSON).setX509CertificatePath (device_certificate_path);
+            wr.setObject (DEVICE_ID_JSON).setX509CertificatePath (device_certificate_path);
           }
 
         ////////////////////////////////////////////////////////////////////////

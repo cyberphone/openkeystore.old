@@ -80,9 +80,9 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasProperty (DEVICE_CERTIFICATE_JSON))
+        if (rd.hasProperty (DEVICE_ID_JSON))
           {
-            device_certificate_path = rd.getObject (DEVICE_CERTIFICATE_JSON).getX509CertificatePath ();
+            device_certificate_path = rd.getObject (DEVICE_ID_JSON).getX509CertificatePath ();
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

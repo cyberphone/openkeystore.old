@@ -76,7 +76,7 @@ public class JSONSignatureDecoder implements Serializable
     
     public static final String SIGNATURE_JSON             = "signature";
     
-    public static final String SIGNATURE_CERTIFICATE_JSON = "signatureCertificate";
+    public static final String SIGNER_CERTIFICATE_JSON    = "signerCertificate";
   
     public static final String SUBJECT_JSON               = "subject";
     
@@ -90,7 +90,7 @@ public class JSONSignatureDecoder implements Serializable
     
     public static final String X_JSON                     = "x";
     
-    public static final String X509_CERTIFICATE_PATH_JSON = "x509CertificatePath";
+    public static final String CERTIFICATE_PATH_JSON      = "certificatePath";
     
     public static final String Y_JSON                     = "y";
   
@@ -152,12 +152,12 @@ public class JSONSignatureDecoder implements Serializable
             default:
               algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
-        checkForUnread (signature);
+        signature.checkForUnread ();
       }
 
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
-        if (rd.hasProperty (X509_CERTIFICATE_PATH_JSON))
+        if (rd.hasProperty (CERTIFICATE_PATH_JSON))
           {
             readX509CertificateEntry (rd);
           }
@@ -199,17 +199,6 @@ public class JSONSignatureDecoder implements Serializable
         return new BigInteger (1, crypto_binary);
       }
 
-    static void checkForUnread (JSONObjectReader rd) throws IOException
-      {
-        for (String property : rd.root.properties.keySet ())
-          {
-            if (!rd.root.properties.get (property).read_flag)
-              {
-                throw new IOException ("Unexpected property: " + property);
-              }
-          }
-      }
-
     static PublicKey getPublicKey (JSONObjectReader rd) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
@@ -232,7 +221,7 @@ public class JSONSignatureDecoder implements Serializable
               {
                 throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
               }
-            checkForUnread (rd);
+            rd.checkForUnread ();;
             return public_key;
           }
         catch (GeneralSecurityException e)
@@ -245,7 +234,7 @@ public class JSONSignatureDecoder implements Serializable
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
-        for (byte[] certificate_blob : rd.getBinaryArray (X509_CERTIFICATE_PATH_JSON))
+        for (byte[] certificate_blob : rd.getBinaryArray (CERTIFICATE_PATH_JSON))
           {
             try
               {
@@ -264,9 +253,9 @@ public class JSONSignatureDecoder implements Serializable
     void readX509CertificateEntry (JSONObjectReader rd) throws IOException
       {
         certificate_path = getX509CertificatePath (rd);
-        if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
+        if (rd.hasProperty (SIGNER_CERTIFICATE_JSON))
           {
-            rd = rd.getObject (SIGNATURE_CERTIFICATE_JSON);
+            rd = rd.getObject (SIGNER_CERTIFICATE_JSON);
             String issuer = rd.getString (ISSUER_JSON);
             BigInteger serial_number = rd.getBigInteger (SERIAL_NUMBER_JSON);
             String subject = rd.getString (SUBJECT_JSON);
@@ -275,7 +264,7 @@ public class JSONSignatureDecoder implements Serializable
                 !signature_certificate.getSerialNumber ().equals (serial_number) ||
                 !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
               {
-                throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+                throw new IOException ("\"" + SIGNER_CERTIFICATE_JSON + "\" doesn't match actual certificate");
               }
           }
       }

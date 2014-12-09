@@ -60,7 +60,7 @@ public interface KeyGen2Constants
     
     String DELETE_PROTECTION_JSON                    = SecureKeyStore.VAR_DELETE_PROTECTION;
 
-    String DEVICE_CERTIFICATE_JSON                   = "deviceCertificate";
+    String DEVICE_ID_JSON                            = "deviceId";
 
     String DEVICE_PIN_PROTECTION_JSON                = SecureKeyStore.VAR_DEVICE_PIN_PROTECTION;
 

@@ -1348,7 +1348,7 @@ public class JSONBaseHTML
         row_interface
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
               .addArrayList (Types.SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.BASE64)
@@ -1361,8 +1361,8 @@ public class JSONBaseHTML
                           "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
-              .addLink (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
+              .addProperty (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
+              .addLink (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1370,12 +1370,12 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("<i>Optional</i> signature certificate attribute data for usage with the <code>" +
-                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
-                          "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON +
-                          "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
+                          "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
+                          "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code>." + Types.LINE_SEPARATOR +
                           "Note: due to the fact that X.500 name comparisions have turned out (in practice) to " +
-                          "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + 
+                          "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + 
                           "</code> option <i>should only be used in specific environments</i>.");
 
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -1478,7 +1478,7 @@ public class JSONBaseHTML
               .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
               .addString (" data type.");
 
-        addSubItemTable (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON)
+        addSubItemTable (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.ISSUER_JSON)

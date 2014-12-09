@@ -411,7 +411,7 @@ import org.webpki.json.JSONSignatureDecoder;
                 throw new IOException (e);
               }
           }
-        setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
+        setBinaryArray (JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
         return this;
       }
 

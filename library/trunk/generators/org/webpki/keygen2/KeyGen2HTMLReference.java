@@ -959,7 +959,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newExtensionRow (new LinkedObject (CLIENT_EPHEMERAL_KEY_JSON,
                                               true,
                                               "See <code>SKS:createProvisioningSession." + CLIENT_EPHEMERAL_KEY_JSON + "</code>."))
-          .newExtensionRow (new LinkedObject (DEVICE_CERTIFICATE_JSON,
+          .newExtensionRow (new LinkedObject (DEVICE_ID_JSON,
                                               false,
                           "See <code>SKS:createProvisioningSession</code>. " +
                           "Note that this property is either required or forbidden " +
@@ -1277,14 +1277,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<code>" + CLIENT_SESSION_ID_JSON + "</code> of matching credential.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("Identical representation as the <code>" +
-                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
               .addString (".")
@@ -1646,7 +1646,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString (" for a specific key.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
@@ -1654,7 +1654,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.X509Certificate</code>")
               .addString (".<br>Identical representation as the <code>" +
-                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
               .addString (".")
@@ -1670,7 +1670,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("<i>Optional:</i> Flag (with the default value <code>false</code>), " +
                           "which tells if <code>" +
-                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code> contains a user-installable trust anchor as well." + LINE_SEPARATOR +
                           "Trust anchor installation is meant to be <i>independent</i> of SKS provisioning.")
           .newExtensionRow (new LinkedObject (IMPORT_SYMMETRIC_KEY_JSON,
@@ -1937,17 +1937,17 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("Image height.");
 
-        json.addSubItemTable (DEVICE_CERTIFICATE_JSON)
+        json.addSubItemTable (DEVICE_ID_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("Identical representation as the <code>" +
-                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
               .addString (".");

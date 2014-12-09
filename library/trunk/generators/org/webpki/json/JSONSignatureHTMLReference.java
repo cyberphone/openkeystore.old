@@ -182,8 +182,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Usage in Applications").append ("JCS as well as the freestanding sub-objects <a href=\"#" + 
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
-            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "\">" +
-            JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "\">" +
+            JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
             "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
          .append ("." + LINE_SEPARATOR +
@@ -255,7 +255,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
         json.addDocumentHistoryLine ("2013-12-29", "0.5", "Added the <code>" + JSONSignatureDecoder.EXTENSIONS_JSON + "</code> facility");
         json.addDocumentHistoryLine ("2014-01-21", "0.51", "Added clarification to public key parameter representation");
-        json.addDocumentHistoryLine ("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + "</code> option");
+        json.addDocumentHistoryLine ("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "</code> option");
         json.addDocumentHistoryLine ("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
         json.addDocumentHistoryLine ("2014-09-17", "0.54", "Changed canonicalization to normalization");
         json.addDocumentHistoryLine ("2014-09-23", "0.55", "Aligned EC parameters with " + json.createReference (JSONBaseHTML.REF_JOSE));
