@@ -18,28 +18,28 @@ package org.webpki.webapps.wcppsignaturedemo;
 
 public interface BaseProperties
   {
-    String DATE_TIME_JSON             = "DateTime";
-    String REFERENCE_ID_JSON          = "ReferenceID";
-    String CERTIFICATE_FILTERS_JSON   = "CertificateFilters";
-    String VALUE_JSON                 = "Value";
-    String DOMAIN_NAME_JSON           = "DomainName";
-    String ALGORITHM_JSON             = "Algorithm";
-    String SIGNATURE_ALGORITHMS_JSON  = "SignatureAlgorithms";
-    String HASH_ALGORITHM_JSON        = "HashAlgorithm";
-    String OBJECT_TO_SIGN_JSON        = "ObjectToSign";
-    String MIME_TYPE_JSON             = "MIMEType";
+    String DATE_TIME_JSON             = "dateTime";
+    String REFERENCE_ID_JSON          = "referenceId";
+    String CERTIFICATE_FILTERS_JSON   = "certificateFilters";
+    String VALUE_JSON                 = "value";
+    String DOMAIN_NAME_JSON           = "domainName";
+    String ALGORITHM_JSON             = "algorithm";
+    String SIGNATURE_ALGORITHMS_JSON  = "signatureAlgorithms";
+    String HASH_ALGORITHM_JSON        = "hashAlgorithm";
+    String OBJECT_TO_SIGN_JSON        = "objectToSign";
+    String MIME_TYPE_JSON             = "mimeType";
     String DOCUMENT_JSON              = "Document";
-    String DOCUMENT_DATA_JSON         = "DocumentData";
-    String DOCUMENT_HASH_JSON         = "DocumentHash";
-    String REQUEST_DATA_JSON          = "RequestData";
-    String ORIGIN_JSON                = "Origin";
+    String DOCUMENT_DATA_JSON         = "documentData";
+    String DOCUMENT_HASH_JSON         = "documentHash";
+    String REQUEST_DATA_JSON          = "requestData";
+    String ORIGIN_JSON                = "origin";
     
-    String SIGNATURE_TYPE_JSON        = "SignatureType";
+    String SIGNATURE_TYPE_JSON        = "signatureType";
     // Argument to the above
-    String SIGNATURE_TYPE_DETACHED    = "Detached";
-    String SIGNATURE_TYPE_EMBEDDING   = "Embedding";
+    String SIGNATURE_TYPE_DETACHED    = "detached";
+    String SIGNATURE_TYPE_EMBEDDING   = "embedding";
     
-    String SIGNATURE_FORMAT_JSON      = "SignatureFormat";
+    String SIGNATURE_FORMAT_JSON      = "signatureFormat";
     // Argument to the above
     String SIGNATURE_FORMAT_JCS       = "JCS";
     String SIGNATURE_FORMAT_XML_DSIG  = "XMLDSig";

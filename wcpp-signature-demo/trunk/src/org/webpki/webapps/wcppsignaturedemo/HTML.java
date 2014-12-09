@@ -672,12 +672,11 @@ public class HTML implements BaseProperties
         "    }\n" +
         "    signature_object = signature_response." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
         "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = jcs_alg;\n" +
-        "    var key_info = signature_object." + JSONSignatureDecoder.KEY_INFO_JSON + " = {};\n"+
-        "    key_info." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = client_cert_data;\n" +
-        "    key_info." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = client_cert_path;\n" +
+        "    signature_object." + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + " = client_cert_data;\n" +
+        "    signature_object." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + " = client_cert_path;\n" +
         "    crypto.subtle.importKey('jwk', client_private_key, key_import_alg, false, ['sign']).then (function(private_key) {\n" +
         "    crypto.subtle.sign (key_signature_alg, private_key, convertStringToUTF8(JSON.stringify(signature_response))).then (function(signature) {\n" +
-        "        signature_object." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
+        "        signature_object." + JSONSignatureDecoder.VALUE_JSON + " = binaryToBase64URL(new Uint8Array(signature));\n" +
         "        window.parent.postMessage(JSON.stringify(signature_response), window.document.referrer);\n" +
         "    }).then (undefined, function() {error('Failed signing')});\n" +
         "    }).then (undefined, function() {error('Failed importing private key')});\n" +
@@ -720,7 +719,7 @@ public class HTML implements BaseProperties
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
         "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
         "    var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
-        "    var jcs_alg = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+        "    var jcs_alg = '" + AsymSignatureAlgorithms.RSA_SHA256.getJOSEName () + "';\n" +
         "    if (client_private_key.kty == 'EC') {\n" +
         "        error('Not implemented yet');\n" +
         "    }\n" +
