@@ -322,7 +322,7 @@ namespace org.webpki.sks.ws.client
 	                throw new SKSException("Key locked, user message", SKSException.ERROR_USER_ABORT);
 	            }
 	            KeyAttributes ka = getKeyAttributes (key_handle);
-	            if (kpi.EnablePINCaching)
+	            if (kpi.EnablePinCaching)
 	            {
 	                if (tga)
 	                {
@@ -341,7 +341,7 @@ namespace org.webpki.sks.ws.client
                                                                                        (PassphraseFormat)kpi.Format,
                                                                                        (Grouping)kpi.Grouping,
                                                                                        (AppUsage)ka.AppUsage,
-                                                                                       kpi.PINErrorCount == 0 ? 0 : kpi.RetryLimit - kpi.PINErrorCount);
+                                                                                       kpi.PinErrorCount == 0 ? 0 : kpi.RetryLimit - kpi.PinErrorCount);
                 if (authorization_form.ShowDialog() == DialogResult.OK)
                 {
                 	authorization = 
@@ -349,7 +349,7 @@ namespace org.webpki.sks.ws.client
                 	                                                Hex.Decode (authorization_form.password)
                 	                                                             :
                 	                                                System.Text.Encoding.UTF8.GetBytes(authorization_form.password);
-    	            if (kpi.EnablePINCaching)
+    	            if (kpi.EnablePinCaching)
 	                {
 	                	// Although the authorization may be incorrect we will just be
 	                	// prompted again so we can save it in the cache anyway

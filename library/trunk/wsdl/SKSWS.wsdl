@@ -99,7 +99,7 @@
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ClientSessionID" type="xs:string"/>
             <xs:element name="ClientEphemeralKey" type="xs:base64Binary"/>
-            <xs:element name="SessionAttestation" type="xs:base64Binary"/>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -114,7 +114,7 @@
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
-            <xs:element name="Challenge" type="xs:base64Binary"/>
+            <xs:element name="Nonce" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
@@ -196,42 +196,42 @@
 
 <!--
       #########################################################
-      #                    createPUKPolicy                    #
+      #                    createPukPolicy                    #
       #########################################################
 -->
-      <xs:element name="createPUKPolicy">
+      <xs:element name="createPukPolicy">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
-            <xs:element name="EncryptedPUK" type="xs:base64Binary"/>
+            <xs:element name="EncryptedPuk" type="xs:base64Binary"/>
             <xs:element name="Format" type="xs:byte"/>
             <xs:element name="RetryLimit" type="xs:short"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="createPUKPolicy.Response">
+      <xs:element name="createPukPolicy.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="PUKPolicyHandle" type="xs:int"/>
+            <xs:element name="PukPolicyHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
 
 <!--
       #########################################################
-      #                    createPINPolicy                    #
+      #                    createPinPolicy                    #
       #########################################################
 -->
-      <xs:element name="createPINPolicy">
+      <xs:element name="createPinPolicy">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
-            <xs:element name="PUKPolicyHandle" type="xs:int"/>
+            <xs:element name="PukPolicyHandle" type="xs:int"/>
             <xs:element name="UserDefined" type="xs:boolean"/>
             <xs:element name="UserModifiable" type="xs:boolean"/>
             <xs:element name="Format" type="xs:byte"/>
@@ -245,7 +245,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="createPINPolicy.Response">
+      <xs:element name="createPinPolicy.Response">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="PINPolicyHandle" type="xs:int"/>
@@ -266,10 +266,10 @@
             <xs:element name="ID" type="xs:string"/>
             <xs:element name="KeyEntryAlgorithm" type="xs:string"/>
             <xs:element name="ServerSeed" type="xs:base64Binary" nillable="true" minOccurs="0"/>
-            <xs:element name="DevicePINProtection" type="xs:boolean"/>
-            <xs:element name="PINPolicyHandle" type="xs:int"/>
-            <xs:element name="PINValue" type="xs:base64Binary" nillable="true" minOccurs="0"/>
-            <xs:element name="EnablePINCaching" type="xs:boolean"/>
+            <xs:element name="DevicePinProtection" type="xs:boolean"/>
+            <xs:element name="PinPolicyHandle" type="xs:int"/>
+            <xs:element name="PinValue" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="EnablePinCaching" type="xs:boolean"/>
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
@@ -287,7 +287,7 @@
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="PublicKey" type="xs:base64Binary"/>
-            <xs:element name="KeyAttestation" type="xs:base64Binary"/>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -539,9 +539,9 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ProtectionStatus" type="xs:byte"/>
-            <xs:element name="PUKFormat" type="xs:byte"/>
-            <xs:element name="PUKRetryLimit" type="xs:short"/>
-            <xs:element name="PUKErrorCount" type="xs:short"/>
+            <xs:element name="PukFormat" type="xs:byte"/>
+            <xs:element name="PukRetryLimit" type="xs:short"/>
+            <xs:element name="PukErrorCount" type="xs:short"/>
             <xs:element name="UserDefined" type="xs:boolean"/>
             <xs:element name="UserModifiable" type="xs:boolean"/>
             <xs:element name="Format" type="xs:byte"/>
@@ -551,8 +551,8 @@
             <xs:element name="MinLength" type="xs:short"/>
             <xs:element name="MaxLength" type="xs:short"/>
             <xs:element name="InputMethod" type="xs:byte"/>
-            <xs:element name="PINErrorCount" type="xs:short"/>
-            <xs:element name="EnablePINCaching" type="xs:boolean"/>
+            <xs:element name="PinErrorCount" type="xs:short"/>
+            <xs:element name="EnablePinCaching" type="xs:boolean"/>
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
@@ -659,37 +659,37 @@
 
 <!--
       #########################################################
-      #                       changePIN                       #
+      #                       changePin                       #
       #########################################################
 -->
-      <xs:element name="changePIN">
+      <xs:element name="changePin">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
-            <xs:element name="NewPIN" type="xs:base64Binary"/>
+            <xs:element name="NewPin" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="changePIN.Response"/>
+      <xs:element name="changePin.Response"/>
 
 <!--
       #########################################################
-      #                        setPIN                         #
+      #                        setPin                         #
       #########################################################
 -->
-      <xs:element name="setPIN">
+      <xs:element name="setPin">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
-            <xs:element name="NewPIN" type="xs:base64Binary"/>
+            <xs:element name="NewPin" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="setPIN.Response"/>
+      <xs:element name="setPin.Response"/>
 
 <!--
       #########################################################
@@ -771,10 +771,10 @@
 
 <!--
       #########################################################
-      #                      performHMAC                      #
+      #                      performHmac                      #
       #########################################################
 -->
-      <xs:element name="performHMAC">
+      <xs:element name="performHmac">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -787,7 +787,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="performHMAC.Response">
+      <xs:element name="performHmac.Response">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="Result" type="xs:base64Binary"/>
@@ -941,20 +941,20 @@
     <wsdl:part name="parameters" element="tns:signProvisioningSessionData.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="createPUKPolicy">
-    <wsdl:part name="parameters" element="tns:createPUKPolicy"/>
+  <wsdl:message name="createPukPolicy">
+    <wsdl:part name="parameters" element="tns:createPukPolicy"/>
   </wsdl:message>
 
-  <wsdl:message name="createPUKPolicy.Response">
-    <wsdl:part name="parameters" element="tns:createPUKPolicy.Response"/>
+  <wsdl:message name="createPukPolicy.Response">
+    <wsdl:part name="parameters" element="tns:createPukPolicy.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="createPINPolicy">
-    <wsdl:part name="parameters" element="tns:createPINPolicy"/>
+  <wsdl:message name="createPinPolicy">
+    <wsdl:part name="parameters" element="tns:createPinPolicy"/>
   </wsdl:message>
 
-  <wsdl:message name="createPINPolicy.Response">
-    <wsdl:part name="parameters" element="tns:createPINPolicy.Response"/>
+  <wsdl:message name="createPinPolicy.Response">
+    <wsdl:part name="parameters" element="tns:createPinPolicy.Response"/>
   </wsdl:message>
 
   <wsdl:message name="createKeyEntry">
@@ -1109,20 +1109,20 @@
     <wsdl:part name="parameters" element="tns:unlockKey.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="changePIN">
-    <wsdl:part name="parameters" element="tns:changePIN"/>
+  <wsdl:message name="changePin">
+    <wsdl:part name="parameters" element="tns:changePin"/>
   </wsdl:message>
 
-  <wsdl:message name="changePIN.Response">
-    <wsdl:part name="parameters" element="tns:changePIN.Response"/>
+  <wsdl:message name="changePin.Response">
+    <wsdl:part name="parameters" element="tns:changePin.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="setPIN">
-    <wsdl:part name="parameters" element="tns:setPIN"/>
+  <wsdl:message name="setPin">
+    <wsdl:part name="parameters" element="tns:setPin"/>
   </wsdl:message>
 
-  <wsdl:message name="setPIN.Response">
-    <wsdl:part name="parameters" element="tns:setPIN.Response"/>
+  <wsdl:message name="setPin.Response">
+    <wsdl:part name="parameters" element="tns:setPin.Response"/>
   </wsdl:message>
 
   <wsdl:message name="signHashedData">
@@ -1149,12 +1149,12 @@
     <wsdl:part name="parameters" element="tns:keyAgreement.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="performHMAC">
-    <wsdl:part name="parameters" element="tns:performHMAC"/>
+  <wsdl:message name="performHmac">
+    <wsdl:part name="parameters" element="tns:performHmac"/>
   </wsdl:message>
 
-  <wsdl:message name="performHMAC.Response">
-    <wsdl:part name="parameters" element="tns:performHMAC.Response"/>
+  <wsdl:message name="performHmac.Response">
+    <wsdl:part name="parameters" element="tns:performHmac.Response"/>
   </wsdl:message>
 
   <wsdl:message name="symmetricKeyEncrypt">
@@ -1235,15 +1235,15 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="createPUKPolicy">
-      <wsdl:input message="tns:createPUKPolicy"/>
-      <wsdl:output message="tns:createPUKPolicy.Response"/>
+    <wsdl:operation name="createPukPolicy">
+      <wsdl:input message="tns:createPukPolicy"/>
+      <wsdl:output message="tns:createPukPolicy.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="createPINPolicy">
-      <wsdl:input message="tns:createPINPolicy"/>
-      <wsdl:output message="tns:createPINPolicy.Response"/>
+    <wsdl:operation name="createPinPolicy">
+      <wsdl:input message="tns:createPinPolicy"/>
+      <wsdl:output message="tns:createPinPolicy.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1361,15 +1361,15 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="changePIN">
-      <wsdl:input message="tns:changePIN"/>
-      <wsdl:output message="tns:changePIN.Response"/>
+    <wsdl:operation name="changePin">
+      <wsdl:input message="tns:changePin"/>
+      <wsdl:output message="tns:changePin.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="setPIN">
-      <wsdl:input message="tns:setPIN"/>
-      <wsdl:output message="tns:setPIN.Response"/>
+    <wsdl:operation name="setPin">
+      <wsdl:input message="tns:setPin"/>
+      <wsdl:output message="tns:setPin.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1391,9 +1391,9 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="performHMAC">
-      <wsdl:input message="tns:performHMAC"/>
-      <wsdl:output message="tns:performHMAC.Response"/>
+    <wsdl:operation name="performHmac">
+      <wsdl:input message="tns:performHmac"/>
+      <wsdl:output message="tns:performHmac.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1502,7 +1502,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="createPUKPolicy">
+      <wsdl:operation name="createPukPolicy">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1514,7 +1514,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="createPINPolicy">
+      <wsdl:operation name="createPinPolicy">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1754,7 +1754,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="changePIN">
+      <wsdl:operation name="changePin">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1766,7 +1766,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="setPIN">
+      <wsdl:operation name="setPin">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1814,7 +1814,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="performHMAC">
+      <wsdl:operation name="performHmac">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

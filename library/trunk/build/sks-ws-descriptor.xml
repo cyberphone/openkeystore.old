@@ -86,7 +86,7 @@
       {
         try
           {
-            CustomCryptoProvider.forcedLoad ();
+            CustomCryptoProvider.forcedLoad (true);
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             String implementations = System.getProperty ("sks.implementation");
             debug = new Boolean (System.getProperty ("sks.debug"));
@@ -226,9 +226,9 @@
       {
         log (device_id, "Local:getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi = getDevice (device_id).getKeyProtectionInfo (key_handle);
-        if (kpi.hasLocalPINProtection ())
+        if (kpi.hasLocalPinProtection ())
           {
-            if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
+            if (kpi.getPinInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
               {
                 String error = "Missing required \"TrustedGUIAuthorization\" for key #" + key_handle;
                 log (error);
@@ -529,7 +529,7 @@
      <Parameter Name="session_key_limit"     Type="short"  XMLName="SessionKeyLimit"/>
      <Parameter Name="client_session_id"     Type="string" XMLName="ClientSessionID"       Mode="out"/>
      <Parameter Name="client_ephemeral_key"  Type="binary" XMLName="ClientEphemeralKey"    Mode="out" RewriteRule="Out.ECPublicKey"/>
-     <Parameter Name="session_attestation"   Type="binary" XMLName="SessionAttestation"    Mode="out"/>
+     <Parameter Name="attestation"           Type="binary" XMLName="Attestation"           Mode="out"/>
      <Code><![CDATA[
         String log_result = "";
         try
@@ -545,7 +545,7 @@
                                                                                         session_key_limit);
             client_session_id.value = sess.getClientSessionID ();
             client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-            session_attestation.value = sess.getSessionAttestation ();
+            attestation.value = sess.getAttestation ();
             log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
             return sess.getProvisioningHandle ();
           }
@@ -564,13 +564,13 @@
      <Returns   Name="close_attestation"   Type="binary" XMLName="CloseAttestation"/>
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
-     <Parameter Name="challenge"           Type="binary" XMLName="Challenge"/>
+     <Parameter Name="nonce"               Type="binary" XMLName="Nonce"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         String log_result = "";
         try
           {
-            return getDevice (device_id).closeProvisioningSession (provisioning_handle, challenge, mac);
+            return getDevice (device_id).closeProvisioningSession (provisioning_handle, nonce, mac);
           }
         catch (SKSException e)
           {
@@ -660,12 +660,12 @@
         return getDevice (device_id).signProvisioningSessionData (provisioning_handle, data);
 ]]></Code></Method>
 
-   <Method Name="createPUKPolicy" Throws="SKSException">
-     <Returns   Name="puk_policy_handle"   Type="int"    XMLName="PUKPolicyHandle"/>
+   <Method Name="createPukPolicy" Throws="SKSException">
+     <Returns   Name="puk_policy_handle"   Type="int"    XMLName="PukPolicyHandle"/>
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                  Type="string" XMLName="ID"/>
-     <Parameter Name="encrypted_puk"       Type="binary" XMLName="EncryptedPUK"/>
+     <Parameter Name="encrypted_puk"       Type="binary" XMLName="EncryptedPuk"/>
      <Parameter Name="format"              Type="byte"   XMLName="Format"             RewriteRule="In.PassphraseFormat"/>
      <Parameter Name="retry_limit"         Type="short"  XMLName="RetryLimit"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
@@ -673,13 +673,13 @@
         String log_result = null;
         try
           {
-            int puk_policy_handle = getDevice (device_id).createPUKPolicy (provisioning_handle,
+            int puk_policy_handle = getDevice (device_id).createPukPolicy (provisioning_handle,
                                                                            id,
                                                                            encrypted_puk,
                                                                            format,
                                                                            retry_limit,
                                                                            mac);
-            log_result = " : PUKPolicyHandle=" + puk_policy_handle;
+            log_result = " : PukPolicyHandle=" + puk_policy_handle;
             return puk_policy_handle;
           }
         catch (SKSException e)
@@ -689,16 +689,16 @@
           }
         finally
           {
-            log (device_id, "createPUKPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+            log (device_id, "createPukPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
           }
 ]]></Code></Method>
 
-   <Method Name="createPINPolicy" Throws="SKSException">
+   <Method Name="createPinPolicy" Throws="SKSException">
      <Returns   Name="pin_policy_handle"    Type="int"    XMLName="PINPolicyHandle"/>
      <Parameter Name="device_id"            Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                   Type="string" XMLName="ID"/>
-     <Parameter Name="puk_policy_handle"    Type="int"    XMLName="PUKPolicyHandle"/>
+     <Parameter Name="puk_policy_handle"    Type="int"    XMLName="PukPolicyHandle"/>
      <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"/>
      <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"/>
      <Parameter Name="format"               Type="byte"   XMLName="Format"              RewriteRule="In.PassphraseFormat"/>
@@ -713,7 +713,7 @@
         String log_result = null;
         try
           {
-            int pin_policy_handle = getDevice (device_id).createPINPolicy (provisioning_handle,
+            int pin_policy_handle = getDevice (device_id).createPinPolicy (provisioning_handle,
                                                                            id,
                                                                            puk_policy_handle,
                                                                            user_defined,
@@ -726,7 +726,7 @@
                                                                            max_length,
                                                                            input_method,
                                                                            mac);
-            log_result = " : PINPolicyHandle=" + pin_policy_handle;
+            log_result = " : PinPolicyHandle=" + pin_policy_handle;
             return pin_policy_handle;
           }
         catch (SKSException e)
@@ -736,7 +736,7 @@
           }
         finally
           {
-            log (device_id, "createPINPolicy (ProvisioningHandle=" + provisioning_handle + ", PUKPolicyHandle=" + puk_policy_handle + ", ID=" + id + ")" + log_result);
+            log (device_id, "createPinPolicy (ProvisioningHandle=" + provisioning_handle + ", PukPolicyHandle=" + puk_policy_handle + ", ID=" + id + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -747,10 +747,10 @@
      <Parameter Name="id"                    Type="string" XMLName="ID"/>
      <Parameter Name="key_entry_algorithm"   Type="string" XMLName="KeyEntryAlgorithm"/>
      <Parameter Name="server_seed"           Type="binary" XMLName="ServerSeed"         Null="true"/>
-     <Parameter Name="device_pin_protection" Type="bool"   XMLName="DevicePINProtection"/>
-     <Parameter Name="pin_policy_handle"     Type="int"    XMLName="PINPolicyHandle"/>
-     <Parameter Name="pin_value"             Type="binary" XMLName="PINValue"           Null="true"/>
-     <Parameter Name="enable_pin_caching"    Type="bool"   XMLName="EnablePINCaching"/>
+     <Parameter Name="device_pin_protection" Type="bool"   XMLName="DevicePinProtection"/>
+     <Parameter Name="pin_policy_handle"     Type="int"    XMLName="PinPolicyHandle"/>
+     <Parameter Name="pin_value"             Type="binary" XMLName="PinValue"           Null="true"/>
+     <Parameter Name="enable_pin_caching"    Type="bool"   XMLName="EnablePinCaching"/>
      <Parameter Name="biometric_protection"  Type="byte"   XMLName="BiometricProtection"                        RewriteRule="In.BiometricProtection"/>
      <Parameter Name="export_protection"     Type="byte"   XMLName="ExportProtection"                           RewriteRule="In.ExportProtection"/>
      <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"                           RewriteRule="In.DeleteProtection"/>
@@ -761,7 +761,7 @@
      <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" RewriteRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
      <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" RewriteRule="Out.PublicKey"/>
-     <Parameter Name="key_attestation"       Type="binary" XMLName="KeyAttestation"     Mode="out"/>
+     <Parameter Name="attestation"           Type="binary" XMLName="Attestation"     Mode="out"/>
      <Code><![CDATA[
         String log_result = null;
         try
@@ -784,7 +784,7 @@
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();
-            key_attestation.value = kd.getKeyAttestation ();
+            attestation.value = kd.getAttestation ();
             log_result = " : KeyHandle=" + kd.getKeyHandle ();
             return kd.getKeyHandle ();
           }
@@ -795,7 +795,7 @@
           }
         finally
           {
-            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", PINPolicyHandle=" + pin_policy_handle + ", ID=" + id + ")" + log_result);
+            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", PinPolicyHandle=" + pin_policy_handle + ", ID=" + id + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -1128,9 +1128,9 @@
      <Parameter Name="device_id"            Type="string" XMLName="DeviceID"            Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"           Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"   XMLName="ProtectionStatus"    Mode="out"/>
-     <Parameter Name="puk_format"           Type="byte"   XMLName="PUKFormat"           Mode="out" RewriteRule="Out.PassphraseFormat"/>
-     <Parameter Name="puk_retry_limit"      Type="short"  XMLName="PUKRetryLimit"       Mode="out"/>
-     <Parameter Name="puk_error_count"      Type="short"  XMLName="PUKErrorCount"       Mode="out"/>
+     <Parameter Name="puk_format"           Type="byte"   XMLName="PukFormat"           Mode="out" RewriteRule="Out.PassphraseFormat"/>
+     <Parameter Name="puk_retry_limit"      Type="short"  XMLName="PukRetryLimit"       Mode="out"/>
+     <Parameter Name="puk_error_count"      Type="short"  XMLName="PukErrorCount"       Mode="out"/>
      <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"         Mode="out"/>
      <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"      Mode="out"/>
      <Parameter Name="format"               Type="byte"   XMLName="Format"              Mode="out" RewriteRule="Out.PassphraseFormat"/>
@@ -1140,8 +1140,8 @@
      <Parameter Name="min_length"           Type="short"  XMLName="MinLength"           Mode="out"/>
      <Parameter Name="max_length"           Type="short"  XMLName="MaxLength"           Mode="out"/>
      <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"         Mode="out" RewriteRule="Out.InputMethod"/>
-     <Parameter Name="pin_error_count"      Type="short"  XMLName="PINErrorCount"       Mode="out"/>
-     <Parameter Name="enable_pin_caching"   Type="bool"   XMLName="EnablePINCaching"    Mode="out"/>
+     <Parameter Name="pin_error_count"      Type="short"  XMLName="PinErrorCount"       Mode="out"/>
+     <Parameter Name="enable_pin_caching"   Type="bool"   XMLName="EnablePinCaching"    Mode="out"/>
      <Parameter Name="biometric_protection" Type="byte"   XMLName="BiometricProtection" Mode="out" RewriteRule="Out.BiometricProtection"/>
      <Parameter Name="export_protection"    Type="byte"   XMLName="ExportProtection"    Mode="out" RewriteRule="Out.ExportProtection"/>
      <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out" RewriteRule="Out.DeleteProtection"/>
@@ -1152,11 +1152,11 @@
           {
             KeyProtectionInfo kpi      = getDevice (device_id).getKeyProtectionInfo (key_handle);
             protection_status.value    = kpi.getSKSProtectionStatus ();
-            if (kpi.hasLocalPUKProtection ())
+            if (kpi.hasLocalPukProtection ())
               {
-                puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
-                puk_retry_limit.value      = kpi.getPUKRetryLimit ();
-                puk_error_count.value      = kpi.getPUKErrorCount ();
+                puk_format.value           = kpi.getPukFormat ().getSKSValue ();
+                puk_retry_limit.value      = kpi.getPukRetryLimit ();
+                puk_error_count.value      = kpi.getPukErrorCount ();
               }
             else
               {
@@ -1164,18 +1164,18 @@
                 puk_retry_limit.value      = (short)0;
                 puk_error_count.value      = (short)0;
               }
-            if (kpi.hasLocalPINProtection ())
+            if (kpi.hasLocalPinProtection ())
               {
-                user_defined.value         = kpi.getPINUserDefinedFlag ();
-                user_modifiable.value      = kpi.getPINUserModifiableFlag ();
-                format.value               = kpi.getPINFormat ().getSKSValue ();
-                retry_limit.value          = kpi.getPINRetryLimit ();
-                grouping.value             = kpi.getPINGrouping ().getSKSValue ();
-                pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
-                min_length.value           = kpi.getPINMinLength ();
-                max_length.value           = kpi.getPINMaxLength ();
-                input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
-                pin_error_count.value      = kpi.getPINErrorCount ();
+                user_defined.value         = kpi.getPinUserDefinedFlag ();
+                user_modifiable.value      = kpi.getPinUserModifiableFlag ();
+                format.value               = kpi.getPinFormat ().getSKSValue ();
+                retry_limit.value          = kpi.getPinRetryLimit ();
+                grouping.value             = kpi.getPinGrouping ().getSKSValue ();
+                pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPatternRestrictions ());
+                min_length.value           = kpi.getPinMinLength ();
+                max_length.value           = kpi.getPinMaxLength ();
+                input_method.value         = kpi.getPinInputMethod ().getSKSValue ();
+                pin_error_count.value      = kpi.getPinErrorCount ();
               }
             else
               {
@@ -1190,7 +1190,7 @@
                 input_method.value         = (byte)0;
                 pin_error_count.value      = (short)0;
               }
-            enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
+            enable_pin_caching.value   = kpi.getEnablePinCachingFlag ();
             biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
             export_protection.value    = kpi.getExportProtection ().getSKSValue ();
             delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
@@ -1321,16 +1321,16 @@
           }
 ]]></Code></Method>
 
-   <Method Name="changePIN" Throws="SKSException">
+   <Method Name="changePin" Throws="SKSException">
      <Parameter Name="device_id"     Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
-     <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
+     <Parameter Name="new_pin"       Type="binary" XMLName="NewPin"/>
      <Code><![CDATA[
         String log_result = "";
         try
           {
-            getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+            getDevice (device_id).changePin (key_handle, authorization, new_pin);
           }
         catch (SKSException e)
           {
@@ -1339,20 +1339,20 @@
           }
         finally
           {
-            log (device_id, "changePIN (KeyHandle=" + key_handle + ")" + log_result);
+            log (device_id, "changePin (KeyHandle=" + key_handle + ")" + log_result);
           }
 ]]></Code></Method>
 
-   <Method Name="setPIN" Throws="SKSException">
+   <Method Name="setPin" Throws="SKSException">
      <Parameter Name="device_id"     Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
-     <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
+     <Parameter Name="new_pin"       Type="binary" XMLName="NewPin"/>
      <Code><![CDATA[
         String log_result = "";
         try
           {
-            getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+            getDevice (device_id).setPin (key_handle, authorization, new_pin);
           }
         catch (SKSException e)
           {
@@ -1361,7 +1361,7 @@
           }
         finally
           {
-            log (device_id, "setPIN (KeyHandle=" + key_handle + ")" + log_result);
+            log (device_id, "setPin (KeyHandle=" + key_handle + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -1467,7 +1467,7 @@
           }
 ]]></Code></Method>
 
-   <Method Name="performHMAC" Throws="SKSException" EmbedRule="TGA">
+   <Method Name="performHmac" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="device_id"                 Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
@@ -1484,7 +1484,7 @@
         String log_result = "";
         try
           {
-            return getDevice (device_id).performHMAC (key_handle, 
+            return getDevice (device_id).performHmac (key_handle, 
                                                       algorithm,
                                                       parameters,
                                                       authorization,

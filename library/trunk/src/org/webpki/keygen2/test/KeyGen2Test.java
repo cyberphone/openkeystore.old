@@ -705,13 +705,13 @@ public class KeyGen2Test
                                 if (ls.matches (cert_path))
                                   {
                                     KeyProtectionInfo kpi = sks.getKeyProtectionInfo (ek.getKeyHandle ()); 
-                                    if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPINGrouping ()) &&
+                                    if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPinGrouping ()) &&
                                         (ls.getAppUsage () == null || ls.getAppUsage () == ka.getAppUsage ()))
                                       {
                                         lr.addMatchingCredential (cert_path,
                                                                   eps.getClientSessionID (),
                                                                   eps.getServerSessionID (),
-                                                                  kpi.isPINBlocked ());
+                                                                  kpi.isPinBlocked ());
                                       }
                                   }
                               }
@@ -1651,7 +1651,7 @@ public class KeyGen2Test
         fixed_pin = true;
         server_seed = true;
         doer.perform ();
-        assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
+        assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPinUserModifiableFlag ());
       }
 
     @Test
@@ -1773,7 +1773,7 @@ public class KeyGen2Test
                                                                                          USER_DEFINED_PIN, 
                                                                                          enc),
                                                                                          TEST_STRING));
-        assertFalse ("PIN Cached", sks.getKeyProtectionInfo (key_handle).getEnablePINCachingFlag ());
+        assertFalse ("PIN Cached", sks.getKeyProtectionInfo (key_handle).getEnablePinCachingFlag ());
       }
 
     @Test
@@ -1794,8 +1794,8 @@ public class KeyGen2Test
         enable_pin_caching = true;
         input_method = InputMethod.TRUSTED_GUI;
         doer.perform ();
-        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
-        assertTrue ("PIN Not Cached", sks.getKeyProtectionInfo (doer.getFirstKey ()).getEnablePINCachingFlag ());
+        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPinUserModifiableFlag ());
+        assertTrue ("PIN Not Cached", sks.getKeyProtectionInfo (doer.getFirstKey ()).getEnablePinCachingFlag ());
       }
 
     @Test
@@ -2009,7 +2009,7 @@ public class KeyGen2Test
               }
             catch (SKSException e)
               {
-                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
+                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPinBlocked () ^ (i == doer1.server.pin_retry_limit));
               }
           }
 
@@ -2019,7 +2019,7 @@ public class KeyGen2Test
         plain_unlock_key = doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
-        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
+        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPinBlocked ());
       }
 
     @Test
@@ -2045,7 +2045,7 @@ public class KeyGen2Test
               }
             catch (SKSException e)
               {
-                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
+                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPinBlocked () ^ (i == doer1.server.pin_retry_limit));
               }
           }
 
@@ -2055,8 +2055,8 @@ public class KeyGen2Test
         plain_unlock_key= doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
-        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
-        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (key_handle).getPINUserModifiableFlag ());
+        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPinBlocked ());
+        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (key_handle).getPinUserModifiableFlag ());
       }
 
     @Test

@@ -88,22 +88,22 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
           }
         
         KeyProtectionInfo kpi = getKeyProtectionInfo (key_handle);
-        if (kpi.hasLocalPINProtection ())
+        if (kpi.hasLocalPinProtection ())
           {
-            if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI)
+            if (kpi.getPinInputMethod () == InputMethod.TRUSTED_GUI)
               {
                 if (authorization_holder.value != null)
                   {
                     throw new SKSException ("Redundant \"Authorization\"", SKSException.ERROR_AUTHORIZATION);
                   }
               }
-            else if (kpi.getPINInputMethod () == InputMethod.PROGRAMMATIC || authorization_holder.value != null)
+            else if (kpi.getPinInputMethod () == InputMethod.PROGRAMMATIC || authorization_holder.value != null)
               {
                 return false;
               }
             KeyAttributes ka = getKeyAttributes (key_handle);
-            authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPINFormat (),
-                                                                               kpi.getPINGrouping (),
+            authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPinFormat (),
+                                                                               kpi.getPinGrouping (),
                                                                                ka.getAppUsage (),
                                                                                ka.getFriendlyName ());
             return authorization_holder.value != null;
@@ -386,7 +386,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS().createPUKPolicy (device_id,
+            return getSKSWS().createPukPolicy (device_id,
                                                provisioning_handle,
                                                id,
                                                encrypted_puk,
@@ -417,7 +417,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS().createPINPolicy (device_id,
+            return getSKSWS().createPinPolicy (device_id,
                                                provisioning_handle,
                                                id,
                                                puk_policy_handle,
@@ -923,7 +923,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().changePIN (device_id,
+            getSKSWS ().changePin (device_id,
                                    key_handle,
                                    authorization,
                                    new_pin);
@@ -941,7 +941,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().setPIN (device_id,
+            getSKSWS ().setPin (device_id,
                                 key_handle,
                                 authorization,
                                 new_pin);
@@ -1065,7 +1065,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               {
                 AuthorizationHolder auth = new AuthorizationHolder (authorization);
                 tga = getTrustedGUIAuthorization (key_handle, auth, tga);
-                return getSKSWS ().performHMAC (device_id,
+                return getSKSWS ().performHmac (device_id,
                                                 key_handle, 
                                                 algorithm,
                                                 parameters,

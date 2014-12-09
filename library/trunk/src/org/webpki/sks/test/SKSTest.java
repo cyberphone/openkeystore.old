@@ -1854,7 +1854,7 @@ public class SKSTest
               {
                 
               }
-            assertTrue ("PIN should be blocked", device.sks.getKeyProtectionInfo (key.key_handle).isPINBlocked () ^ (i < pin_retry));
+            assertTrue ("PIN should be blocked", device.sks.getKeyProtectionInfo (key.key_handle).isPinBlocked () ^ (i < pin_retry));
           }
         try
           {
@@ -1891,7 +1891,7 @@ public class SKSTest
               {
                 
               }
-            assertTrue ("PIN should be blocked", device.sks.getKeyProtectionInfo (key.key_handle).isPINBlocked () ^ (i < pin_retry));
+            assertTrue ("PIN should be blocked", device.sks.getKeyProtectionInfo (key.key_handle).isPinBlocked () ^ (i < pin_retry));
           }
         try
           {
@@ -2061,12 +2061,12 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
-            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 1);
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPinErrorCount () == 1);
           }
         try
           {
             device.sks.exportKey (key.key_handle, good_pin.getBytes ("UTF-8"));
-            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 0);
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPinErrorCount () == 0);
           }
         catch (SKSException e)
           {
@@ -2134,8 +2134,8 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
-            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 1);
-            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 0);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPukErrorCount () == 1);
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPinErrorCount () == 0);
           }
         try
           {
@@ -2145,12 +2145,12 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
-            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 2);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPukErrorCount () == 2);
           }
         try
           {
             device.sks.exportKey (key.key_handle, good_puk.getBytes ("UTF-8"));
-            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPukErrorCount () == 0);
           }
         catch (SKSException e)
           {
@@ -3333,12 +3333,12 @@ public class SKSTest
             catch (SKSException e)
               {
                 authorizationErrorCheck (e);
-                assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
+                assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPukErrorCount () == 0);
               }
           }
         KeyProtectionInfo kpi = key.getKeyProtectionInfo ();
-        assertTrue ("Should be PIN blocked", kpi.isPINBlocked ());
-        assertFalse ("Should not be PUK blocked", kpi.isPUKBlocked ());
+        assertTrue ("Should be PIN blocked", kpi.isPinBlocked ());
+        assertFalse ("Should not be PUK blocked", kpi.isPukBlocked ());
         try
           {
             key.unlockKey (good_puk + "34");
@@ -3347,10 +3347,10 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
-            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPukErrorCount () == 0);
           }
-        assertTrue ("Should be PIN blocked", kpi.isPINBlocked ());
-        assertFalse ("Should not be PUK blocked", kpi.isPUKBlocked ());
+        assertTrue ("Should be PIN blocked", kpi.isPinBlocked ());
+        assertFalse ("Should not be PUK blocked", kpi.isPukBlocked ());
         key.unlockKey (good_puk);
         key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
       }

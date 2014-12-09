@@ -81,92 +81,92 @@ public class KeyProtectionInfo
         return protection_status;
       }
 
-    public boolean hasLocalPUKProtection ()
+    public boolean hasLocalPukProtection ()
       {
         return (protection_status & PROTSTAT_PUK_PROTECTED) != 0;
       }
     
-    public PassphraseFormat getPUKFormat () throws SKSException
+    public PassphraseFormat getPukFormat () throws SKSException
       {
         return puk_format;
       }
 
-    public short getPUKErrorCount ()
+    public short getPukErrorCount ()
       {
         return puk_error_count;
       }
 
-    public short getPUKRetryLimit ()
+    public short getPukRetryLimit ()
       {
         return puk_retry_limit;
       }
 
-    public boolean isPUKBlocked ()
+    public boolean isPukBlocked ()
       {
         return (protection_status & PROTSTAT_PUK_BLOCKED) != 0;
       }
 
-    public boolean hasLocalPINProtection ()
+    public boolean hasLocalPinProtection ()
       {
         return (protection_status & PROTSTAT_PIN_PROTECTED) != 0;
       }
 
-    public PassphraseFormat getPINFormat () throws SKSException
+    public PassphraseFormat getPinFormat () throws SKSException
       {
         return pin_format;
       }
 
-    public Grouping getPINGrouping () throws SKSException
+    public Grouping getPinGrouping () throws SKSException
       {
         return pin_grouping;
       }
 
-    public short getPINMinLength ()
+    public short getPinMinLength ()
       {
         return pin_min_length;
       }
 
-    public short getPINMaxLength ()
+    public short getPinMaxLength ()
       {
         return pin_max_length;
       }
 
-    public boolean getPINUserModifiableFlag ()
+    public boolean getPinUserModifiableFlag ()
       {
         return pin_user_modifiable;
       }
 
-    public boolean getPINUserDefinedFlag ()
+    public boolean getPinUserDefinedFlag ()
       {
         return pin_user_defined;
       }
 
-    public InputMethod getPINInputMethod ()
+    public InputMethod getPinInputMethod ()
       {
         return pin_input_method;
       }
 
-    public boolean isPINBlocked ()
+    public boolean isPinBlocked ()
       {
         return (protection_status & PROTSTAT_PIN_BLOCKED) != 0;
       }
 
-    public boolean hasDevicePINProtection ()
+    public boolean hasDevicePinProtection ()
       {
         return (protection_status & PROTSTAT_DEVICE_PIN) != 0;
       }
 
-    public short getPINErrorCount ()
+    public short getPinErrorCount ()
       {
         return pin_error_count;
       }
 
-    public short getPINRetryLimit ()
+    public short getPinRetryLimit ()
       {
         return pin_retry_limit;
       }
     
-    public Set<PatternRestriction> getPINPatternRestrictions ()
+    public Set<PatternRestriction> getPatternRestrictions ()
       {
         return pin_pattern_restrictions;
       }
@@ -191,7 +191,7 @@ public class KeyProtectionInfo
         return delete_protection;
       }
     
-    public boolean getEnablePINCachingFlag ()
+    public boolean getEnablePinCachingFlag ()
       {
         return enable_pin_caching;
       }
@@ -290,13 +290,13 @@ public class KeyProtectionInfo
 
       {
         this.protection_status = protection_status;
-        if (hasLocalPUKProtection ())
+        if (hasLocalPukProtection ())
           {
             this.puk_format = convertFormat (puk_format);
             this.puk_error_count = puk_error_count;
             this.puk_retry_limit = puk_retry_limit;
           }
-        if (hasLocalPINProtection ())
+        if (hasLocalPinProtection ())
           {
             this.pin_user_defined = user_defined;
             this.pin_user_modifiable = user_modifiable;
@@ -316,7 +316,7 @@ public class KeyProtectionInfo
             this.pin_input_method = convertInputMethod (input_method);
             this.pin_error_count = pin_error_count;
           }
-        if (hasLocalPINProtection () || hasDevicePINProtection ())
+        if (hasLocalPinProtection () || hasDevicePinProtection ())
           {
             this.enable_pin_caching = enable_pin_caching;
           }
