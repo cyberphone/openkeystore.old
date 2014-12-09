@@ -73,6 +73,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
         return verifier.getSignerCertificatePath ()[0];
       }
 
+    private JSONObjectReader getUserAuthorization (byte[] raw_data) throws IOException
+      {
+        JSONObjectReader auth_data = Messages.parseBaseMessage (Messages.AUTH_DATA, JSONParser.parse (raw_data));
+        logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
+        return auth_data;
+      }
+
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         JSONObjectWriter result = Messages.createBaseMessage (Messages.TRANSACTION_RESPONSE);
@@ -142,14 +149,13 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 Cipher cipher = Cipher.getInstance (sym_alg.getJCEName ());
                 SecretKeySpec sk = new SecretKeySpec (raw_aes_key, "AES");
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
-                auth_data = JSONParser.parse (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
-                logger.info ("Decrypted \"" + AUTH_DATA_JSON + "\":\n" + new String (new JSONObjectWriter (auth_data).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8"));
+                auth_data = getUserAuthorization (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
                 VerifierInterface verifier = new KeyStoreVerifier (PaymentDemoService.client_root);
                 auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
               }
             else
               {
-                auth_data = JSONParser.parse (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON));
+                auth_data = getUserAuthorization (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON));
               }
             auth_data.getString (DOMAIN_NAME_JSON);  // We have no DB...
             auth_data.getDateTime (DATE_TIME_JSON);  //     "-"
@@ -191,6 +197,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             KeyStoreSigner signer = new KeyStoreSigner (PaymentDemoService.bank_eecert_key, null);
             signer.setExtendedCertPath (true);
             signer.setKey (null, PaymentDemoService.key_password);
+            result.setJOSEAlgorithmPreference (true);
             result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();

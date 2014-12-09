@@ -28,6 +28,7 @@ public enum Messages
     INVOKE               ("Invoke"),
     ABORT                ("Abort"),
     AUTHORIZE            ("Authorize"),
+    AUTH_DATA            ("AuthData"),
     TRANSACTION_REQUEST  ("TransactionRequest"),
     TRANSACTION_RESPONSE ("TransactionResponse");
     

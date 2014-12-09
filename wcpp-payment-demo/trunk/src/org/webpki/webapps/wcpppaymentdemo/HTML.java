@@ -695,7 +695,7 @@ public class HTML implements BaseProperties
        "//\n" +
        "function userAuthorize() {\n" +
        "    // Create \"" + AUTH_DATA_JSON + "\"\n" +
-       "    var auth_data = {};\n" +
+       "    var auth_data = createJSONBaseCommand('" + Messages.AUTH_DATA + "');\n" +
        "    auth_data." + PAYMENT_REQUEST_JSON + " = json_request;\n" +
        "    auth_data." + DOMAIN_NAME_JSON + " = caller_domain;\n" +
        "    auth_data." + CARD_TYPE_JSON + " = selected_card.type;\n" +
@@ -711,16 +711,16 @@ public class HTML implements BaseProperties
              "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
              "    var signature_object = {};\n" +
              "    auth_data." + JSONSignatureDecoder.SIGNATURE_JSON + " = signature_object;\n" +
-             "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getURI () + "';\n" +
+             "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getJOSEName () + "';\n" +
              "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
              "    var key_sign_alg = key_import_alg;\n" +
              "    if (selected_card.client_private_key.kty == 'EC') {\n" +
-             "        signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "';\n" +
+             "        signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.ECDSA_SHA256.getJOSEName () + "';\n" +
              "        key_import_alg = {name: 'ECDSA'};\n" +
              "        key_sign_alg = {name: 'ECDSA', hash: {name: 'SHA-256'}};\n" +
              "    }\n" +
-             "    signature_object." + JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
-             "    signature_object." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
+             "    signature_object." + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + " = selected_card.cert_data;\n" +
+             "    signature_object." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + " = selected_card.client_cert_path;\n");
          }
        s.append (
        "    var pin = document.getElementById('pin').value;\n" +

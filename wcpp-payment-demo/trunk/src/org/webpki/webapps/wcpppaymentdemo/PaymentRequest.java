@@ -53,6 +53,7 @@ public class PaymentRequest implements BaseProperties
         signer.setExtendedCertPath (true);
         signer.setKey (null, PaymentDemoService.key_password);
         return new JSONObjectWriter ()
+                     .setJOSEAlgorithmPreference (true)
                      .setString (COMMON_NAME_JSON, common_name)
                      .setInt (AMOUNT_JSON, amount)
                      .setString (CURRENCY_JSON, currency.toString ())
