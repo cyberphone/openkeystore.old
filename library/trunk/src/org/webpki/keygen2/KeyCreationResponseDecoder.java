@@ -62,7 +62,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
           {
             GeneratedPublicKey gk = new GeneratedPublicKey ();
             gk.id = key_rd.getString (ID_JSON);
-            gk.attestation = key_rd.getBinary (KEY_ATTESTATION_JSON);
+            gk.attestation = key_rd.getBinary (ATTESTATION_JSON);
             gk.publicKey = key_rd.getPublicKey ();
             if (generated_keys.put (gk.id, gk) != null)
               {

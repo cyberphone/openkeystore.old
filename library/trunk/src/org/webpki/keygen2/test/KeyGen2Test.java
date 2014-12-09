@@ -657,7 +657,7 @@ public class KeyGen2Test
                                                                  sess.getClientEphemeralKey (),
                                                                  sess.getClientSessionID (),
                                                                  client_time,
-                                                                 sess.getSessionAttestation (),
+                                                                 sess.getAttestation (),
                                                                  invocation_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
@@ -791,7 +791,7 @@ public class KeyGen2Test
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_creation_response.addPublicKey (key_data.getPublicKey (),
-                                                    key_data.getKeyAttestation (),
+                                                    key_data.getAttestation (),
                                                     key.getID ());
               }
             return key_creation_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
@@ -842,7 +842,7 @@ public class KeyGen2Test
                   {
                     sks.importSymmetricKey (key_handle, 
                                             key.getEncryptedSymmetricKey (),
-                                            key.getSymmetricKeyMac ());
+                                            key.getSymmetricKeyMAC ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -852,7 +852,7 @@ public class KeyGen2Test
                   {
                     sks.importPrivateKey (key_handle, 
                                           key.getEncryptedPrivateKey (),
-                                          key.getPrivateKeyMac ());
+                                          key.getPrivateKeyMAC ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -900,7 +900,7 @@ public class KeyGen2Test
             ProvisioningFinalizationResponseEncoder fin_prov_response = 
                 new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                              sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                           prov_final_request.getCloseSessionChallenge (),
+                                                                                           prov_final_request.getCloseSessionNonce (),
                                                                                            prov_final_request.getCloseSessionMAC ()));
             return fin_prov_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }

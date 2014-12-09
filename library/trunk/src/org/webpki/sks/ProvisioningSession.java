@@ -34,11 +34,11 @@ public class ProvisioningSession
         return client_session_id;
       }
 
-    byte[] session_attestation;
+    byte[] attestation;
 
-    public byte[] getSessionAttestation ()
+    public byte[] getAttestation ()
       {
-        return session_attestation;
+        return attestation;
       }
 
     ECPublicKey client_ephemeral_key;
@@ -50,12 +50,12 @@ public class ProvisioningSession
 
     public ProvisioningSession (int provisioning_handle, 
                                 String client_session_id,
-                                byte[] session_attestation,
+                                byte[] attestation,
                                 ECPublicKey client_ephemeral_key)
       {
         this.provisioning_handle = provisioning_handle;
         this.client_session_id = client_session_id;
-        this.session_attestation = session_attestation;
+        this.attestation = attestation;
         this.client_ephemeral_key = client_ephemeral_key;
       }
 

@@ -53,7 +53,7 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder
 
         wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
-        wr.setBinary (CLOSE_ATTESTATION_JSON, attestation);
+        wr.setBinary (ATTESTATION_JSON, attestation);
       }
 
     @Override

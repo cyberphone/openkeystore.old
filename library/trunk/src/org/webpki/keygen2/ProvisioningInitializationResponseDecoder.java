@@ -60,7 +60,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        attestation = rd.getBinary (SESSION_ATTESTATION_JSON);
+        attestation = rd.getBinary (ATTESTATION_JSON);
         
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 

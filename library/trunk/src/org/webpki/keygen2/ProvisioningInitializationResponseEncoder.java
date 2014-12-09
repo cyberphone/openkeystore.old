@@ -107,7 +107,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time, false); // Client keeps local time
         
-        wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
+        wr.setBinary (ATTESTATION_JSON, attestation);
         
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

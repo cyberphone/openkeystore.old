@@ -442,7 +442,7 @@ public class ProvSess
                                                         kdf.getResult (),
                                                         attestation_arguments.getResult (),
                                                         privacy_enabled ? null : device.device_info.getCertificatePath ()[0],
-                                                        sess.getSessionAttestation ());
+                                                        sess.getAttestation ());
      }
 
     public void byPassKMK (int kmk_id)
@@ -734,7 +734,7 @@ public class ProvSess
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);
         key_attestation.addArray (key_entry.getPublicKey ().getEncoded ());
-        if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_entry.getKeyAttestation ()))
+        if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_entry.getAttestation ()))
           {
             bad ("Failed key attest");
           }

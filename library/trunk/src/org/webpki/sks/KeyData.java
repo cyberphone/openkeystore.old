@@ -24,15 +24,15 @@ public class KeyData
     
     private PublicKey public_key;
     
-    private byte[] key_attestation;
+    private byte[] attestation;
     
     public KeyData (int key_handle,
                     PublicKey public_key, 
-                    byte[] key_attestation)
+                    byte[] attestation)
       {
         this.key_handle = key_handle;
         this.public_key = public_key;
-        this.key_attestation = key_attestation;
+        this.attestation = attestation;
       }
     
     public PublicKey getPublicKey ()
@@ -45,9 +45,9 @@ public class KeyData
         return key_handle;
       }
     
-    public byte[] getKeyAttestation ()
+    public byte[] getAttestation ()
       {
-        return key_attestation;
+        return attestation;
       }
     
   }

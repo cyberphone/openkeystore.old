@@ -30,11 +30,11 @@ public interface KeyGen2Constants
     
     String APP_USAGE_JSON                            = SecureKeyStore.VAR_APP_USAGE;
 
+    String ATTESTATION_JSON                          = SecureKeyStore.VAR_ATTESTATION;
+
     String AUTHORIZATION_JSON                        = SecureKeyStore.VAR_AUTHORIZATION;
 
     String BIOMETRIC_PROTECTION_JSON                 = SecureKeyStore.VAR_BIOMETRIC_PROTECTION;
-
-    String CHALLENGE_JSON                            = SecureKeyStore.VAR_CHALLENGE;
 
     String CLIENT_CAPABILITIES_JSON                  = "clientCapabilities";
 
@@ -48,8 +48,6 @@ public interface KeyGen2Constants
 
     String CLONE_KEY_PROTECTION_JSON                 = "cloneKeyProtection";
     
-    String CLOSE_ATTESTATION_JSON                    = SecureKeyStore.VAR_CLOSE_ATTESTATION;
-
     String CONFIGURATION_JSON                        = "configuration";
 
     String EXTENSION_DATA_JSON                       = SecureKeyStore.VAR_EXTENSION_DATA;
@@ -108,8 +106,6 @@ public interface KeyGen2Constants
 
     String KEY_ALGORITHM_JSON                        = SecureKeyStore.VAR_KEY_ALGORITHM;
 
-    String KEY_ATTESTATION_JSON                      = SecureKeyStore.VAR_KEY_ATTESTATION;
-
     String KEY_ENTRY_ALGORITHM_JSON                  = SecureKeyStore.VAR_KEY_ENTRY_ALGORITHM;       
 
     String KEY_ENTRY_SPECIFIERS_JSON                 = "keyEntrySpecifiers";       
@@ -167,8 +163,6 @@ public interface KeyGen2Constants
     String SERVER_SESSION_ID_JSON                    = SecureKeyStore.VAR_SERVER_SESSION_ID;
 
     String SERVER_TIME_JSON                          = SecureKeyStore.VAR_SERVER_TIME;
-
-    String SESSION_ATTESTATION_JSON                  = SecureKeyStore.VAR_SESSION_ATTESTATION;
 
     String SESSION_KEY_ALGORITHM_JSON                = SecureKeyStore.VAR_SESSION_KEY_ALGORITHM;
 

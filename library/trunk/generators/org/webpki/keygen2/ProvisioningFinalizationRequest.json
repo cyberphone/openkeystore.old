@@ -7,7 +7,7 @@
     "issuedCredentials": 
         [{
              "id": "Key.1",
-             certificatePath: 
+             "certificatePath": 
                  [
                      "MIICmDCCAYCgAwIBAgIGAULxF0G....UimDl7Dt7733M0TT8qSpXeYvV0NLX5kM"
                  ],
@@ -20,6 +20,6 @@
                       "mac": "uQ5IuLRDpbSkpfU9FHe1grrQ_FXUBfsxsk6HqspjuCU"
                   }]
          }],
-    "challenge": "_U9YmqyULox2Q53F4l9pQaxjbzlOu2wMo6_FgGAmooQ",
+    "nonce": "_U9YmqyULox2Q53F4l9pQaxjbzlOu2wMo6_FgGAmooQ",
     "mac": "_e0T_svX9vXQTuyIxDUmmteM2IwvXbSOEREuqbe7fS4"
 }

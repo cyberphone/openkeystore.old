@@ -42,7 +42,7 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
         
         client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
-        attestation = rd.getBinary (CLOSE_ATTESTATION_JSON);
+        attestation = rd.getBinary (ATTESTATION_JSON);
       }
 
     @Override

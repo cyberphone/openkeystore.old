@@ -362,7 +362,7 @@ public class SKSWSImplementation
                                                                                         session_key_limit);
             client_session_id.value = sess.getClientSessionID ();
             client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-            session_attestation.value = sess.getSessionAttestation ();
+            session_attestation.value = sess.getAttestation ();
             log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
             return sess.getProvisioningHandle ();
           }
@@ -683,7 +683,7 @@ public class SKSWSImplementation
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();
-            key_attestation.value = kd.getKeyAttestation ();
+            key_attestation.value = kd.getAttestation ();
             log_result = " : KeyHandle=" + kd.getKeyHandle ();
             return kd.getKeyHandle ();
           }

@@ -42,7 +42,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder
 
         PublicKey public_key;
 
-        byte[] key_attestation;
+        byte[] attestation;
 
         GeneratedPublicKey (String id)
           {
@@ -53,11 +53,11 @@ public class KeyCreationResponseEncoder extends JSONEncoder
       }
 
 
-    public void addPublicKey (PublicKey public_key, byte[] key_attestation, String id) throws IOException
+    public void addPublicKey (PublicKey public_key, byte[] attestation, String id) throws IOException
       {
         GeneratedPublicKey gk = new GeneratedPublicKey (id);
         gk.public_key = public_key;
-        gk.key_attestation = key_attestation;
+        gk.attestation = attestation;
       }
 
 
@@ -82,7 +82,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder
             keys.setObject ()
               .setString (ID_JSON, gk.id)
               .setPublicKey (gk.public_key)
-              .setBinary (KEY_ATTESTATION_JSON, gk.key_attestation);
+              .setBinary (ATTESTATION_JSON, gk.attestation);
           }
       }
 

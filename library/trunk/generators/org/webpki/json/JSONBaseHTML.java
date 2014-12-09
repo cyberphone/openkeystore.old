@@ -541,6 +541,7 @@ public class JSONBaseHTML
 
         public ProtocolStep (String json_file, String optional_table_comment_HTML)
           {
+            System.out.println ("Sample: " + json_file);
             this.json_file = json_file;
             this.optional_table_comment_HTML = optional_table_comment_HTML;
           }

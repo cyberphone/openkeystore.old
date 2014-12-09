@@ -239,8 +239,8 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
             close.addString (server_state.client_session_id);
             close.addString (server_state.server_session_id);
             close.addString (server_state.issuer_uri);
-            close.addArray (server_state.saved_close_challenge = server_state.server_crypto_interface.generateNonce ());
-            wr.setBinary (CHALLENGE_JSON, server_state.saved_close_challenge);
+            close.addArray (server_state.saved_close_nonce = server_state.server_crypto_interface.generateNonce ());
+            wr.setBinary (NONCE_JSON, server_state.saved_close_nonce);
             wr.setBinary (MAC_JSON, mac (close.getResult (), SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
           }
         catch (GeneralSecurityException e)

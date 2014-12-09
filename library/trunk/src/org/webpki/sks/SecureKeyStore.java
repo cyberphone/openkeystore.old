@@ -79,13 +79,12 @@ public interface SecureKeyStore
     // SKS variable names. For provisioning most of them are the same in KeyGen2
     ///////////////////////////////////////////////////////////////////////////////////
     String VAR_APP_USAGE                      = "appUsage";
+    String VAR_ATTESTATION                    = "attestation";
     String VAR_AUTHORIZATION                  = "authorization";
     String VAR_BIOMETRIC_PROTECTION           = "biometricProtection";
-    String VAR_CHALLENGE                      = "challenge";
     String VAR_CLIENT_EPHEMERAL_KEY           = "clientEphemeralKey";
     String VAR_CLIENT_SESSION_ID              = "clientSessionId";
     String VAR_CLIENT_TIME                    = "clientTime";
-    String VAR_CLOSE_ATTESTATION              = "closeAttestation";
     String VAR_CRYPTO_DATA_SIZE               = "cryptoDataSize";
     String VAR_DATA                           = "data";
     String VAR_EXTENSION_DATA                 = "extensionData";
@@ -103,7 +102,6 @@ public interface SecureKeyStore
     String VAR_INPUT_METHOD                   = "inputMethod";
     String VAR_ISSUER_URI                     = "issuerUri";
     String VAR_KEY_ALGORITHM                  = "keyAlgorithm";
-    String VAR_KEY_ATTESTATION                = "keyAttestation";
     String VAR_KEY_ENTRY_ALGORITHM            = "keyEntryAlgorithm";       
     String VAR_KEY_MANAGEMENT_KEY             = "keyManagementKey";
     String VAR_KEY_PARAMETERS                 = "keyParameters";
@@ -125,7 +123,6 @@ public interface SecureKeyStore
     String VAR_SERVER_SEED                    = "serverSeed";
     String VAR_SERVER_SESSION_ID              = "serverSessionId";
     String VAR_SERVER_TIME                    = "serverTime";
-    String VAR_SESSION_ATTESTATION            = "sessionAttestation";
     String VAR_SESSION_KEY_ALGORITHM          = "sessionKeyAlgorithm";
     String VAR_SESSION_KEY_LIMIT              = "sessionKeyLimit";
     String VAR_SESSION_LIFE_TIME              = "sessionLifeTime";
@@ -234,7 +231,7 @@ public interface SecureKeyStore
                                                    short sessionKeyLimit) throws SKSException;
 
     byte[] closeProvisioningSession (int provisioningHandle,
-                                     byte[] challenge,
+                                     byte[] nonce,
                                      byte[] mac) throws SKSException;
 
     EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioningHandle,

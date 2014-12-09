@@ -374,7 +374,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getSymmetricKeyMac ()
+        public byte[] getSymmetricKeyMAC ()
           {
             return symmetric_key_mac;
           }
@@ -386,7 +386,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getPrivateKeyMac ()
+        public byte[] getPrivateKeyMAC ()
           {
             return private_key_mac;
           }
@@ -444,7 +444,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
     private byte[] close_session_mac;
     
-    private byte[] close_session_challenge;
+    private byte[] close_session_nonce;
 
 
     public String getServerSessionID ()
@@ -489,9 +489,9 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       }
 
     
-    public byte[] getCloseSessionChallenge ()
+    public byte[] getCloseSessionNonce ()
       {
-        return close_session_challenge;
+        return close_session_nonce;
       }
 
 
@@ -507,7 +507,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        close_session_challenge = rd.getBinary (CHALLENGE_JSON);
+        close_session_nonce = rd.getBinary (NONCE_JSON);
 
         close_session_mac = KeyGen2Validator.getMAC (rd);
         
