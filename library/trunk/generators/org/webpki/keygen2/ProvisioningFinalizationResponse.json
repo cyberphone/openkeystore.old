@@ -1,7 +1,7 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20140609",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20141208",
     "@qualifier": "ProvisioningFinalizationResponse",
-    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
-    "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
-    "CloseAttestation": "Oy8QaNN0orkE2gxlCWrMYHxDNr6m5FTdVpqTqF9eXlI"
+    "serverSessionId": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "clientSessionId": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
+    "closeAttestation": "Oy8QaNN0orkE2gxlCWrMYHxDNr6m5FTdVpqTqF9eXlI"
 }

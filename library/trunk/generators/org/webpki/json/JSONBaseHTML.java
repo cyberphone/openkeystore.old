@@ -1248,11 +1248,11 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.ALGORITHM_JSON)
               .addSymbolicValue (JSONSignatureDecoder.ALGORITHM_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.URI)
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature algorithm URI.")
+              .addString ("Signature algorithm ID.")
               .addString (sks_alg_ref)
               .addString ("The currently recognized symmetric key algorithms include:" +
                           enumerateAlgorithms (MACAlgorithms.values (), true, false, reference) +
@@ -1407,11 +1407,11 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.CURVE_JSON)
               .addSymbolicValue (JSONSignatureDecoder.CURVE_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.URI)
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC named curve.")
+              .addString ("EC curve ID.")
               .addString (sks_alg_ref)
               .addString ("The currently recognized EC curves include:" +
                       enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))

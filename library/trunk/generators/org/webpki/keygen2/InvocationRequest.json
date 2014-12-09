@@ -1,8 +1,8 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20140609",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20141208",
     "@qualifier": "InvocationRequest",
-    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
-    "SubmitURL": "https://issuer.example.com/invocation",
-    "Action": "manage",
-    "ClientCapabilityQuery": ["http://xmlns.webpki.org/keygen2/logotype#list"]
+    "serverSessionId": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "submitUrl": "https://issuer.example.com/invocation",
+    "action": "manage",
+    "clientCapabilityQuery": ["http://xmlns.webpki.org/keygen2/logotype#list"]
 }

@@ -40,7 +40,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
 
         String id;
 
-        PublicKey public_key;
+        PublicKey publicKey;
 
         byte[] attestation;
       }
@@ -63,7 +63,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
             GeneratedPublicKey gk = new GeneratedPublicKey ();
             gk.id = key_rd.getString (ID_JSON);
             gk.attestation = key_rd.getBinary (KEY_ATTESTATION_JSON);
-            gk.public_key = key_rd.getPublicKey ();
+            gk.publicKey = key_rd.getPublicKey ();
             if (generated_keys.put (gk.id, gk) != null)
               {
                 ServerState.bad ("Duplicate key id:" + gk.id);

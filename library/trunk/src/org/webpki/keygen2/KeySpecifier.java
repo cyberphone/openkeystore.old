@@ -27,13 +27,13 @@ public class KeySpecifier implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    byte[] parameters;
+    byte[] keyParameters;
     
-    KeyAlgorithms key_algorithm;
+    KeyAlgorithms keyAlgorithm;
     
     public KeySpecifier (KeyAlgorithms key_algorithm)
       {
-        this.key_algorithm = key_algorithm;
+        this.keyAlgorithm = key_algorithm;
       }
 
 
@@ -44,15 +44,15 @@ public class KeySpecifier implements Serializable
           {
             if (!key_algorithm.hasParameters ())
               {
-                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' does not use a \"Parameters\"");
+                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' does not use \"" + KeyGen2Constants.KEY_PARAMETERS_JSON + "\"");
               }
             if (key_algorithm.isRSAKey ())
               {
-                parameters = optional_parameter; 
+                keyParameters = optional_parameter; 
               }
             else
               {
-                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' not fu implemented");
+                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' not implemented");
               }
           }
       }
@@ -70,14 +70,14 @@ public class KeySpecifier implements Serializable
       }
 
 
-    public byte[] getParameters () throws IOException
+    public byte[] getKeyParameters () throws IOException
       {
-        return parameters;
+        return keyParameters;
       }
 
 
     public KeyAlgorithms getKeyAlgorithm ()
       {
-        return key_algorithm;
+        return keyAlgorithm;
       }
   }

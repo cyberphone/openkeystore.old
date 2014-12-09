@@ -741,11 +741,11 @@ public class ServerState implements Serializable
           }
 
         
-        PublicKey public_key;   // Filled in by KeyCreationRequestDecoder
+        PublicKey publicKey;   // Filled in by KeyCreationRequestDecoder
 
         public PublicKey getPublicKey ()
           {
-            return public_key;
+            return publicKey;
           }
 
 
@@ -869,7 +869,7 @@ public class ServerState implements Serializable
             return app_usage;
           }
 
-        KeySpecifier key_specifier;
+        KeySpecifier keySpecifier;
 
         PINPolicy pin_policy;
         
@@ -945,7 +945,7 @@ public class ServerState implements Serializable
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
-            this.key_specifier = key_specifier;
+            this.keySpecifier = key_specifier;
             this.pin_policy = pin_policy;
             this.preset_pin = preset_pin;
             this.device_pin_protection = device_pin_protection;
@@ -995,8 +995,8 @@ public class ServerState implements Serializable
                        DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_pair_mac.addString (key_specifier.getKeyAlgorithm ().getURI ());
-            key_pair_mac.addArray (key_specifier.getParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_specifier.getParameters ());
+            key_pair_mac.addString (keySpecifier.getKeyAlgorithm ().getURI ());
+            key_pair_mac.addArray (keySpecifier.getKeyParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keySpecifier.getKeyParameters ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {
                 key_pair_mac.addString (algorithm);
@@ -1050,10 +1050,10 @@ public class ServerState implements Serializable
 
             wr.setString (APP_USAGE_JSON, app_usage.getProtocolName ());
 
-            wr.setString (KEY_ALGORITHM_JSON, key_specifier.getKeyAlgorithm ().getURI ());
-            if (key_specifier.getParameters () != null)
+            wr.setString (KEY_ALGORITHM_JSON, keySpecifier.getKeyAlgorithm ().getURI ());
+            if (keySpecifier.getKeyParameters () != null)
               {
-                wr.setBinary (KEY_PARAMETERS_JSON, key_specifier.getParameters ());
+                wr.setBinary (KEY_PARAMETERS_JSON, keySpecifier.getKeyParameters ());
               }
 
             if (endorsed_algorithms != null && endorsed_algorithms.length > 0)
@@ -1524,14 +1524,14 @@ public class ServerState implements Serializable
               {
                 ServerState.bad ("Wrong ID order:" + gpk.id + " / " + kp.id);
               }
-            if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+            if (kp.keySpecifier.keyAlgorithm != KeyAlgorithms.getKeyAlgorithm (kp.publicKey = gpk.publicKey, kp.keySpecifier.keyParameters != null))
               {
                 ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
               }
             MacGenerator attestation = new MacGenerator ();
             // Write key attestation data
             attestation.addString (gpk.id);
-            attestation.addArray (gpk.public_key.getEncoded ());
+            attestation.addArray (gpk.publicKey.getEncoded ());
             if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
                                     kp.attestation = gpk.attestation))
               {

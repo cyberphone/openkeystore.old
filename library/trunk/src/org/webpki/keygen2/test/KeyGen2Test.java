@@ -787,7 +787,7 @@ public class KeyGen2Test
                                                        key.getAppUsage ().getSKSValue (),
                                                        key.getFriendlyName (),
                                                        key.getKeySpecifier ().getKeyAlgorithm ().getURI (),
-                                                       key.getKeySpecifier ().getParameters (),
+                                                       key.getKeySpecifier ().getKeyParameters (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_creation_response.addPublicKey (key_data.getPublicKey (),

@@ -122,14 +122,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 
-            "{&quot;now&quot;:&quot;2014-12-08T10:25:17Z&quot;,&quot;escapeMe&quot;:&quot;&#x20AC;$\\u000f\\nA'B\\&quot;\\\\\\\\\\&quot;/&quot;,&quot;numbers&quot;:[1e0,4.50,6],&quot;signature&quot;:<br>" +
+            "{&quot;now&quot;:&quot;2014-12-08T10:25:17Z&quot;,&quot;escapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">&#x20AC;</b>$<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B\\&quot;\\\\</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;signature&quot;:<br>" +
             "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWW<br>" +
-            "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}<br>" +
-"jjjjjj<br>" +
-                "{&quot;Now&quot;:&quot;2014-09-16T10:25:17Z&quot;,&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;Signature&quot;:{&quot;Algorithm&quot;:<br>" +
-            "&quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xml<br>" +
-            "ns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3Lg<br>" +
-            "ZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
+            "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature can now be validated using the method specified in <a href=\"#" + JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.VALUE_JSON + "\">" + 
@@ -152,27 +147,27 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "However, there is a &quot;workaround&quot; which fits most real-world scenarios needing multiple signatures and that is using wrapping signatures. " + LINE_SEPARATOR +
             "Original signed JSON object:" +
     "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-    "&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
-    "&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-    "&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
-    "&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2014-12-08T13:56:08Z&quot;,<br>" +
+    "&nbsp;&nbsp;&quot;id&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
+    "&nbsp;&nbsp;&quot;data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+    "&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
     "}</code></div>" +
     "Dual-signed JSON object:" +
     "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-    "&nbsp;&nbsp;&quot;Container&quot;:<br>" +
+    "&nbsp;&nbsp;&quot;container&quot;:<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
-    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
-    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2014-12-08T13:56:08Z&quot;,<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;id&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-    "&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Wrapping signature...</i><code><br>" +
     "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
@@ -196,7 +191,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;&nbsp;&nbsp;JSONObjectWriter writer = new JSONObjectWriter ();<br>" +
         "&nbsp;<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;// Fill it with some data<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;writer.setString (&quot;MyProperty&quot;, &quot;Some data&quot;);<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;writer.setString (&quot;myProperty&quot;, &quot;Some data&quot;);<br>" +
         "&nbsp;<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;// Sign the document<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()<br>" +
@@ -238,7 +233,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;&nbsp;&nbsp;json_signature.verify (new JSONAsymKeyVerifier (public_key));<br>" +
         "&nbsp;<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;// Print the document payload on the console<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;System.out.println (&quot;Returned data: &quot; + reader.getString (&quot;MyProperty&quot;));<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;System.out.println (&quot;Returned data: &quot; + reader.getString (&quot;myProperty&quot;));<br>" +
         "&nbsp;&nbsp;}" +
         "</code></div>");
 

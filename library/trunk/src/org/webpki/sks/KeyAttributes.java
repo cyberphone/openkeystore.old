@@ -21,39 +21,39 @@ import java.security.cert.X509Certificate;
 
 public class KeyAttributes
   {
-    short symmetric_key_length;
+    short symmetricKeyLength;
     
-    X509Certificate[] certificate_path;
+    X509Certificate[] certificatePath;
     
-    byte app_usage;
+    byte appUsage;
     
-    String friendly_name;
+    String friendlyName;
 
-    String[] endorsed_algorithms;
+    String[] endorsedAlgorithms;
 
-    String[] extension_types;
+    String[] extensionTypes;
     
     
     public boolean isSymmetricKey ()
       {
-        return symmetric_key_length > 0;
+        return symmetricKeyLength > 0;
       }
     
     public short getSymmetricKeyLength ()
       {
-        return symmetric_key_length;
+        return symmetricKeyLength;
       }
     
     public X509Certificate[] getCertificatePath ()
       {
-        return certificate_path;
+        return certificatePath;
       }
 
     public AppUsage getAppUsage () throws SKSException
       {
         for (AppUsage au : AppUsage.values ())
           {
-            if (au.getSKSValue () == app_usage)
+            if (au.getSKSValue () == appUsage)
               {
                 return au;
               }
@@ -63,31 +63,31 @@ public class KeyAttributes
     
     public String getFriendlyName ()
       {
-        return friendly_name;
+        return friendlyName;
       }
 
     public String[] getEndorsedAlgorithms ()
       {
-        return extension_types;
+        return extensionTypes;
       }
 
     public String[] getExtensionTypes ()
       {
-        return extension_types;
+        return extensionTypes;
       }
     
-    public KeyAttributes (short symmetric_key_length,
-                          X509Certificate[] certificate_path,
-                          byte app_usage,
-                          String friendly_name,
-                          String[] endorsed_algorithms,
-                          String[] extension_types)
+    public KeyAttributes (short symmetricKeyLength,
+                          X509Certificate[] certificatePath,
+                          byte appUsage,
+                          String friendlyName,
+                          String[] endorsedAlgorithms,
+                          String[] extensionTypes)
       {
-        this.symmetric_key_length = symmetric_key_length;
-        this.certificate_path = certificate_path;
-        this.app_usage = app_usage;
-        this.friendly_name = friendly_name;
-        this.endorsed_algorithms = endorsed_algorithms;
-        this.extension_types = extension_types;
+        this.symmetricKeyLength = symmetricKeyLength;
+        this.certificatePath = certificatePath;
+        this.appUsage = appUsage;
+        this.friendlyName = friendlyName;
+        this.endorsedAlgorithms = endorsedAlgorithms;
+        this.extensionTypes = extensionTypes;
       }
   }

@@ -111,7 +111,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
         wr.setString (ID_JSON, key.id);
 
         MacGenerator set_certificate = new MacGenerator ();
-        set_certificate.addArray (key.public_key.getEncoded ());
+        set_certificate.addArray (key.publicKey.getEncoded ());
         set_certificate.addString (key.id);
         X509Certificate[] certificate_path = key.certificate_path;
         if (key.trust_anchor_set && !CertificateUtil.isTrustAnchor (certificate_path[certificate_path.length - 1]))
