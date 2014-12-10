@@ -57,7 +57,7 @@ public enum Grouping
                 return option;
               }
           }
-        throw new IOException ("Unknown group: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_GROUPING + "\": " + name);
       }
 
   }

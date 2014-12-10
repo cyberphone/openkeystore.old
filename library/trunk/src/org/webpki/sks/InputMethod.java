@@ -56,6 +56,6 @@ public enum InputMethod
                 return type;
               }
           }
-        throw new IOException ("Unknown method: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_INPUT_METHOD + "\": " + name);
       }
   }

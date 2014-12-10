@@ -39,7 +39,6 @@ import javax.xml.ws.BindingProvider;
 
 import org.webpki.crypto.CertificateUtil;
 
-import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.Extension;
@@ -53,6 +52,7 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.sks.ws.TrustedGUIAuthorization;
 import org.webpki.sks.ws.WSSpecific;
+import org.webpki.sks.ws.WSDeviceInfo;
 
 public class SKSWSClient implements SecureKeyStore, WSSpecific
   {
@@ -185,7 +185,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public DeviceInfo getDeviceInfo () throws SKSException
+    public WSDeviceInfo getDeviceInfo () throws SKSException
       {
         try
           {
@@ -214,7 +214,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                        device_pin_support,
                                        biometric_support,
                                        connection_port);
-            DeviceInfo device_info = new DeviceInfo (api_level.value,
+            WSDeviceInfo device_info = new WSDeviceInfo (api_level.value,
                                                      device_type.value,
                                                      update_url.value,
                                                      vendor_name.value,
@@ -224,8 +224,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                      crypto_data_size.value,
                                                      extension_data_size.value,
                                                      device_pin_support.value,
-                                                     biometric_support.value);
-            device_info.setConnectionPort (connection_port.value);
+                                                     biometric_support.value,
+                                                     connection_port.value);
             return device_info;
           }
         catch (SKSException_Exception e)

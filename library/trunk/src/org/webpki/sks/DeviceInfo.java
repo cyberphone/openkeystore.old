@@ -112,29 +112,6 @@ public class DeviceInfo
         return biometricSupport;
       }
     
-    String connection_port;
-    /**
-     * Holds an optional system-dependent string telling which logical
-     * or physical port the SKS is connected to.  This information is
-     * not gathered from the SKS device itself, but from the calling
-     * environment.  Suitable strings include "USB:4", "COM3", "TCP:192.168.0.45",
-     * "/dev/term3", "PCI:2", "Embedded", "SIM", "http://net-hsm/sks", etc.
-     */
-    public String getConnectionPort ()
-      {
-        return connection_port;
-      }
-
-    /**
-     * 
-     * @see #getConnectionPort()
-     */
-    public void setConnectionPort (String connection_port)
-      {
-        this.connection_port = connection_port;
-      }
-
-    
     public DeviceInfo (short apiLevel,
                        byte deviceType,
                        String updateUrl,  // May be null

@@ -208,25 +208,25 @@ public class KeyProtectionInfo
         throw new SKSException ("Unknown format: " + format);
       }
     
-    private InputMethod convertInputMethod (byte input_method) throws SKSException
+    private InputMethod convertInputMethod (byte inputMethod) throws SKSException
       {
-        for (InputMethod kg2_input_method : InputMethod.values ())
+        for (InputMethod kg2InputMethod : InputMethod.values ())
           {
-            if (kg2_input_method.getSksValue () == input_method)
+            if (kg2InputMethod.getSksValue () == inputMethod)
               {
-                return kg2_input_method;
+                return kg2InputMethod;
               }
           }
-        throw new SKSException ("Unknown input method: " + input_method);
+        throw new SKSException ("Unknown input method: " + inputMethod);
       }
 
     private ExportProtection convertExportProtection (byte exportProtection) throws SKSException
       {
-        for (ExportProtection kg2_exportProtection : ExportProtection.values ())
+        for (ExportProtection kg2ExportProtection : ExportProtection.values ())
           {
-            if (kg2_exportProtection.getSksValue () == exportProtection)
+            if (kg2ExportProtection.getSksValue () == exportProtection)
               {
-                return kg2_exportProtection;
+                return kg2ExportProtection;
               }
           }
         throw new SKSException ("Unknown export protection: " + exportProtection);
@@ -234,11 +234,11 @@ public class KeyProtectionInfo
 
     private DeleteProtection convertDeleteProtection (byte deleteProtection) throws SKSException
       {
-        for (DeleteProtection kg2_deleteProtection : DeleteProtection.values ())
+        for (DeleteProtection kg2DeleteProtection : DeleteProtection.values ())
           {
-            if (kg2_deleteProtection.getSksValue () == deleteProtection)
+            if (kg2DeleteProtection.getSksValue () == deleteProtection)
               {
-                return kg2_deleteProtection;
+                return kg2DeleteProtection;
               }
           }
         throw new SKSException ("Unknown delete protection: " + deleteProtection);
@@ -246,11 +246,11 @@ public class KeyProtectionInfo
 
     private Grouping convertGrouping (byte grouping) throws SKSException
       {
-        for (Grouping kg2_grouping : Grouping.values ())
+        for (Grouping kg2Grouping : Grouping.values ())
           {
-            if (kg2_grouping.getSksValue () == grouping)
+            if (kg2Grouping.getSksValue () == grouping)
               {
-                return kg2_grouping;
+                return kg2Grouping;
               }
           }
         throw new SKSException ("Unknown grouping: " + grouping);
@@ -258,11 +258,11 @@ public class KeyProtectionInfo
 
     private BiometricProtection convertBiometricProtection (byte biometricProtection) throws SKSException
       {
-        for (BiometricProtection kg2_biometricProtection : BiometricProtection.values ())
+        for (BiometricProtection kg2BiometricProtection : BiometricProtection.values ())
           {
-            if (kg2_biometricProtection.getSksValue () == biometricProtection)
+            if (kg2BiometricProtection.getSksValue () == biometricProtection)
               {
-                return kg2_biometricProtection;
+                return kg2BiometricProtection;
               }
           }
         throw new SKSException ("Unknown biometric protection: " + biometricProtection);
@@ -280,7 +280,7 @@ public class KeyProtectionInfo
                               byte patternRestrictions,
                               short minLength,
                               short maxLength,
-                              byte input_method,
+                              byte inputMethod,
                               short pinErrorCount,
                               boolean enablePinCaching,
                               byte biometricProtection,
@@ -313,7 +313,7 @@ public class KeyProtectionInfo
               }
             this.pinMinLength = minLength;
             this.pinMaxLength = maxLength;
-            this.pinInputMethod = convertInputMethod (input_method);
+            this.pinInputMethod = convertInputMethod (inputMethod);
             this.pinErrorCount = pinErrorCount;
           }
         if (hasLocalPinProtection () || hasDevicePinProtection ())

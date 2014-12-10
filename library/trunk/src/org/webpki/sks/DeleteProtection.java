@@ -57,7 +57,7 @@ public enum DeleteProtection
                 return del_pol;
               }
           }
-        throw new IOException ("Unknown delete policy: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_DELETE_PROTECTION + "\": " + name);
       }
 
   }

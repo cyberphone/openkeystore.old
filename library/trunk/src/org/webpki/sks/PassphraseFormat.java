@@ -55,7 +55,7 @@ public enum PassphraseFormat
                 return type;
               }
           }
-        throw new IOException ("Unknown format: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_FORMAT + "\": " + name);
       }
 
   }

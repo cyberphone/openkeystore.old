@@ -57,7 +57,7 @@ public enum BiometricProtection
                 return biom_type;
               }
           }
-        throw new IOException ("Unknown biometric type: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_BIOMETRIC_PROTECTION + "\": " + name);
       }
 
   }

@@ -50,13 +50,13 @@ public enum AppUsage
 
     public static AppUsage getAppUsageFromString (String name) throws IOException
       {
-        for (AppUsage key_type : AppUsage.values ())
+        for (AppUsage appUsage : AppUsage.values ())
           {
-            if (name.equals (key_type.name))
+            if (name.equals (appUsage.name))
               {
-                return key_type;
+                return appUsage;
               }
           }
-        throw new IOException ("Unknown key usage type: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_APP_USAGE + "\": " + name);
       }
   }

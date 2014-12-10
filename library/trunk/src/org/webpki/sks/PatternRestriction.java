@@ -60,7 +60,7 @@ public enum PatternRestriction
                 return restriction;
               }
           }
-        throw new IOException ("Unknown pattern: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_PATTERN_RESTRICTIONS + "\": " + name);
       }
     
 

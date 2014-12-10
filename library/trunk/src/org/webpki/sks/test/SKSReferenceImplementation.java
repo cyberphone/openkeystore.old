@@ -718,7 +718,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                      byte[] authorization) throws GeneralSecurityException
           {
             Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? 
-                                                                                     "SHA256WithRSA" : "SHA256WithECDSA");
+                                                                                   "SHA256WithRSA" : "SHA256WithECDSA");
             kmk_verify.initVerify (keyManagementKey);
             kmk_verify.update (kmk_kdf);
             kmk_verify.update (argument);
@@ -1045,8 +1045,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         try
           {
             supportedEcKeyAlgorithms.put (jceName,
-                                             ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
-                new X509EncodedKeySpec (samplPublicKey))).getParams ().getCurve ());
+                ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
+                    new X509EncodedKeySpec (samplPublicKey))).getParams ().getCurve ());
           }
         catch (Exception e)
           {
@@ -1299,7 +1299,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       }
 
     @SuppressWarnings("fallthrough")
-    void verifyPINPolicyCompliance (boolean forced_setter, byte[] pinValue, PINPolicy pinPolicy, byte appUsage, SKSError sksError) throws SKSException
+    void verifyPINPolicyCompliance (boolean forcedSetter, byte[] pinValue, PINPolicy pinPolicy, byte appUsage, SKSError sksError) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Check PIN length
@@ -1416,7 +1416,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if (keyEntry.pinPolicy == pinPolicy)
               {
                 boolean equal = Arrays.equals (keyEntry.pinValue, pinValue);
-                if (forced_setter && !equal)
+                if (forcedSetter && !equal)
                   {
                     continue;
                   }
