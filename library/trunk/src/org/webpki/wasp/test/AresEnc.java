@@ -76,7 +76,7 @@ System.out.println ("SIGALG=" + authdec.getAuthenticationProfiles ()[0].getSigna
 
         authenc.createSignedResponse (signer,
                                       authdec,
-                                      (new URL (new URL (authdec.getSubmitURL ()), "authreq")).toString (),
+                                      (new URL (new URL (authdec.getSubmitUrl ()), "authreq")).toString (),
                                       localfixed ? 
                                          new GregorianCalendar (2006, 0, 1, 10, 0, 0).getTime() 
                                                  :

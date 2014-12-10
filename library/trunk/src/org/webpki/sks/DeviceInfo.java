@@ -37,7 +37,7 @@ public class DeviceInfo
     
     short apiLevel;
     
-    public short getAPILevel ()
+    public short getApiLevel ()
       {
         return apiLevel;
       }
@@ -51,7 +51,7 @@ public class DeviceInfo
 
     String updateUrl;
     
-    public String getUpdateURL ()
+    public String getUpdateUrl ()
       {
         return updateUrl;
       }
@@ -100,7 +100,7 @@ public class DeviceInfo
     
     boolean devicePinSupport;
     
-    public boolean getDevicePINSupport ()
+    public boolean getDevicePinSupport ()
       {
         return devicePinSupport;
       }

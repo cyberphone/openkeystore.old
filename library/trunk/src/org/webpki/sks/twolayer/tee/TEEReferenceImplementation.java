@@ -1537,16 +1537,16 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     public synchronized DeviceInfo getDeviceInfo () throws SKSException
       {
         DeviceInfo device_info = SEReferenceImplementation.getDeviceInfo ();
-        return new DeviceInfo (device_info.getAPILevel (),
+        return new DeviceInfo (device_info.getApiLevel (),
                                device_info.getDeviceType (),
-                               device_info.getUpdateURL (),
+                               device_info.getUpdateUrl (),
                                SKS_VENDOR_NAME + " / " + device_info.getVendorName (),
                                SKS_VENDOR_DESCRIPTION + " / " + device_info.getVendorDescription (),
                                device_info.getCertificatePath (),
                                device_info.getSupportedAlgorithms (),
                                device_info.getCryptoDataSize (),
                                device_info.getExtensionDataSize (),
-                               device_info.getDevicePINSupport (),
+                               device_info.getDevicePinSupport (),
                                device_info.getBiometricSupport ());
       }
 

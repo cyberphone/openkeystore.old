@@ -273,13 +273,13 @@ public class ServerState implements Serializable
         @Override
         public String getQualifier () throws IOException
           {
-            return logotype.getMIMEType ();
+            return logotype.getMimeType ();
           }
 
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setString (MIME_TYPE_JSON, logotype.getMIMEType ());
+            wr.setString (MIME_TYPE_JSON, logotype.getMimeType ());
             wr.setBinary (EXTENSION_DATA_JSON, logotype.getData ());
           }
 
@@ -430,7 +430,7 @@ public class ServerState implements Serializable
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
             puk_policy_mac.addArray (encrypted_value);
-            puk_policy_mac.addByte (format.getSKSValue ());
+            puk_policy_mac.addByte (format.getSksValue ());
             puk_policy_mac.addShort (retry_limit);
             wr.setBinary (MAC_JSON, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
           }
@@ -545,13 +545,13 @@ public class ServerState implements Serializable
             pin_policy_mac.addString (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
             pin_policy_mac.addBool (user_defined);
             pin_policy_mac.addBool (user_modifiable);
-            pin_policy_mac.addByte (format.getSKSValue ());
+            pin_policy_mac.addByte (format.getSksValue ());
             pin_policy_mac.addShort (retry_limit);
-            pin_policy_mac.addByte (grouping == null ? Grouping.NONE.getSKSValue () : grouping.getSKSValue ());
-            pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
+            pin_policy_mac.addByte (grouping == null ? Grouping.NONE.getSksValue () : grouping.getSksValue ());
+            pin_policy_mac.addByte (PatternRestriction.getSksValue (pattern_restrictions));
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
-            pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
+            pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSksValue () : input_method.getSksValue ());
             wr.setBinary (MAC_JSON, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
           }
 
@@ -988,12 +988,12 @@ public class ServerState implements Serializable
             key_pair_mac.addBool (device_pin_protection);
             key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (biometric_protection == null ?
-                       BiometricProtection.NONE.getSKSValue () : biometric_protection.getSKSValue ());
+                       BiometricProtection.NONE.getSksValue () : biometric_protection.getSksValue ());
             key_pair_mac.addByte (export_protection == null ?
-                ExportProtection.NON_EXPORTABLE.getSKSValue () : export_protection.getSKSValue ());
+                ExportProtection.NON_EXPORTABLE.getSksValue () : export_protection.getSksValue ());
             key_pair_mac.addByte (delete_protection == null ?
-                       DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
-            key_pair_mac.addByte (app_usage.getSKSValue ());
+                       DeleteProtection.NONE.getSksValue () : delete_protection.getSksValue ());
+            key_pair_mac.addByte (app_usage.getSksValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
             key_pair_mac.addString (keySpecifier.getKeyAlgorithm ().getURI ());
             key_pair_mac.addArray (keySpecifier.getKeyParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keySpecifier.getKeyParameters ());
@@ -1063,7 +1063,7 @@ public class ServerState implements Serializable
 
             wr.setBinary (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
-            expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
+            expected_attest_mac_count = getMacSequenceCounterAndUpdate ();
           }
       }
 
@@ -1120,7 +1120,7 @@ public class ServerState implements Serializable
             super.capability = CAPABILITY.IMAGE_ATTRIBUTES;
           }
   
-        public String getMIMEType ()
+        public String getMimeType ()
           {
             return mime_type;
           }
@@ -1289,7 +1289,7 @@ public class ServerState implements Serializable
           }
       }
     
-    private byte[] getMACSequenceCounterAndUpdate ()
+    private byte[] getMacSequenceCounterAndUpdate ()
       {
         int q = mac_sequence_counter++;
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
@@ -1297,7 +1297,7 @@ public class ServerState implements Serializable
 
     byte[] mac (byte[] data, byte[] method) throws IOException
       {
-        return server_crypto_interface.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
+        return server_crypto_interface.mac (data, ArrayUtil.add (method, getMacSequenceCounterAndUpdate ()));
       }
     
     byte[] attest (byte[] data, byte[] mac_counter) throws IOException
@@ -1316,7 +1316,7 @@ public class ServerState implements Serializable
         check.addArray (saved_close_nonce);
         check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
-                                        getMACSequenceCounterAndUpdate ()),
+                                        getMacSequenceCounterAndUpdate ()),
                                 close_session_attestation))
           {
             bad ("Final attestation failed!");
@@ -1600,12 +1600,12 @@ public class ServerState implements Serializable
       }
 
     
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }

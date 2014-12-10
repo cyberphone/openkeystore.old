@@ -39,13 +39,13 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
     XMLSignatureWrapper signature;
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
     
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }

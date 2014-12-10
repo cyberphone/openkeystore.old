@@ -83,7 +83,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
               }
             JSONSignatureDecoder signature = rd.getSignature ();
             key_management_key = signature.getPublicKey ();
-            if (((AsymSignatureAlgorithms) signature.getSignatureAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
+            if (((AsymSignatureAlgorithms) signature.getAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
               {
                 throw new IOException ("Lookup signature must use SHA256");
               }
@@ -145,19 +145,19 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
 
     byte[] nonce_reference;
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

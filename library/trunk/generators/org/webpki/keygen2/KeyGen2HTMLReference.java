@@ -1155,7 +1155,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Previous generation key management key." + LINE_SEPARATOR +
-                          "Note that <code>SKS:updateKeyManagementKey.KeyManagementKey</code>" +
+                          "Note that <code>SKS:updateKeyManagementKey." + KEY_MANAGEMENT_KEY_JSON + "</code>" +
                           " refers to the <i>new</i> key management key specified in the object <i>immediately above</i> (=embedding) this ")
               .addLink (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)
               .addString (" object.")
@@ -1167,7 +1167,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Authorization of the new key management key. See <code>SKS:updateKeyManagementKey.Authorization</code>.")
+              .addString ("Authorization of the new key management key. See <code>SKS:updateKeyManagementKey." + AUTHORIZATION_JSON + "</code>.")
           .newExtensionRow (new OptionalArrayObject (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON,
                             1,
                             "<i>Optional:</i> List of the previous generation of key management keys."));

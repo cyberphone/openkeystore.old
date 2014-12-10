@@ -72,7 +72,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
 
     String session_key_algorithm;
     
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -84,7 +84,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

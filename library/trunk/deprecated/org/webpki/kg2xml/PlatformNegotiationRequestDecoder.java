@@ -39,13 +39,13 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         return basic_capabilities;
       }
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

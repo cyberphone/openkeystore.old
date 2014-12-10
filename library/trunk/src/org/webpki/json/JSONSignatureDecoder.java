@@ -230,7 +230,7 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    static X509Certificate[] getX509CertificatePath (JSONObjectReader rd) throws IOException
+    static X509Certificate[] getCertificatePath (JSONObjectReader rd) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
@@ -252,7 +252,7 @@ public class JSONSignatureDecoder implements Serializable
 
     void readX509CertificateEntry (JSONObjectReader rd) throws IOException
       {
-        certificate_path = getX509CertificatePath (rd);
+        certificate_path = getCertificatePath (rd);
         if (rd.hasProperty (SIGNER_CERTIFICATE_JSON))
           {
             rd = rd.getObject (SIGNER_CERTIFICATE_JSON);
@@ -285,7 +285,7 @@ public class JSONSignatureDecoder implements Serializable
                   break;
   
                 default:
-                  key = getKeyID ();
+                  key = getKeyId ();
                }
             throw new IOException ("Bad signature for key: " + key);
           }
@@ -307,12 +307,12 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    public byte[] getSignatureValue ()
+    public byte[] getValue ()
       {
         return signature_value;
       }
 
-    public SignatureAlgorithms getSignatureAlgorithm ()
+    public SignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }
@@ -330,7 +330,7 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    public X509Certificate[] getX509CertificatePath () throws IOException
+    public X509Certificate[] getCertificatePath () throws IOException
       {
         checkRequest (JSONSignatureTypes.X509_CERTIFICATE);
         return certificate_path;
@@ -342,7 +342,7 @@ public class JSONSignatureDecoder implements Serializable
         return public_key;
       }
 
-    public String getKeyID () throws IOException
+    public String getKeyId () throws IOException
       {
         checkRequest (JSONSignatureTypes.SYMMETRIC_KEY);
         return key_id;

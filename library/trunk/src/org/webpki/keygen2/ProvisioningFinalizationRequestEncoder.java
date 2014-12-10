@@ -122,7 +122,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
           {
             set_certificate.addArray (certificate.getEncoded ());
           }
-        wr.setX509CertificatePath (certificate_path);
+        wr.setCertificatePath (certificate_path);
         mac (wr, set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
         byte[] ee_cert = certificate_path[0].getEncoded ();
         

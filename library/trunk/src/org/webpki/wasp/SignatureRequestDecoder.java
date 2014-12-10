@@ -155,7 +155,7 @@ public class SignatureRequestDecoder extends SignatureRequest
             return data;
           }
 
-        public String getMIMEType ()
+        public String getMimeType ()
           {
             return mime_type;
           }
@@ -336,7 +336,7 @@ public class SignatureRequestDecoder extends SignatureRequest
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

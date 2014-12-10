@@ -38,169 +38,169 @@ public class KeyProtectionInfo
     public static final byte KEYBACKUP_IMPORTED          = 0x01;
     public static final byte KEYBACKUP_EXPORTED          = 0x02;
  
-    private PassphraseFormat puk_format;
+    private PassphraseFormat pukFormat;
     
-    private short puk_error_count;
+    private short pukErrorCount;
     
-    private short puk_retry_limit;
+    private short pukRetryLimit;
     
-    private boolean enable_pin_caching;
+    private boolean enablePinCaching;
     
-    private boolean pin_user_defined;
+    private boolean pinUserDefined;
 
-    private boolean pin_user_modifiable;
+    private boolean pinUserModifiable;
     
-    private byte protection_status;
+    private byte protectionStatus;
     
-    private short pin_min_length;
+    private short pinMinLength;
 
-    private short pin_max_length;
+    private short pinMaxLength;
 
-    private InputMethod pin_input_method;
+    private InputMethod pinInputMethod;
     
-    private short pin_retry_limit;
+    private short pinRetryLimit;
     
-    private Grouping pin_grouping;
+    private Grouping pinGrouping;
     
-    private Set<PatternRestriction> pin_pattern_restrictions;
+    private Set<PatternRestriction> pinPatternRestrictions;
     
-    private PassphraseFormat pin_format;
+    private PassphraseFormat pinFormat;
     
-    private short pin_error_count;
+    private short pinErrorCount;
     
-    private BiometricProtection biometric_protection;
+    private BiometricProtection biometricProtection;
     
-    private byte key_backup;
+    private byte keyBackup;
     
-    private ExportProtection export_protection;
+    private ExportProtection exportProtection;
     
-    private DeleteProtection delete_protection;
+    private DeleteProtection deleteProtection;
     
     public byte getSKSProtectionStatus ()
       {
-        return protection_status;
+        return protectionStatus;
       }
 
     public boolean hasLocalPukProtection ()
       {
-        return (protection_status & PROTSTAT_PUK_PROTECTED) != 0;
+        return (protectionStatus & PROTSTAT_PUK_PROTECTED) != 0;
       }
     
     public PassphraseFormat getPukFormat () throws SKSException
       {
-        return puk_format;
+        return pukFormat;
       }
 
     public short getPukErrorCount ()
       {
-        return puk_error_count;
+        return pukErrorCount;
       }
 
     public short getPukRetryLimit ()
       {
-        return puk_retry_limit;
+        return pukRetryLimit;
       }
 
     public boolean isPukBlocked ()
       {
-        return (protection_status & PROTSTAT_PUK_BLOCKED) != 0;
+        return (protectionStatus & PROTSTAT_PUK_BLOCKED) != 0;
       }
 
     public boolean hasLocalPinProtection ()
       {
-        return (protection_status & PROTSTAT_PIN_PROTECTED) != 0;
+        return (protectionStatus & PROTSTAT_PIN_PROTECTED) != 0;
       }
 
     public PassphraseFormat getPinFormat () throws SKSException
       {
-        return pin_format;
+        return pinFormat;
       }
 
     public Grouping getPinGrouping () throws SKSException
       {
-        return pin_grouping;
+        return pinGrouping;
       }
 
     public short getPinMinLength ()
       {
-        return pin_min_length;
+        return pinMinLength;
       }
 
     public short getPinMaxLength ()
       {
-        return pin_max_length;
+        return pinMaxLength;
       }
 
     public boolean getPinUserModifiableFlag ()
       {
-        return pin_user_modifiable;
+        return pinUserModifiable;
       }
 
     public boolean getPinUserDefinedFlag ()
       {
-        return pin_user_defined;
+        return pinUserDefined;
       }
 
     public InputMethod getPinInputMethod ()
       {
-        return pin_input_method;
+        return pinInputMethod;
       }
 
     public boolean isPinBlocked ()
       {
-        return (protection_status & PROTSTAT_PIN_BLOCKED) != 0;
+        return (protectionStatus & PROTSTAT_PIN_BLOCKED) != 0;
       }
 
     public boolean hasDevicePinProtection ()
       {
-        return (protection_status & PROTSTAT_DEVICE_PIN) != 0;
+        return (protectionStatus & PROTSTAT_DEVICE_PIN) != 0;
       }
 
     public short getPinErrorCount ()
       {
-        return pin_error_count;
+        return pinErrorCount;
       }
 
     public short getPinRetryLimit ()
       {
-        return pin_retry_limit;
+        return pinRetryLimit;
       }
     
     public Set<PatternRestriction> getPatternRestrictions ()
       {
-        return pin_pattern_restrictions;
+        return pinPatternRestrictions;
       }
 
     public BiometricProtection getBiometricProtection ()
       {
-        return biometric_protection;
+        return biometricProtection;
       }
 
     public byte getKeyBackup ()
       {
-        return key_backup;
+        return keyBackup;
       }
 
     public ExportProtection getExportProtection ()
       {
-        return export_protection;
+        return exportProtection;
       }
 
     public DeleteProtection getDeleteProtection ()
       {
-        return delete_protection;
+        return deleteProtection;
       }
     
     public boolean getEnablePinCachingFlag ()
       {
-        return enable_pin_caching;
+        return enablePinCaching;
       }
 
     private PassphraseFormat convertFormat (byte format) throws SKSException
       {
         for (PassphraseFormat kg2_format : PassphraseFormat.values ())
           {
-            if (kg2_format.getSKSValue () == format)
+            if (kg2_format.getSksValue () == format)
               {
                 return kg2_format;
               }
@@ -212,7 +212,7 @@ public class KeyProtectionInfo
       {
         for (InputMethod kg2_input_method : InputMethod.values ())
           {
-            if (kg2_input_method.getSKSValue () == input_method)
+            if (kg2_input_method.getSksValue () == input_method)
               {
                 return kg2_input_method;
               }
@@ -220,35 +220,35 @@ public class KeyProtectionInfo
         throw new SKSException ("Unknown input method: " + input_method);
       }
 
-    private ExportProtection convertExportProtection (byte export_protection) throws SKSException
+    private ExportProtection convertExportProtection (byte exportProtection) throws SKSException
       {
-        for (ExportProtection kg2_export_protection : ExportProtection.values ())
+        for (ExportProtection kg2_exportProtection : ExportProtection.values ())
           {
-            if (kg2_export_protection.getSKSValue () == export_protection)
+            if (kg2_exportProtection.getSksValue () == exportProtection)
               {
-                return kg2_export_protection;
+                return kg2_exportProtection;
               }
           }
-        throw new SKSException ("Unknown export protection: " + export_protection);
+        throw new SKSException ("Unknown export protection: " + exportProtection);
       }
 
-    private DeleteProtection convertDeleteProtection (byte delete_protection) throws SKSException
+    private DeleteProtection convertDeleteProtection (byte deleteProtection) throws SKSException
       {
-        for (DeleteProtection kg2_delete_protection : DeleteProtection.values ())
+        for (DeleteProtection kg2_deleteProtection : DeleteProtection.values ())
           {
-            if (kg2_delete_protection.getSKSValue () == delete_protection)
+            if (kg2_deleteProtection.getSksValue () == deleteProtection)
               {
-                return kg2_delete_protection;
+                return kg2_deleteProtection;
               }
           }
-        throw new SKSException ("Unknown delete protection: " + delete_protection);
+        throw new SKSException ("Unknown delete protection: " + deleteProtection);
       }
 
     private Grouping convertGrouping (byte grouping) throws SKSException
       {
         for (Grouping kg2_grouping : Grouping.values ())
           {
-            if (kg2_grouping.getSKSValue () == grouping)
+            if (kg2_grouping.getSksValue () == grouping)
               {
                 return kg2_grouping;
               }
@@ -256,73 +256,73 @@ public class KeyProtectionInfo
         throw new SKSException ("Unknown grouping: " + grouping);
       }
 
-    private BiometricProtection convertBiometricProtection (byte biometric_protection) throws SKSException
+    private BiometricProtection convertBiometricProtection (byte biometricProtection) throws SKSException
       {
-        for (BiometricProtection kg2_biometric_protection : BiometricProtection.values ())
+        for (BiometricProtection kg2_biometricProtection : BiometricProtection.values ())
           {
-            if (kg2_biometric_protection.getSKSValue () == biometric_protection)
+            if (kg2_biometricProtection.getSksValue () == biometricProtection)
               {
-                return kg2_biometric_protection;
+                return kg2_biometricProtection;
               }
           }
-        throw new SKSException ("Unknown biometric protection: " + biometric_protection);
+        throw new SKSException ("Unknown biometric protection: " + biometricProtection);
       }
 
-    public KeyProtectionInfo (byte protection_status,
-                              byte puk_format,
-                              short puk_retry_limit,
-                              short puk_error_count,
-                              boolean user_defined,
-                              boolean user_modifiable,
+    public KeyProtectionInfo (byte protectionStatus,
+                              byte pukFormat,
+                              short pukRetryLimit,
+                              short pukErrorCount,
+                              boolean userDefined,
+                              boolean userModifiable,
                               byte format,
-                              short retry_limit,
+                              short retryLimit,
                               byte grouping,
-                              byte pattern_restrictions,
-                              short min_length,
-                              short max_length,
+                              byte patternRestrictions,
+                              short minLength,
+                              short maxLength,
                               byte input_method,
-                              short pin_error_count,
-                              boolean enable_pin_caching,
-                              byte biometric_protection,
-                              byte export_protection,
-                              byte delete_protection,
-                              byte key_backup) throws SKSException
+                              short pinErrorCount,
+                              boolean enablePinCaching,
+                              byte biometricProtection,
+                              byte exportProtection,
+                              byte deleteProtection,
+                              byte keyBackup) throws SKSException
 
       {
-        this.protection_status = protection_status;
+        this.protectionStatus = protectionStatus;
         if (hasLocalPukProtection ())
           {
-            this.puk_format = convertFormat (puk_format);
-            this.puk_error_count = puk_error_count;
-            this.puk_retry_limit = puk_retry_limit;
+            this.pukFormat = convertFormat (pukFormat);
+            this.pukErrorCount = pukErrorCount;
+            this.pukRetryLimit = pukRetryLimit;
           }
         if (hasLocalPinProtection ())
           {
-            this.pin_user_defined = user_defined;
-            this.pin_user_modifiable = user_modifiable;
-            this.pin_format = convertFormat (format);
-            this.pin_retry_limit = retry_limit;
-            this.pin_grouping = convertGrouping (grouping);
-            this.pin_pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
+            this.pinUserDefined = userDefined;
+            this.pinUserModifiable = userModifiable;
+            this.pinFormat = convertFormat (format);
+            this.pinRetryLimit = retryLimit;
+            this.pinGrouping = convertGrouping (grouping);
+            this.pinPatternRestrictions = EnumSet.noneOf (PatternRestriction.class);
             for (PatternRestriction pattern : PatternRestriction.values ())
               {
-                if ((pattern.getSKSMaskBit () & pattern_restrictions) != 0)
+                if ((pattern.getSKSMaskBit () & patternRestrictions) != 0)
                   {
-                    this.pin_pattern_restrictions.add (pattern);
+                    this.pinPatternRestrictions.add (pattern);
                   }
               }
-            this.pin_min_length = min_length;
-            this.pin_max_length = max_length;
-            this.pin_input_method = convertInputMethod (input_method);
-            this.pin_error_count = pin_error_count;
+            this.pinMinLength = minLength;
+            this.pinMaxLength = maxLength;
+            this.pinInputMethod = convertInputMethod (input_method);
+            this.pinErrorCount = pinErrorCount;
           }
         if (hasLocalPinProtection () || hasDevicePinProtection ())
           {
-            this.enable_pin_caching = enable_pin_caching;
+            this.enablePinCaching = enablePinCaching;
           }
-        this.key_backup = key_backup;
-        this.biometric_protection = convertBiometricProtection (biometric_protection);
-        this.export_protection = convertExportProtection (export_protection);
-        this.delete_protection = convertDeleteProtection (delete_protection);
+        this.keyBackup = keyBackup;
+        this.biometricProtection = convertBiometricProtection (biometricProtection);
+        this.exportProtection = convertExportProtection (exportProtection);
+        this.deleteProtection = convertDeleteProtection (deleteProtection);
       }
   }

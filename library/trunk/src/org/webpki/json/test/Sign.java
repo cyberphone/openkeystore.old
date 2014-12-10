@@ -68,11 +68,11 @@ public class Sign
         @Override
         public byte[] signData (byte[] data) throws IOException
           {
-            return getMACAlgorithm ().digest (SYMMETRIC_KEY, data);
+            return getMacAlgorithm ().digest (SYMMETRIC_KEY, data);
           }
   
         @Override
-        public MACAlgorithms getMACAlgorithm () throws IOException
+        public MACAlgorithms getMacAlgorithm () throws IOException
           {
             return MACAlgorithms.HMAC_SHA256;
           }
@@ -82,7 +82,7 @@ public class Sign
           {
             if (key_id.equals (SYMMETRIC_KEY_NAME))
               {
-                return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYMMETRIC_KEY, data));
+                return ArrayUtil.compare (digest, getMacAlgorithm ().digest (SYMMETRIC_KEY, data));
               }
             throw new IOException ("Unknown key id: " + key_id);
           }
@@ -177,7 +177,7 @@ public class Sign
     
     public static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
-        wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyID (SYMMETRIC_KEY_NAME));
+        wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyId (SYMMETRIC_KEY_NAME));
       }
     
     

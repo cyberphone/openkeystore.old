@@ -42,7 +42,7 @@ public enum ExportProtection
       }
     
 
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }

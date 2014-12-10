@@ -72,7 +72,7 @@ public class EnumeratedProvisioningSession
 
     String client_session_id;
     
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
@@ -80,7 +80,7 @@ public class EnumeratedProvisioningSession
 
     String server_session_id;
     
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -88,7 +88,7 @@ public class EnumeratedProvisioningSession
     
     String issuer_uri;
     
-    public String getIssuerURI ()
+    public String getIssuerUri ()
       {
         return issuer_uri;
       }

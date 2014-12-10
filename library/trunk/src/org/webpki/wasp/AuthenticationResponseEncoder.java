@@ -68,7 +68,7 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
         this.id = auth_req_decoder.getID ();
         this.server_time = auth_req_decoder.getServerTime ();
         this.request_url = request_url;
-        this.submit_url = auth_req_decoder.getSubmitURL ();
+        this.submit_url = auth_req_decoder.getSubmitUrl ();
         this.client_time = client_time;
         if (server_certificate != null)
           {

@@ -41,12 +41,12 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
         
         boolean locked;
         
-        public String getClientSessionID ()
+        public String getClientSessionId ()
           {
             return client_session_id;
           }
         
-        public String getServerSessionID ()
+        public String getServerSessionId ()
           {
             return server_session_id;
           }
@@ -80,7 +80,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
                 MatchingCredential matching_credential = new MatchingCredential ();
                 matching_credential.client_session_id = KeyGen2Validator.getID (match_object, CLIENT_SESSION_ID_JSON);
                 matching_credential.server_session_id = KeyGen2Validator.getID (match_object, SERVER_SESSION_ID_JSON);
-                matching_credential.certificate_path = match_object.getX509CertificatePath ();
+                matching_credential.certificate_path = match_object.getCertificatePath ();
                 matching_credential.locked = match_object.getBooleanConditional (LOCKED_JSON);
                 matching_credentials.add (matching_credential);
               }

@@ -63,7 +63,7 @@ public class SreqDec
         if (d != null)
           {
             s.append ("\n" +name + ":\nURI=" + d.getContentID () +
-                      "\nMIMEType=" + d.getMIMEType () + "\nValue=\n" +
+                      "\nMIMEType=" + d.getMimeType () + "\nValue=\n" +
                       new String (d.getData(), "UTF-8") + "\n" + 
                       (d instanceof SignatureRequestDecoder.Attachment ?
                       "ProviderOriginated=" + 

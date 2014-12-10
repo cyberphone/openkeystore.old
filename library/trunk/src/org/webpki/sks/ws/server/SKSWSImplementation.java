@@ -124,9 +124,9 @@ public class SKSWSImplementation
                 devices.put (device_id, sks);
                 System.out.println ("Device: " + device_info.getVendorDescription ());
                 System.out.println ("Vendor: " + device_info.getVendorName ());
-                System.out.println ("API Version: " + device_info.getAPILevel () / 100 + "." + 
-                                                     (device_info.getAPILevel () / 10) % 10 + 
-                                                     (device_info.getAPILevel () % 10 == 0 ? "" : "" + device_info.getAPILevel () % 10));
+                System.out.println ("API Version: " + device_info.getApiLevel () / 100 + "." + 
+                                                     (device_info.getApiLevel () / 10) % 10 + 
+                                                     (device_info.getApiLevel () % 10 == 0 ? "" : "" + device_info.getApiLevel () % 10));
                 System.out.println ("DeviceID: " + device_id);
               }
             if (default_device == null)
@@ -289,9 +289,9 @@ public class SKSWSImplementation
         try
           {
             DeviceInfo device_info = getDevice (device_id).getDeviceInfo ();
-            api_level.value = device_info.getAPILevel ();
+            api_level.value = device_info.getApiLevel ();
             device_type.value= device_info.getDeviceType ();
-            update_url.value = device_info.getUpdateURL ();
+            update_url.value = device_info.getUpdateUrl ();
             vendor_name.value = device_info.getVendorName ();
             vendor_description.value = device_info.getVendorDescription ();
             certificate_path.value = new ArrayList<byte[]> ();
@@ -306,7 +306,7 @@ public class SKSWSImplementation
               }
             crypto_data_size.value = device_info.getCryptoDataSize ();
             extension_data_size.value = device_info.getExtensionDataSize ();
-            device_pin_support.value = device_info.getDevicePINSupport ();
+            device_pin_support.value = device_info.getDevicePinSupport ();
             biometric_support.value = device_info.getBiometricSupport ();
             connection_port.value = getConnectionPort (device_id);
           }
@@ -360,7 +360,7 @@ public class SKSWSImplementation
                                                                                         client_time,
                                                                                         session_life_time,
                                                                                         session_key_limit);
-            client_session_id.value = sess.getClientSessionID ();
+            client_session_id.value = sess.getClientSessionId ();
             client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
             attestation.value = sess.getAttestation ();
             log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
@@ -450,9 +450,9 @@ public class SKSWSImplementation
                 key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
                 client_time.value = eps.getClientTime ();
                 session_life_time.value = eps.getSessionLifeTime ();
-                server_session_id.value = eps.getServerSessionID ();
-                client_session_id.value = eps.getClientSessionID ();
-                issuer_uri.value = eps.getIssuerURI ();
+                server_session_id.value = eps.getServerSessionId ();
+                client_session_id.value = eps.getClientSessionId ();
+                issuer_uri.value = eps.getIssuerUri ();
                 log_result = " : ProvisioningHandle=" + eps.getProvisioningHandle (); 
               }
             return eps.getProvisioningHandle ();
@@ -1086,7 +1086,7 @@ public class SKSWSImplementation
               {
                 certificate_path.value.add (cert.getEncoded ());
               }
-            app_usage.value = ka.getAppUsage ().getSKSValue ();
+            app_usage.value = ka.getAppUsage ().getSksValue ();
             friendly_name.value = ka.getFriendlyName ();
             endorsed_algorithms.value = new ArrayList<String> ();
             for (String alg :   ka.getEndorsedAlgorithms ())
@@ -1170,7 +1170,7 @@ public class SKSWSImplementation
             protection_status.value    = kpi.getSKSProtectionStatus ();
             if (kpi.hasLocalPukProtection ())
               {
-                puk_format.value           = kpi.getPukFormat ().getSKSValue ();
+                puk_format.value           = kpi.getPukFormat ().getSksValue ();
                 puk_retry_limit.value      = kpi.getPukRetryLimit ();
                 puk_error_count.value      = kpi.getPukErrorCount ();
               }
@@ -1184,13 +1184,13 @@ public class SKSWSImplementation
               {
                 user_defined.value         = kpi.getPinUserDefinedFlag ();
                 user_modifiable.value      = kpi.getPinUserModifiableFlag ();
-                format.value               = kpi.getPinFormat ().getSKSValue ();
+                format.value               = kpi.getPinFormat ().getSksValue ();
                 retry_limit.value          = kpi.getPinRetryLimit ();
-                grouping.value             = kpi.getPinGrouping ().getSKSValue ();
-                pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPatternRestrictions ());
+                grouping.value             = kpi.getPinGrouping ().getSksValue ();
+                pattern_restrictions.value = PatternRestriction.getSksValue (kpi.getPatternRestrictions ());
                 min_length.value           = kpi.getPinMinLength ();
                 max_length.value           = kpi.getPinMaxLength ();
-                input_method.value         = kpi.getPinInputMethod ().getSKSValue ();
+                input_method.value         = kpi.getPinInputMethod ().getSksValue ();
                 pin_error_count.value      = kpi.getPinErrorCount ();
               }
             else
@@ -1207,9 +1207,9 @@ public class SKSWSImplementation
                 pin_error_count.value      = (short)0;
               }
             enable_pin_caching.value   = kpi.getEnablePinCachingFlag ();
-            biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
-            export_protection.value    = kpi.getExportProtection ().getSKSValue ();
-            delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
+            biometric_protection.value = kpi.getBiometricProtection ().getSksValue ();
+            export_protection.value    = kpi.getExportProtection ().getSksValue ();
+            delete_protection.value    = kpi.getDeleteProtection ().getSksValue ();
             key_backup.value           = kpi.getKeyBackup ();
           }
         catch (SKSException e)

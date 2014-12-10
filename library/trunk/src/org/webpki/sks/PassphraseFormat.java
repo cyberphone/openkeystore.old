@@ -41,7 +41,7 @@ public enum PassphraseFormat
         return name;
       }
 
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }

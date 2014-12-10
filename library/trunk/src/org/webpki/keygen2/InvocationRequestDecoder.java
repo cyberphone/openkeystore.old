@@ -58,7 +58,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String server_session_id;
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -66,7 +66,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String submit_url;
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -74,7 +74,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String abort_url; // Optional
 
-    public String getOptionalAbortURL ()
+    public String getOptionalAbortUrl ()
       {
         return abort_url;
       }

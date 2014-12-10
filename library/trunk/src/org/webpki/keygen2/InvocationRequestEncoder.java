@@ -68,7 +68,7 @@ public class InvocationRequestEncoder extends ServerEncoder
         this.action = action;
       }
 
-    public void setAbortURL (String abort_url)
+    public void setAbortUrl (String abort_url)
       {
         this.abort_url = abort_url;
       }

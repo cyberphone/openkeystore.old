@@ -24,6 +24,6 @@ public interface SymKeySignerInterface
 
     public byte[] signData (byte[] data) throws IOException;
 
-    public MACAlgorithms getMACAlgorithm () throws IOException;
+    public MACAlgorithms getMacAlgorithm () throws IOException;
 
   }

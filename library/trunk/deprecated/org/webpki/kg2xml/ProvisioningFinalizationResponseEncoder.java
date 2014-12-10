@@ -39,8 +39,8 @@ public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinaliz
 
     public ProvisioningFinalizationResponseEncoder (ProvisioningFinalizationRequestDecoder fin_prov_request, byte[] attestation)
       {
-        client_session_id = fin_prov_request.getClientSessionID ();
-        server_session_id = fin_prov_request.getServerSessionID ();
+        client_session_id = fin_prov_request.getClientSessionId ();
+        server_session_id = fin_prov_request.getServerSessionId ();
         this.attestation = attestation;
       }
 

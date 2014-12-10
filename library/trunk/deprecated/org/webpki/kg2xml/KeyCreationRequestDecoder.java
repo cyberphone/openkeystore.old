@@ -105,7 +105,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -238,7 +238,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -388,7 +388,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -806,19 +806,19 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     private String client_session_id;
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

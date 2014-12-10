@@ -36,7 +36,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         return basic_capabilities;
       }
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }

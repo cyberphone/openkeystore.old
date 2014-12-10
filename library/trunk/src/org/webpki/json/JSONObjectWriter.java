@@ -396,7 +396,7 @@ import org.webpki.json.JSONSignatureDecoder;
         return this;
       }
 
-    public JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
+    public JSONObjectWriter setCertificatePath (X509Certificate[] certificate_path) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<byte[]> certificates = new Vector<byte[]> ();

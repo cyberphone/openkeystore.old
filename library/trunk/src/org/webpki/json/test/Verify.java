@@ -68,7 +68,7 @@ public class Verify
                           case ASYMMETRIC_KEY:
                             try
                               {
-                                KeyStore ks = ((AsymSignatureAlgorithms)signature.getSignatureAlgorithm ()).isRSA () ? 
+                                KeyStore ks = ((AsymSignatureAlgorithms)signature.getAlgorithm ()).isRSA () ? 
                                     DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
                                 PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
                                 signature.verify (new JSONAsymKeyVerifier (public_key));
@@ -82,7 +82,7 @@ public class Verify
   
                           case SYMMETRIC_KEY:
                             signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID ());
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyId ());
                             break;
   
                           default:

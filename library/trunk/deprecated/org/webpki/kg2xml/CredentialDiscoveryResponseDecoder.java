@@ -42,12 +42,12 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
         
         boolean locked;
         
-        public String getClientSessionID ()
+        public String getClientSessionId ()
           {
             return client_session_id;
           }
         
-        public String getServerSessionID ()
+        public String getServerSessionId ()
           {
             return server_session_id;
           }
@@ -110,13 +110,13 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
 
     String server_session_id;
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }

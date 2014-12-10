@@ -42,7 +42,7 @@ public enum BiometricProtection
       }
     
 
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }

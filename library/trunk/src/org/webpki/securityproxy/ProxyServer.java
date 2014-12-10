@@ -362,7 +362,7 @@ public class ProxyServer
               {
                 ProxyServerErrorFactory server_error = error_container.newInstance ();
                 server_error.setMessage (message);
-                response.setContentType (server_error.getMIMEtype ());
+                response.setContentType (server_error.getMimeType ());
                 response.getOutputStream ().write (server_error.getContent ());
               }
             catch (InstantiationException e)

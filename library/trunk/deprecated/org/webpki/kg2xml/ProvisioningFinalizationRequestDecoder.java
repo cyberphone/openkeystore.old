@@ -73,7 +73,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             this.post_operation = post_operation;
           }
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -93,12 +93,12 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             return post_operation;
           }
         
-        public String getClientSessionID ()
+        public String getClientSessionId ()
           {
             return client_session_id;
           }
         
-        public String getServerSessionID ()
+        public String getServerSessionId ()
           {
             return server_session_id;
           }
@@ -117,7 +117,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         byte[] mac;
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -418,7 +418,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             return id;
           }
 
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -472,19 +472,19 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
     private byte[] close_session_nonce;
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

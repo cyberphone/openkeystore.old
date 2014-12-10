@@ -83,8 +83,8 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
 
     public KeyCreationResponseEncoder (KeyCreationRequestDecoder key_init_req) throws IOException
       {
-        client_session_id = key_init_req.getClientSessionID ();
-        server_session_id = key_init_req.getServerSessionID ();
+        client_session_id = key_init_req.getClientSessionId ();
+        server_session_id = key_init_req.getServerSessionId ();
       }
 
 

@@ -78,7 +78,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
     String session_key_algorithm;
     
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -90,7 +90,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

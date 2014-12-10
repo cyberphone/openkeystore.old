@@ -51,7 +51,7 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
     X509Certificate[] signer_certpath;
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

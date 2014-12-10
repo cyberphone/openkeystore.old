@@ -266,9 +266,9 @@ public class JSONObjectReader implements Serializable
         return JSONSignatureDecoder.getPublicKey (this);
       }
     
-    public X509Certificate[] getX509CertificatePath () throws IOException
+    public X509Certificate[] getCertificatePath () throws IOException
       {
-        return JSONSignatureDecoder.getX509CertificatePath (this);
+        return JSONSignatureDecoder.getCertificatePath (this);
       }
 
     public void scanAway (String name) throws IOException

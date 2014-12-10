@@ -86,7 +86,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

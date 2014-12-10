@@ -112,7 +112,7 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
 
         wr.setStringAttribute (SERVER_TIME_ATTR, s_req_dec.getServerTime ());
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, s_req_dec.getSubmitURL ());
+        wr.setStringAttribute (SUBMIT_URL_ATTR, s_req_dec.getSubmitUrl ());
 
         wr.setStringAttribute (REQUEST_URL_ATTR, request_url);
  

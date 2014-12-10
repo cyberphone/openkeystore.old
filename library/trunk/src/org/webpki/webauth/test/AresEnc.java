@@ -57,7 +57,7 @@ System.out.println ("SIGALG=" + authdec.getSignatureAlgorithms ()[0]);
 
         AuthenticationResponseEncoder authenc = new AuthenticationResponseEncoder (new JSONX509Signer (signer),
                                       authdec,
-                                      (new URL (new URL (authdec.getSubmitURL ()), "authreq")).toString (),
+                                      (new URL (new URL (authdec.getSubmitUrl ()), "authreq")).toString (),
                                       localfixed ? 
                                          new GregorianCalendar (2006, 0, 1, 10, 0, 0).getTime() 
                                                  :

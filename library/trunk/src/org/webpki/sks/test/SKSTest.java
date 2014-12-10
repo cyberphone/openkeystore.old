@@ -127,7 +127,7 @@ public class SKSTest
           }
         System.out.println ("Description: " + dev.getVendorDescription ());
         System.out.println ("Vendor: " + dev.getVendorName ());
-        System.out.println ("API Level: " + dev.getAPILevel ());
+        System.out.println ("API Level: " + dev.getApiLevel ());
         System.out.println ("Trusted GUI: " + (tga == null ? "N/A" : tga.getImplementation ()));
         System.out.println ("Testing mode: " + (standalone_testing ? "StandAlone" : "MultiThreaded"));
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
@@ -1992,7 +1992,7 @@ public class SKSTest
     public void test34 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.NONE.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.NONE.getSksValue ());
         GenKey key = sess.createKey ("Key.1",
                                      KeyAlgorithms.RSA1024,
                                      null /* pin_value */,
@@ -2017,7 +2017,7 @@ public class SKSTest
     public void test35 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PIN.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PIN.getSksValue ());
         try
           {
             sess.createKey ("Key.1",
@@ -2038,7 +2038,7 @@ public class SKSTest
       {
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PIN.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PIN.getSksValue ());
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -2079,7 +2079,7 @@ public class SKSTest
       {
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PUK.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PUK.getSksValue ());
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -2108,7 +2108,7 @@ public class SKSTest
         String good_pin = "1563";
         String good_puk = "17644";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PUK.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PUK.getSksValue ());
         PUKPol puk_pol = sess.createPUKPolicy ("PUK",
                                                PassphraseFormat.NUMERIC,
                                                (short) 5 /* retry_limit*/, 
@@ -2406,7 +2406,7 @@ public class SKSTest
         byte[] symmetric_key = {0,5,3,9,0,23,67,56,8,34,-45,4,2,5,6, 6, 54,-3};
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PIN.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PIN.getSksValue ());
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -2446,7 +2446,7 @@ public class SKSTest
       {
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PIN.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PIN.getSksValue ());
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -2476,7 +2476,7 @@ public class SKSTest
       {
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
-        sess.overrideExportProtection (ExportProtection.PIN.getSKSValue ());
+        sess.overrideExportProtection (ExportProtection.PIN.getSksValue ());
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 

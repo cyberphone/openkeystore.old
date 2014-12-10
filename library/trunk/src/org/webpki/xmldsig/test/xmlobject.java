@@ -229,7 +229,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
                 XMLSymKeySigner xmls = new XMLSymKeySigner (new SymKeySignerInterface ()
                   {
 
-                    public MACAlgorithms getMACAlgorithm () throws IOException
+                    public MACAlgorithms getMacAlgorithm () throws IOException
                       {
                         return MACAlgorithms.HMAC_SHA256;
                       }

@@ -114,7 +114,7 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
         //////////////////////////////////////////////////////////////////////////
         wr.setStringAttribute (ID_ATTR, id);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, s_req_dec.getSubmitURL ());
+        wr.setStringAttribute (SUBMIT_URL_ATTR, s_req_dec.getSubmitUrl ());
         wr.setStringAttribute (REQUEST_URL_ATTR, request_url);
 
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);

@@ -145,19 +145,19 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
     private XMLSignatureWrapper signature;                  // Optional
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

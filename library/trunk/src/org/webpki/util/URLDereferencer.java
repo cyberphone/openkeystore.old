@@ -51,7 +51,7 @@ public class URLDereferencer implements MIMETypedObject, Serializable
       }
 
 
-    public String getMIMEType () throws IOException
+    public String getMimeType () throws IOException
       {
         return ct;
       }

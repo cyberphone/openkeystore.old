@@ -108,7 +108,7 @@ abstract class KeyGen2Validator extends JSONDecoder
         throw new IOException (message);
       }
 
-    static byte[] getMAC (JSONObjectReader rd) throws IOException
+    static byte[] getMac (JSONObjectReader rd) throws IOException
       {
         byte[] mac = rd.getBinary (KeyGen2Constants.MAC_JSON);
         if (mac.length != 32)

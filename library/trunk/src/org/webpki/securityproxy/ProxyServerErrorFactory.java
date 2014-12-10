@@ -33,7 +33,7 @@ public abstract class ProxyServerErrorFactory
     
     public abstract byte[] getContent () throws IOException;
     
-    public abstract String getMIMEtype ();
+    public abstract String getMimeType ();
     
     void setMessage (String message)
       {

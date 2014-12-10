@@ -64,7 +64,7 @@ public enum PatternRestriction
       }
     
 
-    public static byte getSKSValue (Set<PatternRestriction> patterns)
+    public static byte getSksValue (Set<PatternRestriction> patterns)
       {
         byte result = 0;
         for (PatternRestriction pattern : patterns)

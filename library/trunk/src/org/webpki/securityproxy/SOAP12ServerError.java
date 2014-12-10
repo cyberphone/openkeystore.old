@@ -42,7 +42,7 @@ public class SOAP12ServerError extends ProxyServerErrorFactory
             "</soap12:Envelope>").getBytes ("UTF-8");        
       }
     
-    public String getMIMEtype ()
+    public String getMimeType ()
       {
         return SOAP12_MIME;
       }

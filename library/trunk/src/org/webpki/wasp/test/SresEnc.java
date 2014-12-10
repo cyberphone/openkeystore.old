@@ -68,7 +68,7 @@ public class SresEnc
         sresenc.createSignedResponse (signer,
                                       sreqdec,
                                       spre,
-                                      (new URL (new URL (sreqdec.getSubmitURL ()), "sigreq")).toString (),
+                                      (new URL (new URL (sreqdec.getSubmitUrl ()), "sigreq")).toString (),
                                       localfixed ? 
                                          new GregorianCalendar (2006, 0, 1, 10, 0, 0).getTime() 
                                                  :

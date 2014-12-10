@@ -53,7 +53,7 @@ public class KeyAttributes
       {
         for (AppUsage au : AppUsage.values ())
           {
-            if (au.getSKSValue () == appUsage)
+            if (au.getSksValue () == appUsage)
               {
                 return au;
               }

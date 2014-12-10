@@ -267,7 +267,7 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     public String addDocumentFromMTO (TargetContainer target, MIMETypedObject mto, String meta_data) throws IOException
       {
-        return addDocument (mto.getData (), target, mto.getMIMEType (), meta_data);
+        return addDocument (mto.getData (), target, mto.getMimeType (), meta_data);
       }
 
 

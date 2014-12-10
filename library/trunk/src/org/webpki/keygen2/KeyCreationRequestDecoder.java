@@ -92,7 +92,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
             retry_limit = getAuthorizationRetryLimit (rd, 0);
             id = KeyGen2Validator.getID (rd, ID_JSON);
             format = getPassphraseFormat (rd);
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -126,7 +126,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -188,7 +188,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
                 pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
               }
 
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -256,7 +256,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -345,7 +345,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
 
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -397,7 +397,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -808,19 +808,19 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
     private String client_session_id;
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }

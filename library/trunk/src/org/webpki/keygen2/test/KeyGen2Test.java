@@ -278,7 +278,7 @@ public class KeyGen2Test
             DeviceInfo dev = sks.getDeviceInfo ();
             fos.write (("<b>SKS Description: " + dev.getVendorDescription () +
                         "<br>SKS Vendor: " + dev.getVendorName () +
-                        "<br>SKS API Level: " + (dev.getAPILevel () / 100) + '.' + (dev.getAPILevel () % 100) +
+                        "<br>SKS API Level: " + (dev.getApiLevel () / 100) + '.' + (dev.getApiLevel () % 100) +
                         "<br>SKS Interface: " + (sks instanceof WSSpecific ? "WebService" : "Direct") +
                         "<br>&nbsp<br></b>").getBytes ("UTF-8"));
           }
@@ -527,11 +527,11 @@ public class KeyGen2Test
                 if ((old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session.getProvisioningHandle (), false)) == null)
                   {
                     abort ("Old provisioning session not found:" + 
-                           post_operation.getClientSessionID () + "/" +
-                           post_operation.getServerSessionID ());
+                           post_operation.getClientSessionId () + "/" +
+                           post_operation.getServerSessionId ());
                   }
-                if (old_provisioning_session.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
-                    old_provisioning_session.getServerSessionID ().equals (post_operation.getServerSessionID ()))
+                if (old_provisioning_session.getClientSessionId ().equals(post_operation.getClientSessionId ()) &&
+                    old_provisioning_session.getServerSessionId ().equals (post_operation.getServerSessionId ()))
                   {
                     break;
                   }
@@ -551,19 +551,19 @@ public class KeyGen2Test
                         switch (post_operation.getPostOperation ())
                           {
                             case ProvisioningFinalizationRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
-                              sks.postCloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postCloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMac ());
                               break;
 
                             case ProvisioningFinalizationRequestDecoder.PostOperation.UPDATE_KEY:
-                              sks.postUpdateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postUpdateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMac ());
                               break;
 
                             case ProvisioningFinalizationRequestDecoder.PostOperation.UNLOCK_KEY:
-                              sks.postUnlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postUnlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMac ());
                               break;
 
                             default:
-                              sks.postDeleteKey (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postDeleteKey (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMac ());
                           }
                         return;
                       }
@@ -581,11 +581,11 @@ public class KeyGen2Test
             assertTrue ("Key containers", invocation_request.getOptionalKeyContainerList () == null ^ key_container_list);
             if (set_abort_url)
               {
-                assertTrue ("Abort URL", invocation_request.getOptionalAbortURL ().equals (ABORT_URL));
+                assertTrue ("Abort URL", invocation_request.getOptionalAbortUrl ().equals (ABORT_URL));
               }
             else
               {
-                assertTrue ("Abort URL", invocation_request.getOptionalAbortURL () == null);
+                assertTrue ("Abort URL", invocation_request.getOptionalAbortUrl () == null);
               }
             device_info = sks.getDeviceInfo ();
             InvocationResponseEncoder invocation_response = new InvocationResponseEncoder (invocation_request);
@@ -637,15 +637,15 @@ public class KeyGen2Test
           {
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (json_data);
             scanForKeyManagementKeyUpdates (prov_sess_req.getKeyManagementKeyUpdateHolderRoot ());
-            assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
+            assertTrue ("Submit URL", prov_sess_req.getSubmitUrl ().equals (ISSUER_URL));
             assertFalse ("VM", virtual_environment ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualEnvironmentFriendlyName ()));
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
                                                  invocation_request.getPrivacyEnabledFlag(),
-                                                 prov_sess_req.getServerSessionID (),
+                                                 prov_sess_req.getServerSessionId (),
                                                  prov_sess_req.getServerEphemeralKey (),
-                                                 prov_sess_req.getSubmitURL (), /* IssuerURI */
+                                                 prov_sess_req.getSubmitUrl (), /* IssuerURI */
                                                  prov_sess_req.getKeyManagementKey (),
                                                  (int)(client_time.getTime () / 1000),
                                                  prov_sess_req.getSessionLifeTime (),
@@ -655,7 +655,7 @@ public class KeyGen2Test
             ProvisioningInitializationResponseEncoder prov_init_response = 
                   new ProvisioningInitializationResponseEncoder (prov_sess_req,
                                                                  sess.getClientEphemeralKey (),
-                                                                 sess.getClientSessionID (),
+                                                                 sess.getClientSessionId (),
                                                                  client_time,
                                                                  sess.getAttestation (),
                                                                  invocation_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
@@ -666,7 +666,7 @@ public class KeyGen2Test
 
             prov_init_response.setResponseSigner (new SymKeySignerInterface ()
               {
-                public MACAlgorithms getMACAlgorithm () throws IOException
+                public MACAlgorithms getMacAlgorithm () throws IOException
                   {
                     return MACAlgorithms.HMAC_SHA256;
                   }
@@ -685,7 +685,7 @@ public class KeyGen2Test
         byte[] creDiscResponse (byte[] json_data) throws IOException, GeneralSecurityException
           {
             cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse (json_data);
-            assertTrue ("Submit URL", cre_disc_req.getSubmitURL ().equals (CRE_DISC_URL));
+            assertTrue ("Submit URL", cre_disc_req.getSubmitUrl ().equals (CRE_DISC_URL));
             CredentialDiscoveryResponseEncoder cdre = new CredentialDiscoveryResponseEncoder (cre_disc_req);
             for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cre_disc_req.getLookupSpecifiers ())
               {
@@ -709,8 +709,8 @@ public class KeyGen2Test
                                         (ls.getAppUsage () == null || ls.getAppUsage () == ka.getAppUsage ()))
                                       {
                                         lr.addMatchingCredential (cert_path,
-                                                                  eps.getClientSessionID (),
-                                                                  eps.getServerSessionID (),
+                                                                  eps.getClientSessionId (),
+                                                                  eps.getServerSessionId (),
                                                                   kpi.isPinBlocked ());
                                       }
                                   }
@@ -728,7 +728,7 @@ public class KeyGen2Test
         byte[] keyCreResponse (byte[] json_data) throws IOException
           {
             key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse (json_data);
-            assertTrue ("Submit URL", key_creation_request.getSubmitURL ().equals (KEY_INIT_URL));
+            assertTrue ("Submit URL", key_creation_request.getSubmitUrl ().equals (KEY_INIT_URL));
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors ())
               {
@@ -753,9 +753,9 @@ public class KeyGen2Test
                             puk_policy_handle = sks.createPukPolicy (provisioning_handle, 
                                                                      puk_policy.getID (),
                                                                      puk_policy.getEncryptedValue (),
-                                                                     puk_policy.getFormat ().getSKSValue (),
+                                                                     puk_policy.getFormat ().getSksValue (),
                                                                      puk_policy.getRetryLimit (),
-                                                                     puk_policy.getMAC());
+                                                                     puk_policy.getMac());
                           }
                         KeyCreationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
                         pin_policy_handle = sks.createPinPolicy (provisioning_handle,
@@ -763,14 +763,14 @@ public class KeyGen2Test
                                                                  puk_policy_handle,
                                                                  pin_policy.getUserDefinedFlag (),
                                                                  pin_policy.getUserModifiableFlag (),
-                                                                 pin_policy.getFormat ().getSKSValue (),
+                                                                 pin_policy.getFormat ().getSksValue (),
                                                                  pin_policy.getRetryLimit (),
-                                                                 pin_policy.getGrouping ().getSKSValue (),
-                                                                 PatternRestriction.getSKSValue (pin_policy.getPatternRestrictions ()),
+                                                                 pin_policy.getGrouping ().getSksValue (),
+                                                                 PatternRestriction.getSksValue (pin_policy.getPatternRestrictions ()),
                                                                  pin_policy.getMinLength (),
                                                                  pin_policy.getMaxLength (),
-                                                                 pin_policy.getInputMethod ().getSKSValue (),
-                                                                 pin_policy.getMAC ());
+                                                                 pin_policy.getInputMethod ().getSksValue (),
+                                                                 pin_policy.getMac ());
                       }
                   }
                 KeyData key_data = sks.createKeyEntry (provisioning_handle,
@@ -781,15 +781,15 @@ public class KeyGen2Test
                                                        pin_policy_handle,
                                                        key.getSKSPINValue (),
                                                        key.getEnablePINCachingFlag (),
-                                                       key.getBiometricProtection ().getSKSValue (),
-                                                       key.getExportProtection ().getSKSValue (),
-                                                       key.getDeleteProtection ().getSKSValue (),
-                                                       key.getAppUsage ().getSKSValue (),
+                                                       key.getBiometricProtection ().getSksValue (),
+                                                       key.getExportProtection ().getSksValue (),
+                                                       key.getDeleteProtection ().getSksValue (),
+                                                       key.getAppUsage ().getSksValue (),
                                                        key.getFriendlyName (),
                                                        key.getKeySpecifier ().getKeyAlgorithm ().getURI (),
                                                        key.getKeySpecifier ().getKeyParameters (),
                                                        key.getEndorsedAlgorithms (),
-                                                       key.getMAC ());
+                                                       key.getMac ());
                 key_creation_response.addPublicKey (key_data.getPublicKey (),
                                                     key_data.getAttestation (),
                                                     key.getID ());
@@ -804,7 +804,7 @@ public class KeyGen2Test
           {
             ProvisioningFinalizationRequestDecoder prov_final_request =
                            (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (json_data);
-            assertTrue ("Submit URL", prov_final_request.getSubmitURL ().equals (FIN_PROV_URL));
+            assertTrue ("Submit URL", prov_final_request.getSubmitUrl ().equals (FIN_PROV_URL));
             /* 
                Note: we could have used the saved provisioning_handle but that would not
                work for certifications that are delayed.  The following code is working
@@ -816,11 +816,11 @@ public class KeyGen2Test
                 if ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) == null)
                   {
                     abort ("Provisioning session not found:" + 
-                           prov_final_request.getClientSessionID () + "/" +
-                           prov_final_request.getServerSessionID ());
+                           prov_final_request.getClientSessionId () + "/" +
+                           prov_final_request.getServerSessionId ());
                   }
-                if (eps.getClientSessionID ().equals(prov_final_request.getClientSessionID ()) &&
-                    eps.getServerSessionID ().equals (prov_final_request.getServerSessionID ()))
+                if (eps.getClientSessionId ().equals(prov_final_request.getClientSessionId ()) &&
+                    eps.getServerSessionId ().equals (prov_final_request.getServerSessionId ()))
                   {
                     break;
                   }
@@ -832,27 +832,27 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             for (ProvisioningFinalizationRequestDecoder.IssuedCredential key : prov_final_request.getIssuedCredentials ())
               {
-                int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
-                sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
+                int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getId ());
+                sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMac ());
 
                 //////////////////////////////////////////////////////////////////////////
                 // There may be a symmetric key
                 //////////////////////////////////////////////////////////////////////////
-                if (key.getEncryptedSymmetricKey () != null)
+                if (key.getOptionalSymmetricKey () != null)
                   {
                     sks.importSymmetricKey (key_handle, 
-                                            key.getEncryptedSymmetricKey (),
-                                            key.getSymmetricKeyMAC ());
+                                            key.getOptionalSymmetricKey (),
+                                            key.getSymmetricKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
                 // There may be a private key
                 //////////////////////////////////////////////////////////////////////////
-                if (key.getEncryptedPrivateKey () != null)
+                if (key.getOptionalPrivateKey () != null)
                   {
                     sks.importPrivateKey (key_handle, 
-                                          key.getEncryptedPrivateKey (),
-                                          key.getPrivateKeyMAC ());
+                                          key.getOptionalPrivateKey (),
+                                          key.getPrivateKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -865,7 +865,7 @@ public class KeyGen2Test
                                       extension.getSubType (), 
                                       extension.getQualifier (),
                                       extension.getExtensionData (),
-                                      extension.getMAC ());
+                                      extension.getMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -901,7 +901,7 @@ public class KeyGen2Test
                 new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                              sks.closeProvisioningSession (eps.getProvisioningHandle (),
                                                                                            prov_final_request.getCloseSessionNonce (),
-                                                                                           prov_final_request.getCloseSessionMAC ()));
+                                                                                           prov_final_request.getCloseSessionMac ()));
             return fin_prov_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
       }
@@ -987,7 +987,7 @@ public class KeyGen2Test
             InvocationRequestEncoder invocation_request =  new InvocationRequestEncoder (server_state, INVOCATION_URL, null);
             if (set_abort_url)
               {
-                invocation_request.setAbortURL (ABORT_URL);
+                invocation_request.setAbortUrl (ABORT_URL);
               }
             if (ask_for_4096)
               {
@@ -1203,7 +1203,7 @@ public class KeyGen2Test
             ServerState.ImagePreference im_pref = server_state.getImagePreference (KeyGen2URIs.LOGOTYPES.CARD); 
             if (im_pref != null)
               {
-                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, im_pref.getMIMEType ()));
+                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, im_pref.getMimeType ()));
               }
             if (export_protection != null)
               {
@@ -1225,22 +1225,22 @@ public class KeyGen2Test
               }
             if (clone_key_protection != null)
               {
-                kp.setClonedKeyProtection (clone_key_protection.server_state.getClientSessionID (), 
-                                           clone_key_protection.server_state.getServerSessionID (),
+                kp.setClonedKeyProtection (clone_key_protection.server_state.getClientSessionId (), 
+                                           clone_key_protection.server_state.getServerSessionId (),
                                            clone_key_protection.server_state.getKeys ()[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
-                kp.setUpdatedKey (update_key.server_state.getClientSessionID (), 
-                                  update_key.server_state.getServerSessionID (),
+                kp.setUpdatedKey (update_key.server_state.getClientSessionId (), 
+                                  update_key.server_state.getServerSessionId (),
                                   update_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                   update_kmk ? server_km : update_key.server_km);
               }
             if (delete_key != null)
               {
-                server_state.addPostDeleteKey (delete_key.server_state.getClientSessionID (), 
-                                               delete_key.server_state.getServerSessionID (),
+                server_state.addPostDeleteKey (delete_key.server_state.getClientSessionId (), 
+                                               delete_key.server_state.getServerSessionId (),
                                                delete_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                                delete_key.server_km);
               }
@@ -1380,8 +1380,8 @@ public class KeyGen2Test
                 server_state.update (cdrd);
                 CredentialDiscoveryResponseDecoder.LookupResult[] lres = cdrd.getLookupResults ();
 // TODO verify
-                server_state.addPostUnlockKey (plain_unlock_key.server_state.getClientSessionID (), 
-                                               plain_unlock_key.server_state.getServerSessionID (),
+                server_state.addPostUnlockKey (plain_unlock_key.server_state.getClientSessionId (), 
+                                               plain_unlock_key.server_state.getServerSessionId (),
                                                plain_unlock_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                                plain_unlock_key.server_km);
               }

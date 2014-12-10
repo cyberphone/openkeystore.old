@@ -358,7 +358,7 @@ public class ProvSess
       }
 
 
-    private byte[] getMACSequenceCounterAndUpdate ()
+    private byte[] getMacSequenceCounterAndUpdate ()
       {
         int q = mac_sequence_counter++;
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
@@ -371,7 +371,7 @@ public class ProvSess
             fail_mac = false;
             data = ArrayUtil.add (data, new byte[]{5});
           }
-        return server_sess_key.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
+        return server_sess_key.mac (data, ArrayUtil.add (method, getMacSequenceCounterAndUpdate ()));
       }
 
     byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
@@ -381,7 +381,7 @@ public class ProvSess
     
     byte[] attest (byte[] data) throws IOException, GeneralSecurityException
       {
-        return server_sess_key.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, getMACSequenceCounterAndUpdate ())); 
+        return server_sess_key.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, getMacSequenceCounterAndUpdate ())); 
       }
     
     void bad (String message) throws IOException
@@ -415,7 +415,7 @@ public class ProvSess
                                                       (int)(client_time.getTime () / 1000),
                                                       session_life_time,
                                                       session_key_limit);
-           client_session_id = sess.getClientSessionID ();
+           client_session_id = sess.getClientSessionId ();
            provisioning_handle = sess.getProvisioningHandle ();
            
            MacGenerator kdf = new MacGenerator ();
@@ -555,13 +555,13 @@ public class ProvSess
         MacGenerator puk_policy_mac = new MacGenerator ();
         puk_policy_mac.addString (id);
         puk_policy_mac.addArray (encrypted_value);
-        puk_policy_mac.addByte (format.getSKSValue ());
+        puk_policy_mac.addByte (format.getSksValue ());
         puk_policy_mac.addShort (retry_limit);
         puk_policy.id = id;
         puk_policy.puk_policy_handle = sks.createPukPolicy (provisioning_handle, 
                                                             id,
                                                             encrypted_value, 
-                                                            format.getSKSValue (), 
+                                                            format.getSksValue (), 
                                                             (short)retry_limit, 
                                                             mac4call (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
         return puk_policy;
@@ -590,13 +590,13 @@ public class ProvSess
         pin_policy_mac.addString (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
         pin_policy_mac.addBool (user_defined);
         pin_policy_mac.addBool (user_modifiable);
-        pin_policy_mac.addByte (format.getSKSValue ());
+        pin_policy_mac.addByte (format.getSksValue ());
         pin_policy_mac.addShort (retry_limit);
-        pin_policy_mac.addByte (grouping.getSKSValue ());
-        pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
+        pin_policy_mac.addByte (grouping.getSksValue ());
+        pin_policy_mac.addByte (PatternRestriction.getSksValue (pattern_restrictions));
         pin_policy_mac.addShort (min_length);
         pin_policy_mac.addShort (max_length);
-        pin_policy_mac.addByte (input_method.getSKSValue ());
+        pin_policy_mac.addByte (input_method.getSksValue ());
         pin_policy.id = id;
         pin_policy.user_defined = user_defined;
         pin_policy.format = format;
@@ -605,13 +605,13 @@ public class ProvSess
                                                             puk_policy_handle,
                                                             user_defined,
                                                             user_modifiable,
-                                                            format.getSKSValue (),
+                                                            format.getSksValue (),
                                                             (short)retry_limit,
-                                                            grouping.getSKSValue (),
-                                                            PatternRestriction.getSKSValue (pattern_restrictions), 
+                                                            grouping.getSksValue (),
+                                                            PatternRestriction.getSksValue (pattern_restrictions), 
                                                             (byte)min_length, 
                                                             (byte)max_length, 
-                                                            input_method.getSKSValue (), 
+                                                            input_method.getSksValue (), 
                                                             mac4call (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
         return pin_policy;
       }
@@ -668,7 +668,7 @@ public class ProvSess
         String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm ().getURI () : custom_key_algorithm;
         byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters () : custom_key_parameters;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
-        byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
+        byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSksValue ();
         MacGenerator key_entry_mac = new MacGenerator ();
         key_entry_mac.addString (id);
         key_entry_mac.addString (key_entry_algorithm);
@@ -703,10 +703,10 @@ public class ProvSess
           }
         key_entry_mac.addBool (device_pin_protected);
         key_entry_mac.addBool (enable_pin_caching);
-        key_entry_mac.addByte (biometric_protection.getSKSValue ());
+        key_entry_mac.addByte (biometric_protection.getSksValue ());
         key_entry_mac.addByte (actual_export_policy);
-        key_entry_mac.addByte (delete_protection.getSKSValue ());
-        key_entry_mac.addByte (app_usage.getSKSValue ());
+        key_entry_mac.addByte (delete_protection.getSksValue ());
+        key_entry_mac.addByte (app_usage.getSksValue ());
         key_entry_mac.addString (friendly_name == null ? "" : friendly_name);
         key_entry_mac.addString (key_algorithm);
         key_entry_mac.addArray (key_parameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_parameters);
@@ -722,10 +722,10 @@ public class ProvSess
                                                 pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
                                                 encrypted_pin_value, 
                                                 enable_pin_caching, 
-                                                biometric_protection.getSKSValue (), 
+                                                biometric_protection.getSksValue (), 
                                                 actual_export_policy, 
-                                                delete_protection.getSKSValue (), 
-                                                app_usage.getSKSValue (), 
+                                                delete_protection.getSksValue (), 
+                                                app_usage.getSksValue (), 
                                                 friendly_name, 
                                                 key_algorithm,
                                                 key_parameters,

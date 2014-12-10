@@ -123,7 +123,7 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
     }
 
   
-  public String getSubmitURL ()
+  public String getSubmitUrl ()
     {
       return submit_url;
     }

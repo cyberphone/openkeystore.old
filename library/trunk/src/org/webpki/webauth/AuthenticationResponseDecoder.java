@@ -127,8 +127,8 @@ public class AuthenticationResponseDecoder extends InputValidator
         // Finally, get the signature!
         //////////////////////////////////////////////////////////////////////////
         signature = rd.getSignature ();
-        certificate_path = signature.getX509CertificatePath ();
-        signature_algorithm = signature.getSignatureAlgorithm ().getURI ();
+        certificate_path = signature.getCertificatePath ();
+        signature_algorithm = signature.getAlgorithm ().getURI ();
       }
 
     @Override

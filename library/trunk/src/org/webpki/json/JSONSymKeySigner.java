@@ -35,7 +35,7 @@ public class JSONSymKeySigner extends JSONSigner
     
     String key_id = "symmetric-key";
 
-    public JSONSymKeySigner setKeyID (String key_id)
+    public JSONSymKeySigner setKeyId (String key_id)
       {
         this.key_id = key_id;
         return this;
@@ -44,7 +44,7 @@ public class JSONSymKeySigner extends JSONSigner
     public JSONSymKeySigner (SymKeySignerInterface signer) throws IOException
       {
         this.signer = signer;
-        algorithm = signer.getMACAlgorithm ();
+        algorithm = signer.getMacAlgorithm ();
       }
 
     @Override

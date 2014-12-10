@@ -89,7 +89,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     public void setResponseSigner (SymKeySignerInterface signer) throws IOException
       {
         session_signature = new JSONSymKeySigner (signer);
-        session_signature.setKeyID ("derived-session-key");
+        session_signature.setKeyId ("derived-session-key");
       }
 
 
@@ -119,7 +119,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            wr.setObject (DEVICE_ID_JSON).setX509CertificatePath (device_certificate_path);
+            wr.setObject (DEVICE_ID_JSON).setCertificatePath (device_certificate_path);
           }
 
         ////////////////////////////////////////////////////////////////////////

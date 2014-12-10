@@ -41,7 +41,7 @@ public enum InputMethod
       }
 
     
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }
