@@ -198,11 +198,11 @@ public class KeyProtectionInfo
 
     private PassphraseFormat convertFormat (byte format) throws SKSException
       {
-        for (PassphraseFormat kg2_format : PassphraseFormat.values ())
+        for (PassphraseFormat kg2Format : PassphraseFormat.values ())
           {
-            if (kg2_format.getSksValue () == format)
+            if (kg2Format.getSksValue () == format)
               {
-                return kg2_format;
+                return kg2Format;
               }
           }
         throw new SKSException ("Unknown format: " + format);
