@@ -7,7 +7,7 @@ function deserializeTest (spki, jcs)
     {
         throw "Reading JCS key failed";
     }
-    /* JSONObjectWriter */var ow = new org.webpki.json.JSONObjectWriter ().setXMLDSigECCurveOption (jcs.indexOf ("urn:oid") > 0);
+    /* JSONObjectWriter */var ow = new org.webpki.json.JSONObjectWriter ().setJOSEAlgorithmPreference (jcs.indexOf ('"P-256"') > 0);
     if (ow.setPublicKey (spki_bin).serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)
                  != 
         new org.webpki.json.JSONObjectWriter (or).serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED))
@@ -15,10 +15,9 @@ function deserializeTest (spki, jcs)
         throw "Writing Public key failed";
     }
     /* JSONObjectReader */var pub_key_object = or.getObject (org.webpki.json.JSONSignatureDecoder.PUBLIC_KEY_JSON);
-    /* boolean */var rsa_flag = pub_key_object.hasProperty (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-    pub_key_object = pub_key_object.getObject (rsa_flag ? org.webpki.json.JSONSignatureDecoder.RSA_JSON : org.webpki.json.JSONSignatureDecoder.EC_JSON);
-    console.debug ("Serializing " + (rsa_flag ? "RSA" : "EC curve=" + pub_key_object.getString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON)));
-    /* String */var key_parm = rsa_flag ? org.webpki.json.JSONSignatureDecoder.MODULUS_JSON : org.webpki.json.JSONSignatureDecoder.Y_JSON;
+    /* boolean */var rsa_flag = pub_key_object.getString (org.webpki.json.JSONSignatureDecoder.TYPE_JSON) == org.webpki.json.JSONSignatureDecoder.RSA_PUBLIC_KEY;
+    console.debug ("Serializing " + (rsa_flag ? "RSA" : "EC curve=" + pub_key_object.getString (org.webpki.json.JSONSignatureDecoder.CURVE_JSON)));
+    /* String */var key_parm = rsa_flag ? org.webpki.json.JSONSignatureDecoder.N_JSON : org.webpki.json.JSONSignatureDecoder.Y_JSON;
     var parm_bytes = org.webpki.util.ByteArray.add ([0], pub_key_object.getBinary (key_parm));
     /* JSONObjectWriter */var updated_pub_key_object = new org.webpki.json.JSONObjectWriter (pub_key_object);
     updated_pub_key_object.setupForRewrite (key_parm);
@@ -96,27 +95,23 @@ function dnTest (unicode_argument)
 
 var p256_key =
 '{\
-  "PublicKey": \
+  "publicKey": \
     {\
-      "EC": \
-        {\
-          "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",\
-          "X": "GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU",\
-          "Y": "isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs"\
-        }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",\
+      "x": "GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU",\
+      "y": "isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs"\
     }\
 }';
 
-var p256_key_xml =
+var p256_key_jose =
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "urn:oid:1.2.840.10045.3.1.7",\
-            "X": "GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU",\
-            "Y": "isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs"\
-          }\
+      "type": "EC",\
+      "curve": "P-256",\
+      "x": "GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU",\
+      "y": "isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs"\
       }\
   }';
 
@@ -124,16 +119,14 @@ var p256_key_spki = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGRgbhKB9Mw1lDKJFMbD_HsB
 
 var rsa_2048_key = 
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "RSA": \
-          {\
-            "Modulus": "6mct2A1crFheV3fiMvXzwFJgR6fWnBRyg6X0P_uTQOlll1orTqd6a0QTTjnm1XlM5XF8g5SyqhIO4kLUmvJvwEHaXHHkbn\
+        "type" : "RSA", \
+        "n": "6mct2A1crFheV3fiMvXzwFJgR6fWnBRyg6X0P_uTQOlll1orTqd6a0QTTjnm1XlM5XF8g5SyqhIO4kLUmvJvwEHaXHHkbn\
 8N4gHzhbPA7FHVdCt37W5jduUVWHlBVoXIbGaLrCUj4BCDmXImhOHxbhRvyiY2XWcDFAGt_60IzLAnPUof2Rv-aPNYJY6qa0yvnJmQp4yNPsIpHYpj9Sa3\
 rctEC2OELZy-HTlDBVyzEYwnmDXtvhjoPEaUZUyHaJTC_LZMOTsgJqDT8mOvHyZpLH_f7u55mXDBoXF0iG9sikiRVndkJ18wZmNRow2UmK3QB6G2kUYxt3\
 ltPOjDgADLKw",\
-            "Exponent": "AQAB"\
-          }\
+        "e": "AQAB"\
       }\
   }';
 
@@ -144,14 +137,12 @@ C_LZMOTsgJqDT8mOvHyZpLH_f7u55mXDBoXF0iG9sikiRVndkJ18wZmNRow2UmK3QB6G2kUYxt3ltPOj
 
 var p521_key =
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",\
-            "X": "AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA",\
-            "Y": "AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",\
+      "x": "AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA",\
+      "y": "AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp"\
       }\
   }';
 
@@ -161,14 +152,12 @@ BTPkxv9eOjiaeGp7V_f3qV1kxS_Il2LY7Tc5l2GSlW_-SzYKxgek';
 
 var b283_key = 
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",\
-            "X": "A0QgZzqf_IMeC-sOCBEOZhGmGHD0luoasQAK4-AVYtk0u2bD",\
-            "Y": "BDdnv7LEFj3pN18G8NfTdf6nW171eWS6DLPjstH4i-wSgehw"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",\
+      "x": "A0QgZzqf_IMeC-sOCBEOZhGmGHD0luoasQAK4-AVYtk0u2bD",\
+      "y": "BDdnv7LEFj3pN18G8NfTdf6nW171eWS6DLPjstH4i-wSgehw"\
       }\
   }';
 
@@ -177,14 +166,12 @@ GHD0luoasQAK4-AVYtk0u2bDBDdnv7LEFj3pN18G8NfTdf6nW171eWS6DLPjstH4i-wSgehw';
 
 var p192_key = 
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",\
-            "X": "QWOcZWv7yoeLxbxtA6CHZoSdpmlg_u69",\
-            "Y": "QtAQygGMLDy4Lp2MLtTYQlyQZGUfCQQv"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",\
+      "x": "QWOcZWv7yoeLxbxtA6CHZoSdpmlg_u69",\
+      "y": "QtAQygGMLDy4Lp2MLtTYQlyQZGUfCQQv"\
       }\
   }';
 
@@ -193,14 +180,12 @@ oSdpmlg_u69QtAQygGMLDy4Lp2MLtTYQlyQZGUfCQQv';
 
 var p384_key = 
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",\
-            "X": "MyQMdQM9i47obgf_KDINLfjPaa03y8S_dDenvY5ULGOmoVlki6cvGRpL0QCiw_XD",\
-            "Y": "JwLihlcNyevQvl30kqwVlyHWNSZ1z1LGO4VyxmrMdb8R2egVzMakm4PtPJjf5gMX"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",\
+      "x": "MyQMdQM9i47obgf_KDINLfjPaa03y8S_dDenvY5ULGOmoVlki6cvGRpL0QCiw_XD",\
+      "y": "JwLihlcNyevQvl30kqwVlyHWNSZ1z1LGO4VyxmrMdb8R2egVzMakm4PtPJjf5gMX"\
       }\
   }';
 
@@ -209,15 +194,13 @@ jPaa03y8S_dDenvY5ULGOmoVlki6cvGRpL0QCiw_XDJwLihlcNyevQvl30kqwVlyHWNSZ1z1LGO4Vyxm
 
 var brainpool256_key =
 '{\
-    "PublicKey": \
-      {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",\
-            "X": "AZ8WB15YNakVM9TeblaZh2HmmO2lDTarnXROAh7LO0Q",\
-            "Y": "lal3Vzb5AjElCdazXnpCaa2gdU2LrMucG51oRHXOoHM"\
-          }\
-      }\
+   "publicKey": \
+     {\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",\
+      "x": "AZ8WB15YNakVM9TeblaZh2HmmO2lDTarnXROAh7LO0Q",\
+      "y": "lal3Vzb5AjElCdazXnpCaa2gdU2LrMucG51oRHXOoHM"\
+     }\
   }';
 
 var brainpool256_key_spki = 'MFowFAYHKoZIzj0CAQYJKyQDAwIIAQEHA0IABAGfFgdeWDWpF\
@@ -225,14 +208,12 @@ TPU3m5WmYdh5pjtpQ02q510TgIeyztElal3Vzb5AjElCdazXnpCaa2gdU2LrMucG51oRHXOoHM';
 
 var b163_key = 
 '{\
-    "PublicKey": \
+    "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",\
-            "X": "B0M_ADx-Ma7KuLYX1kiHkeA5be9Z",\
-            "Y": "AGKwJ1CY9PB1id8J036Vs8vktLfn"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",\
+      "x": "B0M_ADx-Ma7KuLYX1kiHkeA5be9Z",\
+      "y": "AGKwJ1CY9PB1id8J036Vs8vktLfn"\
       }\
   }';
 
@@ -241,27 +222,23 @@ be9ZAGKwJ1CY9PB1id8J036Vs8vktLfn';
 
 var b233_key =
 '{\
-    "PublicKey": \
+   "publicKey": \
       {\
-        "EC": \
-          {\
-            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",\
-            "X": "AP2_Y-mMTM0vqpOqdHWP1gn-f9OIMhWlcHR5-jxo",\
-            "Y": "AJKLZXznUzWyiuWfHKNfmJIdtq6TKKxtJZTayXtk"\
-          }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",\
+      "x": "AP2_Y-mMTM0vqpOqdHWP1gn-f9OIMhWlcHR5-jxo",\
+      "y": "AJKLZXznUzWyiuWfHKNfmJIdtq6TKKxtJZTayXtk"\
       }\
   }';
 
 var k256_key =
 '{\
-   "PublicKey":\
+   "publicKey":\
     {\
-      "EC":\
-        {\
-          "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",\
-          "X": "DEejDAk3C45AzHUHD3yRynG4eFdOpqL7UhtnyDcCi8Q",\
-          "Y": "MfFLAToyWCoY-muwZmjsQWPn73J4_-I5rTz_rTPt78Q"\
-        }\
+      "type": "EC",\
+      "curve": "http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",\
+      "x": "DEejDAk3C45AzHUHD3yRynG4eFdOpqL7UhtnyDcCi8Q",\
+      "y": "MfFLAToyWCoY-muwZmjsQWPn73J4_-I5rTz_rTPt78Q"\
     }\
 }';
 
@@ -351,7 +328,7 @@ deserializeTest (b283_key_spki, b283_key);
 deserializeTest (p192_key_spki, p192_key);
 
 deserializeTest (p256_key_spki, p256_key);
-deserializeTest (p256_key_spki, p256_key_xml);
+deserializeTest (p256_key_spki, p256_key_jose);
 
 deserializeTest (p384_key_spki, p384_key);
 

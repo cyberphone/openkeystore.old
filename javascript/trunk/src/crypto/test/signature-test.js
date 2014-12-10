@@ -31,14 +31,14 @@ var mySigner = function (signature_type, algorithm)
     return this._public_key = org.webpki.util.Base64URL.decode ("" + AntCrypto.getPublicKey (this._algorithm));
 };
 
-/* Uint8Array[] */ mySigner.prototype.getX509CertificatePath = function ()
+/* Uint8Array[] */ mySigner.prototype.getCertificatePath = function ()
 {
     var path = [];
     path[0] = org.webpki.util.Base64URL.decode ("" + AntCrypto.getX509Certificate (this._algorithm));
     return this._x509_certificate_path = path;
 };
 
-/* String */ mySigner.prototype.getKeyID = function ()
+/* String */ mySigner.prototype.getKeyId = function ()
 {
     return "my.symmetric.key";
 };
@@ -54,8 +54,8 @@ var mySigner = function (signature_type, algorithm)
 };
 
 var extension_objects = [new org.webpki.json.JSONObjectWriter ()
-                             .setString ("Type", "http://example.com/important")
-                             .setInt ("Data", 88)];
+                             .setString (org.webpki.json.JSONSignatureDecoder.TYPE_JSON, "http://example.com/important")
+                             .setInt ("data", 88)];
 
 mySigner.prototype.getExtensions = function ()
 {
@@ -78,7 +78,7 @@ function myVerifier (signer)
     var signature_key = "";
     if (signature_decoder.getSignatureType () == org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY)
     {
-        if (this._signer.getKeyID () != signature_decoder.getKeyID ())
+        if (this._signer.getKeyId () != signature_decoder.getKeyId ())
         {
             throw "Key ID";
         }
@@ -162,7 +162,7 @@ signatureTest (org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE,
 signatureTest (org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY,
                "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256");
 
-no_extensions = false;
+//no_extensions = false;
 signatureTest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY,
                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
 

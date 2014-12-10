@@ -22,16 +22,16 @@
 //* Serialization/de-serialization of X.509 SPKIs + rudimentary X.509 certificate decoder
 
 org.webpki.crypto.SUPPORTED_NAMED_CURVES = 
-[//                 SKS Algorithm ID                   Coordinate Length   Textual OID            ASN.1 OID (without header)
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        21,     "1.3.132.0.15",         [0x2B, 0x81, 0x04, 0x00, 0x0F],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        30,     "1.3.132.0.27",         [0x2B, 0x81, 0x04, 0x00, 0x1B],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",        36,     "1.3.132.0.17",         [0x2B, 0x81, 0x04, 0x00, 0x11],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",        24,     "1.2.840.10045.3.1.1",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x01],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",        32,     "1.2.840.10045.3.1.7",  [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",        48,     "1.3.132.0.34",         [0x2B, 0x81, 0x04, 0x00, 0x22],
-    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",        66,     "1.3.132.0.35",         [0x2B, 0x81, 0x04, 0x00, 0x23],
-    "http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",      32,     "1.3.132.0.10",         [0x2B, 0x81, 0x04, 0x00, 0x0A],
-    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", 32,     "1.3.36.3.3.2.8.1.1.7", [0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07]
+[//                 SKS Algorithm ID                   Coordinate Length   JOSE ALG       ASN.1 OID (without header)
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",        21,         null,      [0x2B, 0x81, 0x04, 0x00, 0x0F],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b233",        30,         null,      [0x2B, 0x81, 0x04, 0x00, 0x1B],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.b283",        36,         null,      [0x2B, 0x81, 0x04, 0x00, 0x11],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p192",        24,         null,      [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x01],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",        32,         "P-256",   [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",        48,         "P-384",   [0x2B, 0x81, 0x04, 0x00, 0x22],
+    "http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",        66,         "P-521",   [0x2B, 0x81, 0x04, 0x00, 0x23],
+    "http://xmlns.webpki.org/sks/algorithm#ec.secg.p256k1",      32,         null,      [0x2B, 0x81, 0x04, 0x00, 0x0A],
+    "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1", 32,         null,      [0x2B, 0x24, 0x03, 0x03, 0x02, 0x08, 0x01, 0x01, 0x07]
 ];
 
 org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01];
@@ -39,38 +39,24 @@ org.webpki.crypto.EC_ALGORITHM_OID     = [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x
 
 org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
 
-/* int */org.webpki.crypto._getECParamsFromURI = function (/* String */uri)
+/* int */org.webpki.crypto._getECParamsFromID = function (/* String */id)
 {
-    if (uri.indexOf (org.webpki.crypto.XML_DSIG_CURVE_PREFIX) == 0)
+    for (var i = 0; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
     {
-        var oid = uri.substring (org.webpki.crypto.XML_DSIG_CURVE_PREFIX.length);
-        for (var i = 2; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i+= 4)
+        if (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i] == id || org.webpki.crypto.SUPPORTED_NAMED_CURVES[i + 2] == id)
         {
-            if (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i] == oid)
-            {
-                return i - 2;
-            }
+            return i;
         }
     }
-    else
-    {
-        for (var i = 0; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
-        {
-            if (org.webpki.crypto.SUPPORTED_NAMED_CURVES[i] == uri)
-            {
-                return i;
-            }
-        }
-    }
-    org.webpki.util._error ("Unsupported EC curve: " + uri);
+    org.webpki.util._error ("Unsupported EC curve: " + id);
 };
 
-/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */uri, /* Uint8Array */x, /* Uint8Array */y)
+/* Uint8Array */org.webpki.crypto.encodeECPublicKey = function (/* String */id, /* Uint8Array */x, /* Uint8Array */y)
 {
-    var params_entry = org.webpki.crypto._getECParamsFromURI (uri);
+    var params_entry = org.webpki.crypto._getECParamsFromID (id);
     if (x.length != y.length || x.length != org.webpki.crypto.SUPPORTED_NAMED_CURVES[params_entry + 1])
     {
-       org.webpki.util._error ("Bad EC curve: " + uri + " x=" + x.length + " y=" + y.length);
+       org.webpki.util._error ("Bad EC curve: " + id + " x=" + x.length + " y=" + y.length);
     }
     return new org.webpki.asn1.ASN1Encoder
       (
@@ -195,7 +181,7 @@ org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
                 this.x = new Uint8Array (encapsulated_key.subarray (1, 1 + coordinate_length));
                 this.y = new Uint8Array (encapsulated_key.subarray (1 + coordinate_length));
                 this.uri = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 3];
-                this.oid = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 1];
+                this.josename = org.webpki.crypto.SUPPORTED_NAMED_CURVES[i - 1];
                 return;
             }
         }

@@ -36,8 +36,8 @@ public class AntCrypto
     
     static KeyStore getKeyStore (String algorithm) throws Exception
     {
-        return AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm).isRSA () ?
-        		                        DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
+        return AsymSignatureAlgorithms.getAlgorithmFromID (algorithm).isRSA () ?
+        		                       DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
     }
 
 	public static String getPublicKey (String algorithm) throws Exception
@@ -72,10 +72,10 @@ public class AntCrypto
 	{
 		if (MACAlgorithms.testAlgorithmURI (algorithm))
 		{
-			return Base64URL.encode (MACAlgorithms.getAlgorithmFromURI (algorithm).digest (SYMMETRIC_KEY,
-					                                                                       Base64URL.decode (b64_data)));
+			return Base64URL.encode (MACAlgorithms.getAlgorithmFromID (algorithm).digest (SYMMETRIC_KEY,
+					                                                                      Base64URL.decode (b64_data)));
 		}
-        Signature s = Signature.getInstance (AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm).getJCEName ());
+        Signature s = Signature.getInstance (AsymSignatureAlgorithms.getAlgorithmFromID (algorithm).getJCEName ());
         s.initSign ((PrivateKey)getKeyStore (algorithm).getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
         s.update (Base64URL.decode (b64_data));
 		return Base64URL.encode (s.sign ());
@@ -87,7 +87,7 @@ public class AntCrypto
 		{
 			return signData (b64_data, algorithm).equals (b64_signature_value);
 		}
-		AsymSignatureAlgorithms asym_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm);
+		AsymSignatureAlgorithms asym_alg = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm);
 		Signature s = Signature.getInstance (asym_alg.getJCEName ());
 		s.initVerify (KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC").generatePublic (new X509EncodedKeySpec (Base64URL.decode (public_key_b64))));
 		s.update (Base64URL.decode (b64_data));

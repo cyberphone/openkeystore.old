@@ -178,7 +178,7 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     {
         org.webpki.json.JSONTypes._compatibilityTest (expected_type, in_arr[i]);
         array[i] = in_arr[i].value;
-        in_arr[i].value.read_flag = true;
+        in_arr[i].read_flag = true;
     }
     return array;
 };
@@ -234,9 +234,9 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     return org.webpki.json.JSONSignatureDecoder._getPublicKey (this);
 };
 
-/* public X509Certificate[]/Uint8Array[] */org.webpki.json.JSONObjectReader.prototype.getX509CertificatePath = function ()
+/* public X509Certificate[]/Uint8Array[] */org.webpki.json.JSONObjectReader.prototype.getCertificatePath = function ()
 {
-    return org.webpki.json.JSONSignatureDecoder._getX509CertificatePath (this);
+    return org.webpki.json.JSONSignatureDecoder._getCertificatePath (this);
 };
 
 /* public void */org.webpki.json.JSONObjectReader.prototype.scanAway = function (/* String */name)

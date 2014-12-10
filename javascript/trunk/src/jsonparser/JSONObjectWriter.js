@@ -37,7 +37,7 @@ org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_obj
     
     /* int */this.indent_factor = 0;
 
-    /* boolean */this.xml_dsig_named_curve = false;
+    /* boolean */this.jose_algorithm_preference = false;
     
     /* static String */this.html_variable_color = "#008000";
     /* static String */this.html_string_color   = "#0000C0";
@@ -241,31 +241,30 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
 {
     this.signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
     this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
-    var key_info_writer = this.signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON);
     switch (signer.getSignatureType ())
     {
         case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
-             key_info_writer.setPublicKey (signer.getPublicKey ());
+             this.signature_writer.setPublicKey (signer.getPublicKey ());
              break;
 
         case org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY:
-            key_info_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyID ());
+            this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyId ());
             break;
 
         case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
-            var certificate_path = signer.getX509CertificatePath ();
+            var certificate_path = signer.getCertificatePath ();
             if (signer.wantSignatureCertificateAttributes != null && signer.wantSignatureCertificateAttributes ())
             {
                 var signature_certificate = new org.webpki.crypto.X509CertificateDecoder (certificate_path[0]);
                 if (signature_certificate.issuer != null && signature_certificate.subject != null)
                 {
-                    var signature_certificate_info_writer = key_info_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
+                    var signature_certificate_info_writer = this.signature_writer.setObject (org.webpki.json.JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON);
                     signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.ISSUER_JSON, signature_certificate.issuer);
                     signature_certificate_info_writer.setBigInteger (org.webpki.json.JSONSignatureDecoder.SERIAL_NUMBER_JSON, signature_certificate.serial_number);
                     signature_certificate_info_writer.setString (org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON, signature_certificate.subject);
                 }
             }
-            key_info_writer.setX509CertificatePath (certificate_path);
+            this.signature_writer.setCertificatePath (certificate_path);
             break;
 
         default:
@@ -287,7 +286,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
 {
-    this.signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signature_value);
+    this.signature_writer.setBinary (org.webpki.json.JSONSignatureDecoder.VALUE_JSON, signature_value);
     return this;
 };
 
@@ -297,28 +296,29 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     var key_alg = new org.webpki.crypto.PublicKeyDecoder (public_key_in_x509_format);
     if (key_alg.rsa_flag)
     {
-        /* JSONObjectWriter */var rsa_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.RSA_JSON);
-        rsa_key_writer._setCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.MODULUS_JSON);
-        rsa_key_writer._setCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.EXPONENT_JSON);
+        public_key_writer.setString (org.webpki.json.JSONSignatureDecoder.TYPE_JSON, org.webpki.json.JSONSignatureDecoder.RSA_PUBLIC_KEY);
+        public_key_writer._setCryptoBinary (key_alg.modulus, org.webpki.json.JSONSignatureDecoder.N_JSON);
+        public_key_writer._setCryptoBinary (key_alg.exponent, org.webpki.json.JSONSignatureDecoder.E_JSON);
     }
     else
     {
-        /* JSONObjectWriter */var ec_key_writer = public_key_writer.setObject (org.webpki.json.JSONSignatureDecoder.EC_JSON);
-        ec_key_writer.setString (org.webpki.json.JSONSignatureDecoder.NAMED_CURVE_JSON, this.xml_dsig_named_curve ?
-                                                            org.webpki.crypto.XML_DSIG_CURVE_PREFIX + key_alg.oid : key_alg.uri);
-        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.X_JSON, key_alg.x);
-        ec_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON, key_alg.y);
+        public_key_writer.setString (org.webpki.json.JSONSignatureDecoder.TYPE_JSON, org.webpki.json.JSONSignatureDecoder.EC_PUBLIC_KEY);
+        public_key_writer.setString (org.webpki.json.JSONSignatureDecoder.CURVE_JSON, 
+                                     (this.jose_algorithm_preference && key_alg.josename) ?
+                                                                         key_alg.josename : key_alg.uri);
+        public_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.X_JSON, key_alg.x);
+        public_key_writer.setBinary (org.webpki.json.JSONSignatureDecoder.Y_JSON, key_alg.y);
     }
     return this;
 };
 
-/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setXMLDSigECCurveOption = function (/* boolean */flag)
+/* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setJOSEAlgorithmPreference = function (/* boolean */flag)
 {
-    this.xml_dsig_named_curve = flag;
+    this.jose_algorithm_preference = flag;
     return this;
 };
 
-/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setX509CertificatePath = function (/* X509Certificate[] */certificate_path)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setCertificatePath = function (/* X509Certificate[] */certificate_path)
 {
 /*
      X509Certificate last_certificate = null;
@@ -336,7 +336,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
           }
 */
     var certificates = certificate_path;  // Note: the above is still missing...
-    this.setBinaryArray (org.webpki.json.JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
+    this.setBinaryArray (org.webpki.json.JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
     return this;
 };
 
