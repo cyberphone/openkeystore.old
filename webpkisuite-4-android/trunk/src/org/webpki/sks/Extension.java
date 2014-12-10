@@ -23,14 +23,14 @@ import java.util.LinkedHashMap;
 public class Extension
   {
     String qualifier;
-    byte[] extension_data;
+    byte[] extensionData;
     byte sub_type;
 
-    public Extension (byte sub_type, String qualifier, byte[] extension_data)
+    public Extension (byte sub_type, String qualifier, byte[] extensionData)
       {
         this.sub_type = sub_type;
         this.qualifier = qualifier;
-        this.extension_data = extension_data;
+        this.extensionData = extensionData;
       }
     
     public String getQualifier ()
@@ -45,13 +45,13 @@ public class Extension
     
     public byte[] getExtensionData ()
       {
-        return extension_data;
+        return extensionData;
       }
     
     
     private int getShort (int index)
       {
-        return ((extension_data[index++] << 8) & 0xFF00) + (extension_data[index] & 0xFF);
+        return ((extensionData[index++] << 8) & 0xFF00) + (extensionData[index] & 0xFF);
       }
     
     public Property[] getProperties () throws SKSException
@@ -61,16 +61,16 @@ public class Extension
         int i = 0;
         try
           {
-            while (i != extension_data.length)
+            while (i != extensionData.length)
               {
                 int nam_len = getShort (i);
                 i += 2;
-                String name = new String (extension_data, i, nam_len, "UTF-8");
+                String name = new String (extensionData, i, nam_len, "UTF-8");
                 i += nam_len;
-                boolean writable = extension_data[i] == 0x01;
+                boolean writable = extensionData[i] == 0x01;
                 int val_len = getShort (++i);
                 i += 2;
-                String value = new String (extension_data, i, val_len, "UTF-8");
+                String value = new String (extensionData, i, val_len, "UTF-8");
                 i += val_len;
                 if (properties.put (name, new Property (name, writable, value)) != null)
                   {

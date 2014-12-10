@@ -76,6 +76,62 @@ public interface SecureKeyStore
     String CRYPTO_STRING_NOT_AVAILABLE        = "";
 
     ///////////////////////////////////////////////////////////////////////////////////
+    // SKS variable names. For provisioning most of them are the same in KeyGen2
+    ///////////////////////////////////////////////////////////////////////////////////
+    String VAR_APP_USAGE                      = "appUsage";
+    String VAR_ATTESTATION                    = "attestation";
+    String VAR_AUTHORIZATION                  = "authorization";
+    String VAR_BIOMETRIC_PROTECTION           = "biometricProtection";
+    String VAR_CLIENT_EPHEMERAL_KEY           = "clientEphemeralKey";
+    String VAR_CLIENT_SESSION_ID              = "clientSessionId";
+    String VAR_CLIENT_TIME                    = "clientTime";
+    String VAR_CRYPTO_DATA_SIZE               = "cryptoDataSize";
+    String VAR_DATA                           = "data";
+    String VAR_EXTENSION_DATA                 = "extensionData";
+    String VAR_DELETE_PROTECTION              = "deleteProtection";
+    String VAR_DEVICE_PIN_PROTECTION          = "devicePinProtection";
+    String VAR_ENDORSED_ALGORITHMS            = "endorsedAlgorithms";
+    String VAR_ENABLE_PIN_CACHING             = "enablePinCaching";
+    String VAR_ENCRYPTED_KEY                  = "encryptedKey";
+    String VAR_ENCRYPTED_PUK                  = "encryptedPuk";
+    String VAR_EXPORT_PROTECTION              = "exportProtection";
+    String VAR_FORMAT                         = "format";
+    String VAR_FRIENDLY_NAME                  = "friendlyName";
+    String VAR_GROUPING                       = "grouping";
+    String VAR_ID                             = "id";
+    String VAR_INPUT_METHOD                   = "inputMethod";
+    String VAR_ISSUER_URI                     = "issuerUri";
+    String VAR_KEY_ALGORITHM                  = "keyAlgorithm";
+    String VAR_KEY_ENTRY_ALGORITHM            = "keyEntryAlgorithm";       
+    String VAR_KEY_MANAGEMENT_KEY             = "keyManagementKey";
+    String VAR_KEY_PARAMETERS                 = "keyParameters";
+    String VAR_MAC                            = "mac";
+    String VAR_MAX_LENGTH                     = "maxLength";
+    String VAR_MIN_LENGTH                     = "minLength";
+    String VAR_NAME                           = "name";
+    String VAR_NONCE                          = "nonce";
+    String VAR_PARAMETERS                     = "parameters";
+    String VAR_PATTERN_RESTRICTIONS           = "patternRestrictions";
+    String VAR_PIN_VALUE                      = "pinValue";
+    String VAR_PRIVACY_ENABLED                = "privacyEnabled";
+    String VAR_PROPERTY                       = "property";
+    String VAR_PROPERTY_BAG                   = "propertyBag";
+    String VAR_PUBLIC_KEY                     = "publicKey";
+    String VAR_QUALIFIER                      = "qualifier";
+    String VAR_RETRY_LIMIT                    = "retryLimit";
+    String VAR_SERVER_EPHEMERAL_KEY           = "serverEphemeralKey";
+    String VAR_SERVER_SEED                    = "serverSeed";
+    String VAR_SERVER_SESSION_ID              = "serverSessionId";
+    String VAR_SERVER_TIME                    = "serverTime";
+    String VAR_SESSION_KEY_ALGORITHM          = "sessionKeyAlgorithm";
+    String VAR_SESSION_KEY_LIMIT              = "sessionKeyLimit";
+    String VAR_SESSION_LIFE_TIME              = "sessionLifeTime";
+    String VAR_TYPE                           = "type";
+    String VAR_USER_MODIFIABLE                = "userModifiable";
+    String VAR_VALUE                          = "value";
+    String VAR_WRITABLE                       = "writable";
+
+    ///////////////////////////////////////////////////////////////////////////////////
     // See "AppUsage" in the SKS specification
     ///////////////////////////////////////////////////////////////////////////////////
     byte APP_USAGE_SIGNATURE                  = 0x00;
@@ -156,7 +212,7 @@ public interface SecureKeyStore
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
-    short SKS_API_LEVEL                       = 97;
+    short SKS_API_LEVEL                       = 98;
     int AES_CBC_PKCS5_PADDING                 = 32;
 
 
@@ -164,114 +220,114 @@ public interface SecureKeyStore
     // Core Provisioning API
     ///////////////////////////////////////////////////////////////////////////////////
 
-    ProvisioningSession createProvisioningSession (String session_key_algorithm,
-                                                   boolean privacy_enabled,
-                                                   String server_session_id,
-                                                   ECPublicKey server_ephemeral_key,
-                                                   String issuer_uri,
-                                                   PublicKey key_management_key, // Must be null if not applicable
-                                                   int client_time,
-                                                   int session_life_time,
-                                                   short session_key_limit) throws SKSException;
+    ProvisioningSession createProvisioningSession (String sessionKeyAlgorithm,
+                                                   boolean privacyEnabled,
+                                                   String serverSessionId,
+                                                   ECPublicKey serverEphemeralKey,
+                                                   String issuerUri,
+                                                   PublicKey keyManagementKey, // Must be null if not applicable
+                                                   int clientTime,
+                                                   int sessionLifeTime,
+                                                   short sessionKeyLimit) throws SKSException;
 
-    byte[] closeProvisioningSession (int provisioning_handle,
-                                     byte[] challenge,
+    byte[] closeProvisioningSession (int provisioningHandle,
+                                     byte[] nonce,
                                      byte[] mac) throws SKSException;
 
-    EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
-                                                                 boolean provisioning_state) throws SKSException;
+    EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioningHandle,
+                                                                 boolean provisioningState) throws SKSException;
 
-    byte[] signProvisioningSessionData (int provisioning_handle,
+    byte[] signProvisioningSessionData (int provisioningHandle,
                                         byte[] data) throws SKSException;
 
-    KeyData createKeyEntry (int provisioning_handle,
+    KeyData createKeyEntry (int provisioningHandle,
                             String id,
-                            String key_entry_algorithm,
-                            byte[] server_seed,  // May be null
-                            boolean device_pin_protection,
-                            int pin_policy_handle,
-                            byte[] pin_value,  // Must be null if not applicable
-                            boolean enable_pin_caching,
-                            byte biometric_protection,
-                            byte export_protection,
-                            byte delete_protection,
-                            byte app_usage,
-                            String friendly_name,  // May be null
-                            String key_algorithm,
-                            byte[] key_parameters,  // Must be null if not applicable
-                            String[] endorsed_algorithms,
+                            String keyEntryAlgorithm,
+                            byte[] serverSeed,  // May be null
+                            boolean devicePinProtection,
+                            int pinPolicyHandle,
+                            byte[] pinValue,  // Must be null if not applicable
+                            boolean enablePinCaching,
+                            byte biometricProtection,
+                            byte exportProtection,
+                            byte deleteProtection,
+                            byte appUsage,
+                            String friendlyName,  // May be null
+                            String keyAlgorithm,
+                            byte[] keyParameters,  // Must be null if not applicable
+                            String[] endorsedAlgorithms,
                             byte[] mac) throws SKSException;
     
-    int getKeyHandle (int provisioning_handle,
+    int getKeyHandle (int provisioningHandle,
                       String id) throws SKSException;
 
-    void abortProvisioningSession (int provisioning_handle) throws SKSException;
+    void abortProvisioningSession (int provisioningHandle) throws SKSException;
     
-    void setCertificatePath (int key_handle,
-                             X509Certificate[] certificate_path,
+    void setCertificatePath (int keyHandle,
+                             X509Certificate[] certificatePath,
                              byte[] mac) throws SKSException;
     
-    void addExtension (int key_handle,
+    void addExtension (int keyHandle,
                        String type,
-                       byte sub_type,
+                       byte subType,
                        String qualifier,
-                       byte[] extension_data,
+                       byte[] extensionData,
                        byte[] mac) throws SKSException;
     
-    void importSymmetricKey (int key_handle,
-                             byte[] encrypted_key,
+    void importSymmetricKey (int keyHandle,
+                             byte[] encryptedKey,
                              byte[] mac) throws SKSException;
     
-    void importPrivateKey (int key_handle,
-                           byte[] encrypted_key,
+    void importPrivateKey (int keyHandle,
+                           byte[] encryptedKey,
                            byte[] mac) throws SKSException;
 
-    int createPINPolicy (int provisioning_handle,
+    int createPinPolicy (int provisioningHandle,
                          String id,
-                         int puk_policy_handle,
-                         boolean user_defined,
-                         boolean user_modifiable,
+                         int pukPolicyHandle,
+                         boolean userDefined,
+                         boolean userModifiable,
                          byte format,
-                         short retry_limit,
+                         short retryLimit,
                          byte grouping,
-                         byte pattern_restrictions,
-                         short min_length,
-                         short max_length,
-                         byte input_method,
+                         byte patternRestrictions,
+                         short minLength,
+                         short maxLength,
+                         byte inputMethod,
                          byte[] mac) throws SKSException;
 
-    int createPUKPolicy (int provisioning_handle,
+    int createPukPolicy (int provisioningHandle,
                          String id,
-                         byte[] puk_value,
+                         byte[] pukValue,
                          byte format,
-                         short retry_limit,
+                         short retryLimit,
                          byte[] mac) throws SKSException;
 
-    void updateKeyManagementKey (int provisioning_handle,
-                                 PublicKey key_management_key,
+    void updateKeyManagementKey (int provisioningHandle,
+                                 PublicKey keyManagementKey,
                                  byte[] authorization) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Post Provisioning (Management)
     ///////////////////////////////////////////////////////////////////////////////////
 
-    void postDeleteKey (int provisioning_handle,
-                        int target_key_handle,
+    void postDeleteKey (int provisioningHandle,
+                        int targetKeyHandle,
                         byte[] authorization,
                         byte[] mac) throws SKSException;
 
-    void postUnlockKey (int provisioning_handle,
-                        int target_key_handle,
+    void postUnlockKey (int provisioningHandle,
+                        int targetKeyHandle,
                         byte[] authorization,
                         byte[] mac) throws SKSException;
 
-    void postUpdateKey (int key_handle,
-                        int target_key_handle,
+    void postUpdateKey (int keyHandle,
+                        int targetKeyHandle,
                         byte[] authorization,
                         byte[] mac) throws SKSException;
 
-    void postCloneKeyProtection (int key_handle,
-                                 int target_key_handle,
+    void postCloneKeyProtection (int keyHandle,
+                                 int targetKeyHandle,
                                  byte[] authorization,
                                  byte[] mac) throws SKSException;
 
@@ -279,42 +335,42 @@ public interface SecureKeyStore
     // "User" API
     ///////////////////////////////////////////////////////////////////////////////////
 
-    KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
+    KeyAttributes getKeyAttributes (int keyHandle) throws SKSException;
     
-    EnumeratedKey enumerateKeys (int key_handle) throws SKSException;
+    EnumeratedKey enumerateKeys (int keyHandle) throws SKSException;
 
-    byte[] signHashedData (int key_handle,
+    byte[] signHashedData (int keyHandle,
                            String algorithm,
                            byte[] parameters,    // Must be null if not applicable
                            byte[] authorization, // Must be null if not applicable
                            byte[] data) throws SKSException;
     
-    byte[] performHMAC (int key_handle,
+    byte[] performHmac (int keyHandle,
                         String algorithm,
                         byte[] parameters,    // Must be null if not applicable
                         byte[] authorization, // Must be null if not applicable
                         byte[] data) throws SKSException;
     
-    byte[] symmetricKeyEncrypt (int key_handle,
+    byte[] symmetricKeyEncrypt (int keyHandle,
                                 String algorithm,
                                 boolean mode,
                                 byte[] parameters,    // Must be null if not applicable
                                 byte[] authorization, // Must be null if not applicable
                                 byte[] data) throws SKSException;
 
-    byte[] asymmetricKeyDecrypt (int key_handle,
+    byte[] asymmetricKeyDecrypt (int keyHandle,
                                  String algorithm,
                                  byte[] parameters,    // Must be null if not applicable
                                  byte[] authorization, // Must be null if not applicable
                                  byte[] data) throws SKSException;
 
-    byte[] keyAgreement (int key_handle,
+    byte[] keyAgreement (int keyHandle,
                          String algorithm,
                          byte[] parameters,    // Must be null if not applicable
                          byte[] authorization, // Must be null if not applicable
-                         ECPublicKey public_key) throws SKSException;
+                         ECPublicKey publicKey) throws SKSException;
 
-    void deleteKey (int key_handle,
+    void deleteKey (int keyHandle,
                     byte[] authorization /* Must be null if not applicable */) throws SKSException;
     
    
@@ -324,28 +380,28 @@ public interface SecureKeyStore
 
     DeviceInfo getDeviceInfo () throws SKSException;
 
-    Extension getExtension (int key_handle,
+    Extension getExtension (int keyHandle,
                             String type) throws SKSException;
     
-    KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException;
+    KeyProtectionInfo getKeyProtectionInfo (int keyHandle) throws SKSException;
 
-    void setProperty (int key_handle,
+    void setProperty (int keyHandle,
                       String type,
                       String name,
                       String value) throws SKSException;
 
-    void unlockKey (int key_handle,
+    void unlockKey (int keyHandle,
                     byte[] authorization) throws SKSException;
     
-    void changePIN (int key_handle,
+    void changePin (int keyHandle,
                     byte[] authorization,
-                    byte[] new_pin) throws SKSException;
+                    byte[] newPin) throws SKSException;
     
-    void setPIN (int key_handle,
+    void setPin (int keyHandle,
                  byte[] authorization,
-                 byte[] new_pin) throws SKSException;
+                 byte[] newPin) throws SKSException;
 
-    byte[] exportKey (int key_handle,
+    byte[] exportKey (int keyHandle,
                       byte[] authorization /* Must be null if not applicable */) throws SKSException;
     
     String updateFirmware (byte[] chunk) throws SKSException;

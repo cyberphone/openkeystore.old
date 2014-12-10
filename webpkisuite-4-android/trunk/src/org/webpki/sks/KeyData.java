@@ -20,34 +20,34 @@ import java.security.PublicKey;
 
 public class KeyData
   {
-    private int key_handle;
+    private int keyHandle;
     
-    private PublicKey public_key;
+    private PublicKey publicKey;
     
-    private byte[] key_attestation;
+    private byte[] attestation;
     
-    public KeyData (int key_handle,
-                    PublicKey public_key, 
-                    byte[] key_attestation)
+    public KeyData (int keyHandle,
+                    PublicKey publicKey, 
+                    byte[] attestation)
       {
-        this.key_handle = key_handle;
-        this.public_key = public_key;
-        this.key_attestation = key_attestation;
+        this.keyHandle = keyHandle;
+        this.publicKey = publicKey;
+        this.attestation = attestation;
       }
     
     public PublicKey getPublicKey ()
       {
-        return public_key;
+        return publicKey;
       }
 
     public int getKeyHandle ()
       {
-        return key_handle;
+        return keyHandle;
       }
     
-    public byte[] getKeyAttestation ()
+    public byte[] getAttestation ()
       {
-        return key_attestation;
+        return attestation;
       }
     
   }

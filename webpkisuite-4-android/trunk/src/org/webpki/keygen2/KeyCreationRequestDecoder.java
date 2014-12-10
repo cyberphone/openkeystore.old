@@ -17,7 +17,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -30,10 +29,8 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
-
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -95,7 +92,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
             retry_limit = getAuthorizationRetryLimit (rd, 0);
             id = KeyGen2Validator.getID (rd, ID_JSON);
             format = getPassphraseFormat (rd);
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -129,7 +126,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -191,7 +188,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
                 pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
               }
 
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -259,7 +256,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -348,7 +345,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
 
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
           }
 
 
@@ -400,7 +397,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
           }
 
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -772,9 +769,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         KeyObject rk;
         PresetPIN preset = null;
         boolean save_user_defined = pin_policy.user_defined;
-        if (rd.hasProperty (ENCRYPTED_PRESET_PIN_JSON))
+        if (rd.hasProperty (ENCRYPTED_PIN_JSON))
           {
-            preset = new PresetPIN (rd, ENCRYPTED_PRESET_PIN_JSON);
+            preset = new PresetPIN (rd, ENCRYPTED_PIN_JSON);
           }
         else
           {
@@ -811,19 +808,19 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
     private String client_session_id;
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -898,6 +895,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_REQUEST_JSON;
+        return KeyGen2Messages.KEY_CREATION_REQUEST.getName ();
       }
   }

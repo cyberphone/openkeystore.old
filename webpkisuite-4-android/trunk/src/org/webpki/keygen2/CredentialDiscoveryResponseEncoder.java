@@ -17,10 +17,8 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 import java.util.Vector;
-
 import java.security.cert.X509Certificate;
 
 import org.webpki.json.JSONArrayWriter;
@@ -130,7 +128,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
                 JSONObjectWriter match_object = matcher_array.setObject ();
                 match_object.setString (SERVER_SESSION_ID_JSON, mc.server_session_id);
                 match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
-                match_object.setX509CertificatePath (mc.certificate_path);
+                match_object.setCertificatePath (mc.certificate_path);
                 if (mc.locked)
                   {
                     match_object.setBoolean (LOCKED_JSON, mc.locked);
@@ -142,7 +140,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return CREDENTIAL_DISCOVERY_RESPONSE_JSON;
+        return KeyGen2Messages.CREDENTIAL_DISCOVERY_RESPONSE.getName ();
       }
 
     @Override

@@ -88,7 +88,7 @@ public class CredentialListDataFactory
                   {
                     if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
                       {
-                        return new URL (eps.getIssuerURI ()).getHost ();
+                        return new URL (eps.getIssuerUri ()).getHost ();
                       }
                   }
               }

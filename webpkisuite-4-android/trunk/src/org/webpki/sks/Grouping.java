@@ -42,7 +42,7 @@ public enum Grouping
       }
 
     
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }
@@ -57,7 +57,7 @@ public enum Grouping
                 return option;
               }
           }
-        throw new IOException ("Unknown group: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_GROUPING + "\": " + name);
       }
 
   }

@@ -17,18 +17,13 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Date;
-
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
-
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSymKeySigner;
@@ -94,7 +89,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     public void setResponseSigner (SymKeySignerInterface signer) throws IOException
       {
         session_signature = new JSONSymKeySigner (signer);
-        session_signature.setKeyID ("derived-session-key");
+        session_signature.setKeyId ("derived-session-key");
       }
 
 
@@ -112,7 +107,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time, false); // Client keeps local time
         
-        wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
+        wr.setBinary (ATTESTATION_JSON, attestation);
         
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
@@ -124,7 +119,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            wr.setObject (DEVICE_CERTIFICATE_JSON).setX509CertificatePath (device_certificate_path);
+            wr.setObject (DEVICE_ID_JSON).setCertificatePath (device_certificate_path);
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -144,7 +139,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_INITIALIZATION_RESPONSE_JSON;
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName ();
       }
 
     @Override

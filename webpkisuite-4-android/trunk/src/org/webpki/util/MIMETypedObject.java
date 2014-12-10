@@ -24,6 +24,6 @@ public interface MIMETypedObject
 
     public byte[] getData () throws IOException;
 
-    public String getMIMEType () throws IOException;
+    public String getMimeType () throws IOException;
 
   }

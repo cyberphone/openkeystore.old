@@ -32,7 +32,6 @@ package org.webpki.keygen2;
  *
  */
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayWriter;
@@ -164,7 +163,7 @@ public class InvocationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return INVOCATION_RESPONSE_JSON;
+        return KeyGen2Messages.INVOCATION_RESPONSE.getName ();
       }
 
     @Override

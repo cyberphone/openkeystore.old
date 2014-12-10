@@ -20,43 +20,43 @@ import java.security.interfaces.ECPublicKey;
 
 public class ProvisioningSession
   {
-    int provisioning_handle;
+    int provisioningHandle;
 
     public int getProvisioningHandle ()
       {
-        return provisioning_handle;
+        return provisioningHandle;
       }
 
-    String client_session_id;
+    String clientSessionId;
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
-    byte[] session_attestation;
+    byte[] attestation;
 
-    public byte[] getSessionAttestation ()
+    public byte[] getAttestation ()
       {
-        return session_attestation;
+        return attestation;
       }
 
-    ECPublicKey client_ephemeral_key;
+    ECPublicKey clientEphemeralKey;
 
     public ECPublicKey getClientEphemeralKey ()
       {
-        return client_ephemeral_key;
+        return clientEphemeralKey;
       }
 
-    public ProvisioningSession (int provisioning_handle, 
-                                String client_session_id,
-                                byte[] session_attestation,
-                                ECPublicKey client_ephemeral_key)
+    public ProvisioningSession (int provisioningHandle, 
+                                String clientSessionId,
+                                byte[] attestation,
+                                ECPublicKey clientEphemeralKey)
       {
-        this.provisioning_handle = provisioning_handle;
-        this.client_session_id = client_session_id;
-        this.session_attestation = session_attestation;
-        this.client_ephemeral_key = client_ephemeral_key;
+        this.provisioningHandle = provisioningHandle;
+        this.clientSessionId = clientSessionId;
+        this.attestation = attestation;
+        this.clientEphemeralKey = clientEphemeralKey;
       }
 
   }

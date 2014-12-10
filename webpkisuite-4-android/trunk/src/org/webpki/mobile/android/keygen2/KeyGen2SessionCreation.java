@@ -314,16 +314,16 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 invocation_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
               }
 
-            keygen2_activity.postJSONData (keygen2_activity.invocation_request.getSubmitURL (), invocation_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.invocation_request.getSubmitUrl (), invocation_response, false);
 
             keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseJSONResponse ();
             Date client_time = new Date ();
             ProvisioningSession session = 
                 keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_init_request.getSessionKeyAlgorithm (),
                                                                 keygen2_activity.invocation_request.getPrivacyEnabledFlag (),
-                                                                keygen2_activity.prov_init_request.getServerSessionID (),
+                                                                keygen2_activity.prov_init_request.getServerSessionId (),
                                                                 keygen2_activity.prov_init_request.getServerEphemeralKey (),
-                                                                keygen2_activity.invocation_request.getSubmitURL (), // IssuerURI
+                                                                keygen2_activity.invocation_request.getSubmitUrl (), // IssuerURI
                                                                 keygen2_activity.prov_init_request.getKeyManagementKey (),
                                                                 (int) (client_time.getTime () / 1000),
                                                                 keygen2_activity.prov_init_request.getSessionLifeTime (),
@@ -334,9 +334,9 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             ProvisioningInitializationResponseEncoder prov_sess_response =
                 new ProvisioningInitializationResponseEncoder (keygen2_activity.prov_init_request,
                                                                session.getClientEphemeralKey (),
-                                                               session.getClientSessionID (),
+                                                               session.getClientSessionId (),
                                                                client_time,
-                                                               session.getSessionAttestation (),
+                                                               session.getAttestation (),
                                                                keygen2_activity.invocation_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
 
             if (keygen2_activity.getServerCertificate () != null)
@@ -353,13 +353,13 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                   }
 
                 @Override
-                public MACAlgorithms getMACAlgorithm () throws IOException
+                public MACAlgorithms getMacAlgorithm () throws IOException
                   {
                     return MACAlgorithms.HMAC_SHA256;
                   }
               });
 
-            keygen2_activity.postJSONData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.prov_init_request.getSubmitUrl (), prov_sess_response, false);
             JSONDecoder json_object = keygen2_activity.parseJSONResponse ();
             if (json_object instanceof CredentialDiscoveryRequestDecoder)
               {
@@ -386,13 +386,13 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                     if (ls.matches (cert_path))
                                       {
                                         KeyProtectionInfo kpi = keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ());
-                                        if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPINGrouping ()) &&
+                                        if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPinGrouping ()) &&
                                             (ls.getAppUsage () == null || ls.getAppUsage () == ka.getAppUsage ()))
                                           {
                                             lr.addMatchingCredential (cert_path,
-                                                                      eps.getClientSessionID (),
-                                                                      eps.getServerSessionID (),
-                                                                      kpi.isPINBlocked ());
+                                                                      eps.getClientSessionId (),
+                                                                      eps.getServerSessionId (),
+                                                                      kpi.isPinBlocked ());
                                           }
                                       }
                                   }
@@ -400,7 +400,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                           }
                       }
                   }
-                keygen2_activity.postJSONData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
+                keygen2_activity.postJSONData (cred_disc_request.getSubmitUrl (), cred_disc_response, false);
                 json_object = keygen2_activity.parseJSONResponse ();
               }
              keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) json_object;

@@ -77,11 +77,11 @@ public class JSONX509Signer extends JSONSigner
         if (output_signature_certificate_attributes)
           {
             X509Certificate signer_cert = certificate_path[0];
-            JSONObjectWriter signature_certificate_info_writer = wr.setObject (JSONSignatureDecoder.SIGNATURE_CERTIFICATE_JSON);
+            JSONObjectWriter signature_certificate_info_writer = wr.setObject (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON);
             signature_certificate_info_writer.setString (JSONSignatureDecoder.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
             signature_certificate_info_writer.setBigInteger (JSONSignatureDecoder.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
             signature_certificate_info_writer.setString (JSONSignatureDecoder.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
           }
-        wr.setX509CertificatePath (certificate_path);
+        wr.setCertificatePath (certificate_path);
       }
   }

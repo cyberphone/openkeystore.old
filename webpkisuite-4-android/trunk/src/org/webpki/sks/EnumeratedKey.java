@@ -20,19 +20,19 @@ public class EnumeratedKey
   {
     public static final int INIT_ENUMERATION = 0;
     
-    int key_handle = INIT_ENUMERATION;
+    int keyHandle = INIT_ENUMERATION;
     
     public int getKeyHandle ()
       {
-        return key_handle;
+        return keyHandle;
       }
 
 
-    int provisioning_handle;
+    int provisioningHandle;
     
     public int getProvisioningHandle ()
       {
-        return provisioning_handle;
+        return provisioningHandle;
       }
     
 
@@ -41,11 +41,11 @@ public class EnumeratedKey
       }
     
     
-    public EnumeratedKey (int key_handle, 
-                          int provisioning_handle)
+    public EnumeratedKey (int keyHandle, 
+                          int provisioningHandle)
       {
-        this.key_handle = key_handle;
-        this.provisioning_handle = provisioning_handle;
+        this.keyHandle = keyHandle;
+        this.provisioningHandle = provisioningHandle;
       }
 
   }

@@ -35,128 +35,105 @@ public class DeviceInfo
     public static final byte TYPE_CPU                    = 0x0C;
     public static final byte TYPE_MASK                   = 0x0C;
     
-    short api_level;
+    short apiLevel;
     
-    public short getAPILevel ()
+    public short getApiLevel ()
       {
-        return api_level;
+        return apiLevel;
       }
     
-    private byte device_type;
+    private byte deviceType;
 
     public byte getDeviceType ()
       {
-        return device_type;
+        return deviceType;
       }
 
-    String update_url;
+    String updateUrl;
     
-    public String getUpdateURL ()
+    public String getUpdateUrl ()
       {
-        return update_url;
+        return updateUrl;
       }
 
-    String vendor_name;
+    String vendorName;
     
     public String getVendorName ()
       {
-        return vendor_name;
+        return vendorName;
       }
     
-    String vendor_description;
+    String vendorDescription;
     
     public String getVendorDescription ()
       {
-        return vendor_description;
+        return vendorDescription;
       }
     
-    X509Certificate[] certificate_path;
+    X509Certificate[] certificatePath;
     
     public X509Certificate[] getCertificatePath ()
       {
-        return certificate_path;
+        return certificatePath;
       }
     
-    String[] supported_algorithms;
+    String[] supportedAlgorithms;
     
     public String[] getSupportedAlgorithms ()
       {
-        return supported_algorithms;
+        return supportedAlgorithms;
       }
 
-    int crypto_data_size;
+    int cryptoDataSize;
     
     public int getCryptoDataSize ()
       {
-        return crypto_data_size;
+        return cryptoDataSize;
       }
     
-    int extension_data_size;
+    int extensionDataSize;
     
     public int getExtensionDataSize ()
       {
-        return extension_data_size;
+        return extensionDataSize;
       }
     
-    boolean device_pin_support;
+    boolean devicePinSupport;
     
-    public boolean getDevicePINSupport ()
+    public boolean getDevicePinSupport ()
       {
-        return device_pin_support;
+        return devicePinSupport;
       }
     
-    boolean biometric_support;
+    boolean biometricSupport;
     
     public boolean getBiometricSupport ()
       {
-        return biometric_support;
+        return biometricSupport;
       }
     
-    String connection_port;
-    /**
-     * Holds an optional system-dependent string telling which logical
-     * or physical port the SKS is connected to.  This information is
-     * not gathered from the SKS device itself, but from the calling
-     * environment.  Suitable strings include "USB:4", "COM3", "TCP:192.168.0.45",
-     * "/dev/term3", "PCI:2", "Embedded", "SIM", "http://net-hsm/sks", etc.
-     */
-    public String getConnectionPort ()
+    public DeviceInfo (short apiLevel,
+                       byte deviceType,
+                       String updateUrl,  // May be null
+                       String vendorName,
+                       String vendorDescription,
+                       X509Certificate[] certificatePath,
+                       String[] supportedAlgorithms,
+                       int cryptoDataSize,
+                       int extensionDataSize,
+                       boolean devicePinSupport,
+                       boolean biometricSupport)
       {
-        return connection_port;
-      }
-
-    /**
-     * 
-     * @see #getConnectionPort()
-     */
-    public void setConnectionPort (String connection_port)
-      {
-        this.connection_port = connection_port;
-      }
-
-    
-    public DeviceInfo (short api_level,
-                       byte device_type,
-                       String update_url,  // May be null
-                       String vendor_name,
-                       String vendor_description,
-                       X509Certificate[] certificate_path,
-                       String[] supported_algorithms,
-                       int crypto_data_size,
-                       int extension_data_size,
-                       boolean device_pin_support,
-                       boolean biometric_support)
-      {
-        this.api_level = api_level;
-        this.device_type = device_type;
-        this.update_url = update_url;
-        this.vendor_name = vendor_name;
-        this.vendor_description = vendor_description;
-        this.certificate_path = certificate_path;
-        this.supported_algorithms = supported_algorithms;
-        this.crypto_data_size = crypto_data_size;
-        this.extension_data_size = extension_data_size;
-        this.device_pin_support = device_pin_support;
-        this.biometric_support = biometric_support;
+        this.apiLevel = apiLevel;
+        this.deviceType = deviceType;
+        this.updateUrl = updateUrl;
+        this.vendorName = vendorName;
+        this.vendorDescription = vendorDescription;
+        this.certificatePath = certificatePath;
+        this.supportedAlgorithms = supportedAlgorithms;
+        this.cryptoDataSize = cryptoDataSize;
+        this.extensionDataSize = extensionDataSize;
+        this.devicePinSupport = devicePinSupport;
+        this.biometricSupport = biometricSupport;
       }
   }

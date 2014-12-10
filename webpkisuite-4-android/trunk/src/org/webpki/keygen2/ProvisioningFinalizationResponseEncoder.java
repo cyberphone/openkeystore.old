@@ -38,8 +38,8 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder
 
     public ProvisioningFinalizationResponseEncoder (ProvisioningFinalizationRequestDecoder fin_prov_request, byte[] attestation)
       {
-        client_session_id = fin_prov_request.getClientSessionID ();
-        server_session_id = fin_prov_request.getServerSessionID ();
+        client_session_id = fin_prov_request.getClientSessionId ();
+        server_session_id = fin_prov_request.getServerSessionId ();
         this.attestation = attestation;
       }
 
@@ -53,13 +53,13 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder
 
         wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
-        wr.setBinary (CLOSE_ATTESTATION_JSON, attestation);
+        wr.setBinary (ATTESTATION_JSON, attestation);
       }
 
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_FINALIZATION_RESPONSE_JSON;
+        return KeyGen2Messages.PROVISIONING_FINALIZATION_RESPONSE.getName ();
       }
 
     @Override

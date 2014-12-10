@@ -52,7 +52,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
             keygen2_activity.addDecoder (CredentialDiscoveryRequestDecoder.class);
             keygen2_activity.addDecoder (ProvisioningFinalizationRequestDecoder.class);
             keygen2_activity.invocation_request = (InvocationRequestDecoder) keygen2_activity.getInitialReguest ();
-            keygen2_activity.setAbortURL (keygen2_activity.invocation_request.getOptionalAbortURL ());
+            keygen2_activity.setAbortURL (keygen2_activity.invocation_request.getOptionalAbortUrl ());
             return true;
           }
         catch (Exception e)

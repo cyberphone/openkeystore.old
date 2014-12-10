@@ -17,13 +17,11 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.webpki.crypto.KeyContainerTypes;
-
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -60,7 +58,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String server_session_id;
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -68,7 +66,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String submit_url;
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -76,7 +74,7 @@ public class InvocationRequestDecoder extends ClientDecoder
 
     String abort_url; // Optional
 
-    public String getOptionalAbortURL ()
+    public String getOptionalAbortUrl ()
       {
         return abort_url;
       }
@@ -137,6 +135,6 @@ public class InvocationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return INVOCATION_REQUEST_JSON;
+        return KeyGen2Messages.INVOCATION_REQUEST.getName ();
       }
   }

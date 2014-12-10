@@ -22,75 +22,75 @@ public class EnumeratedProvisioningSession
   {
     public static final int INIT_ENUMERATION = 0;
 
-    int provisioning_handle = INIT_ENUMERATION;
+    int provisioningHandle = INIT_ENUMERATION;
     
     public int getProvisioningHandle ()
       {
-        return provisioning_handle;
+        return provisioningHandle;
       }
     
 
-    String session_key_algorithm;
+    String sessionKeyAlgorithm;
     
     public String getSessionKeyAlgorithm ()
       {
-        return session_key_algorithm;
+        return sessionKeyAlgorithm;
       }
 
 
-    boolean privacy_enabled;
+    boolean privacyEnabled;
     
     public boolean getPrivacyEnabled ()
       {
-        return privacy_enabled;
+        return privacyEnabled;
       }
 
 
-    PublicKey key_management_key;
+    PublicKey keyManagementKey;
     
     public PublicKey getKeyManagementKey ()
       {
-        return key_management_key;
+        return keyManagementKey;
       }
 
 
-    int client_time;
+    int clientTime;
     
     public int getClientTime ()
       {
-        return client_time;
+        return clientTime;
       }
     
 
-    int session_life_time;
+    int sessionLifeTime;
     
     public int getSessionLifeTime ()
       {
-        return session_life_time;
+        return sessionLifeTime;
       }
     
 
-    String client_session_id;
+    String clientSessionId;
     
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
     
 
-    String server_session_id;
+    String serverSessionId;
     
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
  
     
-    String issuer_uri;
+    String issuerUri;
     
-    public String getIssuerURI ()
+    public String getIssuerUri ()
       {
-        return issuer_uri;
+        return issuerUri;
       }
     
 
@@ -99,25 +99,25 @@ public class EnumeratedProvisioningSession
       }
     
     
-    public EnumeratedProvisioningSession (int provisioning_handle,
-                                          String session_key_algorithm,
-                                          boolean privacy_enabled,
-                                          PublicKey key_management_key,
-                                          int client_time,
-                                          int session_life_time,
-                                          String server_session_id,
-                                          String client_session_id,
-                                          String issuer_uri)
+    public EnumeratedProvisioningSession (int provisioningHandle,
+                                          String sessionKeyAlgorithm,
+                                          boolean privacyEnabled,
+                                          PublicKey keyManagementKey,
+                                          int clientTime,
+                                          int sessionLifeTime,
+                                          String serverSessionId,
+                                          String clientSessionId,
+                                          String issuerUri)
       {
-        this.session_key_algorithm = session_key_algorithm;
-        this.privacy_enabled = privacy_enabled;
-        this.key_management_key = key_management_key;
-        this.client_time = client_time;
-        this.session_life_time = session_life_time;
-        this.provisioning_handle = provisioning_handle;
-        this.client_session_id = client_session_id;
-        this.server_session_id = server_session_id;
-        this.issuer_uri = issuer_uri;
+        this.sessionKeyAlgorithm = sessionKeyAlgorithm;
+        this.privacyEnabled = privacyEnabled;
+        this.keyManagementKey = keyManagementKey;
+        this.clientTime = clientTime;
+        this.sessionLifeTime = sessionLifeTime;
+        this.provisioningHandle = provisioningHandle;
+        this.clientSessionId = clientSessionId;
+        this.serverSessionId = serverSessionId;
+        this.issuerUri = issuerUri;
       }
 
   }

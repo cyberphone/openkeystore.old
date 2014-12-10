@@ -17,9 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
-
 import java.security.PublicKey;
 
 import org.webpki.json.JSONArrayWriter;
@@ -44,7 +42,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder
 
         PublicKey public_key;
 
-        byte[] key_attestation;
+        byte[] attestation;
 
         GeneratedPublicKey (String id)
           {
@@ -55,19 +53,19 @@ public class KeyCreationResponseEncoder extends JSONEncoder
       }
 
 
-    public void addPublicKey (PublicKey public_key, byte[] key_attestation, String id) throws IOException
+    public void addPublicKey (PublicKey public_key, byte[] attestation, String id) throws IOException
       {
         GeneratedPublicKey gk = new GeneratedPublicKey (id);
         gk.public_key = public_key;
-        gk.key_attestation = key_attestation;
+        gk.attestation = attestation;
       }
 
 
 
     public KeyCreationResponseEncoder (KeyCreationRequestDecoder key_init_req) throws IOException
       {
-        client_session_id = key_init_req.getClientSessionID ();
-        server_session_id = key_init_req.getServerSessionID ();
+        client_session_id = key_init_req.getClientSessionId ();
+        server_session_id = key_init_req.getServerSessionId ();
       }
 
 
@@ -84,14 +82,14 @@ public class KeyCreationResponseEncoder extends JSONEncoder
             keys.setObject ()
               .setString (ID_JSON, gk.id)
               .setPublicKey (gk.public_key)
-              .setBinary (KEY_ATTESTATION_JSON, gk.key_attestation);
+              .setBinary (ATTESTATION_JSON, gk.attestation);
           }
       }
 
     @Override
     public String getQualifier ()
       {
-        return KEY_CREATION_RESPONSE_JSON;
+        return KeyGen2Messages.KEY_CREATION_RESPONSE.getName ();
       }
 
     @Override

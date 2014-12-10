@@ -42,7 +42,7 @@ public enum ExportProtection
       }
     
 
-    public byte getSKSValue ()
+    public byte getSksValue ()
       {
         return sks_value;
       }
@@ -57,7 +57,7 @@ public enum ExportProtection
                 return exp_pol;
               }
           }
-        throw new IOException ("Unknown export policy: " + name);
+        throw new IOException ("Unknown \"" + SecureKeyStore.VAR_EXPORT_PROTECTION + "\": " + name);
       }
 
   }

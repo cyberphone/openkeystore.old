@@ -61,12 +61,12 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             if ((old_provisioning_session = keygen2_activity.sks.enumerateProvisioningSessions (old_provisioning_session.getProvisioningHandle (), false)) == null)
               {
                 throw new IOException ("Old provisioning session not found:" +
-                                       post_operation.getClientSessionID () + 
+                                       post_operation.getClientSessionId () + 
                                        "/" +
-                                       post_operation.getServerSessionID ());
+                                       post_operation.getServerSessionId ());
               }
-            if (old_provisioning_session.getClientSessionID ().equals (post_operation.getClientSessionID ()) &&
-                old_provisioning_session.getServerSessionID ().equals (post_operation.getServerSessionID ()))
+            if (old_provisioning_session.getClientSessionId ().equals (post_operation.getClientSessionId ()) &&
+                old_provisioning_session.getServerSessionId ().equals (post_operation.getServerSessionId ()))
               {
                 break;
               }
@@ -90,28 +90,28 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                           keygen2_activity.sks.postCloneKeyProtection (handle,
                                                                        ek.getKeyHandle (),
                                                                        post_operation.getAuthorization (),
-                                                                       post_operation.getMAC ());
+                                                                       post_operation.getMac ());
                           break;
 
                         case ProvisioningFinalizationRequestDecoder.PostOperation.UPDATE_KEY:
                           keygen2_activity.sks.postUpdateKey (handle,
                                                               ek.getKeyHandle (),
                                                               post_operation.getAuthorization (),
-                                                              post_operation.getMAC ());
+                                                              post_operation.getMac ());
                           break;
 
                         case ProvisioningFinalizationRequestDecoder.PostOperation.UNLOCK_KEY:
                           keygen2_activity.sks.postUnlockKey (handle,
                                                               ek.getKeyHandle (),
                                                               post_operation.getAuthorization (),
-                                                              post_operation.getMAC ());
+                                                              post_operation.getMac ());
                           break;
 
                         default:
                           keygen2_activity.sks.postDeleteKey (handle,
                                                               ek.getKeyHandle (),
                                                               post_operation.getAuthorization (),
-                                                              post_operation.getMAC ());
+                                                              post_operation.getMac ());
                       }
                     return;
                   }
@@ -144,27 +144,27 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                         if (key.isStartOfPUKPolicy ())
                           {
                             KeyCreationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
-                            puk_policy_handle = keygen2_activity.sks.createPUKPolicy (keygen2_activity.provisioning_handle,
+                            puk_policy_handle = keygen2_activity.sks.createPukPolicy (keygen2_activity.provisioning_handle,
                                                                                       puk_policy.getID (),
                                                                                       puk_policy.getEncryptedValue (),
-                                                                                      puk_policy.getFormat ().getSKSValue (),
+                                                                                      puk_policy.getFormat ().getSksValue (),
                                                                                       puk_policy.getRetryLimit (),
-                                                                                      puk_policy.getMAC ());
+                                                                                      puk_policy.getMac ());
                           }
                         KeyCreationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
-                        pin_policy_handle = keygen2_activity.sks.createPINPolicy (keygen2_activity.provisioning_handle,
+                        pin_policy_handle = keygen2_activity.sks.createPinPolicy (keygen2_activity.provisioning_handle,
                                                                                   pin_policy.getID (),
                                                                                   puk_policy_handle,
                                                                                   pin_policy.getUserDefinedFlag (),
                                                                                   pin_policy.getUserModifiableFlag (),
-                                                                                  pin_policy.getFormat ().getSKSValue (),
+                                                                                  pin_policy.getFormat ().getSksValue (),
                                                                                   pin_policy.getRetryLimit (),
-                                                                                  pin_policy.getGrouping ().getSKSValue (),
-                                                                                  PatternRestriction.getSKSValue (pin_policy.getPatternRestrictions ()),
+                                                                                  pin_policy.getGrouping ().getSksValue (),
+                                                                                  PatternRestriction.getSksValue (pin_policy.getPatternRestrictions ()),
                                                                                   pin_policy.getMinLength (),
                                                                                   pin_policy.getMaxLength (),
-                                                                                  pin_policy.getInputMethod ().getSKSValue (),
-                                                                                  pin_policy.getMAC ());
+                                                                                  pin_policy.getInputMethod ().getSksValue (),
+                                                                                  pin_policy.getMac ());
                       }
                   }
                 KeyData key_data = keygen2_activity.sks.createKeyEntry (keygen2_activity.provisioning_handle,
@@ -175,19 +175,19 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                                                                         pin_policy_handle,
                                                                         key.getSKSPINValue (),
                                                                         key.getEnablePINCachingFlag (),
-                                                                        key.getBiometricProtection ().getSKSValue (),
-                                                                        key.getExportProtection ().getSKSValue (),
-                                                                        key.getDeleteProtection ().getSKSValue (),
-                                                                        key.getAppUsage ().getSKSValue (),
+                                                                        key.getBiometricProtection ().getSksValue (),
+                                                                        key.getExportProtection ().getSksValue (),
+                                                                        key.getDeleteProtection ().getSksValue (),
+                                                                        key.getAppUsage ().getSksValue (),
                                                                         key.getFriendlyName (),
                                                                         key.getKeySpecifier ().getKeyAlgorithm ().getURI (), 
-                                                                        key.getKeySpecifier ().getParameters (),
+                                                                        key.getKeySpecifier ().getKeyParameters (),
                                                                         key.getEndorsedAlgorithms (),
-                                                                        key.getMAC ());
-                key_creation_response.addPublicKey (key_data.getPublicKey (), key_data.getKeyAttestation (), key.getID ());
+                                                                        key.getMac ());
+                key_creation_response.addPublicKey (key_data.getPublicKey (), key_data.getAttestation (), key.getID ());
               }
 
-            keygen2_activity.postJSONData (keygen2_activity.key_creation_request.getSubmitURL (), key_creation_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.key_creation_request.getSubmitUrl (), key_creation_response, false);
 
             publishProgress (BaseProxyActivity.PROGRESS_DEPLOY_CERTS);
 
@@ -205,12 +205,12 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                 if ((eps = keygen2_activity.sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) == null)
                   {
                     throw new IOException ("Provisioning session not found:" + 
-                                           prov_final_request.getClientSessionID () +
+                                           prov_final_request.getClientSessionId () +
                                            "/" +
-                                           prov_final_request.getServerSessionID ());
+                                           prov_final_request.getServerSessionId ());
                   }
-                if (eps.getClientSessionID ().equals (prov_final_request.getClientSessionID ()) &&
-                    eps.getServerSessionID ().equals (prov_final_request.getServerSessionID ()))
+                if (eps.getClientSessionId ().equals (prov_final_request.getClientSessionId ()) &&
+                    eps.getServerSessionId ().equals (prov_final_request.getServerSessionId ()))
                   {
                     break;
                   }
@@ -222,28 +222,28 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             for (ProvisioningFinalizationRequestDecoder.IssuedCredential key : prov_final_request.getIssuedCredentials ())
               {
                 int key_handle = keygen2_activity.sks.getKeyHandle (eps.getProvisioningHandle (),
-                                                                    key.getID ());
+                                                                    key.getId ());
                 keygen2_activity.sks.setCertificatePath (key_handle,
                                                          key.getCertificatePath (),
-                                                         key.getMAC ());
+                                                         key.getMac ());
 
                 //////////////////////////////////////////////////////////////////////////
                 // There may be a symmetric key
                 //////////////////////////////////////////////////////////////////////////
-                if (key.getEncryptedSymmetricKey () != null)
+                if (key.getOptionalSymmetricKey () != null)
                   {
                     keygen2_activity.sks.importSymmetricKey (key_handle,
-                                                             key.getEncryptedSymmetricKey (),
+                                                             key.getOptionalSymmetricKey (),
                                                              key.getSymmetricKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
                 // There may be a private key
                 //////////////////////////////////////////////////////////////////////////
-                if (key.getEncryptedPrivateKey () != null)
+                if (key.getOptionalPrivateKey () != null)
                   {
                     keygen2_activity.sks.importPrivateKey (key_handle,
-                                                           key.getEncryptedPrivateKey (),
+                                                           key.getOptionalPrivateKey (),
                                                            key.getPrivateKeyMac ());
                   }
 
@@ -257,7 +257,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                                                        extension.getSubType (),
                                                        extension.getQualifier (),
                                                        extension.getExtensionData (),
-                                                       extension.getMAC ());
+                                                       extension.getMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -291,11 +291,11 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             //////////////////////////////////////////////////////////////////////////
             // Create final and attested message
             //////////////////////////////////////////////////////////////////////////
-            keygen2_activity.postJSONData (prov_final_request.getSubmitURL (),
+            keygen2_activity.postJSONData (prov_final_request.getSubmitUrl (),
                                           new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                                                        keygen2_activity.sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                       prov_final_request.getCloseSessionChallenge (),
-                                                                                       prov_final_request.getCloseSessionMAC ())),
+                                                                                       prov_final_request.getCloseSessionNonce (),
+                                                                                       prov_final_request.getCloseSessionMac ())),
                                           true);
             return keygen2_activity.getRedirectURL ();
           }

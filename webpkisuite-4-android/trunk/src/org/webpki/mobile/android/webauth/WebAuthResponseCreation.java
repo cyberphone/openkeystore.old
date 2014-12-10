@@ -92,7 +92,7 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
                                                    webauth_activity.getInitializationURL (),
                                                    new Date (),
                                                    webauth_activity.getServerCertificate ());
-            webauth_activity.postJSONData (webauth_activity.authentication_request.getSubmitURL (), authentication_response, true);
+            webauth_activity.postJSONData (webauth_activity.authentication_request.getSubmitUrl (), authentication_response, true);
             return webauth_activity.getRedirectURL ();
           }
         catch (SKSException e)
@@ -102,7 +102,7 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
               {
                 try
                   {
-                    authorization_error = webauth_activity.sks.getKeyProtectionInfo (key_handle).isPINBlocked () ? "Too many PIN errors - Blocked" : "Incorrect PIN";
+                    authorization_error = webauth_activity.sks.getKeyProtectionInfo (key_handle).isPinBlocked () ? "Too many PIN errors - Blocked" : "Incorrect PIN";
                   }
                 catch (SKSException e1)
                   {

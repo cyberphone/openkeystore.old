@@ -17,23 +17,18 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
-
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.Grouping;
-
 import org.webpki.util.ArrayUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -88,7 +83,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
               }
             JSONSignatureDecoder signature = rd.getSignature ();
             key_management_key = signature.getPublicKey ();
-            if (((AsymSignatureAlgorithms) signature.getSignatureAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
+            if (((AsymSignatureAlgorithms) signature.getAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
               {
                 throw new IOException ("Lookup signature must use SHA256");
               }
@@ -150,19 +145,19 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
 
     byte[] nonce_reference;
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -210,6 +205,6 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return CREDENTIAL_DISCOVERY_REQUEST_JSON;
+        return KeyGen2Messages.CREDENTIAL_DISCOVERY_REQUEST.getName ();
       }
   }

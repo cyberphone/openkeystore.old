@@ -86,7 +86,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -164,7 +164,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_JSON))
           {
-            AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (sig_alg_string);
+            AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromID (sig_alg_string);
             if (!algorithms.add (sig_alg))
               {
                 bad ("Duplicate \"" + SIGNATURE_ALGORITHMS_JSON + "\" : " + sig_alg_string);

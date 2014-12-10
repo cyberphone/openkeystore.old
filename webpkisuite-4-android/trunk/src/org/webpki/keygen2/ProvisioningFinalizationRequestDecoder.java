@@ -17,17 +17,12 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Vector;
-
 import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.util.ArrayUtil;
-
 import org.webpki.crypto.CertificateFilter;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 
@@ -71,7 +66,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
             this.post_operation = post_operation;
           }
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -91,12 +86,12 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
             return post_operation;
           }
         
-        public String getClientSessionID ()
+        public String getClientSessionId ()
           {
             return client_session_id;
           }
         
-        public String getServerSessionID ()
+        public String getServerSessionId ()
           {
             return server_session_id;
           }
@@ -115,7 +110,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         
         byte[] mac;
         
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -132,7 +127,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         Extension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             type = rd.getString (TYPE_JSON);
-            mac = KeyGen2Validator.getMAC (rd);
+            mac = KeyGen2Validator.getMac (rd);
             cpk.extensions.add (this);
           }
       }
@@ -311,8 +306,8 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         IssuedCredential (JSONObjectReader rd) throws IOException
           {
             id = rd.getString (ID_JSON);
-            certificate_path = rd.getX509CertificatePath ();            
-            mac = KeyGen2Validator.getMAC (rd);
+            certificate_path = rd.getCertificatePath ();            
+            mac = KeyGen2Validator.getMac (rd);
 
             trust_anchor = rd.getBooleanConditional (TRUST_ANCHOR_JSON);
             if (trust_anchor)
@@ -327,13 +322,13 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
               {
                 JSONObjectReader import_key = rd.getObject(IMPORT_SYMMETRIC_KEY_JSON);
                 encrypted_symmetric_key = import_key.getBinary (ENCRYPTED_KEY_JSON);
-                symmetric_key_mac = KeyGen2Validator.getMAC (import_key);
+                symmetric_key_mac = KeyGen2Validator.getMac (import_key);
               }
             else if (rd.hasProperty (IMPORT_PRIVATE_KEY_JSON))
               {
                 JSONObjectReader import_key = rd.getObject(IMPORT_PRIVATE_KEY_JSON);
                 encrypted_private_key = import_key.getBinary (ENCRYPTED_KEY_JSON);
-                private_key_mac = KeyGen2Validator.getMAC (import_key);
+                private_key_mac = KeyGen2Validator.getMac (import_key);
               }
 
             for (JSONObjectReader extension : getObjectArrayConditional (rd, EXTENSIONS_JSON))
@@ -373,7 +368,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getEncryptedSymmetricKey ()
+        public byte[] getOptionalSymmetricKey ()
           {
             return encrypted_symmetric_key;
           }
@@ -385,7 +380,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           }
 
 
-        public byte[] getEncryptedPrivateKey ()
+        public byte[] getOptionalPrivateKey ()
           {
             return encrypted_private_key;
           }
@@ -397,12 +392,12 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           }
 
 
-        public String getID ()
+        public String getId ()
           {
             return id;
           }
 
-        public byte[] getMAC ()
+        public byte[] getMac ()
           {
             return mac;
           }
@@ -431,7 +426,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                                   KeyGen2Validator.getID (rd, SERVER_SESSION_ID_JSON),
                                   rd.getBinary (CertificateFilter.CF_FINGER_PRINT),
                                   rd.getBinary (AUTHORIZATION_JSON),
-                                  KeyGen2Validator.getMAC (rd),
+                                  KeyGen2Validator.getMac (rd),
                                   post_op);
       }
 
@@ -449,22 +444,22 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
     private byte[] close_session_mac;
     
-    private byte[] close_session_challenge;
+    private byte[] close_session_nonce;
 
 
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
 
 
-    public String getClientSessionID ()
+    public String getClientSessionId ()
       {
         return client_session_id;
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -488,15 +483,15 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       }
 
 
-    public byte[] getCloseSessionMAC ()
+    public byte[] getCloseSessionMac ()
       {
         return close_session_mac;
       }
 
     
-    public byte[] getCloseSessionChallenge ()
+    public byte[] getCloseSessionNonce ()
       {
-        return close_session_challenge;
+        return close_session_nonce;
       }
 
 
@@ -512,9 +507,9 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        close_session_challenge = rd.getBinary (CHALLENGE_JSON);
+        close_session_nonce = rd.getBinary (NONCE_JSON);
 
-        close_session_mac = KeyGen2Validator.getMAC (rd);
+        close_session_mac = KeyGen2Validator.getMac (rd);
         
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]
@@ -544,6 +539,6 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_FINALIZATION_REQUEST_JSON;
+        return KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName ();
       }
   }

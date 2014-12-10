@@ -17,18 +17,14 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.Date;
 import java.util.Vector;
-
 import java.security.PublicKey;
-
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
-
 import org.webpki.util.ISODateTime;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -76,7 +72,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
 
     String session_key_algorithm;
     
-    public String getServerSessionID ()
+    public String getServerSessionId ()
       {
         return server_session_id;
       }
@@ -88,7 +84,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
       }
 
 
-    public String getSubmitURL ()
+    public String getSubmitUrl ()
       {
         return submit_url;
       }
@@ -229,7 +225,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return PROVISIONING_INITIALIZATION_REQUEST_JSON;
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName ();
       }
   }
 
