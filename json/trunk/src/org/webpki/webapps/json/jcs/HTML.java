@@ -417,8 +417,8 @@ public class HTML
                "<tr><td align=\"left\">Paste an unsigned JSON object in the text box or try with the default:</td></tr>" +
                "<tr><td align=\"left\">" + fancyText (10,
                          "{\n" + "" +
-                         "  &quot;Statement&quot;: &quot;Hello signed world!&quot;,\n" +
-                         "  &quot;OtherProperties&quot;: [2000, true]\n" +
+                         "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n" +
+                         "  &quot;otherProperties&quot;: [2000, true]\n" +
                          "}") +
                      "</td></tr>" +
                "<tr><td align=\"center\"><table>" +
