@@ -125,11 +125,11 @@ public class ReadSignature
   
                           case SYMMETRIC_KEY:
                             signature.verify (new JSONSymKeyVerifier (new GenerateSignature.SymmetricOperations ()));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (GenerateSignature.SYMMETRIC_KEY));
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyId () + "\nValue=" + DebugFormatter.getHexString (GenerateSignature.SYMMETRIC_KEY));
                             break;
   
                           default:
-                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (signature.getX509CertificatePath ()[0]).toString ());
+                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (signature.getCertificatePath ()[0]).toString ());
                             break;
                         }
                     }

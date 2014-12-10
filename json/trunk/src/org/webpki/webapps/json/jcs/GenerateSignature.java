@@ -80,11 +80,11 @@ public class GenerateSignature
         @Override
         public byte[] signData (byte[] data) throws IOException
           {
-            return getMACAlgorithm ().digest (SYMMETRIC_KEY, data);
+            return getMacAlgorithm ().digest (SYMMETRIC_KEY, data);
           }
   
         @Override
-        public MACAlgorithms getMACAlgorithm () throws IOException
+        public MACAlgorithms getMacAlgorithm () throws IOException
           {
             return MACAlgorithms.HMAC_SHA256;
           }
@@ -94,7 +94,7 @@ public class GenerateSignature
           {
             if (key_id.equals (KEY_NAME))
               {
-                return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYMMETRIC_KEY, data));
+                return ArrayUtil.compare (digest, getMacAlgorithm ().digest (SYMMETRIC_KEY, data));
               }
             throw new IOException ("Unknown key id: " + key_id);
           }
@@ -109,7 +109,7 @@ public class GenerateSignature
           }
         else if (action == ACTION.SYM)
           {
-            wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyID (KEY_NAME));
+            wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyId (KEY_NAME));
           }
         else
           {

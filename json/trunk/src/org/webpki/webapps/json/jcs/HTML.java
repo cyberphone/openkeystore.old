@@ -38,8 +38,8 @@ public class HTML
     static final String TEXT_BOX   = "background:#FFFFD0;width:805pt;";
     
     static final String SAMPLE_DATA = "{\n" + 
-                                      "  &quot;Statement&quot;: &quot;Hello signed world!&quot;,\n" +
-                                      "  &quot;OtherProperties&quot;: [2000, true]\n" +
+                                      "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n" +
+                                      "  &quot;otherProperties&quot;: [2000, true]\n" +
                                       "}";
     
     static final String HTML_INIT = 
