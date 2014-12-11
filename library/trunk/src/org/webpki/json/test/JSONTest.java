@@ -21,23 +21,24 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.KeyStore;
 import java.security.PublicKey;
-
+import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
-
 import java.util.Date;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
-
+import org.webpki.crypto.KeyStoreReader;
+import org.webpki.crypto.KeyStoreSigner;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -49,7 +50,7 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONTypes;
-
+import org.webpki.json.JSONX509Verifier;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -859,5 +860,143 @@ public class JSONTest
         ow = new JSONObjectWriter ();
         ow.setString ("Yes", "No");
         assertTrue ("Reader added", ArrayUtil.compare (json, ow.setObject ("Yay", or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
+      }
+
+    enum BAD_SIGNATURE 
+    {
+      JustFine  (null),
+      NoSignature ("Property \"value\" is missing"),
+      ECAlg (""),
+      IncorrectNormalization (""),
+      ExtraData ("Property \"WTF\" was never read"),
+      ExtensionTest1 ("You must enable \"extensions\" to accept such"),
+      ExtensionTest2 (null),
+      PathOrder (""),
+      Verify ("Unknown CA"),
+      Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
+      Certificate2 (null),
+      MissingKey ("Missing key information");
+      
+      String error;
+      
+      BAD_SIGNATURE (String error)
+        {
+          this.error = error;
+        }
+    };
+    
+    @Test(expected = Exception.class)
+    public void KeyErrors () throws Exception
+      {
+        badSignature (BAD_SIGNATURE.ECAlg);
+        badSignature (BAD_SIGNATURE.IncorrectNormalization);
+     }
+
+    @Test
+    public void Signatures () throws Exception
+      {
+        badSignature (BAD_SIGNATURE.PathOrder);
+        badSignature (BAD_SIGNATURE.JustFine);
+        badSignature (BAD_SIGNATURE.NoSignature);
+        badSignature (BAD_SIGNATURE.ExtraData);
+        badSignature (BAD_SIGNATURE.ExtensionTest1);
+        badSignature (BAD_SIGNATURE.ExtensionTest2);
+        badSignature (BAD_SIGNATURE.Verify);
+        badSignature (BAD_SIGNATURE.Certificate1);
+        badSignature (BAD_SIGNATURE.Certificate2);
+        badSignature (BAD_SIGNATURE.MissingKey);
+      }
+
+    private void badSignature (BAD_SIGNATURE test) throws Exception
+      {
+        KeyStore ks = KeyStoreReader.loadKeyStore (JSONTest.class.getResourceAsStream ("demomerchant-eecert.p12"), "foo123");
+        KeyStoreSigner signer = new KeyStoreSigner (ks, null);
+        signer.setExtendedCertPath (true);
+        signer.setKey ("mykey", "foo123");
+
+        ks = KeyStore.getInstance ("JKS");
+        ks.load (null, null);
+        ks.setCertificateEntry ("mykey",
+                                CertificateUtil.getCertificateFromBlob (
+                                    ArrayUtil.getByteArrayFromInputStream ( 
+                                        JSONTest.class.getResourceAsStream ("merchant-network-rootca.cer"))));
+        KeyStoreVerifier verifier = new KeyStoreVerifier (ks);
+
+        
+        AsymSignatureAlgorithms signAlg = (test == BAD_SIGNATURE.ECAlg ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
+        JSONObjectWriter ow = new JSONObjectWriter ();
+        ow.setString ("some", "value");
+        JSONObjectWriter signature = ow.setObject (JSONSignatureDecoder.SIGNATURE_JSON);
+        signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getURI ());
+        if (test == BAD_SIGNATURE.ExtensionTest1 || test == BAD_SIGNATURE.ExtensionTest2)
+          {
+            JSONArrayWriter aw = signature.setArray (JSONSignatureDecoder.EXTENSIONS_JSON);
+            aw.setObject ().setString (JSONSignatureDecoder.TYPE_JSON, "http://example.com/gg").setInt ("Some", -4);
+          }
+        if (test == BAD_SIGNATURE.Certificate1 || test == BAD_SIGNATURE.Certificate2)
+          {
+            JSONObjectWriter cert = signature.setObject (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON);
+            X509Certificate ee = signer.getCertificatePath ()[0];
+            cert.setBigInteger (JSONSignatureDecoder.SERIAL_NUMBER_JSON, test == BAD_SIGNATURE.Certificate2 ? ee.getSerialNumber () : BigInteger.valueOf (56));
+            cert.setString (JSONSignatureDecoder.SUBJECT_JSON, ee.getSubjectX500Principal ().getName ());
+            cert.setString (JSONSignatureDecoder.ISSUER_JSON, ee.getIssuerX500Principal ().getName ());
+          }
+        if (test == BAD_SIGNATURE.ExtraData)
+          {
+            signature.setInt ("WTF", 666);
+          }
+        if (test != BAD_SIGNATURE.MissingKey)
+          {
+            JSONArrayWriter aw = signature.setArray (JSONSignatureDecoder.CERTIFICATE_PATH_JSON);
+            if (test == BAD_SIGNATURE.PathOrder)
+              {
+                int q = signer.getCertificatePath ().length;
+                while (q-- > 0)
+                  {
+                    aw.setBinary (signer.getCertificatePath ()[q].getEncoded ());
+                  }
+              }
+            else for (X509Certificate cert : signer.getCertificatePath ())
+              {
+                aw.setBinary (cert.getEncoded ());
+                if (test == BAD_SIGNATURE.Verify)
+                  {
+                    break;
+                  }
+              }
+          }
+        byte[] normalized = ow.serializeJSONObject (test == BAD_SIGNATURE.IncorrectNormalization ? 
+                                                                  JSONOutputFormats.PRETTY_PRINT : JSONOutputFormats.NORMALIZED);
+        byte[] value = signer.signData (normalized, signAlg);
+        if (test != BAD_SIGNATURE.NoSignature)
+          {
+            signature.setBinary (JSONSignatureDecoder.VALUE_JSON, value);
+          }
+        byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
+  //      if (test == BAD_SIGNATURE.PathOrder) System.out.println (new String(json, "UTF-8"));
+        try
+          {
+            JSONSignatureDecoder dec = JSONParser.parse (json).getSignature (test == BAD_SIGNATURE.ExtensionTest2);
+            if (test == BAD_SIGNATURE.ExtensionTest2)
+              {
+                JSONObjectReader[] exts = dec.getExtensions ();
+                assertTrue ("Ext", exts.length == 1);
+                assertTrue ("type", exts[0].getString (JSONSignatureDecoder.TYPE_JSON).equals ("http://example.com/gg"));
+                assertTrue ("val", exts[0].getInt ("Some") == -4);
+              }
+            else
+              {
+                assertTrue ("Noext", dec.getExtensions () == null);
+              }
+            dec.verify (new JSONX509Verifier (verifier));
+            assertTrue ("OK", test.error == null);
+          }
+        catch (Exception e)
+          {
+            if (test.error.length () > 0)
+              {
+                checkException (e, test.error);
+              }
+          }
       }
   }
