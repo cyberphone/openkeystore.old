@@ -23,7 +23,8 @@ import java.util.Vector;
 
 /**
  * Local support class for holding JSON objects.
- * Note that outer-level arrays are (&quot;hackishly&quot;) represented as a JSON object having a single <code>null</code> property.
+ * Note that outer-level arrays are (&quot;hackishly&quot;) represented as a 
+ * JSON object having a single <code>null</code> property.
  */
 class JSONObject implements Serializable
   {
@@ -52,6 +53,10 @@ class JSONObject implements Serializable
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
+            if (value == null) // See JSONSignatureDecoder...
+              {
+                continue;
+              }
             if (!value.read_flag)
               {
                 throw new IOException ("Property \"" + name + "\" was never read");

@@ -367,9 +367,9 @@ import org.webpki.json.JSONSignatureDecoder;
         return algorithm.getURI ();
       }
  
-    public JSONObjectWriter setJOSEAlgorithmPreference (boolean flag)
+    public JSONObjectWriter setJOSEAlgorithmPreference (boolean on)
       {
-        jose_algorithm_preference = flag;
+        jose_algorithm_preference = on;
         return this;
       }
 
@@ -481,8 +481,7 @@ import org.webpki.json.JSONSignatureDecoder;
         for (String property : object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
-            // See JSONSignatureDecoder...
-            if (json_value == null)
+            if (json_value == null) // See JSONSignatureDecoder...
               {
                 continue;
               }

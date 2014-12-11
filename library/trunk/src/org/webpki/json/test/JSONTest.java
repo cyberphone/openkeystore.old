@@ -696,7 +696,7 @@ public class JSONTest
       "    }" +
       "}";
 
-    static final String p521_jcs_xml =
+    static final String p521_jcs_jose =
       "{" +
       "  \"publicKey\": " +
       "     {" +
@@ -742,6 +742,17 @@ public class JSONTest
       "    }" +
       "}";
 
+    static final String p256_jcs_bad =
+        "{" +
+        "  \"publicKey\":" + 
+        "    {" +
+        "      \"type\": \"EC\"," + 
+        "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
+        "      \"x\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
+        "      \"y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"," +
+        "      \"alien\": \"data\"" +
+        "    }" +
+        "}";
 
     static final String p256_spki = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2Sx" +
                                     "HkDiOWKzGmrFLHoAASZl-Avkd69Lrt6N-b_gdywHzzdNRpxyw";
@@ -813,8 +824,18 @@ public class JSONTest
       {
         serializeKey (p256_spki, p256_jcs);
         serializeKey (p521_spki, p521_jcs);
-        serializeKey (p521_spki, p521_jcs_xml);
+        serializeKey (p521_spki, p521_jcs_jose);
         serializeKey (rsa_spki, rsa_jcs);
+        JSONObjectReader or = JSONParser.parse (p256_jcs_bad);
+        try
+          {
+            or.getPublicKey ();
+            fail ("shouldn't accept");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Property \"alien\" was never read");
+          }
       }
 
     @Test

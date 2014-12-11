@@ -154,7 +154,16 @@ public class JSONSignatureDecoder implements Serializable
             default:
               algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
-        signature.checkForUnread ();
+        if (extensions != null)
+          {
+            save = signature.root.properties.get (EXTENSIONS_JSON);       // Save property
+            signature.root.properties.put (EXTENSIONS_JSON, null);        // Hide property for the check method..
+          }
+        signature.checkForUnread ();                                      // Check for unread data - extensions
+        if (extensions != null)
+          {
+            signature.root.properties.put (EXTENSIONS_JSON, save);        // Restore property
+          }
       }
 
     void getKeyInfo (JSONObjectReader rd) throws IOException

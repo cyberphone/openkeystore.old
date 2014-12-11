@@ -3549,4 +3549,31 @@ public class SKSTest
             ProvSess.override_key_entry_algorithm = null;
           }
       }
+
+    @Test
+    public void test82 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey ec = sess.createKey ("Key.1",
+                                    KeyAlgorithms.NIST_P_256,
+                                    null /* pin_value */,
+                                    null,
+                                    AppUsage.AUTHENTICATION).setCertificate (cn ());
+        GenKey rsa = sess.createKey ("Key.2",
+                                     KeyAlgorithms.RSA2048,
+                                     null /* pin_value */,
+                                     null,
+                                     AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        
+        for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
+          {
+            GenKey tk = alg.isRSA () ? rsa : ec;
+            byte[] result = tk.signData (alg, null, TEST_STRING);
+            Signature verify = Signature.getInstance (alg.getJCEName ());
+            verify.initVerify (tk.getPublicKey ());
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature " + alg.getURI (), verify.verify (result));
+          }
+      }
   }

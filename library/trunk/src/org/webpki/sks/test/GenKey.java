@@ -248,7 +248,7 @@ public class GenKey
                                              alg_id.getURI (),
                                              null,
                                              getConditionalAuthorization (pin),
-                                             alg_id.getDigestAlgorithm ().digest (data));
+                                             alg_id.getDigestAlgorithm () == null ? data : alg_id.getDigestAlgorithm ().digest (data));
       }
 
     public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws SKSException
