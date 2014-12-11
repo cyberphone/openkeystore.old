@@ -110,7 +110,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, boolean permitExtensions) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -122,23 +122,25 @@ public class JSONSignatureDecoder implements Serializable
         getKeyInfo (signature);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
+            if (!permitExtensions)
+              {
+                throw new IOException ("You must enable \"" + EXTENSIONS_JSON + "\" to accept such");
+              }
             extensions = new Vector<JSONObjectReader> ();
             JSONArrayReader ar = signature.getArray (EXTENSIONS_JSON);
             do
               {
                 extensions.add (ar.getObject ());
-                if (!extensions.lastElement ().hasProperty (TYPE_JSON))
-                  {
-                    throw new IOException ("An \"" + EXTENSIONS_JSON + "\" object lack a \"" + TYPE_JSON + "\" property");
-                  }
+                // Minimal syntax check
+                extensions.lastElement ().getString (TYPE_JSON);
               }
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (VALUE_JSON);
-        JSONValue save = signature.root.properties.get (VALUE_JSON);
-        signature.root.properties.remove (VALUE_JSON);
-        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);
-        signature.root.properties.put (VALUE_JSON, save);
+        JSONValue save = signature.root.properties.get (VALUE_JSON);       // Save property
+        signature.root.properties.put (VALUE_JSON, null);                  // Hide property for the serializer..
+        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // Serialize
+        signature.root.properties.put (VALUE_JSON, save);                  // Restore property
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:

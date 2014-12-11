@@ -481,6 +481,11 @@ import org.webpki.json.JSONSignatureDecoder;
         for (String property : object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
+            // See JSONSignatureDecoder...
+            if (json_value == null)
+              {
+                continue;
+              }
             if (next)
               {
                 buffer.append (',');

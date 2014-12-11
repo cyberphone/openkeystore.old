@@ -258,9 +258,14 @@ public class JSONObjectReader implements Serializable
      */
     public JSONSignatureDecoder getSignature () throws IOException
       {
-        return new JSONSignatureDecoder (this);
+        return getSignature (false);
       }
     
+    public JSONSignatureDecoder getSignature (boolean permitExtensions) throws IOException
+      {
+        return new JSONSignatureDecoder (this, permitExtensions);
+      }
+
     public PublicKey getPublicKey () throws IOException
       {
         return JSONSignatureDecoder.getPublicKey (this);
