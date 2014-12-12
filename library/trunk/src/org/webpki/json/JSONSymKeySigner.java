@@ -33,14 +33,6 @@ public class JSONSymKeySigner extends JSONSigner
 
     SymKeySignerInterface signer;
     
-    String key_id = "symmetric-key";
-
-    public JSONSymKeySigner setKeyId (String key_id)
-      {
-        this.key_id = key_id;
-        return this;
-      }
-
     public JSONSymKeySigner (SymKeySignerInterface signer) throws IOException
       {
         this.signer = signer;
@@ -62,6 +54,5 @@ public class JSONSymKeySigner extends JSONSigner
     @Override
     void writeKeyInfoData (JSONObjectWriter wr) throws IOException
       {
-        wr.setString (JSONSignatureDecoder.KEY_ID_JSON, key_id);
       }
   }

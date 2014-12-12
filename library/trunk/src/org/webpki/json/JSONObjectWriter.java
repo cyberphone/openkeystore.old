@@ -344,6 +344,10 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
         signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, getAlgorithmID (signer.getAlgorithm ()));
+        if (signer.keyId != null)
+          {
+            signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+          }
         signer.writeKeyInfoData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
         if (signer.extensions != null)
           {

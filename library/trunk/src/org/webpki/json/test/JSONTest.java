@@ -871,10 +871,12 @@ public class JSONTest
       ExtraData ("Property \"WTF\" was never read"),
       ExtensionTest1 ("You must enable \"extensions\" to accept such"),
       ExtensionTest2 (null),
+      KeyId (null),
       PathOrder (""),
       Verify ("Unknown CA"),
       Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
       Certificate2 (null),
+      DataAtEnd (null),
       MissingKey ("Missing key information");
       
       String error;
@@ -904,6 +906,8 @@ public class JSONTest
         badSignature (BAD_SIGNATURE.Verify);
         badSignature (BAD_SIGNATURE.Certificate1);
         badSignature (BAD_SIGNATURE.Certificate2);
+        badSignature (BAD_SIGNATURE.KeyId);
+        badSignature (BAD_SIGNATURE.DataAtEnd);
         badSignature (BAD_SIGNATURE.MissingKey);
       }
 
@@ -922,11 +926,14 @@ public class JSONTest
                                         JSONTest.class.getResourceAsStream ("merchant-network-rootca.cer"))));
         KeyStoreVerifier verifier = new KeyStoreVerifier (ks);
 
-        
         AsymSignatureAlgorithms signAlg = (test == BAD_SIGNATURE.ECAlg ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
         JSONObjectWriter ow = new JSONObjectWriter ();
         ow.setString ("some", "value");
         JSONObjectWriter signature = ow.setObject (JSONSignatureDecoder.SIGNATURE_JSON);
+        if (test == BAD_SIGNATURE.KeyId)
+          {
+            signature.setString (JSONSignatureDecoder.KEY_ID_JSON, "MyKey");
+          }
         signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getURI ());
         if (test == BAD_SIGNATURE.ExtensionTest1 || test == BAD_SIGNATURE.ExtensionTest2)
           {
@@ -965,6 +972,10 @@ public class JSONTest
                   }
               }
           }
+        if (test == BAD_SIGNATURE.DataAtEnd)
+          {
+            ow.setString ("End-is-near..", "Indeed!");
+          }
         byte[] normalized = ow.serializeJSONObject (test == BAD_SIGNATURE.IncorrectNormalization ? 
                                                                   JSONOutputFormats.PRETTY_PRINT : JSONOutputFormats.NORMALIZED);
         byte[] value = signer.signData (normalized, signAlg);
@@ -973,10 +984,15 @@ public class JSONTest
             signature.setBinary (JSONSignatureDecoder.VALUE_JSON, value);
           }
         byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
-  //      if (test == BAD_SIGNATURE.PathOrder) System.out.println (new String(json, "UTF-8"));
+//        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
         try
           {
             JSONSignatureDecoder dec = JSONParser.parse (json).getSignature (test == BAD_SIGNATURE.ExtensionTest2);
+            assertTrue ("KID1", dec.getKeyId () == null ^ test == BAD_SIGNATURE.KeyId);
+            if (test == BAD_SIGNATURE.KeyId)
+              {
+                assertTrue ("KID2", dec.getKeyId ().equals ("MyKey"));
+              }
             if (test == BAD_SIGNATURE.ExtensionTest2)
               {
                 JSONObjectReader[] exts = dec.getExtensions ();

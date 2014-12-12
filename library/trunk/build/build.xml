@@ -399,7 +399,7 @@
   	<property name="sks.standalone" value="true"/>
     <mkdir dir="${test_dir}"/>
 	<property name="test.dir" location="${test_dir}"/>
-    <junit fork="yes" forkmode="once" haltonfailure="yes" tempdir="${test_dir}">
+    <junit fork="no" haltonfailure="yes" tempdir="${test_dir}">
       <test name="${test.class}" unless="method"/>
       <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>

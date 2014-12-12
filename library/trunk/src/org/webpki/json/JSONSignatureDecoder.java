@@ -168,6 +168,7 @@ public class JSONSignatureDecoder implements Serializable
 
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
+        key_id = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
           {
             readX509CertificateEntry (rd);
@@ -176,17 +177,20 @@ public class JSONSignatureDecoder implements Serializable
           {
             public_key = getPublicKey (rd);
           }
-        else if (rd.hasProperty (KEY_ID_JSON))
-          {
-            key_id = rd.getString (KEY_ID_JSON);
-          }
         else if (rd.hasProperty (URL_JSON))
           {
             throw new IOException ("\"" + URL_JSON + "\" not yet implemented");
           }
         else
           {
-            throw new IOException ("Missing key information");
+            // Should be a symmetric key then.  Just to be nice we perform a sanity check...
+            for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
+              {
+                if (algorithm_string.equals (alg.getJOSEName ()) || algorithm_string.equals (alg.getURI ()))
+                  {
+                    throw new IOException ("Missing key information");
+                  }
+              }
           }
       }
 
@@ -353,9 +357,8 @@ public class JSONSignatureDecoder implements Serializable
         return public_key;
       }
 
-    public String getKeyId () throws IOException
+    public String getKeyId ()
       {
-        checkRequest (JSONSignatureTypes.SYMMETRIC_KEY);
         return key_id;
       }
 
