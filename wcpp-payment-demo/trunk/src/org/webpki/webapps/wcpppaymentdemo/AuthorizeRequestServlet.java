@@ -86,6 +86,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
             KeyStoreSigner signer = new KeyStoreSigner (PaymentDemoService.merchant_eecert_key, null);
             signer.setExtendedCertPath (true);
             signer.setKey (null, PaymentDemoService.key_password);
+            transact.setJOSEAlgorithmPreference (true);
             transact.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
             HTTPSWrapper https_wrapper = new HTTPSWrapper ();
             https_wrapper.setRequireSuccess (true);
