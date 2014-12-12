@@ -857,6 +857,10 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
 {
     this.signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
     this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    if (signer.getKeyId ())
+    {
+        this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyId ());
+    }
     switch (signer.getSignatureType ())
     {
         case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
@@ -864,8 +868,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
              break;
 
         case org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY:
-            this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyId ());
-            break;
+             break;
 
         case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
             var certificate_path = signer.getCertificatePath ();
@@ -1764,10 +1767,8 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
         do
         {
             var ext_obj = ext_arr_reader.getObject ();
-            if (!ext_obj.hasProperty (org.webpki.json.JSONSignatureDecoder.TYPE_JSON))
-            {
-                org.webpki.util._error ("An \"" + org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON + "\" object lack a \"" + org.webpki.json.JSONSignatureDecoder.TYPE_JSON + "\" property");
-            }
+            // Minimal syntax check
+            ext_obj.getString (org.webpki.json.JSONSignatureDecoder.TYPE_JSON);
             this._extensions.push (ext_obj);
         }
         while (ext_arr_reader.hasMore ());
@@ -1784,8 +1785,20 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
     }
     signature.root.property_list = new_list;
     this._normalized_data = org.webpki.json.JSONObjectWriter._getNormalizedSubset (rd.root);
-    signature.root.property_list = save;
+    if (this._extensions)
+    {
+        var new_list2 = [];
+        for (var i = 0; i < new_list.length; i++)
+        {
+            if (new_list[i].name != org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON)
+            {
+                new_list2.push (new_list[i]);
+            }
+        }
+        signature.root.property_list = new_list2;
+    }
     signature.checkForUnread ();
+    signature.root.property_list = save;
 };
 
 org.webpki.json.JSONSignatureDecoder.RSA_PUBLIC_KEY             = "RSA";
@@ -1835,6 +1848,7 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "y";
 
 /* void */org.webpki.json.JSONSignatureDecoder.prototype._getKeyInfo = function (/* JSONObjectReader */rd)
 {
+    this._key_id = rd.getStringConditional (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON);
     if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.CERTIFICATE_PATH_JSON))
     {
         this._readX509CertificateEntry (rd);
@@ -1843,17 +1857,9 @@ org.webpki.json.JSONSignatureDecoder.Y_JSON                     = "y";
     {
         this._public_key = org.webpki.json.JSONSignatureDecoder._getPublicKey (rd);
     }
-    else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON))
-    {
-        this._key_id = rd.getString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON);
-    }
     else if (rd.hasProperty (org.webpki.json.JSONSignatureDecoder.URL_JSON))
     {
         org.webpki.util._error ("\"" + org.webpki.json.JSONSignatureDecoder.URL_JSON + "\" not yet implemented");
-    }
-    else
-    {
-        org.webpki.util._error ("Undecodable \"" + org.webpki.json.JSONSignatureDecoder.KEY_INFO_JSON + "\" object");
     }
 };
 
@@ -1951,7 +1957,6 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
 
 /* public String */org.webpki.json.JSONSignatureDecoder.prototype.getKeyId = function ()
 {
-    this._checkRequest (org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY);
     return this._key_id;
 };
 

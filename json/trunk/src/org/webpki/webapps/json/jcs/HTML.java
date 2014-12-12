@@ -318,11 +318,16 @@ public class HTML
 
               "/* String */ JCSSigner.prototype.getAlgorithm = function () {\n" +
               "    // Every crypto-system with some self-estem defines their own algorithm IDs, right?\n" +
-              "    return 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';\n" +
+              "    // But in the demo we used JOSE since JCS has been upgraded to support this as well...\n" +
+              "    return 'RS256';\n" +
               "};\n\n" +
 
               "/* JSONSignatureTypes */JCSSigner.prototype.getSignatureType = function () {\n" +
               "    return org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY;\n" +
+              "};\n\n" +
+
+              "/* String */JCSSigner.prototype.getKeyId = function () {\n" +
+              "    return null;\n" +
               "};\n\n" +
 
               "/* Uint8Array */ JCSSigner.prototype.getPublicKey = function () {\n" +
