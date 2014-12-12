@@ -245,6 +245,6 @@ public class AuthenticationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_REQUEST_JSON;
+        return AUTHENTICATION_REQUEST_MSG;
       }
   }
