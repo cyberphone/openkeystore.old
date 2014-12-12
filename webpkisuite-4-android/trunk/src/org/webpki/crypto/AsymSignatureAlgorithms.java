@@ -30,25 +30,22 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
                   "1.2.840.113549.1.1.11", "SHA256withRSA",   HashAlgorithms.SHA256, true,  true),
         
     RSA_SHA384   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",    "RS384",     
-                  "1.2.840.113549.1.1.12", "SHA384withRSA",   HashAlgorithms.SHA384, false, true),
+                  "1.2.840.113549.1.1.12", "SHA384withRSA",   HashAlgorithms.SHA384, true,  true),
         
     RSA_SHA512   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",    "RS512",   
-                  "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, false, true),
+                  "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, true,  true),
         
     ECDSA_NONE   ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",     null,
                   null,                    "NONEwithECDSA",   null,                  true,  false),
-        
-    ECDSA_SHA1   ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",    null,  
-                  "1.2.840.10045.1",       "SHA1withECDSA",   HashAlgorithms.SHA1,   true,  false),
         
     ECDSA_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",  "ES256",  
                   "1.2.840.10045.4.3.2",   "SHA256withECDSA", HashAlgorithms.SHA256, true,  false),
         
     ECDSA_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",  "ES384",   
-                  "1.2.840.10045.4.3.3",   "SHA384withECDSA", HashAlgorithms.SHA384, false, false),
+                  "1.2.840.10045.4.3.3",   "SHA384withECDSA", HashAlgorithms.SHA384, true,  false),
         
     ECDSA_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",  "ES512",   
-                  "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, false, false);
+                  "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, true,  false);
 
     private final String sks_id;    // As (typically) expressed in protocols
     private final String josename;  // Alternative JOSE name

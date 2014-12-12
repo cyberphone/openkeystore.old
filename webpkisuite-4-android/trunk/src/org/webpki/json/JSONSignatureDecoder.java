@@ -110,7 +110,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, boolean permitExtensions) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -122,23 +122,25 @@ public class JSONSignatureDecoder implements Serializable
         getKeyInfo (signature);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
+            if (!permitExtensions)
+              {
+                throw new IOException ("You must enable \"" + EXTENSIONS_JSON + "\" to accept such");
+              }
             extensions = new Vector<JSONObjectReader> ();
             JSONArrayReader ar = signature.getArray (EXTENSIONS_JSON);
             do
               {
                 extensions.add (ar.getObject ());
-                if (!extensions.lastElement ().hasProperty (TYPE_JSON))
-                  {
-                    throw new IOException ("An \"" + EXTENSIONS_JSON + "\" object lack a \"" + TYPE_JSON + "\" property");
-                  }
+                // Minimal syntax check
+                extensions.lastElement ().getString (TYPE_JSON);
               }
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (VALUE_JSON);
-        JSONValue save = signature.root.properties.get (VALUE_JSON);
-        signature.root.properties.remove (VALUE_JSON);
-        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);
-        signature.root.properties.put (VALUE_JSON, save);
+        JSONValue save = signature.root.properties.get (VALUE_JSON);       // Save property
+        signature.root.properties.put (VALUE_JSON, null);                  // Hide property for the serializer..
+        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // Serialize
+        signature.root.properties.put (VALUE_JSON, save);                  // Restore property
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -152,11 +154,21 @@ public class JSONSignatureDecoder implements Serializable
             default:
               algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
-        signature.checkForUnread ();
+        if (extensions != null)
+          {
+            save = signature.root.properties.get (EXTENSIONS_JSON);       // Save property
+            signature.root.properties.put (EXTENSIONS_JSON, null);        // Hide property for the check method..
+          }
+        signature.checkForUnread ();                                      // Check for unread data - extensions
+        if (extensions != null)
+          {
+            signature.root.properties.put (EXTENSIONS_JSON, save);        // Restore property
+          }
       }
 
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
+        key_id = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
           {
             readX509CertificateEntry (rd);
@@ -165,17 +177,20 @@ public class JSONSignatureDecoder implements Serializable
           {
             public_key = getPublicKey (rd);
           }
-        else if (rd.hasProperty (KEY_ID_JSON))
-          {
-            key_id = rd.getString (KEY_ID_JSON);
-          }
         else if (rd.hasProperty (URL_JSON))
           {
             throw new IOException ("\"" + URL_JSON + "\" not yet implemented");
           }
         else
           {
-            throw new IOException ("Missing key information");
+            // Should be a symmetric key then.  Just to be nice we perform a sanity check...
+            for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
+              {
+                if (algorithm_string.equals (alg.getJOSEName ()) || algorithm_string.equals (alg.getURI ()))
+                  {
+                    throw new IOException ("Missing key information");
+                  }
+              }
           }
       }
 
@@ -342,9 +357,8 @@ public class JSONSignatureDecoder implements Serializable
         return public_key;
       }
 
-    public String getKeyId () throws IOException
+    public String getKeyId ()
       {
-        checkRequest (JSONSignatureTypes.SYMMETRIC_KEY);
         return key_id;
       }
 

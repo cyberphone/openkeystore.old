@@ -89,7 +89,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     public void setResponseSigner (SymKeySignerInterface signer) throws IOException
       {
         session_signature = new JSONSymKeySigner (signer);
-        session_signature.setKeyId ("derived-session-key");
       }
 
 

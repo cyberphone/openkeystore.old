@@ -21,16 +21,16 @@ public interface WebAuthConstants
   {
     String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20141208";
     
+    String AUTHENTICATION_REQUEST_MSG      = "AuthenticationRequest";
+
+    String AUTHENTICATION_RESPONSE_MS      = "AuthenticationResponse";
+
     int MAX_ID_LENGTH          = 32;
 
 
     // JSON properties
 
     String ABORT_URL_JSON                  = "abortUrl";
-
-    String AUTHENTICATION_REQUEST_JSON     = "authenticationRequest";
-
-    String AUTHENTICATION_RESPONSE_JSON    = "authenticationResponse";
 
     String CERTIFICATE_FILTERS_JSON        = "certificateFilters";
 

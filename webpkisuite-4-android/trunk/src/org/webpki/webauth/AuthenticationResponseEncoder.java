@@ -131,6 +131,6 @@ public class AuthenticationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_RESPONSE_JSON;
+        return AUTHENTICATION_RESPONSE_MS;
       }
   }

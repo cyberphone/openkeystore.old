@@ -203,7 +203,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  384,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
-                 false,
+                 true,
                  "1.3.132.0.34",
                  new byte[]
                     {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
@@ -227,7 +227,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  521,
                  AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
-                 false,
+                 true,
                  "1.3.132.0.35",
                  new byte[]
                     {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,

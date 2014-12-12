@@ -405,5 +405,4 @@ public interface SecureKeyStore
                       byte[] authorization /* Must be null if not applicable */) throws SKSException;
     
     String updateFirmware (byte[] chunk) throws SKSException;
-
   }

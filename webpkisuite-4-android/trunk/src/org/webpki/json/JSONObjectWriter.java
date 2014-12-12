@@ -344,6 +344,10 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
         signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, getAlgorithmID (signer.getAlgorithm ()));
+        if (signer.keyId != null)
+          {
+            signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+          }
         signer.writeKeyInfoData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
         if (signer.extensions != null)
           {
@@ -367,9 +371,9 @@ import org.webpki.json.JSONSignatureDecoder;
         return algorithm.getURI ();
       }
  
-    public JSONObjectWriter setJOSEAlgorithmPreference (boolean flag)
+    public JSONObjectWriter setJOSEAlgorithmPreference (boolean on)
       {
-        jose_algorithm_preference = flag;
+        jose_algorithm_preference = on;
         return this;
       }
 
@@ -481,6 +485,10 @@ import org.webpki.json.JSONSignatureDecoder;
         for (String property : object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
+            if (json_value == null) // See JSONSignatureDecoder...
+              {
+                continue;
+              }
             if (next)
               {
                 buffer.append (',');

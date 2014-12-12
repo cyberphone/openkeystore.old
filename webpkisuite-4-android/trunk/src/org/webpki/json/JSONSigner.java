@@ -30,6 +30,8 @@ public abstract class JSONSigner implements Serializable
     private static final long serialVersionUID = 1L;
     
     JSONObjectWriter[] extensions;
+    
+    String keyId;
 
     JSONSigner () {}
 
@@ -42,6 +44,12 @@ public abstract class JSONSigner implements Serializable
     public JSONSigner setExtensions (JSONObjectWriter[] extensions)
       {
         this.extensions = extensions;
+        return this;
+      }
+
+    public JSONSigner setKeyId (String keyId)
+      {
+        this.keyId = keyId;
         return this;
       }
   }
