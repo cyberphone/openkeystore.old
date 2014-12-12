@@ -40,7 +40,7 @@ var mySigner = function (signature_type, algorithm)
 
 /* String */ mySigner.prototype.getKeyId = function ()
 {
-    return "my.symmetric.key";
+    return this._signature_type == org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY ? "my.symmetric.key" : null;
 };
 
 /* Uint8Array */mySigner.prototype.signData = function (/* Uint8Array */ data)
@@ -134,10 +134,16 @@ function signatureTest (signature_type, algorithm)
             }
         }
     }
+    if (new org.webpki.json.JSONObjectWriter (document_reader).serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT)
+                                             !=
+        result)
+    {
+        throw "Changed input";
+    }
     signer = new mySigner (signature_type, algorithm);
     disable_signdata = true;
     signedDoc = new org.webpki.json.JSONObjectWriter ();
-    signedDoc.setString ("Statement", "Hello async signed world!").setString ("SignatureType", signature_type.toString ());
+    signedDoc.setString ("Statement", "Hello async signed world!").setString ("SignatureType", org.webpki.json.JSONSignatureTypes.getName (signature_type));
     var data_to_sign = signedDoc.beginSignature (signer);
     var signature_value = org.webpki.util.Base64URL.decode ("" + AntCrypto.signData (org.webpki.util.Base64URL.encode (data_to_sign), algorithm));
     signedDoc.endSignature (signature_value);
@@ -162,7 +168,7 @@ signatureTest (org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE,
 signatureTest (org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY,
                "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256");
 
-//no_extensions = false;
+no_extensions = false;
 signatureTest (org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY,
                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
 

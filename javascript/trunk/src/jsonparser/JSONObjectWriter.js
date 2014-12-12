@@ -241,6 +241,10 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
 {
     this.signature_writer = this.setObject (org.webpki.json.JSONSignatureDecoder.SIGNATURE_JSON);
     this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ());
+    if (signer.getKeyId ())
+    {
+        this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyId ());
+    }
     switch (signer.getSignatureType ())
     {
         case org.webpki.json.JSONSignatureTypes.ASYMMETRIC_KEY:
@@ -248,8 +252,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
              break;
 
         case org.webpki.json.JSONSignatureTypes.SYMMETRIC_KEY:
-            this.signature_writer.setString (org.webpki.json.JSONSignatureDecoder.KEY_ID_JSON, signer.getKeyId ());
-            break;
+             break;
 
         case org.webpki.json.JSONSignatureTypes.X509_CERTIFICATE:
             var certificate_path = signer.getCertificatePath ();
