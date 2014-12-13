@@ -72,10 +72,16 @@ public class KeyCreationResponseEncoder extends JSONEncoder
     @Override
     protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
+        //////////////////////////////////////////////////////////////////////////
+        // Session properties
+        //////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
         
         wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
+        //////////////////////////////////////////////////////////////////////////
+        // The generated keys
+        //////////////////////////////////////////////////////////////////////////
         JSONArrayWriter keys = wr.setArray (GENERATED_KEYS_JSON);
         for (GeneratedPublicKey gk : generated_keys)
           {

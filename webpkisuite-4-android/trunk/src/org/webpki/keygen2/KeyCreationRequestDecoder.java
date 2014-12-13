@@ -844,7 +844,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
 
         key_entry_algorithm = getURI (rd, KEY_ENTRY_ALGORITHM_JSON);

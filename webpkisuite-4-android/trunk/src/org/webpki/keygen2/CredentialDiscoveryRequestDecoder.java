@@ -173,7 +173,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 

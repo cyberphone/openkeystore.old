@@ -96,7 +96,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level properties
+        // Session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
 
@@ -105,8 +105,6 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         wr.setString (SERVER_TIME_JSON, server_time_verbatim);
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time, false); // Client keeps local time
-        
-        wr.setBinary (ATTESTATION_JSON, attestation);
         
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
@@ -120,6 +118,11 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
           {
             wr.setObject (DEVICE_ID_JSON).setCertificatePath (device_certificate_path);
           }
+
+        ////////////////////////////////////////////////////////////////////////
+        // "Logical" position for the attestion
+        ////////////////////////////////////////////////////////////////////////
+        wr.setBinary (ATTESTATION_JSON, attestation);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional server certificate fingerprint

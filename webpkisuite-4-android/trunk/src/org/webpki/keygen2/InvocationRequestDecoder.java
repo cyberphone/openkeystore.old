@@ -100,7 +100,7 @@ public class InvocationRequestDecoder extends ClientDecoder
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
         action = Action.getActionFromString (rd.getString (ACTION_JSON));
 
