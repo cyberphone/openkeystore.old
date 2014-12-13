@@ -202,7 +202,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
         try
           {
             //////////////////////////////////////////////////////////////////////////
-            // Set top-level attributes
+            // Session properties
             //////////////////////////////////////////////////////////////////////////
             wr.setString (SERVER_SESSION_ID_JSON, server_state.server_session_id);
             

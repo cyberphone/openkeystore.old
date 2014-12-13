@@ -114,7 +114,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
     protected void readJSONData (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 

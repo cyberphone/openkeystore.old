@@ -191,7 +191,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
     void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level attributes
+        // Core session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
         

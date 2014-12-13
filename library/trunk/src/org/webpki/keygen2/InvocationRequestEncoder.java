@@ -78,7 +78,7 @@ public class InvocationRequestEncoder extends ServerEncoder
     void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level properties
+        // Session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
 

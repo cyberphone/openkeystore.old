@@ -173,7 +173,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // Core session properties
         /////////////////////////////////////////////////////////////////////////////////////////
         session_key_algorithm = rd.getString (SESSION_KEY_ALGORITHM_JSON);
         

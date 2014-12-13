@@ -58,7 +58,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
     protected void readJSONData (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level properties
+        // The core session properties
         /////////////////////////////////////////////////////////////////////////////////////////
         attestation = rd.getBinary (ATTESTATION_JSON);
         

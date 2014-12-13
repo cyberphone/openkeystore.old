@@ -1314,7 +1314,6 @@ public class ServerState implements Serializable
       {
         MacGenerator check = new MacGenerator ();
         check.addArray (saved_close_nonce);
-        check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMacSequenceCounterAndUpdate ()),
                                 close_session_attestation))

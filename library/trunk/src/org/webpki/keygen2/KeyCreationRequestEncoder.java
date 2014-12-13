@@ -84,7 +84,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
     void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level properties
+        // Session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_state.server_session_id);
 

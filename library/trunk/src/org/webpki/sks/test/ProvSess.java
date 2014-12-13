@@ -489,7 +489,6 @@ public class ProvSess
                                                       SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
         check.addArray (nonce);
-        check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult ()), result))
           {
             bad ("Final attestation failed!");

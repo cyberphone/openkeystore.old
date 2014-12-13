@@ -117,6 +117,9 @@ public class InvocationResponseEncoder extends JSONEncoder
     @SuppressWarnings("fallthrough")
     protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
+        ////////////////////////////////////////////////////////////////////////
+        // Session properties
+        ////////////////////////////////////////////////////////////////////////
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
         
         ////////////////////////////////////////////////////////////////////////

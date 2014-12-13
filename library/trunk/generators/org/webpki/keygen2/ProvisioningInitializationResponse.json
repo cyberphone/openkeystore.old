@@ -5,7 +5,6 @@
     "clientSessionId": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
     "serverTime": "2014-12-08T16:33:30Z",
     "clientTime": "2014-12-08T16:33:30Z",
-    "attestation": "KMUpOesC8nDTLpu8PppsSGg1j....WiwvUcVpbNudbY14lLks8RQuwoiU",
     "clientEphemeralKey": 
         {
             "publicKey": 
@@ -23,11 +22,11 @@
                     "MIIC2DCCAcCgAwIBAgIGARTWcc7VMCSq....awCV4OfAGXLIwJBCp85AN7KNdcJfL"
                 ]
         },
+    "attestation": "KMUpOesC8nDTLpu8PppsSGg1j....WiwvUcVpbNudbY14lLks8RQuwoiU",
     "serverCertificateFingerPrint": "HwKCofkqkTFXRmyyb_CnWhAcTbQF7w8rl1OqCwyM4TM",
     "signature": 
         {
             "algorithm": "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
-            "keyId": "derived-session-key",
             "value": "nnzNSZUZw1qlGVydZZ3ssCVIZTznyHwDXlOpLMpI3Lo"
         }
 }
