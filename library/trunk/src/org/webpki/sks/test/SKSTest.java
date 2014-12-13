@@ -118,7 +118,7 @@ public class SKSTest
           }
         device = new Device (sks);
         DeviceInfo dev = device.device_info;
-        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ())
+        reference_implementation = dev.getVendorName ().contains (SKSReferenceImplementation.SKS_VENDOR_NAME)
                                                    ||
                                    new Boolean (System.getProperty ("sks.referenceimplementation"));
         if (reference_implementation)
@@ -259,7 +259,7 @@ public class SKSTest
     void authorizationErrorCheck (SKSException e)
       {
         assertTrue ("Wrong return code", e.getError () == SKSException.ERROR_AUTHORIZATION);
-        checkException (e, "Authorization error for key #");
+        checkException (e, "\"" + SecureKeyStore.VAR_AUTHORIZATION + "\" error for key #");
       }
     
     void sessionNotOpenCheck (SKSException e)
@@ -3532,10 +3532,11 @@ public class SKSTest
     @Test
     public void test81 () throws Exception
       {
+        ProvSess sess = null;
         try
           {
-            ProvSess.override_key_entry_algorithm = "http://somewhere";
-            ProvSess sess = new ProvSess (device);
+            sess = new ProvSess (device);
+            sess.override_key_entry_algorithm = "http://somewhere";
             sess.createKey ("Key.1",
                             KeyAlgorithms.NIST_P_256,
                             null /* pin_value */,
@@ -3545,8 +3546,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Unknown \"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\" : " + ProvSess.override_key_entry_algorithm);
-            ProvSess.override_key_entry_algorithm = null;
+            checkException (e, "Unknown \"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\" : " + sess.override_key_entry_algorithm);
           }
       }
 
@@ -3574,6 +3574,28 @@ public class SKSTest
             verify.initVerify (tk.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature " + alg.getURI (), verify.verify (result));
+          }
+      }
+
+    @Test
+    public void Test83 () throws Exception
+      {
+        boolean dev_pin = device.sks.getDeviceInfo ().getDevicePinSupport ();
+        try
+          {
+            ProvSess sess = new ProvSess (device);
+            sess.device_pin_protected = true;
+            sess.createKey ("Key.1",
+                            KeyAlgorithms.NIST_P_256,
+                            null /* pin_value */,
+                            null,
+                            AppUsage.AUTHENTICATION).setCertificate (cn ());
+             assertTrue ("devPIN", dev_pin);
+             sess.closeSession ();
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Unsupported: \"devicePinProtection\"");
           }
       }
   }

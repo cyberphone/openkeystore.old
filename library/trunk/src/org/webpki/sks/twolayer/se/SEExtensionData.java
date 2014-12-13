@@ -18,7 +18,7 @@ package org.webpki.sks.twolayer.se;
 
 public class SEExtensionData
   {
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
     
-    public byte[] extension_data;
+    public byte[] extensionData;
   }

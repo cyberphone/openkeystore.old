@@ -228,7 +228,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         void authError () throws SKSException
           {
-            abort ("Authorization error for key #" + keyHandle, SKSException.ERROR_AUTHORIZATION);
+            abort ("\"" + VAR_AUTHORIZATION + "\" error for key #" + keyHandle, SKSException.ERROR_AUTHORIZATION);
           }
 
         @SuppressWarnings("fallthrough")
@@ -3411,9 +3411,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         boolean pinProtection = true;
         if (devicePinProtection)
           {
-            if (pinPolicyHandle != 0)
+            if (SKS_DEVICE_PIN_SUPPORT)
               {
-                provisioning.abort ("Device PIN mixed with PIN policy ojbect");
+                if (pinPolicyHandle != 0)
+                  {
+                    provisioning.abort ("Device PIN mixed with PIN policy ojbect");
+                  }
+              }
+            else
+              {
+                provisioning.abort ("Unsupported: \"" + VAR_DEVICE_PIN_PROTECTION + "\"");
               }
           }
         else if (pinPolicyHandle != 0)

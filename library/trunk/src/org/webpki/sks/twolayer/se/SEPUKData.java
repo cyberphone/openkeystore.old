@@ -18,7 +18,7 @@ package org.webpki.sks.twolayer.se;
 
 public class SEPUKData
   {
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
 
-    public byte[] puk_value;
+    public byte[] pukValue;
   }

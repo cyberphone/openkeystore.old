@@ -605,6 +605,13 @@ public class KeyGen2Test
               {
                 invocation_response.addSupportedFeature (algorithm);
               }
+            if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.CLIENT_ATTRIBUTES.DEVICE_PIN_SUPPORT))
+              {
+                if (device_info.getDevicePinSupport ())
+                  {
+                    invocation_response.addSupportedFeature (KeyGen2URIs.CLIENT_ATTRIBUTES.DEVICE_PIN_SUPPORT);
+                  }
+              }
             if (invocation_request.getQueriedCapabilities ().contains (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
               {
                 invocation_response.addClientValues (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER,
@@ -925,6 +932,8 @@ public class KeyGen2Test
         PublicKey server_km;
         
         SoftHSM server_crypto_interface = new SoftHSM ();
+        
+        String aborted;
 
         Server () throws Exception
           {
@@ -998,6 +1007,10 @@ public class KeyGen2Test
               {
                 server_state.addFeatureQuery (KeyAlgorithms.RSA2048_EXP.getURI ());
               }
+            if (device_pin_protection)
+              {
+                server_state.addFeatureQuery (KeyGen2URIs.CLIENT_ATTRIBUTES.DEVICE_PIN_SUPPORT);
+              }
             if (image_prefs)
               {
                 server_state.addImageAttributesQuery (KeyGen2URIs.LOGOTYPES.CARD)
@@ -1044,6 +1057,14 @@ public class KeyGen2Test
                 if (server_state.isFeatureSupported (KeyAlgorithms.RSA4096.getURI ()))
                   {
                     ask_for_4096 = true;
+                  }
+              }
+            if (device_pin_protection)
+              {
+                if (!server_state.isFeatureSupported (KeyGen2URIs.CLIENT_ATTRIBUTES.DEVICE_PIN_SUPPORT))
+                  {
+                    aborted = "No device PIN support";
+                    return null;
                   }
               }
 
@@ -1461,6 +1482,10 @@ public class KeyGen2Test
         
         byte[] fileLogger (byte[] json_data) throws Exception
           {
+            if (json_data == null)
+              {
+                return new byte[0];
+              }
             JSONDecoder xo = xmlschemas.parse (json_data);
             writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + 
                          (++pass) +
@@ -1541,6 +1566,11 @@ public class KeyGen2Test
             json = fileLogger (server.invocationRequest ());
             json = fileLogger (client.invocationResponse (json));
             json = fileLogger (server.provSessRequest (json));
+            if (server.aborted != null)
+              {
+                writeString ("<b>Test Aborted: " + server.aborted + "</b>\n&nbsp;\n");
+                return;
+              }
             json = fileLogger (client.provSessResponse (json));
             if (delete_key != null || clone_key_protection != null || update_key != null || plain_unlock_key != null)
               {

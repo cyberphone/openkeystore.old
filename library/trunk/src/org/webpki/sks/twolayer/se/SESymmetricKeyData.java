@@ -18,9 +18,9 @@ package org.webpki.sks.twolayer.se;
 
 public class SESymmetricKeyData
   {
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
     
-    public short symmetric_key_length;
+    public short symmetricKeyLength;
 
-    public byte[] sealed_key;
+    public byte[] sealedKey;
   }

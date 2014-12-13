@@ -527,6 +527,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
         getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VENDOR);
         getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VERSION);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.DEVICE_PIN_SUPPORT);
         return s.toString ();
       }
 

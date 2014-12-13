@@ -18,7 +18,7 @@ package org.webpki.sks.twolayer.se;
 
 public class SEPrivateKeyData
   {
-    public byte[] sealed_key;
+    public byte[] sealedKey;
     
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
   }

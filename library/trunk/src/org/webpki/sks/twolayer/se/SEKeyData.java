@@ -20,13 +20,13 @@ import java.security.PublicKey;
 
 public class SEKeyData
   {
-    public byte[] sealed_key;
+    public byte[] sealedKey;
     
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
     
     public byte[] attestation;
     
-    public byte[] decrypted_pin_value;
+    public byte[] decryptedPinValue;
 
-    public PublicKey public_key;
+    public PublicKey publicKey;
   }

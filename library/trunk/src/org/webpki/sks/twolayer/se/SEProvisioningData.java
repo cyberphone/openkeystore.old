@@ -20,11 +20,11 @@ import java.security.interfaces.ECPublicKey;
 
 public class SEProvisioningData
   {
-    public byte[] provisioning_state;
+    public byte[] provisioningState;
 
-    public String client_session_id;
+    public String clientSessionId;
 
     public byte[] attestation;
 
-    public ECPublicKey client_ephemeral_key;
+    public ECPublicKey clientEphemeralKey;
   }

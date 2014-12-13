@@ -243,8 +243,6 @@ public class ProvSess
     
     SoftHSM server_sess_key = new SoftHSM ();
 
-    static String override_key_entry_algorithm;
-    
     static String override_session_key_algorithm;
     
     static KeyAlgorithms override_server_ephemeral_key_algorithm;
@@ -280,6 +278,8 @@ public class ProvSess
     
     byte overriden_export_protection;
        
+    String override_key_entry_algorithm;
+    
     boolean user_defined_pins = true;
     
     boolean user_modifiable_pins = false;
