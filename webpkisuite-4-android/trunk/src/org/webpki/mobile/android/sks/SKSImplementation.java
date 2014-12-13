@@ -890,16 +890,18 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         int mask;
         String jceName;
+        byte[] pkcs1DigestInfo;
       }
 
     static LinkedHashMap<String,Algorithm> supportedAlgorithms = new LinkedHashMap<String,Algorithm> ();
 
-    static void addAlgorithm (String uri, String jceName, int mask)
+    static Algorithm addAlgorithm (String uri, String jceName, int mask)
       {
         Algorithm alg = new Algorithm ();
         alg.mask = mask;
         alg.jceName = jceName;
         supportedAlgorithms.put (uri, alg);
+        return alg;
       }
 
     static final int ALG_SYM_ENC  = 0x00000001;
@@ -916,6 +918,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static final int ALG_RSA_EXP  = 0x00008000;
     static final int ALG_HASH_160 = 0x00140000;
     static final int ALG_HASH_256 = 0x00200000;
+    static final int ALG_HASH_384 = 0x00300000;
+    static final int ALG_HASH_512 = 0x00400000;
     static final int ALG_HASH_DIV = 0x00010000;
     static final int ALG_HASH_MSK = 0x0000007F;
     static final int ALG_NONE     = 0x00800000;
@@ -946,7 +950,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                       "AES/ECB/NoPadding",
                       ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
 
-        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
@@ -956,6 +960,10 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC);
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
+
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", ALG_HMAC);
+
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512", ALG_HMAC);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
@@ -988,15 +996,39 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",
                       "NONEwithRSA",
-                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160);
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02,
+                                     0x1a, 0x05, 0x00, 0x04, 0x14};
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
                       "NONEwithRSA",
-                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256);
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                     0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
+
+       addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",
+                      "NONEwithRSA",
+                       ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_384).pkcs1DigestInfo =
+                           new byte[]{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                      0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30};
+
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
+                      "NONEwithRSA",
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_512).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                     0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40};
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
+
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_384);
+
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_512);
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
                       "NONEwithRSA",
@@ -1012,6 +1044,14 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                       "secp256r1",
                       ALG_EC_KEY | ALG_KEY_GEN);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
+                      "secp384r1",
+                      ALG_EC_KEY | ALG_KEY_GEN);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
+                      "secp521r1",
+                       ALG_EC_KEY | ALG_KEY_GEN);
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
                       "brainpoolP256r1",
@@ -1038,7 +1078,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
 
       }
-
+ 
     static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1983,7 +2023,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             if (keyEntry.isRSA () && hashLen > 0)
               {
-                data = addArrays (hashLen == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
+                data = addArrays (alg.pkcs1DigestInfo, data);
               }
             Signature signature = Signature.getInstance (alg.jceName);
             signature.initSign (keyEntry.privateKey);
