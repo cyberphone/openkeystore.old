@@ -1471,19 +1471,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             int max = ((pinPolicy.patternRestrictions & PIN_PATTERN_TWO_IN_A_ROW) == 0) ? 3 : 2;
             byte c = pinValue [0];
-            int same_count = 1;
+            int sameCount = 1;
             for (int i = 1; i < pinValue.length; i++)
               {
                 if (c == pinValue[i])
                   {
-                    if (++same_count == max)
+                    if (++sameCount == max)
                       {
                         sksError.abort ("PIN with " + max + " or more of same the character in a row");
                       }
                   }
                 else
                   {
-                    same_count = 1;
+                    sameCount = 1;
                     c = pinValue[i];
                   }
               }
@@ -3126,7 +3126,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     ((extensionData[i++] & 0xFE) != 0) ||
                     (i += getShort (extensionData, i) + 2) > extensionData.length)
                   {
-                    keyEntry.owner.abort ("\"" + SecureKeyStore.VAR_PROPERTY_BAG + "\" format error: " + type);
+                    keyEntry.owner.abort ("\"" + VAR_PROPERTY_BAG + "\" format error: " + type);
                   }
               }
             while (i != extensionData.length);
