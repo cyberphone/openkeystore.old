@@ -1296,7 +1296,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         throw new SKSException (message, option);
       }
 
-    String checkECKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
       {
         for (String jceName : supportedEcKeyAlgorithms.keySet ())
           {
@@ -1309,7 +1309,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         return null;
       }
 
-    void checkRSAKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
+    void checkRsaKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
       {
         if (!SKS_RSA_EXPONENT_SUPPORT && !exponent.equals (RSAKeyGenParameterSpec.F4))
           {
@@ -2071,7 +2071,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        checkECKeyCompatibility (publicKey, this, "\"" + VAR_PUBLIC_KEY + "\"");
+        checkEcKeyCompatibility (publicKey, this, "\"" + VAR_PUBLIC_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -2904,7 +2904,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check server ECDH key compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        String jceName = checkECKeyCompatibility (serverEphemeralKey, this, "\"" + VAR_SERVER_EPHEMERAL_KEY + "\"");
+        String jceName = checkEcKeyCompatibility (serverEphemeralKey, this, "\"" + VAR_SERVER_EPHEMERAL_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check optional key management key compatibility
@@ -2913,12 +2913,12 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             if (keyManagementKey instanceof RSAPublicKey)
               {
-                checkRSAKeyCompatibility (getRSAKeySize ((RSAPublicKey)keyManagementKey),
+                checkRsaKeyCompatibility (getRSAKeySize ((RSAPublicKey)keyManagementKey),
                                           ((RSAPublicKey)keyManagementKey).getPublicExponent (), this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
             else
               {
-                checkECKeyCompatibility ((ECPublicKey)keyManagementKey, this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
+                checkEcKeyCompatibility ((ECPublicKey)keyManagementKey, this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
           }
 
@@ -3188,13 +3188,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             keyEntry.privateKey = KeyFactory.getInstance (rsaFlag ? "RSA" : "EC").generatePrivate (key_spec);
             if (rsaFlag)
               {
-                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) keyEntry.privateKey),
+                checkRsaKeyCompatibility (getRSAKeySize((RSAPrivateKey) keyEntry.privateKey),
                                           keyEntry.getPublicRSAExponentFromPrivateKey (),
                                           keyEntry.owner, keyEntry.id);
               }
             else
               {
-                checkECKeyCompatibility ((ECPrivateKey)keyEntry.privateKey, keyEntry.owner, keyEntry.id);
+                checkEcKeyCompatibility ((ECPrivateKey)keyEntry.privateKey, keyEntry.owner, keyEntry.id);
               }
           }
         catch (GeneralSecurityException e)
@@ -3295,13 +3295,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (keyEntry.publicKey instanceof RSAPublicKey)
           {
-            checkRSAKeyCompatibility (getRSAKeySize((RSAPublicKey) keyEntry.publicKey),
+            checkRsaKeyCompatibility (getRSAKeySize((RSAPublicKey) keyEntry.publicKey),
                                       ((RSAPublicKey) keyEntry.publicKey).getPublicExponent (),
                                       keyEntry.owner, keyEntry.id);
           }
         else
           {
-            checkECKeyCompatibility ((ECPublicKey) keyEntry.publicKey, keyEntry.owner, keyEntry.id);
+            checkEcKeyCompatibility ((ECPublicKey) keyEntry.publicKey, keyEntry.owner, keyEntry.id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
