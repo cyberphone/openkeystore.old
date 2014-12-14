@@ -2345,7 +2345,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Find the protection data objects that are not stored in the key entry
         ///////////////////////////////////////////////////////////////////////////////////
         byte protection_status = KeyProtectionInfo.PROTSTAT_NO_PIN;
-        byte puk_format = 0;
+        byte pukFormat = 0;
         short pukRetryLimit = 0;
         short pukErrorCount = 0;
         boolean userDefined = false;
@@ -2370,7 +2370,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             if (keyEntry.pinPolicy.pukPolicy != null)
               {
-                puk_format = keyEntry.pinPolicy.pukPolicy.format; 
+                pukFormat = keyEntry.pinPolicy.pukPolicy.format; 
                 pukRetryLimit = keyEntry.pinPolicy.pukPolicy.retryLimit;
                 pukErrorCount = keyEntry.pinPolicy.pukPolicy.errorCount;
                 protection_status |= KeyProtectionInfo.PROTSTAT_PUK_PROTECTED;
@@ -2391,7 +2391,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             inputMethod = keyEntry.pinPolicy.inputMethod;
           }
         return new KeyProtectionInfo (protection_status,
-                                      puk_format,
+                                      pukFormat,
                                       pukRetryLimit,
                                       pukErrorCount,
                                       userDefined,
