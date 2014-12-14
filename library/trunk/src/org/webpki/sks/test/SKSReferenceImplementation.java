@@ -466,7 +466,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        boolean isRSA ()
+        boolean isRsa ()
           {
             return publicKey instanceof RSAPublicKey;
           }
@@ -1359,9 +1359,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             sksError.abort ("Unsupported RSA exponent value for: " + keyId);
           }
         boolean found = false;
-        for (short key_size : SKS_DEFAULT_RSA_SUPPORT)
+        for (short keySize : SKS_DEFAULT_RSA_SUPPORT)
           {
-            if (key_size == rsaKeySize)
+            if (keySize == rsaKeySize)
               {
                 found = true;
                 break;
@@ -1373,14 +1373,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
 
-    int getRSAKeySize (RSAKey rsa_key)
+    int getRSAKeySize (RSAKey rsaKey)
       {
-        byte[] modblob = rsa_key.getModulus ().toByteArray ();
+        byte[] modblob = rsaKey.getModulus ().toByteArray ();
         return (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
       }
 
     @SuppressWarnings("fallthrough")
-    void verifyPINPolicyCompliance (boolean forcedSetter, byte[] pinValue, PINPolicy pinPolicy, byte appUsage, SKSError sksError) throws SKSException
+    void verifyPinPolicyCompliance (boolean forcedSetter, byte[] pinValue, PINPolicy pinPolicy, byte appUsage, SKSError sksError) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Check PIN length
@@ -1533,7 +1533,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("PIN for key #" + keyEntry.keyHandle + " is not user modifiable", SKSException.ERROR_NOT_ALLOWED);
           }
-        verifyPINPolicyCompliance (true, newPin, keyEntry.pinPolicy, keyEntry.appUsage, this);
+        verifyPinPolicyCompliance (true, newPin, keyEntry.pinPolicy, keyEntry.appUsage, this);
       }
     
     void deleteEmptySession (Provisioning provisioning)
@@ -1592,9 +1592,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             testAESKey (inputAlgorithm, keyEntry.symmetricKey, "#" + keyEntry.keyHandle, this);
           }
-        else if (keyEntry.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
+        else if (keyEntry.isRsa () ^ (alg.mask & ALG_RSA_KEY) != 0)
           {
-            abort ((keyEntry.isRSA () ? "RSA" : "EC") + " key #" + keyEntry.keyHandle + " is incompatible with: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
+            abort ((keyEntry.isRsa () ? "RSA" : "EC") + " key #" + keyEntry.keyHandle + " is incompatible with: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
           }
         if (keyEntry.endorsedAlgorithms.isEmpty () || keyEntry.endorsedAlgorithms.contains (inputAlgorithm))
           {
@@ -2053,7 +2053,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            if (keyEntry.isRSA () && hashLen > 0)
+            if (keyEntry.isRsa () && hashLen > 0)
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
@@ -2688,11 +2688,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (keyEntry.isRSA () ^ keyEntry.privateKey instanceof RSAPrivateKey)
+                if (keyEntry.isRsa () ^ keyEntry.privateKey instanceof RSAPrivateKey)
                   {
                     provisioning.abort ("RSA/EC mixup between public and private keys for: " + keyEntry.id);
                   }
-                if (keyEntry.isRSA ())
+                if (keyEntry.isRsa ())
                   {
                     if (!((RSAPublicKey)keyEntry.publicKey).getPublicExponent ().equals (keyEntry.getPublicRSAExponentFromPrivateKey ()) ||
                         !((RSAPublicKey)keyEntry.publicKey).getModulus ().equals (((RSAPrivateKey)keyEntry.privateKey).getModulus ()))
@@ -2708,10 +2708,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                         ecSigner.initSign (keyEntry.privateKey);
                         ecSigner.update (RSA_ENCRYPTION_OID);  // Any data could be used...
                         byte[] ecSignData = ecSigner.sign ();
-                        Signature ec_verifier = Signature.getInstance ("SHA256withECDSA");
-                        ec_verifier.initVerify (keyEntry.publicKey);
-                        ec_verifier.update (RSA_ENCRYPTION_OID);
-                        if (!ec_verifier.verify (ecSignData))
+                        Signature ecVerifier = Signature.getInstance ("SHA256withECDSA");
+                        ecVerifier.initVerify (keyEntry.publicKey);
+                        ecVerifier.update (RSA_ENCRYPTION_OID);
+                        if (!ecVerifier.verify (ecSignData))
                           {
                             provisioning.abort ("EC mismatch between public and private keys for: " + keyEntry.id);
                           }
@@ -2774,13 +2774,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 // Asymmetric.  Check that algorithms match RSA or EC
                                 ///////////////////////////////////////////////////////////////////////////////////
-                                if (((alg.mask & ALG_RSA_KEY) == 0) ^ keyEntry.isRSA ())
+                                if (((alg.mask & ALG_RSA_KEY) == 0) ^ keyEntry.isRsa ())
                                   {
                                     continue;
                                   }
                               }
                           }
-                        provisioning.abort ((keyEntry.isSymmetric () ? "Symmetric" : keyEntry.isRSA () ? "RSA" : "EC") + 
+                        provisioning.abort ((keyEntry.isSymmetric () ? "Symmetric" : keyEntry.isRsa () ? "RSA" : "EC") + 
                                             " key " + keyEntry.id + " does not match algorithm: " + algorithm);
                       }
                   }
@@ -3494,13 +3494,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addString (keyAlgorithm);
         verifier.addArray (keyParameters == null ? ZERO_LENGTH_ARRAY : keyParameters);
         LinkedHashSet<String> tempEndorsed = new LinkedHashSet<String> ();
-        String prev_alg = "\0";
+        String prevAlg = "\0";
         for (String endorsedAlgorithm : endorsedAlgorithms)
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that the algorithms are sorted and known
             ///////////////////////////////////////////////////////////////////////////////////
-            if (prev_alg.compareTo (endorsedAlgorithm) >= 0)
+            if (prevAlg.compareTo (endorsedAlgorithm) >= 0)
               {
                 provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsedAlgorithm);
               }
@@ -3513,7 +3513,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("Algorithm must be alone: " + endorsedAlgorithm);
               }
-            tempEndorsed.add (prev_alg = endorsedAlgorithm);
+            tempEndorsed.add (prevAlg = endorsedAlgorithm);
             verifier.addString (endorsedAlgorithm);
           }
         provisioning.verifyMac (verifier, mac);
@@ -3526,7 +3526,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
-            verifyPINPolicyCompliance (false, pinValue, pinPolicy, appUsage, provisioning);
+            verifyPinPolicyCompliance (false, pinValue, pinPolicy, appUsage, provisioning);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -3631,10 +3631,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisioning.passphraseFormatTest (format);
         provisioning.retryLimitTest (retryLimit, (short)1);
         if ((patternRestrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 
-                                      PIN_PATTERN_THREE_IN_A_ROW |
-                                      PIN_PATTERN_SEQUENCE |
-                                      PIN_PATTERN_REPEATED |
-                                      PIN_PATTERN_MISSING_GROUP)) != 0)
+                                     PIN_PATTERN_THREE_IN_A_ROW |
+                                     PIN_PATTERN_SEQUENCE |
+                                     PIN_PATTERN_REPEATED |
+                                     PIN_PATTERN_MISSING_GROUP)) != 0)
           {
             provisioning.abort ("Invalid \"" + VAR_PATTERN_RESTRICTIONS + "\" value=" + patternRestrictions);
           }
