@@ -234,7 +234,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         void authError () throws SKSException
           {
-            abort ("Authorization error for key #" + keyHandle, SKSException.ERROR_AUTHORIZATION);
+            abort ("\"" + VAR_AUTHORIZATION + "\" error for key #" + keyHandle, SKSException.ERROR_AUTHORIZATION);
           }
 
         @SuppressWarnings("fallthrough")
@@ -420,14 +420,14 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
               }
           }
         
-        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+        MacBuilder getEeCertMacBuilder (byte[] method) throws SKSException
           {
             checkEECerificateAvailablity ();
-            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
+            MacBuilder macBuilder = owner.getMacBuilderForMethodCall (method);
             try
               {
-                mac_builder.addArray (certificatePath[0].getEncoded ());
-                return mac_builder;
+                macBuilder.addArray (certificatePath[0].getEncoded ());
+                return macBuilder;
              }
             catch (GeneralSecurityException e)
               {
@@ -593,18 +593,18 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             provisionings.put (provisioningHandle, this);
           }
 
-        void verifyMac (MacBuilder actual_mac, byte[] claimed_mac) throws SKSException
+        void verifyMac (MacBuilder actualMac, byte[] claimedMac) throws SKSException
           {
-            if (!Arrays.equals (actual_mac.getResult (),  claimed_mac))
+            if (!Arrays.equals (actualMac.getResult (),  claimedMac))
               {
                 abort ("MAC error", SKSException.ERROR_MAC);
               }
           }
 
-        void abort (String message, int exception_type) throws SKSException
+        void abort (String message, int exceptionType) throws SKSException
           {
             abortProvisioningSession (provisioningHandle);
-            throw new SKSException (message, exception_type);
+            throw new SKSException (message, exceptionType);
           }
 
         @Override
@@ -668,7 +668,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             return keyEntry;
           }
 
-        void addPostProvisioningObject (KeyEntry targetKeyEntry, KeyEntry newKey, boolean updOrDel) throws SKSException
+        void addPostProvisioningObject (KeyEntry targetKeyEntry, KeyEntry newKey, boolean updateOrDelete) throws SKSException
           {
             for (PostProvisioningObject postOp : postProvisioningObjects)
               {
@@ -681,7 +681,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                     ////////////////////////////////////////////////////////////////////////////////////////////////
                     // Multiple targeting of the same old key is OK but has restrictions
                     ////////////////////////////////////////////////////////////////////////////////////////////////
-                    if ((newKey == null && updOrDel) || (postOp.newKey == null && postOp.updOrDel)) // postDeleteKey
+                    if ((newKey == null && updateOrDelete) || (postOp.newKey == null && postOp.updateOrDelete)) // postDeleteKey
                       {
                         abort ("Delete wasn't exclusive for key #" + targetKeyEntry.keyHandle);
                       }
@@ -689,13 +689,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                       {
                         abort ("Multiple unlocks of key #" + targetKeyEntry.keyHandle);
                       }
-                    else if (updOrDel && postOp.updOrDel)
+                    else if (updateOrDelete && postOp.updateOrDelete)
                       {
                         abort ("Multiple updates of key #" + targetKeyEntry.keyHandle);
                       }
                   }
               }
-            postProvisioningObjects.add (new PostProvisioningObject (targetKeyEntry, newKey, updOrDel));
+            postProvisioningObjects.add (new PostProvisioningObject (targetKeyEntry, newKey, updateOrDelete));
           }
 
         void rangeTest (byte value, byte lowLimit, byte highLimit, String objectName) throws SKSException
@@ -869,13 +869,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         KeyEntry targetKeyEntry;
         KeyEntry newKey;      // null for postDeleteKey and postUnlockKey
-        boolean updOrDel;    // true for postUpdateKey and postDeleteKey
+        boolean updateOrDelete;    // true for postUpdateKey and postDeleteKey
 
-        PostProvisioningObject (KeyEntry targetKeyEntry, KeyEntry newKey, boolean updOrDel)
+        PostProvisioningObject (KeyEntry targetKeyEntry, KeyEntry newKey, boolean updateOrDelete)
           {
             this.targetKeyEntry = targetKeyEntry;
             this.newKey = newKey;
-            this.updOrDel = updOrDel;
+            this.updateOrDelete = updateOrDelete;
           }
       }
 
@@ -1534,10 +1534,10 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           }
       }
 
-    Algorithm checkKeyAndAlgorithm (KeyEntry keyEntry, String inputAlgorithm, int expected_type) throws SKSException
+    Algorithm checkKeyAndAlgorithm (KeyEntry keyEntry, String inputAlgorithm, int expectedType) throws SKSException
       {
         Algorithm alg = getAlgorithm (inputAlgorithm);
-        if ((alg.mask & expected_type) == 0)
+        if ((alg.mask & expectedType) == 0)
           {
             abort ("Algorithm does not match operation: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
           }
@@ -1649,7 +1649,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = newKey.getEECertMacBuilder (update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION);
+        MacBuilder verifier = newKey.getEeCertMacBuilder (update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION);
         targetKeyEntry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2705,7 +2705,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                         boolean collision = true;
                         for (PostProvisioningObject postOp : provisioning.postProvisioningObjects)
                           {
-                            if (postOp.targetKeyEntry == key_entry_temp && postOp.updOrDel)
+                            if (postOp.targetKeyEntry == key_entry_temp && postOp.updateOrDelete)
                               {
                                 collision = false;
                               }
@@ -2772,7 +2772,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             KeyEntry keyEntry = postOp.targetKeyEntry;
             if (postOp.newKey == null)
               {
-                if (postOp.updOrDel)
+                if (postOp.updateOrDelete)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
                     // postDeleteKey
@@ -2801,7 +2801,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                 postOp.newKey.errorCount = keyEntry.errorCount;
                 postOp.newKey.devicePinProtection = keyEntry.devicePinProtection;
 
-                if (postOp.updOrDel)
+                if (postOp.updateOrDelete)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
                     // postUpdateKey. Store new key in the place of the old
@@ -3106,7 +3106,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_ADD_EXTENSION);
         verifier.addString (type);
         verifier.addByte (subType);
         verifier.addArray (bin_qualifier);
@@ -3151,7 +3151,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
         verifier.addArray (encryptedKey);
         keyEntry.owner.verifyMac (verifier, mac);
 
@@ -3235,7 +3235,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
         verifier.addArray (encryptedKey);
         keyEntry.owner.verifyMac (verifier, mac);
 
