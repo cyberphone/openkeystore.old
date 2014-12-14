@@ -101,7 +101,7 @@ public class PKCS12Import
         if (app_usage == AppUsage.ENCRYPTION)
           {
             endorsed_algs = rsa_flag ? 
-                new String[]{AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (),
+                new String[]{AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (),
                              AsymEncryptionAlgorithms.RSA_OAEP_SHA1_MGF1P.getURI (),
                              AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()} 
                                  :

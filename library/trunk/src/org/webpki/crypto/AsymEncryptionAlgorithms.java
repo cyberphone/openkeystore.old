@@ -21,7 +21,7 @@ import java.io.IOException;
 
 public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
   {
-    RSA_PKCS_1_5           ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+    RSA_ES_PKCS_1_5        ("http://xmlns.webpki.org/sks/algorithm#rsa.es.pkcs1_5",
                             null,
                             "1.2.840.113549.1.1.1",
                             "RSA/ECB/PKCS1Padding"),

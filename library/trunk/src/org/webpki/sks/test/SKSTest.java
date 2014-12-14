@@ -918,7 +918,7 @@ public class SKSTest
                                                                 null,
                                                                 good_pin.getBytes ("UTF-8"), 
                                                                 enc), TEST_STRING) ||
-                                                                (!bc_loaded && encryption_algorithm != AsymEncryptionAlgorithms.RSA_PKCS_1_5));
+                                                                (!bc_loaded && encryption_algorithm != AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5));
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
@@ -1835,11 +1835,11 @@ public class SKSTest
           }
         key.changePIN (good_pin, good_pin = "8463");
         
-        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1_5.getJCEName ());
+        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJCEName ());
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1847,7 +1847,7 @@ public class SKSTest
           {
             try
               {
-                key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, good_pin + "4", enc);
+                key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5, good_pin + "4", enc);
                 fail ("PIN error");
               }
             catch (SKSException e)
@@ -1858,7 +1858,7 @@ public class SKSTest
           }
         try
           {
-            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, good_pin, enc);
+            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5, good_pin, enc);
             fail ("PIN lock error");
           }
         catch (SKSException e)
@@ -1876,7 +1876,7 @@ public class SKSTest
           }
         key.unlockKey (good_puk);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1903,7 +1903,7 @@ public class SKSTest
             authorizationErrorCheck (e);
           }
         key.setPIN (good_puk, good_pin + "2");
-        assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, 
+        assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5, 
                                                                                      good_pin + "2", 
                                                                                      enc),
                                                            TEST_STRING));
@@ -2538,10 +2538,10 @@ public class SKSTest
             key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
             assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
-            Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1_5.getJCEName ());
+            Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);
-            assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, 
+            assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5, 
                                                                                          good_pin, 
                                                                                          enc), TEST_STRING));
             byte[] result = key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);

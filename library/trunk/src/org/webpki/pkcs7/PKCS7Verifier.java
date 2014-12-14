@@ -122,7 +122,7 @@ public class PKCS7Verifier
                 throw new IOException ("Authenticated not supported");
               }
             
-            if (AsymEncryptionAlgorithms.getAlgorithmFromOID (getAlgorithmIdentifier (seq.get (i++))) != AsymEncryptionAlgorithms.RSA_PKCS_1_5)
+            if (AsymEncryptionAlgorithms.getAlgorithmFromOID (getAlgorithmIdentifier (seq.get (i++))) != AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5)
               {
                 throw new IOException ("Only RSA is supported by this implementation");
               }

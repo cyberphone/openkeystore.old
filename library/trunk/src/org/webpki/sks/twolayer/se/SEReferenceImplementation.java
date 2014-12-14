@@ -204,7 +204,7 @@ public class SEReferenceImplementation
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.es.pkcs1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
   
