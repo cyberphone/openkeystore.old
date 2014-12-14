@@ -78,6 +78,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     static final String SKS_UPDATE_URL                     = null;   // Change here to test or disable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = false;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = false;  // Change here to test or disable
+    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // In virtualized environments keys may be bound to the OS + SE so that keys are unusable

@@ -89,15 +89,17 @@ public class SEReferenceImplementation
     static final String SKS_VENDOR_DESCRIPTION             = "SKS TEE/SE RI - SE Module";
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
+    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
-    static final char[] MODIFIED_BASE64 = {'A','B','C','D','E','F','G','H',
-                                           'I','J','K','L','M','N','O','P',
-                                           'Q','R','S','T','U','V','W','X',
-                                           'Y','Z','a','b','c','d','e','f',
-                                           'g','h','i','j','k','l','m','n',
-                                           'o','p','q','r','s','t','u','v',
-                                           'w','x','y','z','0','1','2','3',
-                                           '4','5','6','7','8','9','-','_'};
+    static final char[] BASE64_URL = {'A','B','C','D','E','F','G','H',
+                                      'I','J','K','L','M','N','O','P',
+                                      'Q','R','S','T','U','V','W','X',
+                                      'Y','Z','a','b','c','d','e','f',
+                                      'g','h','i','j','k','l','m','n',
+                                      'o','p','q','r','s','t','u','v',
+                                      'w','x','y','z','0','1','2','3',
+                                      '4','5','6','7','8','9','-','_'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
@@ -1222,8 +1224,8 @@ public class SEReferenceImplementation
                                      SKS_VENDOR_DESCRIPTION,
                                      getDeviceCertificatePath (),
                                      supportedAlgorithms.keySet ().toArray (new String[0]),
-                                     SecureKeyStore.MAX_LENGTH_CRYPTO_DATA,
-                                     SecureKeyStore.MAX_LENGTH_EXTENSION_DATA);
+                                     MAX_LENGTH_CRYPTO_DATA,
+                                     MAX_LENGTH_EXTENSION_DATA);
           }
         catch (GeneralSecurityException e)
           {
@@ -1815,7 +1817,7 @@ public class SEReferenceImplementation
         StringBuffer buffer = new StringBuffer ();
         for (byte b : random)
           {
-            buffer.append (MODIFIED_BASE64[b & 0x3F]);
+            buffer.append (BASE64_URL[b & 0x3F]);
           }
         String clientSessionId = buffer.toString ();
 
@@ -1945,9 +1947,9 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
-            if (encryptedKey.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
+            if (encryptedKey.length > (MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
               {
-                abort ("Private key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
+                abort ("Private key: " + id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2107,11 +2109,11 @@ public class SEReferenceImplementation
                 abort ("URI length error: " + type.length ());
               }
             if (extensionData.length > (subType == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING
+                MAX_LENGTH_EXTENSION_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING
                      :
-                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
+                MAX_LENGTH_EXTENSION_DATA))
               {
-                abort ("Extension data exceeds " + SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + " bytes");
+                abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
               }
             if (((subType == SecureKeyStore.SUB_TYPE_LOGOTYPE) ^ (binQualifier.length != 0)) ||
                 binQualifier.length > SecureKeyStore.MAX_LENGTH_QUALIFIER)
@@ -2199,9 +2201,9 @@ public class SEReferenceImplementation
             for (X509Certificate certificate : certificatePath)
               {
                 byte[] der = certificate.getEncoded ();
-                if (der.length > SecureKeyStore.MAX_LENGTH_CRYPTO_DATA)
+                if (der.length > MAX_LENGTH_CRYPTO_DATA)
                   {
-                    abort ("Certificate for: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
+                    abort ("Certificate for: " + id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
                   }
                 verifier.addArray (der);
               }

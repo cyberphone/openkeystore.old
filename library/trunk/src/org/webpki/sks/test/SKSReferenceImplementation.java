@@ -112,6 +112,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
+    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
     static final char[] BASE64_URL = {'A','B','C','D','E','F','G','H',
                                       'I','J','K','L','M','N','O','P',

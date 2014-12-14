@@ -36,8 +36,6 @@ public interface SecureKeyStore
     int MAX_LENGTH_ID_TYPE                    = 32;
     int MAX_LENGTH_SERVER_SEED                = 64;
     int MAX_LENGTH_URI                        = 1000;
-    int MAX_LENGTH_CRYPTO_DATA                = 16384;
-    int MAX_LENGTH_EXTENSION_DATA             = 65536;
     int MAX_RETRY_LIMIT                       = 10000;
     
     ///////////////////////////////////////////////////////////////////////////////////
