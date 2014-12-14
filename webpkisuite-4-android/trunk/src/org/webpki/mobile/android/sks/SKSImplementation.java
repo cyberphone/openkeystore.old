@@ -724,7 +724,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                                                      byte[] authorization) throws GeneralSecurityException
           {
             Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? 
-                                                                                     "SHA256WithRSA" : "SHA256WithECDSA");
+                                                                                   "SHA256WithRSA" : "SHA256WithECDSA");
             kmk_verify.initVerify (keyManagementKey);
             kmk_verify.update (kmk_kdf);
             kmk_verify.update (argument);
@@ -1084,13 +1084,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Supported EC algorithms
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static LinkedHashMap<String,EllipticCurve> supported_ecKeyAlgorithms = new LinkedHashMap<String,EllipticCurve> ();
+    static LinkedHashMap<String,EllipticCurve> supportedEcKeyAlgorithms = new LinkedHashMap<String,EllipticCurve> ();
     
     static void addECKeyAlgorithm (String jceName, byte[] samplePublicKey)
       {
         try
           {
-            supported_ecKeyAlgorithms.put (jceName,
+            supportedEcKeyAlgorithms.put (jceName,
                                              ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
                 new X509EncodedKeySpec (samplePublicKey))).getParams ().getCurve ());
           }
@@ -1298,9 +1298,9 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
     String checkECKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
       {
-        for (String jceName : supported_ecKeyAlgorithms.keySet ())
+        for (String jceName : supportedEcKeyAlgorithms.keySet ())
           {
-            if (ecKey.getParams ().getCurve ().equals (supported_ecKeyAlgorithms.get (jceName)))
+            if (ecKey.getParams ().getCurve ().equals (supportedEcKeyAlgorithms.get (jceName)))
               {
                 return jceName;
               }
