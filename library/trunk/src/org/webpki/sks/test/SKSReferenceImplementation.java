@@ -131,7 +131,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     int nextPinHandle = 1;
     LinkedHashMap<Integer,PINPolicy> pinPolicies = new LinkedHashMap<Integer,PINPolicy> ();
 
-    int next_puk_handle = 1;
+    int nextPukHandle = 1;
     LinkedHashMap<Integer,PUKPolicy> pukPolicies = new LinkedHashMap<Integer,PUKPolicy> ();
 
 
@@ -152,7 +152,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 owner.abort ("Duplicate \"" + VAR_ID + "\" : " + id);
               }
-            checkIDSyntax (id, VAR_ID, owner);
+            checkIdSyntax (id, VAR_ID, owner);
             owner.names.put (id, false);
             this.owner = owner;
             this.id = id;
@@ -160,7 +160,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       }
 
 
-    static void checkIDSyntax (String identifier, String symbolicName, SKSError sksError) throws SKSException
+    static void checkIdSyntax (String identifier, String symbolicName, SKSError sksError) throws SKSException
       {
         boolean flag = false;
         if (identifier.length () == 0 || identifier.length () > MAX_LENGTH_ID_TYPE)
@@ -232,7 +232,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         @SuppressWarnings("fallthrough")
-        Vector<KeyEntry> getPINSynchronizedKeys ()
+        Vector<KeyEntry> getPinSynchronizedKeys ()
           {
             Vector<KeyEntry> group = new Vector<KeyEntry> ();
             if (pinPolicy.grouping == PIN_GROUPING_NONE)
@@ -270,21 +270,21 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         void setErrorCounter (short newErrorCount)
           {
-            for (KeyEntry keyEntry : getPINSynchronizedKeys ())
+            for (KeyEntry keyEntry : getPinSynchronizedKeys ())
               {
                 keyEntry.errorCount = newErrorCount;
               }
           }
         
-         void updatePIN (byte[] newPin)
+         void updatePin (byte[] newPin)
           {
-            for (KeyEntry keyEntry : getPINSynchronizedKeys ())
+            for (KeyEntry keyEntry : getPinSynchronizedKeys ())
               {
                 keyEntry.pinValue = newPin;
               }
           }
 
-        void verifyPIN (byte[] pin) throws SKSException
+        void verifyPin (byte[] pin) throws SKSException
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // If there is no PIN policy there is nothing to verify...
@@ -332,7 +332,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        void verifyPUK (byte[] puk) throws SKSException
+        void verifyPuk (byte[] puk) throws SKSException
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that this key really has a PUK...
@@ -390,11 +390,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             switch (policy)
               {
                 case EXPORT_DELETE_PROTECTION_PIN:
-                  verifyPIN (authorization);
+                  verifyPin (authorization);
                   return;
                   
                 case EXPORT_DELETE_PROTECTION_PUK:
-                  verifyPUK (authorization);
+                  verifyPuk (authorization);
                   return;
 
                 case EXPORT_DELETE_PROTECTION_NOT_ALLOWED:
@@ -414,7 +414,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
         
-        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+        MacBuilder getEeCertMacBuilder (byte[] method) throws SKSException
           {
             checkEECerificateAvailablity ();
             MacBuilder macBuilder = owner.getMacBuilderForMethodCall (method);
@@ -551,7 +551,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         PUKPolicy (Provisioning owner, String id) throws SKSException
           {
             super (owner, id);
-            pukPolicyHandle = next_puk_handle++;
+            pukPolicyHandle = nextPukHandle++;
             pukPolicies.put (pukPolicyHandle, this);
           }
       }
@@ -587,18 +587,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             provisionings.put (provisioningHandle, this);
           }
 
-        void verifyMac (MacBuilder actual_mac, byte[] claimed_mac) throws SKSException
+        void verifyMac (MacBuilder actualMac, byte[] claimedMac) throws SKSException
           {
-            if (!Arrays.equals (actual_mac.getResult (),  claimed_mac))
+            if (!Arrays.equals (actualMac.getResult (),  claimedMac))
               {
                 abort ("MAC error", SKSException.ERROR_MAC);
               }
           }
 
-        void abort (String message, int exception_type) throws SKSException
+        void abort (String message, int exceptionType) throws SKSException
           {
             abortProvisioningSession (provisioningHandle);
-            throw new SKSException (message, exception_type);
+            throw new SKSException (message, exceptionType);
           }
 
         @Override
@@ -692,11 +692,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             postProvisioningObjects.add (new PostProvisioningObject (targetKeyEntry, newKey, updateOrDelete));
           }
 
-        void rangeTest (byte value, byte lowLimit, byte highLimit, String object_name) throws SKSException
+        void rangeTest (byte value, byte lowLimit, byte highLimit, String objectName) throws SKSException
           {
             if (value > highLimit || value < lowLimit)
               {
-                abort ("Invalid \"" + object_name + "\" value=" + value);
+                abort ("Invalid \"" + objectName + "\" value=" + value);
               }
           }
 
@@ -1080,13 +1080,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     /////////////////////////////////////////////////////////////////////////////////////////////
     static LinkedHashMap<String,EllipticCurve> supportedEcKeyAlgorithms = new LinkedHashMap<String,EllipticCurve> ();
     
-    static void addECKeyAlgorithm (String jceName, byte[] samplPublicKey)
+    static void addEcKeyAlgorithm (String jceName, byte[] samplePublicKey)
       {
         try
           {
             supportedEcKeyAlgorithms.put (jceName,
                 ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
-                    new X509EncodedKeySpec (samplPublicKey))).getParams ().getCurve ());
+                    new X509EncodedKeySpec (samplePublicKey))).getParams ().getCurve ());
           }
         catch (Exception e)
           {
@@ -1096,7 +1096,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     static
       {
-        addECKeyAlgorithm ("secp256r1",
+        addEcKeyAlgorithm ("secp256r1",
             new byte[]
                {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                 (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
@@ -1111,7 +1111,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
                 (byte)0x7C, (byte)0x0D, (byte)0xB2});
         
-        addECKeyAlgorithm ("secp384r1",
+        addEcKeyAlgorithm ("secp384r1",
             new byte[]
                {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                 (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
@@ -1129,7 +1129,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
                 (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98});
 
-        addECKeyAlgorithm ("secp521r1",
+        addEcKeyAlgorithm ("secp521r1",
             new byte[]
                {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
                 (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
@@ -1152,7 +1152,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
                 (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96});
 
-        addECKeyAlgorithm ("brainpoolP256r1",
+        addEcKeyAlgorithm ("brainpoolP256r1",
             new byte[]
                {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                 (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
@@ -1339,7 +1339,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         throw new SKSException (message, option);
       }
 
-    String checkECKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
       {
         for (String jceName : supportedEcKeyAlgorithms.keySet ())
           {
@@ -1352,7 +1352,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return null;
       }
 
-    void checkRSAKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
+    void checkRsaKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
       {
         if (!SKS_RSA_EXPONENT_SUPPORT && !exponent.equals (RSAKeyGenParameterSpec.F4))
           {
@@ -1527,7 +1527,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
     
-    void testUpdatablePIN (KeyEntry keyEntry, byte[] newPin) throws SKSException
+    void testUpdatablePin (KeyEntry keyEntry, byte[] newPin) throws SKSException
       {
         if (!keyEntry.pinPolicy.userModifiable)
           {
@@ -1577,30 +1577,30 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
 
-    Algorithm checkKeyAndAlgorithm (KeyEntry keyEntry, String input_algorithm, int expected_type) throws SKSException
+    Algorithm checkKeyAndAlgorithm (KeyEntry keyEntry, String inputAlgorithm, int expectedType) throws SKSException
       {
-        Algorithm alg = getAlgorithm (input_algorithm);
-        if ((alg.mask & expected_type) == 0)
+        Algorithm alg = getAlgorithm (inputAlgorithm);
+        if ((alg.mask & expectedType) == 0)
           {
-            abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+            abort ("Algorithm does not match operation: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
           }
         if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ keyEntry.isSymmetric ())
           {
-            abort ((keyEntry.isSymmetric () ? "S" : "As") + "ymmetric key #" + keyEntry.keyHandle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+            abort ((keyEntry.isSymmetric () ? "S" : "As") + "ymmetric key #" + keyEntry.keyHandle + " is incompatible with: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
           }
         if (keyEntry.isSymmetric ())
           {
-            testAESKey (input_algorithm, keyEntry.symmetricKey, "#" + keyEntry.keyHandle, this);
+            testAESKey (inputAlgorithm, keyEntry.symmetricKey, "#" + keyEntry.keyHandle, this);
           }
         else if (keyEntry.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
           {
-            abort ((keyEntry.isRSA () ? "RSA" : "EC") + " key #" + keyEntry.keyHandle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+            abort ((keyEntry.isRSA () ? "RSA" : "EC") + " key #" + keyEntry.keyHandle + " is incompatible with: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (keyEntry.endorsedAlgorithms.isEmpty () || keyEntry.endorsedAlgorithms.contains (input_algorithm))
+        if (keyEntry.endorsedAlgorithms.isEmpty () || keyEntry.endorsedAlgorithms.contains (inputAlgorithm))
           {
             return alg;
           }
-        abort ("\"" + VAR_ENDORSED_ALGORITHMS + "\" for key #" + keyEntry.keyHandle + " does not include: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+        abort ("\"" + VAR_ENDORSED_ALGORITHMS + "\" for key #" + keyEntry.keyHandle + " does not include: " + inputAlgorithm, SKSException.ERROR_ALGORITHM);
         return null;    // For the compiler only...
       }
 
@@ -1692,7 +1692,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = newKey.getEECertMacBuilder (update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION);
+        MacBuilder verifier = newKey.getEeCertMacBuilder (update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION);
         targetKeyEntry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1750,7 +1750,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PUK
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPUK (authorization);
+        keyEntry.verifyPuk (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Success!  Reset PIN error counter(s)
@@ -1777,17 +1777,17 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify old PIN
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Test new PIN
         ///////////////////////////////////////////////////////////////////////////////////
-        testUpdatablePIN (keyEntry, newPin);
+        testUpdatablePin (keyEntry, newPin);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Success!  Set PIN value(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.updatePIN (newPin);
+        keyEntry.updatePin (newPin);
       }
 
 
@@ -1809,17 +1809,17 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PUK
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPUK (authorization);
+        keyEntry.verifyPuk (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Test new PIN
         ///////////////////////////////////////////////////////////////////////////////////
-        testUpdatablePIN (keyEntry, newPin);
+        testUpdatablePin (keyEntry, newPin);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Success!  Set PIN value(s) and unlock associated key(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.updatePIN (newPin);
+        keyEntry.updatePin (newPin);
         keyEntry.setErrorCounter ((short)0);
       }
 
@@ -1922,7 +1922,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 if (extObj.extensionData[i] != 0x01)
                   {
-                    abort ("\"" + SecureKeyStore.VAR_PROPERTY + "\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
+                    abort ("\"" + VAR_PROPERTY + "\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
                   }
                 extObj.extensionData = addArrays (addArrays (Arrays.copyOfRange (extObj.extensionData, 0, ++i),
                                                                addArrays (new byte[]{(byte)(binValue.length >> 8),(byte)binValue.length}, binValue)),
@@ -1931,7 +1931,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             i += valueLen + 3;
           }
-        abort ("\"" + SecureKeyStore.VAR_PROPERTY + "\" not found: " + name);
+        abort ("\"" + VAR_PROPERTY + "\" not found: " + name);
       }
 
 
@@ -1980,7 +1980,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the encryption algorithm is known and applicable
@@ -2027,7 +2027,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
@@ -2089,7 +2089,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key agreement algorithm is known and applicable
@@ -2103,7 +2103,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        checkECKeyCompatibility (publicKey, this, "\"" + VAR_PUBLIC_KEY + "\"");
+        checkEcKeyCompatibility (publicKey, this, "\"" + VAR_PUBLIC_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -2143,7 +2143,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
@@ -2231,7 +2231,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.verifyPIN (authorization);
+        keyEntry.verifyPin (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
@@ -2934,7 +2934,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check server ECDH key compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        String jceName = checkECKeyCompatibility (serverEphemeralKey, this, "\"" + VAR_SERVER_EPHEMERAL_KEY + "\"");
+        String jceName = checkEcKeyCompatibility (serverEphemeralKey, this, "\"" + VAR_SERVER_EPHEMERAL_KEY + "\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check optional key management key compatibility
@@ -2943,19 +2943,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (keyManagementKey instanceof RSAPublicKey)
               {
-                checkRSAKeyCompatibility (getRSAKeySize ((RSAPublicKey)keyManagementKey),
+                checkRsaKeyCompatibility (getRSAKeySize ((RSAPublicKey)keyManagementKey),
                                           ((RSAPublicKey)keyManagementKey).getPublicExponent (), this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
             else
               {
-                checkECKeyCompatibility ((ECPublicKey)keyManagementKey, this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
+                checkEcKeyCompatibility ((ECPublicKey)keyManagementKey, this, "\"" + VAR_KEY_MANAGEMENT_KEY + "\"");
               }
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check ServerSessionID
         ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax (serverSessionId, VAR_SERVER_SESSION_ID, this);
+        checkIdSyntax (serverSessionId, VAR_SERVER_SESSION_ID, this);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
@@ -3135,7 +3135,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_ADD_EXTENSION);
         verifier.addString (type);
         verifier.addByte (subType);
         verifier.addArray (binQualifier);
@@ -3180,7 +3180,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
         verifier.addArray (encryptedKey);
         keyEntry.owner.verifyMac (verifier, mac);
 
@@ -3217,13 +3217,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             keyEntry.privateKey = KeyFactory.getInstance (rsaFlag ? "RSA" : "EC").generatePrivate (keySpec);
             if (rsaFlag)
               {
-                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) keyEntry.privateKey),
+                checkRsaKeyCompatibility (getRSAKeySize((RSAPrivateKey) keyEntry.privateKey),
                                           keyEntry.getPublicRSAExponentFromPrivateKey (),
                                           keyEntry.owner, keyEntry.id);
               }
             else
               {
-                checkECKeyCompatibility ((ECPrivateKey)keyEntry.privateKey, keyEntry.owner, keyEntry.id);
+                checkEcKeyCompatibility ((ECPrivateKey)keyEntry.privateKey, keyEntry.owner, keyEntry.id);
               }
           }
         catch (GeneralSecurityException e)
@@ -3264,7 +3264,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = keyEntry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
+        MacBuilder verifier = keyEntry.getEeCertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
         verifier.addArray (encryptedKey);
         keyEntry.owner.verifyMac (verifier, mac);
 
@@ -3324,13 +3324,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (keyEntry.publicKey instanceof RSAPublicKey)
           {
-            checkRSAKeyCompatibility (getRSAKeySize((RSAPublicKey) keyEntry.publicKey),
+            checkRsaKeyCompatibility (getRSAKeySize((RSAPublicKey) keyEntry.publicKey),
                                       ((RSAPublicKey) keyEntry.publicKey).getPublicExponent (),
                                       keyEntry.owner, keyEntry.id);
           }
         else
           {
-            checkECKeyCompatibility ((ECPublicKey) keyEntry.publicKey, keyEntry.owner, keyEntry.id);
+            checkEcKeyCompatibility ((ECPublicKey) keyEntry.publicKey, keyEntry.owner, keyEntry.id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
