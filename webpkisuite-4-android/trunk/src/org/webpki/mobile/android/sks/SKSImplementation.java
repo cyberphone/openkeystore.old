@@ -105,6 +105,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = false;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = false;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;   // Change here to test or disable
+    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
     private static final String SKS_DEBUG                  = "SKS";  // Android SKS debug constant
     
@@ -3096,7 +3098,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for duplicates and length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        keyEntry.owner.rangeTest (subType, SUB_TYPE_EXTENSION, SUB_TYPE_LOGOTYPE, "SubType");
+        keyEntry.owner.rangeTest (subType, SUB_TYPE_EXTENSION, SUB_TYPE_LOGOTYPE, VAR_SUB_TYPE);
         if (type.length () == 0 || type.length () >  MAX_LENGTH_URI)
           {
             keyEntry.owner.abort ("URI length error: " + type.length ());
@@ -3400,10 +3402,10 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             provisioning.abort ("\"" + VAR_SERVER_SEED + "\" length error: " + serverSeed.length);
           }
-        provisioning.rangeTest (exportProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "ExportProtection");
-        provisioning.rangeTest (deleteProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "DeleteProtection");
-        provisioning.rangeTest (appUsage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
-        provisioning.rangeTest (biometricProtection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
+        provisioning.rangeTest (exportProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, VAR_EXPORT_PROTECTION);
+        provisioning.rangeTest (deleteProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, VAR_DELETE_PROTECTION);
+        provisioning.rangeTest (appUsage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, VAR_APP_USAGE);
+        provisioning.rangeTest (biometricProtection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, VAR_BIOMETRIC_PROTECTION);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get proper PIN policy ID
@@ -3631,8 +3633,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform PIN "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
-        provisioning.rangeTest (inputMethod, INPUT_METHOD_ANY, INPUT_METHOD_TRUSTED_GUI, "InputMethod");
+        provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, VAR_GROUPING);
+        provisioning.rangeTest (inputMethod, INPUT_METHOD_ANY, INPUT_METHOD_TRUSTED_GUI, VAR_INPUT_METHOD);
         provisioning.passphraseFormatTest (format);
         provisioning.retryLimitTest (retryLimit, (short)1);
         if ((patternRestrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 

@@ -40,6 +40,8 @@ public interface KeyGen2URIs
         String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/clientattr#os-vendor";
 
         String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/clientattr#os-version";
+
+        String DEVICE_PIN_SUPPORT          = "http://xmlns.webpki.org/keygen2/clientattr#device-pin-support";
       }
 
     public interface FEATURE
