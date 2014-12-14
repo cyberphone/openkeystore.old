@@ -106,294 +106,276 @@ public class SEReferenceImplementation
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     static class Algorithm implements Serializable
-    {
-      private static final long serialVersionUID = 1L;
-
-      int mask;
-      String jceName;
-      byte[] pkcs1DigestInfo;
-    }
-
-  static LinkedHashMap<String,Algorithm> supportedAlgorithms = new LinkedHashMap<String,Algorithm> ();
-
-  static Algorithm addAlgorithm (String uri, String jceName, int mask)
-    {
-      Algorithm alg = new Algorithm ();
-      alg.mask = mask;
-      alg.jceName = jceName;
-      supportedAlgorithms.put (uri, alg);
-      return alg;
-    }
-
-  static final int ALG_SYM_ENC  = 0x00000001;
-  static final int ALG_IV_REQ   = 0x00000002;
-  static final int ALG_IV_INT   = 0x00000004;
-  static final int ALG_SYML_128 = 0x00000008;
-  static final int ALG_SYML_192 = 0x00000010;
-  static final int ALG_SYML_256 = 0x00000020;
-  static final int ALG_HMAC     = 0x00000040;
-  static final int ALG_ASYM_ENC = 0x00000080;
-  static final int ALG_ASYM_SGN = 0x00000100;
-  static final int ALG_RSA_KEY  = 0x00004000;
-  static final int ALG_RSA_GMSK = 0x00003FFF;
-  static final int ALG_RSA_EXP  = 0x00008000;
-  static final int ALG_HASH_160 = 0x00140000;
-  static final int ALG_HASH_256 = 0x00200000;
-  static final int ALG_HASH_384 = 0x00300000;
-  static final int ALG_HASH_512 = 0x00400000;
-  static final int ALG_HASH_DIV = 0x00010000;
-  static final int ALG_HASH_MSK = 0x0000007F;
-  static final int ALG_NONE     = 0x00800000;
-  static final int ALG_ASYM_KA  = 0x01000000;
-  static final int ALG_AES_PAD  = 0x02000000;
-  static final int ALG_EC_KEY   = 0x04000000;
-  static final int ALG_KEY_GEN  = 0x08000000;
-  static final int ALG_KEY_PARM = 0x10000000;
-
-  static
-    {
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Symmetric Key Encryption and Decryption
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes128-cbc",
-                    "AES/CBC/PKCS5Padding",
-                    ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_128);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes192-cbc",
-                    "AES/CBC/PKCS5Padding",
-                    ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_192);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes256-cbc",
-                    "AES/CBC/PKCS5Padding",
-                    ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
-                    "AES/ECB/NoPadding",
-                    ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc",
-                    "AES/CBC/PKCS5Padding",
-                    ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
-
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  HMAC Operations
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", ALG_HMAC);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512", ALG_HMAC);
-
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Asymmetric Key Decryption
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
-                    "RSA/ECB/PKCS1Padding",
-                    ALG_ASYM_ENC | ALG_RSA_KEY);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
-                    "RSA/ECB/OAEPWithSHA1AndMGF1Padding",
-                    ALG_ASYM_ENC | ALG_RSA_KEY);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
-                    "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
-                    ALG_ASYM_ENC | ALG_RSA_KEY);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
-                    "RSA/ECB/NoPadding",
-                    ALG_ASYM_ENC | ALG_RSA_KEY);
-
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Diffie-Hellman Key Agreement
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
-                    "ECDH",
-                    ALG_ASYM_KA | ALG_EC_KEY);
-      
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Asymmetric Key Signatures
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-                    "NONEwithRSA",
-                    ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160).pkcs1DigestInfo =
-                        new byte[]{0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02,
-                                   0x1a, 0x05, 0x00, 0x04, 0x14};
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                    "NONEwithRSA",
-                    ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256).pkcs1DigestInfo =
-                        new byte[]{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
-                                   0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
-
-     addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",
-                    "NONEwithRSA",
-                     ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_384).pkcs1DigestInfo =
-                         new byte[]{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
-                                    0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30};
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
-                    "NONEwithRSA",
-                    ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_512).pkcs1DigestInfo =
-                        new byte[]{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
-                                   0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40};
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-                    "NONEwithECDSA",
-                    ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",
-                    "NONEwithECDSA",
-                    ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_384);
-
-      addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",
-                    "NONEwithECDSA",
-                    ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_512);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
-                    "NONEwithRSA",
-                    ALG_ASYM_SGN | ALG_RSA_KEY);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
-                    "NONEwithECDSA",
-                    ALG_ASYM_SGN | ALG_EC_KEY);
-
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Asymmetric Key Generation
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
-                    "secp256r1",
-                    ALG_EC_KEY | ALG_KEY_GEN);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
-                    "secp384r1",
-                    ALG_EC_KEY | ALG_KEY_GEN);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
-                    "secp521r1",
-                     ALG_EC_KEY | ALG_KEY_GEN);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
-                    "brainpoolP256r1",
-                    ALG_EC_KEY | ALG_KEY_GEN);
-      
-      for (short rsa_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
-        {
-          addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
-                        null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
-          if (SKS_RSA_EXPONENT_SUPPORT)
-            {
-              addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size + ".exp",
-                            null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
-            }
-        }
-
-      //////////////////////////////////////////////////////////////////////////////////////
-      //  Special Algorithms
-      //////////////////////////////////////////////////////////////////////////////////////
-      addAlgorithm (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1, null, 0);
-
-      addAlgorithm (SecureKeyStore.ALGORITHM_KEY_ATTEST_1, null, 0);
-
-      addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
-
-    }
-
-  static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
-
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  // Supported EC algorithms
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  static LinkedHashMap<String,EllipticCurve> supportedEcKeyAlgorithms = new LinkedHashMap<String,EllipticCurve> ();
+      {
+        private static final long serialVersionUID = 1L;
   
-  static void addECKeyAlgorithm (String jceName, byte[] samplPublicKey)
-    {
-      try
-        {
-          supportedEcKeyAlgorithms.put (jceName,
-              ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
-                  new X509EncodedKeySpec (samplPublicKey))).getParams ().getCurve ());
-        }
-      catch (Exception e)
-        {
-          new RuntimeException (e);
-        }
-    }
+        int mask;
+        String jceName;
+        byte[] pkcs1DigestInfo;
+        EllipticCurve curve;
+        
+        void addEcCurve (byte[] samplePublicKey)
+          {
+            try
+              {
+                curve = ((ECPublicKey) KeyFactory.getInstance ("EC")
+                           .generatePublic (
+                              new X509EncodedKeySpec (samplePublicKey))).getParams ().getCurve ();
+              }
+            catch (Exception e)
+              {
+                new RuntimeException (e);
+              }
+          }
+      }
 
-  static
-    {
-      addECKeyAlgorithm ("secp256r1",
-          new byte[]
-             {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
-              (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
-              (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
-              (byte)0x42, (byte)0x00, (byte)0x04, (byte)0x8B, (byte)0xDF, (byte)0x5D, (byte)0xA2, (byte)0xBE,
-              (byte)0x57, (byte)0x73, (byte)0xAC, (byte)0x78, (byte)0x86, (byte)0xD3, (byte)0xE5, (byte)0xE6,
-              (byte)0xC4, (byte)0xA5, (byte)0x6C, (byte)0x32, (byte)0xE2, (byte)0x28, (byte)0xBE, (byte)0xA0,
-              (byte)0x0F, (byte)0x8F, (byte)0xBF, (byte)0x29, (byte)0x1E, (byte)0xC6, (byte)0x67, (byte)0xB3,
-              (byte)0x51, (byte)0x99, (byte)0xB7, (byte)0xAD, (byte)0x13, (byte)0x0C, (byte)0x5A, (byte)0x7C,
-              (byte)0x66, (byte)0x4B, (byte)0x47, (byte)0xF6, (byte)0x1F, (byte)0x41, (byte)0xE9, (byte)0xB3,
-              (byte)0xB2, (byte)0x40, (byte)0xC0, (byte)0x65, (byte)0xF8, (byte)0x8F, (byte)0x30, (byte)0x0A,
-              (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
-              (byte)0x7C, (byte)0x0D, (byte)0xB2});
-      
-      addECKeyAlgorithm ("secp384r1",
-          new byte[]
-             {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
-              (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
-              (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
-              (byte)0x63, (byte)0x5C, (byte)0x35, (byte)0x5C, (byte)0xC0, (byte)0xDF, (byte)0x90, (byte)0x16,
-              (byte)0xA6, (byte)0x18, (byte)0xF1, (byte)0x50, (byte)0xA7, (byte)0x73, (byte)0xE7, (byte)0x05,
-              (byte)0x22, (byte)0x36, (byte)0xF7, (byte)0xDC, (byte)0x9F, (byte)0xD8, (byte)0xA5, (byte)0xAC,
-              (byte)0x71, (byte)0x9F, (byte)0x1C, (byte)0x9A, (byte)0x71, (byte)0x94, (byte)0x8B, (byte)0x81,
-              (byte)0x15, (byte)0x32, (byte)0x24, (byte)0x92, (byte)0x11, (byte)0x11, (byte)0xDC, (byte)0x7E,
-              (byte)0x9D, (byte)0x70, (byte)0x1A, (byte)0x9B, (byte)0x83, (byte)0x33, (byte)0x8B, (byte)0x59,
-              (byte)0xC1, (byte)0x93, (byte)0x34, (byte)0x7F, (byte)0x58, (byte)0x0D, (byte)0x91, (byte)0xC4,
-              (byte)0xD2, (byte)0x20, (byte)0x8F, (byte)0x64, (byte)0x16, (byte)0x16, (byte)0xEE, (byte)0x07,
-              (byte)0x51, (byte)0xC3, (byte)0xF8, (byte)0x56, (byte)0x5B, (byte)0xCD, (byte)0x49, (byte)0xFE,
-              (byte)0xE0, (byte)0xE2, (byte)0xD5, (byte)0xC5, (byte)0x79, (byte)0xD1, (byte)0xA6, (byte)0x18,
-              (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
-              (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98});
+    static LinkedHashMap<String,Algorithm> supportedAlgorithms = new LinkedHashMap<String,Algorithm> ();
+  
+    static Algorithm addAlgorithm (String uri, String jceName, int mask)
+      {
+        Algorithm alg = new Algorithm ();
+        alg.mask = mask;
+        alg.jceName = jceName;
+        supportedAlgorithms.put (uri, alg);
+        return alg;
+      }
+  
+    static final int ALG_SYM_ENC  = 0x00000001;
+    static final int ALG_IV_REQ   = 0x00000002;
+    static final int ALG_IV_INT   = 0x00000004;
+    static final int ALG_SYML_128 = 0x00000008;
+    static final int ALG_SYML_192 = 0x00000010;
+    static final int ALG_SYML_256 = 0x00000020;
+    static final int ALG_HMAC     = 0x00000040;
+    static final int ALG_ASYM_ENC = 0x00000080;
+    static final int ALG_ASYM_SGN = 0x00000100;
+    static final int ALG_RSA_KEY  = 0x00004000;
+    static final int ALG_RSA_GMSK = 0x00003FFF;
+    static final int ALG_RSA_EXP  = 0x00008000;
+    static final int ALG_HASH_160 = 0x00140000;
+    static final int ALG_HASH_256 = 0x00200000;
+    static final int ALG_HASH_384 = 0x00300000;
+    static final int ALG_HASH_512 = 0x00400000;
+    static final int ALG_HASH_DIV = 0x00010000;
+    static final int ALG_HASH_MSK = 0x0000007F;
+    static final int ALG_NONE     = 0x00800000;
+    static final int ALG_ASYM_KA  = 0x01000000;
+    static final int ALG_AES_PAD  = 0x02000000;
+    static final int ALG_EC_KEY   = 0x04000000;
+    static final int ALG_KEY_GEN  = 0x08000000;
+    static final int ALG_KEY_PARM = 0x10000000;
+  
+    static
+      {
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Symmetric Key Encryption and Decryption
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes128-cbc",
+                      "AES/CBC/PKCS5Padding",
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_128);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes192-cbc",
+                      "AES/CBC/PKCS5Padding",
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_192);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes256-cbc",
+                      "AES/CBC/PKCS5Padding",
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
+                      "AES/ECB/NoPadding",
+                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc",
+                      "AES/CBC/PKCS5Padding",
+                      ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
+  
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  HMAC Operations
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", ALG_HMAC);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512", ALG_HMAC);
+  
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Asymmetric Key Decryption
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+                      "RSA/ECB/PKCS1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+                      "RSA/ECB/OAEPWithSHA1AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                      "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
+                      "RSA/ECB/NoPadding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+  
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Diffie-Hellman Key Agreement
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
+                      "ECDH",
+                      ALG_ASYM_KA | ALG_EC_KEY);
+        
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Asymmetric Key Signatures
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+                      "NONEwithRSA",
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02,
+                                     0x1a, 0x05, 0x00, 0x04, 0x14};
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+                      "NONEwithRSA",
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                     0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
+  
+       addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",
+                      "NONEwithRSA",
+                       ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_384).pkcs1DigestInfo =
+                           new byte[]{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                      0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30};
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
+                      "NONEwithRSA",
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_512).pkcs1DigestInfo =
+                          new byte[]{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                     0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40};
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_384);
+  
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_512);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
+                      "NONEwithRSA",
+                      ALG_ASYM_SGN | ALG_RSA_KEY);
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
+                      "NONEwithECDSA",
+                      ALG_ASYM_SGN | ALG_EC_KEY);
+  
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Asymmetric Key Generation
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+                      "secp256r1",
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+              {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+               (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
+               (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
+               (byte)0x42, (byte)0x00, (byte)0x04, (byte)0x8B, (byte)0xDF, (byte)0x5D, (byte)0xA2, (byte)0xBE,
+               (byte)0x57, (byte)0x73, (byte)0xAC, (byte)0x78, (byte)0x86, (byte)0xD3, (byte)0xE5, (byte)0xE6,
+               (byte)0xC4, (byte)0xA5, (byte)0x6C, (byte)0x32, (byte)0xE2, (byte)0x28, (byte)0xBE, (byte)0xA0,
+               (byte)0x0F, (byte)0x8F, (byte)0xBF, (byte)0x29, (byte)0x1E, (byte)0xC6, (byte)0x67, (byte)0xB3,
+               (byte)0x51, (byte)0x99, (byte)0xB7, (byte)0xAD, (byte)0x13, (byte)0x0C, (byte)0x5A, (byte)0x7C,
+               (byte)0x66, (byte)0x4B, (byte)0x47, (byte)0xF6, (byte)0x1F, (byte)0x41, (byte)0xE9, (byte)0xB3,
+               (byte)0xB2, (byte)0x40, (byte)0xC0, (byte)0x65, (byte)0xF8, (byte)0x8F, (byte)0x30, (byte)0x0A,
+               (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
+               (byte)0x7C, (byte)0x0D, (byte)0xB2});
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
+                      "secp384r1",
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+              {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+               (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
+               (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
+               (byte)0x63, (byte)0x5C, (byte)0x35, (byte)0x5C, (byte)0xC0, (byte)0xDF, (byte)0x90, (byte)0x16,
+               (byte)0xA6, (byte)0x18, (byte)0xF1, (byte)0x50, (byte)0xA7, (byte)0x73, (byte)0xE7, (byte)0x05,
+               (byte)0x22, (byte)0x36, (byte)0xF7, (byte)0xDC, (byte)0x9F, (byte)0xD8, (byte)0xA5, (byte)0xAC,
+               (byte)0x71, (byte)0x9F, (byte)0x1C, (byte)0x9A, (byte)0x71, (byte)0x94, (byte)0x8B, (byte)0x81,
+               (byte)0x15, (byte)0x32, (byte)0x24, (byte)0x92, (byte)0x11, (byte)0x11, (byte)0xDC, (byte)0x7E,
+               (byte)0x9D, (byte)0x70, (byte)0x1A, (byte)0x9B, (byte)0x83, (byte)0x33, (byte)0x8B, (byte)0x59,
+               (byte)0xC1, (byte)0x93, (byte)0x34, (byte)0x7F, (byte)0x58, (byte)0x0D, (byte)0x91, (byte)0xC4,
+               (byte)0xD2, (byte)0x20, (byte)0x8F, (byte)0x64, (byte)0x16, (byte)0x16, (byte)0xEE, (byte)0x07,
+               (byte)0x51, (byte)0xC3, (byte)0xF8, (byte)0x56, (byte)0x5B, (byte)0xCD, (byte)0x49, (byte)0xFE,
+               (byte)0xE0, (byte)0xE2, (byte)0xD5, (byte)0xC5, (byte)0x79, (byte)0xD1, (byte)0xA6, (byte)0x18,
+               (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
+               (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98});
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
+                      "secp521r1",
+                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+              {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
+               (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
+               (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
+               (byte)0x00, (byte)0x04, (byte)0x01, (byte)0xFC, (byte)0xA0, (byte)0x56, (byte)0x27, (byte)0xB7,
+               (byte)0x68, (byte)0x25, (byte)0xC5, (byte)0x83, (byte)0xD1, (byte)0x34, (byte)0x0A, (byte)0xAE,
+               (byte)0x96, (byte)0x1D, (byte)0xDC, (byte)0xE0, (byte)0x95, (byte)0xC5, (byte)0xE0, (byte)0x25,
+               (byte)0x1F, (byte)0x46, (byte)0xF6, (byte)0x36, (byte)0xD7, (byte)0x3F, (byte)0xD9, (byte)0x5A,
+               (byte)0x15, (byte)0xE3, (byte)0x05, (byte)0xBA, (byte)0x14, (byte)0x06, (byte)0x1B, (byte)0xEB,
+               (byte)0xD4, (byte)0x88, (byte)0xFC, (byte)0x0D, (byte)0x87, (byte)0x02, (byte)0x15, (byte)0x4E,
+               (byte)0x7E, (byte)0xC0, (byte)0x9F, (byte)0xF6, (byte)0x1C, (byte)0x80, (byte)0x2C, (byte)0xE6,
+               (byte)0x0D, (byte)0xF5, (byte)0x0E, (byte)0x6C, (byte)0xD9, (byte)0x55, (byte)0xFA, (byte)0xBD,
+               (byte)0x6B, (byte)0x55, (byte)0xA1, (byte)0x0E, (byte)0x00, (byte)0x55, (byte)0x12, (byte)0x35,
+               (byte)0x8D, (byte)0xFC, (byte)0x0A, (byte)0x42, (byte)0xE5, (byte)0x78, (byte)0x09, (byte)0xD6,
+               (byte)0xF6, (byte)0x0C, (byte)0xBE, (byte)0x15, (byte)0x0A, (byte)0x7D, (byte)0xC2, (byte)0x2E,
+               (byte)0x98, (byte)0xA1, (byte)0xE1, (byte)0x6A, (byte)0xF1, (byte)0x1F, (byte)0xD2, (byte)0x9F,
+               (byte)0x9A, (byte)0x81, (byte)0x65, (byte)0x51, (byte)0x8F, (byte)0x6E, (byte)0xF1, (byte)0x3B,
+               (byte)0x95, (byte)0x6B, (byte)0xCE, (byte)0x51, (byte)0x09, (byte)0xFF, (byte)0x23, (byte)0xDC,
+               (byte)0xE8, (byte)0x71, (byte)0x1A, (byte)0x94, (byte)0xC7, (byte)0x8E, (byte)0x4A, (byte)0xA9,
+               (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
+               (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96});
+  
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
+                      "brainpoolP256r1",
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+              {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+               (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
+               (byte)0x24, (byte)0x03, (byte)0x03, (byte)0x02, (byte)0x08, (byte)0x01, (byte)0x01, (byte)0x07,
+               (byte)0x03, (byte)0x42, (byte)0x00, (byte)0x04, (byte)0x26, (byte)0x3C, (byte)0x91, (byte)0x3F,
+               (byte)0x6B, (byte)0x91, (byte)0x10, (byte)0x6F, (byte)0xE4, (byte)0xA2, (byte)0x2D, (byte)0xA4,
+               (byte)0xBB, (byte)0xAB, (byte)0xCE, (byte)0x9E, (byte)0x41, (byte)0x01, (byte)0x0B, (byte)0xB0,
+               (byte)0xC3, (byte)0x84, (byte)0xEF, (byte)0x35, (byte)0x0D, (byte)0x66, (byte)0xEE, (byte)0x0C,
+               (byte)0xEC, (byte)0x60, (byte)0xB6, (byte)0xF5, (byte)0x54, (byte)0x54, (byte)0x27, (byte)0x2A,
+               (byte)0x1D, (byte)0x07, (byte)0x61, (byte)0xB0, (byte)0xC3, (byte)0x01, (byte)0xE8, (byte)0xCB,
+               (byte)0x52, (byte)0xF5, (byte)0x03, (byte)0xC1, (byte)0x0C, (byte)0x3F, (byte)0xF0, (byte)0x97,
+               (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
+               (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
+        
+        for (short rsa_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
+          {
+            addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
+                          null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
+            if (SKS_RSA_EXPONENT_SUPPORT)
+              {
+                addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size + ".exp",
+                              null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
+              }
+          }
 
-      addECKeyAlgorithm ("secp521r1",
-          new byte[]
-             {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
-              (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
-              (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
-              (byte)0x00, (byte)0x04, (byte)0x01, (byte)0xFC, (byte)0xA0, (byte)0x56, (byte)0x27, (byte)0xB7,
-              (byte)0x68, (byte)0x25, (byte)0xC5, (byte)0x83, (byte)0xD1, (byte)0x34, (byte)0x0A, (byte)0xAE,
-              (byte)0x96, (byte)0x1D, (byte)0xDC, (byte)0xE0, (byte)0x95, (byte)0xC5, (byte)0xE0, (byte)0x25,
-              (byte)0x1F, (byte)0x46, (byte)0xF6, (byte)0x36, (byte)0xD7, (byte)0x3F, (byte)0xD9, (byte)0x5A,
-              (byte)0x15, (byte)0xE3, (byte)0x05, (byte)0xBA, (byte)0x14, (byte)0x06, (byte)0x1B, (byte)0xEB,
-              (byte)0xD4, (byte)0x88, (byte)0xFC, (byte)0x0D, (byte)0x87, (byte)0x02, (byte)0x15, (byte)0x4E,
-              (byte)0x7E, (byte)0xC0, (byte)0x9F, (byte)0xF6, (byte)0x1C, (byte)0x80, (byte)0x2C, (byte)0xE6,
-              (byte)0x0D, (byte)0xF5, (byte)0x0E, (byte)0x6C, (byte)0xD9, (byte)0x55, (byte)0xFA, (byte)0xBD,
-              (byte)0x6B, (byte)0x55, (byte)0xA1, (byte)0x0E, (byte)0x00, (byte)0x55, (byte)0x12, (byte)0x35,
-              (byte)0x8D, (byte)0xFC, (byte)0x0A, (byte)0x42, (byte)0xE5, (byte)0x78, (byte)0x09, (byte)0xD6,
-              (byte)0xF6, (byte)0x0C, (byte)0xBE, (byte)0x15, (byte)0x0A, (byte)0x7D, (byte)0xC2, (byte)0x2E,
-              (byte)0x98, (byte)0xA1, (byte)0xE1, (byte)0x6A, (byte)0xF1, (byte)0x1F, (byte)0xD2, (byte)0x9F,
-              (byte)0x9A, (byte)0x81, (byte)0x65, (byte)0x51, (byte)0x8F, (byte)0x6E, (byte)0xF1, (byte)0x3B,
-              (byte)0x95, (byte)0x6B, (byte)0xCE, (byte)0x51, (byte)0x09, (byte)0xFF, (byte)0x23, (byte)0xDC,
-              (byte)0xE8, (byte)0x71, (byte)0x1A, (byte)0x94, (byte)0xC7, (byte)0x8E, (byte)0x4A, (byte)0xA9,
-              (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
-              (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96});
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Special Algorithms
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1, null, 0);
 
-      addECKeyAlgorithm ("brainpoolP256r1",
-          new byte[]
-             {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
-              (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
-              (byte)0x24, (byte)0x03, (byte)0x03, (byte)0x02, (byte)0x08, (byte)0x01, (byte)0x01, (byte)0x07,
-              (byte)0x03, (byte)0x42, (byte)0x00, (byte)0x04, (byte)0x26, (byte)0x3C, (byte)0x91, (byte)0x3F,
-              (byte)0x6B, (byte)0x91, (byte)0x10, (byte)0x6F, (byte)0xE4, (byte)0xA2, (byte)0x2D, (byte)0xA4,
-              (byte)0xBB, (byte)0xAB, (byte)0xCE, (byte)0x9E, (byte)0x41, (byte)0x01, (byte)0x0B, (byte)0xB0,
-              (byte)0xC3, (byte)0x84, (byte)0xEF, (byte)0x35, (byte)0x0D, (byte)0x66, (byte)0xEE, (byte)0x0C,
-              (byte)0xEC, (byte)0x60, (byte)0xB6, (byte)0xF5, (byte)0x54, (byte)0x54, (byte)0x27, (byte)0x2A,
-              (byte)0x1D, (byte)0x07, (byte)0x61, (byte)0xB0, (byte)0xC3, (byte)0x01, (byte)0xE8, (byte)0xCB,
-              (byte)0x52, (byte)0xF5, (byte)0x03, (byte)0xC1, (byte)0x0C, (byte)0x3F, (byte)0xF0, (byte)0x97,
-              (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
-              (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
-    }
+        addAlgorithm (SecureKeyStore.ALGORITHM_KEY_ATTEST_1, null, 0);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
+
+      }
+
+    static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
+
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -797,11 +779,12 @@ public class SEReferenceImplementation
 
     static String checkECKeyCompatibility (ECKey ecKey, String keyId) throws SKSException
       {
-        for (String jceName : supportedEcKeyAlgorithms.keySet ())
+        for (String uri : supportedAlgorithms.keySet ())
           {
-            if (ecKey.getParams ().getCurve ().equals (supportedEcKeyAlgorithms.get (jceName)))
+            EllipticCurve curve = supportedAlgorithms.get (uri).curve;
+            if (curve != null && ecKey.getParams ().getCurve ().equals (curve))
               {
-                return jceName;
+                return supportedAlgorithms.get (uri).jceName;
               }
           }
         abort ("Unsupported EC key algorithm for: " + keyId);
