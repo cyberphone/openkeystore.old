@@ -126,6 +126,7 @@ public interface SecureKeyStore
     String VAR_SESSION_KEY_ALGORITHM          = "sessionKeyAlgorithm";
     String VAR_SESSION_KEY_LIMIT              = "sessionKeyLimit";
     String VAR_SESSION_LIFE_TIME              = "sessionLifeTime";
+    String VAR_SUB_TYPE                       = "subType";
     String VAR_TYPE                           = "type";
     String VAR_USER_MODIFIABLE                = "userModifiable";
     String VAR_VALUE                          = "value";
