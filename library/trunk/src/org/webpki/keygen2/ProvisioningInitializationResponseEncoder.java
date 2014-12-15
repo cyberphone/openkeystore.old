@@ -120,7 +120,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
           }
 
         ////////////////////////////////////////////////////////////////////////
-        // "Logical" position for the attestion
+        // "Logical" position for the attestation
         ////////////////////////////////////////////////////////////////////////
         wr.setBinary (ATTESTATION_JSON, attestation);
 
