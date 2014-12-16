@@ -1436,7 +1436,6 @@ org.webpki.json.JSONParser = function ()
 
 org.webpki.json.JSONParser.LEFT_CURLY_BRACKET  = '{';
 org.webpki.json.JSONParser.RIGHT_CURLY_BRACKET = '}';
-org.webpki.json.JSONParser.BLANK_CHARACTER     = ' ';
 org.webpki.json.JSONParser.DOUBLE_QUOTE        = '"';
 org.webpki.json.JSONParser.COLON_CHARACTER     = ':';
 org.webpki.json.JSONParser.LEFT_BRACKET        = '[';
@@ -1728,7 +1727,7 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN      = new RegExp ("^([-+]?(([0-9]*\\.
 
 /* boolean */org.webpki.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)
 {
-    return c <= org.webpki.json.JSONParser.BLANK_CHARACTER;
+    return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 };
 
 /* char */org.webpki.json.JSONParser.prototype._scan = function ()
