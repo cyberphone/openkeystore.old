@@ -30,7 +30,6 @@ public class JSONParser
   {
     static final char LEFT_CURLY_BRACKET  = '{';
     static final char RIGHT_CURLY_BRACKET = '}';
-    static final char BLANK_CHARACTER     = ' ';
     static final char DOUBLE_QUOTE        = '"';
     static final char COLON_CHARACTER     = ':';
     static final char LEFT_BRACKET        = '[';
@@ -336,7 +335,7 @@ public class JSONParser
 
     boolean isWhiteSpace (char c)
       {
-        return c <= BLANK_CHARACTER;
+        return c == 0x20 || c == 0x0A || c == 0x0D || c == 0x09;
       }
 
     char scan () throws IOException
