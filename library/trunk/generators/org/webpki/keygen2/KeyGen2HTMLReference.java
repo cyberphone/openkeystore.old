@@ -673,7 +673,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                         new ProtocolStep ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
                         new ProtocolStep ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
  "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
-                        new ProtocolStep ("ProvisioningInitializationResponse.json", "After these messages exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
+                        new ProtocolStep ("ProvisioningInitializationResponse.json", "After these message exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
  "which is used for securing the<br>rest of the session through MAC- and encryption-operations." +
  "<br>&nbsp;<br>SKS API Reference: <code>createProvisioningSession</code>.<br>&nbsp;<br>" +
  "In the sample a request for creating a key is subsequently returned to the client:"),
