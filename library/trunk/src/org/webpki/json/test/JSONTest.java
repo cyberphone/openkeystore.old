@@ -910,6 +910,20 @@ public class JSONTest
         badSignature (BAD_SIGNATURE.DataAtEnd);
         badSignature (BAD_SIGNATURE.MissingKey);
       }
+    @Test
+    public void Whitespace () throws Exception
+      {
+        try
+          {
+            JSONParser.parse ("{\u0007 \"name\": 6}");
+            fail("Ws");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Expected '\"' but got '\u0007'");
+          }
+        JSONParser.parse ("{\u0009 \"name\": 6}");
+      }
 
     private void badSignature (BAD_SIGNATURE test) throws Exception
       {
