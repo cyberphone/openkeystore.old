@@ -37,7 +37,7 @@ public enum KeyContainerTypes
         this.name = name;  
       }
     
-    public static final String KCT_TARGET_KEY_CONTAINERS    = "TargetKeyContainers";
+    public static final String KCT_TARGET_KEY_CONTAINERS    = "targetKeyContainers";
 
     public String getName ()
       {

@@ -94,13 +94,14 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Normalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
-          .append (" containing a <code>Signature</code> property." + LINE_SEPARATOR +
+          .append (" containing a <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property." + LINE_SEPARATOR +
             "Parsing restrictions:<ul>" +
             "<li>The original property order <b>must</b> be <i>preserved</i>.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "</ul>The normalization steps are as follows:<ul>" +
-            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings having a value &lt;= ASCII space (0x32).</li>" +
+            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
+            "having a value of x09, x0a, x0d or x20.</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be adjusted as follows: " +
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
@@ -179,9 +180,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "\">" +
             JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-            "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
+            "</a>, have been successfully integrated in a proof-of-concept application ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
-         .append ("." + LINE_SEPARATOR +
+         .append (" running on Android." + LINE_SEPARATOR +
          "This application is based on an integrated " +
          "JSON encoder, decoder and signature solution which makes the code comparatively easy to grasp:" +
          "<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
@@ -254,6 +255,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
         json.addDocumentHistoryLine ("2014-09-17", "0.54", "Changed canonicalization to normalization");
         json.addDocumentHistoryLine ("2014-09-23", "0.55", "Aligned EC parameters with " + json.createReference (JSONBaseHTML.REF_JOSE));
+        json.addDocumentHistoryLine ("2014-12-08", "0.56", "Major upgrade including removal of " + json.createReference (JSONBaseHTML.REF_XMLDSIG) + " bloat and adding support for " + json.createReference (JSONBaseHTML.REF_JOSE) + " algorithm identifiers");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +

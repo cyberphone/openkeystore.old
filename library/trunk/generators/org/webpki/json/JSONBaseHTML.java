@@ -18,6 +18,8 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.net.URLEncoder;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -37,7 +39,7 @@ import org.webpki.util.Base64;
  */
 public class JSONBaseHTML
   {
-    public static final String MANDATORY               = "Y";
+    public static final String MANDATORY               = "M";
     public static final String OPTIONAL                = "O";
     
     public static final String PAGE_WIDTH              = "1000pt";
@@ -85,9 +87,13 @@ public class JSONBaseHTML
     
     public static final String REF_FIPS186             = "FIPS-186-4";
 
-    public static final String REF_WEBPKI_FOR_ANDROID  = "W4A";
+    public static final String REF_WEBPKI_FOR_ANDROID  = "PKIDROID";
 
     public static final String REF_WEBIDL              = "WEBIDL";
+    
+    public static final String JCS_PUBLIC_KEY_RSA      = "publicKey [RSA]";
+
+    public static final String JCS_PUBLIC_KEY_EC       = "publicKey [EC]";
 
     String file_name;
     String subsystem_name;
@@ -222,11 +228,11 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.55, September&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.56, December&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V0.97c, August 2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.98, December 2014.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
@@ -1050,12 +1056,12 @@ public class JSONBaseHTML
                                  .append ("</td></tr></table>");
       }
 
-    static String makeLink (String header)
+    static String makeLink (String header) throws IOException
       {
         StringBuffer buffer = new StringBuffer ();
         for (char c : header.toCharArray ())
           {
-            if (c == ' ')
+            if (URLEncoder.encode (new String(new char[]{c}), "UTF-8").charAt (0) != c)
               {
                 c = '_';
               }
@@ -1068,7 +1074,7 @@ public class JSONBaseHTML
       {
         addParagraphObject ("Notation").append (intro).append (
             "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#Notation\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
-            "Properties may either be <i>required</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
+            "Properties may either be <i>mandatory</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
             "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
             "In some JSON objects there is a choice " +
             "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
@@ -1080,7 +1086,7 @@ public class JSONBaseHTML
         new DataTypesTable ();
       }
 
-    public static String enumerateAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter, boolean reference)
+    public static String enumerateStandardAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter)
       {
         StringBuffer buffer = new StringBuffer ("<ul>");
         for (SKSAlgorithms algorithm : algorithms)
@@ -1097,10 +1103,21 @@ public class JSONBaseHTML
               {
                 continue;
               }
-            buffer.append ("<li><code")
-             .append ((algorithm.isMandatorySKSAlgorithm () || reference) ? ">" : " style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">")
-             .append (algorithm.getURI ())
-             .append ("</code></li>");
+            buffer.append ("<li><code>").append (algorithm.getURI ()).append ("</code></li>");
+          }
+        return buffer.append ("</ul>").toString ();
+      }
+
+    public static String enumerateJOSEAlgorithms (SKSAlgorithms[] algorithms)
+      {
+        StringBuffer buffer = new StringBuffer ("<ul>");
+        for (SKSAlgorithms algorithm : algorithms)
+          {
+            String joseName = algorithm.getJOSEName ();
+            if (joseName != null)
+              {
+                buffer.append ("<li><code>").append (joseName).append ("</code></li>");
+              }
           }
         return buffer.append ("</ul>").toString ();
       }
@@ -1177,12 +1194,12 @@ public class JSONBaseHTML
         return s.toString ();
       }
 
-    public String globalLinkRef (String name)
+    public String globalLinkRef (String name) throws IOException
       {
         return "<a href=\"#" + makeLink (name) + "\">" + makeName (name) +"</a>"; 
       }
 
-    public String globalLinkRef (String parent, String name)
+    public String globalLinkRef (String parent, String name) throws IOException
       {
         return "<a href=\"#" + makeLink(parent) + "." + makeLink (name) + "\">" + makeName (name) +"</a>"; 
       }
@@ -1231,6 +1248,15 @@ public class JSONBaseHTML
         String jcs = reference ? "" : createReference (REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
+        Vector<SKSAlgorithms> sym_plus_asym = new Vector<SKSAlgorithms> ();
+        for (SKSAlgorithms sks_alg : MACAlgorithms.values ())
+          {
+            sym_plus_asym.add (sks_alg);
+          }
+        for (AsymSignatureAlgorithms sks_alg : AsymSignatureAlgorithms.values ())
+          {
+            sym_plus_asym.add (sks_alg);
+          }
        
         RowInterface row_interface = addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow ()
@@ -1256,25 +1282,86 @@ public class JSONBaseHTML
               .addString ("Signature algorithm ID.")
               .addString (sks_alg_ref)
               .addString ("The currently recognized symmetric key algorithms include:" +
-                          enumerateAlgorithms (MACAlgorithms.values (), true, false, reference) +
+                          enumerateStandardAlgorithms (MACAlgorithms.values (), true, false) +
                           "The currently recognized asymmetric key algorithms include:" +
-                          enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true, reference))
-              .addString ("For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) + ".")
+                          enumerateStandardAlgorithms (AsymSignatureAlgorithms.values (), false, true) +
+                          (reference ? "For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) +
+                          "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JOSE) + " notation:" +
+                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new SKSAlgorithms[0])) : ""))
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.SIGNATURE_JSON)
-              .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
+              .addProperty (JSONSignatureDecoder.KEY_ID_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.KEY_ID_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
+            .newColumn ()
+               .setUsage (false)
+            .newColumn ()
+              .addString (option)
+              .addString ("Application-specific string identifying the signature key.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
+              .setChoice (false, url_option == null ? 2 : 3)
             .newColumn ()
-              .addString (jcs)
-              .addString ("Signature key information placeholder." + 
-                          Types.LINE_SEPARATOR +
-                          "The designated key <b>must</b> be compatible with ")
-              .addPropertyLink (JSONSignatureDecoder.ALGORITHM_JSON, JSONSignatureDecoder.SIGNATURE_JSON)
-              .addString (".");
-        if (extension_option != null)
+              .addString (option)
+              .addString ("Public key object.");
+        if (url_option!= null)
+          {
+            row_interface = row_interface
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureDecoder.URL_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.URL_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn ()
+            .newColumn ()
+              .addString (option)
+              .addString ("A single public key or X.509 ")
+              .addString (createReference (REF_X509))
+              .addString (" certificate path stored in a PEM ")
+              .addString (createReference (REF_PEM))
+              .addString (" file accessible via an HTTP&nbsp;URL.")
+              .addString (url_option);
+          }
+    row_interface
+          .newRow ()
+        .newColumn ()
+          .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
+          .addArrayList (Types.SORTED_CERT_PATH, 1)
+        .newColumn ()
+          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+        .newColumn ()
+        .newColumn ()
+          .addString (option)
+          .addString ("Sorted X.509 ")
+          .addString (createReference (REF_X509))
+          .addString (" certificate path where the <i>first</i> array element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+                      "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
+      .newRow ()
+        .newColumn ()
+          .addProperty (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
+          .addLink (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
+        .newColumn ()
+          .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
+        .newColumn ()
+          .setUsage (false)
+        .newColumn ()
+          .addString (jcs)
+          .addString ("<i>Optional</i> signature certificate attribute data for usage with the <code>" +
+                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
+                      "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
+                      "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+                      "</code>." + Types.LINE_SEPARATOR +
+                      "Note: due to the fact that X.500 name comparisons have turned out (in practice) to " +
+                      "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + 
+                      "</code> option <i>should only be used in specific environments</i>.");
+       if (extension_option != null)
           {
             row_interface = row_interface
               .newRow ()
@@ -1287,7 +1374,8 @@ public class JSONBaseHTML
                   .setUsage (false)
                 .newColumn ()
                   .addString (jcs)
-                  .addString ("<i>Optional</i> array holding custom extension objects like time-stamps, CRLs, and OCSP responses.")
+                  .addString ("<i>Optional</i> array holding custom extension objects like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
+                              "A conforming implementation <b>must</b> reject extensions that are not recognized.")
                   .addString (extension_option);
           }
         row_interface
@@ -1303,125 +1391,57 @@ public class JSONBaseHTML
               .addString ("The signature value is calculated by applying the algorithm specified in <code>" +
                   JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the specified key on the " +
                   "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
-                  "normalized JSON object.");
-
-        row_interface = addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.KEY_ID_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.KEY_ID_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.STRING)
-            .newColumn ()
-              .setChoice (true, url_option == null ? 3 : 4)
-            .newColumn ()
-              .addString (option)
-              .addString ("Symmetric key ID.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString (option)
-              .addString ("Public key.");
-        if (url_option!= null)
-          {
-            row_interface = row_interface
-              .newRow ()
-                .newColumn ()
-                  .addProperty (JSONSignatureDecoder.URL_JSON)
-                  .addSymbolicValue (JSONSignatureDecoder.URL_JSON)
-                .newColumn ()
-                  .setType (Types.WEBPKI_DATA_TYPES.URI)
-                .newColumn ()
-                .newColumn ()
-                  .addString (option)
-                  .addString ("A single public key or X.509 ")
-                  .addString (createReference (REF_X509))
-                  .addString (" certificate path stored in a PEM ")
-                  .addString (createReference (REF_PEM))
-                  .addString (" file accessible via an HTTP&nbsp;URL.")
-                  .addString (url_option);
-              }
-        row_interface
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
-              .addArrayList (Types.SORTED_CERT_PATH, 1)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
-            .newColumn ()
-            .newColumn ()
-              .addString (option)
-              .addString ("Sorted X.509 ")
-              .addString (createReference (REF_X509))
-              .addString (" certificate path where the <i>first</i> array element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
-                          "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-              .addLink (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString (jcs)
-              .addString ("<i>Optional</i> signature certificate attribute data for usage with the <code>" +
-                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
-                          "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
-                          "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-                          "</code>." + Types.LINE_SEPARATOR +
-                          "Note: due to the fact that X.500 name comparisions have turned out (in practice) to " +
-                          "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + 
-                          "</code> option <i>should only be used in specific environments</i>.");
+                  "normalized JSON object.").setNotes (
+                   "Note that asymmetric key signatures <b>must</b> provide the associated " +
+                  "public key in a <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
+                   (url_option!= null ? ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" : "") + 
+                   " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> property.");
 
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.RSA_PUBLIC_KEY)
-              .addLink (JSONSignatureDecoder.RSA_PUBLIC_KEY)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-              .setChoice (true, 2)
-            .newColumn ()
-              .addString (option)
-              .addString ("EC public key.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.RSA_PUBLIC_KEY)
-              .addLink (JSONSignatureDecoder.RSA_PUBLIC_KEY)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString (option)
-              .addString ("RSA public key. <i>Algorithm restrictions</i>: 1024-4096 bit keys appear to work just about &quot;everywhere&quot;.");
+            .newRow ()
+              .newColumn ()
+                .addProperty (JSONSignatureDecoder.TYPE_JSON)
+                .addValue (JSONSignatureDecoder.EC_PUBLIC_KEY)
+              .newColumn ()
+                .setType (Types.WEBPKI_DATA_TYPES.STRING)
+              .newColumn ()
+                 .setChoice (true, 2)
+              .newColumn ()
+                .addString (jcs)
+                .addString ("EC key type indicator.  For the additional properties see: ")
+                .addLink (JCS_PUBLIC_KEY_EC)
+            .newRow ()
+              .newColumn ()
+                .addProperty (JSONSignatureDecoder.TYPE_JSON)
+                .addValue (JSONSignatureDecoder.RSA_PUBLIC_KEY)
+              .newColumn ()
+                .setType (Types.WEBPKI_DATA_TYPES.STRING)
+              .newColumn ()
+              .newColumn ()
+                .addString (jcs)
+                .addString ("RSA key type indicator. For the additional properties see: ")
+                .addLink (JCS_PUBLIC_KEY_RSA);
 
-        addSubItemTable (JSONSignatureDecoder.RSA_PUBLIC_KEY)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.CURVE_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.CURVE_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.STRING)
-            .newColumn ()
-            .newColumn ()
-              .addString (jcs)
-              .addString ("EC curve ID.")
-              .addString (sks_alg_ref)
-              .addString ("The currently recognized EC curves include:" +
-                      enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))
-              .addString (reference ?
+        addSubItemTable (JCS_PUBLIC_KEY_EC)
+           .newRow ()
+              .newColumn ()
+                .addProperty (JSONSignatureDecoder.CURVE_JSON)
+                .addSymbolicValue (JSONSignatureDecoder.CURVE_JSON)
+              .newColumn ()
+                .setType (Types.WEBPKI_DATA_TYPES.STRING)
+              .newColumn ()
+              .newColumn ()
+                .addString (jcs)
+                .addString ("EC curve ID.")
+                .addString (sks_alg_ref)
+                .addString ("The currently recognized EC curves include:" +
+                        enumerateStandardAlgorithms (KeyAlgorithms.values (), false, true))
+                .addString (reference ?
   "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
   ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference (REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
   "The algorithm names were derived from the SKS " + createReference (REF_SKS) + " specification. " + Types.LINE_SEPARATOR +
-  "Compatible EC curves may also be expressed in the XML&nbsp;DSig " +  createReference (REF_XMLDSIG) +
-  " notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
+  "A subset of the EC curves may also be expressed in the JOSE " +  createReference (REF_JOSE) + 
+  " notation: " + enumerateJOSEAlgorithms (KeyAlgorithms.values ()) : "")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X_JSON)
@@ -1453,7 +1473,7 @@ public class JSONBaseHTML
               .addString (KeyAlgorithms.NIST_P_521.getURI ())
               .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
 
-        addSubItemTable (JSONSignatureDecoder.RSA_PUBLIC_KEY)
+        addSubItemTable (JCS_PUBLIC_KEY_RSA)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.N_JSON)
