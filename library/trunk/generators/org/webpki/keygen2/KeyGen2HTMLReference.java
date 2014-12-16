@@ -322,7 +322,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 .newColumn ()
                   .addString ("<i>Optional</i> X.509-based signature covering the request. See ")
                   .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
-                  .addString (".");
+                  .addString ("." + LINE_SEPARATOR +
+                              "It is <b>recommended</b> using a commercial grade TLS certificate to avoid user security alerts.");
           }
       }
 
