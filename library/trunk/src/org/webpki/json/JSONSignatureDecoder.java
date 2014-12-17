@@ -167,7 +167,7 @@ public class JSONSignatureDecoder implements Serializable
         key_id = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
           {
-            readX509CertificateEntry (rd);
+            readCertificateData (rd);
           }
         else if (rd.hasProperty (PUBLIC_KEY_JSON))
           {
@@ -190,7 +190,7 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    static BigInteger getFixedBinary (JSONObjectReader rd, String property, KeyAlgorithms ec) throws IOException
+    static BigInteger getCurvePoint (JSONObjectReader rd, String property, KeyAlgorithms ec) throws IOException
       {
         byte[] fixed_binary = rd.getBinary (property);
         if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
@@ -225,7 +225,7 @@ public class JSONSignatureDecoder implements Serializable
             else if (type.equals (EC_PUBLIC_KEY))
               {
                 KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON));
-                ECPoint w = new ECPoint (getFixedBinary (rd, X_JSON, ec), getFixedBinary (rd, Y_JSON, ec));
+                ECPoint w = new ECPoint (getCurvePoint (rd, X_JSON, ec), getCurvePoint (rd, Y_JSON, ec));
                 public_key = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
               }
             else
@@ -261,7 +261,7 @@ public class JSONSignatureDecoder implements Serializable
         return certificates.toArray (new X509Certificate[0]);
       }
 
-    void readX509CertificateEntry (JSONObjectReader rd) throws IOException
+    void readCertificateData (JSONObjectReader rd) throws IOException
       {
         certificate_path = getCertificatePath (rd);
         if (rd.hasProperty (SIGNER_CERTIFICATE_JSON))

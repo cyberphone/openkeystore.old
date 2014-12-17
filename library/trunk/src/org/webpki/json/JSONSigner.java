@@ -39,7 +39,7 @@ public abstract class JSONSigner implements Serializable
   
     abstract byte[] signData (byte[] data) throws IOException;
 
-    abstract void writeKeyInfoData (JSONObjectWriter wr) throws IOException;
+    abstract void writeKeyData (JSONObjectWriter wr) throws IOException;
     
     public JSONSigner setExtensions (JSONObjectWriter[] extensions)
       {

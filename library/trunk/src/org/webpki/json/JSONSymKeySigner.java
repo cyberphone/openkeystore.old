@@ -52,7 +52,7 @@ public class JSONSymKeySigner extends JSONSigner
       }
 
     @Override
-    void writeKeyInfoData (JSONObjectWriter wr) throws IOException
+    void writeKeyData (JSONObjectWriter wr) throws IOException
       {
       }
   }

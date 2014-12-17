@@ -307,12 +307,12 @@ import org.webpki.json.JSONSignatureDecoder;
  </pre>
      */
 
-    void setFixedBinary (BigInteger value, String name, KeyAlgorithms ec) throws IOException
+    void setCurvePoint (BigInteger value, String name, KeyAlgorithms ec) throws IOException
       {
-        byte[] fixed_binary = value.toByteArray ();
-        if (fixed_binary.length > (ec.getPublicKeySizeInBits () + 7) / 8)
+        byte[] curve_point = value.toByteArray ();
+        if (curve_point.length > (ec.getPublicKeySizeInBits () + 7) / 8)
           {
-            if (fixed_binary[0] != 0)
+            if (curve_point[0] != 0)
               {
                 throw new IOException ("Unexpected EC \"" + name + "\" value");
               }
@@ -320,11 +320,11 @@ import org.webpki.json.JSONSignatureDecoder;
           }
         else
           {
-            while (fixed_binary.length < (ec.getPublicKeySizeInBits () + 7) / 8)
+            while (curve_point.length < (ec.getPublicKeySizeInBits () + 7) / 8)
               {
-                fixed_binary = ArrayUtil.add (new byte[]{0}, fixed_binary);
+                curve_point = ArrayUtil.add (new byte[]{0}, curve_point);
               }
-            setBinary (name, fixed_binary);
+            setBinary (name, curve_point);
           }
       }
 
@@ -348,7 +348,7 @@ import org.webpki.json.JSONSignatureDecoder;
           {
             signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
           }
-        signer.writeKeyInfoData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
+        signer.writeKeyData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
         if (signer.extensions != null)
           {
             Vector<JSONValue> array = new Vector<JSONValue> ();
@@ -394,8 +394,8 @@ import org.webpki.json.JSONSignatureDecoder;
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
             public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg));
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-            public_key_writer.setFixedBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
-            public_key_writer.setFixedBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
+            public_key_writer.setCurvePoint (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
+            public_key_writer.setCurvePoint (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
         return this;
       }
