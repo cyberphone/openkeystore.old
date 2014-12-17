@@ -110,7 +110,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd, boolean permitExtensions) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -122,10 +122,6 @@ public class JSONSignatureDecoder implements Serializable
         getKeyInfo (signature);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
-            if (!permitExtensions)
-              {
-                throw new IOException ("You must enable \"" + EXTENSIONS_JSON + "\" to accept such");
-              }
             extensions = new Vector<JSONObjectReader> ();
             JSONArrayReader ar = signature.getArray (EXTENSIONS_JSON);
             do
@@ -376,6 +372,14 @@ public class JSONSignatureDecoder implements Serializable
         if (verifier.getVerifierType () != getSignatureType ())
           {
             throw new IOException ("Verifier type doesn't match the received signature");
+          }
+        if (!verifier.extensionsAllowed && extensions != null)
+          {
+            throw new IOException ("\"" + EXTENSIONS_JSON + "\" requires enabling in the verifier");
+          }
+        if (!verifier.keyIdAllowed && key_id != null)
+          {
+            throw new IOException ("\"" + KEY_ID_JSON + "\" requires enabling in the verifier");
           }
         verifier.verify (this);
       }

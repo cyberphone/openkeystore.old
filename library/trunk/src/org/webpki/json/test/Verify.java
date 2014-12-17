@@ -81,7 +81,7 @@ public class Verify
                             break;
   
                           case SYMMETRIC_KEY:
-                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
+                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()).permitKeyId (true));
                             debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyId ());
                             break;
   

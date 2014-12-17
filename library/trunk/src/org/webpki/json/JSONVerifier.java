@@ -32,4 +32,20 @@ public abstract class JSONVerifier implements Serializable
     abstract void verify (JSONSignatureDecoder signature_decoder) throws IOException;
 
     abstract JSONSignatureTypes getVerifierType () throws IOException;
+    
+    boolean extensionsAllowed;
+    
+    boolean keyIdAllowed;
+    
+    public JSONVerifier permitExtensions (boolean flag)
+      {
+        extensionsAllowed = flag;
+        return this;
+      }
+
+    public JSONVerifier permitKeyId (boolean flag)
+      {
+        keyIdAllowed = flag;
+        return this;
+      }
   }

@@ -869,9 +869,10 @@ public class JSONTest
       ECAlg (""),
       IncorrectNormalization (""),
       ExtraData ("Property \"WTF\" was never read"),
-      ExtensionTest1 ("You must enable \"extensions\" to accept such"),
+      ExtensionTest1 ("\"extensions\" requires enabling in the verifier"),
       ExtensionTest2 (null),
-      KeyId (null),
+      KeyId ("\"keyId\" requires enabling in the verifier"),
+      KeyId2 (null),
       PathOrder (""),
       Verify ("Unknown CA"),
       Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
@@ -944,7 +945,7 @@ public class JSONTest
         JSONObjectWriter ow = new JSONObjectWriter ();
         ow.setString ("some", "value");
         JSONObjectWriter signature = ow.setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        if (test == BAD_SIGNATURE.KeyId)
+        if (test == BAD_SIGNATURE.KeyId || test == BAD_SIGNATURE.KeyId2)
           {
             signature.setString (JSONSignatureDecoder.KEY_ID_JSON, "MyKey");
           }
@@ -1001,12 +1002,13 @@ public class JSONTest
 //        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
         try
           {
-            JSONSignatureDecoder dec = JSONParser.parse (json).getSignature (test == BAD_SIGNATURE.ExtensionTest2);
+            JSONSignatureDecoder dec = JSONParser.parse (json).getSignature ();
             assertTrue ("KID1", dec.getKeyId () == null ^ test == BAD_SIGNATURE.KeyId);
             if (test == BAD_SIGNATURE.KeyId)
               {
                 assertTrue ("KID2", dec.getKeyId ().equals ("MyKey"));
               }
+            dec.verify (new JSONX509Verifier (verifier).permitExtensions (test == BAD_SIGNATURE.ExtensionTest2).permitKeyId (test == BAD_SIGNATURE.KeyId2));
             if (test == BAD_SIGNATURE.ExtensionTest2)
               {
                 JSONObjectReader[] exts = dec.getExtensions ();
@@ -1018,7 +1020,6 @@ public class JSONTest
               {
                 assertTrue ("Noext", dec.getExtensions () == null);
               }
-            dec.verify (new JSONX509Verifier (verifier));
             assertTrue ("OK", test.error == null);
           }
         catch (Exception e)
