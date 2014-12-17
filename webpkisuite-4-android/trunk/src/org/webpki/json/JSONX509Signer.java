@@ -72,7 +72,7 @@ public class JSONX509Signer extends JSONSigner
       }
 
     @Override
-    void writeKeyInfoData (JSONObjectWriter wr) throws IOException
+    void writeKeyData (JSONObjectWriter wr) throws IOException
       {
         if (output_signature_certificate_attributes)
           {
