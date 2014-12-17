@@ -303,13 +303,19 @@ public class JSONBaseHTML
                      "Unsigned byte"),
                      
             SHORT   ("short",  "<i>number</i>",                           null,
+                     "Signed two-byte integer"),
+                     
+            USHORT  ("ushort",  "<i>number</i>",                          null,
                      "Unsigned two-byte integer"),
-                     
+
             INT     ("int",    "<i>number</i>",                           null,
-                     "Unsigned four-byte integer"),
+                     "Signed four-byte integer"),
                      
+            UINT    ("uint",    "<i>number</i>",                          null,
+                     "Unsigned four-byte integer"),
+                         
             BIGINT  ("bigint", "<i>string</i>",                           null,
-                     "Base10-encoded integer with arbitrary precision"),
+                    "Base10-encoded integer with arbitrary precision"),
                      
             BIGDEC  ("decimal", "<i>string</i>",                          null,
                      "Decimal type compatible with Java'buffer BigDecimal"),
