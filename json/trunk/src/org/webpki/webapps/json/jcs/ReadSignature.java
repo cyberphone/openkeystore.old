@@ -124,7 +124,7 @@ public class ReadSignature
                             break;
   
                           case SYMMETRIC_KEY:
-                            signature.verify (new JSONSymKeyVerifier (new GenerateSignature.SymmetricOperations ()));
+                            signature.verify (new JSONSymKeyVerifier (new GenerateSignature.SymmetricOperations ()).permitKeyId (true));
                             debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyId () + "\nValue=" + DebugFormatter.getHexString (GenerateSignature.SYMMETRIC_KEY));
                             break;
   
