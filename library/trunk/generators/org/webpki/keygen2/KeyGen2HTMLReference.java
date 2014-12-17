@@ -648,7 +648,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     " algorithm identifiers since these are not natively supported by the target. See " + json.createReference (JSONBaseHTML.REF_SKS) + 
                                     " <i>Algorithm Support</i>." + LINE_SEPARATOR +
                                     "In addition, the JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + JSONSignatureDecoder.URL_JSON + "</code> " +
-                                    "properties <b>must not</b> be featured in KeyGen2 messages either.");
+                                    "properties <b>must not</b> be featured in KeyGen2 messages either." + LINE_SEPARATOR +
+                                    "This document only refers to the required JCS properties.");
 
         json.addDataTypesDescription ("");
         
@@ -1984,7 +1985,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "</code> <b>must</b> be an EC key using the same curve as <code>" + 
                           SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
-        json.addJSONSignatureDefinitions (false, null, null);
+        json.addJSONSignatureDefinitions (false, null, null, false);
         
         json.writeHTML ();
       }

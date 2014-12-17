@@ -1243,7 +1243,7 @@ public class JSONBaseHTML
         doc_history.insert (doc_history.lastIndexOf ("</table>"), "<tr><td>" + date + "</td><td style=\"text-align:center\">" + version + "</td><td>" + comment + "</td></tr>");
       }
 
-    public void addJSONSignatureDefinitions (boolean reference, String url_option, String extension_option) throws IOException
+    public void addJSONSignatureDefinitions (boolean reference, String url_option, String extension_option, boolean key_id_option) throws IOException
       {
         String jcs = reference ? "" : createReference (REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
@@ -1287,7 +1287,10 @@ public class JSONBaseHTML
                           enumerateStandardAlgorithms (AsymSignatureAlgorithms.values (), false, true) +
                           (reference ? "For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) +
                           "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JOSE) + " notation:" +
-                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new SKSAlgorithms[0])) : ""))
+                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new SKSAlgorithms[0])) : ""));
+        if (key_id_option)
+          {
+          row_interface = row_interface
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.KEY_ID_JSON)
@@ -1298,7 +1301,9 @@ public class JSONBaseHTML
                .setUsage (false)
             .newColumn ()
               .addString (option)
-              .addString ("Application-specific string identifying the signature key.")
+              .addString ("Application-specific string identifying the signature key.");
+          }
+        row_interface
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
