@@ -78,8 +78,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;curve&quot;:&nbsp;&quot;P-256&quot;,<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;value&quot;:&nbsp;&quot;MEYCIQDGP3HL5aCGaMlgNlqqnPbq-Dhkli4SkfV_ZoGlhGroowIhAPlPhXOsjpPHgQ8E8M-jUQo8lfgO_GRZUJKsg_-u-aJO&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<span style=\"background:#f0f0f0\">,</span><br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;MEYCIQDGP3HL5aCGaMlgNlqqnPbq-Dhkli4SkfV_ZoGlhGroowIhAPlPhXOsjpPHgQ8E8M-jUQo8lfgO_GRZUJKsg_-u-aJO&quot;</span><br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
 "}</code></div>" +
 "The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
@@ -89,7 +89,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "The scope of a signature (=what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
             "object holding the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
-            "</code> property except for the actual <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property.");
+            "</code> property except for the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property (=shaded part in the sample).");
 
         json.addParagraphObject ("Normalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
