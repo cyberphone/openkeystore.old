@@ -34,7 +34,7 @@ public interface BaseProperties
     String CARD_TYPE_JSON             = "cardType";          // Card type
     String REFERENCE_PAN_JSON         = "referencePan";      // Truncated card number given to merchant
     String PAYMENT_TOKEN_JSON         = "paymentToken";      // EMV tokenization result
-    String REQUEST_HASH_JSON          = "pequestHash";
+    String REQUEST_HASH_JSON          = "requestHash";
     String VALUE_JSON                 = "value";
     String DOMAIN_NAME_JSON           = "domainName";
     String ENCRYPTED_DATA_JSON        = "encryptedData";
