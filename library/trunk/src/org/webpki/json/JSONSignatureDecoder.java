@@ -232,7 +232,7 @@ public class JSONSignatureDecoder implements Serializable
               {
                 throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
               }
-            rd.checkForUnread ();;
+            rd.checkForUnread ();
             return public_key;
           }
         catch (GeneralSecurityException e)
