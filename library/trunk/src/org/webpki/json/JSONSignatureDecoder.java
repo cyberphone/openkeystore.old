@@ -30,6 +30,8 @@ import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -225,6 +227,10 @@ public class JSONSignatureDecoder implements Serializable
             else if (type.equals (EC_PUBLIC_KEY))
               {
                 KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON));
+                if (!ec.isECKey ())
+                  {
+                    throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
+                  }
                 ECPoint w = new ECPoint (getCurvePoint (rd, X_JSON, ec), getCurvePoint (rd, Y_JSON, ec));
                 public_key = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
               }
@@ -305,6 +311,10 @@ public class JSONSignatureDecoder implements Serializable
     void asymmetricSignatureVerification (PublicKey public_key) throws IOException
       {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string);
+        if (((AsymSignatureAlgorithms)algorithm).isRSA () != public_key instanceof RSAPublicKey)
+          {
+            throw new IOException ("\"" + ALGORITHM_JSON + "\" doesn't match key type: " + public_key.getAlgorithm ());
+          }
         try
           {
             Signature sig = Signature.getInstance (algorithm.getJCEName ());
