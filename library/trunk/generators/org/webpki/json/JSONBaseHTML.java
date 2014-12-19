@@ -1399,8 +1399,8 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("The signature value is calculated by applying the algorithm specified in <code>" +
-                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the signature key on the " +
+              .addString ("The signature value is calculated by running the algorithm specified in <code>" +
+                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the signature key over the " +
                   "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "normalized JSON object.").setNotes (
                    "Note that asymmetric key signatures <b>must</b> provide the associated " +
