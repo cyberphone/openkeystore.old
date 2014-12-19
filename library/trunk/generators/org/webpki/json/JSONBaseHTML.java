@@ -228,7 +228,7 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.56, December&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.57, December&nbsp;2014.</span>");
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
