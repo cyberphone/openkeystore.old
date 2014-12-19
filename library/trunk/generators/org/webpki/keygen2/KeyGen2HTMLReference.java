@@ -695,7 +695,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                         new ProtocolStep ("ProvisioningFinalizationResponse.json", "Here the user is supposed to receive an issuer-specific web-page telling what to do next. " +
 "See " + json.globalLinkRef (SECTION_TERMINATION_MESSAGE) + ".")});
 
-        json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
+        json.addParagraphObject ("Acknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
                           .append (json.createReference (JSONBaseHTML.REF_DSKPP))
                           .append ("." + LINE_SEPARATOR +
                           "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
