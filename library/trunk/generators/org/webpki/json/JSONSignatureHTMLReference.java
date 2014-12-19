@@ -241,9 +241,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Interoperability").append ("Since serialization of floating numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
                                  "to put such data in quotes.  Albeit a limitation, financial data is not natively supported by JSON either " +
                                  "due to the fact that JavaScript lacks support for big decimals.  Note the handling of certificate serial numbers in JCS." + LINE_SEPARATOR +
-                                 "Fully compatible implementations are though available both for Java and JavaScript while Pyhton users can get the required parser behavior " +
-                                 "(minus floating point...) by using the following construct:"  + LINE_SEPARATOR +
-                                 "&nbsp;&nbsp;&nbsp;&nbsp;<code>jsonObject = json.loads(jcsSignedData, object_pairs_hook=collections.OrderedDict)</code>");   
+                                 "Fully compatible implementations are though available both for Java and JavaScript (<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>)."  + LINE_SEPARATOR + 
+                                 "Pyhton users can get the required parser behavior (minus floating point...) by using the following constructs:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
+                                 "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)<br>" +
+                                 "jsonObject['signature'].pop('value')<br>" +
+                                 "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)</code></div>");   
 
         json.addParagraphObject ("Acknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
