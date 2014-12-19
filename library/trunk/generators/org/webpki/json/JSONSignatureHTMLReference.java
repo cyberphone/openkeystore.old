@@ -237,8 +237,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;&nbsp;&nbsp;System.out.println (&quot;Returned data: &quot; + reader.getString (&quot;myProperty&quot;));<br>" +
         "&nbsp;&nbsp;}" +
         "</code></div>");
+        
+        json.addParagraphObject ("Interoperability").append ("Since serialization of floating numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
+                                 "to put such data in quotes.  Albeit a limitation, financial data is not natively supported by JSON either " +
+                                 "due to the fact that JavaScript lacks support for big decimals.  Note the handling of certificate serial numbers in JCS." + LINE_SEPARATOR +
+                                 "Fully compatible implementations are though available both for Java and JavaScript while Pyhton users can get the required parser behavior " +
+                                 "(minus floating point...) by using the following construct:"  + LINE_SEPARATOR +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;<code>jsonObject = json.loads(jcsSignedData, object_pairs_hook=collections.OrderedDict)</code>");   
 
-        json.addParagraphObject ("Aknowledgements").append ("During the initial phases of the design process, highly appreciated " +
+        json.addParagraphObject ("Acknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
                                  "Jeffrey&nbsp;Walton, David&nbsp;Chadwick, Jim&nbsp;Schaad, David&nbsp;Waite, " +
                                  "Douglas&nbsp;Crockford, Arne&nbsp;Riiber, Brian&nbsp;Campbell and others."
