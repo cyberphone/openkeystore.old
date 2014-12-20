@@ -31,6 +31,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
     
     static JSONBaseHTML json;
     static RowInterface row;
+    
+    private static final String INTEROPERABILITY = "Interoperability";
 
     public static void main (String args[]) throws IOException
       {
@@ -115,7 +117,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
             "trailing zero being redundant. To cope with this " +
             "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
-            "properties internally in order to support JCS normalization requirements." + LINE_SEPARATOR +
+            "properties internally in order to support JCS normalization requirements. " +
+            "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a>." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
              JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
@@ -128,8 +131,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in <code>" +
-                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the signature key over the " +
+            "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in the <code>" +
+                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> property using the signature key over the " +
                   "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "normalized JSON object." + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
@@ -240,7 +243,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;}" +
         "</code></div>");
         
-        json.addParagraphObject ("Interoperability").append ("Since serialization of floating numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
+        json.addParagraphObject (INTEROPERABILITY).append ("Since serialization of floating numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
                                  "to put such data in quotes.  Albeit a limitation, financial data is not natively supported by JSON either " +
                                  "due to the fact that JavaScript lacks support for big decimals.  Note the handling of " +
                                  "<a href=\"#" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
