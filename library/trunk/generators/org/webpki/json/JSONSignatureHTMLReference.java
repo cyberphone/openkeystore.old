@@ -128,8 +128,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature can now be validated using the method specified in <a href=\"#" + JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.VALUE_JSON + "\">" + 
-            JSONSignatureDecoder.VALUE_JSON + "</a>. " + LINE_SEPARATOR +
+            "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in <code>" +
+                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the signature key over the " +
+                  "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
+                  "normalized JSON object." + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference (JSONBaseHTML.REF_X509) +
             "." + LINE_SEPARATOR +

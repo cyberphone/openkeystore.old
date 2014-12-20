@@ -1399,10 +1399,7 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("The signature value is calculated by running the algorithm specified in <code>" +
-                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> using the signature key over the " +
-                  "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
-                  "normalized JSON object.").setNotes (
+              .addString ("The signature value.").setNotes (
                    "Note that asymmetric key signatures <b>must</b> provide the associated " +
                   "public key in a <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
                    (url_option!= null ? ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" : "") + 
