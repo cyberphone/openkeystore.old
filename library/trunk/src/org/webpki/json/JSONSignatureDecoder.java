@@ -136,14 +136,19 @@ public class JSONSignatureDecoder implements Serializable
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (VALUE_JSON);
-        // Make a shallow copy of the signature object property list
-        LinkedHashMap<String,JSONValue> saved_properties = new LinkedHashMap<String,JSONValue> ();
-        for (String property : signature.root.properties.keySet ())
-          {
-            saved_properties.put (property, signature.root.properties.get (property));
-          }
-        signature.root.properties.remove (VALUE_JSON);                     // Hide property for the serializer..
-        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // Serialize
+
+        /////////////////////////////////////////////////////////////////////
+        // Begin JCS normalization                                         //
+        LinkedHashMap<String,JSONValue> saved_properties =                 // 1. Make a shallow copy of the signature object property list
+             new LinkedHashMap<String,JSONValue> (signature.root.properties);
+        signature.root.properties.remove (VALUE_JSON);                     // 2. Hide property for the serializer..
+        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // 3. Serialize ("stringify")
+        signature.root.properties.remove (EXTENSIONS_JSON);                // Hide the optional extensions property for the check method..
+        signature.checkForUnread ();                                       // Check for unread data - extensions
+        signature.root.properties = saved_properties;                      // 4. Restore signature property list
+        // End JCS normalization                                           //
+        /////////////////////////////////////////////////////////////////////
+
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -157,12 +162,6 @@ public class JSONSignatureDecoder implements Serializable
             default:
               algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
-        if (extensions != null)
-          {
-            signature.root.properties.remove (EXTENSIONS_JSON);       // Hide the extensions property for the check method..
-          }
-        signature.checkForUnread ();                                  // Check for unread data - extensions
-        signature.root.properties = saved_properties;                 // Restore signature property list
       }
     
     void getKeyInfo (JSONObjectReader rd) throws IOException
