@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -53,10 +54,6 @@ class JSONObject implements Serializable
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
-            if (value == null) // See JSONSignatureDecoder...
-              {
-                continue;
-              }
             if (!value.read_flag)
               {
                 throw new IOException ("Property \"" + name + "\" was never read");

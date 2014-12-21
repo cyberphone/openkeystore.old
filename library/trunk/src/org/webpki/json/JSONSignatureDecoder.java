@@ -36,6 +36,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.webpki.crypto.SignatureAlgorithms;
@@ -135,10 +136,14 @@ public class JSONSignatureDecoder implements Serializable
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (VALUE_JSON);
-        JSONValue save = signature.root.properties.get (VALUE_JSON);       // Save property
-        signature.root.properties.put (VALUE_JSON, null);                  // Hide property for the serializer..
+        // Make a shallow copy of the signature object property list
+        LinkedHashMap<String,JSONValue> saved_properties = new LinkedHashMap<String,JSONValue> ();
+        for (String property : signature.root.properties.keySet ())
+          {
+            saved_properties.put (property, signature.root.properties.get (property));
+          }
+        signature.root.properties.remove (VALUE_JSON);                     // Hide property for the serializer..
         normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // Serialize
-        signature.root.properties.put (VALUE_JSON, save);                  // Restore property
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -154,16 +159,12 @@ public class JSONSignatureDecoder implements Serializable
           }
         if (extensions != null)
           {
-            save = signature.root.properties.get (EXTENSIONS_JSON);       // Save property
-            signature.root.properties.put (EXTENSIONS_JSON, null);        // Hide property for the check method..
+            signature.root.properties.remove (EXTENSIONS_JSON);       // Hide the extensions property for the check method..
           }
-        signature.checkForUnread ();                                      // Check for unread data - extensions
-        if (extensions != null)
-          {
-            signature.root.properties.put (EXTENSIONS_JSON, save);        // Restore property
-          }
+        signature.checkForUnread ();                                  // Check for unread data - extensions
+        signature.root.properties = saved_properties;                 // Restore signature property list
       }
-
+    
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
         key_id = rd.getStringConditional (KEY_ID_JSON);
