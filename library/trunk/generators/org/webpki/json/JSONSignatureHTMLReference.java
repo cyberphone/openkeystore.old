@@ -251,8 +251,13 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                  "Fully compatible implementations are though available both for Java and JavaScript (<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>)."  + LINE_SEPARATOR + 
                                  "Pyhton users can get the required parser behavior (minus floating point...) by using the following constructs:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
                                  "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)<br>" +
-                                 "jsonObject['signature'].pop('value')<br>" +
-                                 "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)</code></div>");   
+                                 "signatureObject = jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "']<br>" +
+                                 "clonedSignatureObject = collections.OrderedDict(signatureObject)<br>" +
+                                 "signatureValue = signatureObject.pop('" + JSONSignatureDecoder.VALUE_JSON + "')<br>" +
+                                 "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)<br>" +
+                                 "jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "'] = clonedSignatureObject # Restore JSON object<br>" +
+                                 "  ... validation ..." +
+                                 "</code></div>");   
 
         json.addParagraphObject ("Acknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
