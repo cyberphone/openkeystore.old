@@ -16,18 +16,18 @@ jsonString = codecs.open(sys.argv[1], "r", "utf-8").read()
 
 def checkAllSignatures(jsonObject):
     for w in jsonObject:
+       if isinstance(jsonObject[w],collections.OrderedDict):
+         checkAllSignatures(jsonObject[w])
        if w == 'signature':
           validator = JCSValidator.new(jsonObject)
           print 'Valid=' + str(validator.isValid()) + ' Normalized data=\n' + validator.getNormalizedData()
-       if isinstance(jsonObject[w],collections.OrderedDict):
-         checkAllSignatures(jsonObject[w])
 
 jsonObject = json.loads(jsonString, object_pairs_hook=collections.OrderedDict)
 result = JCSValidator.new(jsonObject)
 print 'Valid=' + str(result.isValid())
 if result.isValid():
-  print 'Key=' + str(result.getPublicKey().exportKey(format='PEM', passphrase=None, pkcs=1))
+  print 'Key=' + result.getPublicKey(type='JWK')
 #  print result.getNormalizedData () # Fails on Windows unless you have the "Lucida Console" font
 
-# checkAllSignatures(jsonObject)
+checkAllSignatures(jsonObject)
 
