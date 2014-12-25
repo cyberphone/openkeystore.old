@@ -6,7 +6,8 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-from org.webpki.json import Utils
+from org.webpki.json.Utils import getCryptoBigNum
+from org.webpki.json.Utils import base64UrlDecode
 
 ############################################
 # JCS (JSON Cleartext Signature) validator #
@@ -25,9 +26,9 @@ class new:
     self.publicKey = signatureObject['publicKey']
     if self.publicKey['type'] != 'RSA':
       raise TypeError('Only "RSA" keys are currently supported')
-    self.rsaPublicKey = RSA.construct([Utils.getCryptoBigNum(self.publicKey['n']),Utils.getCryptoBigNum(self.publicKey['e'])])
+    self.rsaPublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),getCryptoBigNum(self.publicKey['e'])])
     rsaVerifier = PKCS1_v1_5.new(self.rsaPublicKey)
-    signatureValue = Utils.base64UrlDecode(signatureObject.pop('value'))
+    signatureValue = base64UrlDecode(signatureObject.pop('value'))
     self.normalizedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
     jsonObject['signature'] = clonedSignatureObject
     self.valid = rsaVerifier.verify(SHA256.new(self.normalizedData.encode("utf-8")),signatureValue)
@@ -36,10 +37,10 @@ class new:
     return self.valid
 
   def getPublicKey(self,type='PEM'):
-    if type == 'Native':
+    if type == 'PEM':
+      return self.rsaPublicKey.exportKey(format='PEM')
+    elif type == 'Native':
       return self.rsaPublicKey
-    elif type == 'PEM':
-      return self.rsaPublicKey.exportKey(format='PEM', passphrase=None, pkcs=1)
     elif type == 'JWK':
       jwk = collections.OrderedDict()
       for item in self.publicKey:
