@@ -806,7 +806,10 @@ public class JSONBaseHTML
 
                 public Column setNotes (String notes) throws IOException
                   {
-                    protocol_objects.lastElement ().setNotes (notes);
+                    if (notes != null)
+                      {
+                        protocol_objects.lastElement ().setNotes (notes);
+                      }
                     return this;
                   }
               }
@@ -1399,11 +1402,12 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("The signature value.").setNotes (
-                   "Note that asymmetric key signatures <b>must</b> provide the associated " +
-                  "public key in a <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
-                   (url_option!= null ? ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" : "") + 
-                   " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> property.");
+              .addString ("The signature value.").setNotes (reference ? 
+                   "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
+                   "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
+                   ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" + 
+                   " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
+                   "</code> property since the key may be given by the context." : null);
 
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newRow ()

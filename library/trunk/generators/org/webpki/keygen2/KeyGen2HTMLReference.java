@@ -320,7 +320,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 .newColumn ()
                   .setUsage (false)
                 .newColumn ()
-                  .addString ("<i>Optional</i> X.509-based signature covering the request. See ")
+                  .addString ("<i>Optional</i> X.509-based signature covering the request including the <code>" +
+                              JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> property. See ")
                   .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
                   .addString ("." + LINE_SEPARATOR +
                               "It is <b>recommended</b> using a commercial grade TLS certificate to avoid user security alerts.");
@@ -1243,6 +1244,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                             true,
                             "Signature using a key management key signature covering the lookup specifier. " +
+                            "Note that the <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property <b>must</b> be present. " +
                             "See SKS appendix &quot;Remote Key Lookup&quot; for details."));
 
         createSearchFilter ();

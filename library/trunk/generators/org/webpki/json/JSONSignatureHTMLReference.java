@@ -250,14 +250,23 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                  "\">certificate serial numbers</a> in JCS." + LINE_SEPARATOR +
                                  "Fully compatible implementations are though available both for Java and JavaScript (<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>)."  + LINE_SEPARATOR + 
                                  "Pyhton users can get the required parser behavior (minus floating point...) by using the following constructs:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
-                                 "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)<br>" +
-                                 "signatureObject = jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "']<br>" +
-                                 "clonedSignatureObject = collections.OrderedDict(signatureObject)<br>" +
-                                 "signatureValue = signatureObject.pop('" + JSONSignatureDecoder.VALUE_JSON + "')<br>" +
-                                 "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)<br>" +
-                                 "jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "'] = clonedSignatureObject # Restore JSON object<br>" +
-                                 "  ... validation ..." +
-                                 "</code></div>");   
+                                 "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Parse JSON while keeping original property order<br>" +
+                                 "signatureObject = jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + 
+                                  "']&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# As described in this document<br>" +
+                                 "clonedSignatureObject = collections.OrderedDict(signatureObject)" +
+                                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# For non-destructive signature validation<br>" +
+                                 "signatureValue = signatureObject.pop('" + JSONSignatureDecoder.VALUE_JSON + "')" +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# In Base64URL notation<br>" +
+                                 "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)" +
+                                 "&nbsp;&nbsp;# In Unicode<br>" +
+                                 "jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "'] = clonedSignatureObject" +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Restore JSON object" + LINE_SEPARATOR +
+                                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>... Signature Validation Code ...</i>" +
+                                 "</div>");   
 
         json.addParagraphObject ("Acknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
