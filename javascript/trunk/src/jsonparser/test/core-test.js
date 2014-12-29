@@ -219,8 +219,10 @@ if (arr_reader.getString () != big_string ||
     throw "ARRAY";
 }
 
-if (newobjec.createContainerObject ("Keeper").serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED)
-        != ('{"Keeper":' + json1 + '}'))
+var container = new org.webpki.json.JSONObjectWriter ();
+container.setObject ("Keeper", newobjec);
+
+if (container.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED) != ('{"Keeper":' + json1 + '}'))
 {
     throw "Container";
 }

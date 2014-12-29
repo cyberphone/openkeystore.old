@@ -793,18 +793,20 @@ org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
     return this.setString (name, org.webpki.util.Base64URL.encode (value));
 };
 
-/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name)
+/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.setObject = function (/*String */name, optional_reader_or_writer)
 {
-    /* JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
-    this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, sub_object));
-    return new org.webpki.json.JSONObjectWriter (sub_object);
-};
-
-/* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.createContainerObject = function (/* String */name)
-{
-    /* JSONObjectWriter */var container = new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
-    container._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, this.root));
-    return container;
+    if (optional_reader_or_writer === undefined)
+    {
+        /* JSONObject */ var sub_object = new org.webpki.json.JSONObject ();
+        this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, sub_object));
+        return new org.webpki.json.JSONObjectWriter (sub_object);
+    }
+    if (optional_reader_or_writer instanceof org.webpki.json.JSONObjectReader ||
+        optional_reader_or_writer instanceof org.webpki.json.JSONObjectWriter)
+    {
+        return this._setProperty (name, new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, optional_reader_or_writer.root));
+    }
+    org.webpki.util._error ("Unknown argument");
 };
 
 /* public JSONArrayWriter */org.webpki.json.JSONObjectWriter.prototype.setArray = function (/* String */name)
