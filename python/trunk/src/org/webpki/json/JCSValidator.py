@@ -14,7 +14,6 @@ from ecdsa.curves import NIST521p
 from ecdsa.util import sigdecode_der
 from ecdsa import VerifyingKey
 
-
 from org.webpki.json.Utils import getCryptoBigNum
 from org.webpki.json.Utils import base64UrlDecode
 
@@ -46,14 +45,7 @@ class new:
     signatureValue = base64UrlDecode(signatureObject.pop('value'))
     signatureAlgorithm = signatureObject['algorithm']
     if not signatureAlgorithm in algorithms:
-      comma = False
-      result = ''
-      for item in algorithms:
-        if comma:
-          result += ', '
-        comma = True
-        result += item
-      raise TypeError('Found "' + signatureAlgorithm + '". Recognized algorithms: ' + result)
+      raise TypeError('Found "' + signatureAlgorithm + '". Supported algorithms: ' + _listKeys(algorithms))
     hashObject = algorithms[signatureAlgorithm][1].new(serialize(jsonObject).encode("utf-8"))
     jsonObject['signature'] = clonedSignatureObject
     self.publicKey = signatureObject['publicKey']
@@ -70,12 +62,12 @@ class new:
         raise TypeError('"EC" expected')
       ecCurve = self.publicKey['curve']
       if not ecCurve in ecCurves:
-        raise TypeError('Unsupported EC curve: ' + ecCurve) 
+        raise TypeError('Found "' + ecCurve + '". Supported EC curves: ' + _listKeys(ecCurves))
       self.nativePublicKey = VerifyingKey.from_string(base64UrlDecode(self.publicKey['x']) + 
                                                       base64UrlDecode(self.publicKey['y']),
                                                       curve=ecCurves[ecCurve])
       self.nativePublicKey.verify_digest(signatureValue,hashObject.digest(),sigdecode=sigdecode_der)
-
+      
   def getPublicKey(self,type='PEM'):
     if type == 'PEM':
       if self.keyType == 'RSA':
@@ -121,6 +113,16 @@ class EnhancedDecimal(Decimal):
      obj = Decimal.__new__(cls,value,context)
      obj.saved_string = value
      return obj;  
+
+def _listKeys(dictionary):
+  comma = False
+  result = ''
+  for item in dictionary:
+    if comma:
+      result += ', '
+    comma = True
+    result += item
+  return result
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 
