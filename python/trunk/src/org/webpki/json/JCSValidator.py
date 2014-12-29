@@ -1,6 +1,6 @@
-import json
+import simplejson as json
 import collections
-import base64
+from decimal import Decimal
 
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
@@ -56,6 +56,23 @@ class new:
 
   def getNormalizedData(self):
     return self.normalizedData
+
+############################################
+# JCS Compatible Parser                    #
+############################################
+
+def parse(jsonString):
+  return json.loads(jsonString, object_pairs_hook=collections.OrderedDict,parse_float=EnhancedDecimal)
+
+# Support class
+class EnhancedDecimal(Decimal):
+   def __str__ (self):
+     return self.saved_string
+
+   def __new__(cls, value="0", context=None):
+     obj = Decimal.__new__(cls,value,context)
+     obj.saved_string = value
+     return obj;  
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 

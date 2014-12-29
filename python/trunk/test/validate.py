@@ -1,7 +1,9 @@
-import json
+import simplejson as json
 import collections
 import sys
 import codecs
+from decimal import Decimal
+
 from org.webpki.json import JCSValidator
 
 # Our test program
@@ -22,7 +24,17 @@ def checkAllSignatures(jsonObject):
           validator = JCSValidator.new(jsonObject)
           print 'Valid=' + str(validator.isValid()) + ' Normalized data=\n' + validator.getNormalizedData()
 
-jsonObject = json.loads(jsonString, object_pairs_hook=collections.OrderedDict)
+class EnhancedDecimal(Decimal):
+   def __str__ (self):
+     return self.saved_string
+
+   def __new__(cls, value="0", context=None):
+     obj = Decimal.__new__(cls,value,context)
+     obj.saved_string = value
+     return obj;
+
+#jsonObject = json.loads(jsonString, object_pairs_hook=collections.OrderedDict,parse_float=EnhancedDecimal)
+jsonObject = JCSValidator.parse(jsonString)
 result = JCSValidator.new(jsonObject)
 print 'Valid=' + str(result.isValid())
 if result.isValid():
