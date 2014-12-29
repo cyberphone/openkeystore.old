@@ -22,7 +22,7 @@ def checkAllSignatures(jsonObject):
          checkAllSignatures(jsonObject[w])
        if w == 'signature':
           validator = JCSValidator.new(jsonObject)
-          print 'Key=' + validator.getPublicKey('JWK')
+          print 'PEM=\n' + validator.getPublicKey('PEM') + 'JWK=\n' + validator.getPublicKey('JWK')
 
 jsonObject = JCSValidator.parse(jsonString)
 JCSValidator.new(jsonObject)

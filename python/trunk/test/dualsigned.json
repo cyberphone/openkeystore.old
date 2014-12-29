@@ -1,20 +1,21 @@
 {
     "statement": "Hello signed world!",
     "otherProperties": [2000,true],
-    "container": 
+    "inner": 
         {
             "statement": "Hello signed world!",
             "otherProperties": [2000,true],
             "signature": 
                 {
-                    "algorithm": "RS256",
+                    "algorithm": "ES256",
                     "publicKey": 
                         {
-                            "type": "RSA",
-                            "n": "ld-uUL2csxx3hbGqN_Ix48wbIgcas2i42ujmW3D2ZtT8tmrebQLbo-e6aZ9MZS8CQCysWZ4m5lp5hiPJrbEir82WFncl3mUidDsvN4AjvgjmciflwmA4Qm1KzoNAqLe0Hw1xqvNbAnPyOTrec0d4TmbZcHnYgxrE56a62IBRPZUll_nudXbhWD_PAEqAGeslo6djRUYjdcKLwe1gchi2UAbPlTN4BhIXF8tV9seDS5yY8W6d2RSzrwo9WZiSCyara9by2g8tjUTCNVCrG16YB-t8rKUzpf7Qx3A2ZxttaEB7VnYF56h45CD3FPLAYR9ZFNlAWdgTQi5OUdSJvAwK1w",
-                            "e": "AQAB"
+                            "type": "EC",
+                            "curve": "P-256",
+                            "x": "vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs",
+                            "y": "fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM"
                         },
-                    "value": "U9FuoELkG24uu9oOckFxMfVJaVb7S2CWJidvfsunERZOV-vqZTij8pXvRPbGG5RoF2PPCcmpyUx388wfXkduf4kAoTvkCaq7VDNxpbdYzKeRe1V4FUtDF3cMiZTT2ldtadUB7JsJ5kK2riifJz0XyKh39dCi6PhooKr9rv-xyssKXGDULIAXOKClVIo8H_aAmyAfCo2bOoGshRPsgov5bmg9_tBOyAuKOlI7dnJ1p50Jr8h0nFeZcdX2TlA1nZw9HdRLQWbVj_exAXr5aVEWoW-mJJM3a7EqU7v18mzTb8e9zg7Q0z8FZ2XQyfF9NFZEZD0c-Jud-cCt3PArq-3LjQ"
+                    "value": "MEUCIFYYYG57-pm7rf_mHZGEqNrGypGB5nZxYkomR1YuFp3tAiEAwklhnsoduY9K02O30XxZCv5UoMdJB-Unc_rlAguHSNk"
                 }
         },
     "signature": 
@@ -26,6 +27,6 @@
                     "n": "ld-uUL2csxx3hbGqN_Ix48wbIgcas2i42ujmW3D2ZtT8tmrebQLbo-e6aZ9MZS8CQCysWZ4m5lp5hiPJrbEir82WFncl3mUidDsvN4AjvgjmciflwmA4Qm1KzoNAqLe0Hw1xqvNbAnPyOTrec0d4TmbZcHnYgxrE56a62IBRPZUll_nudXbhWD_PAEqAGeslo6djRUYjdcKLwe1gchi2UAbPlTN4BhIXF8tV9seDS5yY8W6d2RSzrwo9WZiSCyara9by2g8tjUTCNVCrG16YB-t8rKUzpf7Qx3A2ZxttaEB7VnYF56h45CD3FPLAYR9ZFNlAWdgTQi5OUdSJvAwK1w",
                     "e": "AQAB"
                 },
-            "value": "MBLaDP2K7RRwEBuTw6kwE6xZDGwZsktvkX9bYU_sJRYjIKtOl2BbS8BCkxgAL69wqGzFk_NyWyOwBmMug7F1O0P2yx5WZXgrTWWxPAJwnpnWYNueh4NdiS3ives_nvfrzkXweQ5xd2tATThy1a0ltba9YylTkvDYLFLqMpecJJFSyp6RRYMo-tXkG23HzG7KtF4rsZqz3A4fAzQsWwmw7qHKPCm10HJcqXGkTB1JuWqxNHbb6sauXzO0l5vwzLUSlsHlZvqoq0CtBcbNR6aB6-wl5rl6GZVtvnvJ1sm24l5ZCsBby_xOAGDkjeoSK8DBgwTESePsDOThhFTmeSjPHA"
+            "value": "Ha08ulPg1_7zF0xI_Eo8RQs0jFYA2zM0fFjbDq1q84sHME5l0ywSxkD51WU8_WfL5plq9ziWkg_LB3RwQdGFBHRAayQgPMVTrFOJ7D5NA8GGbmWyjv2FH94gmrauTlTvpPW5FMZXFSP1XlLjYqXgZ8hPFu9Gj4V0MAQNICyf9Z2pa43IsQeTWAmMijssl6VmNRsZ7vKGRVzAAAIgSDfGl6lrenbPFYcslUTvBh-K2PpeuYSUyYC7Wf7nCerKaQrQTua3Ao9jeZ2u_k9GwVB5Mtd_PQ_cNMvKwQ1L3mb6eWsNvJITzS5F1zk_Q_BTJjuVYd1NtGzo8pxZiw7SkjlfjA"
         }
 }

@@ -8,6 +8,13 @@ from Crypto.Hash import SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
+from ecdsa.curves import NIST256p
+from ecdsa.curves import NIST384p
+from ecdsa.curves import NIST521p
+from ecdsa.util import sigdecode_der
+from ecdsa import VerifyingKey
+
+
 from org.webpki.json.Utils import getCryptoBigNum
 from org.webpki.json.Utils import base64UrlDecode
 
@@ -18,6 +25,12 @@ algorithms = OrderedDict([
    ('ES256', (False, SHA256)),
    ('ES384', (False, SHA384)),
    ('ES512', (False, SHA512))
+])
+
+ecCurves = OrderedDict([
+   ('P-256', NIST256p),
+   ('P-384', NIST384p),
+   ('P-521', NIST521p)
 ])
 
 ############################################
@@ -42,26 +55,35 @@ class new:
         result += item
       raise TypeError('Found "' + signatureAlgorithm + '". Recognized algorithms: ' + result)
     hashObject = algorithms[signatureAlgorithm][1].new(serialize(jsonObject).encode("utf-8"))
+    jsonObject['signature'] = clonedSignatureObject
     self.publicKey = signatureObject['publicKey']
-    keyType = self.publicKey['type']
+    self.keyType = self.publicKey['type']
     if algorithms[signatureAlgorithm][0]:
-      if keyType != 'RSA':
+      if self.keyType != 'RSA':
         raise TypeError('"RSA" expected')
-      self.rsaPublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),getCryptoBigNum(self.publicKey['e'])])
-      rsaVerifier = PKCS1_v1_5.new(self.rsaPublicKey)
-      if not rsaVerifier.verify(hashObject,signatureValue):
+      self.nativePublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),
+                                            getCryptoBigNum(self.publicKey['e'])])
+      if not PKCS1_v1_5.new(self.nativePublicKey).verify(hashObject,signatureValue):
         raise ValueError('Invalid Signature!')
     else:
-      if keyType != 'EC':
+      if self.keyType != 'EC':
         raise TypeError('"EC" expected')
-      raise TypeError('Only "RSA" keys are currently supported')
-    jsonObject['signature'] = clonedSignatureObject
+      ecCurve = self.publicKey['curve']
+      if not ecCurve in ecCurves:
+        raise TypeError('Unsupported EC curve: ' + ecCurve) 
+      self.nativePublicKey = VerifyingKey.from_string(base64UrlDecode(self.publicKey['x']) + 
+                                                      base64UrlDecode(self.publicKey['y']),
+                                                      curve=ecCurves[ecCurve])
+      self.nativePublicKey.verify_digest(signatureValue,hashObject.digest(),sigdecode=sigdecode_der)
 
   def getPublicKey(self,type='PEM'):
     if type == 'PEM':
-      return self.rsaPublicKey.exportKey(format='PEM')
+      if self.keyType == 'RSA':
+        return self.nativePublicKey.exportKey(format='PEM') + '\n'
+      else:
+        return self.nativePublicKey.to_pem()
     elif type == 'Native':
-      return self.rsaPublicKey
+      return self.nativePublicKey
     elif type == 'JWK':
       jwk = OrderedDict()
       for item in self.publicKey:
