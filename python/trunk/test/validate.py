@@ -22,24 +22,11 @@ def checkAllSignatures(jsonObject):
          checkAllSignatures(jsonObject[w])
        if w == 'signature':
           validator = JCSValidator.new(jsonObject)
-          print 'Valid=' + str(validator.isValid()) + ' Normalized data=\n' + validator.getNormalizedData()
+          print 'Key=' + validator.getPublicKey('JWK')
 
-class EnhancedDecimal(Decimal):
-   def __str__ (self):
-     return self.saved_string
-
-   def __new__(cls, value="0", context=None):
-     obj = Decimal.__new__(cls,value,context)
-     obj.saved_string = value
-     return obj;
-
-#jsonObject = json.loads(jsonString, object_pairs_hook=collections.OrderedDict,parse_float=EnhancedDecimal)
 jsonObject = JCSValidator.parse(jsonString)
-result = JCSValidator.new(jsonObject)
-print 'Valid=' + str(result.isValid())
-if result.isValid():
-  print 'Key=' + result.getPublicKey(type='JWK')
-#  print result.getNormalizedData () # Fails on Windows unless you have the "Lucida Console" font
+JCSValidator.new(jsonObject)
+print 'Valid'
 
 checkAllSignatures(jsonObject)
 

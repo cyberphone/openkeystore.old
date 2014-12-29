@@ -3,38 +3,59 @@ from collections import OrderedDict
 from decimal import Decimal
 
 from Crypto.Hash import SHA256
+from Crypto.Hash import SHA384
+from Crypto.Hash import SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 from org.webpki.json.Utils import getCryptoBigNum
 from org.webpki.json.Utils import base64UrlDecode
 
+algorithms = OrderedDict([
+   ('RS256', (True,  SHA256)),
+   ('RS384', (True,  SHA384)),
+   ('RS512', (True,  SHA512)),
+   ('ES256', (False, SHA256)),
+   ('ES384', (False, SHA384)),
+   ('ES512', (False, SHA512))
+])
+
 ############################################
 # JCS (JSON Cleartext Signature) validator #
 ############################################
 
 class new:
-
   def __init__(self,jsonObject):
     if not isinstance(jsonObject, OrderedDict):
       raise TypeError('JCS requires JSON to be parsed into a "OrderedDict"')
     signatureObject = jsonObject['signature']
     clonedSignatureObject = OrderedDict(signatureObject)
-    signatureAlgorithm = signatureObject['algorithm']
-    if signatureAlgorithm != 'RS256':
-      raise TypeError('Only the "RS256" algorithm is currently supported')
-    self.publicKey = signatureObject['publicKey']
-    if self.publicKey['type'] != 'RSA':
-      raise TypeError('Only "RSA" keys are currently supported')
-    self.rsaPublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),getCryptoBigNum(self.publicKey['e'])])
-    rsaVerifier = PKCS1_v1_5.new(self.rsaPublicKey)
     signatureValue = base64UrlDecode(signatureObject.pop('value'))
-    self.normalizedData = serialize(jsonObject)
+    signatureAlgorithm = signatureObject['algorithm']
+    if not signatureAlgorithm in algorithms:
+      comma = False
+      result = ''
+      for item in algorithms:
+        if comma:
+          result += ', '
+        comma = True
+        result += item
+      raise TypeError('Found "' + signatureAlgorithm + '". Recognized algorithms: ' + result)
+    hashObject = algorithms[signatureAlgorithm][1].new(serialize(jsonObject).encode("utf-8"))
+    self.publicKey = signatureObject['publicKey']
+    keyType = self.publicKey['type']
+    if algorithms[signatureAlgorithm][0]:
+      if keyType != 'RSA':
+        raise TypeError('"RSA" expected')
+      self.rsaPublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),getCryptoBigNum(self.publicKey['e'])])
+      rsaVerifier = PKCS1_v1_5.new(self.rsaPublicKey)
+      if not rsaVerifier.verify(hashObject,signatureValue):
+        raise ValueError('Invalid Signature!')
+    else:
+      if keyType != 'EC':
+        raise TypeError('"EC" expected')
+      raise TypeError('Only "RSA" keys are currently supported')
     jsonObject['signature'] = clonedSignatureObject
-    self.valid = rsaVerifier.verify(SHA256.new(self.normalizedData.encode("utf-8")),signatureValue)
-
-  def isValid(self):
-    return self.valid
 
   def getPublicKey(self,type='PEM'):
     if type == 'PEM':
@@ -54,8 +75,6 @@ class new:
     else:
       raise ValueError('Unknown key type: "' + type + '"') 
 
-  def getNormalizedData(self):
-    return self.normalizedData
 
 ############################################
 # JCS Compatible Parser                    #
