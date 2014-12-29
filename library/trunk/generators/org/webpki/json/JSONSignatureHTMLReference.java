@@ -243,7 +243,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;}" +
         "</code></div>");
         
-        json.addParagraphObject (INTEROPERABILITY).append ("Since serialization of floating numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
+        json.addParagraphObject (INTEROPERABILITY).append ("Since serialization of floating-point numbers as specified by JCS is currently not to be counted on, it is <b>highly recommended</b> " + 
                                  "to put such data in quotes.  Albeit a limitation, financial data is not natively supported by JSON either " +
                                  "due to the fact that JavaScript lacks support for big decimals.  Note the handling of " +
                                  "<a href=\"#" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
