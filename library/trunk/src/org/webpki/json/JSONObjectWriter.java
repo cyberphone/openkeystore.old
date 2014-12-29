@@ -185,13 +185,6 @@ public class JSONObjectWriter implements Serializable
           return new JSONObjectWriter (sub_object);
       }
 
-    public JSONObjectWriter createContainerObject (String name) throws IOException
-      {
-        JSONObjectWriter container = new JSONObjectWriter (new JSONObject ());
-        container.setProperty (name, new JSONValue (JSONTypes.OBJECT, this.root));
-        return container;
-      }
-
     public JSONArrayWriter setArray (String name) throws IOException
       {
         Vector<JSONValue> array = new Vector<JSONValue> ();

@@ -42,7 +42,9 @@ public class AddSignature
       {
         if (contain)
           {
-            wr = wr.createContainerObject ("Container");
+            JSONObjectWriter container = new JSONObjectWriter ();
+            container.setObject ("Container", wr);
+            wr = container;
           }
         if (action == ACTION.X509)
           {
