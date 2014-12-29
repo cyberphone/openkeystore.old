@@ -1,5 +1,5 @@
 import simplejson as json
-import collections
+from collections import OrderedDict
 from decimal import Decimal
 
 from Crypto.Hash import SHA256
@@ -16,10 +16,10 @@ from org.webpki.json.Utils import base64UrlDecode
 class new:
 
   def __init__(self,jsonObject):
-    if not isinstance(jsonObject, collections.OrderedDict):
-      raise TypeError('JCS requires JSON to be parsed into a "collections.OrderedDict"')
+    if not isinstance(jsonObject, OrderedDict):
+      raise TypeError('JCS requires JSON to be parsed into a "OrderedDict"')
     signatureObject = jsonObject['signature']
-    clonedSignatureObject = collections.OrderedDict(signatureObject)
+    clonedSignatureObject = OrderedDict(signatureObject)
     signatureAlgorithm = signatureObject['algorithm']
     if signatureAlgorithm != 'RS256':
       raise TypeError('Only the "RS256" algorithm is currently supported')
@@ -29,7 +29,7 @@ class new:
     self.rsaPublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),getCryptoBigNum(self.publicKey['e'])])
     rsaVerifier = PKCS1_v1_5.new(self.rsaPublicKey)
     signatureValue = base64UrlDecode(signatureObject.pop('value'))
-    self.normalizedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
+    self.normalizedData = serialize(jsonObject)
     jsonObject['signature'] = clonedSignatureObject
     self.valid = rsaVerifier.verify(SHA256.new(self.normalizedData.encode("utf-8")),signatureValue)
 
@@ -42,15 +42,15 @@ class new:
     elif type == 'Native':
       return self.rsaPublicKey
     elif type == 'JWK':
-      jwk = collections.OrderedDict()
+      jwk = OrderedDict()
       for item in self.publicKey:
         key = item
         if key == 'type':
           key = 'kty'
         jwk[key] = self.publicKey[item]
-      return json.dumps(jwk,separators=(',',':'),ensure_ascii=False)
+      return serialize(jwk)
     elif type == 'JCS':
-      return json.dumps(self.publicKey,separators=(',',':'),ensure_ascii=False)
+      return serialize(self.publicKey)
     else:
       raise ValueError('Unknown key type: "' + type + '"') 
 
@@ -62,7 +62,14 @@ class new:
 ############################################
 
 def parse(jsonString):
-  return json.loads(jsonString, object_pairs_hook=collections.OrderedDict,parse_float=EnhancedDecimal)
+  return json.loads(jsonString, object_pairs_hook=OrderedDict,parse_float=EnhancedDecimal)
+
+############################################
+# JCS Compatible Serializer                #
+############################################
+
+def serialize(jsonObject):
+  return json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
 
 # Support class
 class EnhancedDecimal(Decimal):
