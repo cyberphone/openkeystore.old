@@ -14,8 +14,9 @@ from ecdsa.curves import NIST521p
 from ecdsa.util import sigdecode_der
 from ecdsa import VerifyingKey
 
-from org.webpki.json.Utils import getCryptoBigNum
+from org.webpki.json.Utils import cryptoBigNumDecode
 from org.webpki.json.Utils import base64UrlDecode
+from org.webpki.json.Utils import listKeys
 
 algorithms = OrderedDict([
    ('RS256', (True,  SHA256)),
@@ -45,7 +46,7 @@ class new:
     signatureValue = base64UrlDecode(signatureObject.pop('value'))
     signatureAlgorithm = signatureObject['algorithm']
     if not signatureAlgorithm in algorithms:
-      raise TypeError('Found "' + signatureAlgorithm + '". Supported algorithms: ' + _listKeys(algorithms))
+      raise TypeError('Found "' + signatureAlgorithm + '". Supported algorithms: ' + listKeys(algorithms))
     hashObject = algorithms[signatureAlgorithm][1].new(serialize(jsonObject).encode("utf-8"))
     jsonObject['signature'] = clonedSignatureObject
     self.publicKey = signatureObject['publicKey']
@@ -53,8 +54,8 @@ class new:
     if algorithms[signatureAlgorithm][0]:
       if self.keyType != 'RSA':
         raise TypeError('"RSA" expected')
-      self.nativePublicKey = RSA.construct([getCryptoBigNum(self.publicKey['n']),
-                                            getCryptoBigNum(self.publicKey['e'])])
+      self.nativePublicKey = RSA.construct([cryptoBigNumDecode(self.publicKey['n']),
+                                            cryptoBigNumDecode(self.publicKey['e'])])
       if not PKCS1_v1_5.new(self.nativePublicKey).verify(hashObject,signatureValue):
         raise ValueError('Invalid Signature!')
     else:
@@ -62,7 +63,7 @@ class new:
         raise TypeError('"EC" expected')
       ecCurve = self.publicKey['curve']
       if not ecCurve in ecCurves:
-        raise TypeError('Found "' + ecCurve + '". Supported EC curves: ' + _listKeys(ecCurves))
+        raise TypeError('Found "' + ecCurve + '". Supported EC curves: ' + listKeys(ecCurves))
       self.nativePublicKey = VerifyingKey.from_string(base64UrlDecode(self.publicKey['x']) + 
                                                       base64UrlDecode(self.publicKey['y']),
                                                       curve=ecCurves[ecCurve])
@@ -113,16 +114,6 @@ class EnhancedDecimal(Decimal):
      obj = Decimal.__new__(cls,value,context)
      obj.saved_string = value
      return obj;  
-
-def _listKeys(dictionary):
-  comma = False
-  result = ''
-  for item in dictionary:
-    if comma:
-      result += ', '
-    comma = True
-    result += item
-  return result
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 
