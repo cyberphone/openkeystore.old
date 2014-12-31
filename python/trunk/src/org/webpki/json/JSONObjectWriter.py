@@ -10,7 +10,7 @@ from Crypto.Signature import PKCS1_v1_5
 from ecdsa.curves import NIST256p
 from ecdsa.curves import NIST384p
 from ecdsa.curves import NIST521p
-from ecdsa.util import sigdecode_der
+from ecdsa.util import sigencode_der
 from ecdsa import VerifyingKey
 
 from org.webpki.json import JCSValidator
@@ -61,9 +61,9 @@ class new:
     hashObject = JCSValidator.algorithms[signatureKey.algorithm][1].new(JCSValidator.serialize(self.root).encode("utf-8"))
     if signatureKey.isRSA():
       signer = PKCS1_v1_5.new(signatureKey.nativePrivateKey)
-      signatureObject.setBinary("value",signer.sign(hashObject))
+      signatureObject.setBinary('value',signer.sign(hashObject))
     else:
-      pass
+      signatureObject.setBinary('value',signatureKey.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der))
     return self
 
   def put(self,name,value):

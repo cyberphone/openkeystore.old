@@ -12,8 +12,9 @@ from ecdsa.curves import NIST256p
 from ecdsa.curves import NIST384p
 from ecdsa.curves import NIST521p
 from ecdsa.util import sigdecode_der
-from ecdsa import VerifyingKey
+from ecdsa import SigningKey
 
+from org.webpki.json.Utils import base64UrlEncode
 from org.webpki.json.Utils import cryptoBigNumEncode
 from org.webpki.json.Utils import cryptoBigNumDecode
 from org.webpki.json import JCSValidator
@@ -44,21 +45,23 @@ class new:
       keyType = jwk['kty']
       if keyType == 'RSA':
         self.nativePrivateKey = RSA.construct([cryptoBigNumDecode(jwk['n']),
-                                              cryptoBigNumDecode(jwk['e']),
-                                              cryptoBigNumDecode(jwk['d']),
-                                              cryptoBigNumDecode(jwk['p']),
-                                              cryptoBigNumDecode(jwk['q'])])
+                                               cryptoBigNumDecode(jwk['e']),
+                                               cryptoBigNumDecode(jwk['d']),
+                                               cryptoBigNumDecode(jwk['p']),
+                                               cryptoBigNumDecode(jwk['q'])])
         # JWK syntax checking...
         cryptoBigNumDecode(jwk['dp'])
         cryptoBigNumDecode(jwk['dq'])
         cryptoBigNumDecode(jwk['qi'])
+      elif keyType == 'EC':
+        pass
       else:
         raise ValueError('Unsupported key type: "' + keyType + '"');
     elif format == 'PEM':
       if ' RSA ' in privateKeyString:
         self.nativePrivateKey = RSA.importKey(privateKeyString)
       else:
-        raise TypeError('EC PEM not implemented')
+        self.nativePrivateKey = SigningKey.from_pem(privateKeyString)
     else:
       raise ValueError('Unsupported key format: "' + format + '"')
     if self.isRSA():
@@ -74,8 +77,10 @@ class new:
 
   def getPublicKeyParameters(self, JCSFormat=True):
     keyTypeMnemonic = 'type'
+    curveMnemonic = 'curve'
     if not JCSFormat:
       keyTypeMnemonic = 'kty'
+      curveMnemonic = 'crv'
     publicKeyParameters = OrderedDict()
     if self.isRSA():
       publicKeyParameters[keyTypeMnemonic] = 'RSA'
@@ -83,5 +88,20 @@ class new:
       publicKeyParameters['e'] = cryptoBigNumEncode(self.nativePrivateKey.e)
     else:
       publicKeyParameters[keyTypeMnemonic] = 'EC'
+      found = False
+      for curve in JCSValidator.ecCurves:
+        if self.nativePrivateKey.curve == JCSValidator.ecCurves[curve]:
+          found = True
+          publicKeyParameters[curveMnemonic] = curve
+          break
+      if not found:
+        raise TypeError('Curve "' + self.nativePrivateKey.curve.name + '" not supported')
+      point = self.nativePrivateKey.get_verifying_key().to_string()
+      length = len(point)
+      if length % 2:
+        raise ValueError('EC point length error')
+      length >>= 1
+      publicKeyParameters['x'] = base64UrlEncode(point[:length])
+      publicKeyParameters['y'] = base64UrlEncode(point[length:])
     return publicKeyParameters
 
