@@ -1,38 +1,17 @@
-import simplejson as json
 from collections import OrderedDict
-from decimal import Decimal
 
-from Crypto.Hash import SHA256
-from Crypto.Hash import SHA384
-from Crypto.Hash import SHA512
 from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 
-from ecdsa.curves import NIST256p
-from ecdsa.curves import NIST384p
-from ecdsa.curves import NIST521p
 from ecdsa.util import sigdecode_der
 from ecdsa import SigningKey
 
 from org.webpki.json.Utils import base64UrlEncode
+from org.webpki.json.Utils import base64UrlDecode
 from org.webpki.json.Utils import cryptoBigNumEncode
 from org.webpki.json.Utils import cryptoBigNumDecode
-from org.webpki.json import JCSValidator
-
-algorithms = OrderedDict([
-   ('RS256', (True,  SHA256)),
-   ('RS384', (True,  SHA384)),
-   ('RS512', (True,  SHA512)),
-   ('ES256', (False, SHA256)),
-   ('ES384', (False, SHA384)),
-   ('ES512', (False, SHA512))
-])
-
-ecCurves = OrderedDict([
-   ('P-256', NIST256p),
-   ('P-384', NIST384p),
-   ('P-521', NIST521p)
-])
+from org.webpki.json.Utils import parseJson
+from org.webpki.json.Utils import getEcCurveName
+from org.webpki.json.Utils import getEcCurve
 
 ###################################################
 # JCS (JSON Cleartext Signature) Signature object #
@@ -41,7 +20,7 @@ ecCurves = OrderedDict([
 class new:
   def __init__(self,privateKeyString, format='JWK'):
     if format == 'JWK':
-      jwk = JCSValidator.parse(privateKeyString)
+      jwk = parseJson(privateKeyString)
       keyType = jwk['kty']
       if keyType == 'RSA':
         self.nativePrivateKey = RSA.construct([cryptoBigNumDecode(jwk['n']),
@@ -54,7 +33,7 @@ class new:
         cryptoBigNumDecode(jwk['dq'])
         cryptoBigNumDecode(jwk['qi'])
       elif keyType == 'EC':
-        pass
+        self.nativePrivateKey = SigningKey.from_string(base64UrlDecode(jwk['d']),getEcCurve(jwk['crv']))
       else:
         raise ValueError('Unsupported key type: "' + keyType + '"');
     elif format == 'PEM':
@@ -73,7 +52,8 @@ class new:
     return isinstance(self.nativePrivateKey,RSA._RSAobj)
 
   def setAlgorithm(self,algorithm):
-    pass
+    if not algorithm in algorithms:
+      pass
 
   def getPublicKeyParameters(self, JCSFormat=True):
     keyTypeMnemonic = 'type'
@@ -88,14 +68,7 @@ class new:
       publicKeyParameters['e'] = cryptoBigNumEncode(self.nativePrivateKey.e)
     else:
       publicKeyParameters[keyTypeMnemonic] = 'EC'
-      found = False
-      for curve in JCSValidator.ecCurves:
-        if self.nativePrivateKey.curve == JCSValidator.ecCurves[curve]:
-          found = True
-          publicKeyParameters[curveMnemonic] = curve
-          break
-      if not found:
-        raise TypeError('Curve "' + self.nativePrivateKey.curve.name + '" not supported')
+      publicKeyParameters[curveMnemonic] = getEcCurveName(self.nativePrivateKey)
       point = self.nativePrivateKey.get_verifying_key().to_string()
       length = len(point)
       if length % 2:

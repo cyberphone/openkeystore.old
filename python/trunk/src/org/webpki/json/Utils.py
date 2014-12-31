@@ -1,7 +1,36 @@
 import base64
 
+from decimal import Decimal
+
+import simplejson as json
+
 from Crypto.Util.number import bytes_to_long
 from Crypto.Util.number import long_to_bytes
+
+from collections import OrderedDict
+
+from Crypto.Hash import SHA256
+from Crypto.Hash import SHA384
+from Crypto.Hash import SHA512
+
+from ecdsa.curves import NIST256p
+from ecdsa.curves import NIST384p
+from ecdsa.curves import NIST521p
+
+algorithms = OrderedDict([
+   ('RS256', (True,  SHA256)),
+   ('RS384', (True,  SHA384)),
+   ('RS512', (True,  SHA512)),
+   ('ES256', (False, SHA256)),
+   ('ES384', (False, SHA384)),
+   ('ES512', (False, SHA512))
+])
+
+ecCurves = OrderedDict([
+   ('P-256', NIST256p),
+   ('P-384', NIST384p),
+   ('P-521', NIST521p)
+])
 
 def cryptoBigNumDecode(base64String):
   return bytes_to_long(base64UrlDecode(base64String))
@@ -24,6 +53,11 @@ def base64UrlEncode(data):
   if not isinstance(data, str):
     raise TypeError('argument should be str or bytearray')
   return base64.urlsafe_b64encode(data).rstrip('=')
+
+def getEcCurve(curveName):
+  if not curveName in ecCurves:
+    raise TypeError('Found "' + curveName + '". Supported EC curves: ' + listKeys(ecCurves))
+  return ecCurves[curveName]
   
 def listKeys(dictionary):
   comma = False
@@ -34,4 +68,38 @@ def listKeys(dictionary):
     comma = True
     result += item
   return result
+  
+def getEcCurveName(nativeKey):
+  for curve in ecCurves:
+    if nativeKey.curve == ecCurves[curve]:
+      return curve;
+  raise TypeError('Curve "' + nativeKey.curve.name + '" not supported')
 
+def getAlgorithmEntry(algorithm):
+  if not algorithm in algorithms:
+    raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
+  return algorithms[algorithm]
+
+############################################
+# JCS Compatible Parser                    #
+############################################
+
+def parseJson(jsonString):
+  return json.loads(jsonString, object_pairs_hook=OrderedDict,parse_float=EnhancedDecimal)
+
+############################################
+# JCS Compatible Serializer                #
+############################################
+
+def serializeJson(jsonObject):
+  return json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
+
+# Support class
+class EnhancedDecimal(Decimal):
+   def __str__ (self):
+     return self.saved_string
+
+   def __new__(cls, value="0", context=None):
+     obj = Decimal.__new__(cls,value,context)
+     obj.saved_string = value
+     return obj;  

@@ -1,10 +1,11 @@
-import simplejson as json
 import collections
 import sys
 import codecs
 from decimal import Decimal
 
 from org.webpki.json import JCSValidator
+
+from org.webpki.json.Utils import parseJson
 
 # Our test program
 if len(sys.argv) != 2:
@@ -24,7 +25,7 @@ def checkAllSignatures(jsonObject):
           validator = JCSValidator.new(jsonObject)
           print 'PEM=\n' + validator.getPublicKey('PEM') + 'JWK=\n' + validator.getPublicKey('JWK')
 
-jsonObject = JCSValidator.parse(jsonString)
+jsonObject = parseJson(jsonString)
 JCSValidator.new(jsonObject)
 print 'Valid'
 

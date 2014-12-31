@@ -1,10 +1,10 @@
-import collections
 import sys
 import codecs
 
 from org.webpki.json import JSONObjectWriter
 from org.webpki.json import JCSSignatureKey
-from org.webpki.json import JCSValidator
+
+from org.webpki.json.Utils import parseJson
 
 # Our test program
 if not len(sys.argv) in (2,3):
@@ -26,7 +26,7 @@ else:
   print "EC key"
 
 if len(sys.argv) == 3:
-  jsonObject = JSONObjectWriter.new(JCSValidator.parse(readFile(sys.argv[2])))
+  jsonObject = JSONObjectWriter.new(parseJson(readFile(sys.argv[2])))
 else:
   jsonObject = JSONObjectWriter.new()
   jsonObject.setInt("name", 7)
