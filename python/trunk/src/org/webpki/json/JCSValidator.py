@@ -37,6 +37,9 @@ from org.webpki.json.Utils import getAlgorithmEntry
 
 class new:
     def __init__(self,jsonObject):
+        """
+        Initialize and validate parsed JCS signature
+        """
         if not isinstance(jsonObject, OrderedDict):
             raise TypeError('JCS requires JSON to be parsed into a "OrderedDict"')
         signatureObject = jsonObject['signature']
@@ -63,7 +66,11 @@ class new:
             self.nativePublicKey.verify_digest(signatureValue,hashObject.digest(),
                                                sigdecode=sigdecode_der)
             
+
     def getPublicKey(self,type='PEM'):
+        """
+        Return public key as a PEM or JWK string or as a JCS in an OrderedDict
+        """
         if type == 'PEM':
             if self.keyType == 'RSA':
                 return self.nativePublicKey.exportKey(format='PEM') + '\n'

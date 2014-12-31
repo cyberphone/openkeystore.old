@@ -15,11 +15,8 @@ def readFile(name):
   return codecs.open(name, "r", "utf-8").read()
 
 keyString = readFile(sys.argv[1])
-if '-----' in keyString:
-  signatureKey = JCSSignatureKey.new(keyString,"PEM")
-else:
-  signatureKey = JCSSignatureKey.new(keyString) # JWK is default
 
+signatureKey = JCSSignatureKey.new(keyString)
 if signatureKey.isRSA():
   print "RSA key"
 else:

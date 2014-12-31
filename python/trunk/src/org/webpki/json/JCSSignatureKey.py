@@ -32,13 +32,16 @@ from org.webpki.json.Utils import getEcCurveName
 from org.webpki.json.Utils import getEcCurve
 from org.webpki.json.Utils import getAlgorithmEntry
 
-#######################################################
-# JCS (JSON Cleartext Signature) Signature key object #
-#######################################################
+#####################################################
+# JCS (JSON Cleartext Signature) private key object #
+#####################################################
 
 class new:
-    def __init__(self,privateKeyString, format='JWK'):
-        if format == 'JWK':
+    def __init__(self,privateKeyString):
+        """
+        Initialize object with an RSA or EC private key in JWK or PEM format
+        """
+        if '"kty"' in  privateKeyString:
             jwk = parseJson(privateKeyString)
             keyType = jwk['kty']
             if keyType == 'RSA':
@@ -47,7 +50,7 @@ class new:
                                                        cryptoBigNumDecode(jwk['d']),
                                                        cryptoBigNumDecode(jwk['p']),
                                                        cryptoBigNumDecode(jwk['q'])])
-                # JWK syntax checking...
+                """ JWK syntax checking... """
                 cryptoBigNumDecode(jwk['dp'])
                 cryptoBigNumDecode(jwk['dq'])
                 cryptoBigNumDecode(jwk['qi'])
@@ -55,27 +58,40 @@ class new:
                 self.nativePrivateKey = SigningKey.from_string(base64UrlDecode(jwk['d']),getEcCurve(jwk['crv']))
             else:
                 raise ValueError('Unsupported key type: "' + keyType + '"');
-        elif format == 'PEM':
+        else:
             if ' RSA ' in privateKeyString:
                 self.nativePrivateKey = RSA.importKey(privateKeyString)
             else:
                 self.nativePrivateKey = SigningKey.from_pem(privateKeyString)
-        else:
-            raise ValueError('Unsupported key format: "' + format + '"')
+        """
+        Set default signature algorithm
+        """
         if self.isRSA():
             self.algorithm = 'RS256'
         else:
             self.algorithm = 'ES256'
 
+
     def isRSA(self):
+        """
+        Return True for RSA, False for EC
+        """
         return isinstance(self.nativePrivateKey,RSA._RSAobj)
 
+
     def setAlgorithm(self,algorithm):
+        """
+        Override the default algorithm setting
+        """
         if getAlgorithmEntry(algorithm)[0] != self.isRSA():
             raise TypeError('Algorithm is not compatible with key type')
         self.algorithm = algorithm
 
+
     def getPublicKeyParameters(self, JCSFormat=True):
+        """
+        Return public key as JCS or JWK in a OrderedDict
+        """ 
         keyTypeMnemonic = 'type'
         curveMnemonic = 'curve'
         if not JCSFormat:
