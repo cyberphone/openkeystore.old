@@ -39,29 +39,29 @@ class new:
     def setInt(self,name,value):
         if not isinstance(value,int):
             raise TypeError('Integer expected')
-        return self.put(name,value)
+        return self._put(name,value)
 
     def setString(self,name,value):
         if not isinstance(value,str):
             raise TypeError('String expected')
-        return self.put(name,value)
+        return self._put(name,value)
 
     def setFloat(self,name,value):
         if isinstance(value, int):
             value = float(value)
         elif not isinstance(value,float):
             raise TypeError('Float expected')
-        return self.put(name,value)
+        return self._put(name,value)
 
     def setObject(self,name, optionalRoot=None):
         newObject = new(optionalRoot)
-        self.put(name,newObject.root)
+        self._put(name,newObject.root)
         return newObject
 
     def setBinary(self,name,value):
         if not isinstance(value, str):
             raise TypeError('String or bytearray expected')
-        return self.put(name,base64UrlEncode(value))
+        return self._put(name,base64UrlEncode(value))
 
     def setSignature(self,signatureKey):
         if not isinstance(signatureKey,JCSSignatureKey.new):
@@ -69,19 +69,17 @@ class new:
         signatureObject = new()
         signatureObject.setString('algorithm',signatureKey.algorithm)
         signatureObject.setObject('publicKey',signatureKey.getPublicKeyParameters())
-        self.put('signature',signatureObject.root)
+        self._put('signature',signatureObject.root)
         algorithmEntry = getAlgorithmEntry(signatureKey.algorithm)
         hashObject = algorithmEntry[1].new(self.serialize().encode("utf-8"))
         if signatureKey.isRSA():
-            signer = PKCS1_v1_5.new(signatureKey.nativePrivateKey)
-            signatureObject.setBinary('value',signer.sign(hashObject))
+            signatureValue = PKCS1_v1_5.new(signatureKey.nativePrivateKey).sign(hashObject)
         else:
-            signatureObject.setBinary('value',
-                                      signatureKey.nativePrivateKey.sign_digest(hashObject.digest(),
-                                                                                sigencode=sigencode_der))
+            signatureValue = signatureKey.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
+        signatureObject.setBinary('value',signatureValue)
         return self
 
-    def put(self,name,value):
+    def _put(self,name,value):
         if not isinstance(name,str):
             raise TypeError('Name must be a string')
         if name in self.root:
