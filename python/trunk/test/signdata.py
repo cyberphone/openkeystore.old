@@ -36,4 +36,4 @@ else:
 
 jsonObject.setSignature(signatureKey)
 
-print jsonObject.serialize()
+print jsonObject.serialize().encode("utf-8")

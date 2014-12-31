@@ -1,3 +1,21 @@
+##############################################################################
+#                                                                            #
+#  Copyright 2006-2015 WebPKI.org (http://webpki.org).                       #
+#                                                                            #
+#  Licensed under the Apache License, Version 2.0 (the "License");           #
+#  you may not use this file except in compliance with the License.          #
+#  You may obtain a copy of the License at                                   #
+#                                                                            #
+#      http://www.apache.org/licenses/LICENSE-2.0                            #
+#                                                                            #
+#  Unless required by applicable law or agreed to in writing, software       #
+#  distributed under the License is distributed on an "AS IS" BASIS,         #
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  #
+#  See the License for the specific language governing permissions and       #
+#  limitations under the License.                                            #
+#                                                                            #
+##############################################################################
+
 import base64
 
 from decimal import Decimal
@@ -18,88 +36,88 @@ from ecdsa.curves import NIST384p
 from ecdsa.curves import NIST521p
 
 algorithms = OrderedDict([
-   ('RS256', (True,  SHA256)),
-   ('RS384', (True,  SHA384)),
-   ('RS512', (True,  SHA512)),
-   ('ES256', (False, SHA256)),
-   ('ES384', (False, SHA384)),
-   ('ES512', (False, SHA512))
+    ('RS256', (True,  SHA256)),
+    ('RS384', (True,  SHA384)),
+    ('RS512', (True,  SHA512)),
+    ('ES256', (False, SHA256)),
+    ('ES384', (False, SHA384)),
+    ('ES512', (False, SHA512))
 ])
 
 ecCurves = OrderedDict([
-   ('P-256', NIST256p),
-   ('P-384', NIST384p),
-   ('P-521', NIST521p)
+    ('P-256', NIST256p),
+    ('P-384', NIST384p),
+    ('P-521', NIST521p)
 ])
 
 def cryptoBigNumDecode(base64String):
-  return bytes_to_long(base64UrlDecode(base64String))
-  
+    return bytes_to_long(base64UrlDecode(base64String))
+    
 def cryptoBigNumEncode(bigPostiveNumber):
-  return base64UrlEncode(long_to_bytes(bigPostiveNumber))
+    return base64UrlEncode(long_to_bytes(bigPostiveNumber))
 
 def base64UrlDecode(data):
-  if isinstance(data, unicode):
-    try:
-      data = data.encode('ascii')
-    except UnicodeEncodeError:
-      raise ValueError(
-        'unicode argument should contain only ASCII characters')
-  elif not isinstance(data, str):
-    raise TypeError('argument should be a str or unicode')
-  return base64.urlsafe_b64decode(data + '=' * (4 - (len(data) % 4)))
+    if isinstance(data, unicode):
+        try:
+            data = data.encode('ascii')
+        except UnicodeEncodeError:
+            raise ValueError(
+                'unicode argument should contain only ASCII characters')
+    elif not isinstance(data, str):
+        raise TypeError('argument should be a str or unicode')
+    return base64.urlsafe_b64decode(data + '=' * (4 - (len(data) % 4)))
 
 def base64UrlEncode(data):
-  if not isinstance(data, str):
-    raise TypeError('argument should be str or bytearray')
-  return base64.urlsafe_b64encode(data).rstrip('=')
+    if not isinstance(data, str):
+        raise TypeError('argument should be str or bytearray')
+    return base64.urlsafe_b64encode(data).rstrip('=')
 
 def getEcCurve(curveName):
-  if not curveName in ecCurves:
-    raise TypeError('Found "' + curveName + '". Supported EC curves: ' + listKeys(ecCurves))
-  return ecCurves[curveName]
-  
+    if not curveName in ecCurves:
+        raise TypeError('Found "' + curveName + '". Supported EC curves: ' + listKeys(ecCurves))
+    return ecCurves[curveName]
+    
 def listKeys(dictionary):
-  comma = False
-  result = ''
-  for item in dictionary:
-    if comma:
-      result += ', '
-    comma = True
-    result += item
-  return result
-  
+    comma = False
+    result = ''
+    for item in dictionary:
+        if comma:
+            result += ', '
+        comma = True
+        result += item
+    return result
+    
 def getEcCurveName(nativeKey):
-  for curve in ecCurves:
-    if nativeKey.curve == ecCurves[curve]:
-      return curve;
-  raise TypeError('Curve "' + nativeKey.curve.name + '" not supported')
+    for curve in ecCurves:
+        if nativeKey.curve == ecCurves[curve]:
+            return curve;
+    raise TypeError('Curve "' + nativeKey.curve.name + '" not supported')
 
 def getAlgorithmEntry(algorithm):
-  if not algorithm in algorithms:
-    raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
-  return algorithms[algorithm]
+    if not algorithm in algorithms:
+        raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
+    return algorithms[algorithm]
 
 ############################################
-# JCS Compatible Parser                    #
+# JCS Compatible Parser                                        #
 ############################################
 
 def parseJson(jsonString):
-  return json.loads(jsonString, object_pairs_hook=OrderedDict,parse_float=EnhancedDecimal)
+    return json.loads(jsonString, object_pairs_hook=OrderedDict,parse_float=EnhancedDecimal)
 
 ############################################
-# JCS Compatible Serializer                #
+# JCS Compatible Serializer                                #
 ############################################
 
 def serializeJson(jsonObject):
-  return json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
+    return json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)
 
 # Support class
 class EnhancedDecimal(Decimal):
-   def __str__ (self):
-     return self.saved_string
+     def __str__ (self):
+         return self.saved_string
 
-   def __new__(cls, value="0", context=None):
-     obj = Decimal.__new__(cls,value,context)
-     obj.saved_string = value
-     return obj;  
+     def __new__(cls, value="0", context=None):
+         obj = Decimal.__new__(cls,value,context)
+         obj.saved_string = value
+         return obj;    
