@@ -27,6 +27,8 @@ class new:
     def __init__(self,optionalRoot=None):
         if optionalRoot:
             self.root = optionalRoot
+            if not isinstance(optionalRoot,OrderedDict):
+                raise TypeError('Optional argument not "OrderedDict"')
         else:
             self.root = OrderedDict()
 
