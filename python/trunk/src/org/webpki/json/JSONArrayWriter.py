@@ -18,69 +18,43 @@
 
 from collections import OrderedDict
 
-from org.webpki.json import SignatureKey
-from org.webpki.json import JSONArrayWriter
-
 from org.webpki.json.Utils import base64UrlEncode
 from org.webpki.json.Utils import serializeJson
 
 class new:
-    def __init__(self,optionalRoot=None):
-        if optionalRoot:
-            self.root = optionalRoot
-            if not isinstance(optionalRoot,OrderedDict):
-                raise TypeError('Optional argument not "OrderedDict"')
-        else:
-            self.root = OrderedDict()
+    def __init__(self):
+        self.array = list()
 
-    def setInt(self,name,value):
+    def setInt(self,value):
         if not isinstance(value,int):
             raise TypeError('Integer expected')
-        return self._put(name,value)
+        return self._put(value)
 
-    def setString(self,name,value):
+    def setString(self,value):
         if not isinstance(value,str):
             raise TypeError('String expected')
-        return self._put(name,value)
+        return self._put(value)
 
-    def setFloat(self,name,value):
+    def setFloat(self,value):
         if isinstance(value, int):
             value = float(value)
         elif not isinstance(value,float):
             raise TypeError('Float expected')
-        return self._put(name,value)
+        return self._put(value)
 
-    def setObject(self,name, optionalRoot=None):
-        newObject = new(optionalRoot)
-        self._put(name,newObject.root)
+    def setObject(self):
+        newObject = new()
+        self._put(newObject.root)
         return newObject
 
-    def setArray(self,name):
-        newArray = JSONArrayWriter.new()
-        self._put(name,newArray.array)
-        return newArray
-
-    def setBinary(self,name,value):
+    def setBinary(self,value):
         if not isinstance(value, str):
             raise TypeError('String or bytearray expected')
-        return self._put(name,base64UrlEncode(value))
+        return self._put(base64UrlEncode(value))
 
-    def setSignature(self,signatureKey):
-        if not isinstance(signatureKey,SignatureKey.new):
-            raise TypeError('SignatureKey expected')
-        signatureObject = new()
-        signatureKey.setSignatureKeyData(signatureObject)
-        self._put('signature',signatureObject.root)
-        signatureObject.setBinary('value',signatureKey.signData(self.serialize().encode("utf-8")))
-        return self
-
-    def _put(self,name,value):
-        if not isinstance(name,str):
-            raise TypeError('Name must be a string')
-        if name in self.root:
-            raise ValueError('Duplicate property: "' + name + '"')
-        self.root[name] = value
+    def _put(self,value):
+        self.array.append(value)
         return self
 
     def serialize(self):
-        return serializeJson(self.root)
+        return serializeJson(self.array)

@@ -110,11 +110,12 @@ class new:
         return self.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
 
 
-    def _getJCSKeyData(self):
+    def setSignatureKeyData(self,jsonObjectWriter):
         """
         Only for usage by JSONObjectWriter
         """
-        return self.getPublicKey('JCS')
+        jsonObjectWriter.setString('algorithm',self.algorithm)
+        jsonObjectWriter.setObject('publicKey',self.getPublicKey('JCS'))
 
 
     def getPublicKey(self,format='JWK'):

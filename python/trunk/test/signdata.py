@@ -26,10 +26,11 @@ if len(sys.argv) == 3:
   jsonObject = JSONObjectWriter.new(parseJson(readFile(sys.argv[2])))
 else:
   jsonObject = JSONObjectWriter.new()
-  jsonObject.setInt("name", 7)
+  jsonObject.setInt("an_int", 7)
 
-  jsonObject.setString("nam", "f")
-  jsonObject.setObject("myo").setString("keyi","meyi").setFloat("fl",1e+5)
+  jsonObject.setString("a_string", "Sure")
+  jsonObject.setObject("an_object").setString("another_string","Yeah").setFloat("a_float",1e+5).setBinary("a_blob",'\x00\x01\x03\x04\x05')
+  jsonObject.setArray("an_array").setInt(45).setString("Nope")
 
 jsonObject.setSignature(signatureKey)
 
