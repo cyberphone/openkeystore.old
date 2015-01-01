@@ -98,6 +98,17 @@ def getAlgorithmEntry(algorithm):
         raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
     return algorithms[algorithm]
 
+def exportPublicKeyAsPem(nativePublicKey,rsaFlag):
+    if rsaFlag:
+        return nativePublicKey.exportKey(format='PEM') + '\n'
+    return nativePublicKey.to_pem()
+
+def exportFormatCheck(format):
+    if format in ('JWK','PEM','JCS'):
+        return format
+    raise TypeError('Found "' + format + '". JWK, PEM or JCS expected')
+
+
 ############################################
 # JCS Compatible Parser                                        #
 ############################################

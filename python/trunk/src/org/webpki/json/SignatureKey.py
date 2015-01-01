@@ -30,9 +30,12 @@ from org.webpki.json.Utils import base64UrlDecode
 from org.webpki.json.Utils import cryptoBigNumEncode
 from org.webpki.json.Utils import cryptoBigNumDecode
 from org.webpki.json.Utils import parseJson
+from org.webpki.json.Utils import serializeJson
 from org.webpki.json.Utils import getEcCurveName
 from org.webpki.json.Utils import getEcCurve
 from org.webpki.json.Utils import getAlgorithmEntry
+from org.webpki.json.Utils import exportPublicKeyAsPem
+from org.webpki.json.Utils import exportFormatCheck
 
 ##################################################
 # Python private key and signature support class #
@@ -111,33 +114,39 @@ class new:
         """
         Only for usage by JSONObjectWriter
         """
-        return self.getPublicKeyParameters(False)
+        return self.getPublicKey('JCS')
 
 
-    def getPublicKeyParameters(self, JWKFormat=True):
+    def getPublicKey(self,format='JWK'):
         """
-        Return public key as a JCS or JWK key in an OrderedDict
+        Return public key as a PEM or JWK string or as a JCS in an OrderedDict
         """ 
-        if JWKFormat:
+        if exportFormatCheck(format) == 'PEM':
+            if self.isRSA():
+                return exportPublicKeyAsPem(self.nativePrivateKey,True)
+            return exportPublicKeyAsPem(self.nativePrivateKey.get_verifying_key(),False)
+        if format == 'JWK':
             keyTypeMnemonic = 'kty'
             curveMnemonic = 'crv'
         else:
             keyTypeMnemonic = 'type'
             curveMnemonic = 'curve'
-        publicKeyParameters = OrderedDict()
+        publicKey = OrderedDict()
         if self.isRSA():
-            publicKeyParameters[keyTypeMnemonic] = 'RSA'
-            publicKeyParameters['n'] = cryptoBigNumEncode(self.nativePrivateKey.n)
-            publicKeyParameters['e'] = cryptoBigNumEncode(self.nativePrivateKey.e)
+            publicKey[keyTypeMnemonic] = 'RSA'
+            publicKey['n'] = cryptoBigNumEncode(self.nativePrivateKey.n)
+            publicKey['e'] = cryptoBigNumEncode(self.nativePrivateKey.e)
         else:
-            publicKeyParameters[keyTypeMnemonic] = 'EC'
-            publicKeyParameters[curveMnemonic] = getEcCurveName(self.nativePrivateKey)
+            publicKey[keyTypeMnemonic] = 'EC'
+            publicKey[curveMnemonic] = getEcCurveName(self.nativePrivateKey)
             point = self.nativePrivateKey.get_verifying_key().to_string()
             length = len(point)
             if length % 2:
                 raise ValueError('EC point length error')
             length >>= 1
-            publicKeyParameters['x'] = base64UrlEncode(point[:length])
-            publicKeyParameters['y'] = base64UrlEncode(point[length:])
-        return publicKeyParameters
+            publicKey['x'] = base64UrlEncode(point[:length])
+            publicKey['y'] = base64UrlEncode(point[length:])
+        if format == 'JWK':
+            return serializeJson(publicKey)
+        return publicKey
 

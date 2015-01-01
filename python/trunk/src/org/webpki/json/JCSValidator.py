@@ -30,6 +30,8 @@ from org.webpki.json.Utils import listKeys
 from org.webpki.json.Utils import getEcCurve
 from org.webpki.json.Utils import serializeJson
 from org.webpki.json.Utils import getAlgorithmEntry
+from org.webpki.json.Utils import exportPublicKeyAsPem
+from org.webpki.json.Utils import exportFormatCheck
 
 ############################################
 # JCS (JSON Cleartext Signature) validator #
@@ -76,6 +78,8 @@ class new:
         """
         Return public key as a PEM or JWK string or as a JCS in an OrderedDict
         """
+        if exportFormatCheck(format) == 'PEM':
+            return exportPublicKeyAsPem(self.nativePublicKey,self.keyType == 'RSA')
         if format == 'JWK':
             jwk = OrderedDict()
             for item in self.publicKey:
@@ -84,14 +88,7 @@ class new:
                     key = 'kty'
                 jwk[key] = self.publicKey[item]
             return serializeJson(jwk)
-        if format == 'PEM':
-            if self.keyType == 'RSA':
-                return self.nativePublicKey.exportKey(format='PEM') + '\n'
-            else:
-                return self.nativePublicKey.to_pem()
-        if format == 'JCS':
-            return self.publicKey
-        raise ValueError('Unknown key format: "' + format + '"') 
+        return self.publicKey
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 
