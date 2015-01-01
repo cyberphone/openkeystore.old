@@ -50,6 +50,12 @@ ecCurves = OrderedDict([
     ('P-521', NIST521p)
 ])
 
+publicKeyExportFormats = OrderedDict([
+    ('PEM', 'Privacy Enhanced Mail format'),
+    ('JWK', 'JOSE Web Key format'),
+    ('JCS', 'JSON Cleartext Signature format')
+])
+
 def cryptoBigNumDecode(base64String):
     return bytes_to_long(base64UrlDecode(base64String))
     
@@ -64,18 +70,18 @@ def base64UrlDecode(data):
             raise ValueError(
                 'unicode argument should contain only ASCII characters')
     elif not isinstance(data, str):
-        raise TypeError('argument should be a str or unicode')
+        raise TypeError('Argument should be a str or unicode')
     return base64.urlsafe_b64decode(data + '=' * (4 - (len(data) % 4)))
 
 def base64UrlEncode(data):
-    if not isinstance(data, str):
-        raise TypeError('argument should be str or bytearray')
-    return base64.urlsafe_b64encode(data).rstrip('=')
+    if isinstance(data, str):
+        return base64.urlsafe_b64encode(data).rstrip('=')
+    raise TypeError('Argument should be str or bytearray')
 
 def getEcCurve(curveName):
-    if not curveName in ecCurves:
-        raise TypeError('Found "' + curveName + '". Supported EC curves: ' + listKeys(ecCurves))
-    return ecCurves[curveName]
+    if curveName in ecCurves:
+        return ecCurves[curveName]
+    raise TypeError('Found "' + curveName + '". Supported EC curves: ' + listKeys(ecCurves))
     
 def listKeys(dictionary):
     comma = False
@@ -94,9 +100,9 @@ def getEcCurveName(nativeKey):
     raise TypeError('Curve "' + nativeKey.curve.name + '" not supported')
 
 def getAlgorithmEntry(algorithm):
-    if not algorithm in algorithms:
-        raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
-    return algorithms[algorithm]
+    if algorithm in algorithms:
+        return algorithms[algorithm]
+    raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
 
 def exportPublicKeyAsPem(nativePublicKey,rsaFlag):
     if rsaFlag:
@@ -104,9 +110,9 @@ def exportPublicKeyAsPem(nativePublicKey,rsaFlag):
     return nativePublicKey.to_pem()
 
 def exportFormatCheck(format):
-    if format in ('JWK','PEM','JCS'):
+    if format in publicKeyExportFormats:
         return format
-    raise TypeError('Found "' + format + '". JWK, PEM or JCS expected')
+    raise TypeError('Found "' + format + '". Supported formats: ' + listKeys(publicKeyExportFormats))
 
 
 ############################################
