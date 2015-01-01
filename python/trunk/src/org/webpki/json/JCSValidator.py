@@ -39,6 +39,11 @@ class new:
     def __init__(self,jsonObject):
         """
         Initialize and validate parsed JCS signature
+        
+        The current implementation is limited to RSA and EC
+        signatures and usage of the IETF JOSE algorithms
+        
+        An invalid signature raises an exception
         """
         if not isinstance(jsonObject, OrderedDict):
             raise TypeError('JCS requires JSON to be parsed into a "OrderedDict"')
@@ -67,18 +72,11 @@ class new:
                                                sigdecode=sigdecode_der)
             
 
-    def getPublicKey(self,type='PEM'):
+    def getPublicKey(self,type='JWK'):
         """
         Return public key as a PEM or JWK string or as a JCS in an OrderedDict
         """
-        if type == 'PEM':
-            if self.keyType == 'RSA':
-                return self.nativePublicKey.exportKey(format='PEM') + '\n'
-            else:
-                return self.nativePublicKey.to_pem()
-        elif type == 'Native':
-            return self.nativePublicKey
-        elif type == 'JWK':
+        if type == 'JWK':
             jwk = OrderedDict()
             for item in self.publicKey:
                 key = item
@@ -86,10 +84,14 @@ class new:
                     key = 'kty'
                 jwk[key] = self.publicKey[item]
             return serializeJson(jwk)
-        elif type == 'JCS':
+        if type == 'PEM':
+            if self.keyType == 'RSA':
+                return self.nativePublicKey.exportKey(format='PEM') + '\n'
+            else:
+                return self.nativePublicKey.to_pem()
+        if type == 'JCS':
             return self.publicKey
-        else:
-            raise ValueError('Unknown key type: "' + type + '"') 
+        raise ValueError('Unknown key type: "' + type + '"') 
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 

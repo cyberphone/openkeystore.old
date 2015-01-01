@@ -1,7 +1,6 @@
 import collections
 import sys
 import codecs
-from decimal import Decimal
 
 from org.webpki.json import JCSValidator
 
@@ -19,15 +18,17 @@ jsonString = codecs.open(sys.argv[1], "r", "utf-8").read()
 
 def checkAllSignatures(jsonObject):
     for w in jsonObject:
-       if isinstance(jsonObject[w],collections.OrderedDict):
-         checkAllSignatures(jsonObject[w])
-       if w == 'signature':
-          validator = JCSValidator.new(jsonObject)
-          print 'PEM=\n' + validator.getPublicKey('PEM') + 'JWK=\n' + validator.getPublicKey('JWK')
+        if isinstance(jsonObject[w],collections.OrderedDict):
+            checkAllSignatures(jsonObject[w])
+    if w == 'signature':
+        validator = JCSValidator.new(jsonObject)
+        print 'PEM=\n' + validator.getPublicKey('PEM') + 'JWK=\n' + validator.getPublicKey('JWK')
 
+# Just check the outer signature
 jsonObject = parseJson(jsonString)
 JCSValidator.new(jsonObject)
-print 'Valid'
+print 'Valid (since it didn\'t raise an exception)'
 
+# For fun we can traverse the entire object and look for inner signatures as well 
 checkAllSignatures(jsonObject)
 
