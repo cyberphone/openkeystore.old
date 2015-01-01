@@ -96,6 +96,7 @@ class new:
         self.algorithm = algorithm
         return self
 
+
     def signData(self,data):
         """
         Well, use the private key + hash method and return a signature blob
