@@ -38,7 +38,7 @@ from org.webpki.json.Utils import getAlgorithmEntry
 class new:
     def __init__(self,jsonObject):
         """
-        Validate an already parsed JCS signature
+        Validate the signature of an already parsed JSON object
         
         The current implementation is limited to RSA and EC
         signatures and usage of the IETF JOSE algorithms
