@@ -22,7 +22,6 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 from ecdsa.util import sigencode_der
-from ecdsa.util import sigdecode_der
 
 from ecdsa import SigningKey
 
