@@ -72,11 +72,11 @@ class new:
                                                sigdecode=sigdecode_der)
             
 
-    def getPublicKey(self,type='JWK'):
+    def getPublicKey(self,format='JWK'):
         """
         Return public key as a PEM or JWK string or as a JCS in an OrderedDict
         """
-        if type == 'JWK':
+        if format == 'JWK':
             jwk = OrderedDict()
             for item in self.publicKey:
                 key = item
@@ -84,14 +84,14 @@ class new:
                     key = 'kty'
                 jwk[key] = self.publicKey[item]
             return serializeJson(jwk)
-        if type == 'PEM':
+        if format == 'PEM':
             if self.keyType == 'RSA':
                 return self.nativePublicKey.exportKey(format='PEM') + '\n'
             else:
                 return self.nativePublicKey.to_pem()
-        if type == 'JCS':
+        if format == 'JCS':
             return self.publicKey
-        raise ValueError('Unknown key type: "' + type + '"') 
+        raise ValueError('Unknown key format: "' + format + '"') 
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
 
