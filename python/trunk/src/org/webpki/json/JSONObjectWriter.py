@@ -18,15 +18,9 @@
 
 from collections import OrderedDict
 
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
-
-from ecdsa.util import sigencode_der
-
-from org.webpki.json import JCSSignatureKey
+from org.webpki.json import SignatureKey
 
 from org.webpki.json.Utils import base64UrlEncode
-from org.webpki.json.Utils import getAlgorithmEntry
 from org.webpki.json.Utils import serializeJson
 
 class new:
@@ -64,19 +58,13 @@ class new:
         return self._put(name,base64UrlEncode(value))
 
     def setSignature(self,signatureKey):
-        if not isinstance(signatureKey,JCSSignatureKey.new):
-            raise TypeError('JCSSignature expected')
+        if not isinstance(signatureKey,SignatureKey.new):
+            raise TypeError('SignatureKey expected')
         signatureObject = new()
         signatureObject.setString('algorithm',signatureKey.algorithm)
-        signatureObject.setObject('publicKey',signatureKey.getPublicKeyParameters())
+        signatureObject.setObject('publicKey',signatureKey._getJCSKeyData())
         self._put('signature',signatureObject.root)
-        algorithmEntry = getAlgorithmEntry(signatureKey.algorithm)
-        hashObject = algorithmEntry[1].new(self.serialize().encode("utf-8"))
-        if signatureKey.isRSA():
-            signatureValue = PKCS1_v1_5.new(signatureKey.nativePrivateKey).sign(hashObject)
-        else:
-            signatureValue = signatureKey.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
-        signatureObject.setBinary('value',signatureValue)
+        signatureObject.setBinary('value',signatureKey.signData(self.serialize().encode("utf-8")))
         return self
 
     def _put(self,name,value):

@@ -19,8 +19,11 @@
 from collections import OrderedDict
 
 from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 
+from ecdsa.util import sigencode_der
 from ecdsa.util import sigdecode_der
+
 from ecdsa import SigningKey
 
 from org.webpki.json.Utils import base64UrlEncode
@@ -32,14 +35,19 @@ from org.webpki.json.Utils import getEcCurveName
 from org.webpki.json.Utils import getEcCurve
 from org.webpki.json.Utils import getAlgorithmEntry
 
-#####################################################
-# JCS (JSON Cleartext Signature) private key object #
-#####################################################
+##################################################
+# Python private key and signature support class #
+##################################################
 
 class new:
     def __init__(self,privateKeyString):
         """
         Initialize object with an RSA or EC private key in JWK or PEM format
+        
+        Signature algorithms are assumed to be given in the IETF JOSE format
+        
+        This class is essentially a wrapper over the currently disparate Python
+        EC and RSA libraries, not limited to JSON or JCS
         """
         if '"kty"' in  privateKeyString:
             jwk = parseJson(privateKeyString)
@@ -86,17 +94,36 @@ class new:
         if getAlgorithmEntry(algorithm)[0] != self.isRSA():
             raise TypeError('Algorithm is not compatible with key type')
         self.algorithm = algorithm
+        return self
 
-
-    def getPublicKeyParameters(self, JCSFormat=True):
+    def signData(self,data):
         """
-        Return public key as JCS or JWK in a OrderedDict
+        Well, use the private key + hash method and return a signature blob
+        """
+        algorithmEntry = getAlgorithmEntry(self.algorithm)
+        hashObject = algorithmEntry[1].new(data)
+        if algorithmEntry[0]:
+            return PKCS1_v1_5.new(self.nativePrivateKey).sign(hashObject)
+        return self.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
+
+
+    def _getJCSKeyData(self):
+        """
+        Only for usage by JSONObjectWriter
+        """
+        return self.getPublicKeyParameters(False)
+
+
+    def getPublicKeyParameters(self, JWKFormat=True):
+        """
+        Return public key as a JCS or JWK key in an OrderedDict
         """ 
-        keyTypeMnemonic = 'type'
-        curveMnemonic = 'curve'
-        if not JCSFormat:
+        if JWKFormat:
             keyTypeMnemonic = 'kty'
             curveMnemonic = 'crv'
+        else:
+            keyTypeMnemonic = 'type'
+            curveMnemonic = 'curve'
         publicKeyParameters = OrderedDict()
         if self.isRSA():
             publicKeyParameters[keyTypeMnemonic] = 'RSA'

@@ -2,7 +2,7 @@ import sys
 import codecs
 
 from org.webpki.json import JSONObjectWriter
-from org.webpki.json import JCSSignatureKey
+from org.webpki.json import SignatureKey
 
 from org.webpki.json.Utils import parseJson
 
@@ -16,7 +16,7 @@ def readFile(name):
 
 keyString = readFile(sys.argv[1])
 
-signatureKey = JCSSignatureKey.new(keyString)
+signatureKey = SignatureKey.new(keyString)
 if signatureKey.isRSA():
   print "RSA key"
 else:
