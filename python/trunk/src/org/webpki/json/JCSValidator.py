@@ -86,6 +86,8 @@ class new:
                 key = item
                 if key == 'type':
                     key = 'kty'
+                elif key == 'curve':
+                    key = 'crv'
                 jwk[key] = self.publicKey[item]
             return serializeJson(jwk)
         return self.publicKey
