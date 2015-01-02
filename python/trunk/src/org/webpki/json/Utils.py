@@ -25,6 +25,8 @@ import simplejson as json
 from Crypto.Util.number import bytes_to_long
 from Crypto.Util.number import long_to_bytes
 
+from Crypto.PublicKey import RSA
+
 from collections import OrderedDict
 
 from Crypto.Hash import SHA256
@@ -34,6 +36,10 @@ from Crypto.Hash import SHA512
 from ecdsa.curves import NIST256p
 from ecdsa.curves import NIST384p
 from ecdsa.curves import NIST521p
+
+############################################
+# Crypto and JSON support methods and data #
+############################################
 
 algorithms = OrderedDict([
     ('RS256', (True,  SHA256)),
@@ -104,8 +110,8 @@ def getAlgorithmEntry(algorithm):
         return algorithms[algorithm]
     raise TypeError('Found "' + algorithm + '". Supported algorithms: ' + listKeys(algorithms))
 
-def exportPublicKeyAsPem(nativePublicKey,rsaFlag):
-    if rsaFlag:
+def exportPublicKeyAsPem(nativePublicKey):
+    if isinstance(nativePublicKey,RSA._RSAobj):
         return nativePublicKey.exportKey(format='PEM') + '\n'
     return nativePublicKey.to_pem()
 

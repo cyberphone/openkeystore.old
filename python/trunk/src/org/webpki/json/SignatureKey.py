@@ -23,7 +23,7 @@ from Crypto.Signature import PKCS1_v1_5
 
 from ecdsa.util import sigencode_der
 
-from ecdsa import SigningKey
+from ecdsa import SigningKey as EC
 
 from org.webpki.json.Utils import base64UrlEncode
 from org.webpki.json.Utils import base64UrlDecode
@@ -37,9 +37,9 @@ from org.webpki.json.Utils import getAlgorithmEntry
 from org.webpki.json.Utils import exportPublicKeyAsPem
 from org.webpki.json.Utils import exportFormatCheck
 
-##################################################
-# Python private key and signature support class #
-##################################################
+###################################################
+# Private key and signature support wrapper class #
+###################################################
 
 class new:
     def __init__(self,privateKeyString):
@@ -65,14 +65,14 @@ class new:
                 cryptoBigNumDecode(jwk['dq'])
                 cryptoBigNumDecode(jwk['qi'])
             elif keyType == 'EC':
-                self.nativePrivateKey = SigningKey.from_string(base64UrlDecode(jwk['d']),getEcCurve(jwk['crv']))
+                self.nativePrivateKey = EC.from_string(base64UrlDecode(jwk['d']),getEcCurve(jwk['crv']))
             else:
                 raise ValueError('Unsupported key type: "' + keyType + '"');
         else:
             if ' RSA ' in privateKeyString:
                 self.nativePrivateKey = RSA.importKey(privateKeyString)
             else:
-                self.nativePrivateKey = SigningKey.from_pem(privateKeyString)
+                self.nativePrivateKey = EC.from_pem(privateKeyString)
         """
         Set default signature algorithm
         """
@@ -110,7 +110,7 @@ class new:
         return self.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
 
 
-    def setSignatureKeyData(self,jsonObjectWriter):
+    def setSignatureMetaData(self,jsonObjectWriter):
         """
         Only for usage by JSONObjectWriter
         """
@@ -124,8 +124,8 @@ class new:
         """ 
         if exportFormatCheck(format) == 'PEM':
             if self.isRSA():
-                return exportPublicKeyAsPem(self.nativePrivateKey,True)
-            return exportPublicKeyAsPem(self.nativePrivateKey.get_verifying_key(),False)
+                return exportPublicKeyAsPem(self.nativePrivateKey.publickey())
+            return exportPublicKeyAsPem(self.nativePrivateKey.get_verifying_key())
         if format == 'JWK':
             keyTypeMnemonic = 'kty'
             curveMnemonic = 'crv'

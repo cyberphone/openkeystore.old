@@ -1,7 +1,7 @@
 import sys
 import codecs
 
-from org.webpki.json import JSONObjectWriter
+from org.webpki.json.Writer import JSONObjectWriter
 from org.webpki.json import SignatureKey
 
 from org.webpki.json.Utils import parseJson
@@ -23,14 +23,15 @@ else:
   print "EC key"
 
 if len(sys.argv) == 3:
-  jsonObject = JSONObjectWriter.new(parseJson(readFile(sys.argv[2])))
+  jsonObject = JSONObjectWriter(parseJson(readFile(sys.argv[2])))
 else:
-  jsonObject = JSONObjectWriter.new()
+  jsonObject = JSONObjectWriter()
   jsonObject.setInt("an_int", 7)
 
   jsonObject.setString("a_string", "Sure")
   jsonObject.setObject("an_object").setString("another_string","Yeah").setFloat("a_float",1e+5).setBinary("a_blob",'\x00\x01\x03\x04\x05')
-  jsonObject.setArray("an_array").setInt(45).setString("Nope")
+  jsonObject.setArray("an_array").setInt(45).setString("Nope").setObject()
+  jsonObject.setArray("two_dimensional").setArray().setString("Bye")
 
 jsonObject.setSignature(signatureKey)
 

@@ -19,12 +19,15 @@
 from collections import OrderedDict
 
 from org.webpki.json import SignatureKey
-from org.webpki.json import JSONArrayWriter
 
 from org.webpki.json.Utils import base64UrlEncode
 from org.webpki.json.Utils import serializeJson
 
-class new:
+##############################################
+# JSON encoding medium-level wrapper classes #
+##############################################
+
+class JSONObjectWriter:
     def __init__(self,optionalRoot=None):
         if optionalRoot:
             self.root = optionalRoot
@@ -51,12 +54,12 @@ class new:
         return self._put(name,value)
 
     def setObject(self,name, optionalRoot=None):
-        newObject = new(optionalRoot)
+        newObject = JSONObjectWriter(optionalRoot)
         self._put(name,newObject.root)
         return newObject
 
     def setArray(self,name):
-        newArray = JSONArrayWriter.new()
+        newArray = JSONArrayWriter()
         self._put(name,newArray.array)
         return newArray
 
@@ -68,8 +71,8 @@ class new:
     def setSignature(self,signatureKey):
         if not isinstance(signatureKey,SignatureKey.new):
             raise TypeError('SignatureKey expected')
-        signatureObject = new()
-        signatureKey.setSignatureKeyData(signatureObject)
+        signatureObject = JSONObjectWriter()
+        signatureKey.setSignatureMetaData(signatureObject)
         self._put('signature',signatureObject.root)
         signatureObject.setBinary('value',signatureKey.signData(self.serialize().encode("utf-8")))
         return self
@@ -84,3 +87,47 @@ class new:
 
     def serialize(self):
         return serializeJson(self.root)
+        
+class JSONArrayWriter:
+    def __init__(self):
+        self.array = list()
+
+    def setInt(self,value):
+        if not isinstance(value,int):
+            raise TypeError('Integer expected')
+        return self._put(value)
+
+    def setString(self,value):
+        if not isinstance(value,str):
+            raise TypeError('String expected')
+        return self._put(value)
+
+    def setFloat(self,value):
+        if isinstance(value, int):
+            value = float(value)
+        elif not isinstance(value,float):
+            raise TypeError('Float expected')
+        return self._put(value)
+
+    def setObject(self):
+        newObject = JSONObjectWriter()
+        self._put(newObject.root)
+        return newObject
+
+    def setArray(self):
+        newArray = JSONArrayWriter()
+        self._put(newArray.array)
+        return newArray
+
+    def setBinary(self,value):
+        if not isinstance(value, str):
+            raise TypeError('String or bytearray expected')
+        return self._put(base64UrlEncode(value))
+
+    def _put(self,value):
+        self.array.append(value)
+        return self
+
+    def serialize(self):
+        return serializeJson(self.array)
+

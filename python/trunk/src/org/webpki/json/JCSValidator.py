@@ -22,7 +22,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
 from ecdsa.util import sigdecode_der
-from ecdsa import VerifyingKey
+from ecdsa import VerifyingKey as EC
 
 from org.webpki.json.Utils import cryptoBigNumDecode
 from org.webpki.json.Utils import base64UrlDecode
@@ -56,20 +56,20 @@ class new:
         hashObject = algorithmEntry[1].new(serializeJson(jsonObject).encode("utf-8"))
         jsonObject['signature'] = clonedSignatureObject
         self.publicKey = signatureObject['publicKey']
-        self.keyType = self.publicKey['type']
+        keyType = self.publicKey['type']
         if algorithmEntry[0]:
-            if self.keyType != 'RSA':
+            if keyType != 'RSA':
                 raise TypeError('"RSA" expected')
             self.nativePublicKey = RSA.construct([cryptoBigNumDecode(self.publicKey['n']),
                                                   cryptoBigNumDecode(self.publicKey['e'])])
             if not PKCS1_v1_5.new(self.nativePublicKey).verify(hashObject,signatureValue):
                 raise ValueError('Invalid Signature!')
         else:
-            if self.keyType != 'EC':
+            if keyType != 'EC':
                 raise TypeError('"EC" expected')
-            self.nativePublicKey = VerifyingKey.from_string(base64UrlDecode(self.publicKey['x']) + 
-                                                            base64UrlDecode(self.publicKey['y']),
-                                                            curve=getEcCurve(self.publicKey['curve']))
+            self.nativePublicKey = EC.from_string(base64UrlDecode(self.publicKey['x']) + 
+                                                  base64UrlDecode(self.publicKey['y']),
+                                                  curve=getEcCurve(self.publicKey['curve']))
             self.nativePublicKey.verify_digest(signatureValue,hashObject.digest(),
                                                sigdecode=sigdecode_der)
             
@@ -79,7 +79,7 @@ class new:
         Return public key as a PEM or JWK string or as a JCS in an OrderedDict
         """
         if exportFormatCheck(format) == 'PEM':
-            return exportPublicKeyAsPem(self.nativePublicKey,self.keyType == 'RSA')
+            return exportPublicKeyAsPem(self.nativePublicKey)
         if format == 'JWK':
             jwk = OrderedDict()
             for item in self.publicKey:
