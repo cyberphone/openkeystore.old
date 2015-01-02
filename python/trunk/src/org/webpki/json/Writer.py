@@ -18,9 +18,10 @@
 
 from collections import OrderedDict
 
-from org.webpki.json import SignatureKey
+from org.webpki.json.BaseKey import BaseKey
 
 from org.webpki.json.Utils import base64UrlEncode
+from org.webpki.json.Utils import cryptoBigNumEncode
 from org.webpki.json.Utils import serializeJson
 
 ##############################################
@@ -30,9 +31,9 @@ from org.webpki.json.Utils import serializeJson
 class JSONObjectWriter:
     def __init__(self,optionalRoot=None):
         if optionalRoot:
-            self.root = optionalRoot
             if not isinstance(optionalRoot,OrderedDict):
                 raise TypeError('Optional argument not "OrderedDict"')
+            self.root = optionalRoot
         else:
             self.root = OrderedDict()
 
@@ -68,8 +69,11 @@ class JSONObjectWriter:
             raise TypeError('String or bytearray expected')
         return self._put(name,base64UrlEncode(value))
 
+    def setCryptoBigNum(self,name,value):
+        return self._put(name,cryptoBigNumEncode(value))
+
     def setSignature(self,signatureKey):
-        if not isinstance(signatureKey,SignatureKey.new):
+        if not isinstance(signatureKey,BaseKey):
             raise TypeError('SignatureKey expected')
         signatureObject = JSONObjectWriter()
         signatureKey.setSignatureMetaData(signatureObject)

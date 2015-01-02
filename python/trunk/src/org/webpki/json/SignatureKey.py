@@ -16,8 +16,6 @@
 #                                                                            #
 ##############################################################################
 
-from collections import OrderedDict
-
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
@@ -25,23 +23,24 @@ from ecdsa.util import sigencode_der
 
 from ecdsa import SigningKey as EC
 
-from org.webpki.json.Utils import base64UrlEncode
 from org.webpki.json.Utils import base64UrlDecode
-from org.webpki.json.Utils import cryptoBigNumEncode
 from org.webpki.json.Utils import cryptoBigNumDecode
 from org.webpki.json.Utils import parseJson
-from org.webpki.json.Utils import serializeJson
 from org.webpki.json.Utils import getEcCurveName
 from org.webpki.json.Utils import getEcCurve
 from org.webpki.json.Utils import getAlgorithmEntry
 from org.webpki.json.Utils import exportPublicKeyAsPem
 from org.webpki.json.Utils import exportFormatCheck
 
+from org.webpki.json.Writer import JSONObjectWriter
+
+from org.webpki.json.BaseKey import BaseKey
+
 ###################################################
 # Private key and signature support wrapper class #
 ###################################################
 
-class new:
+class new(BaseKey):
     def __init__(self,privateKeyString):
         """
         Initialize object with an RSA or EC private key in JWK or PEM format
@@ -132,22 +131,22 @@ class new:
         else:
             keyTypeMnemonic = 'type'
             curveMnemonic = 'curve'
-        publicKey = OrderedDict()
+        publicKey = JSONObjectWriter()
         if self.isRSA():
-            publicKey[keyTypeMnemonic] = 'RSA'
-            publicKey['n'] = cryptoBigNumEncode(self.nativePrivateKey.n)
-            publicKey['e'] = cryptoBigNumEncode(self.nativePrivateKey.e)
+            publicKey.setString(keyTypeMnemonic, 'RSA')
+            publicKey.setCryptoBigNum('n', self.nativePrivateKey.n)
+            publicKey.setCryptoBigNum('e', self.nativePrivateKey.e)
         else:
-            publicKey[keyTypeMnemonic] = 'EC'
-            publicKey[curveMnemonic] = getEcCurveName(self.nativePrivateKey)
+            publicKey.setString(keyTypeMnemonic, 'EC')
+            publicKey.setString(curveMnemonic, getEcCurveName(self.nativePrivateKey))
             point = self.nativePrivateKey.get_verifying_key().to_string()
             length = len(point)
             if length % 2:
                 raise ValueError('EC point length error')
             length >>= 1
-            publicKey['x'] = base64UrlEncode(point[:length])
-            publicKey['y'] = base64UrlEncode(point[length:])
+            publicKey.setBinary('x', point[:length])
+            publicKey.setBinary('y', point[length:])
         if format == 'JWK':
-            return serializeJson(publicKey)
-        return publicKey
+            return publicKey.serialize()
+        return publicKey.root
 
