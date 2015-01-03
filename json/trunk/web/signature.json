@@ -1,17 +1,17 @@
 {
   "now": "2014-12-08T10:25:17Z",
-  "escapeMe": "\u20ac\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e0, 4.50, 6],
   "signature":
     {
-      "algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+      "algorithm": "ES256",
       "publicKey":
         {
           "type": "EC",
-          "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+          "curve": "P-256",
           "x": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",
           "y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
         },
-      "value": "MEUCIFFbVuV-LiLiQcDq3hg56qCF9HmGzQ4Pij8D_vc3ufIcAiEAy-Ju7hf_XKkbIcYlNB5Ovte6yLlCrbGs-TuXDwupyTc"
+      "value": "MEUCIQC-VBH_s_ph3WtrLyAGs7p1kTvc7qXWw5U2RT-tQbPrcAIgbs4CucrP5WygqocgxKD4COdUhVl0hFOAiYqqwdDcNhM"
     }
 }
