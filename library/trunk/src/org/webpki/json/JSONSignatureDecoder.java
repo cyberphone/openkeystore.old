@@ -313,7 +313,7 @@ public class JSONSignatureDecoder implements Serializable
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string);
         if (((AsymSignatureAlgorithms)algorithm).isRSA () != public_key instanceof RSAPublicKey)
           {
-            throw new IOException ("\"" + ALGORITHM_JSON + "\" doesn't match key type: " + public_key.getAlgorithm ());
+            throw new IOException ("\"" + algorithm_string + "\" doesn't match key type: " + public_key.getAlgorithm ());
           }
         try
           {
