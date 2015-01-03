@@ -55,7 +55,7 @@ class JSONObjectWriter:
     def setObject(self,name, optionalArgument=None):
         if _checkOptionalArgument(optionalArgument,JSONObjectWriter):
             return self._put(name,optionalArgument.root)
-        newObject = JSONObjectWriter(optionalArgument)
+        newObject = JSONObjectWriter()
         self._put(name,newObject.root)
         return newObject
 
