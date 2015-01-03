@@ -180,16 +180,22 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setObject (String name) throws IOException
       {
-          JSONObject sub_object = new JSONObject ();
-          setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
-          return new JSONObjectWriter (sub_object);
+        JSONObjectWriter writer = new JSONObjectWriter ();
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
+        return writer;
       }
 
     public JSONArrayWriter setArray (String name) throws IOException
       {
-        Vector<JSONValue> array = new Vector<JSONValue> ();
-        setProperty (name, new JSONValue (JSONTypes.ARRAY, array));
-        return new JSONArrayWriter (array);
+        JSONArrayWriter writer = new JSONArrayWriter ();
+        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
+        return writer;
+      }
+
+    public JSONObjectWriter setArray (String name, JSONArrayWriter writer) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
+        return this;
       }
 
     JSONObjectWriter setStringArray (String name, String[] values, JSONTypes json_type) throws IOException

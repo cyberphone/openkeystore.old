@@ -862,6 +862,38 @@ public class JSONTest
         assertTrue ("Reader added", ArrayUtil.compare (json, ow.setObject ("Yay", or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
       }
 
+    @Test
+    public void SingleLineCreation() throws Exception
+      {
+        String expected = 
+            "{\"one\":1," +
+             "\"two\":{" +
+                  "\"three\":3," +
+                  "\"arr\":[" +
+                      "-5," +
+                      "[8]," +
+                      "true," +
+                      "{\"six\":6}," +
+                      "7" +
+                           "]," +
+                      "\"four\":4}," +
+             "\"five\":5}";
+        String result = new String (new JSONObjectWriter ()
+            .setInt ("one", 1)
+            .setObject ("two", new JSONObjectWriter ()
+                 .setInt ("three", 3)
+                 .setArray ("arr", new JSONArrayWriter ()
+                      .setInt (-5)
+                      .setArray (new JSONArrayWriter().setInt (8))
+                      .setBoolean (true)
+                      .setObject (new JSONObjectWriter ().setInt ("six", 6))
+                      .setInt (7))
+                 .setInt ("four", 4))
+             .setInt ("five", 5)
+        .serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8");
+        assertTrue("Single\n" + expected + "\n" + result, expected.equals(result));
+      }
+
     enum BAD_SIGNATURE 
     {
       JustFine  (null),
