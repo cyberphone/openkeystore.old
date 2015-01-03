@@ -119,7 +119,7 @@ class new(BaseKey):
 
     def getPublicKey(self,format='JWK'):
         """
-        Return public key as a PEM or JWK string or as a JCS in an OrderedDict
+        Return public key as a PEM or JWK string or as a JCS in an JSONObjectWriter
         """ 
         if exportFormatCheck(format) == 'PEM':
             if self.isRSA():
@@ -148,5 +148,5 @@ class new(BaseKey):
             publicKey.setBinary('y', point[length:])
         if format == 'JWK':
             return publicKey.serialize()
-        return publicKey.root
+        return publicKey
 

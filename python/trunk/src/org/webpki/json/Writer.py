@@ -29,11 +29,9 @@ from org.webpki.json.Utils import serializeJson
 ##############################################
 
 class JSONObjectWriter:
-    def __init__(self,optionalRoot=None):
-        if optionalRoot:
-            if not isinstance(optionalRoot,OrderedDict):
-                raise TypeError('Optional argument not "OrderedDict"')
-            self.root = optionalRoot
+    def __init__(self,optionalArgument=None):
+        if _checkOptionalArgument(optionalArgument,OrderedDict):
+            self.root = optionalArgument
         else:
             self.root = OrderedDict()
 
@@ -54,12 +52,16 @@ class JSONObjectWriter:
             raise TypeError('Float expected')
         return self._put(name,value)
 
-    def setObject(self,name, optionalRoot=None):
-        newObject = JSONObjectWriter(optionalRoot)
+    def setObject(self,name, optionalArgument=None):
+        if _checkOptionalArgument(optionalArgument,JSONObjectWriter):
+            return self._put(name,optionalArgument.root)
+        newObject = JSONObjectWriter(optionalArgument)
         self._put(name,newObject.root)
         return newObject
 
-    def setArray(self,name):
+    def setArray(self,name, optionalArgument=None):
+        if _checkOptionalArgument(optionalArgument,JSONArrayWriter):
+            return self._put(name,optionalArgument.array)
         newArray = JSONArrayWriter()
         self._put(name,newArray.array)
         return newArray
@@ -113,12 +115,16 @@ class JSONArrayWriter:
             raise TypeError('Float expected')
         return self._put(value)
 
-    def setObject(self):
+    def setObject(self,optionalArgument=None):
+        if _checkOptionalArgument(optionalArgument,JSONObjectWriter):
+            return self._put(optionalArgument.root)
         newObject = JSONObjectWriter()
         self._put(newObject.root)
         return newObject
 
-    def setArray(self):
+    def setArray(self,optionalArgument=None):
+        if _checkOptionalArgument(optionalArgument,JSONArrayWriter):
+            return self._put(optionalArgument.array)
         newArray = JSONArrayWriter()
         self._put(newArray.array)
         return newArray
@@ -135,3 +141,9 @@ class JSONArrayWriter:
     def serialize(self):
         return serializeJson(self.array)
 
+def _checkOptionalArgument(optionalArgument,expectedType):
+    if optionalArgument:
+        if isinstance(optionalArgument,expectedType):
+            return True
+        raise TypeError('Optional argument not "' + expectedType.__name__ + '"')
+    return False
