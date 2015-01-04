@@ -142,7 +142,7 @@ public class JSONSignatureDecoder implements Serializable
         LinkedHashMap<String,JSONValue> saved_properties =                    // 1. Make a shallow copy of the signature object property list
              new LinkedHashMap<String,JSONValue> (signature.root.properties);
         signature.root.properties.remove (VALUE_JSON);                        // 2. Hide property for the serializer..
-        normalized_data = new JSONObjectWriter (rd).getNormalizedData ();     // 3. Serialize ("JSON.stringify()")
+        normalized_data = new JSONObjectWriter (rd).getNormalizedData (null); // 3. Serialize ("JSON.stringify()")
         signature.root.properties.remove (EXTENSIONS_JSON);                   // Hide the optional extensions property for the check method..
         signature.checkForUnread ();                                          // Check for unread data - extensions
         signature.root.properties = saved_properties;                         // 4. Restore signature property list
@@ -366,6 +366,11 @@ public class JSONSignatureDecoder implements Serializable
     public String getKeyId ()
       {
         return key_id;
+      }
+
+    public byte[] getNormalizedData ()
+      {
+        return normalized_data;
       }
 
     public JSONSignatureTypes getSignatureType ()

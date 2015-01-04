@@ -17,7 +17,6 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -28,12 +27,13 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.test.DemoKeyStore;
-
 import org.webpki.json.JSONAsymKeySigner;
+import org.webpki.json.JSONNormalizerDebugger;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.util.ArrayUtil;
 
 /**
  * JCS sample signature test generator
@@ -72,14 +72,14 @@ public class JCSSample
           }
       }
 
-    public static void createAsymmetricKeySignature (JSONObjectWriter wr) throws IOException
+    static void createAsymmetricKeySignature (JSONObjectWriter wr, JSONNormalizerDebugger debug) throws IOException
       {
         try
           {
             KeyStore ks = DemoKeyStore.getECDSAStore ();
             PrivateKey private_key = (PrivateKey)ks.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
             PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
-            wr.setSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
+            wr.setSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)).setNormalizerDebugger (debug));
           }
         catch (GeneralSecurityException e)
           {
@@ -87,7 +87,7 @@ public class JCSSample
           }
       }
     
-    public static void main (String[] argc)
+    public static void main (final String[] argc)
       {
         try
           {
@@ -96,7 +96,6 @@ public class JCSSample
                 throw new IOException ("Output-file jose-flag");
               }
             CustomCryptoProvider.conditionalLoad (true);
-            JSONObjectWriter.setNormalizationDebugFile (argc[0]);
             String unormalized_json = 
               "{\n" +
               "  \"now\": \"2014-12-08T10:25:17Z\",\n" +
@@ -106,7 +105,15 @@ public class JCSSample
             JSONObjectReader or = JSONParser.parse (unormalized_json);
             JSONObjectWriter wr = new JSONObjectWriter (or);
             wr.setJOSEAlgorithmPreference (new Boolean(argc[1]));
-            createAsymmetricKeySignature (wr);
+            createAsymmetricKeySignature (wr, new JSONNormalizerDebugger() {
+
+              @Override
+              public void writeNormalizedData (byte[] data) throws IOException
+                {
+                  ArrayUtil.writeFile(argc[0], data);
+                }
+
+            });
             String res = new String (wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
             res = unormalized_json.substring (0, unormalized_json.indexOf (']')) + res.substring (res.indexOf (']'));
             System.out.println (res);

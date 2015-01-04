@@ -52,8 +52,6 @@ public class JSONObjectWriter implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    static String normalization_debug_file;
-
     static final int STANDARD_INDENT = 2;
 
     boolean jose_algorithm_preference;
@@ -357,7 +355,7 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (getNormalizedData ()));
+        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (getNormalizedData (signer.normalizer_debugger)));
         return this;
       }
     
@@ -808,15 +806,12 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    byte[] getNormalizedData () throws IOException
+    byte[] getNormalizedData (JSONNormalizerDebugger writer) throws IOException
       {
         byte[] result = serializeJSONObject (JSONOutputFormats.NORMALIZED);
-        if (normalization_debug_file != null)
+        if (writer != null)
           {
-            byte[] other = ArrayUtil.readFile (normalization_debug_file);
-            ArrayUtil.writeFile (normalization_debug_file,
-                                 ArrayUtil.add (other, 
-                                                new StringBuffer ("\n\n").append (buffer).toString ().getBytes ("UTF-8")));
+            writer.writeNormalizedData (result);
           }
         return result;
       }
@@ -858,12 +853,6 @@ import org.webpki.json.JSONSignatureDecoder;
         return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
       }
   
-    public static void setNormalizationDebugFile (String file) throws IOException
-      {
-        ArrayUtil.writeFile (file, "Normalization Debug Output".getBytes ("UTF-8"));
-        normalization_debug_file = file;
-      }
-
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
       {
         return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONObject (output_format);

@@ -26,7 +26,6 @@ import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
-
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONArrayReader;
@@ -36,7 +35,6 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Verifier;
 
 import org.webpki.util.ArrayUtil;
@@ -46,13 +44,19 @@ import org.webpki.util.ArrayUtil;
  */
 public class Verify
   {
+    String output_file;
+    
     static
       {
         CustomCryptoProvider.conditionalLoad (true);
       }
 
-    static int count;
-
+    void setFile (String output_file) throws IOException
+      {
+        this.output_file = output_file;
+        ArrayUtil.writeFile(output_file,"Normalized Data\n".getBytes ("UTF-8"));
+      }
+ 
     void recurseObject (JSONObjectReader rd) throws IOException
       {
         for (String property : rd.getProperties ())
@@ -63,6 +67,11 @@ public class Verify
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
                       JSONSignatureDecoder signature = rd.getSignature ();
+                      if (output_file != null)
+                        {
+                          byte[] old = ArrayUtil.readFile (output_file);
+                          ArrayUtil.writeFile (output_file, ArrayUtil.add (old, ArrayUtil.add(new byte[]{'\n','\n'}, signature.getNormalizedData ())));
+                        }
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:
@@ -129,38 +138,24 @@ public class Verify
 
     void debugOutput (String string)
       {
-        if (count == 1)
-          {
-            System.out.println (string);
-          }
+        System.out.println (string);
       }
 
     public static void main (String[] argc)
       {
         if (argc.length != 1 && argc.length != 2)
           {
-            System.out.println ("\ninstance-document-file [normalize-debug-file|-rnnnn]");
+            System.out.println ("\ninstance-document-file [normalize-debug-file]");
             System.exit (0);
           }
         try
           {
-            int repeat = 1;
+            Verify doc = new Verify ();
             if (argc.length == 2)
               {
-                if (argc[1].startsWith ("-r"))
-                  {
-                    repeat = Integer.parseInt (argc[1].substring (2));
-                  }
-                else
-                  {
-                    JSONObjectWriter.setNormalizationDebugFile (argc[1]);
-                  }
+                doc.setFile (argc[1]);
               }
-            while (count++ < repeat)
-              {
-                Verify doc = new Verify ();
-                doc.recurseObject (JSONParser.parse (ArrayUtil.readFile (argc[0])));
-              }
+            doc.recurseObject (JSONParser.parse (ArrayUtil.readFile (argc[0])));
           }
         catch (Exception e)
           {
