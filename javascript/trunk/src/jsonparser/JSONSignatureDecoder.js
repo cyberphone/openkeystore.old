@@ -55,7 +55,7 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
         }
     }
     signature.root.property_list = new_list;
-    this._normalized_data = org.webpki.json.JSONObjectWriter._getNormalizedSubset (rd.root);
+    this._normalized_data = new org.webpki.json.JSONObjectWriter(rd)._getNormalizedSubset ();
     if (this._extensions)
     {
         var new_list2 = [];

@@ -77,18 +77,34 @@ org.webpki.json.JSONArrayWriter = function (optional_array)
     return this.setString (date_time.toISOString ());
 };
 
-/* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
+/* public JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function (/* JSONArrayWriter*/ optional_writer)
 {
-    /* JSONValue[] */var new_array = [];
-    this._add (org.webpki.json.JSONTypes.ARRAY, new_array);
-    return new org.webpki.json.JSONArrayWriter (new_array);
+    if (optional_writer === undefined)
+    {
+        var writer = new org.webpki.json.JSONArrayWriter ();
+        this._add (org.webpki.json.JSONTypes.ARRAY, writer.array);
+        return writer;
+    }
+    if (optional_writer instanceof org.webpki.json.JSONArrayWriter)
+    {
+        return this._add (org.webpki.json.JSONTypes.ARRAY, optional_writer.array);
+    }
+    org.webpki.util._error ("JSONArrayWriter expected");
 };
 
-/* public JSONObjectWriter */org.webpki.json.JSONArrayWriter.prototype.setObject = function ()
+/* public JSONObjectWriter */org.webpki.json.JSONArrayWriter.prototype.setObject = function (/* JSONObjectWriter*/ optional_writer)
 {
-    /* JSONObject */var holder = new org.webpki.json.JSONObject ();
-    this._add (org.webpki.json.JSONTypes.OBJECT, holder);
-    return new org.webpki.json.JSONObjectWriter (holder);
+    if (optional_writer === undefined)
+    {
+        var writer = new org.webpki.json.JSONObjectWriter ();
+        this._add (org.webpki.json.JSONTypes.OBJECT, writer.root);
+        return writer;
+    }
+    if (optional_writer instanceof org.webpki.json.JSONObjectWriter)
+    {
+        return this._add (org.webpki.json.JSONTypes.OBJECT, optional_writer.root);
+    }
+    org.webpki.util._error ("JSONObjectWriter expected");
 };
 
 /* public String */org.webpki.json.JSONArrayWriter.prototype.serializeJSONArray = function (/* JSONOutputFormats */output_format)

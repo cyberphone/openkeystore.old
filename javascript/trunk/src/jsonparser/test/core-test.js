@@ -314,6 +314,37 @@ reader = org.webpki.json.JSONParser.parse (newobjec.serializeJSONObject (org.web
 reader.getInt("h");
 reader.getArray("iy").getString ();
 reader.checkForUnread ();
+
+var expectedstring = '{"one":1,' +
+             '"two":{' +
+                  '"three":3,' +
+                  '"arr":[' +
+                      '-5,' +
+                      '[8],' +
+                      'true,' +
+                      '{"six":6},' +
+                      '7' +
+                           '],' +
+                      '"four":4},' +
+             '"five":5}';
+var resultstring = new org.webpki.json.JSONObjectWriter ()
+            .setInt ("one", 1)
+            .setObject ("two", new org.webpki.json.JSONObjectWriter ()
+                 .setInt ("three", 3)
+                 .setArray ("arr", new org.webpki.json.JSONArrayWriter ()
+                      .setInt (-5)
+                      .setArray (new org.webpki.json.JSONArrayWriter().setInt (8))
+                      .setBoolean (true)
+                      .setObject (new org.webpki.json.JSONObjectWriter ().setInt ("six", 6))
+                      .setInt (7))
+                 .setInt ("four", 4))
+             .setInt ("five", 5)
+        .serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED);
+if (expectedstring != resultstring)
+{
+    throw "Mismatch\n" + expectedstring + "\n" + resultstring;
+}
+
 console.debug ("Successful");
 
 
