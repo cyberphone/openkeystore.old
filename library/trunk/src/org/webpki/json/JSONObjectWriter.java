@@ -357,7 +357,7 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
+        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (getNormalizedData ()));
         return this;
       }
     
@@ -808,16 +808,15 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    static byte[] getNormalizedSubset (JSONObject json_object) throws IOException
+    byte[] getNormalizedData () throws IOException
       {
-        JSONObjectWriter writer = new JSONObjectWriter (json_object);
-        byte[] result = writer.serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        byte[] result = serializeJSONObject (JSONOutputFormats.NORMALIZED);
         if (normalization_debug_file != null)
           {
             byte[] other = ArrayUtil.readFile (normalization_debug_file);
             ArrayUtil.writeFile (normalization_debug_file,
                                  ArrayUtil.add (other, 
-                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
+                                                new StringBuffer ("\n\n").append (buffer).toString ().getBytes ("UTF-8")));
           }
         return result;
       }
