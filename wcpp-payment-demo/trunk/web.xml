@@ -138,11 +138,6 @@
         <servlet-class>org.webpki.webapps.wcpppaymentdemo.PaymentProviderServlet</servlet-class>
     </servlet>
 
-    <servlet>
-        <servlet-name>http402Servlet</servlet-name>
-        <servlet-class>org.webpki.webapps.wcpppaymentdemo.http402Servlet</servlet-class>
-    </servlet>
-    
     <servlet-mapping>
         <servlet-name>MerchantServlet</servlet-name>
         <url-pattern>/merchant</url-pattern>
@@ -182,10 +177,5 @@
         <servlet-name>PaymentProviderServlet</servlet-name>
         <url-pattern>/transact</url-pattern>
     </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>http402Servlet</servlet-name>
-        <url-pattern>/httptest</url-pattern>
-    </servlet-mapping>
-    @security-constraints@    
+@security-constraints@    
 </web-app>
