@@ -19,9 +19,9 @@
 /*                         JSONArrayWriter                        */
 /*================================================================*/
 
-org.webpki.json.JSONArrayWriter = function (optional_array)
+org.webpki.json.JSONArrayWriter = function ()
 {
-    /* JSONValue[] */this.array = optional_array === undefined ? [] : optional_array;
+    /* JSONValue[] */this.array = [];
 };
 
 /* JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype._add = function (/* JSONTypes */type, /* Object */value)
