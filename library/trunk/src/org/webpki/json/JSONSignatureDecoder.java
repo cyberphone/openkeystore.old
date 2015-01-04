@@ -138,11 +138,12 @@ public class JSONSignatureDecoder implements Serializable
         signature_value = signature.getBinary (VALUE_JSON);
 
         ////////////////////////////////////////////////////////////////////////
-        // Begin JCS normalization                                            //
-        LinkedHashMap<String,JSONValue> saved_properties =                    // 1. Make a shallow copy of the signature object property list
-             new LinkedHashMap<String,JSONValue> (signature.root.properties);
+        // Begin JCS normalization                                            // 1. Make a shallow copy of the signature object property list
+        LinkedHashMap<String,JSONValue> saved_properties = new LinkedHashMap<String,JSONValue> (signature.root.properties);
+        //                                                                    //
         signature.root.properties.remove (VALUE_JSON);                        // 2. Hide property for the serializer..
-        normalized_data = new JSONObjectWriter (rd).getNormalizedData (null); // 3. Serialize ("JSON.stringify()")
+        //                                                                    // 3. Serialize ("JSON.stringify()")
+        normalized_data = new JSONObjectWriter (rd).serializeJSONObject (JSONOutputFormats.NORMALIZED);
         signature.root.properties.remove (EXTENSIONS_JSON);                   // Hide the optional extensions property for the check method..
         signature.checkForUnread ();                                          // Check for unread data - extensions
         signature.root.properties = saved_properties;                         // 4. Restore signature property list

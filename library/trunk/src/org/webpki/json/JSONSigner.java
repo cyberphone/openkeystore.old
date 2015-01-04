@@ -31,9 +31,9 @@ public abstract class JSONSigner implements Serializable
     
     JSONObjectWriter[] extensions;
     
-    JSONNormalizerDebugger normalizer_debugger;
-    
     String keyId;
+
+    byte[] normalized_data;
 
     JSONSigner () {}
 
@@ -55,9 +55,8 @@ public abstract class JSONSigner implements Serializable
         return this;
       }
 
-    public JSONSigner setNormalizerDebugger (JSONNormalizerDebugger normalizer_debugger)
+    public byte[] getNormalizedData ()
       {
-        this.normalizer_debugger = normalizer_debugger;
-        return this;
+        return normalized_data;
       }
   }

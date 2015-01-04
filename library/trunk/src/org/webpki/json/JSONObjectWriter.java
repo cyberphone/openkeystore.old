@@ -355,7 +355,8 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (getNormalizedData (signer.normalizer_debugger)));
+        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, 
+                                    signer.signData (signer.normalized_data = serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         return this;
       }
     
@@ -804,16 +805,6 @@ import org.webpki.json.JSONSignatureDecoder;
           {
             singleSpace ();
           }
-      }
-
-    byte[] getNormalizedData (JSONNormalizerDebugger writer) throws IOException
-      {
-        byte[] result = serializeJSONObject (JSONOutputFormats.NORMALIZED);
-        if (writer != null)
-          {
-            writer.writeNormalizedData (result);
-          }
-        return result;
       }
 
     @SuppressWarnings("unchecked")
