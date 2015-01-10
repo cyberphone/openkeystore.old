@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ public abstract class JSONSigner implements Serializable
     
     String keyId;
 
+    byte[] normalized_data;
+
     JSONSigner () {}
 
     abstract SignatureAlgorithms getAlgorithm ();
@@ -51,5 +53,10 @@ public abstract class JSONSigner implements Serializable
       {
         this.keyId = keyId;
         return this;
+      }
+
+    public byte[] getNormalizedData ()
+      {
+        return normalized_data;
       }
   }

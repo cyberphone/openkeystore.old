@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  */
 package org.webpki.mobile.android.sks;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -94,7 +95,7 @@ import android.util.Log;
  */
 public class SKSImplementation implements SKSError, SecureKeyStore, Serializable, GrantInterface
   {
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS version and configuration data
@@ -724,12 +725,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                                                      byte[] argument,
                                                      byte[] authorization) throws GeneralSecurityException
           {
-            Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? 
-                                                                                   "SHA256WithRSA" : "SHA256WithECDSA");
-            kmk_verify.initVerify (keyManagementKey);
-            kmk_verify.update (kmk_kdf);
-            kmk_verify.update (argument);
-            return kmk_verify.verify (authorization);
+            return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
+                                                                  "SHA256WithRSA" : "SHA256WithECDSA",
+                                         keyManagementKey)
+                .initVerify ()
+                .update (kmk_kdf)
+                .update (argument)
+                .verify (authorization);
           }
       }
 
@@ -802,13 +804,14 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
     class AttestationSignatureGenerator
       {
-        Signature signer;
+        SignatureWrapper signer;
         
         AttestationSignatureGenerator () throws GeneralSecurityException
           {
             PrivateKey attester = getAttestationKey ();
-            signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
-            signer.initSign (attester);
+            signer = new SignatureWrapper (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA",
+                                           getDeviceCertificatePath ()[0].getPublicKey ())
+                             .initSign (attester);
           }
   
         private byte[] short2bytes (int s)
@@ -880,6 +883,148 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           }
       }
 
+    class SignatureWrapper
+      {
+        static final int ASN1_SEQUENCE = 0x30;
+        static final int ASN1_INTEGER  = 0x02;
+        
+        static final int LEADING_ZERO   = 0x00;
+  
+        Signature instance;
+        PublicKey publicKey;
+  
+        public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
+          {
+            instance = Signature.getInstance (algorithm);
+            this.publicKey = publicKey;
+          }
+  
+        public SignatureWrapper initVerify () throws GeneralSecurityException
+          {
+            instance.initVerify (publicKey);
+            return this;
+          }
+  
+        public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+          {
+            instance.initSign (private_key);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte[] data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public boolean verify (byte[] signature) throws GeneralSecurityException
+          {
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return instance.verify (signature);
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                int l = extendTo;
+                int start = offset;
+                while (signature[start] == LEADING_ZERO)
+                  {
+                    start++;
+                    l--;
+                  }
+                boolean add_zero = false;
+                if (signature[start] < 0)
+                  {
+                    add_zero = true;
+                    l++;
+                  }
+                baos.write (ASN1_INTEGER);
+                baos.write (l);
+                if (add_zero)
+                  {
+                    baos.write (LEADING_ZERO);
+                  }
+                baos.write (signature, start, extendTo - start + offset);
+              }
+            byte[] body = baos.toByteArray ();
+            baos = new ByteArrayOutputStream ();
+            baos.write (ASN1_SEQUENCE);
+            int length = body.length;
+            if (length > 127)
+              {
+                baos.write (0x81);
+              }
+            baos.write (length);
+            try
+              {
+                baos.write (body);
+              }
+            catch (IOException e)
+              {
+                throw new GeneralSecurityException (e);
+              }
+            return instance.verify (baos.toByteArray ());
+          }
+  
+        byte[] sign () throws GeneralSecurityException
+          {
+            byte[] signature = instance.sign ();
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return signature;
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            int index = 2;
+            int length;
+            byte[] integerPairs = new byte[extendTo << 1];
+            if (signature[0] != ASN1_SEQUENCE)
+              {
+                throw new GeneralSecurityException ("Not SEQUENCE");
+              }
+            length = signature[1] & 0xFF;
+            if ((length & 0x80) != 0)
+              {
+                int q = length & 0x7F;
+                length = 0;
+                while (q-- > 0)
+                  {
+                    length <<= 8;
+                    length += signature[index++] & 0xFF;
+                  }
+              }
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                if (signature[index++] != ASN1_INTEGER)
+                  {
+                    throw new GeneralSecurityException ("Not INTEGER");
+                  }
+                int l = signature[index++];
+                while (l > extendTo)
+                  {
+                    if (signature[index++] != LEADING_ZERO)
+                      {
+                        throw new GeneralSecurityException ("Bad INTEGER");
+                      }
+                    l--;
+                  }
+                System.arraycopy (signature, index, integerPairs, offset + extendTo - l, l);
+                index += l;
+              }
+            if (index != signature.length)
+              {
+                throw new GeneralSecurityException ("ASN.1 Length error");
+              }
+            return integerPairs;
+          }
+      }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
@@ -888,14 +1033,16 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static class Algorithm implements Serializable
       {
         private static final long serialVersionUID = 1L;
-
+  
         int mask;
         String jceName;
         byte[] pkcs1DigestInfo;
         EllipticCurve curve;
+        int ecPointLength;
         
-        void addEcCurve (byte[] samplePublicKey)
+        void addEcCurve (int ecPointLength, byte[] samplePublicKey)
           {
+            this.ecPointLength = ecPointLength;
             try
               {
                 curve = ((ECPublicKey) KeyFactory.getInstance ("EC")
@@ -1059,7 +1206,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                       "secp256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
@@ -1075,7 +1222,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
                       "secp384r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (48, new byte[]
               {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
                (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
@@ -1094,7 +1241,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
                       "secp521r1",
-                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (66, new byte[]
               {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
                (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
@@ -1118,7 +1265,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
                       "brainpoolP256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
                (byte)0x24, (byte)0x03, (byte)0x03, (byte)0x02, (byte)0x08, (byte)0x01, (byte)0x01, (byte)0x07,
@@ -1319,18 +1466,38 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         throw new SKSException (message, option);
       }
 
-    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+    Algorithm getEcType (ECKey ecKey)
       {
         for (String uri : supportedAlgorithms.keySet ())
           {
             EllipticCurve curve = supportedAlgorithms.get (uri).curve;
             if (curve != null && ecKey.getParams ().getCurve ().equals (curve))
               {
-                return supportedAlgorithms.get (uri).jceName;
+                return supportedAlgorithms.get (uri);
               }
+          }
+        return null;
+      }
+
+    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.jceName;
           }
         sksError.abort ("Unsupported EC key algorithm for: " + keyId);
         return null;
+      }
+
+    int getEcPointLength (ECKey ecKey) throws GeneralSecurityException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.ecPointLength;
+          }
+        throw new GeneralSecurityException ("Unsupported EC curve");
       }
 
     void checkRsaKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
@@ -2040,10 +2207,10 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
-            Signature signature = Signature.getInstance (alg.jceName);
-            signature.initSign (keyEntry.privateKey);
-            signature.update (data);
-            return signature.sign ();
+            return new SignatureWrapper (alg.jceName, keyEntry.publicKey)
+                          .initSign (keyEntry.privateKey)
+                          .update (data)
+                          .sign ();
           }
         catch (Exception e)
           {

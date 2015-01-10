@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,21 +25,24 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.Signature;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
+import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 /**
  * Decoder for JCS signatures.
@@ -133,10 +136,20 @@ public class JSONSignatureDecoder implements Serializable
             while (ar.hasMore ());
           }
         signature_value = signature.getBinary (VALUE_JSON);
-        JSONValue save = signature.root.properties.get (VALUE_JSON);       // Save property
-        signature.root.properties.put (VALUE_JSON, null);                  // Hide property for the serializer..
-        normalized_data = JSONObjectWriter.getNormalizedSubset (rd.root);  // Serialize
-        signature.root.properties.put (VALUE_JSON, save);                  // Restore property
+
+        ////////////////////////////////////////////////////////////////////////
+        // Begin JCS normalization                                            // 1. Make a shallow copy of the signature object property list
+        LinkedHashMap<String,JSONValue> saved_properties = new LinkedHashMap<String,JSONValue> (signature.root.properties);
+        //                                                                    //
+        signature.root.properties.remove (VALUE_JSON);                        // 2. Hide property for the serializer..
+        //                                                                    // 3. Serialize ("JSON.stringify()")
+        normalized_data = new JSONObjectWriter (rd).serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        signature.root.properties.remove (EXTENSIONS_JSON);                   // Hide the optional extensions property for the check method..
+        signature.checkForUnread ();                                          // Check for unread data - extensions
+        signature.root.properties = saved_properties;                         // 4. Restore signature property list
+        // End JCS normalization                                              //
+        ////////////////////////////////////////////////////////////////////////
+
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -150,18 +163,8 @@ public class JSONSignatureDecoder implements Serializable
             default:
               algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
           }
-        if (extensions != null)
-          {
-            save = signature.root.properties.get (EXTENSIONS_JSON);       // Save property
-            signature.root.properties.put (EXTENSIONS_JSON, null);        // Hide property for the check method..
-          }
-        signature.checkForUnread ();                                      // Check for unread data - extensions
-        if (extensions != null)
-          {
-            signature.root.properties.put (EXTENSIONS_JSON, save);        // Restore property
-          }
       }
-
+    
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
         key_id = rd.getStringConditional (KEY_ID_JSON);
@@ -225,6 +228,10 @@ public class JSONSignatureDecoder implements Serializable
             else if (type.equals (EC_PUBLIC_KEY))
               {
                 KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON));
+                if (!ec.isECKey ())
+                  {
+                    throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
+                  }
                 ECPoint w = new ECPoint (getCurvePoint (rd, X_JSON, ec), getCurvePoint (rd, Y_JSON, ec));
                 public_key = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
               }
@@ -232,7 +239,7 @@ public class JSONSignatureDecoder implements Serializable
               {
                 throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
               }
-            rd.checkForUnread ();;
+            rd.checkForUnread ();
             return public_key;
           }
         catch (GeneralSecurityException e)
@@ -305,12 +312,16 @@ public class JSONSignatureDecoder implements Serializable
     void asymmetricSignatureVerification (PublicKey public_key) throws IOException
       {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string);
+        if (((AsymSignatureAlgorithms)algorithm).isRSA () != public_key instanceof RSAPublicKey)
+          {
+            throw new IOException ("\"" + algorithm_string + "\" doesn't match key type: " + public_key.getAlgorithm ());
+          }
         try
           {
-            Signature sig = Signature.getInstance (algorithm.getJCEName ());
-            sig.initVerify (public_key);
-            sig.update (normalized_data);
-            checkVerification (sig.verify (signature_value));
+            checkVerification (new SignatureWrapper ((AsymSignatureAlgorithms) algorithm, public_key)
+                                   .initVerify ()
+                                   .update (normalized_data)
+                                   .verify (signature_value));
           }
         catch (GeneralSecurityException e)
           {
@@ -356,6 +367,11 @@ public class JSONSignatureDecoder implements Serializable
     public String getKeyId ()
       {
         return key_id;
+      }
+
+    public byte[] getNormalizedData ()
+      {
+        return normalized_data;
       }
 
     public JSONSignatureTypes getSignatureType ()

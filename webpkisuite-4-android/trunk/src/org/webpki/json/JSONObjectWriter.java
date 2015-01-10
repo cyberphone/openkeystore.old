@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,26 +18,20 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECPoint;
-
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SKSAlgorithms;
-
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -51,8 +45,6 @@ import org.webpki.util.ISODateTime;
 public class JSONObjectWriter implements Serializable
   {
     private static final long serialVersionUID = 1L;
-
-    static String normalization_debug_file;
 
     static final int STANDARD_INDENT = 2;
 
@@ -180,23 +172,22 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setObject (String name) throws IOException
       {
-          JSONObject sub_object = new JSONObject ();
-          setProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
-          return new JSONObjectWriter (sub_object);
-      }
-
-    public JSONObjectWriter createContainerObject (String name) throws IOException
-      {
-        JSONObjectWriter container = new JSONObjectWriter (new JSONObject ());
-        container.setProperty (name, new JSONValue (JSONTypes.OBJECT, this.root));
-        return container;
+        JSONObjectWriter writer = new JSONObjectWriter ();
+        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
+        return writer;
       }
 
     public JSONArrayWriter setArray (String name) throws IOException
       {
-        Vector<JSONValue> array = new Vector<JSONValue> ();
-        setProperty (name, new JSONValue (JSONTypes.ARRAY, array));
-        return new JSONArrayWriter (array);
+        JSONArrayWriter writer = new JSONArrayWriter ();
+        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
+        return writer;
+      }
+
+    public JSONObjectWriter setArray (String name, JSONArrayWriter writer) throws IOException
+      {
+        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
+        return this;
       }
 
     JSONObjectWriter setStringArray (String name, String[] values, JSONTypes json_type) throws IOException
@@ -237,10 +228,10 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -270,12 +261,12 @@ import org.webpki.json.JSONSignatureDecoder;
               {
                 try
                   {
-                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
-                    signature.initSign (private_key);
-                    signature.update (data);
-                    return signature.sign ();
+                    return new SignatureWrapper (algorithm, public_key)
+                        .initSign (private_key)
+                        .update (data)
+                        .sign ();
                   }
-                catch (Exception e)
+                catch (GeneralSecurityException e)
                   {
                     throw new IOException (e);
                   }
@@ -358,7 +349,8 @@ import org.webpki.json.JSONSignatureDecoder;
               }
             signature_writer.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
-        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, signer.signData (JSONObjectWriter.getNormalizedSubset (root)));
+        signature_writer.setBinary (JSONSignatureDecoder.VALUE_JSON, 
+                                    signer.signData (signer.normalized_data = serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         return this;
       }
     
@@ -485,10 +477,6 @@ import org.webpki.json.JSONSignatureDecoder;
         for (String property : object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
-            if (json_value == null) // See JSONSignatureDecoder...
-              {
-                continue;
-              }
             if (next)
               {
                 buffer.append (',');
@@ -813,20 +801,6 @@ import org.webpki.json.JSONSignatureDecoder;
           }
       }
 
-    static byte[] getNormalizedSubset (JSONObject json_object) throws IOException
-      {
-        JSONObjectWriter writer = new JSONObjectWriter (json_object);
-        byte[] result = writer.serializeJSONObject (JSONOutputFormats.NORMALIZED);
-        if (normalization_debug_file != null)
-          {
-            byte[] other = ArrayUtil.readFile (normalization_debug_file);
-            ArrayUtil.writeFile (normalization_debug_file,
-                                 ArrayUtil.add (other, 
-                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
-          }
-        return result;
-      }
-
     @SuppressWarnings("unchecked")
     public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
       {
@@ -864,12 +838,6 @@ import org.webpki.json.JSONSignatureDecoder;
         return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
       }
   
-    public static void setNormalizationDebugFile (String file) throws IOException
-      {
-        ArrayUtil.writeFile (file, "Normalization Debug Output".getBytes ("UTF-8"));
-        normalization_debug_file = file;
-      }
-
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
       {
         return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONObject (output_format);

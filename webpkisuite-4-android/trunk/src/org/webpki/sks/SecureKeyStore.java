@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public interface SecureKeyStore
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
-    short SKS_API_LEVEL                       = 98;
+    short SKS_API_LEVEL                       = 99;
     int AES_CBC_PKCS5_PADDING                 = 32;
 
 

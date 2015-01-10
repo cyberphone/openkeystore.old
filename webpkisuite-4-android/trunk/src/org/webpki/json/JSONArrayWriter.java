@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,11 +40,6 @@ public class JSONArrayWriter implements Serializable
     public JSONArrayWriter ()
       {
         array = new Vector<JSONValue> ();
-      }
-
-    JSONArrayWriter (Vector<JSONValue> array)
-      {
-        this.array = array;
       }
 
     JSONArrayWriter add (JSONTypes type, Object value) throws IOException
@@ -105,16 +100,28 @@ public class JSONArrayWriter implements Serializable
 
     public JSONArrayWriter setArray () throws IOException
       {
-        Vector<JSONValue> new_array = new Vector<JSONValue> ();
-        add (JSONTypes.ARRAY, new_array);
-        return new JSONArrayWriter (new_array);
+        JSONArrayWriter writer = new JSONArrayWriter ();
+        add (JSONTypes.ARRAY, writer.array);
+        return writer;
+      }
+
+    public JSONArrayWriter setArray (JSONArrayWriter writer) throws IOException
+      {
+        add (JSONTypes.ARRAY, writer.array);
+        return this;
       }
 
     public JSONObjectWriter setObject () throws IOException
       {
-        JSONObject holder = new JSONObject ();
-        add (JSONTypes.OBJECT, holder);
-        return new JSONObjectWriter (holder);
+        JSONObjectWriter writer = new JSONObjectWriter ();
+        add (JSONTypes.OBJECT, writer.root);
+        return writer;
+      }
+
+    public JSONArrayWriter setObject (JSONObjectWriter writer) throws IOException
+      {
+        add (JSONTypes.OBJECT, writer.root);
+        return this;
       }
 
     public byte[] serializeJSONArray (JSONOutputFormats output_format) throws IOException
