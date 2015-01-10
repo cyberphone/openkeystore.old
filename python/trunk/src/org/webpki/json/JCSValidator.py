@@ -21,7 +21,6 @@ from collections import OrderedDict
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-from ecdsa.util import sigdecode_der
 from ecdsa import VerifyingKey as EC
 
 from org.webpki.json.Utils import cryptoBigNumDecode
@@ -72,8 +71,7 @@ class new:
             self.nativePublicKey = EC.from_string(base64UrlDecode(self.publicKey['x']) + 
                                                   base64UrlDecode(self.publicKey['y']),
                                                   curve=getEcCurve(self.publicKey['curve']))
-            self.nativePublicKey.verify_digest(signatureValue,hashObject.digest(),
-                                               sigdecode=sigdecode_der)
+            self.nativePublicKey.verify_digest(signatureValue,hashObject.digest())
             
 
     def getPublicKey(self,format='JWK'):

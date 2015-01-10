@@ -1,32 +1,33 @@
 {
-    "statement": "Hello signed world!",
-    "otherProperties": [2000,true],
-    "inner": 
+  "statement": "Hello signed world!",
+  "otherProperties": [2000,true],
+  "inner": 
+    {
+      "now": "2015-01-12T09:22:36Z",
+      "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+      "numbers": [1e0,4.50,6],
+      "signature": 
         {
-            "statement": "Hello signed world!",
-            "otherProperties": [2000,true],
-            "signature": 
-                {
-                    "algorithm": "ES256",
-                    "publicKey": 
-                        {
-                            "type": "EC",
-                            "curve": "P-256",
-                            "x": "vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs",
-                            "y": "fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM"
-                        },
-                    "value": "MEUCIFYYYG57-pm7rf_mHZGEqNrGypGB5nZxYkomR1YuFp3tAiEAwklhnsoduY9K02O30XxZCv5UoMdJB-Unc_rlAguHSNk"
-                }
-        },
-    "signature": 
-        {
-            "algorithm": "RS256",
-            "publicKey": 
-                {
-                    "type": "RSA",
-                    "n": "ld-uUL2csxx3hbGqN_Ix48wbIgcas2i42ujmW3D2ZtT8tmrebQLbo-e6aZ9MZS8CQCysWZ4m5lp5hiPJrbEir82WFncl3mUidDsvN4AjvgjmciflwmA4Qm1KzoNAqLe0Hw1xqvNbAnPyOTrec0d4TmbZcHnYgxrE56a62IBRPZUll_nudXbhWD_PAEqAGeslo6djRUYjdcKLwe1gchi2UAbPlTN4BhIXF8tV9seDS5yY8W6d2RSzrwo9WZiSCyara9by2g8tjUTCNVCrG16YB-t8rKUzpf7Qx3A2ZxttaEB7VnYF56h45CD3FPLAYR9ZFNlAWdgTQi5OUdSJvAwK1w",
-                    "e": "AQAB"
-                },
-            "value": "Ha08ulPg1_7zF0xI_Eo8RQs0jFYA2zM0fFjbDq1q84sHME5l0ywSxkD51WU8_WfL5plq9ziWkg_LB3RwQdGFBHRAayQgPMVTrFOJ7D5NA8GGbmWyjv2FH94gmrauTlTvpPW5FMZXFSP1XlLjYqXgZ8hPFu9Gj4V0MAQNICyf9Z2pa43IsQeTWAmMijssl6VmNRsZ7vKGRVzAAAIgSDfGl6lrenbPFYcslUTvBh-K2PpeuYSUyYC7Wf7nCerKaQrQTua3Ao9jeZ2u_k9GwVB5Mtd_PQ_cNMvKwQ1L3mb6eWsNvJITzS5F1zk_Q_BTJjuVYd1NtGzo8pxZiw7SkjlfjA"
+          "algorithm": "ES256",
+          "publicKey": 
+            {
+              "type": "EC",
+              "curve": "P-256",
+              "x": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",
+              "y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
+            },
+          "value": "C1qP8PghKOl6NT8gpoy6cDI1Uzls_o8mYECYnWT-CkRaIaiZd9u_4nDKRhQvjbbeWZ1FiHPMs3TKmXIBSCuUHg"
         }
+    },
+  "signature": 
+    {
+      "algorithm": "RS256",
+      "publicKey": 
+        {
+          "type": "RSA",
+          "n": "y__yOXXaisKqCW2UCcOxpZRCCIdz04074KrnQXMOjSulnaB-kBUUV49Gc8jBI1k7IP0gLdtIPjv2WVFaewt3bm2P2tymRYNw6trisoVtSswWhPDNR12ZEhUNh4vIyJsyYsZRg2y11_ghmK5PeRRxSqVwdga-HOuhXhN_KyD-CL7VxHQwpeAmwWXDvPweTpLWzlVoRzOSkCbsluzCW9Sh0rBHPe4pBScaY2oXQsiWt8nm3p6rgfBALsP_8pEdt5W-dHMihTYfsuLNroJRngocnvPhv44F1ODafUwfuLPe-LpG8zIzMGHnaD4GECOatrzOqPjUCnyiHchNFap1HU8khQ",
+          "e": "AQAB"
+        },
+      "value": "uXYasUuO4S62CvMc7WS9ZfRPwkDn_nW99senkdnuNT5QJgkkzvE8sGFlDa7mvw4BTEBAzIMeU72Y012C7owPBJwUzy9AKsJ7H_sRA-8xF5o73EKsSBmxS2iDXeAvUX2w6vt2gDhIHZwW2bnsqoS2YZKQBRZxqu2vTt-VEkLDfwgnhARYPIeSH9_8f20s8jDFWnL3YWyqENFIBrTEZjMFu-amh1Uc9p4lgBhVMxpAPh3xYZcvQDFqzKpz_UhT25OULtQwV5JKr-EKDu-UiO70MMhKz6cKrjNveLohybxwa7iylYT6rjtC5BuXdV-Yk_Phmtrf3XvaHqwfGLzujJHc8Q"
+    }
 }

@@ -19,8 +19,6 @@
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-from ecdsa.util import sigencode_der
-
 from ecdsa import SigningKey as EC
 
 from org.webpki.json.Utils import base64UrlDecode
@@ -106,7 +104,7 @@ class new(BaseKey):
         hashObject = algorithmEntry[1].new(data)
         if algorithmEntry[0]:
             return PKCS1_v1_5.new(self.nativePrivateKey).sign(hashObject)
-        return self.nativePrivateKey.sign_digest(hashObject.digest(),sigencode=sigencode_der)
+        return self.nativePrivateKey.sign_digest(hashObject.digest())
 
 
     def setSignatureMetaData(self,jsonObjectWriter):
