@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,26 +18,20 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECPoint;
-
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SKSAlgorithms;
-
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -234,10 +228,10 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -267,12 +261,12 @@ import org.webpki.json.JSONSignatureDecoder;
               {
                 try
                   {
-                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
-                    signature.initSign (private_key);
-                    signature.update (data);
-                    return signature.sign ();
+                    return new SignatureWrapper (algorithm, public_key)
+                        .initSign (private_key)
+                        .update (data)
+                        .sign ();
                   }
-                catch (Exception e)
+                catch (GeneralSecurityException e)
                   {
                     throw new IOException (e);
                   }

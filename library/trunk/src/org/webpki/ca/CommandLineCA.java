@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.TimeZone;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.PublicKey;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -49,6 +48,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.SignatureWrapper;
 
 
 public class CommandLineCA
@@ -254,13 +254,13 @@ public class CommandLineCA
 
         public byte[] signData (byte[] data, AsymSignatureAlgorithms certalg) throws IOException
           {
-            Signature s;
-            try
+             try
               {
-                s = Signature.getInstance (certalg.getJCEName ());
-                s.initSign (sign_key);
-                s.update (data);
-                return s.sign ();
+                return new SignatureWrapper (certalg, public_key)
+                    .setECDSASignatureEncoding (true)
+                    .initSign (sign_key)
+                    .update (data)
+                    .sign ();
               }
             catch (GeneralSecurityException e)
               {

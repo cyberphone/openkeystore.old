@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
  */
 package org.webpki.crypto.test;
 
-import java.io.IOException;
 import java.math.BigInteger;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.Signature;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -33,6 +34,8 @@ import javax.crypto.KeyAgreement;
 
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -79,16 +82,15 @@ public class KeyExperiments
                                                         : 
                        optional;
  
-        Signature signer = Signature.getInstance (sign_alg.getJCEName ());
-        signer.initSign (kp.getPrivate ());
-        signer.update (data);
-        byte[] signature = signer.sign ();
+        byte[] signature = new SignatureWrapper (sign_alg, kp.getPublic ())
+                                   .initSign (kp.getPrivate ())
+                                   .update (data)
+                                   .sign ();
 
-        Signature verifier = Signature.getInstance (sign_alg.getJCEName ());
-        verifier.initVerify (kp.getPublic ());
-        verifier.update (data);
-
-        if (!verifier.verify (signature))
+        if (!new SignatureWrapper (sign_alg, kp.getPublic ())
+                     .initVerify ()
+                     .update (data)
+                     .verify (signature))
           {
             throw new RuntimeException ("Bad sign for: " + kp.getPublic ().toString ());
           }

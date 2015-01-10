@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.PrivateKey;
-import java.security.Signature;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,6 +41,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -85,10 +85,10 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
           {
             try
               {
-                Signature s = Signature.getInstance (sign_alg.getJCEName ());
-                s.initSign (priv_key);
-                s.update (data);
-                return s.sign ();
+                return new SignatureWrapper (sign_alg, pub_key)
+                    .initSign (priv_key)
+                    .update (data)
+                    .sign ();
               }
             catch (GeneralSecurityException e)
               {

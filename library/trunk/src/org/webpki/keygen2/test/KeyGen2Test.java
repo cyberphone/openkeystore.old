@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -57,7 +56,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.BeforeClass;
-
 import org.junit.rules.TestName;
 
 import static org.junit.Assert.*;
@@ -79,6 +77,8 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
+import org.webpki.crypto.SignatureWrapper;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
@@ -929,6 +929,8 @@ public class KeyGen2Test
         
         PrivateKey gen_private_key;
         
+        PublicKey gen_public_key;
+        
         PublicKey server_km;
         
         SoftHSM server_crypto_interface = new SoftHSM ();
@@ -1317,7 +1319,7 @@ public class KeyGen2Test
                     GregorianCalendar end = (GregorianCalendar) start.clone ();
                     end.set (GregorianCalendar.YEAR, end.get (GregorianCalendar.YEAR) + 25);
     
-                    PublicKey pub_key =  key_prop.getPublicKey ();
+                    gen_public_key =  key_prop.getPublicKey ();
     
                     if (temp_set_private_key)
                       {
@@ -1331,7 +1333,7 @@ public class KeyGen2Test
                             generator.initialize (new RSAKeyGenParameterSpec (1024, RSAKeyGenParameterSpec.F4), new SecureRandom ());
                           }
                         KeyPair kp = generator.generateKeyPair();
-                        pub_key = kp.getPublic ();
+                        gen_public_key = kp.getPublic ();
                         gen_private_key = kp.getPrivate ();
                       }
     
@@ -1363,10 +1365,10 @@ public class KeyGen2Test
                             {
                               try
                                 {
-                                  Signature signer = Signature.getInstance (algorithm.getJCEName ());
-                                  signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
-                                  signer.update (data);
-                                  return signer.sign ();
+                                  return new SignatureWrapper (algorithm, getPublicKey ())
+                                      .initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()))
+                                      .update (data)
+                                      .sign ();
                                 }
                               catch (GeneralSecurityException e)
                                 {
@@ -1374,7 +1376,7 @@ public class KeyGen2Test
                                 }
                             }
                           
-                        }, pub_key));
+                        }, gen_public_key));
 
                     if (set_trust_anchor)
                       {
@@ -1855,10 +1857,11 @@ public class KeyGen2Test
                                                     null,
                                                     USER_DEFINED_PIN,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
-                verify.initVerify (ka.getCertificatePath ()[0]);
-                verify.update (TEST_STRING);
-                assertTrue ("Bad signature", verify.verify (result));
+                assertTrue ("Bad signature",
+                            new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
+                                 .initVerify ()
+                                 .update (TEST_STRING)
+                                 .verify (result));
               }
           }
         assertTrue ("Missing keys", j == 2);
@@ -1884,10 +1887,11 @@ public class KeyGen2Test
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
-        verify.initVerify (ka.getCertificatePath ()[0]);
-        verify.update (TEST_STRING);
-        assertTrue ("Bad signature", verify.verify (result));
+        assertTrue ("Bad signature",
+                    new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
+                        .initVerify ()
+                        .update (TEST_STRING)
+                        .verify (result));
       }
 
     @Test
@@ -1912,10 +1916,11 @@ public class KeyGen2Test
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
-        verify.initVerify (ka.getCertificatePath ()[0]);
-        verify.update (TEST_STRING);
-        assertTrue ("Bad signature", verify.verify (result));
+        assertTrue ("Bad signature",
+                    new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
+                        .initVerify ()
+                        .update (TEST_STRING)
+                        .verify (result));
       }
 
     @Test
@@ -1953,7 +1958,7 @@ public class KeyGen2Test
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature sign = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
+        SignatureWrapper sign = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, doer.server.gen_public_key);
         sign.initSign (doer.server.gen_private_key);
         sign.update (TEST_STRING);
         assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,18 +17,26 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
+
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
+
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -71,9 +79,11 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
             kmk.authorization = external_authorization;
             try
               {
-                Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
-                                                                                         "SHA256WithRSA" : "SHA256WithECDSA");
-                kmk_verify.initVerify (key_management_key);
+                SignatureWrapper kmk_verify = 
+                    new SignatureWrapper (key_management_key instanceof RSAPublicKey ? 
+                                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256,
+                                          key_management_key);
+                kmk_verify.initVerify ();
                 kmk_verify.update (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION);
                 kmk_verify.update (this.key_management_key.getEncoded ());
                 if (!kmk_verify.verify (external_authorization))

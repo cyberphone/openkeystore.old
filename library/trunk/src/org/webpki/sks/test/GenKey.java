@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -33,24 +31,22 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.webpki.asn1.cert.DistinguishedName;
-
 import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
-
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.crypto.SymEncryptionAlgorithms;
-
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.sks.test.ProvSess.MacGenerator;
+
 import org.webpki.util.ArrayUtil;
 
 public class GenKey
@@ -120,7 +116,8 @@ public class GenKey
                 {
                   try
                     {
-                      Signature signer = Signature.getInstance (algorithm.getJCEName ());
+                      SignatureWrapper signer = new SignatureWrapper (algorithm, getPublicKey ());
+                      signer.setECDSASignatureEncoding (true);
                       signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
                       signer.update (data);
                       return signer.sign ();

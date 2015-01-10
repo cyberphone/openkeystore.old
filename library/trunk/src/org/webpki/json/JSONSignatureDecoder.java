@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.Signature;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -43,6 +42,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 /**
  * Decoder for JCS signatures.
@@ -318,10 +318,10 @@ public class JSONSignatureDecoder implements Serializable
           }
         try
           {
-            Signature sig = Signature.getInstance (algorithm.getJCEName ());
-            sig.initVerify (public_key);
-            sig.update (normalized_data);
-            checkVerification (sig.verify (signature_value));
+            checkVerification (new SignatureWrapper ((AsymSignatureAlgorithms) algorithm, public_key)
+                                   .initVerify ()
+                                   .update (normalized_data)
+                                   .verify (signature_value));
           }
         catch (GeneralSecurityException e)
           {

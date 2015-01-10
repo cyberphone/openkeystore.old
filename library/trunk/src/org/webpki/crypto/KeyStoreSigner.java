@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.webpki.crypto;
 import java.io.IOException;
 
 import java.util.Enumeration;
+
 import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
 
 import java.security.KeyStore;
-import java.security.Signature;
 import java.security.PrivateKey;
+
 import java.security.GeneralSecurityException;
-import java.security.UnrecoverableKeyException;
 
 /**
  * Sign data using the KeyStore interface. 
@@ -43,6 +43,8 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
     private String key_alias;
 
     private boolean extended_certpath;
+    
+    private boolean ecdsa_der_encoded;
 
 
     private KeyStoreSigner testKey (String key_alias) throws IOException, GeneralSecurityException
@@ -132,6 +134,13 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
+    public KeyStoreSigner setECDSASignatureEncoding (boolean der_encoded)
+      {
+        ecdsa_der_encoded = der_encoded;
+        return this;
+      }
+
+
     public KeyStoreSigner setAuthorityInfoAccessCAIssuersHandler (AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler)
       {
         this.aia_caissuer_handler = aia_caissuer_handler;
@@ -144,10 +153,11 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       {
         try
           {
-            Signature signer = Signature.getInstance (algorithm.getJCEName ());
-            signer.initSign (private_key);
-            signer.update (data);
-            return signer.sign ();
+            return new SignatureWrapper (algorithm,
+                                         signer_cert_keystore.getCertificate (key_alias).getPublicKey ())
+               .initSign (private_key).setECDSASignatureEncoding (ecdsa_der_encoded)
+               .update (data)
+               .sign ();
           }
         catch (GeneralSecurityException e)
           {
@@ -196,10 +206,6 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
             private_key = (PrivateKey)signer_cert_keystore.getKey (key_alias, 
                                                                    password == null ? null : password.toCharArray ());
             return this;
-          }
-        catch (UnrecoverableKeyException e)
-          {
-            throw new IOException (e);
           }
         catch (GeneralSecurityException e)
           {

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -462,7 +462,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     provisioning.abort ("\"" + VAR_AUTHORIZATION + "\" signature did not verify for key #" + keyHandle);
                   }
               }
-            catch (Exception e)
+            catch (GeneralSecurityException e)
               {
                 provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
               }
@@ -717,7 +717,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         boolean verifyKeyManagementKeyAuthorization (byte[] kmk_kdf,
                                                      byte[] argument,
-                                                     byte[] authorization) throws GeneralSecurityException, IOException
+                                                     byte[] authorization) throws GeneralSecurityException
           {
             return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
                                                                   "SHA256WithRSA" : "SHA256WithECDSA",
@@ -878,140 +878,147 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       }
 
     class SignatureWrapper
-    {
-      static final int ASN1_SEQUENCE = 0x30;
-      static final int ASN1_INTEGER  = 0x02;
-      
-      static final int LEADING_ZERO   = 0x00;
-
-      Signature instance;
-      PublicKey publicKey;
-
-      public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
-        {
-          instance = Signature.getInstance (algorithm);
-          this.publicKey = publicKey;
-        }
-
-      public SignatureWrapper initVerify () throws GeneralSecurityException
-        {
-          instance.initVerify (publicKey);
-          return this;
-        }
-
-      public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
-        {
-          instance.initSign (private_key);
-          return this;
-        }
-
-      public SignatureWrapper update (byte[] data) throws GeneralSecurityException
-        {
-          instance.update (data);
-          return this;
-        }
-
-      public SignatureWrapper update (byte data) throws GeneralSecurityException
-        {
-          instance.update (data);
-          return this;
-        }
-
-      public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
-        {
-          if (publicKey instanceof RSAPublicKey)
-            {
-              return instance.verify (signature);
-            }
-          int extend_to = 40;
-          ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-          for (int offset = 0; offset <= extend_to; offset += extend_to)
-            {
-              int l = extend_to;
-              int start = offset;
-              while (signature[start] == LEADING_ZERO)
-                {
-                  start++;
-                  l--;
-                }
-              boolean add_zero = false;
-              if (signature[start] < 0)
-                {
-                  add_zero = true;
-                  l++;
-                }
-              baos.write (ASN1_INTEGER);
-              baos.write (l);
-              if (add_zero)
-                {
-                  baos.write (LEADING_ZERO);
-                }
-              baos.write (signature, start, extend_to - start + offset);
-            }
-          byte[] body = baos.toByteArray ();
-          baos = new ByteArrayOutputStream ();
-          baos.write (ASN1_SEQUENCE);
-          int length = body.length;
-          if (length > 127)
-            {
-              baos.write (0x81);
-            }
-          baos.write (length);
-          baos.write (body);
-          return instance.verify (baos.toByteArray ());
-        }
-
-      byte[] sign () throws GeneralSecurityException, IOException
-        {
-          byte[] signature = instance.sign ();
-          if (publicKey instanceof RSAPublicKey)
-            {
-              return signature;
-            }
-          int index = 2;
-          int length;
-          int extend_to = 32;
-          byte[] integerPairs = new byte[extend_to << 1];
-          if (signature[0] != ASN1_SEQUENCE)
-            {
-              throw new IOException ("Not SEQUENCE");
-            }
-          length = signature[1] & 0xFF;
-          if ((length & 0x80) != 0)
-            {
-              int q = length & 0x7F;
-              length = 0;
-              while (q-- > 0)
-                {
-                  length <<= 8;
-                  length += signature[index++] & 0xFF;
-                }
-            }
-          for (int offset = 0; offset <= extend_to; offset += extend_to)
-            {
-              if (signature[index++] != ASN1_INTEGER)
-                {
-                  throw new IOException ("Not INTEGER");
-                }
-              int l = signature[index++];
-              while (l > extend_to)
-                {
-                  if (signature[index++] != LEADING_ZERO)
-                    {
-                      throw new IOException ("Bad INTEGER");
-                    }
-                  l--;
-                }
-              System.arraycopy (signature, index, integerPairs, offset + extend_to - l, l);
-              index += l;
-            }
-          if (index != signature.length)
-            {
-              throw new IOException ("ASN.1 Length error");
-            }
-          return integerPairs;
-        }
-    }
+      {
+        static final int ASN1_SEQUENCE = 0x30;
+        static final int ASN1_INTEGER  = 0x02;
+        
+        static final int LEADING_ZERO   = 0x00;
+  
+        Signature instance;
+        PublicKey publicKey;
+  
+        public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
+          {
+            instance = Signature.getInstance (algorithm);
+            this.publicKey = publicKey;
+          }
+  
+        public SignatureWrapper initVerify () throws GeneralSecurityException
+          {
+            instance.initVerify (publicKey);
+            return this;
+          }
+  
+        public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+          {
+            instance.initSign (private_key);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte[] data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public boolean verify (byte[] signature) throws GeneralSecurityException
+          {
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return instance.verify (signature);
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                int l = extendTo;
+                int start = offset;
+                while (signature[start] == LEADING_ZERO)
+                  {
+                    start++;
+                    l--;
+                  }
+                boolean add_zero = false;
+                if (signature[start] < 0)
+                  {
+                    add_zero = true;
+                    l++;
+                  }
+                baos.write (ASN1_INTEGER);
+                baos.write (l);
+                if (add_zero)
+                  {
+                    baos.write (LEADING_ZERO);
+                  }
+                baos.write (signature, start, extendTo - start + offset);
+              }
+            byte[] body = baos.toByteArray ();
+            baos = new ByteArrayOutputStream ();
+            baos.write (ASN1_SEQUENCE);
+            int length = body.length;
+            if (length > 127)
+              {
+                baos.write (0x81);
+              }
+            baos.write (length);
+            try
+              {
+                baos.write (body);
+              }
+            catch (IOException e)
+              {
+                throw new GeneralSecurityException (e);
+              }
+            return instance.verify (baos.toByteArray ());
+          }
+  
+        byte[] sign () throws GeneralSecurityException
+          {
+            byte[] signature = instance.sign ();
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return signature;
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            int index = 2;
+            int length;
+            byte[] integerPairs = new byte[extendTo << 1];
+            if (signature[0] != ASN1_SEQUENCE)
+              {
+                throw new GeneralSecurityException ("Not SEQUENCE");
+              }
+            length = signature[1] & 0xFF;
+            if ((length & 0x80) != 0)
+              {
+                int q = length & 0x7F;
+                length = 0;
+                while (q-- > 0)
+                  {
+                    length <<= 8;
+                    length += signature[index++] & 0xFF;
+                  }
+              }
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                if (signature[index++] != ASN1_INTEGER)
+                  {
+                    throw new GeneralSecurityException ("Not INTEGER");
+                  }
+                int l = signature[index++];
+                while (l > extendTo)
+                  {
+                    if (signature[index++] != LEADING_ZERO)
+                      {
+                        throw new GeneralSecurityException ("Bad INTEGER");
+                      }
+                    l--;
+                  }
+                System.arraycopy (signature, index, integerPairs, offset + extendTo - l, l);
+                index += l;
+              }
+            if (index != signature.length)
+              {
+                throw new GeneralSecurityException ("ASN.1 Length error");
+              }
+            return integerPairs;
+          }
+      }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
@@ -1025,9 +1032,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         String jceName;
         byte[] pkcs1DigestInfo;
         EllipticCurve curve;
+        int ecPointLength;
         
-        void addEcCurve (byte[] samplePublicKey)
+        void addEcCurve (int ecPointLength, byte[] samplePublicKey)
           {
+            this.ecPointLength = ecPointLength;
             try
               {
                 curve = ((ECPublicKey) KeyFactory.getInstance ("EC")
@@ -1191,7 +1200,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                       "secp256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
@@ -1207,7 +1216,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
                       "secp384r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (48, new byte[]
               {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
                (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
@@ -1226,7 +1235,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
                       "secp521r1",
-                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (66, new byte[]
               {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
                (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
@@ -1250,7 +1259,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
                       "brainpoolP256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
                (byte)0x24, (byte)0x03, (byte)0x03, (byte)0x02, (byte)0x08, (byte)0x01, (byte)0x01, (byte)0x07,
@@ -1458,19 +1467,39 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         throw new SKSException (message, option);
       }
-
-    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+    
+    Algorithm getEcType (ECKey ecKey)
       {
         for (String uri : supportedAlgorithms.keySet ())
           {
             EllipticCurve curve = supportedAlgorithms.get (uri).curve;
             if (curve != null && ecKey.getParams ().getCurve ().equals (curve))
               {
-                return supportedAlgorithms.get (uri).jceName;
+                return supportedAlgorithms.get (uri);
               }
+          }
+        return null;
+      }
+
+    String checkEcKeyCompatibility (ECKey ecKey, SKSError sksError, String keyId) throws SKSException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.jceName;
           }
         sksError.abort ("Unsupported EC key algorithm for: " + keyId);
         return null;
+      }
+
+    int getEcPointLength (ECKey ecKey) throws GeneralSecurityException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.ecPointLength;
+          }
+        throw new GeneralSecurityException ("Unsupported EC curve");
       }
 
     void checkRsaKeyCompatibility (int rsaKeySize, BigInteger exponent, SKSError sksError, String keyId) throws SKSException
@@ -1847,7 +1876,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (delete ? METHOD_POST_DELETE_KEY : METHOD_POST_UNLOCK_KEY);
         targetKeyEntry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
-
+ 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the post-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.webpki.sks.SecureKeyStore;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20141208";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20150112";
 
     // JSON properties
 

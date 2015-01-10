@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.webpki.xmldsig;
 
 import java.io.IOException;
 
-import java.security.Signature;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
@@ -32,6 +31,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.crypto.HashAlgorithms;
 
 
@@ -120,12 +120,10 @@ abstract class XMLVerifierCore
           {
             // Check signature
             signature_algorithm = signature.signedinfo_object.asym_signature_alg;
-            Signature verifier = Signature.getInstance (signature.signedinfo_object.asym_signature_alg.getJCEName ());
-    
-            verifier.initVerify (public_key);
-            verifier.update (sign_cn);
-    
-            success = verifier.verify (signature.signedinfo_object.signature_val);
+            success = new SignatureWrapper (signature.signedinfo_object.asym_signature_alg, public_key)
+                              .initVerify ()
+                              .update (sign_cn)
+                              .verify (signature.signedinfo_object.signature_val);
           }
         if (!success)
           {

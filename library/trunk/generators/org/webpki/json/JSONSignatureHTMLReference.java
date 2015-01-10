@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 
@@ -68,7 +69,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
-"&nbsp;&nbsp;&quot;now&quot;:&nbsp;&quot;2014-12-08T10:25:17Z&quot;,<br>" +
+"&nbsp;&nbsp;&quot;now&quot;:&nbsp;&quot;2015-01-12T09:22:36Z&quot;,<br>" +
 "&nbsp;&nbsp;&quot;escapeMe&quot;:&nbsp;&quot;\\u20ac$\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\&quot;\\/&quot;,<br>" +
 "&nbsp;&nbsp;&quot;numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
 "&nbsp;&nbsp;&quot;signature&quot;:<br>" +
@@ -81,7 +82,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<span style=\"background:#f0f0f0\">,</span><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;MEYCIQDGP3HL5aCGaMlgNlqqnPbq-Dhkli4SkfV_ZoGlhGroowIhAPlPhXOsjpPHgQ8E8M-jUQo8lfgO_GRZUJKsg_-u-aJO&quot;</span><br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;C1qP8PghKOl6NT8gpoy6cDI1Uzls_o8mYECYnWT-CkRaIaiZd9u_4nDKRhQvjbbeWZ1FiHPMs3TKmXIBSCuUHg&quot;</span><br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
 "}</code></div>" +
 "The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
@@ -126,7 +127,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 
-            "{&quot;now&quot;:&quot;2014-12-08T10:25:17Z&quot;,&quot;escapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">&#x20AC;</b>$<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B\\&quot;\\\\</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;signature&quot;:<br>" +
+            "{&quot;now&quot;:&quot;2015-01-12T09:22:36Z&quot;,&quot;escapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">&#x20AC;</b>$<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B\\&quot;\\\\</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;signature&quot;:<br>" +
             "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWW<br>" +
             "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
@@ -207,12 +208,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signature.initSign (private_key);<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signature.update (data);<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return signature.sign ();<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new SignatureWrapper (algorithm, public_key)<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.initSign (private_key)<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.update (data)<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.sign ();<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch (Exception e)<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch (GeneralSecurityException e)<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw new IOException (e);<br>" +
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +

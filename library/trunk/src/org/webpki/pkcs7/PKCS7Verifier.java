@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.cert.X509Certificate;
-import java.security.Signature;
 import java.security.GeneralSecurityException;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -29,6 +28,7 @@ import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.asn1.ASN1Util;
 import org.webpki.asn1.ParseUtil;
@@ -222,10 +222,11 @@ public class PKCS7Verifier
           {
             throw new IOException ("Signer certificate descriptor error");
           }
-        Signature verifier = Signature.getInstance (getSignatureAlgorithm ().getJCEName ());
-        verifier.initVerify (certpath[0].getPublicKey ());
-        verifier.update (message);
-        if (!verifier.verify (signer_info.encrypted_digest))
+        if (!new SignatureWrapper (getSignatureAlgorithm (), certpath[0].getPublicKey ())
+                     .setECDSASignatureEncoding (true)
+                     .initVerify ()
+                     .update (message)
+                     .verify (signer_info.encrypted_digest))
           {
             throw new IOException ("Incorrect signature");
           }

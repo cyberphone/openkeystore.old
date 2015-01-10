@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 
 import java.security.spec.ECGenParameterSpec;
 
@@ -31,6 +31,7 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -47,7 +48,7 @@ public class DemoCode
   {
     static
       {
-        CustomCryptoProvider.forcedLoad (true);
+        CustomCryptoProvider.conditionalLoad (true);
       }
 
     public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
@@ -66,12 +67,12 @@ public class DemoCode
               {
                 try
                   {
-                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
-                    signature.initSign (private_key);
-                    signature.update (data);
-                    return signature.sign ();
+                    return new SignatureWrapper (algorithm, public_key)
+                        .initSign (private_key)
+                        .update (data)
+                        .sign ();
                   }
-                catch (Exception e)
+                catch (GeneralSecurityException e)
                   {
                     throw new IOException (e);
                   }

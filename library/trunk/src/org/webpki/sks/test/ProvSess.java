@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,14 +28,10 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
@@ -55,6 +51,7 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -166,8 +163,8 @@ public class ProvSess
                         AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
         
                     // Verify that the session key signature was signed by the device key
-                    Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-                    verifier.initVerify (device_public_key);
+                    SignatureWrapper verifier = new SignatureWrapper (signature_algorithm, device_public_key);
+                    verifier.initVerify ();
                     verifier.update (attestation_arguments);
                     if (!verifier.verify (session_attestation))
                       {
@@ -223,7 +220,8 @@ public class ProvSess
           {
             try
               {
-                Signature km_sign = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
+                SignatureWrapper km_sign = new SignatureWrapper (key_management_key instanceof RSAPublicKey ?
+                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256, key_management_key);
                 km_sign.initSign (key_management_keys.get (key_management_key));
                 km_sign.update (data);
                 return km_sign.sign ();

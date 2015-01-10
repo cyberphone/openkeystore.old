@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 
 import java.security.cert.X509Certificate;
 
@@ -48,6 +47,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.ServerCryptoInterface;
@@ -137,14 +138,14 @@ public class SoftHSM implements ServerCryptoInterface
               {
                 // E2ES mode
                 PublicKey device_public_key = device_certificate.getPublicKey ();
-                AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                    AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
-      
+
                 // Verify that attestation was signed by the device key
-                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-                verifier.initVerify (device_public_key);
-                verifier.update (attestation_arguments);
-                if (!verifier.verify (session_attestation))
+                if (!new SignatureWrapper (device_public_key instanceof RSAPublicKey ?
+                                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256, 
+                                           device_public_key)
+                         .initVerify ()
+                         .update (attestation_arguments)
+                         .verify (session_attestation))
                   {
                     throw new IOException ("Verify provisioning signature failed");
                   }
@@ -202,10 +203,12 @@ public class SoftHSM implements ServerCryptoInterface
       {
         try
           {
-            Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
-            km_sign.initSign (key_management_keys.get (key_management__key));
-            km_sign.update (data);
-            return km_sign.sign ();
+            return new SignatureWrapper (key_management__key instanceof RSAPublicKey ?
+                                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256,
+                                         key_management__key)
+                .initSign (key_management_keys.get (key_management__key))
+                .update (data)
+                .sign ();
           }
         catch (GeneralSecurityException e)
           {
