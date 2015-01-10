@@ -715,7 +715,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        boolean verifyKeyManagementKeyAuthorization (byte[] kmk_kdf,
+        boolean verifyKeyManagementKeyAuthorization (byte[] kmkKdf,
                                                      byte[] argument,
                                                      byte[] authorization) throws GeneralSecurityException
           {
@@ -723,7 +723,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                                   "SHA256WithRSA" : "SHA256WithECDSA",
                                          keyManagementKey)
                            .initVerify ()
-                           .update (kmk_kdf)
+                           .update (kmkKdf)
                            .update (argument)
                            .verify (authorization);
           }

@@ -22,9 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
@@ -35,9 +33,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -45,21 +41,18 @@ import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
-
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -101,6 +94,149 @@ public class SEReferenceImplementation
                                       'w','x','y','z','0','1','2','3',
                                       '4','5','6','7','8','9','-','_'};
 
+    static class SignatureWrapper
+      {
+        static final int ASN1_SEQUENCE = 0x30;
+        static final int ASN1_INTEGER  = 0x02;
+        
+        static final int LEADING_ZERO   = 0x00;
+  
+        Signature instance;
+        PublicKey publicKey;
+  
+        public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
+          {
+            instance = Signature.getInstance (algorithm);
+            this.publicKey = publicKey;
+          }
+  
+        public SignatureWrapper initVerify () throws GeneralSecurityException
+          {
+            instance.initVerify (publicKey);
+            return this;
+          }
+  
+        public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+          {
+            instance.initSign (private_key);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte[] data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public SignatureWrapper update (byte data) throws GeneralSecurityException
+          {
+            instance.update (data);
+            return this;
+          }
+  
+        public boolean verify (byte[] signature) throws GeneralSecurityException
+          {
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return instance.verify (signature);
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                int l = extendTo;
+                int start = offset;
+                while (signature[start] == LEADING_ZERO)
+                  {
+                    start++;
+                    l--;
+                  }
+                boolean add_zero = false;
+                if (signature[start] < 0)
+                  {
+                    add_zero = true;
+                    l++;
+                  }
+                baos.write (ASN1_INTEGER);
+                baos.write (l);
+                if (add_zero)
+                  {
+                    baos.write (LEADING_ZERO);
+                  }
+                baos.write (signature, start, extendTo - start + offset);
+              }
+            byte[] body = baos.toByteArray ();
+            baos = new ByteArrayOutputStream ();
+            baos.write (ASN1_SEQUENCE);
+            int length = body.length;
+            if (length > 127)
+              {
+                baos.write (0x81);
+              }
+            baos.write (length);
+            try
+              {
+                baos.write (body);
+              }
+            catch (IOException e)
+              {
+                throw new GeneralSecurityException (e);
+              }
+            return instance.verify (baos.toByteArray ());
+          }
+  
+        byte[] sign () throws GeneralSecurityException
+          {
+            byte[] signature = instance.sign ();
+            if (publicKey instanceof RSAPublicKey)
+              {
+                return signature;
+              }
+            int extendTo = getEcPointLength ((ECKey) publicKey);
+            int index = 2;
+            int length;
+            byte[] integerPairs = new byte[extendTo << 1];
+            if (signature[0] != ASN1_SEQUENCE)
+              {
+                throw new GeneralSecurityException ("Not SEQUENCE");
+              }
+            length = signature[1] & 0xFF;
+            if ((length & 0x80) != 0)
+              {
+                int q = length & 0x7F;
+                length = 0;
+                while (q-- > 0)
+                  {
+                    length <<= 8;
+                    length += signature[index++] & 0xFF;
+                  }
+              }
+            for (int offset = 0; offset <= extendTo; offset += extendTo)
+              {
+                if (signature[index++] != ASN1_INTEGER)
+                  {
+                    throw new GeneralSecurityException ("Not INTEGER");
+                  }
+                int l = signature[index++];
+                while (l > extendTo)
+                  {
+                    if (signature[index++] != LEADING_ZERO)
+                      {
+                        throw new GeneralSecurityException ("Bad INTEGER");
+                      }
+                    l--;
+                  }
+                System.arraycopy (signature, index, integerPairs, offset + extendTo - l, l);
+                index += l;
+              }
+            if (index != signature.length)
+              {
+                throw new GeneralSecurityException ("ASN.1 Length error");
+              }
+            return integerPairs;
+          }
+      }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,14 +244,16 @@ public class SEReferenceImplementation
     static class Algorithm implements Serializable
       {
         private static final long serialVersionUID = 1L;
-  
+
         int mask;
         String jceName;
         byte[] pkcs1DigestInfo;
         EllipticCurve curve;
+        int ecPointLength;
         
-        void addEcCurve (byte[] samplePublicKey)
+        void addEcCurve (int ecPointLength, byte[] samplePublicKey)
           {
+            this.ecPointLength = ecPointLength;
             try
               {
                 curve = ((ECPublicKey) KeyFactory.getInstance ("EC")
@@ -279,7 +417,7 @@ public class SEReferenceImplementation
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                       "secp256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
@@ -292,10 +430,10 @@ public class SEReferenceImplementation
                (byte)0xB2, (byte)0x40, (byte)0xC0, (byte)0x65, (byte)0xF8, (byte)0x8F, (byte)0x30, (byte)0x0A,
                (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
                (byte)0x7C, (byte)0x0D, (byte)0xB2});
-  
+
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384",
                       "secp384r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (48, new byte[]
               {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
                (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
@@ -311,10 +449,10 @@ public class SEReferenceImplementation
                (byte)0xE0, (byte)0xE2, (byte)0xD5, (byte)0xC5, (byte)0x79, (byte)0xD1, (byte)0xA6, (byte)0x18,
                (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
                (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98});
-  
+            
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p521",
                       "secp521r1",
-                       ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (66, new byte[]
               {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
                (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
                (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
@@ -335,10 +473,10 @@ public class SEReferenceImplementation
                (byte)0xE8, (byte)0x71, (byte)0x1A, (byte)0x94, (byte)0xC7, (byte)0x8E, (byte)0x4A, (byte)0xA9,
                (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
                (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96});
-  
+            
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
                       "brainpoolP256r1",
-                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (new byte[]
+                      ALG_EC_KEY | ALG_KEY_GEN).addEcCurve (32, new byte[]
               {(byte)0x30, (byte)0x5A, (byte)0x30, (byte)0x14, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
                (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x09, (byte)0x2B,
                (byte)0x24, (byte)0x03, (byte)0x03, (byte)0x02, (byte)0x08, (byte)0x01, (byte)0x01, (byte)0x07,
@@ -350,8 +488,8 @@ public class SEReferenceImplementation
                (byte)0x1D, (byte)0x07, (byte)0x61, (byte)0xB0, (byte)0xC3, (byte)0x01, (byte)0xE8, (byte)0xCB,
                (byte)0x52, (byte)0xF5, (byte)0x03, (byte)0xC1, (byte)0x0C, (byte)0x3F, (byte)0xF0, (byte)0x97,
                (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
-               (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
-        
+               (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});        
+
         for (short rsa_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
           {
             addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
@@ -777,15 +915,35 @@ public class SEReferenceImplementation
           }
       }
 
-    static String checkECKeyCompatibility (ECKey ecKey, String keyId) throws SKSException
+    static Algorithm getEcType (ECKey ecKey)
       {
         for (String uri : supportedAlgorithms.keySet ())
           {
             EllipticCurve curve = supportedAlgorithms.get (uri).curve;
             if (curve != null && ecKey.getParams ().getCurve ().equals (curve))
               {
-                return supportedAlgorithms.get (uri).jceName;
+                return supportedAlgorithms.get (uri);
               }
+          }
+        return null;
+      }
+
+    static int getEcPointLength (ECKey ecKey) throws GeneralSecurityException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.ecPointLength;
+          }
+        throw new GeneralSecurityException ("Unsupported EC curve");
+      }
+
+    static String checkECKeyCompatibility (ECKey ecKey, String keyId) throws SKSException
+      {
+        Algorithm ecType = getEcType (ecKey);
+        if (ecType != null)
+          {
+            return ecType.jceName;
           }
         abort ("Unsupported EC key algorithm for: " + keyId);
         return null;
@@ -908,13 +1066,14 @@ public class SEReferenceImplementation
 
     static class AttestationSignatureGenerator
       {
-        Signature signer;
+        SignatureWrapper signer;
         
         AttestationSignatureGenerator () throws GeneralSecurityException
           {
             PrivateKey attester = getAttestationKey ();
-            signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
-            signer.initSign (attester);
+            signer = new SignatureWrapper (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA",
+                                           getDeviceCertificatePath ()[0].getPublicKey ())
+                             .initSign (attester);
           }
   
         private byte[] short2bytes (int s)
@@ -1028,11 +1187,13 @@ public class SEReferenceImplementation
                                                         byte[] argument,
                                                         byte[] authorization) throws GeneralSecurityException
       {
-        Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
-        kmk_verify.initVerify (keyManagementKey);
-        kmk_verify.update (kmkKdf);
-        kmk_verify.update (argument);
-        return kmk_verify.verify (authorization);
+        return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
+                                                              "SHA256WithRSA" : "SHA256WithECDSA",
+                                     keyManagementKey)
+            .initVerify ()
+            .update (kmkKdf)
+            .update (argument)
+            .verify (authorization);
       }
 
     static void validateTargetKeyLocal (MacBuilder verifier,
@@ -1335,6 +1496,7 @@ public class SEReferenceImplementation
     public static byte[] executeSignHash (byte[] osInstanceKey,
                                           byte[] sealedKey,
                                           int keyHandle,
+                                          PublicKey publicKey,
                                           String algorithm,
                                           byte[] parameters,
                                           byte[] data) throws SKSException
@@ -1367,10 +1529,10 @@ public class SEReferenceImplementation
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
-            Signature signature = Signature.getInstance (alg.jceName);
-            signature.initSign (unwrappedKey.privateKey);
-            signature.update (data);
-            return signature.sign ();
+            return new SignatureWrapper (alg.jceName, publicKey)
+                .initSign (unwrappedKey.privateKey)
+                .update (data)
+                .sign ();
           }
         catch (Exception e)
           {

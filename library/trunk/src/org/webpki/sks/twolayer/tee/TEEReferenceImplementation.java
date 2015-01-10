@@ -1399,6 +1399,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         return SEReferenceImplementation.executeSignHash (OS_INSTANCE_KEY,
                                                           keyEntry.sealedKey,
                                                           keyHandle,
+                                                          keyEntry.publicKey,
                                                           algorithm,
                                                           parameters,
                                                           data);
