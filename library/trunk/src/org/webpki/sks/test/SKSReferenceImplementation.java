@@ -16,6 +16,7 @@
  */
 package org.webpki.sks.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -57,7 +58,6 @@ import java.util.Vector;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
-
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -462,7 +462,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     provisioning.abort ("\"" + VAR_AUTHORIZATION + "\" signature did not verify for key #" + keyHandle);
                   }
               }
-            catch (GeneralSecurityException e)
+            catch (Exception e)
               {
                 provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
               }
@@ -717,14 +717,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         boolean verifyKeyManagementKeyAuthorization (byte[] kmk_kdf,
                                                      byte[] argument,
-                                                     byte[] authorization) throws GeneralSecurityException
+                                                     byte[] authorization) throws GeneralSecurityException, IOException
           {
-            Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? 
-                                                                                   "SHA256WithRSA" : "SHA256WithECDSA");
-            kmk_verify.initVerify (keyManagementKey);
-            kmk_verify.update (kmk_kdf);
-            kmk_verify.update (argument);
-            return kmk_verify.verify (authorization);
+            return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
+                                                                  "SHA256WithRSA" : "SHA256WithECDSA",
+                                         keyManagementKey)
+                           .initVerify ()
+                           .update (kmk_kdf)
+                           .update (argument)
+                           .verify (authorization);
           }
       }
 
@@ -797,13 +798,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     class AttestationSignatureGenerator
       {
-        Signature signer;
+        SignatureWrapper signer;
         
         AttestationSignatureGenerator () throws GeneralSecurityException
           {
             PrivateKey attester = getAttestationKey ();
-            signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
-            signer.initSign (attester);
+            signer = new SignatureWrapper (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA",
+                                           getDeviceCertificatePath ()[0].getPublicKey ())
+                             .initSign (attester);
           }
   
         private byte[] short2bytes (int s)
@@ -853,7 +855,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             signer.update (flag ? (byte) 0x01 : (byte) 0x00);
           }
   
-        byte[] getResult () throws GeneralSecurityException
+        byte[] getResult () throws GeneralSecurityException, IOException
           {
             return signer.sign ();
           }
@@ -864,7 +866,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         private static final long serialVersionUID = 1L;
 
         KeyEntry targetKeyEntry;
-        KeyEntry newKey;      // null for postDeleteKey and postUnlockKey
+        KeyEntry newKey;           // null for postDeleteKey and postUnlockKey
         boolean updateOrDelete;    // true for postUpdateKey and postDeleteKey
 
         PostProvisioningObject (KeyEntry targetKeyEntry, KeyEntry newKey, boolean updateOrDelete)
@@ -875,6 +877,141 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
 
+    class SignatureWrapper
+    {
+      static final int ASN1_SEQUENCE = 0x30;
+      static final int ASN1_INTEGER  = 0x02;
+      
+      static final int LEADING_ZERO   = 0x00;
+
+      Signature instance;
+      PublicKey publicKey;
+
+      public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
+        {
+          instance = Signature.getInstance (algorithm);
+          this.publicKey = publicKey;
+        }
+
+      public SignatureWrapper initVerify () throws GeneralSecurityException
+        {
+          instance.initVerify (publicKey);
+          return this;
+        }
+
+      public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+        {
+          instance.initSign (private_key);
+          return this;
+        }
+
+      public SignatureWrapper update (byte[] data) throws GeneralSecurityException
+        {
+          instance.update (data);
+          return this;
+        }
+
+      public SignatureWrapper update (byte data) throws GeneralSecurityException
+        {
+          instance.update (data);
+          return this;
+        }
+
+      public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
+        {
+          if (publicKey instanceof RSAPublicKey)
+            {
+              return instance.verify (signature);
+            }
+          int extend_to = 40;
+          ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+          for (int offset = 0; offset <= extend_to; offset += extend_to)
+            {
+              int l = extend_to;
+              int start = offset;
+              while (signature[start] == LEADING_ZERO)
+                {
+                  start++;
+                  l--;
+                }
+              boolean add_zero = false;
+              if (signature[start] < 0)
+                {
+                  add_zero = true;
+                  l++;
+                }
+              baos.write (ASN1_INTEGER);
+              baos.write (l);
+              if (add_zero)
+                {
+                  baos.write (LEADING_ZERO);
+                }
+              baos.write (signature, start, extend_to - start + offset);
+            }
+          byte[] body = baos.toByteArray ();
+          baos = new ByteArrayOutputStream ();
+          baos.write (ASN1_SEQUENCE);
+          int length = body.length;
+          if (length > 127)
+            {
+              baos.write (0x81);
+            }
+          baos.write (length);
+          baos.write (body);
+          return instance.verify (baos.toByteArray ());
+        }
+
+      byte[] sign () throws GeneralSecurityException, IOException
+        {
+          byte[] signature = instance.sign ();
+          if (publicKey instanceof RSAPublicKey)
+            {
+              return signature;
+            }
+          int index = 2;
+          int length;
+          int extend_to = 32;
+          byte[] integerPairs = new byte[extend_to << 1];
+          if (signature[0] != ASN1_SEQUENCE)
+            {
+              throw new IOException ("Not SEQUENCE");
+            }
+          length = signature[1] & 0xFF;
+          if ((length & 0x80) != 0)
+            {
+              int q = length & 0x7F;
+              length = 0;
+              while (q-- > 0)
+                {
+                  length <<= 8;
+                  length += signature[index++] & 0xFF;
+                }
+            }
+          for (int offset = 0; offset <= extend_to; offset += extend_to)
+            {
+              if (signature[index++] != ASN1_INTEGER)
+                {
+                  throw new IOException ("Not INTEGER");
+                }
+              int l = signature[index++];
+              while (l > extend_to)
+                {
+                  if (signature[index++] != LEADING_ZERO)
+                    {
+                      throw new IOException ("Bad INTEGER");
+                    }
+                  l--;
+                }
+              System.arraycopy (signature, index, integerPairs, offset + extend_to - l, l);
+              index += l;
+            }
+          if (index != signature.length)
+            {
+              throw new IOException ("ASN.1 Length error");
+            }
+          return integerPairs;
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
@@ -2041,10 +2178,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
-            Signature signature = Signature.getInstance (alg.jceName);
-            signature.initSign (keyEntry.privateKey);
-            signature.update (data);
-            return signature.sign ();
+            return new SignatureWrapper (alg.jceName, keyEntry.publicKey)
+                           .initSign (keyEntry.privateKey)
+                           .update (data)
+                           .sign ();
           }
         catch (Exception e)
           {
@@ -2454,7 +2591,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             provisioning.keyManagementKey = keyManagementKey;
           }
-        catch (GeneralSecurityException e)
+        catch (Exception e)
           {
             abort (e.getMessage (), SKSException.ERROR_CRYPTO);
           }
