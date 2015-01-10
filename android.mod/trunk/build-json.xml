@@ -40,6 +40,7 @@
         <include name="**/crypto/SignatureAlgorithms.java"/>
         <include name="**/crypto/AsymSignatureAlgorithms.java"/>
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SignatureWrapper.java"/>
       </fileset>
     </copy>
     <delete dir="${class_dir}"/>
