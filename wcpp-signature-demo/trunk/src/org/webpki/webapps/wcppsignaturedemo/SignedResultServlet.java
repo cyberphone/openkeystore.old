@@ -19,7 +19,6 @@ package org.webpki.webapps.wcppsignaturedemo;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.security.Signature;
 
 import java.security.cert.X509Certificate;
 
@@ -34,6 +33,7 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -115,10 +115,10 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 X509Certificate cert = CertificateUtil.getCertificateFromBlob (new Base64().getBinaryFromBase64String (header.getArray ("x5c").getString ()));
                 byte[] signed_data = signature.substring (0, signature.lastIndexOf ('.')).getBytes ("UTF-8");
                 byte[] raw_signature = Base64URL.decode (signature.substring (signature.lastIndexOf ('.') + 1));
-                Signature sig = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
-                sig.initVerify (cert.getPublicKey ());
-                sig.update (signed_data);
-                if (!sig.verify (raw_signature))
+                if (!new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, cert.getPublicKey ())
+                          .initVerify ()
+                          .update (signed_data)
+                          .verify (raw_signature))
                   {
                     throw new IOException ("Bad JWS signature");
                   }

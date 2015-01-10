@@ -17,12 +17,15 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+
 import java.security.KeyStore;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,10 +39,13 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyUsageBits;
+
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
+
 import org.webpki.webutil.InitPropertyReader;
 
 public class SignatureDemoService extends InitPropertyReader implements ServletContextListener

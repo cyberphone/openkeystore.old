@@ -543,7 +543,7 @@ public class HTML implements BaseProperties
         "}\n\n" +
         "function userSign() {\n" +
         "    closeCredentialDialog();\n" +
-        "    document.getElementById('sign').disabled = true;\n" +
+        "    document.getElementById('sign').style.visibility = 'hidden';\n" +
         "    var pindialog_width = document.getElementById('pindialog').offsetWidth;\n" +
         "    document.getElementById('pincross').style.height = (border_height - 9) + 'px';\n" +
         "    document.getElementById('pincross').style.top = '4px';\n" +
@@ -556,7 +556,7 @@ public class HTML implements BaseProperties
         "}\n\n" +
         "function closePINDialog() {\n" +
         "    removeDragHandlers('pinborder');\n" +
-        "    document.getElementById('sign').disabled = false;\n" +
+        "    document.getElementById('sign').style.visibility = 'visible';\n" +
         "    document.getElementById('pindialog').style.visibility = 'hidden';\n" +
         "}\n\n" +
         "function showPINError(message) {\n" +
