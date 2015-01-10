@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.GeneralSecurityException;
-import java.security.Signature;
 import java.security.PrivateKey;
 
 import org.bouncycastle.jce.X509Principal;
@@ -16,8 +15,10 @@ import java.security.spec.X509EncodedKeySpec;
 import org.webpki.util.Base64URL;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.crypto.CertificateUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
@@ -75,10 +76,9 @@ public class AntCrypto
 			return Base64URL.encode (MACAlgorithms.getAlgorithmFromID (algorithm).digest (SYMMETRIC_KEY,
 					                                                                      Base64URL.decode (b64_data)));
 		}
-        Signature s = Signature.getInstance (AsymSignatureAlgorithms.getAlgorithmFromID (algorithm).getJCEName ());
-        s.initSign ((PrivateKey)getKeyStore (algorithm).getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
-        s.update (Base64URL.decode (b64_data));
-		return Base64URL.encode (s.sign ());
+		KeyStoreSigner s = new KeyStoreSigner (getKeyStore (algorithm), null);
+		s.setKey("mykey", DemoKeyStore.getSignerPassword ());
+		return Base64URL.encode (s.signData (Base64URL.decode (b64_data), AsymSignatureAlgorithms.getAlgorithmFromID (algorithm)));
 	}
 
 	public static boolean verifySignature (String b64_data, String b64_signature_value, String algorithm, String public_key_b64) throws Exception
@@ -88,8 +88,10 @@ public class AntCrypto
 			return signData (b64_data, algorithm).equals (b64_signature_value);
 		}
 		AsymSignatureAlgorithms asym_alg = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm);
-		Signature s = Signature.getInstance (asym_alg.getJCEName ());
-		s.initVerify (KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC").generatePublic (new X509EncodedKeySpec (Base64URL.decode (public_key_b64))));
+		SignatureWrapper s = new SignatureWrapper (asym_alg,
+		                                           KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC")
+		                                .generatePublic (new X509EncodedKeySpec (Base64URL.decode (public_key_b64))));
+		s.initVerify ();
 		s.update (Base64URL.decode (b64_data));
 		return s.verify (Base64URL.decode (b64_signature_value));
 	}
