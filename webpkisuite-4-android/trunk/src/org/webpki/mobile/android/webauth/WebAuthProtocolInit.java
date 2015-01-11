@@ -168,7 +168,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
         if (success)
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // Successfully recieved the request, now show the domain name of the requester
+            // Successfully received the request, now show the domain name of the requester
             ///////////////////////////////////////////////////////////////////////////////////
             ((TextView) webauth_activity.findViewById (R.id.partyInfo)).setText (webauth_activity.getRequestingHost ());
             ((TextView)webauth_activity.findViewById (R.id.partyInfo)).setOnClickListener (new View.OnClickListener ()
