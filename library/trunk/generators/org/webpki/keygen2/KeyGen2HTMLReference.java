@@ -706,6 +706,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-08-08", "0.7", "First official release");
         json.addDocumentHistoryLine ("2014-12-08", "0.71", "Aligned KeyGen2 with the updated " + json.createReference (JSONBaseHTML.REF_SKS) + " and " + 
                                      json.createReference (JSONBaseHTML.REF_JCS) + " specifications");
+        json.addDocumentHistoryLine ("2015-01-12", "0.72", "Updated version to match ECDSA signature encoding change");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 

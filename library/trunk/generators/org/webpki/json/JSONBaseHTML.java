@@ -228,11 +228,11 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.57, December&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.58, January&nbsp;2015.</span>");
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V0.98, December 2014.</span>");
+            ", <span style=\"white-space: nowrap\">V0.99, January&nbsp;2015.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
@@ -1402,7 +1402,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("The signature value.").setNotes (reference ? 
+              .addString ("The signature data.")
+              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the XML DSig " +  createReference (REF_XMLDSIG) + " standard.":"")
+                       .setNotes (reference ? 
                    "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
                    ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" + 
