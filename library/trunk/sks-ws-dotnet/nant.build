@@ -113,6 +113,50 @@
            </imports>
           <code>
             <![CDATA[
+public static byte[] encodeSignature (byte[] concatendated_signature)
+{
+    int extend_to = concatendated_signature.Length / 2;
+    MemoryStream baos = new MemoryStream ();
+    for (int offset = 0; offset <= extend_to; offset += extend_to)
+    {
+        int l = extend_to;
+        int start = offset;
+        while (concatendated_signature[start] == 0x00)
+        {
+            start++;
+            l--;
+        }
+        bool add_zero = false;
+        if (concatendated_signature[start] > 127)
+        {
+            add_zero = true;
+            l++;
+        }
+        baos.WriteByte (0x02);
+        baos.WriteByte ((byte)l);
+        if (add_zero)
+        {
+            baos.WriteByte (0x00);
+        }
+        baos.Write (concatendated_signature, start, extend_to - start + offset);
+      }
+    byte[] body = baos.ToArray ();
+    baos = new MemoryStream ();
+    baos.WriteByte (0x30);
+    int length = body.Length;
+    if (length > 127)
+    {
+        baos.WriteByte (0x81);
+    }
+    baos.WriteByte ((byte)length);
+    baos.Write (body, 0, body.Length);
+    byte[] res = baos.ToArray ();
+ 
+ //   System.Console.WriteLine(org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders.Hex.ToHexString (res) + "\n" +
+ //                            org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders.Hex.ToHexString (concatendated_signature));
+    return res;
+}
+
 public static void ScriptMain(Project project)
 {
    try
@@ -156,7 +200,7 @@ public static void ScriptMain(Project project)
                 Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
                 verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
                 verify.BlockUpdate(test_string, 0, test_string.Length);
-                if (!verify.VerifySignature(res))
+                if (!verify.VerifySignature(rsa ? res : encodeSignature (res)))
                 {
                     throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
                 }
