@@ -261,8 +261,7 @@ import org.webpki.json.JSONSignatureDecoder;
               {
                 try
                   {
-                    return new SignatureWrapper (algorithm, public_key)
-                        .initSign (private_key)
+                    return new SignatureWrapper (algorithm, private_key)
                         .update (data)
                         .sign ();
                   }
