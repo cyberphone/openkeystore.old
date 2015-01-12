@@ -99,7 +99,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
           .append (json.createReference (JSONBaseHTML.REF_JSON))
           .append (" containing a <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property." + LINE_SEPARATOR +
             "Parsing restrictions:<ul>" +
-            "<li>The original property order <b>must</b> be <i>preserved</i>.</li>" +
+            "<li>The original property serialization order <b>must</b> be <i>preserved</i>.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "</ul>The normalization steps are as follows:<ul>" +
