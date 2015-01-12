@@ -116,7 +116,6 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                 byte[] signed_data = signature.substring (0, signature.lastIndexOf ('.')).getBytes ("UTF-8");
                 byte[] raw_signature = Base64URL.decode (signature.substring (signature.lastIndexOf ('.') + 1));
                 if (!new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, cert.getPublicKey ())
-                          .initVerify ()
                           .update (signed_data)
                           .verify (raw_signature))
                   {
