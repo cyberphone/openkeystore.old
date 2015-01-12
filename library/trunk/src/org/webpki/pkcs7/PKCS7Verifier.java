@@ -224,7 +224,6 @@ public class PKCS7Verifier
           }
         if (!new SignatureWrapper (getSignatureAlgorithm (), certpath[0].getPublicKey ())
                      .setECDSASignatureEncoding (true)
-                     .initVerify ()
                      .update (message)
                      .verify (signer_info.encrypted_digest))
           {

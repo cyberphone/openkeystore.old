@@ -17,10 +17,14 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
+
 import java.security.KeyFactory;
 import java.security.PublicKey;
+
+import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECParameterSpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.X509EncodedKeySpec;
@@ -422,21 +426,27 @@ public enum KeyAlgorithms implements SKSAlgorithms
       {
         return ec_parm_spec;
       }
+
+
+    public static KeyAlgorithms getECKeyAlgorithm (ECKey ec_key) throws IOException
+      {
+        EllipticCurve ec_curve = ec_key.getParams ().getCurve ();
+        for (KeyAlgorithms alg : values ())
+          {
+            if (alg.isECKey () && alg.ec_parm_spec.getCurve ().equals (ec_curve))
+              {
+                return alg;
+              }
+          }
+        throw new IOException ("Unknown EC curve: " + ec_curve.toString ());
+      }
  
 
     public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key, Boolean key_parameters) throws IOException
       {
         if (public_key instanceof ECPublicKey)
           {
-            EllipticCurve ec_curve = ((ECPublicKey) public_key).getParams ().getCurve ();
-            for (KeyAlgorithms alg : values ())
-              {
-                if (alg.isECKey () && alg.ec_parm_spec.getCurve ().equals (ec_curve))
-                  {
-                    return alg;
-                  }
-              }
-            throw new IOException ("Unknown EC curve: " + ec_curve.toString ());
+            return getECKeyAlgorithm ((ECPublicKey) public_key);
           }
         byte[] modblob = ((RSAPublicKey)public_key).getModulus ().toByteArray ();
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;

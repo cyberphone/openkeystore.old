@@ -58,6 +58,7 @@ import java.util.Vector;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -722,7 +723,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
                                                                   "SHA256WithRSA" : "SHA256WithECDSA",
                                          keyManagementKey)
-                           .initVerify ()
                            .update (kmkKdf)
                            .update (argument)
                            .verify (authorization);
@@ -804,8 +804,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             PrivateKey attester = getAttestationKey ();
             signer = new SignatureWrapper (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA",
-                                           getDeviceCertificatePath ()[0].getPublicKey ())
-                             .initSign (attester);
+                                           attester);
           }
   
         private byte[] short2bytes (int s)
@@ -885,26 +884,31 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         static final int LEADING_ZERO   = 0x00;
   
         Signature instance;
-        PublicKey publicKey;
+        boolean rsaFlag;
+        int extendTo;
   
         public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
           {
             instance = Signature.getInstance (algorithm);
-            this.publicKey = publicKey;
-          }
-  
-        public SignatureWrapper initVerify () throws GeneralSecurityException
-          {
             instance.initVerify (publicKey);
-            return this;
+            rsaFlag = publicKey instanceof RSAPublicKey;
+            if (!rsaFlag)
+              {
+                extendTo = getEcPointLength ((ECKey) publicKey);
+              }
           }
   
-        public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+        public SignatureWrapper (String algorithm, PrivateKey private_key) throws GeneralSecurityException
           {
+            instance = Signature.getInstance (algorithm);
             instance.initSign (private_key);
-            return this;
+            rsaFlag = private_key instanceof RSAPrivateKey;
+            if (!rsaFlag)
+              {
+                extendTo = getEcPointLength ((ECKey) private_key);
+              }
           }
-  
+ 
         public SignatureWrapper update (byte[] data) throws GeneralSecurityException
           {
             instance.update (data);
@@ -919,11 +923,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
   
         public boolean verify (byte[] signature) throws GeneralSecurityException
           {
-            if (publicKey instanceof RSAPublicKey)
+            if (rsaFlag)
               {
                 return instance.verify (signature);
               }
-            int extendTo = getEcPointLength ((ECKey) publicKey);
             ByteArrayOutputStream baos = new ByteArrayOutputStream ();
             for (int offset = 0; offset <= extendTo; offset += extendTo)
               {
@@ -971,11 +974,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte[] sign () throws GeneralSecurityException
           {
             byte[] signature = instance.sign ();
-            if (publicKey instanceof RSAPublicKey)
+            if (rsaFlag)
               {
                 return signature;
               }
-            int extendTo = getEcPointLength ((ECKey) publicKey);
             int index = 2;
             int length;
             byte[] integerPairs = new byte[extendTo << 1];
@@ -2207,8 +2209,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
-            return new SignatureWrapper (alg.jceName, keyEntry.publicKey)
-                           .initSign (keyEntry.privateKey)
+            return new SignatureWrapper (alg.jceName, keyEntry.privateKey)
                            .update (data)
                            .sign ();
           }

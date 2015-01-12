@@ -57,8 +57,7 @@ public class JCSSample
           {
             try
               {
-                return new SignatureWrapper (sign_alg, pub_key)
-                    .initSign (priv_key)
+                return new SignatureWrapper (sign_alg, priv_key)
                     .update (data)
                     .sign ();
               }

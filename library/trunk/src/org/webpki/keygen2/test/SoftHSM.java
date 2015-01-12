@@ -143,7 +143,6 @@ public class SoftHSM implements ServerCryptoInterface
                 if (!new SignatureWrapper (device_public_key instanceof RSAPublicKey ?
                                                   AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256, 
                                            device_public_key)
-                         .initVerify ()
                          .update (attestation_arguments)
                          .verify (session_attestation))
                   {
@@ -205,8 +204,7 @@ public class SoftHSM implements ServerCryptoInterface
           {
             return new SignatureWrapper (key_management__key instanceof RSAPublicKey ?
                                                   AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256,
-                                         key_management__key)
-                .initSign (key_management_keys.get (key_management__key))
+                                         key_management_keys.get (key_management__key))
                 .update (data)
                 .sign ();
           }

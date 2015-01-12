@@ -121,7 +121,6 @@ abstract class XMLVerifierCore
             // Check signature
             signature_algorithm = signature.signedinfo_object.asym_signature_alg;
             success = new SignatureWrapper (signature.signedinfo_object.asym_signature_alg, public_key)
-                              .initVerify ()
                               .update (sign_cn)
                               .verify (signature.signedinfo_object.signature_val);
           }

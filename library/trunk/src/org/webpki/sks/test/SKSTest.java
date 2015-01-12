@@ -324,12 +324,10 @@ public class SKSTest
           {
             byte[] result = key3.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, key3.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             verify = new SignatureWrapper (AsymSignatureAlgorithms.ECDSA_SHA256, key2.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }
@@ -841,12 +839,10 @@ public class SKSTest
               {
                 byte[] result = key2.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
                 SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, key2.getPublicKey ());
-                verify.initVerify ();
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature key2", verify.verify (result));
                 result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
                 verify = new SignatureWrapper (AsymSignatureAlgorithms.ECDSA_SHA256, key1.getPublicKey ());
-                verify.initVerify ();
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature key1", verify.verify (result));
               }
@@ -1246,7 +1242,6 @@ public class SKSTest
         sess.closeSession ();
         byte[] result = key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
         SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.ECDSA_SHA256, key.getPublicKey ());
-        verify.initVerify ();
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
         try
@@ -1283,13 +1278,11 @@ public class SKSTest
 
         byte[] result = key.signData (AsymSignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
         SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, key.getPublicKey ());
-        verify.initVerify ();
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
 
         result = key.signData (AsymSignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
         verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA1, key.getPublicKey ());
-        verify.initVerify ();
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
       }
@@ -1532,7 +1525,6 @@ public class SKSTest
           {
             byte[] result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.ECDSA_SHA256, key2.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
           }
@@ -1726,12 +1718,10 @@ public class SKSTest
           {
             byte[] result = key3.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, key3.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             verify = new SignatureWrapper (AsymSignatureAlgorithms.ECDSA_SHA256, key1.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }
@@ -2546,7 +2536,6 @@ public class SKSTest
                                                                                          enc), TEST_STRING));
             byte[] result = key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, key.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
             try
@@ -3571,7 +3560,6 @@ public class SKSTest
             GenKey tk = alg.isRSA () ? rsa : ec;
             byte[] result = tk.signData (alg, null, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (alg, tk.getPublicKey ());
-            verify.initVerify ();
             verify.update (TEST_STRING);
             assertTrue ("Bad signature " + alg.getURI (), verify.verify (result));
           }

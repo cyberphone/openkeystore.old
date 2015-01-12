@@ -82,13 +82,11 @@ public class KeyExperiments
                                                         : 
                        optional;
  
-        byte[] signature = new SignatureWrapper (sign_alg, kp.getPublic ())
-                                   .initSign (kp.getPrivate ())
+        byte[] signature = new SignatureWrapper (sign_alg, kp.getPrivate ())
                                    .update (data)
                                    .sign ();
 
         if (!new SignatureWrapper (sign_alg, kp.getPublic ())
-                     .initVerify ()
                      .update (data)
                      .verify (signature))
           {

@@ -24,6 +24,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -34,19 +36,14 @@ public class SignatureWrapper
     static final int ASN1_SEQUENCE = 0x30;
     static final int ASN1_INTEGER  = 0x02;
     
-    static final int LEADING_ZERO   = 0x00;
+    static final int LEADING_ZERO  = 0x00;
     
     boolean ecdsa_der_encoded;
 
-    public static byte[] decode (byte[] der_coded_signature, PublicKey public_key) throws IOException
+    public static byte[] decodeDEREncodedECDSASignature (byte[] der_coded_signature, int extend_to) throws IOException
       {
-        if (public_key instanceof RSAPublicKey)
-          {
-            return der_coded_signature;
-          }
         int index = 2;
         int length;
-        int extend_to = (KeyAlgorithms.getKeyAlgorithm (public_key).getPublicKeySizeInBits () + 7) / 8;
         byte[] concatendated_signature = new byte[extend_to << 1];
         if (der_coded_signature[0] != ASN1_SEQUENCE)
           {
@@ -88,13 +85,8 @@ public class SignatureWrapper
         return concatendated_signature;
       }
 
-    public static byte[] encode (byte[] concatendated_signature, PublicKey public_key) throws IOException
+    public static byte[] encodeDEREncodedECDSASignature (byte[] concatendated_signature, int extend_to) throws IOException
       {
-        if (public_key instanceof RSAPublicKey)
-          {
-            return concatendated_signature;
-          }
-        int extend_to = (KeyAlgorithms.getKeyAlgorithm (public_key).getPublicKeySizeInBits () + 7) / 8;
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         for (int offset = 0; offset <= extend_to; offset += extend_to)
           {
@@ -133,28 +125,34 @@ public class SignatureWrapper
       }
 
     Signature instance;
-    PublicKey public_key;
+    boolean rsa_flag;
+    int extend_to;
 
-    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key) throws GeneralSecurityException
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key) throws GeneralSecurityException, IOException
       {
         instance = Signature.getInstance (algorithm.getJCEName ());
-        this.public_key = public_key;
+        instance.initVerify (public_key);
+        rsa_flag = public_key instanceof RSAPublicKey;
+        if (!rsa_flag)
+          {
+            extend_to = (KeyAlgorithms.getECKeyAlgorithm ((ECKey)public_key).getPublicKeySizeInBits () + 7) / 8;
+          }
       }
+
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PrivateKey private_key) throws GeneralSecurityException, IOException
+      {
+        instance = Signature.getInstance (algorithm.getJCEName ());
+        instance.initSign (private_key);
+        rsa_flag = private_key instanceof RSAPrivateKey;
+        if (!rsa_flag)
+          {
+            extend_to = (KeyAlgorithms.getECKeyAlgorithm ((ECKey)private_key).getPublicKeySizeInBits () + 7) / 8;
+          }
+      }
+
     public SignatureWrapper setECDSASignatureEncoding (boolean der_encoded)
       {
         ecdsa_der_encoded = der_encoded;
-        return this;
-      }
-
-    public SignatureWrapper initVerify () throws GeneralSecurityException
-      {
-        instance.initVerify (public_key);
-        return this;
-      }
-
-    public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
-      {
-        instance.initSign (private_key);
         return this;
       }
 
@@ -172,11 +170,13 @@ public class SignatureWrapper
 
     public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
       {
-        return instance.verify (ecdsa_der_encoded ? signature : SignatureWrapper.encode (signature, public_key));
+        return instance.verify (ecdsa_der_encoded || rsa_flag ?
+                                                    signature : SignatureWrapper.encodeDEREncodedECDSASignature (signature,extend_to));
       }
 
     public byte[] sign () throws GeneralSecurityException, IOException
       {
-        return ecdsa_der_encoded ? instance.sign () : SignatureWrapper.decode (instance.sign (), public_key);
+        return ecdsa_der_encoded || rsa_flag ? 
+                            instance.sign () : SignatureWrapper.decodeDEREncodedECDSASignature (instance.sign (), extend_to);
       }
   }

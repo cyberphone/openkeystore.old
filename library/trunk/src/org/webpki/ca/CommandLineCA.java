@@ -256,9 +256,8 @@ public class CommandLineCA
           {
              try
               {
-                return new SignatureWrapper (certalg, public_key)
+                return new SignatureWrapper (certalg, sign_key)
                     .setECDSASignatureEncoding (true)
-                    .initSign (sign_key)
                     .update (data)
                     .sign ();
               }

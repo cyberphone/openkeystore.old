@@ -22,7 +22,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
@@ -33,7 +35,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -41,18 +45,21 @@ import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -102,24 +109,29 @@ public class SEReferenceImplementation
         static final int LEADING_ZERO   = 0x00;
   
         Signature instance;
-        PublicKey publicKey;
+        boolean rsaFlag;
+        int extendTo;
   
         public SignatureWrapper (String algorithm, PublicKey publicKey) throws GeneralSecurityException
           {
             instance = Signature.getInstance (algorithm);
-            this.publicKey = publicKey;
-          }
-  
-        public SignatureWrapper initVerify () throws GeneralSecurityException
-          {
             instance.initVerify (publicKey);
-            return this;
+            rsaFlag = publicKey instanceof RSAPublicKey;
+            if (!rsaFlag)
+              {
+                extendTo = getEcPointLength ((ECKey) publicKey);
+              }
           }
   
-        public SignatureWrapper initSign (PrivateKey private_key) throws GeneralSecurityException
+        public SignatureWrapper (String algorithm, PrivateKey private_key) throws GeneralSecurityException
           {
+            instance = Signature.getInstance (algorithm);
             instance.initSign (private_key);
-            return this;
+            rsaFlag = private_key instanceof RSAPrivateKey;
+            if (!rsaFlag)
+              {
+                extendTo = getEcPointLength ((ECKey) private_key);
+              }
           }
   
         public SignatureWrapper update (byte[] data) throws GeneralSecurityException
@@ -136,11 +148,10 @@ public class SEReferenceImplementation
   
         public boolean verify (byte[] signature) throws GeneralSecurityException
           {
-            if (publicKey instanceof RSAPublicKey)
+            if (rsaFlag)
               {
                 return instance.verify (signature);
               }
-            int extendTo = getEcPointLength ((ECKey) publicKey);
             ByteArrayOutputStream baos = new ByteArrayOutputStream ();
             for (int offset = 0; offset <= extendTo; offset += extendTo)
               {
@@ -188,11 +199,10 @@ public class SEReferenceImplementation
         byte[] sign () throws GeneralSecurityException
           {
             byte[] signature = instance.sign ();
-            if (publicKey instanceof RSAPublicKey)
+            if (rsaFlag)
               {
                 return signature;
               }
-            int extendTo = getEcPointLength ((ECKey) publicKey);
             int index = 2;
             int length;
             byte[] integerPairs = new byte[extendTo << 1];
@@ -1072,8 +1082,7 @@ public class SEReferenceImplementation
           {
             PrivateKey attester = getAttestationKey ();
             signer = new SignatureWrapper (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA",
-                                           getDeviceCertificatePath ()[0].getPublicKey ())
-                             .initSign (attester);
+                                           attester);
           }
   
         private byte[] short2bytes (int s)
@@ -1190,7 +1199,6 @@ public class SEReferenceImplementation
         return new SignatureWrapper (keyManagementKey instanceof RSAPublicKey ? 
                                                               "SHA256WithRSA" : "SHA256WithECDSA",
                                      keyManagementKey)
-            .initVerify ()
             .update (kmkKdf)
             .update (argument)
             .verify (authorization);
@@ -1496,7 +1504,6 @@ public class SEReferenceImplementation
     public static byte[] executeSignHash (byte[] osInstanceKey,
                                           byte[] sealedKey,
                                           int keyHandle,
-                                          PublicKey publicKey,
                                           String algorithm,
                                           byte[] parameters,
                                           byte[] data) throws SKSException
@@ -1529,8 +1536,7 @@ public class SEReferenceImplementation
               {
                 data = addArrays (alg.pkcs1DigestInfo, data);
               }
-            return new SignatureWrapper (alg.jceName, publicKey)
-                .initSign (unwrappedKey.privateKey)
+            return new SignatureWrapper (alg.jceName, unwrappedKey.privateKey)
                 .update (data)
                 .sign ();
           }

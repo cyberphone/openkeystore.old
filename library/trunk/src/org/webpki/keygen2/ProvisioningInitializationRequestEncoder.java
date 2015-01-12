@@ -83,7 +83,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
                     new SignatureWrapper (key_management_key instanceof RSAPublicKey ? 
                                                   AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256,
                                           key_management_key);
-                kmk_verify.initVerify ();
                 kmk_verify.update (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION);
                 kmk_verify.update (this.key_management_key.getEncoded ());
                 if (!kmk_verify.verify (external_authorization))

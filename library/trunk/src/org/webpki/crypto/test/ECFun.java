@@ -75,12 +75,10 @@ public class ECFun
     
     private static void performOneOp (PublicKey publicKey, PrivateKey privateKey, AsymSignatureAlgorithms algorithm) throws Exception
       {
-        SignatureWrapper sign = new SignatureWrapper (algorithm, publicKey).setECDSASignatureEncoding (ecdsa_der);
-        sign.initSign (privateKey);
+        SignatureWrapper sign = new SignatureWrapper (algorithm, privateKey).setECDSASignatureEncoding (ecdsa_der);
         sign.update (DATA);
         byte[] signature = sign.sign ();
         SignatureWrapper ver = new SignatureWrapper (algorithm, publicKey).setECDSASignatureEncoding (ecdsa_der);
-        ver.initVerify ();
         ver.update (DATA);
         if (!ver.verify (signature))
           {

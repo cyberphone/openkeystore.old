@@ -154,8 +154,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
         try
           {
             return new SignatureWrapper (algorithm,
-                                         signer_cert_keystore.getCertificate (key_alias).getPublicKey ())
-               .initSign (private_key).setECDSASignatureEncoding (ecdsa_der_encoded)
+                                         private_key).setECDSASignatureEncoding (ecdsa_der_encoded)
                .update (data)
                .sign ();
           }

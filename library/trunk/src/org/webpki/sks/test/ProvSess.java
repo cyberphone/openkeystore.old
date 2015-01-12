@@ -164,7 +164,6 @@ public class ProvSess
         
                     // Verify that the session key signature was signed by the device key
                     SignatureWrapper verifier = new SignatureWrapper (signature_algorithm, device_public_key);
-                    verifier.initVerify ();
                     verifier.update (attestation_arguments);
                     if (!verifier.verify (session_attestation))
                       {
@@ -221,8 +220,8 @@ public class ProvSess
             try
               {
                 SignatureWrapper km_sign = new SignatureWrapper (key_management_key instanceof RSAPublicKey ?
-                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256, key_management_key);
-                km_sign.initSign (key_management_keys.get (key_management_key));
+                                                                         AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256, 
+                                                                 key_management_keys.get (key_management_key));
                 km_sign.update (data);
                 return km_sign.sign ();
               }

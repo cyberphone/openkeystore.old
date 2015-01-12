@@ -319,7 +319,6 @@ public class JSONSignatureDecoder implements Serializable
         try
           {
             checkVerification (new SignatureWrapper ((AsymSignatureAlgorithms) algorithm, public_key)
-                                   .initVerify ()
                                    .update (normalized_data)
                                    .verify (signature_value));
           }

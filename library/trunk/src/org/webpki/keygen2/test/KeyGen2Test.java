@@ -1365,8 +1365,7 @@ public class KeyGen2Test
                             {
                               try
                                 {
-                                  return new SignatureWrapper (algorithm, getPublicKey ())
-                                      .initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()))
+                                  return new SignatureWrapper (algorithm, (PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()))
                                       .update (data)
                                       .sign ();
                                 }
@@ -1859,7 +1858,6 @@ public class KeyGen2Test
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 assertTrue ("Bad signature",
                             new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
-                                 .initVerify ()
                                  .update (TEST_STRING)
                                  .verify (result));
               }
@@ -1889,7 +1887,6 @@ public class KeyGen2Test
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
         assertTrue ("Bad signature",
                     new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
-                        .initVerify ()
                         .update (TEST_STRING)
                         .verify (result));
       }
@@ -1918,7 +1915,6 @@ public class KeyGen2Test
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
         assertTrue ("Bad signature",
                     new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, ka.getCertificatePath ()[0].getPublicKey ())
-                        .initVerify ()
                         .update (TEST_STRING)
                         .verify (result));
       }
@@ -1958,8 +1954,7 @@ public class KeyGen2Test
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        SignatureWrapper sign = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, doer.server.gen_public_key);
-        sign.initSign (doer.server.gen_private_key);
+        SignatureWrapper sign = new SignatureWrapper (AsymSignatureAlgorithms.RSA_SHA256, doer.server.gen_private_key);
         sign.update (TEST_STRING);
         assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));
       }
