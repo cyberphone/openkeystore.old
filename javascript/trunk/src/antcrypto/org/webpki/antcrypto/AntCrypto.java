@@ -91,7 +91,6 @@ public class AntCrypto
 		SignatureWrapper s = new SignatureWrapper (asym_alg,
 		                                           KeyFactory.getInstance (asym_alg.isRSA () ? "RSA" : "EC")
 		                                .generatePublic (new X509EncodedKeySpec (Base64URL.decode (public_key_b64))));
-		s.initVerify ();
 		s.update (Base64URL.decode (b64_data));
 		return s.verify (Base64URL.decode (b64_signature_value));
 	}
