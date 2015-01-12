@@ -171,7 +171,7 @@ public class SignatureWrapper
     public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
       {
         return instance.verify (ecdsa_der_encoded || rsa_flag ?
-                                                    signature : SignatureWrapper.encodeDEREncodedECDSASignature (signature,extend_to));
+                                                    signature : SignatureWrapper.encodeDEREncodedECDSASignature (signature, extend_to));
       }
 
     public byte[] sign () throws GeneralSecurityException, IOException
