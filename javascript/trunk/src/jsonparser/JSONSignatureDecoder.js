@@ -107,7 +107,7 @@ org.webpki.json.JSONSignatureDecoder.SUBJECT_JSON               = "subject";
 
 org.webpki.json.JSONSignatureDecoder.TYPE_JSON                  = "type";
 
-org.webpki.json.JSONSignatureDecoder.URL_JSON                   = "url";
+org.webpki.json.JSONSignatureDecoder.PEM_URL_JSON               = "pemUrl";
 
 org.webpki.json.JSONSignatureDecoder.VERSION_JSON               = "version";
 
