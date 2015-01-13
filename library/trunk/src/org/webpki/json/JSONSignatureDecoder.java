@@ -85,7 +85,7 @@ public class JSONSignatureDecoder implements Serializable
     
     public static final String TYPE_JSON                  = "type";
 
-    public static final String URL_JSON                   = "url";
+    public static final String PEM_URL_JSON               = "pemUrl";
     
     public static final String VALUE_JSON                 = "value";
     
@@ -176,9 +176,9 @@ public class JSONSignatureDecoder implements Serializable
           {
             public_key = getPublicKey (rd);
           }
-        else if (rd.hasProperty (URL_JSON))
+        else if (rd.hasProperty (PEM_URL_JSON))
           {
-            throw new IOException ("\"" + URL_JSON + "\" not yet implemented");
+            throw new IOException ("\"" + PEM_URL_JSON + "\" not yet implemented");
           }
         else
           {

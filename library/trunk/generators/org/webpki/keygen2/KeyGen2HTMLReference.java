@@ -648,7 +648,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     " a compliant implementation <b>must not</b> accept JOSE " +  json.createReference (JSONBaseHTML.REF_JOSE) + 
                                     " algorithm identifiers since these are not natively supported by the target. See " + json.createReference (JSONBaseHTML.REF_SKS) + 
                                     " <i>Algorithm Support</i>." + LINE_SEPARATOR +
-                                    "In addition, the JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + JSONSignatureDecoder.URL_JSON + "</code> " +
+                                    "In addition, the JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code> " +
                                     "properties <b>must not</b> be featured in KeyGen2 messages either." + LINE_SEPARATOR +
                                     "This document only refers to the required JCS properties.");
 

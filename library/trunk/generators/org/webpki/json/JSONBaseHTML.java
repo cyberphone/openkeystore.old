@@ -1329,8 +1329,8 @@ public class JSONBaseHTML
             row_interface = row_interface
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureDecoder.URL_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.URL_JSON)
+              .addProperty (JSONSignatureDecoder.PEM_URL_JSON)
+              .addSymbolicValue (JSONSignatureDecoder.PEM_URL_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.URI)
             .newColumn ()
@@ -1407,7 +1407,7 @@ public class JSONBaseHTML
                        .setNotes (reference ? 
                    "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
-                   ", <code>" + JSONSignatureDecoder.URL_JSON + "</code>" + 
+                   ", <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code>" + 
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
                    "</code> property since the key may be given by the context." : null);
 
