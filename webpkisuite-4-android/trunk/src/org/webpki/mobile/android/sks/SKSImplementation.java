@@ -43,7 +43,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.EllipticCurve;
+import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -94,7 +94,7 @@ import android.util.Log;
  */
 public class SKSImplementation implements SKSError, SecureKeyStore, Serializable, GrantInterface
   {
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 6L;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS version and configuration data
@@ -1033,11 +1033,11 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static class Algorithm implements Serializable
       {
         private static final long serialVersionUID = 1L;
-  
+
         int mask;
         String jceName;
         byte[] pkcs1DigestInfo;
-        EllipticCurve curve;
+        ECParameterSpec ecParameterSpec;
         int ecPointLength;
         
         void addEcCurve (int ecPointLength, byte[] samplePublicKey)
@@ -1045,9 +1045,9 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             this.ecPointLength = ecPointLength;
             try
               {
-                curve = ((ECPublicKey) KeyFactory.getInstance ("EC")
+                ecParameterSpec = ((ECPublicKey) KeyFactory.getInstance ("EC")
                            .generatePublic (
-                              new X509EncodedKeySpec (samplePublicKey))).getParams ().getCurve ();
+                              new X509EncodedKeySpec (samplePublicKey))).getParams ();
               }
             catch (Exception e)
               {
@@ -1470,8 +1470,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
       {
         for (String uri : supportedAlgorithms.keySet ())
           {
-            EllipticCurve curve = supportedAlgorithms.get (uri).curve;
-            if (curve != null && ecKey.getParams ().getCurve ().equals (curve))
+            ECParameterSpec ecParameterSpec = supportedAlgorithms.get (uri).ecParameterSpec;
+            if (ecParameterSpec != null && ecKey.getParams ().getCurve ().equals (ecParameterSpec.getCurve ()))
               {
                 return supportedAlgorithms.get (uri);
               }
