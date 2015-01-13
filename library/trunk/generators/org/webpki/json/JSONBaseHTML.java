@@ -1355,7 +1355,7 @@ public class JSONBaseHTML
           .addString (option)
           .addString ("Sorted array of X.509 ")
           .addString (createReference (REF_X509))
-          .addString (" certificates in DER format, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+          .addString (" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
       .newRow ()
         .newColumn ()
