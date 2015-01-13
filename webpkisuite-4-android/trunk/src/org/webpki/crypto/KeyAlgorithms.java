@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 
-import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
