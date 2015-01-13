@@ -428,9 +428,9 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
 
-    public static KeyAlgorithms getECKeyAlgorithm (ECKey ec_key) throws IOException
+    public static KeyAlgorithms getECKeyAlgorithm (ECParameterSpec ec_parameters) throws IOException
       {
-        EllipticCurve ec_curve = ec_key.getParams ().getCurve ();
+        EllipticCurve ec_curve = ec_parameters.getCurve ();
         for (KeyAlgorithms alg : values ())
           {
             if (alg.isECKey () && alg.ec_parm_spec.getCurve ().equals (ec_curve))
@@ -446,7 +446,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
       {
         if (public_key instanceof ECPublicKey)
           {
-            return getECKeyAlgorithm ((ECPublicKey) public_key);
+            return getECKeyAlgorithm (((ECPublicKey) public_key).getParams ());
           }
         byte[] modblob = ((RSAPublicKey)public_key).getModulus ().toByteArray ();
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;

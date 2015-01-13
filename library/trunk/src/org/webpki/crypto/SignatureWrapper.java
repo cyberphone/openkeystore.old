@@ -28,6 +28,8 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import java.security.spec.ECParameterSpec;
+
 /**
  * Wrapper over java.security.Signature
  */
@@ -39,9 +41,15 @@ public class SignatureWrapper
     static final int LEADING_ZERO  = 0x00;
     
     boolean ecdsa_der_encoded;
-
-    public static byte[] decodeDEREncodedECDSASignature (byte[] der_coded_signature, int extend_to) throws IOException
+    
+    private static int getExtendTo (ECParameterSpec ec_parameters) throws IOException
       {
+        return (KeyAlgorithms.getECKeyAlgorithm (ec_parameters).getPublicKeySizeInBits () + 7) / 8;
+      }
+    
+    public static byte[] decodeDEREncodedECDSASignature (byte[] der_coded_signature, ECParameterSpec ec_parameters) throws IOException
+      {
+        int extend_to = getExtendTo (ec_parameters);
         int index = 2;
         int length;
         byte[] concatendated_signature = new byte[extend_to << 1];
@@ -85,8 +93,9 @@ public class SignatureWrapper
         return concatendated_signature;
       }
 
-    public static byte[] encodeDEREncodedECDSASignature (byte[] concatendated_signature, int extend_to) throws IOException
+    public static byte[] encodeDEREncodedECDSASignature (byte[] concatendated_signature, ECParameterSpec ec_parameters) throws IOException
       {
+        int extend_to = getExtendTo (ec_parameters);
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         for (int offset = 0; offset <= extend_to; offset += extend_to)
           {
@@ -126,7 +135,7 @@ public class SignatureWrapper
 
     Signature instance;
     boolean rsa_flag;
-    int extend_to;
+    ECParameterSpec ec_parameters;
 
     public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key) throws GeneralSecurityException, IOException
       {
@@ -135,7 +144,7 @@ public class SignatureWrapper
         rsa_flag = public_key instanceof RSAPublicKey;
         if (!rsa_flag)
           {
-            extend_to = (KeyAlgorithms.getECKeyAlgorithm ((ECKey)public_key).getPublicKeySizeInBits () + 7) / 8;
+            ec_parameters = ((ECKey)public_key).getParams ();
           }
       }
 
@@ -146,7 +155,7 @@ public class SignatureWrapper
         rsa_flag = private_key instanceof RSAPrivateKey;
         if (!rsa_flag)
           {
-            extend_to = (KeyAlgorithms.getECKeyAlgorithm ((ECKey)private_key).getPublicKeySizeInBits () + 7) / 8;
+            ec_parameters = ((ECKey)private_key).getParams ();
           }
       }
 
@@ -171,12 +180,12 @@ public class SignatureWrapper
     public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
       {
         return instance.verify (ecdsa_der_encoded || rsa_flag ?
-                                                    signature : SignatureWrapper.encodeDEREncodedECDSASignature (signature, extend_to));
+                                                    signature : SignatureWrapper.encodeDEREncodedECDSASignature (signature, ec_parameters));
       }
 
     public byte[] sign () throws GeneralSecurityException, IOException
       {
         return ecdsa_der_encoded || rsa_flag ? 
-                            instance.sign () : SignatureWrapper.decodeDEREncodedECDSASignature (instance.sign (), extend_to);
+                            instance.sign () : SignatureWrapper.decodeDEREncodedECDSASignature (instance.sign (), ec_parameters);
       }
   }
