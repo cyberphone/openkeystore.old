@@ -91,9 +91,9 @@ public class JSONBaseHTML
 
     public static final String REF_WEBIDL              = "WEBIDL";
     
-    public static final String JCS_PUBLIC_KEY_RSA      = "publicKey [RSA]";
+    public static final String JCS_PUBLIC_KEY_RSA      = "publicKey RSA";
 
-    public static final String JCS_PUBLIC_KEY_EC       = "publicKey [EC]";
+    public static final String JCS_PUBLIC_KEY_EC       = "publicKey EC";
 
     String file_name;
     String subsystem_name;
