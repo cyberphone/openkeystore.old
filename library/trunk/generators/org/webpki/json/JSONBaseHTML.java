@@ -1279,6 +1279,7 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (option)
               .addString ("Signature object version identifier.")
+              .addString (reference ?" For future revisions of JCS, this property would be mandatory." : "")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.ALGORITHM_JSON)
