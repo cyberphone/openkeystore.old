@@ -245,7 +245,7 @@ public class JSONBaseHTML
        addReferenceEntry (REF_JOSE,
             "M. Jones, et al, Work in progress, " +
             externalWebReference ("https://ietf.org/wg/jose/") +
-            ", <span style=\"white-space: nowrap\">October&nbsp;2014.</span>");
+            ", <span style=\"white-space: nowrap\">January&nbsp;2015.</span>");
 
         addReferenceEntry (REF_X509,
             "D. Cooper, S. Santesson, S. Farrell, S. Boeyen, " +
@@ -1277,8 +1277,8 @@ public class JSONBaseHTML
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString (jcs)
-              .addString ("<i>Optional</i> signature object version identifier.")
+              .addString (option)
+              .addString ("Signature object version identifier.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.ALGORITHM_JSON)
@@ -1366,8 +1366,8 @@ public class JSONBaseHTML
         .newColumn ()
           .setUsage (false)
         .newColumn ()
-          .addString (jcs)
-          .addString ("<i>Optional</i> signature certificate attribute data for usage with the <code>" +
+          .addString (option)
+          .addString ("Signature certificate attribute data for usage with the <code>" +
                       JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
                       "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
                       "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
@@ -1387,8 +1387,8 @@ public class JSONBaseHTML
                 .newColumn ()
                   .setUsage (false)
                 .newColumn ()
-                  .addString (jcs)
-                  .addString ("<i>Optional</i> array holding custom extension objects like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
+                  .addString (option)
+                  .addString ("Array holding custom extension objects like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
                               "A conforming implementation <b>must</b> reject extensions that are not recognized.")
                   .addString (extension_option);
           }
