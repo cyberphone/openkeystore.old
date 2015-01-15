@@ -920,29 +920,15 @@ public class JSONTest
         }
     };
     
-    @Test(expected = Exception.class)
-    public void KeyErrors () throws Exception
-      {
-        badSignature (BAD_SIGNATURE.ECAlg);
-        badSignature (BAD_SIGNATURE.IncorrectNormalization);
-     }
-
     @Test
     public void Signatures () throws Exception
       {
-        badSignature (BAD_SIGNATURE.PathOrder);
-        badSignature (BAD_SIGNATURE.JustFine);
-        badSignature (BAD_SIGNATURE.NoSignature);
-        badSignature (BAD_SIGNATURE.ExtraData);
-        badSignature (BAD_SIGNATURE.ExtensionTest1);
-        badSignature (BAD_SIGNATURE.ExtensionTest2);
-        badSignature (BAD_SIGNATURE.Verify);
-        badSignature (BAD_SIGNATURE.Certificate1);
-        badSignature (BAD_SIGNATURE.Certificate2);
-        badSignature (BAD_SIGNATURE.KeyId);
-        badSignature (BAD_SIGNATURE.DataAtEnd);
-        badSignature (BAD_SIGNATURE.MissingKey);
+        for (BAD_SIGNATURE test : BAD_SIGNATURE.values ())
+          {
+            badSignature (test);
+          }
       }
+
     @Test
     public void Whitespace () throws Exception
       {
@@ -1025,17 +1011,17 @@ public class JSONTest
           }
         byte[] normalized = ow.serializeJSONObject (test == BAD_SIGNATURE.IncorrectNormalization ? 
                                                                   JSONOutputFormats.PRETTY_PRINT : JSONOutputFormats.NORMALIZED);
-        byte[] value = signer.signData (normalized, signAlg);
-        if (test != BAD_SIGNATURE.NoSignature)
-          {
-            signature.setBinary (JSONSignatureDecoder.VALUE_JSON, value);
-          }
-        byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
-//        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
         try
           {
+            byte[] value = signer.signData (normalized, signAlg);
+            if (test != BAD_SIGNATURE.NoSignature)
+              {
+                signature.setBinary (JSONSignatureDecoder.VALUE_JSON, value);
+              }
+            byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
+    //        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
             JSONSignatureDecoder dec = JSONParser.parse (json).getSignature ();
-            assertTrue ("KID1", dec.getKeyId () == null ^ test == BAD_SIGNATURE.KeyId);
+            assertTrue ("KID1", dec.getKeyId () == null ^ (test == BAD_SIGNATURE.KeyId || test == BAD_SIGNATURE.KeyId2));
             if (test == BAD_SIGNATURE.KeyId)
               {
                 assertTrue ("KID2", dec.getKeyId ().equals ("MyKey"));
