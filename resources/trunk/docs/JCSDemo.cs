@@ -66,7 +66,7 @@ class JCSDemo
         return Convert.FromBase64String(s); // Standard base64 decoder
     }
 
-    public static byte[] createJcs(ECDsaCng ecKey, Dictionary<String, Object> document)
+    public static string createJcs(ECDsaCng ecKey, Dictionary<String, Object> document)
     {
         // Add signature object
         Dictionary<String, Object> signature = new Dictionary<String, Object>();
@@ -84,7 +84,7 @@ class JCSDemo
         publicKey[Y_JSON] = base64urlencode(coordinate);
         ecKey.HashAlgorithm = CngAlgorithm.Sha256;
         signature[VALUE_JSON] = base64urlencode(ecKey.SignData(Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(document))));
-        return Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(document));
+        return new JavaScriptSerializer().Serialize(document);
     }
 
     public static bool validateJcs(Dictionary<String, Object> document)
@@ -133,9 +133,9 @@ class JCSDemo
         // Use a P-521 ECDSA key for signing
         using (ECDsaCng ecKey = new ECDsaCng(521))
         {
-            byte[] documentUtf8 = createJcs(ecKey, document);
-            Console.WriteLine("Signed JSON Document:\n" + Encoding.UTF8.GetString(documentUtf8));
-            Console.WriteLine("\nVerified=" + validateJcs(new JavaScriptSerializer().Deserialize<Dictionary<String, Object>>(Encoding.UTF8.GetString(documentUtf8))));
+            string json = createJcs(ecKey, document);
+            Console.WriteLine("Signed JSON Document:\n" + json);
+            Console.WriteLine("\nVerified=" + validateJcs(new JavaScriptSerializer().Deserialize<Dictionary<String, Object>>(json)));
         }
     }
 }
