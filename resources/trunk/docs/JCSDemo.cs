@@ -107,16 +107,19 @@ class JCSDemo
         byte[] rawKey = new byte[140]; rawKey[0] = 69; rawKey[1] = 67; rawKey[2] = 83; rawKey[3] = 53; rawKey[4] = 66;
         Buffer.BlockCopy(base64urldecode((string)publicKey[X_JSON]), 0, rawKey, 8, 66);
         Buffer.BlockCopy(base64urldecode((string)publicKey[Y_JSON]), 0, rawKey, 74, 66);
-        byte[] value = base64urldecode((string)signature[VALUE_JSON]);
+
+        // Normalization: Remove signature/value from the document
         signature.Remove(VALUE_JSON);
+
+        // Normalization: The rest is what we consider signable
         byte[] data = Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(document));
 
-        // Note: we don't want signature validation to modify the document!
+        // However, we don't want signature validation to modify the document!
         document[SIGNATURE_JSON] = signatureClone;
         using (ECDsaCng ecKey = new ECDsaCng(CngKey.Import(rawKey, CngKeyBlobFormat.EccPublicBlob)))
         {
             ecKey.HashAlgorithm = CngAlgorithm.Sha256;
-            return ecKey.VerifyData(data, value);
+            return ecKey.VerifyData(data, base64urldecode((string)signatureClone[VALUE_JSON]));
         }
     }
 
