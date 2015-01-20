@@ -1410,7 +1410,7 @@ public class JSONBaseHTML
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
                    ", <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code>" + 
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
-                   "</code> property since the key may be given by the context." : null);
+                   "</code> property since the key may be given by the context or through the <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code> property." : null);
 
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newRow ()
