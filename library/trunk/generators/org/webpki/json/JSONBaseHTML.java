@@ -1404,7 +1404,7 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("The signature data.")
-              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the XML DSig " +  createReference (REF_XMLDSIG) + " standard.":"")
+              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the JOSE " +  createReference (REF_JOSE) + " specifications.":"")
                        .setNotes (reference ? 
                    "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
