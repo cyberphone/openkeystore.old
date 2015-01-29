@@ -53,7 +53,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "Compared to its XML counterpart JCS is quite primitive but on the other hand it has proved to be " +
             "simple to implement and use.  That is, JCS follows the &quot;spirit&quot; of JSON." +
             Types.LINE_SEPARATOR +
-            "Unlike for example IETF's JWS ")
+            "Unlike IETF's JWS ")
           .append (json.createReference (JSONBaseHTML.REF_JOSE))
           .append (
             ", <i>JCS was designed to be an integral part of a JSON object</i> " +
@@ -62,7 +62,13 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "cleartext data at least have an advantage for documentation and debugging. " +
             "To cope with the primary drawback (the potential dependency on " +
             "canonicalization), this part has been extremely simplified. "+
-            "In fact, JCS only relies on <i>predictable serialization</i> of JSON data.");
+            "In fact, JCS only relies on <i>predictable serialization</i> of JSON data." + Types.LINE_SEPARATOR +
+            "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
+          .append (json.createReference (JSONBaseHTML.REF_JOSE))
+          .append (", JCS supports the same algorithms, curve names, signature blob representation, and public key objects. " +
+            "The only crypto object that differs is JWS's &quot;<code>x5c</code>&quot; since it (for historical reasons), uses base64 ")
+          .append (json.createReference (JSONBaseHTML.REF_BASE64))
+          .append (" rather than base64url encoding.");
 
         json.addParagraphObject ("Sample Signature").append (
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
