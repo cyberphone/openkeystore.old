@@ -64,6 +64,8 @@
         <exclude name="**/kg2xml/**"/>
         <exclude name="**/wasp/**"/>
         <exclude name="**/xml/**"/>
+        <exclude name="**/crypto/**"/>
+        <exclude name="**/util/**"/>
         <exclude name="**/xmldsig/**"/>
         <exclude name="**/xmlenc/**"/>
         <exclude name="**/pdf/**"/>
@@ -81,7 +83,37 @@
         <exclude name="**/webauth/*RequestEncoder.java"/>
         <exclude name="**/webauth/*ResponseDecoder.java"/>
       </fileset>
-    </copy>
+      <fileset dir="${webpki_src_dir}/org/webpki">
+        <include name="**/util/ISODateTime.java"/>
+        <include name="**/util/DebugFormatter.java"/>
+        <include name="**/util/ArrayUtil.java"/>
+        <include name="**/util/StringUtil.java"/>
+        <include name="**/util/Base64URL.java"/>
+        <include name="**/util/HTMLEncoder.java"/>
+        <include name="**/crypto/KeyStoreReader.java"/>
+        <include name="**/crypto/KeyContainerTypes.java"/>
+        <include name="**/crypto/CertificateFilter.java"/>
+        <include name="**/crypto/CertificateUtil.java"/>
+        <include name="**/crypto/CertificateInfo.java"/>
+        <include name="**/crypto/CertificateExtensions.java"/>
+        <include name="**/crypto/ExtendedKeyUsages.java"/>
+        <include name="**/crypto/DeviceID.java"/>
+        <include name="**/crypto/KeyUsageBits.java"/>
+        <include name="**/crypto/VerifierInterface.java"/>
+        <include name="**/crypto/SymKeyVerifierInterface.java"/>
+        <include name="**/crypto/SignerInterface.java"/>
+        <include name="**/crypto/AsymKeySignerInterface.java"/>
+        <include name="**/crypto/SymKeySignerInterface.java"/>
+        <include name="**/crypto/SKSAlgorithms.java"/>
+        <include name="**/crypto/KeyAlgorithms.java"/>
+        <include name="**/crypto/MACAlgorithms.java"/>
+        <include name="**/crypto/HashAlgorithms.java"/>
+        <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AsymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SignatureWrapper.java"/>
+      </fileset>
+      </copy>
 
     <replaceregexp file="${temp_dir}/org/webpki/crypto/KeyStoreReader.java"
         match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
