@@ -20,13 +20,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Signature;
 
 import java.security.interfaces.ECKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.RSAKey;
 
 import java.security.spec.ECParameterSpec;
 
@@ -136,27 +137,37 @@ public class SignatureWrapper
     Signature instance;
     boolean rsa_flag;
     ECParameterSpec ec_parameters;
+    
+    private SignatureWrapper (AsymSignatureAlgorithms algorithm, String provider, Key key) throws GeneralSecurityException, IOException
+      {
+        instance = provider == null ? Signature.getInstance (algorithm.getJCEName ()) : Signature.getInstance (algorithm.getJCEName (), provider);
+        rsa_flag = key instanceof RSAKey;
+        if (!rsa_flag)
+          {
+            ec_parameters = ((ECKey)key).getParams ();
+          }
+      }
+
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key, String provider) throws GeneralSecurityException, IOException
+      {
+        this (algorithm, provider, public_key);
+        instance.initVerify (public_key);
+      }
 
     public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key) throws GeneralSecurityException, IOException
       {
-        instance = Signature.getInstance (algorithm.getJCEName ());
-        instance.initVerify (public_key);
-        rsa_flag = public_key instanceof RSAPublicKey;
-        if (!rsa_flag)
-          {
-            ec_parameters = ((ECKey)public_key).getParams ();
-          }
+        this (algorithm, public_key, null);
+      }
+
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PrivateKey private_key, String provider) throws GeneralSecurityException, IOException
+      {
+        this (algorithm, provider, private_key);
+        instance.initSign (private_key);
       }
 
     public SignatureWrapper (AsymSignatureAlgorithms algorithm, PrivateKey private_key) throws GeneralSecurityException, IOException
       {
-        instance = Signature.getInstance (algorithm.getJCEName ());
-        instance.initSign (private_key);
-        rsa_flag = private_key instanceof RSAPrivateKey;
-        if (!rsa_flag)
-          {
-            ec_parameters = ((ECKey)private_key).getParams ();
-          }
+        this (algorithm, private_key, null);
       }
 
     public SignatureWrapper setECDSASignatureEncoding (boolean der_encoded)
@@ -175,6 +186,11 @@ public class SignatureWrapper
       {
         instance.update (data);
         return this;
+      }
+
+    public Provider getProvider ()
+      {
+        return instance.getProvider ();
       }
 
     public boolean verify (byte[] signature) throws GeneralSecurityException, IOException

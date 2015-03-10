@@ -41,6 +41,7 @@ import org.webpki.util.Base64URL;
 
 public class KeyExperiments
   {
+    static String provider;
 
     // Simple test of keys and generation
 
@@ -74,7 +75,7 @@ public class KeyExperiments
     static byte[] data = {4, 5, 6, 7, 8, 0};
  
     
-    private static void signverify (KeyPair kp, AsymSignatureAlgorithms optional) throws Exception
+    private static String signverify (KeyPair kp, AsymSignatureAlgorithms optional) throws Exception
       {
         AsymSignatureAlgorithms sign_alg = optional == null ?
                        kp.getPublic () instanceof RSAPublicKey ? 
@@ -82,17 +83,23 @@ public class KeyExperiments
                                                         : 
                        optional;
  
-        byte[] signature = new SignatureWrapper (sign_alg, kp.getPrivate ())
+        byte[] signature = new SignatureWrapper (sign_alg, kp.getPrivate (), provider)
                                    .update (data)
                                    .sign ();
 
-        if (!new SignatureWrapper (sign_alg, kp.getPublic ())
+        if (!new SignatureWrapper (sign_alg, kp.getPublic (), provider)
                      .update (data)
                      .verify (signature))
           {
             throw new RuntimeException ("Bad sign for: " + kp.getPublic ().toString ());
           }
+        return new SignatureWrapper (sign_alg, kp.getPrivate (), provider).getProvider ().getName ();
       }
+    
+    private static KeyAgreement getKeyAgreement () throws Exception
+      {
+        return provider == null ? KeyAgreement.getInstance("ECDH") : KeyAgreement.getInstance("ECDH", provider);
+       }
     
     private static void execute (KeyAlgorithms key_alg) throws Exception
       {
@@ -100,11 +107,11 @@ public class KeyExperiments
         KeyPair kp2 = gen (key_alg);
         if (key_alg.isECKey ())
           {
-            KeyAgreement ka1 = KeyAgreement.getInstance("ECDH");
+            KeyAgreement ka1 = getKeyAgreement ();
     
             ka1.init(kp1.getPrivate());
     
-            KeyAgreement ka2 = KeyAgreement.getInstance("ECDH");
+            KeyAgreement ka2 = getKeyAgreement ();
     
             ka2.init(kp2.getPrivate());
     
@@ -131,8 +138,8 @@ public class KeyExperiments
                                 "\nZ=" + Base64URL.encode (Z));
           }
         signverify (kp1, null);
-        signverify (kp2, key_alg.getRecommendedSignatureAlgorithm ());
-        System.out.println ("Signature worked for algorithm: " + key_alg);
+        String provider_name = signverify (kp2, key_alg.getRecommendedSignatureAlgorithm ());
+        System.out.println ("Signature worked for algorithm: " + key_alg + ", provider=" + provider_name);
       }
 
     public static void main (String[] argv) throws Exception
@@ -145,6 +152,10 @@ public class KeyExperiments
         catch (Exception e)
           {
             System.out.println ("BC not found");
+          }
+        if (argv.length == 1)
+          {
+            provider = argv[0];
           }
         for (KeyAlgorithms key_alg : KeyAlgorithms.values ())
           {
