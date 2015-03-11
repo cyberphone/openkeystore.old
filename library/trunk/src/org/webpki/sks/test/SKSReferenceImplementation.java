@@ -16,7 +16,6 @@
  */
 package org.webpki.sks.test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -927,48 +926,56 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 return instance.verify (signature);
               }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-            for (int offset = 0; offset <= extendTo; offset += extendTo)
+            if (extendTo != signature.length / 2)
               {
-                int l = extendTo;
-                int start = offset;
-                while (signature[start] == LEADING_ZERO)
-                  {
-                    start++;
-                    l--;
-                  }
-                boolean add_zero = false;
-                if (signature[start] < 0)
-                  {
-                    add_zero = true;
-                    l++;
-                  }
-                baos.write (ASN1_INTEGER);
-                baos.write (l);
-                if (add_zero)
-                  {
-                    baos.write (LEADING_ZERO);
-                  }
-                baos.write (signature, start, extendTo - start + offset);
+                throw new GeneralSecurityException ("Signature length error");
               }
-            byte[] body = baos.toByteArray ();
-            baos = new ByteArrayOutputStream ();
-            baos.write (ASN1_SEQUENCE);
-            int length = body.length;
-            if (length > 127)
+
+            int i = extendTo;
+            while (i > 0 && signature[extendTo - i] == LEADING_ZERO)
               {
-                baos.write (0x81);
+                i--;
               }
-            baos.write (length);
-            try
+            int j = i;
+            if (signature[extendTo - i] < 0)
               {
-                baos.write (body);
+                j++;
               }
-            catch (IOException e)
+
+            int k = extendTo;
+            while (k > 0 && signature[2 * extendTo - k] == LEADING_ZERO)
               {
-                throw new GeneralSecurityException (e);
+                k--;
               }
-            return instance.verify (baos.toByteArray ());
+            int l = k;
+            if (signature[2 * extendTo - k] < 0)
+              {
+                l++;
+              }
+
+            int len = 2 + j + 2 + l;
+            int offset = 1;
+            byte derCodedSignature[];
+            if (len < 128)
+              {
+                derCodedSignature = new byte[len + 2];
+              }
+            else
+              {
+                derCodedSignature = new byte[len + 3];
+                derCodedSignature[1] = (byte) 0x81;
+                offset = 2;
+              }
+            derCodedSignature[0] = ASN1_SEQUENCE;
+            derCodedSignature[offset++] = (byte) len;
+            derCodedSignature[offset++] = ASN1_INTEGER;
+            derCodedSignature[offset++] = (byte) j;
+            System.arraycopy (signature, extendTo - i, derCodedSignature, offset + j - i, i);
+            offset += j;
+            derCodedSignature[offset++] = ASN1_INTEGER;
+            derCodedSignature[offset++] = (byte) l;
+            System.arraycopy (signature, 2 * extendTo - k, derCodedSignature, offset + l - k, k);
+            return instance.verify (derCodedSignature);
           }
   
         byte[] sign () throws GeneralSecurityException
@@ -979,22 +986,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 return signature;
               }
             int index = 2;
-            int length;
             byte[] integerPairs = new byte[extendTo << 1];
             if (signature[0] != ASN1_SEQUENCE)
               {
                 throw new GeneralSecurityException ("Not SEQUENCE");
               }
-            length = signature[1] & 0xFF;
-            if ((length & 0x80) != 0)
+            int length = signature[1];
+            if (length < 4)
               {
-                int q = length & 0x7F;
-                length = 0;
-                while (q-- > 0)
+                if (length != -127)
                   {
-                    length <<= 8;
-                    length += signature[index++] & 0xFF;
+                    throw new GeneralSecurityException ("Bad ASN.1 length");
                   }
+                length = signature[index++] & 0xFF;
               }
             for (int offset = 0; offset <= extendTo; offset += extendTo)
               {
