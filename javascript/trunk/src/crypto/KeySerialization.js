@@ -37,8 +37,6 @@ org.webpki.crypto.SUPPORTED_NAMED_CURVES =
 org.webpki.crypto.RSA_ALGORITHM_OID    = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01];
 org.webpki.crypto.EC_ALGORITHM_OID     = [0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01]; 
 
-org.webpki.crypto.XML_DSIG_CURVE_PREFIX      = "urn:oid:";
-
 /* int */org.webpki.crypto._getECParamsFromID = function (/* String */id)
 {
     for (var i = 0; i < org.webpki.crypto.SUPPORTED_NAMED_CURVES.length; i += 4)
