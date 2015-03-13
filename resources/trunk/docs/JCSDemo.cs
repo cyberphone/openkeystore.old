@@ -66,13 +66,13 @@ class JCSDemo
         return Convert.FromBase64String(s); // Standard base64 decoder
     }
 
-    public static string createJcs(ECDsaCng ecKey, Dictionary<String, Object> document)
+    public static string createJcs(ECDsaCng ecKey, Dictionary<String,Object> document)
     {
         // Add signature object
-        Dictionary<String, Object> signature = new Dictionary<String, Object>();
+        Dictionary<String,Object> signature = new Dictionary<String,Object>();
         document[SIGNATURE_JSON] = signature;
         signature[ALGORITHM_JSON] = ES256_ALG;
-        Dictionary<String, Object> publicKey = new Dictionary<String, Object>();
+        Dictionary<String,Object> publicKey = new Dictionary<String,Object>();
         signature[PUBLIC_KEY_JSON] = publicKey;
         publicKey[TYPE_JSON] = EC_PUBLIC_KEY;
         publicKey[CURVE_JSON] = P_521_CRV;
@@ -87,11 +87,11 @@ class JCSDemo
         return new JavaScriptSerializer().Serialize(document);
     }
 
-    public static bool validateJcs(Dictionary<String, Object> document)
+    public static bool validateJcs(Dictionary<String,Object> document)
     {
-        Dictionary<String, Object> signature = (Dictionary<String, Object>)document[SIGNATURE_JSON];
-        Dictionary<String, Object> signatureClone = new Dictionary<String, Object>(signature);
-        Dictionary<String, Object> publicKey = (Dictionary<String, Object>)signature[PUBLIC_KEY_JSON];
+        Dictionary<String,Object> signature = (Dictionary<String,Object>)document[SIGNATURE_JSON];
+        Dictionary<String,Object> signatureClone = new Dictionary<String,Object>(signature);
+        Dictionary<String,Object> publicKey = (Dictionary<String,Object>)signature[PUBLIC_KEY_JSON];
         if (!signature[ALGORITHM_JSON].Equals(ES256_ALG))
         {
             throw new ArgumentException("\"" + ES256_ALG + "\" expected");
@@ -126,7 +126,7 @@ class JCSDemo
     public static void Main(string[] args)
     {
         // The JSON document to be signed
-        Dictionary<String, Object> document = new Dictionary<String, Object>();
+        Dictionary<String,Object> document = new Dictionary<String,Object>();
         document["now"] = "2015-01-17T10:20:03Z";
         document["intProperty"] = 612;
 
@@ -135,7 +135,7 @@ class JCSDemo
         {
             string json = createJcs(ecKey, document);
             Console.WriteLine("Signed JSON Document:\n" + json);
-            Console.WriteLine("\nVerified=" + validateJcs(new JavaScriptSerializer().Deserialize<Dictionary<String, Object>>(json)));
+            Console.WriteLine("\nVerified=" + validateJcs(new JavaScriptSerializer().Deserialize<Dictionary<String,Object>>(json)));
         }
     }
 }
