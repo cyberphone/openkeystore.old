@@ -16,17 +16,17 @@
  */
 package org.webpki.crypto;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Signature;
 
 import java.security.interfaces.ECKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.RSAKey;
 
 import java.security.spec.ECParameterSpec;
 
@@ -57,16 +57,18 @@ public class SignatureWrapper
           {
             throw new IOException ("Not SEQUENCE");
           }
-        length = der_coded_signature[1] & 0xFF;
-        if ((length & 0x80) != 0)
+        length = der_coded_signature[1];
+        if (length < 4)
           {
-            int q = length & 0x7F;
-            length = 0;
-            while (q-- > 0)
+            if (length != -127)
               {
-                length <<= 8;
-                length += der_coded_signature[index++] & 0xFF;
+                throw new IOException ("ASN.1 Length error");
               }
+            length = der_coded_signature[index++] & 0xFF;
+          }
+        if (index != der_coded_signature.length - length)
+          {
+            throw new IOException ("ASN.1 Length error");
           }
         for (int offset = 0; offset <= extend_to; offset += extend_to)
           {
@@ -96,67 +98,92 @@ public class SignatureWrapper
     public static byte[] encodeDEREncodedECDSASignature (byte[] concatendated_signature, ECParameterSpec ec_parameters) throws IOException
       {
         int extend_to = getExtendTo (ec_parameters);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-        for (int offset = 0; offset <= extend_to; offset += extend_to)
+        if (extend_to != concatendated_signature.length / 2)
           {
-            int l = extend_to;
-            int start = offset;
-            while (concatendated_signature[start] == LEADING_ZERO)
-              {
-                start++;
-                l--;
-              }
-            boolean add_zero = false;
-            if (concatendated_signature[start] < 0)
-              {
-                add_zero = true;
-                l++;
-              }
-            baos.write (ASN1_INTEGER);
-            baos.write (l);
-            if (add_zero)
-              {
-                baos.write (LEADING_ZERO);
-              }
-            baos.write (concatendated_signature, start, extend_to - start + offset);
+            throw new IOException ("Signature length error");
           }
-        byte[] body = baos.toByteArray ();
-        baos = new ByteArrayOutputStream ();
-        baos.write (ASN1_SEQUENCE);
-        int length = body.length;
-        if (length > 127)
+
+        int i = extend_to;
+        while (i > 0 && concatendated_signature[extend_to - i] == LEADING_ZERO)
           {
-            baos.write (0x81);
+            i--;
           }
-        baos.write (length);
-        baos.write (body);
-        return baos.toByteArray ();
+        int j = i;
+        if (concatendated_signature[extend_to - i] < 0)
+          {
+            j++;
+          }
+
+        int k = extend_to;
+        while (k > 0 && concatendated_signature[2 * extend_to - k] == LEADING_ZERO)
+          {
+            k--;
+          }
+        int l = k;
+        if (concatendated_signature[2 * extend_to - k] < 0)
+          {
+            l++;
+          }
+
+        int len = 2 + j + 2 + l;
+        int offset = 1;
+        byte der_coded_signature[];
+        if (len < 128)
+          {
+            der_coded_signature = new byte[len + 2];
+          }
+        else
+          {
+            der_coded_signature = new byte[len + 3];
+            der_coded_signature[1] = (byte) 0x81;
+            offset = 2;
+          }
+        der_coded_signature[0] = ASN1_SEQUENCE;
+        der_coded_signature[offset++] = (byte) len;
+        der_coded_signature[offset++] = ASN1_INTEGER;
+        der_coded_signature[offset++] = (byte) j;
+        System.arraycopy (concatendated_signature, extend_to - i, der_coded_signature, offset + j - i, i);
+        offset += j;
+        der_coded_signature[offset++] = ASN1_INTEGER;
+        der_coded_signature[offset++] = (byte) l;
+        System.arraycopy (concatendated_signature, 2 * extend_to - k, der_coded_signature, offset + l - k, k);
+        return der_coded_signature;
       }
 
     Signature instance;
     boolean rsa_flag;
     ECParameterSpec ec_parameters;
+    
+    private SignatureWrapper (AsymSignatureAlgorithms algorithm, String provider, Key key) throws GeneralSecurityException, IOException
+      {
+        instance = provider == null ? Signature.getInstance (algorithm.getJCEName ()) : Signature.getInstance (algorithm.getJCEName (), provider);
+        rsa_flag = key instanceof RSAKey;
+        if (!rsa_flag)
+          {
+            ec_parameters = ((ECKey)key).getParams ();
+          }
+      }
+
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key, String provider) throws GeneralSecurityException, IOException
+      {
+        this (algorithm, provider, public_key);
+        instance.initVerify (public_key);
+      }
 
     public SignatureWrapper (AsymSignatureAlgorithms algorithm, PublicKey public_key) throws GeneralSecurityException, IOException
       {
-        instance = Signature.getInstance (algorithm.getJCEName ());
-        instance.initVerify (public_key);
-        rsa_flag = public_key instanceof RSAPublicKey;
-        if (!rsa_flag)
-          {
-            ec_parameters = ((ECKey)public_key).getParams ();
-          }
+        this (algorithm, public_key, null);
+      }
+
+    public SignatureWrapper (AsymSignatureAlgorithms algorithm, PrivateKey private_key, String provider) throws GeneralSecurityException, IOException
+      {
+        this (algorithm, provider, private_key);
+        instance.initSign (private_key);
       }
 
     public SignatureWrapper (AsymSignatureAlgorithms algorithm, PrivateKey private_key) throws GeneralSecurityException, IOException
       {
-        instance = Signature.getInstance (algorithm.getJCEName ());
-        instance.initSign (private_key);
-        rsa_flag = private_key instanceof RSAPrivateKey;
-        if (!rsa_flag)
-          {
-            ec_parameters = ((ECKey)private_key).getParams ();
-          }
+        this (algorithm, private_key, null);
       }
 
     public SignatureWrapper setECDSASignatureEncoding (boolean der_encoded)
@@ -175,6 +202,11 @@ public class SignatureWrapper
       {
         instance.update (data);
         return this;
+      }
+
+    public Provider getProvider ()
+      {
+        return instance.getProvider ();
       }
 
     public boolean verify (byte[] signature) throws GeneralSecurityException, IOException
