@@ -39,7 +39,7 @@ import org.webpki.util.ISODateTime;
  * Returned by the parser methods.
  *
  */
-public class JSONObjectReader implements Serializable
+public class JSONObjectReader implements Serializable, Cloneable
   {
     private static final long serialVersionUID = 1L;
 
@@ -64,13 +64,19 @@ public class JSONObjectReader implements Serializable
           }
       }
 
-    JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
+    JSONValue getProperty (String name) throws IOException
       {
         JSONValue value = root.properties.get (name);
         if (value == null)
           {
             throw new IOException ("Property \"" + name + "\" is missing");
           }
+        return value;
+      }
+
+    JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
+      {
+        JSONValue value = getProperty (name);
         JSONTypes.compatibilityTest (expected_type, value);
         value.read_flag = true;
         return value;
@@ -246,8 +252,7 @@ public class JSONObjectReader implements Serializable
 
     public JSONTypes getPropertyType (String name) throws IOException
       {
-        JSONValue value = root.properties.get (name);
-        return value == null ? null : value.type;
+        return getProperty (name).type;
       }
 
     /**
@@ -274,5 +279,33 @@ public class JSONObjectReader implements Serializable
     public void scanAway (String name) throws IOException
       {
         getProperty (name, getPropertyType (name));
+      }
+
+    public JSONObjectReader removeProperty (String name) throws IOException
+      {
+        getProperty (name);
+        root.properties.remove (name);
+        return this;
+      }
+
+    public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
+      {
+        return new JSONObjectWriter (root).serializeJSONObject (output_format);
+      }
+
+    /**
+     * Deep copy of JSON object
+     */
+    @Override
+    public JSONObjectReader clone ()
+      {
+        try
+          {
+            return JSONParser.parse (serializeJSONObject (JSONOutputFormats.NORMALIZED));
+          }
+        catch (IOException e)
+          {
+            throw new RuntimeException (e);
+          }
       }
   }
