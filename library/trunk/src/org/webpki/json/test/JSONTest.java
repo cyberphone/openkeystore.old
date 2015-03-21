@@ -895,54 +895,30 @@ public class JSONTest
       }
 
     enum BAD_SIGNATURE 
-    {
-      JustFine  (null),
-      NoSignature ("Property \"value\" is missing"),
-      ECAlg (""),
-      IncorrectNormalization (""),
-      ExtraData ("Property \"WTF\" was never read"),
-      ExtensionTest1 ("\"extensions\" requires enabling in the verifier"),
-      ExtensionTest2 (null),
-      KeyId ("\"keyId\" requires enabling in the verifier"),
-      KeyId2 (null),
-      PathOrder (""),
-      Verify ("Unknown CA"),
-      Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
-      Certificate2 (null),
-      DataAtEnd (null),
-      MissingKey ("Missing key information");
-      
-      String error;
-      
-      BAD_SIGNATURE (String error)
-        {
-          this.error = error;
-        }
-    };
-    
-    @Test
-    public void Signatures () throws Exception
       {
-        for (BAD_SIGNATURE test : BAD_SIGNATURE.values ())
+        JustFine  (null),
+        NoSignature ("Property \"value\" is missing"),
+        ECAlg (""),
+        IncorrectNormalization (""),
+        ExtraData ("Property \"WTF\" was never read"),
+        ExtensionTest1 ("\"extensions\" requires enabling in the verifier"),
+        ExtensionTest2 (null),
+        KeyId ("\"keyId\" requires enabling in the verifier"),
+        KeyId2 (null),
+        PathOrder (""),
+        Verify ("Unknown CA"),
+        Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
+        Certificate2 (null),
+        DataAtEnd (null),
+        MissingKey ("Missing key information");
+        
+        String error;
+        
+        BAD_SIGNATURE (String error)
           {
-            badSignature (test);
+            this.error = error;
           }
-      }
-
-    @Test
-    public void Whitespace () throws Exception
-      {
-        try
-          {
-            JSONParser.parse ("{\u0007 \"name\": 6}");
-            fail("Ws");
-          }
-        catch (Exception e)
-          {
-            checkException (e, "Expected '\"' but got '\u0007'");
-          }
-        JSONParser.parse ("{\u0009 \"name\": 6}");
-      }
+      };
 
     private void badSignature (BAD_SIGNATURE test) throws Exception
       {
@@ -950,7 +926,7 @@ public class JSONTest
         KeyStoreSigner signer = new KeyStoreSigner (ks, null);
         signer.setExtendedCertPath (true);
         signer.setKey ("mykey", "foo123");
-
+  
         ks = KeyStore.getInstance ("JKS");
         ks.load (null, null);
         ks.setCertificateEntry ("mykey",
@@ -958,7 +934,7 @@ public class JSONTest
                                     ArrayUtil.getByteArrayFromInputStream ( 
                                         JSONTest.class.getResourceAsStream ("merchant-network-rootca.cer"))));
         KeyStoreVerifier verifier = new KeyStoreVerifier (ks);
-
+  
         AsymSignatureAlgorithms signAlg = (test == BAD_SIGNATURE.ECAlg ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
         JSONObjectWriter ow = new JSONObjectWriter ();
         ow.setString ("some", "value");
@@ -1047,5 +1023,61 @@ public class JSONTest
                 checkException (e, test.error);
               }
           }
+      }
+    
+    @Test
+    public void Signatures () throws Exception
+      {
+        for (BAD_SIGNATURE test : BAD_SIGNATURE.values ())
+          {
+            badSignature (test);
+          }
+      }
+
+    @Test
+    public void Whitespace () throws Exception
+      {
+        try
+          {
+            JSONParser.parse ("{\u0007 \"name\": 6}");
+            fail("Ws");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Expected '\"' but got '\u0007'");
+          }
+        JSONParser.parse ("{\u0009 \"name\": 6}");
+      }
+
+    void cloneObject (String json) throws Exception
+      {
+        JSONObjectReader o1 = JSONParser.parse (json);
+        JSONObjectReader o2 = o1.clone ();
+        assertTrue ("clone1=" + json, ArrayUtil.compare (o1.serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                                        o2.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
+        assertTrue ("clone2=" + json, ArrayUtil.compare (o1.serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                                         json.getBytes ("UTF-8")));
+      }
+    
+    void removeProperty (String original, String property, String result) throws Exception
+      {
+        JSONObjectReader o = JSONParser.parse (original);
+        (property.equals ("outer") ? o : o.getObject ("outer")).removeProperty (property);
+        assertTrue ("remove", ArrayUtil.compare (o.serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                                 result.getBytes ("UTF-8")));
+      }
+
+    @Test 
+    public void Operations () throws Exception
+      {
+        cloneObject ("[]");
+        cloneObject ("{}");
+        cloneObject ("{\"outer\":6}");
+        cloneObject ("{\"outer\":6,\"oo\":{}}");
+        cloneObject ("{\"outer\":6,\"aa\":[]}");
+        cloneObject ("{\"outer\":6,\"aa\":[{}]}");
+        removeProperty ("{\"outer\": 5}", "outer", "{}");
+        removeProperty ("{\"outer\": {\"inner\":6}}", "inner", "{\"outer\":{}}");
+        removeProperty ("{\"outer\": {\"hi\":\"yes?\",\"inner\":6}}", "inner", "{\"outer\":{\"hi\":\"yes?\"}}");
       }
   }
