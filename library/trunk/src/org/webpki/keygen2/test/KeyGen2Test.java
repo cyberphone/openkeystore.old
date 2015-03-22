@@ -1499,7 +1499,7 @@ public class KeyGen2Test
                          "." +
                          round +
                          "\"/>&nbsp;</td></tr></table><p style=\"padding-left:10pt\">");
-            fos.write (JSONObjectWriter.serializeParsedJSONDocument (xo, JSONOutputFormats.PRETTY_HTML));
+            fos.write (xo.serializeJSONDecoder (JSONOutputFormats.PRETTY_HTML));
             writeString ("</p>");
             return json_data;
           }

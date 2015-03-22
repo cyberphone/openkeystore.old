@@ -355,7 +355,7 @@ public class JSONTest
         assertTrue ("Escaping", escape.escape.equals ("A\n\tTAB\nNL /\\\""));
         byte[] data = new Writer ().serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse (data);
-        byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader, JSONOutputFormats.PRETTY_PRINT);
+        byte[] output = reader.serializeJSONDecoder (JSONOutputFormats.PRETTY_PRINT);
         assertTrue (ArrayUtil.compare (data, output));
       }
 
@@ -779,7 +779,7 @@ public class JSONTest
         JSONObjectWriter ow = new JSONObjectWriter ().setJOSEAlgorithmPreference (jcs.indexOf ("\"P-") > 0);
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.NORMALIZED),
-                                new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.NORMALIZED)));
+                                or.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
         String key_parm = rsa_flag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
@@ -807,7 +807,7 @@ public class JSONTest
         updated_pub_key_object.setBinary (key_parm, parm_bytes);
         try
           {
-            JSONParser.parse (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
+            JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
             assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)

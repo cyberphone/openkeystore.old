@@ -143,7 +143,7 @@ public class JSONSignatureDecoder implements Serializable
         //                                                                    //
         signature.root.properties.remove (VALUE_JSON);                        // 2. Hide property for the serializer..
         //                                                                    // 3. Serialize ("JSON.stringify()")
-        normalized_data = new JSONObjectWriter (rd).serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        normalized_data = rd.serializeJSONObject (JSONOutputFormats.NORMALIZED);
         signature.root.properties.remove (EXTENSIONS_JSON);                   // Hide the optional extensions property for the check method..
         signature.checkForUnread ();                                          // Check for unread data - extensions
         signature.root.properties = saved_properties;                         // 4. Restore signature property list

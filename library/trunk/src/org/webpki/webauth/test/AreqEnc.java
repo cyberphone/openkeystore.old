@@ -217,7 +217,7 @@ public class AreqEnc
         AuthenticationResponseDecoder aresdec = AresDec.test (authfile);
         areqenc.checkRequestResponseIntegrity (aresdec, null);
 
-        ArrayUtil.writeFile (authfile, JSONObjectWriter.serializeParsedJSONDocument (aresdec, JSONOutputFormats.PRETTY_PRINT));
+        ArrayUtil.writeFile (authfile, aresdec.serializeJSONDecoder (JSONOutputFormats.PRETTY_PRINT));
 
       }
   }

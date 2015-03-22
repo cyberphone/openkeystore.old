@@ -1167,7 +1167,7 @@ public class JSONBaseHTML
                   .append ("\">")
                   .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
                   .append ("</th></tr><tr><td><code>")
-                  .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
+                  .append (new String (or.serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
                   .append ("</code></td></tr>");
             if (protocol_step.optional_table_comment_HTML != null)
               {

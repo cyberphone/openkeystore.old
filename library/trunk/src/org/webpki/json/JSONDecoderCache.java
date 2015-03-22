@@ -21,8 +21,6 @@ import java.io.Serializable;
 
 import java.util.Hashtable;
 
-import org.webpki.util.ArrayUtil;
-
 /**
  * Stores {@link JSONDecoder} classes for automatic instantiation during parsing.
  * This is (sort of) an emulation of XML schema caches.
@@ -128,36 +126,6 @@ public class JSONDecoderCache implements Serializable
         catch (ClassNotFoundException cnfe)
           {
             throw new IOException ("Class " + json_decoder_path + " can't be found", cnfe);
-          }
-      }
-
-    public static void main (String[] argc)
-      {
-        if (argc.length != 4)
-          {
-            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.NORMALIZED + "|" + JSONOutputFormats.JS_STRING + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
-            System.exit (0);
-          }
-        try
-          {
-            for (JSONOutputFormats of : JSONOutputFormats.values ())
-              {
-                if (of.toString ().equals (argc[3]))
-                  {
-                    JSONDecoderCache parser = new JSONDecoderCache ();
-                    parser.setCheckForUnreadProperties (new Boolean(argc[2]));
-                    parser.addToCache (argc[0]);
-                    JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[1]));
-                    System.out.print (new String (JSONObjectWriter.serializeParsedJSONDocument (doc, of), "UTF-8"));
-                    return;
-                  }
-              }
-            throw new IOException ("Unknown format: " + argc[3]);
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
           }
       }
 
