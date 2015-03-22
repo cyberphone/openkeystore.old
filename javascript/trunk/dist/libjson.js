@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -31,7 +31,22 @@
 // used in a browser application.                                                         //
 //                                                                                        //
 ////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*             Namespace for the JSON core library                */
@@ -42,6 +57,23 @@
 var org = org || {};
 org.webpki = org.webpki || {};
 org.webpki.json = org.webpki.json || {};
+
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                        JSONArrayReader                         */
@@ -147,6 +179,22 @@ org.webpki.json.JSONArrayReader = function (/* JSONValue[] */array)
 {
     this._get (this.getElementType ());
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                         JSONArrayWriter                        */
@@ -246,6 +294,22 @@ org.webpki.json.JSONArrayWriter = function ()
     dummy._setArray (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, this.array));
     return new org.webpki.json.JSONObjectWriter (dummy).serializeJSONObject (output_format);
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                       JSONDecoderCache                         */
@@ -313,6 +377,22 @@ org.webpki.json.JSONDecoderCache.QUALIFIER_JSON            = "@qualifier";
 {
     this.check_for_unread = flag;
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                           JSONObject                           */
@@ -417,6 +497,22 @@ org.webpki.json.JSONObject = function ()
     unnamed_property.value = array;
     this.property_list[0] = unnamed_property;
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                        JSONObjectReader                        */
@@ -441,13 +537,19 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     }
 };
 
-/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
+/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getPropertyEntry = function (/* String */name)
 {
     /* JSONValue */var value = this.root._getProperty (name);
     if (value == null)
     {
         org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
+    return value;
+};
+
+/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
+{
+    /* JSONValue */var value = this._getPropertyEntry (name);
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     value.read_flag = true;
     return value;
@@ -647,6 +749,48 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     this._getProperty (name, this.getPropertyType (name));
 };
 
+/* String */org.webpki.json.JSONObjectReader.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (this.root).serializeJSONObject (output_format);
+};
+
+/* public JSONObjectReader */org.webpki.json.JSONObjectReader.prototype.clone = function ()
+{
+    return org.webpki.json.JSONParser.parse (this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED));
+};
+
+/* public JSONObjectReader */org.webpki.json.JSONObjectReader.prototype.removeProperty = function (/* String */name)
+{
+    this._getPropertyEntry (name);
+    var original = this.root.property_list;
+    var new_list = [];
+    for (var i = 0; i < original.length; i++)
+    {
+        if (original[i].name != name)
+        {
+            new_list.push (original[i]);
+        }
+    }
+    this.root.property_list = new_list;
+    return this;
+};
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 /*================================================================*/
 /*                        JSONObjectWriter                        */
 /*================================================================*/
@@ -699,8 +843,6 @@ org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_obj
     }
 };
 
-org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
-    
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
     this.root._setProperty (name, value);
@@ -926,7 +1068,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
         this.signature_writer._setProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON,
                                             new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     }
-    return this._getNormalizedSubset ();
+    return this.getNormalizedUTF8Representation ();
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
@@ -1375,14 +1517,9 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
 };
 
-/* Uint8Array */org.webpki.json.JSONObjectWriter.prototype._getNormalizedSubset = function ()
+/* Uint8Array */org.webpki.json.JSONObjectWriter.prototype.getNormalizedUTF8Representation = function ()
 {
-    /* String*/var result = this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED);
-    if (org.webpki.json.JSONObjectWriter.normalization_debug_mode)
-    {
-        console.debug ("Normalization debug:\n" + result);
-    }
-    return org.webpki.util.ByteArray.convertStringToUTF8 (result);
+    return org.webpki.util.ByteArray.convertStringToUTF8 (this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED));
 };
 
 /* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
@@ -1415,21 +1552,22 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
     return this.buffer;
 };
-
-/* public static String */org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument = function (/* JSONDecoderCache.parse() */ document, /* JSONOutputFormats */output_format)
-{
-    return new org.webpki.json.JSONObjectWriter (document._root).serializeJSONObject (output_format);
-};
-  
-/* public static void */org.webpki.json.JSONObjectWriter.setNormalizationDebugMode = function (/* boolean */flag)
-{
-    org.webpki.json.JSONObjectWriter.normalization_debug_mode = flag;
-};
-
-/* public static string */org.webpki.json.JSONObjectWriter.parseAndFormat = function (/* String */json_string, /* JSONOutputFormats */output_format)
-{
-    return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_string)).serializeJSONObject (output_format);
-};
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                        JSONOutputFormats                       */
@@ -1450,6 +1588,22 @@ org.webpki.json.JSONOutputFormats =
     {
     }
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                           JSONParser                           */
@@ -1767,6 +1921,22 @@ org.webpki.json.JSONParser.DOUBLE_PATTERN      = new RegExp ("^([-+]?(([0-9]*\\.
         return c;
     }
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                       JSONSignatureDecoder                     */
@@ -1799,27 +1969,11 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
     }
     this._signature_value = signature.getBinary (org.webpki.json.JSONSignatureDecoder.VALUE_JSON);
     var save = signature.root.property_list;
-    var new_list = [];
-    for (var i = 0; i < save.length; i++)
-    {
-        if (save[i].name != org.webpki.json.JSONSignatureDecoder.VALUE_JSON)
-        {
-            new_list.push (save[i]);
-        }
-    }
-    signature.root.property_list = new_list;
-    this._normalized_data = new org.webpki.json.JSONObjectWriter(rd)._getNormalizedSubset ();
+    signature.removeProperty (org.webpki.json.JSONSignatureDecoder.VALUE_JSON);
+    this._normalized_data = new org.webpki.json.JSONObjectWriter(rd).getNormalizedUTF8Representation ();
     if (this._extensions)
     {
-        var new_list2 = [];
-        for (var i = 0; i < new_list.length; i++)
-        {
-            if (new_list[i].name != org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON)
-            {
-                new_list2.push (new_list[i]);
-            }
-        }
-        signature.root.property_list = new_list2;
+        signature.removeProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON);
     }
     signature.checkForUnread ();
     signature.root.property_list = save;
@@ -2038,6 +2192,22 @@ org.webpki.json.JSONSignatureDecoder.prototype.verify = function (/* Verifier*/v
         }
     }
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                       JSONSignatureTypes                       */
@@ -2067,6 +2237,22 @@ org.webpki.json.JSONSignatureTypes.getName = function (signature_type)
     }
     return "UNKNOWN!";
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                            JSONTypes                           */
@@ -2127,6 +2313,23 @@ org.webpki.json.JSONTypes._compatibilityTest = function (/* JSONTypes */expected
     }
 };
 
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 /*================================================================*/
 /*                            JSONValue                           */
 /*================================================================*/
@@ -2137,6 +2340,22 @@ org.webpki.json.JSONValue = function (type, value)
     this.value = value;
     this.read_flag = false;
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*               Namespace for the "Math" library                 */
@@ -2147,6 +2366,23 @@ org.webpki.json.JSONValue = function (type, value)
 var org = org || {};
 org.webpki = org.webpki || {};
 org.webpki.math = org.webpki.math || {};
+
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                           BigInteger                           */
@@ -2366,6 +2602,22 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
     }
     return result;
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*               Namespace for the "Util" library                 */
@@ -2376,6 +2628,23 @@ org.webpki.math.BigInteger._base = function (/* int */optional_10_or_16_base)
 var org = org || {};
 org.webpki = org.webpki || {};
 org.webpki.util = org.webpki.util || {};
+
+/*
+*  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                            Base64URL                           */
@@ -2506,6 +2775,22 @@ org.webpki.util.Base64URL =
     }
     return encoded;
 };
+/*
+*  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                            ByteArray                           */
@@ -2580,6 +2865,22 @@ org.webpki.util.ByteArray = {};
     }
     return result;
 };
+/*
+*  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                             Error                              */
@@ -2606,6 +2907,22 @@ org.webpki.util.Error = function (message)
 {
     throw new org.webpki.util.Error (message);
 };
+/*
+*  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                              HEX                               */
@@ -2633,6 +2950,22 @@ org.webpki.util.HEX = {};
 {
     return org.webpki.util.HEX.twoHex (value >>> 8) + org.webpki.util.HEX.twoHex (value & 0xFF);
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*              Namespace for the "Crypto" library                */
@@ -2643,6 +2976,23 @@ org.webpki.util.HEX = {};
 var org = org || {};
 org.webpki = org.webpki || {};
 org.webpki.crypto = org.webpki.crypto || {};
+
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                       Key Serialization                        */
@@ -2961,6 +3311,22 @@ console.debug ("Weird, drop it");
     }
     new org.webpki.crypto.PublicKeyDecoder (this.public_key = tbs.getComponent (index).getASN1Sequence ().encode ());
 };
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*               Namespace for the "ASN1" library                 */
@@ -2971,6 +3337,23 @@ console.debug ("Weird, drop it");
 var org = org || {};
 org.webpki = org.webpki || {};
 org.webpki.asn1 = org.webpki.asn1 || {};
+
+/*
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
 /*================================================================*/
 /*                            ASN1                                */

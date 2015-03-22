@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -67,8 +67,6 @@ org.webpki.json.JSONObjectWriter = function (/* optional argument */optional_obj
     }
 };
 
-org.webpki.json.JSONObjectWriter.normalization_debug_mode = false;
-    
 /* JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype._setProperty = function (/* String */name, /* JSONValue */value)
 {
     this.root._setProperty (name, value);
@@ -294,7 +292,7 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
         this.signature_writer._setProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON,
                                             new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, array));
     }
-    return this._getNormalizedSubset ();
+    return this.getNormalizedUTF8Representation ();
 };
 
 /* public JSONObjectWriter */org.webpki.json.JSONObjectWriter.prototype.endSignature = function (/* Uni8Array */signature_value)
@@ -743,14 +741,9 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
     }
 };
 
-/* Uint8Array */org.webpki.json.JSONObjectWriter.prototype._getNormalizedSubset = function ()
+/* Uint8Array */org.webpki.json.JSONObjectWriter.prototype.getNormalizedUTF8Representation = function ()
 {
-    /* String*/var result = this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED);
-    if (org.webpki.json.JSONObjectWriter.normalization_debug_mode)
-    {
-        console.debug ("Normalization debug:\n" + result);
-    }
-    return org.webpki.util.ByteArray.convertStringToUTF8 (result);
+    return org.webpki.util.ByteArray.convertStringToUTF8 (this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED));
 };
 
 /* String */org.webpki.json.JSONObjectWriter.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
@@ -782,19 +775,4 @@ org.webpki.json.JSONObjectWriter.prototype._setCryptoBinary = function (/* Uint8
         this.buffer += '\'';
     }
     return this.buffer;
-};
-
-/* public static String */org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument = function (/* JSONDecoderCache.parse() */ document, /* JSONOutputFormats */output_format)
-{
-    return new org.webpki.json.JSONObjectWriter (document._root).serializeJSONObject (output_format);
-};
-  
-/* public static void */org.webpki.json.JSONObjectWriter.setNormalizationDebugMode = function (/* boolean */flag)
-{
-    org.webpki.json.JSONObjectWriter.normalization_debug_mode = flag;
-};
-
-/* public static string */org.webpki.json.JSONObjectWriter.parseAndFormat = function (/* String */json_string, /* JSONOutputFormats */output_format)
-{
-    return new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse (json_string)).serializeJSONObject (output_format);
 };

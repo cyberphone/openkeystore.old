@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -344,6 +344,40 @@ if (expectedstring != resultstring)
 {
     throw "Mismatch\n" + expectedstring + "\n" + resultstring;
 }
+
+function cloneObject (json)
+{
+    var o1 = org.webpki.json.JSONParser.parse (json);
+    var o2 = o1.clone ();
+    if (o1.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED) != o2.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED))
+    {
+        throw "clone1 mismatch\n" + json;
+    }
+    if (o1.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED) != json)
+    {
+        throw "clone2 mismatch\n" + json;
+    }
+}
+    
+function removeProperty (original, property, result)
+{
+    var o = org.webpki.json.JSONParser.parse (original);
+    ((property == "outer") ? o : o.getObject ("outer")).removeProperty (property);
+    if (o.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED) != result)
+    {
+        throw "remove mismatch\n" + original;
+    }
+}
+
+cloneObject ("[]");
+cloneObject ("{}");
+cloneObject ("{\"outer\":6}");
+cloneObject ("{\"outer\":6,\"oo\":{}}");
+cloneObject ("{\"outer\":6,\"aa\":[]}");
+cloneObject ("{\"outer\":6,\"aa\":[{}]}");
+removeProperty ("{\"outer\": 5}", "outer", "{}");
+removeProperty ("{\"outer\": {\"inner\":6}}", "inner", "{\"outer\":{}}");
+removeProperty ("{\"outer\": {\"hi\":\"yes?\",\"inner\":6}}", "inner", "{\"outer\":{\"hi\":\"yes?\"}}");
 
 console.debug ("Successful");
 

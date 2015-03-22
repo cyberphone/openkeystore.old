@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -46,27 +46,11 @@ org.webpki.json.JSONSignatureDecoder = function (/* JSONObjectReader */rd)
     }
     this._signature_value = signature.getBinary (org.webpki.json.JSONSignatureDecoder.VALUE_JSON);
     var save = signature.root.property_list;
-    var new_list = [];
-    for (var i = 0; i < save.length; i++)
-    {
-        if (save[i].name != org.webpki.json.JSONSignatureDecoder.VALUE_JSON)
-        {
-            new_list.push (save[i]);
-        }
-    }
-    signature.root.property_list = new_list;
-    this._normalized_data = new org.webpki.json.JSONObjectWriter(rd)._getNormalizedSubset ();
+    signature.removeProperty (org.webpki.json.JSONSignatureDecoder.VALUE_JSON);
+    this._normalized_data = new org.webpki.json.JSONObjectWriter(rd).getNormalizedUTF8Representation ();
     if (this._extensions)
     {
-        var new_list2 = [];
-        for (var i = 0; i < new_list.length; i++)
-        {
-            if (new_list[i].name != org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON)
-            {
-                new_list2.push (new_list[i]);
-            }
-        }
-        signature.root.property_list = new_list2;
+        signature.removeProperty (org.webpki.json.JSONSignatureDecoder.EXTENSIONS_JSON);
     }
     signature.checkForUnread ();
     signature.root.property_list = save;

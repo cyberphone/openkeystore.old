@@ -1,26 +1,27 @@
-org.webpki.keygen2 = org.webpki.keygen2 || {};
+org.example = org.example || {};
+org.example.json = org.example.json || {};
 
 //////////////////////////////////////////////
 // InvocationRequest Decoder
 //////////////////////////////////////////////
 
-org.webpki.keygen2.InvocationRequest = function ()
+org.example.json.InvocationRequest = function ()
 {
 };
 
-org.webpki.keygen2.InvocationRequest.prototype.readJSONData = function (json_object_reader)
+org.example.json.InvocationRequest.prototype.readJSONData = function (json_object_reader)
 {
     this.submit_url = json_object_reader.getString ("SubmitURL");
     this.server_session_id = json_object_reader.getString ("ServerSessionID");
     this.action = json_object_reader.getString ("Action");
 };
 
-org.webpki.keygen2.InvocationRequest.prototype.getContext = function ()
+org.example.json.InvocationRequest.prototype.getContext = function ()
 {
-    return "http://xmlns.webpki.org/keygen2/beta/20131201";
+    return "http://org.example.json/protocol";
 };
 
-org.webpki.keygen2.InvocationRequest.prototype.getQualifier = function ()
+org.example.json.InvocationRequest.prototype.getQualifier = function ()
 {
     return "InvocationRequest";
 };
@@ -29,11 +30,11 @@ org.webpki.keygen2.InvocationRequest.prototype.getQualifier = function ()
 // InvocationResponse Decoder
 //////////////////////////////////////////////
 
-org.webpki.keygen2.InvocationResponse = function ()
+org.example.json.InvocationResponse = function ()
 {
 };
 
-org.webpki.keygen2.InvocationResponse.prototype.readJSONData = function (json_object_reader)
+org.example.json.InvocationResponse.prototype.readJSONData = function (json_object_reader)
 {
     this.server_session_id = json_object_reader.getString ("ServerSessionID");
     this.image_preferences = [];
@@ -55,12 +56,12 @@ org.webpki.keygen2.InvocationResponse.prototype.readJSONData = function (json_ob
     }
 };
 
-org.webpki.keygen2.InvocationResponse.prototype.getContext = function ()
+org.example.json.InvocationResponse.prototype.getContext = function ()
 {
-    return "http://xmlns.webpki.org/keygen2/beta/20131201";
+    return "http://org.example.json/protocol";
 };
 
-org.webpki.keygen2.InvocationResponse.prototype.getQualifier = function ()
+org.example.json.InvocationResponse.prototype.getQualifier = function ()
 {
     return "InvocationResponse";
 };
@@ -70,8 +71,8 @@ org.webpki.keygen2.InvocationResponse.prototype.getQualifier = function ()
 //////////////////////////////////////////////
 
 var cache = new org.webpki.json.JSONDecoderCache ();
-cache.addToCache (org.webpki.keygen2.InvocationResponse);
-cache.addToCache (org.webpki.keygen2.InvocationRequest);
+ cache.addToCache (org.example.json.InvocationResponse);
+ cache.addToCache (org.example.json.InvocationRequest);
 
 //////////////////////////////////////////////
 // Sample Messages
@@ -79,7 +80,7 @@ cache.addToCache (org.webpki.keygen2.InvocationRequest);
 
 var invocation_request =
 '{\
- "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",\
+ "@context": "http://org.example.json/protocol",\
  "@qualifier": "InvocationRequest",\
  "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",\
  "SubmitURL": "http://issuer.example.com/platform",\
@@ -88,7 +89,7 @@ var invocation_request =
 
 var invocation_response =
 '{\
- "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",\
+ "@context": "http://org.example.json/protocol",\
  "@qualifier": "InvocationResponse",\
  "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",\
  "ImagePreferences": \
@@ -100,11 +101,11 @@ var invocation_response =
     }]\
 }';
 
-// Note: ImagePreferences is (in this definition NB...) an optional item
+// Note: ImagePreferences is an optional item
 
 var invocation_response_2 =
 '{\
- "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",\
+ "@context": "http://org.example.json/protocol",\
  "@qualifier": "InvocationResponse",\
  "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk"\
 }';
@@ -115,22 +116,23 @@ var invocation_response_2 =
 
 // Remove any of the property read statements above and you can see what the following method does...
 // cache.setCheckForUnreadProperties (false);
-
 var doc1 = cache.parse (invocation_request);
-if (!(doc1 instanceof org.webpki.keygen2.InvocationRequest)) throw "Object error1";    
-console.debug ("SubmitURL=" + doc1.submit_url + " @context=" + doc1.getContext ());
+if (!(doc1 instanceof org.example.json.InvocationRequest)) throw "Object error1";    
+if (doc1.submit_url != "http://issuer.example.com/platform" || doc1.getContext () != "http://org.example.json/protocol")
+{
+    throw "Reading";
+}
 
 var doc2 = cache.parse (invocation_response);
-if (!(doc2 instanceof org.webpki.keygen2.InvocationResponse)) throw "Object error2";    
-console.debug ("Number of ImagePreferences=" + doc2.image_preferences.length);
-
-console.debug ("Number of ImagePreferences=" + cache.parse (invocation_response_2).image_preferences.length);
-
-if (org.webpki.json.JSONObjectWriter.serializeParsedJSONDocument (doc1, org.webpki.json.JSONOutputTypes) !=
-    org.webpki.json.JSONObjectWriter.parseAndFormat (invocation_request, org.webpki.json.JSONOutputTypes))
+if (!(doc2 instanceof org.example.json.InvocationResponse)) throw "Object error2";
+if (doc2.image_preferences.length != 1)
 {
-    throw "Parsing problem";
+    throw "Image 1 length";
+}
+
+if (cache.parse (invocation_response_2).image_preferences.length != 0)
+{
+    throw "Image 0 length";
 }
 
 console.debug ("Successful decoding/instantiation of two different JSON document types");
-

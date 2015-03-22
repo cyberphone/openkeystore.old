@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,13 +38,19 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
     }
 };
 
-/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
+/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getPropertyEntry = function (/* String */name)
 {
     /* JSONValue */var value = this.root._getProperty (name);
     if (value == null)
     {
         org.webpki.util._error ("Property \"" + name + "\" is missing");
     }
+    return value;
+};
+
+/* JSONValue */org.webpki.json.JSONObjectReader.prototype._getProperty = function (/* String */name, /* JSONTypes */expected_type)
+{
+    /* JSONValue */var value = this._getPropertyEntry (name);
     org.webpki.json.JSONTypes._compatibilityTest (expected_type, value);
     value.read_flag = true;
     return value;
@@ -242,4 +248,30 @@ org.webpki.json.JSONObjectReader.DECIMAL_PATTERN = new RegExp ("^(-?([1-9][0-9]+
 /* public void */org.webpki.json.JSONObjectReader.prototype.scanAway = function (/* String */name)
 {
     this._getProperty (name, this.getPropertyType (name));
+};
+
+/* String */org.webpki.json.JSONObjectReader.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
+{
+    return new org.webpki.json.JSONObjectWriter (this.root).serializeJSONObject (output_format);
+};
+
+/* public JSONObjectReader */org.webpki.json.JSONObjectReader.prototype.clone = function ()
+{
+    return org.webpki.json.JSONParser.parse (this.serializeJSONObject (org.webpki.json.JSONOutputFormats.NORMALIZED));
+};
+
+/* public JSONObjectReader */org.webpki.json.JSONObjectReader.prototype.removeProperty = function (/* String */name)
+{
+    this._getPropertyEntry (name);
+    var original = this.root.property_list;
+    var new_list = [];
+    for (var i = 0; i < original.length; i++)
+    {
+        if (original[i].name != name)
+        {
+            new_list.push (original[i]);
+        }
+    }
+    this.root.property_list = new_list;
+    return this;
 };
