@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
@@ -51,14 +52,15 @@ public class RequestServlet extends HttpServlet
       {
         logger.info ("JSON Signature Verification Entered");
         ReadSignature doc = new ReadSignature ();
-        doc.recurseObject (JSONParser.parse (signed_json));
+        JSONObjectReader parsed_json = JSONParser.parse (signed_json);
+        doc.recurseObject (parsed_json);
         HTML.printResultPage (response,
             "<table>"  +
             "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Successful Verification!<br>&nbsp;</td></tr>" +
             "<tr><td align=\"left\">" + HTML.newLines2HTML (doc.getResult ()) + "</td></tr>" +
             "<tr><td align=\"left\">Received Message:</td></tr>" +
             "<tr><td align=\"left\">" + HTML.fancyBox ("verify", 
-                                                       new String (JSONObjectWriter.parseAndFormat (signed_json, JSONOutputFormats.PRETTY_HTML), "UTF-8")) +
+                                                       new String (new JSONObjectWriter (parsed_json).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8")) +
             "</td></tr>" +
             "</table>");
       }
