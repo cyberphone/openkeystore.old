@@ -45,7 +45,7 @@ import org.webpki.util.ISODateTime;
 /**
  * Creates JSON objects and performs serialization.
  * <p>
- * Also provides built-in write support for JCS (JSON Cleartext Signatures).</p>
+ * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
  * 
  */
 public class JSONObjectWriter implements Serializable
