@@ -1,0 +1,32 @@
+<project name="X-OBI library" default="replace" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src" value="org/webpki" />
+  <property environment="env"/>
+
+  <target name="help">
+    <echo message="Available targets are help, replace."/>
+  </target>
+
+  <target name="replace">
+     <replace summary="true" dir="${src}" value="logotype">
+       <include name="**/*.java"/>
+       <include name="**/*.xsd"/>
+       <replacetoken><![CDATA[logo_type]]></replacetoken>
+    </replace>
+<!--
+     <replace summary="true" dir="${src}" value="http://xmlns.webpki.org/wasp/core/20060826#cn">
+       <include name="**/*.java"/>
+       <include name="**/*.xsd"/>
+       <replacetoken><![CDATA[http://xmlns.webpki.org/wasp/20060826#cn-std]]></replacetoken>
+    </replace> 
+     <replace summary="true" dir="${src}" value="http://xmlns.webpki.org/wasp/pdfsigprofile0/20060826">
+       <include name="**/*.java"/>
+       <include name="**/*.xsd"/>
+       <replacetoken><![CDATA[http://xmlns.webpki.org/wasp/20060826#pdfsigprofile0]]></replacetoken>
+    </replace> 
+-->
+  </target>
+
+</project>
+

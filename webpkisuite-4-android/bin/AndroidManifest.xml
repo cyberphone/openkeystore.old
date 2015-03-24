@@ -1,0 +1,100 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.webpki.mobile.android"
+    android:versionCode="12"
+    android:versionName="1.12">
+
+    <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="16"/>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    
+    <!-- Don't require camera, as this requires a rear camera. 
+         This allows it us to at least use KeyGen2 without QRID on the Nexus 7 -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Black">
+        <activity
+            android:taskAffinity=".application.PropertiesActivity"
+            android:name=".application.PropertiesActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_webpki">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity 
+            android:taskAffinity=".application.QRIDActivity"
+            android:name=".application.QRIDActivity"
+            android:icon="@drawable/qr_launcher"
+            android:label="@string/title_activity_qrid"
+            android:noHistory="true"
+            android:hardwareAccelerated="true"
+            android:clearTaskOnLaunch="true"
+            android:stateNotNeeded="true"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:taskAffinity=".keygen2.KeyGen2Activity"
+            android:name=".keygen2.KeyGen2Activity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_keygen2"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="webpkiproxy" android:host="keygen2"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:taskAffinity=".webauth.WebAuthActivity"
+            android:name=".webauth.WebAuthActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_webauth"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="webpkiproxy" android:host="webauth"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:taskAffinity=".proxy.FailLoggerActivity"
+            android:name=".proxy.FailLoggerActivity"
+            android:label="@string/title_activity_fail_logger">
+        </activity>
+        <activity
+            android:name=".application.ProtocolViewActivity"
+            android:label="@string/title_activity_protocol_view">
+        </activity>
+        <activity
+            android:name=".application.CertificateViewActivity"
+            android:label="@string/title_activity_cert_view">
+        </activity>
+        <activity
+            android:name=".application.CredentialsActivity"
+            android:label="@string/title_activity_credentials">
+        </activity>
+        
+    </application>
+
+</manifest>

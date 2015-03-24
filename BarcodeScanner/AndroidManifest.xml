@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (C) 2008 ZXing authors
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="org.webpki.android.qrcode"
+          android:versionName="4.3.2"
+          android:versionCode="88"
+          android:installLocation="auto">
+
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.FLASHLIGHT"/>
+
+  <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="11"/>
+
+  <application android:icon="@drawable/launcher_icon"
+               android:logo="@drawable/launcher_icon"
+               android:label="@string/app_name"
+               android:allowBackup="true">
+
+      <activity android:name=".CaptureActivity"
+              android:noHistory="true"
+              android:hardwareAccelerated="true"
+              android:clearTaskOnLaunch="true"
+              android:stateNotNeeded="true"
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+              android:windowSoftInputMode="stateAlwaysHidden">
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+          </intent-filter>
+    </activity>
+  </application>
+
+</manifest>

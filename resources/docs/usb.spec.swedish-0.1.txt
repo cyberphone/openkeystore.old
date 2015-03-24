@@ -1,0 +1,30 @@
+USB Token
+---------
+
+Anordningen skall se ut som ett USB-minne men skall fungera
+som ett smart kort.  Jag har för avsikt att skriva programvaran
+själv men något slags testprogramvara måste dock finnas annars
+kan man inte veta om enheten fungerar eller inte.
+
+Systemet skall bestå av:
+
+- Standard USB kontakt
+- Kretskort
+- 32-bitars ARM MCU (STM32F105RCT6)
+- 32kb SPI EEPROM
+- 4-16Mb SPI DataFlash
+- En LED med två färger
+- En enpolig tryckkontakt
+
++ allt som behövs för strömmatning från en PC via USB
+
+Enheten skall kunna gjutas in i plast.
+
+V0.1  25 Nov 2010
+
+Anders Rundgren
+anders.rundgren@telia.com
+
+http://webpki.org/auth-token-4-the-cloud.html
+
+
