@@ -181,7 +181,7 @@ public class HTML
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\">URL for testing with a client device: <a href=\"" + request_url + "\">" + request_url + "</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html\">JCS Documentation</a></td></tr>" +
+                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/openkeystore/resources/docs/jcs.html\">JCS Documentation</a></td></tr>" +
                  "</table></td></tr>"));
       }
 

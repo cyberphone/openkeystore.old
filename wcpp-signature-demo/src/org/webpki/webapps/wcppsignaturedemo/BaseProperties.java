@@ -28,7 +28,7 @@ public interface BaseProperties
     String HASH_ALGORITHM_JSON        = "hashAlgorithm";
     String OBJECT_TO_SIGN_JSON        = "objectToSign";
     String MIME_TYPE_JSON             = "mimeType";
-    String DOCUMENT_JSON              = "Document";
+    String DOCUMENT_JSON              = "document";
     String DOCUMENT_DATA_JSON         = "documentData";
     String DOCUMENT_HASH_JSON         = "documentHash";
     String REQUEST_DATA_JSON          = "requestData";
