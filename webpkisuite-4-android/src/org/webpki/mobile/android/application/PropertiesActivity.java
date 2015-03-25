@@ -153,7 +153,7 @@ public class PropertiesActivity extends ListActivity
             catch (Exception e)
               {
               }
-              about_builder.setMessage ("This application was developed by PrimeKey Solutions AB.\n\nCurrent version: " + version);
+              about_builder.setMessage ("This application was developed by PrimeKey Solutions and WebPKI.org\n\nCurrent version: " + version);
               about_builder.setIcon (android.R.drawable.btn_star_big_on);
               about_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
                 {
