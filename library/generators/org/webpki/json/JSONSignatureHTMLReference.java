@@ -253,7 +253,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                  "due to the fact that JavaScript lacks support for big decimals.  Note the handling of " +
                                  "<a href=\"#" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
                                  "\">certificate serial numbers</a> in JCS." + LINE_SEPARATOR +
-                                 "Fully compatible implementations are though available both for Java and JavaScript (<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>)."  + LINE_SEPARATOR + 
+                                 "Fully compatible implementations are though available both for Java and JavaScript (<a href=\"https://github.com/cyberphone/openkeystore\">https://github.com/cyberphone/openkeystore</a>)."  + LINE_SEPARATOR + 
                                  "Pyhton users can get the required parser behavior (minus floating point...) by using the following constructs:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
                                  "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Parse JSON while keeping original property order<br>" +
                                  "signatureObject = jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + 
@@ -295,7 +295,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +
-                                                   "(<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>).");
+                                                   "(<a href=\"https://github.com/cyberphone/openkeystore\">https://github.com/cyberphone/openkeystore</a>).");
 
         json.addProtocolTable ("Top-level Property")
           .newRow ()
