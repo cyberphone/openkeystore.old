@@ -9,6 +9,11 @@ The project also defines KeyGen2 which is a credential provisioning and manageme
 for SKS:<br>
 https://cyberphone.github.io/openkeystore/resources/docs/keygen2.html
 
+##Requirements
+* Java SDK V6 or V7
+* Ant 1.8 or later
+* The projects are being developed using Eclipse but there's no dependence on Eclipse.
+
 Currently only the "library" and "resources" projects are suitable for download:
 ```
 $ cd library
