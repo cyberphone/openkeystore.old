@@ -21,5 +21,7 @@ $ ant
 $ ant testsks
 $ ant testkeygen2
 ```
-There also is an Android proof-of-concept implementation:<br>
+##Proof of Concept Implementation
+There also is an Android proof-of-concept implementation which allows you to test provisioning
+and then using provisioned keys for authentication:<br>
 https://play.google.com/store/apps/details?id=org.webpki.mobile.android
