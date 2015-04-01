@@ -31,18 +31,21 @@
   <!-- If you want non-local SKS WS access you must bind to non-local IP --> 
   <property name="sksws.url" value="http://localhost:9982/securekeystore"/>
 
-  <condition property="jdk7" else="false">
-    <equals arg1="1.7" arg2="${ant.java.version}"/>
+  <condition property="jdk7-8" else="false">
+  	<or>
+      <equals arg1="1.7" arg2="${ant.java.version}"/>
+      <equals arg1="1.8" arg2="${ant.java.version}"/>
+    </or>
   </condition>
 
   <!-- JDK 7 does not need (or work with) the externally supplied WS library -->
   <condition property="jax.ws.lib.dir" value="${wslibdummy}" else="${wslibext}">
-    <istrue value="${jdk7}"/>
+    <istrue value="${jdk7-8}"/>
   </condition>
 
   <!-- JDK 7 has a different JavaDoc -->
   <condition property="javadoc-version" value="7" else="6">
-    <istrue value="${jdk7}"/>
+    <istrue value="${jdk7-8}"/>
   </condition>
 
 	<!-- check dependecies that should force WS recreation -->
