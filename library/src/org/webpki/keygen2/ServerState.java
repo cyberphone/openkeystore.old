@@ -1691,6 +1691,7 @@ public class ServerState implements Serializable
         return service_specific_objects.get (name);
       }
 
+
     public ECPublicKey generateEphemeralKey () throws IOException
       {
         return server_crypto_interface.generateEphemeralKey (ephemeral_key_algorithm);
