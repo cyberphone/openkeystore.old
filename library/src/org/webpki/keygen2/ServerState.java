@@ -123,13 +123,12 @@ public class ServerState implements Serializable
             this.key_management_key = key_management_key;
             this.post_operation = post_operation;
           }
-  
-        public boolean equals (Object o)
+
+        private boolean matching (PostProvisioningTargetKey target_key)
           {
-            return o instanceof PostProvisioningTargetKey && 
-                   client_session_id.equals(((PostProvisioningTargetKey)o).client_session_id) &&
-                   server_session_id.equals (((PostProvisioningTargetKey)o).server_session_id) &&
-                   ArrayUtil.compare (certificate_data, ((PostProvisioningTargetKey)o).certificate_data);
+            return client_session_id.equals(target_key.client_session_id) &&
+                   server_session_id.equals (target_key.server_session_id) &&
+                   ArrayUtil.compare (certificate_data, target_key.certificate_data);
           }
       }
   
@@ -1260,7 +1259,7 @@ public class ServerState implements Serializable
                                                                                    operation);
             for (PostProvisioningTargetKey post_op : post_operations)
               {
-                if (post_op.equals (new_post_op))
+                if (post_op.matching (new_post_op))
                   {
                     if (post_op.post_operation == PostOperation.DELETE_KEY || new_post_op.post_operation == PostOperation.DELETE_KEY)
                       {
