@@ -10,7 +10,7 @@ for SKS:<br>
 https://cyberphone.github.io/openkeystore/resources/docs/keygen2.html
 
 ##Requirements
-* Java SDK V6 or V7
+* Java SDK Version 6, 7 or 8
 * Ant 1.8 or later
 * The projects are being developed using Eclipse but there's no dependence on Eclipse.
 
