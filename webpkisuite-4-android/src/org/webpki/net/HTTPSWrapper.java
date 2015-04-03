@@ -280,6 +280,7 @@ public class HTTPSWrapper
      *
      * @param store_name Path to the Trust store file.
      * @param store_passphrase Passphrase to unlock Trust Store.
+     * @throws IOException If something unexpected happens...
      */
     public void setTrustStore (String store_name, String store_passphrase) throws IOException
       {
@@ -297,6 +298,7 @@ public class HTTPSWrapper
      *
      * @param store_name Path to the Trust store file.
      * @param store_passphrase Passphrase to unlock Trust Store.
+     * @throws IOException If something unexpected happens...
      */
     public static void setDefaultTrustStore (String store_name, String store_passphrase) throws IOException
       {
@@ -351,6 +353,7 @@ public class HTTPSWrapper
      * To set your own Key Store this method must be called before making
      * either a GET or POST request.
      *
+     * @param key_store_password Password to private key
      * @param key_store Initialized java KeyStore.
      */
     public void setKeyStore (KeyStore key_store, String key_store_password)
@@ -371,8 +374,9 @@ public class HTTPSWrapper
      * To set your own Key Store this method must be called before making
      * either a GET or POST request.
      *
-     * @param key_store_file
-     * @throws IOException 
+     * @param key_store_file PKCS #12 or Java Keystore file
+     * @param key_store_password Password to private key
+     * @throws IOException If something unexpected happens...
      */
     public void setKeyStore (String key_store_file, String key_store_password) throws IOException
       {
@@ -389,8 +393,7 @@ public class HTTPSWrapper
      *
      * his method must be called before making either a GET or POST request.
      *
-     * @param key_alias
-     * @throws IOException 
+     * @param key_alias name of selected key
      */
     public void setKeyAlias (String key_alias)
       {
@@ -404,6 +407,7 @@ public class HTTPSWrapper
      *
      * @param url Fully qualified URL to make connection to.
      * @param data Byte array to post to server.
+     * @throws IOException If something unexpected happens...
      */
     public void makePostRequest (String url, byte[] data) throws IOException
       {
@@ -433,6 +437,7 @@ public class HTTPSWrapper
      *
      * @param url Fully qualified URL to make connection to.
      * @param data String to post to server.
+     * @throws IOException If something unexpected happens...
      */
     public void makePostRequestUTF8 (String url, String data) throws IOException
       {
@@ -550,6 +555,7 @@ public class HTTPSWrapper
      * Performs a GET request to the Web Server.
      *
      * @param url Fully qualified URL to make connection to.
+     * @throws IOException If something unexpected happens...
      */
     public void makeGetRequest (String url) throws IOException
       {
@@ -565,7 +571,7 @@ public class HTTPSWrapper
       }
     
 
-    /**
+    /*
      * Initializes connection to server and reads data from the server response. 
      * If data is not null, data is posted to server.
      */
@@ -633,6 +639,7 @@ public class HTTPSWrapper
      * 
      * @return String containing all received data in UTF-8 encoding, 
      * or null if no data was available.
+     * @throws IOException If something unexpected happens...
      */
     public String getDataUTF8 () throws IOException
       {
@@ -686,7 +693,7 @@ public class HTTPSWrapper
      *
      * This method affects all proceeding requests. <br><br>
      *
-     * @param flag 
+     * @param flag The flag, Yeah
      */
     public void setServerCertificateRevocation (boolean flag)
       {
@@ -709,6 +716,7 @@ public class HTTPSWrapper
      *
      * @param host Host name or IP address of proxy. <tt>null</tt> removes any previous setting.
      * @param port Port number for proxy connection. 
+     * @throws IOException If something unexpected happens...
      */
     public void setProxy (String host, int port) throws IOException
       {
@@ -723,6 +731,7 @@ public class HTTPSWrapper
      *
      * @param host Host name or IP address of proxy. <tt>null</tt> removes any previous setting.
      * @param port Port number for proxy connection. 
+     * @throws IOException If something unexpected happens...
      */
     public static void setDefaultProxy (String host, int port) throws IOException
       {
@@ -769,6 +778,7 @@ public class HTTPSWrapper
      *
      * @param name Name of header to set.
      * @param value Value associated with the header.
+     * @throws IOException If something unexpected happens...
      */
     public void setHeader (String name, String value) throws IOException
       {
@@ -907,7 +917,7 @@ public class HTTPSWrapper
     /** 
      * Gets server certificate from HTTPS response.
      *
-     * @return Server certifcate.
+     * @return Server certificate.
      */
     public X509Certificate getServerCertificate ()
       {
@@ -938,7 +948,7 @@ public class HTTPSWrapper
         password_authentication = new PasswordAuthentication (user_id, password.toCharArray ());
       }
 
-    /**
+    /*
      * TrustManager for the HTTPSWrapper. 
      * Makes it possible to configure the SSL Client behaviour
      * and to set the Trust Store to use.
@@ -946,7 +956,7 @@ public class HTTPSWrapper
     private class HttpsWrapperTrustManager implements X509TrustManager 
       { 
   
-        /**
+        /*
          * Constructor
          */
         private HttpsWrapperTrustManager () throws IOException
@@ -954,7 +964,7 @@ public class HTTPSWrapper
           }
 
 
-        /**
+        /*
          * Implements X509TrustManager.
          */
         public void checkClientTrusted (X509Certificate[] chain, String authType) throws CertificateException
@@ -962,7 +972,7 @@ public class HTTPSWrapper
           } 
     
     
-        /**
+        /*
          * Handles server certificate validation. 
          * Flags for validity and certificate chain verification 
          * decides this functions behavior.
@@ -1010,7 +1020,7 @@ public class HTTPSWrapper
           }
 
 
-        /**
+        /*
          * Implements X509TrustManager.
          */
         public X509Certificate[] getAcceptedIssuers ()
@@ -1674,6 +1684,8 @@ public class HTTPSWrapper
 
     /**
      * Command-line interface to the HTTPSWrapper.
+     * @param argv Command line parameters
+     * @throws Exception If something unexpected happens...
      */
     static public void main (String[] argv) throws Exception
       {

@@ -33,7 +33,7 @@ public class StringUtil
         return i != -1 ? i : a.length();
       }
   
-    /**
+    /*
      * Splits a string at any of a given set of delimiter.
      * <p>The delimiters will not be present in the resulting substrings.
      * <p>The delimiters may consist of more than one character.
@@ -86,7 +86,7 @@ public class StringUtil
         return r;
       }
 
-    /**
+    /*
      * Splits a string at any of a given set of delimiter.
      * <p>The delimiters will not be present in the resulting substrings.
      * Empty substrings of s will not be included in the result.
@@ -100,7 +100,7 @@ public class StringUtil
         return splitAtAny(s, delimiters, false);
       }
 
-    /**
+    /*
      * Splits a string at a given delimiter.
      * <p>The delimiter will not be present in the resulting substrings.
      * <p>The delimiter may consist of more than one character.
@@ -127,7 +127,7 @@ public class StringUtil
         return r;
       }
 
-    /**
+    /*
      * Splits a string at a given delimiter.
      * <p>The delimiter will not be present in the resulting substrings.
      * Empty substrings of s will not be included in the result.
@@ -154,7 +154,7 @@ public class StringUtil
       }
 
     // TODO: document better
-    /**
+    /*
      * Uses {@link StringTokenizer StringTokenizer}.
      */
     public static String[] tokenVector(String s, String delimiters)
@@ -163,7 +163,7 @@ public class StringUtil
       }
 
     // TODO: document better
-    /**
+    /*
      * Uses {@link StringTokenizer StringTokenizer}.
      */
     public static String[] tokenVector(String s)
@@ -186,7 +186,7 @@ public class StringUtil
         return t.toString();
       }
     
-   /**
+    /*
      * Converts a set of characters represented as a string to a {@link BitSet BitSet}.
      * <p>The BitSet returned is suitable for use with 
      * {@link #checkAllowedChars(String, BitSet) checkAllowedChars()}.
@@ -216,7 +216,7 @@ public class StringUtil
         return -1;
       }
     
-    /**
+    /*
      * Check that no characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first member character, -1 if there is none.
@@ -226,7 +226,7 @@ public class StringUtil
         return firstMember(s, charSet, false, startOffset);
       }
     
-    /**
+    /*
      * Check that no characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first member character, -1 if there is none.
@@ -236,7 +236,7 @@ public class StringUtil
         return firstMember(s, charSet, 0);
       }
     
-    /**
+    /*
      * Check that no characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first member character, -1 if there is none.
@@ -246,7 +246,7 @@ public class StringUtil
         return firstMember(s, charSet(charSet));
       }
 
-    /**
+    /*
      * Check that only characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first non-member character, -1 if there is none.
@@ -256,7 +256,7 @@ public class StringUtil
         return firstMember(s, charSet, true, startOffset);
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first non-member character, -1 if there is none.
@@ -266,7 +266,7 @@ public class StringUtil
         return firstNonMember(s, charSet, 0);
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>charSet</i></code> 
      * occur in <code><i>s</i></code>.
      * @return Index of first non-member character, -1 if there is none.
@@ -276,7 +276,7 @@ public class StringUtil
         return firstNonMember(s, charSet(charSet));
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>allowedChars</i></code> 
      * occur in <code><i>s</i></code>.
      * @return true iff there are only legal characters.
@@ -286,7 +286,7 @@ public class StringUtil
         return firstNonMember(s, allowedChars) == -1;
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>allowedChars</i></code> 
      * occur in <code><i>s</i></code>.
      * @return true iff there are only legal characters.
@@ -296,7 +296,7 @@ public class StringUtil
         return hasOnlyLegalChars(s, charSet(allowedChars));
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>allowedChars</i></code> 
      * occur in <code><i>s</i></code>.
      * @throws IllegalArgumentException If an illegal character occurs
@@ -310,7 +310,7 @@ public class StringUtil
           }
       }
     
-    /**
+    /*
      * Check that only characters from <code><i>allowedChars</i></code> 
      * occur in <code><i>s</i></code>.
      * @throws IllegalArgumentException If an illegal character occurs
@@ -320,7 +320,7 @@ public class StringUtil
         checkAllowedChars(s, charSet(allowedChars));
       }
     
-    /**
+    /*
      * Tests if a string starts with a prefix and, if so, removes it.
      * @return The substring of <code><i>original</i><code> starting after <code><i>prefix</i><code>
      *         if it starts with <code><i>prefix</i><code>, null otherwise.
@@ -330,7 +330,7 @@ public class StringUtil
         return original.startsWith(prefix) ? original.substring(prefix.length()) : null;
       }
 
-    /**
+    /*
      * Replace &quot;Java&quot; (C++) escapes.
      */
     public static String javaUnescape(String s)

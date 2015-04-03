@@ -43,9 +43,9 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Writes formatted JSON data to a DOM-like tree.
+ * Creates JSON objects and performs serialization.
  * <p>
- * It also performs normalization for usage with JCS (JSON Cleartext Signatures).
+ * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
  * 
  */
 public class JSONObjectWriter implements Serializable
@@ -79,7 +79,8 @@ public class JSONObjectWriter implements Serializable
     
     /**
      * For updating already read JSON objects.
-     * @throws IOException 
+     * @param reader Existing object
+     * @throws IOException For any kind of underlying error...
      */
     public JSONObjectWriter (JSONObjectReader reader) throws IOException
       {
@@ -835,41 +836,5 @@ public class JSONObjectWriter implements Serializable
             buffer.append ('\'');
           }
         return buffer.toString ().getBytes ("UTF-8");
-      }
-
-    public static byte[] serializeParsedJSONDocument (JSONDecoder document, JSONOutputFormats output_format) throws IOException
-      {
-        return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
-      }
-  
-    public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
-      {
-        return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
-      }
-
-    public static void main (String[] argc)
-      {
-        if (argc.length != 2)
-          {
-            System.out.println ("\nJSON-input-document format(" + JSONOutputFormats.getOptions () + ")");
-            System.exit (0);
-          }
-        try
-          {
-            JSONOutputFormats format = JSONOutputFormats.getFormatFromString (argc[1]);
-            String pre = "";
-            String post = "";
-            if (format == JSONOutputFormats.PRETTY_HTML)
-              {
-                pre = "<html><body>";
-                post = "</body></html>";
-              }
-            System.out.print (pre + new String (parseAndFormat (ArrayUtil.readFile (argc[0]), format), "UTF-8") + post);
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
-          }
       }
   }

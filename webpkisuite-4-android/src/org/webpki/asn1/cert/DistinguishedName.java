@@ -39,7 +39,7 @@ public class DistinguishedName
     
     private ASN1Sequence asn1Representation;
     
-    /**
+    /*
      * Get the ASN.1 representation of this <code>DistinguishedName</code>.
      * @see org.webpki.asn1
      */
@@ -61,7 +61,7 @@ public class DistinguishedName
         return asn1Representation;
       }
 
-    /**
+    /*
      * Hashvalue used to compare certificate issuers.
      * <p>Used when comparing two <code>DistinguishedName</code>s using the rules specified
      * in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
@@ -80,13 +80,10 @@ public class DistinguishedName
         components.addElement(rdn);
       }
     
-    /**
-     * Construct an <code>DistinguishedName</code> from an 
-     * {@link org.webpki.asn1.BaseASN1Object ASN.1 structure}.
-     * @see org.webpki.asn1
+    /*
+     * Construct an <code>DistinguishedName</code> from a BaseASN1Object ASN.1 structure.
      */
-    public DistinguishedName(BaseASN1Object distinguishedName)
-    throws IOException
+    public DistinguishedName(BaseASN1Object distinguishedName) throws IOException
       {
         asn1Representation = ParseUtil.sequence(distinguishedName);
         
@@ -96,9 +93,8 @@ public class DistinguishedName
           }
       }
     
-    /**
-     * Construct an <code>DistinguishedName</code> from an array of 
-     * {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}s.
+    /*
+     * Construct an <code>DistinguishedName</code> from an array of RelativeDistinguishedNames.
      */
     public DistinguishedName(RelativeDistinguishedName[] relativeDistinguishedNames)
       {
@@ -108,17 +104,8 @@ public class DistinguishedName
           }
       }
     
-    /**
+    /*
      * Create a <code>DistinguishedName</code> from a set of <code>OID</code>/value-pairs.
-     * <p>Each <code>OID</code>/value-pair will be individually converted to a
-     * {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}
-     * (i.e. this method can't be used to create a <code>DistinguishedName</code> containing
-     * composite {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}s).
-     * <p><code>OID</code>'s may be given as simple names in the cases handled by 
-     * {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}'s 
-     * {@link RelativeDistinguishedName#name2OID name2OID} method.
-     * @see RelativeDistinguishedName#RelativeDistinguishedName(String, String)
-     * @see RelativeDistinguishedName#name2OID(String)
      */
     public DistinguishedName(Hashtable<String,String> nameOrOIDValuePairs) throws IOException
       {
@@ -131,7 +118,7 @@ public class DistinguishedName
           }
       }
         
-    /**
+    /*
      * Returns the DistinguishedName of a certificate subject.
      */
     public static DistinguishedName subjectDN(ASN1Sequence certificate)
@@ -143,7 +130,7 @@ public class DistinguishedName
         return new DistinguishedName(seq.get(ParseUtil.isContext(seq.get(0), 0) ? 5 : 4));
       }
     
-    /**
+    /*
      * Returns the DistinguishedName of a certificate subject.
      */
     public static DistinguishedName subjectDN(X509Certificate certificate)
@@ -152,7 +139,7 @@ public class DistinguishedName
         return subjectDN(ASN1Util.x509Certificate(certificate));
       }
     
-    /**
+    /*
      * Returns the DistinguishedName of a certificate issuer.
      */
     public static DistinguishedName issuerDN(ASN1Sequence certificate)
@@ -164,7 +151,7 @@ public class DistinguishedName
         return new DistinguishedName(seq.get(ParseUtil.isContext(seq.get(0), 0) ? 3 : 2));
       }
     
-    /**
+    /*
      * Returns the DistinguishedName of a certificate issuer.
      */
     public static DistinguishedName issuerDN(X509Certificate certificate)
@@ -173,22 +160,16 @@ public class DistinguishedName
         return issuerDN(ASN1Util.x509Certificate(certificate));
       }
     
-    /**
-     * Tests if this <code>DistinguishedName</code> contains a specific 
-     * {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}.
-     * <p>Matches {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}s 
-     * using to the rules specified
-     * in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
+    /*
+     * Tests if this DistinguishedName contains a specific RelativeDistinguishedName
      */
     public boolean hasComponent(RelativeDistinguishedName rdn)
       {
         return components.contains(rdn);
       }
     
-    /**
-     * Compare two <code>DistinguishedName</code>s in PKCS#7 Issuer type.
-     * <p>Compares {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}s
-     * using to the rules specified in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
+    /*
+     * Compare two DistinguishedNames in PKCS#7 Issuer type.
      */
     public boolean compare(DistinguishedName dn)
       {
@@ -208,10 +189,8 @@ public class DistinguishedName
         return true;
       }
 
-    /**
+    /*
      * Compare two <code>DistinguishedName</code>s in PKCS#7 Issuer type.
-     * <p>Compares {@link org.webpki.asn1.cert.RelativeDistinguishedName RelativeDistinguishedName}s
-     * using to the rules specified in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
      */
     public boolean equals(Object o)
       {

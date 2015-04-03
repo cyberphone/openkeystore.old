@@ -174,7 +174,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's common name (CN).
      */
     public String getSubjectCommonName ()
@@ -183,7 +183,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's organization (O).
      */
     public String getSubjectOrganization ()
@@ -192,7 +192,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's organizational unit (OU).
      */
     public String getSubjectOrganizationUnit ()
@@ -201,7 +201,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's e-mail address (E).
      */
     public String getSubjectEmail ()
@@ -210,7 +210,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's country address (C).
      */
     public String getSubjectCountry ()
@@ -219,7 +219,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject's serial number (OID 2.5.4.5).
      */
     public String getSubjectSerialNumber ()
@@ -228,7 +228,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the certificate hash.
      */
     public byte[] getCertificateHash ()
@@ -244,7 +244,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the subject of this certificate
      */
     public String getSubject ()
@@ -253,7 +253,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the issuer of this certificate
      */
     public String getIssuer ()
@@ -262,7 +262,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the serial number of this certificate
      */
     public String getSerialNumber ()
@@ -271,7 +271,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the start date of this certificate's validity period.
      */
     public Date getNotBeforeDate ()
@@ -280,7 +280,7 @@ public class CertificateInfo
       }
 
 
-    /**
+    /*
      * Returns the end date of this certificate's validity period.
      */
     public Date getNotAfterDate ()
@@ -289,8 +289,8 @@ public class CertificateInfo
       }
 
 
-    /**
-     * Checks if this certificate is valid &quot;now&quot;.
+    /*
+     * Checks if this certificate is currently valid.
      */
     public boolean isValid ()
       {

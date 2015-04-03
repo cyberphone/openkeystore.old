@@ -36,7 +36,9 @@ import org.webpki.util.ISODateTime;
 
 /**
  * JSON object reader.
+ * <p>
  * Returned by the parser methods.
+ * Also provides built-in support for JCS (JSON Cleartext Signatures) decoding.</p>
  *
  */
 public class JSONObjectReader implements Serializable, Cloneable

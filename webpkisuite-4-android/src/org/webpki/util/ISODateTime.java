@@ -39,6 +39,10 @@ public class ISODateTime
      *   _time       = 2h ":" 2m ":" 2s ["." 1*s]
      *   _timeZone   = "Z" / ("+" / "-" 2h ":" 2m)
      *   dateTime    = _date "T" _time [_timeZone]
+     *   
+     * @param s String to be parsed
+     * @return GregorianCalendar
+     * @throws IOException If anything unexpected is found...
      */
     public static GregorianCalendar parseDateTime (String s) throws IOException
       {

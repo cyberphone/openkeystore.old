@@ -34,9 +34,8 @@ public class JSONAsymKeyVerifier extends JSONVerifier
      * Note that you can access the received public key from {@link JSONSignatureDecoder}
      * which is useful if there are multiple keys possible.
      * @param expected_public_key Expected public key
-     * @throws IOException
-     */
-    public JSONAsymKeyVerifier (PublicKey expected_public_key) throws IOException
+      */
+    public JSONAsymKeyVerifier (PublicKey expected_public_key)
       {
         this.expected_public_key = expected_public_key;
       }

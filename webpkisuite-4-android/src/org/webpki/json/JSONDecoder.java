@@ -31,20 +31,29 @@ public abstract class JSONDecoder implements Serializable
     JSONObject root;  // Of parsed document
 
     /**
-     * INTERNAL USE ONLY.    
+     * INTERNAL USE ONLY.
+     * @param rd A JSON reader
+     * @throws IOException For any kind of error...   
      */
     protected abstract void readJSONData (JSONObjectReader rd) throws IOException;
     
     /**
-     * Emulation of XML namespace     
+     * Emulation of XML namespace
+     * @return The context name
      */
     public abstract String getContext ();
 
     /**
      * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
+     * @return The qualifier name
      */
     public String getQualifier ()
       {
         return null;
+      }
+
+    public byte[] serializeJSONDecoder (JSONOutputFormats output_format) throws IOException
+      {
+        return new JSONObjectWriter (root).serializeJSONObject (output_format);
       }
   }

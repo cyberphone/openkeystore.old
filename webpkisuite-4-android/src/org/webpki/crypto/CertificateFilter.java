@@ -343,14 +343,11 @@ public class CertificateFilter
         return this;
       }
 
-/**
- * 
- * @param extended_key_usage_rules The argument<br>
- *   <code>&quot;new String[]{"1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.4"}&quot;</code><br>
+/*
+ * The argument
+ *   new String[]{"1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.4"}
  *   requires matching end-entity certificates to have (at least) the two extended key usages,
- *   <code>clientAuthentication</code> and <code>emailProtection</code>
- * @return {@link CertificateFilter}
- * @throws IOException 
+ *   clientAuthentication and emailProtection
  */
     public CertificateFilter setExtendedKeyUsageRules (String[] extended_key_usage_rules) throws IOException
       {
