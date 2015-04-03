@@ -1,6 +1,0 @@
-# view res/layout/capture.xml #generated:25
--keep class com.google.zxing.client.android.ViewfinderView { <init>(...); }
-
-# view AndroidManifest.xml #generated:35
--keep class org.webpki.android.qrcode.CaptureActivity { <init>(...); }
-
