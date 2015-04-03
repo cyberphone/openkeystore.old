@@ -38,25 +38,25 @@ public class Canonicalizer {
    public static final String ENCODING = "UTF-8";
 
    
-   /**
-     * XPath Expresion for selecting every node and continuos comments joined in only one node 
-     */
+   /*
+    * XPath Expresion for selecting every node and continuos comments joined in only one node 
+    */
     public static final String XPATH_C14N_WITH_COMMENTS_SINGLE_NODE = "(.//. | .//@* | .//namespace::*)";
    
 
-   /**
-     * The URL defined in XML-SEC Rec for inclusive c14n <b>without</b> comments.
-     */
+   /*
+    * The URL defined in XML-SEC Rec for inclusive c14n <b>without</b> comments.
+    */
    public static final String ALGO_ID_C14N_OMIT_COMMENTS = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
-   /**
+   /*
     * The URL defined in XML-SEC Rec for inclusive c14n <b>with</b> comments.
     */
    public static final String ALGO_ID_C14N_WITH_COMMENTS = ALGO_ID_C14N_OMIT_COMMENTS + "#WithComments";
-   /**
+   /*
     * The URL defined in XML-SEC Rec for exclusive c14n <b>without</b> comments.
     */
    public static final String ALGO_ID_C14N_EXCL_OMIT_COMMENTS = "http://www.w3.org/2001/10/xml-exc-c14n#";
-   /**
+   /*
     * The URL defined in XML-SEC Rec for exclusive c14n <b>with</b> comments.
     */
    public static final String ALGO_ID_C14N_EXCL_WITH_COMMENTS = ALGO_ID_C14N_EXCL_OMIT_COMMENTS + "WithComments";
@@ -66,7 +66,7 @@ public class Canonicalizer {
    protected CanonicalizerSpi canonicalizerSpi = null;
    //J+
 
-   /**
+   /*
     * Method init
     *
     */
@@ -84,7 +84,7 @@ public class Canonicalizer {
    }
 
 
-    /**
+   /*
     * Constructor Canonicalizer
     *
     * @param algorithmURI
@@ -107,7 +107,7 @@ public class Canonicalizer {
       }
    }
 
- /**
+   /*
     * Method getInstance
     *
     * @param algorithmURI
@@ -123,7 +123,7 @@ public class Canonicalizer {
    }
 
 
-   /**
+   /*
     * Method getURI
     *
     * @return the URI defined for this c14n instance.
@@ -132,7 +132,7 @@ public class Canonicalizer {
       return this.canonicalizerSpi.engineGetURI();
    }
 
-   /**
+   /*
     * Method getIncludeComments
     *
     * @return true if the c14n respect the comments.
@@ -142,7 +142,7 @@ public class Canonicalizer {
    }
 
 
-   /**
+   /*
     * Canonicalizes the subtree rooted by <CODE>node</CODE>.
     *
     * @param node The node to canicalize
@@ -155,7 +155,7 @@ public class Canonicalizer {
       return this.canonicalizerSpi.engineCanonicalizeSubTree(node);
    }
 
-   /**
+   /*
     * Canonicalizes the subtree rooted by <CODE>node</CODE>.
     *
     * @param node
@@ -170,7 +170,7 @@ public class Canonicalizer {
    }
 
 
-   /**
+   /*
     * Sets the writter where the cannocalization ends. ByteArrayOutputStream if 
     * none is setted.
     * @param os
@@ -179,7 +179,7 @@ public class Canonicalizer {
         this.canonicalizerSpi.setWriter(os);
    }
 
-   /**
+   /*
     * Returns the name of the implementing {@link CanonicalizerSpi} class
     *
     * @return the name of the implementing {@link CanonicalizerSpi} class
@@ -188,7 +188,7 @@ public class Canonicalizer {
       return this.canonicalizerSpi.getClass().getName();
    }
 
-   /**
+   /*
     * Method getImplementingClass
     * 
     * @param URI
@@ -198,7 +198,7 @@ public class Canonicalizer {
       return (Class) _canonicalizerHash.get(URI);         
    }
    
-   /**
+   /*
     * Set the canonicalizator behaviour to not reset.
     *
     */

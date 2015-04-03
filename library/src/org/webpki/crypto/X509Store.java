@@ -90,8 +90,8 @@ public class X509Store
       {
       }
     
-    /**
-     * Create a X509Store containing all certificates in <code>keyStore</code>.
+    /*
+     * Create a X509Store containing all certificates in keyStore.
      */
     public X509Store(KeyStore keyStore) throws IOException, GeneralSecurityException
       {
@@ -108,7 +108,7 @@ public class X509Store
           }
       }
     
-    /**
+    /*
      * Create a X509Store containing all certificates in an array.
      */
     public X509Store(X509Certificate[] certificates) throws IOException, GeneralSecurityException
@@ -117,7 +117,7 @@ public class X509Store
         add(certificates);
       }
     
-    /**
+    /*
      * Create a X509Store containing all certificates in an array.
      */
     public X509Store(byte[][] certificates) throws IOException, GeneralSecurityException
@@ -132,7 +132,7 @@ public class X509Store
           }
       }
     
-    /**
+    /*
      * Returns true if this store contains one or more certificates for <code>subject</code>
      */
     public boolean hasCertificate(DistinguishedName subject)
@@ -140,8 +140,8 @@ public class X509Store
         return store.containsKey(subject);
       }
     
-    /**
-     * Returns true if this store contains <code>certificate</code>
+    /*
+     * Returns true if this store contains certificate
      */
     public boolean hasCertificate(X509Certificate certificate) throws IOException, GeneralSecurityException
       {
@@ -158,8 +158,8 @@ public class X509Store
         return false;
       }
     
-    /**
-     * Returns all certificates matching a given {@link DistinguishedName subject}
+    /*
+     * Returns all certificates matching a given DistinguishedName
      */
     public Enumeration<X509Certificate> getCertificates(DistinguishedName subject)
       {
@@ -169,13 +169,12 @@ public class X509Store
                              v.elements();
       }
 
-    /**
+    /*
      * Verify a certificate against the store.
      * 
      * Check if the certificate is either itself in the store or 
      * can be verified by a certificate in the store.
      * 
-     * @return true if the certificate can be verified.
      */
     public boolean verifyCertificate(X509Certificate certificate) throws IOException, GeneralSecurityException
       {
@@ -187,7 +186,7 @@ public class X509Store
         return getVerifiedIssuer(certificate) != null;
       }
 
-    /**
+    /*
      * Returns the (verified) issuer of a certificate if present in this store.
      */
     public X509Certificate getVerifiedIssuer(X509Certificate certificate) throws IOException, GeneralSecurityException
@@ -212,7 +211,7 @@ public class X509Store
         return null;
       }
     
-    /**
+    /*
      * Returns the issuer of a certificate if present in the supplied list of certs.
      * This method will return null if the issuer certificate cannot be found or if the
      * certificate is self-signed.
@@ -237,15 +236,13 @@ public class X509Store
         return null;
       }
     
-    /**
+    /*
      * Verify a certificate against the store.
      * 
      * Checks if the supplied certificate is either itself in
      * the store och can be verified by a certificate in the store,
      * possibly using a certificate chain constructed from other 
      * certificates in the supplied store.
-     * 
-     * @return true if the certificate can be verified.
      */
     public boolean verifyCertificate(X509Store chainStore, X509Certificate certificate)
     throws IOException, GeneralSecurityException
@@ -256,15 +253,13 @@ public class X509Store
                 verifyCertificateByIssuer(certificate));
       }
 
-    /**
+    /*
      * Verify a certificate against the store.
      * 
      * Checks if the supplied certificate is either itself in
      * the store och can be verified by a certificate in the store,
      * possibly using a certificate chain constructed from other 
      * certificates in the supplied stores.
-     * 
-     * @return true if the certificate can be verified.
      */
     public boolean verifyCertificate(X509Store chainStore1, X509Store chainStore2, X509Certificate certificate)
     throws IOException, GeneralSecurityException
@@ -276,15 +271,13 @@ public class X509Store
                 verifyCertificateByIssuer(certificate));
       }
 
-    /**
+    /*
      * Verify a certificate against the store.
      * 
      * Checks if the i:th certificate in the array is either itself in
      * the store och can be verified by a certificate in the store,
      * possibly using a certificate chain constructed from other 
      * certificates in the array.
-     * 
-     * @return true if the certificate can be verified.
      */
     public boolean verifyCertificate(X509Certificate[] certificates, int i)
     throws IOException, GeneralSecurityException
@@ -292,15 +285,13 @@ public class X509Store
         return verifyCertificate(certificates, certificates[i]);
       }
 
-    /**
+    /*
      * Verify a certificate against the store.
      * 
      * Checks if the certificate is either itself in
      * the store och can be verified by a certificate in the store,
      * possibly using a certificate chain constructed from
      * certificates in the array.
-     * 
-     * @return true if the certificate can be verified.
      */
     public boolean verifyCertificate(X509Certificate[] certificates, X509Certificate certificate)
     throws IOException, GeneralSecurityException
@@ -308,15 +299,13 @@ public class X509Store
         return verifyCertificate(new X509Store(certificates), certificate);
       }
     
-    /**
+    /*
      * Verify an array of certificates against the store.
      * 
      * Checks if the certificates are either themselves in
      * the store och can be verified by certificates in the store,
      * possibly using certificate chains constructed from
      * certificates in the array.
-     * 
-     * @return true if all the certificates can be verified.
      */
     public boolean verifyCertificates(X509Certificate[] certificates)
     throws IOException, GeneralSecurityException

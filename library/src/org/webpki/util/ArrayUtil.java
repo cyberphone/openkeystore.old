@@ -30,67 +30,9 @@ public class ArrayUtil
   {
     private ArrayUtil () {}  // No instantiation please
 
-    /**
-     * Find byte in byte array, starting at an offset.
-     * @return First index, larger or equal to offset, of b in a or -1 if there is no such index.
-     */
-    public static int indexOf(byte[] a, int startOffset, byte b)
-      {
-        for(int i = startOffset; i < a.length; i++)
-          {
-            if(a[i] == b)
-              {
-                return i;
-              }
-          }
-        return -1;
-      }
-  
-    /**
-     * Find byte in byte array.
-     * @return First index of b in a or -1 if b doesn't occur in a.
-     */
-    public static int indexOf(byte[] a, byte b)
-      {
-        return indexOf(a, 0, b);
-      }
-  
-    /**
-     * Find byte sequence in byte array, starting at an offset.
-     * @return First index, larger or equal to offset, of b in a or -1 if there is no such index.
-     */
-    public static int indexOf(byte[] a, int startOffset, byte b[])
-      {
-        for(int i = startOffset; i < a.length; i++)
-          {
-            int j = 0;
-            
-            while(j < b.length && i + j < a.length &&
-                  a[i + j] == b[j])
-              {
-                j++;
-              }
-          
-            if(j == b.length)
-              {
-                return i;
-              }
-          }
-        return -1;
-      }
-    
-    /**
-     * Find byte sequence in byte array, starting at an offset.
-     * @return First index of b in a or -1 if there is no such index.
-     */
-    public static int indexOf(byte[] a, byte b[])
-      {
-        return indexOf(a, 0, b);
-      }
-    
-    /**
+    /*
      * Find first difference between two byte arrays.
-     * @return First index i < length for which 
+     * return First index i < length for which 
      * a[aOffset + i] != b[bOffset + i], 
      * or -1 if no differences are found.
      */
@@ -120,7 +62,7 @@ public class ArrayUtil
         return -1;
       }
 
-    /**
+    /*
      * Find first difference between two byte arrays.
      */
     public static int firstDiff(byte[] a, byte[] b, int offset, int length)
@@ -128,7 +70,7 @@ public class ArrayUtil
         return firstDiff(a, offset, b, offset, length);
       }
 
-    /**
+    /*
      * Find first difference between two byte arrays.
      */
     public static int firstDiff(byte[] a, byte[] b)
@@ -136,9 +78,9 @@ public class ArrayUtil
         return firstDiff(a, b, 0, Math.min(a.length, b.length));
       }
 
-    /**
+    /*
      * Compare two byte arrays.
-     * @return true if contents are the same and both are non-null.
+     * return true if contents are the same and both are non-null.
      */
     public static boolean compare(byte[] a, int aOffset, byte[] b, int bOffset, int length)
       {
@@ -162,9 +104,9 @@ public class ArrayUtil
         return true;
       }
 
-    /**
+    /*
      * Compare two byte arrays.
-     * @return true if a.length - aOffset == b.length - bOffset and all values in a starting at aOffset match the values in b starting at bOffset.
+     * return true if a.length - aOffset == b.length - bOffset and all values in a starting at aOffset match the values in b starting at bOffset.
      */
     public static boolean compare(byte[] a, int aOffset, byte[] b, int bOffset)
       {
@@ -172,7 +114,7 @@ public class ArrayUtil
                compare(a, aOffset, b, bOffset, a.length - aOffset);
       }
 
-    /**
+    /*
      * Compare two byte arrays.
      */
     public static boolean compare(byte[] a, byte[] b, int offset, int length)
@@ -180,7 +122,7 @@ public class ArrayUtil
         return compare(a, offset, b, offset, length);
       }
 
-    /**
+    /*
      * Compare two byte arrays.
      */
     public static boolean compare(byte[] a, byte[] b, int offset)
@@ -188,18 +130,18 @@ public class ArrayUtil
         return compare(a, offset, b, offset);
       }
 
-    /**
-     * @return true if contents are the same or both are null.
+    /*
+     * Compare two byte arrays.
      */
     public static boolean compare(byte[] a, byte[] b)
       {
         return a == b || compare(a, b, 0);
       }
     
-    /**
+    /*
      * Returns the index of the (first) minimal element of an <code>int</code> array.
-     * @return The index of the (first) minimal element.
-     * @throws IllegalArgumentException If <code><i>a</i></code> is empty.
+     * return The index of the (first) minimal element.
+     * throws IllegalArgumentException If <code><i>a</i></code> is empty.
      */
     public static int indexOfMin(int[] a)
       {
@@ -221,10 +163,10 @@ public class ArrayUtil
           }
       }
     
-    /**
+    /*
      * Returns the index of the (first) maximal element of an <code>int</code> array.
-     * @return The index of the (first) maximal element.
-     * @throws IllegalArgumentException If <code><i>a</i></code> is empty.
+     * return The index of the (first) maximal element.
+     * throws IllegalArgumentException If <code><i>a</i></code> is empty.
      */
     public static int indexOfMax(int[] a)
       {
@@ -246,29 +188,30 @@ public class ArrayUtil
           }
       }
     
-    /**
+    /*
      * Returns the minimal element of an <code>int</code> array.
-     * @throws IllegalArgumentException If <code><i>a</i></code> is empty.
+     * throws IllegalArgumentException If <code><i>a</i></code> is empty.
      */
     public static int min(int[] a)
       {
         return a[indexOfMin(a)];
       }
     
-    /**
+    /*
      * Returns the maximal element of an <code>int</code> array.
-     * @throws IllegalArgumentException If <code><i>a</i></code> is empty.
+     * throws IllegalArgumentException If <code><i>a</i></code> is empty.
      */
     public static int max(int[] a)
       {
         return a[indexOfMax(a)];
       }
     
-    /**
+    /*
      * Convert byte array to hex string with formating options.
      * @param maxLength Max number of bytes to convert (-1 for full string).
      * @param separator Character to insert between converted bytes ('\0' for none).
      * @param uppercase Use uppercase letters (for hex symbols).
+     * @return String
      */
     public static String toHexString(byte[] value, int startOffset,
                                      int maxLength,
@@ -299,7 +242,7 @@ public class ArrayUtil
         return r.toString();
       }
 
-    /**
+    /*
      * Convert byte array to hex string.
      * Calls the more configurable {@link #toHexString(byte[], int, int, boolean, char) 
      * toHexString} with uppercase set to true and space as separator character.
@@ -310,7 +253,7 @@ public class ArrayUtil
         return toHexString(value, startOffset, maxLength, true, ' ');
       }
 
-    /**
+    /*
      * Convert byte array to hex string.
      * Calls the more configurable {@link #toHexString(byte[], int, int, boolean, char) 
      * toHexString} with no offset, no max length, uppercase set to true and 
@@ -321,7 +264,7 @@ public class ArrayUtil
         return toHexString(value, 0, -1, true, ' ');
       }
     
-    /**
+    /*
      * Convert int to hex string.
      * Calls {@link #toHexString(byte[], int, int, boolean, char) toHexString} with an array
      * containing the byte representation of the integer (little-endian).
@@ -356,7 +299,7 @@ public class ArrayUtil
         writeFile(new File(filename), b);
       }
     
-    /**
+    /*
      * Copies a part or the whole of the supplied byte array to a new array of the indicated size.
      * If <i>newSize</i> is larger than <code>b.length</code> the remaining bytes of the 
      * result array will be set to zero.
@@ -368,7 +311,7 @@ public class ArrayUtil
         return r;
       }
     
-    /**
+    /*
      * Makes a copy of the supplied byte array.
      */
     public static byte[] copy(byte[] b)
@@ -376,8 +319,8 @@ public class ArrayUtil
         return copy(b, b.length);
       }
 
-    /**
-     * @return the added byte array.
+    /*
+     * return the added byte array.
      */
     public static byte[] add(byte[] a, byte[] b)
       {
@@ -387,7 +330,7 @@ public class ArrayUtil
         return r;
       }
     
-    /**
+    /*
      * Makes a reversed copy of the supplied byte array.
      */
     public static byte[] reverse(byte[] b)

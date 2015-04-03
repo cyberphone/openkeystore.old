@@ -20,7 +20,6 @@ import java.io.IOException;
 
 /**
  * Encodes/decodes base64 data.
- * @version 1.1 (2000-08-17)
  */
 public class Base64
   {
@@ -388,7 +387,7 @@ public class Base64
      * For every 4 base64 bytes you'll get 3 binary bytes.
      * @param base64_ascii8_blob encoded data
      * @return decoded data as a byte array
-     * @exception IOException if the input data isn't valid base64 data
+     * @throws IOException if the input data isn't valid base64 data
      */
     public byte[] getBinaryFromBase64Binary(byte[] base64_ascii8_blob) throws IOException
       {
@@ -399,7 +398,7 @@ public class Base64
      * For every 4 base64 bytes you'll get 3 binary bytes.
      * @param base64 encoded data
      * @return decoded data as a byte array
-     * @exception IOException if the input data isn't valid base64 data
+     * @throws IOException if the input data isn't valid base64 data
      * or if the input String contains characters
      * other than ASCII8.
      */
@@ -412,7 +411,7 @@ public class Base64
      * For every 4 base64 bytes you'll get 3 binary bytes.
      * @param base64_ascii8_blob encoded data
      * @return decoded data as a String
-     * @exception IOException if the input data isn't valid base64 data.
+     * @throws IOException if the input data isn't valid base64 data.
      */
     public String getStringFromBase64Binary(byte[] base64_ascii8_blob) throws IOException
       {
@@ -423,7 +422,7 @@ public class Base64
      * For every 4 base64 bytes you'll get 3 binary bytes.
      * @param base64 encoded data
      * @return decoded data as a String
-     * @exception IOException if the input data isn't valid base64 data
+     * @throws IOException if the input data isn't valid base64 data
      * or if the input String contains characters
      * other than ASCII8.
      */
@@ -437,7 +436,7 @@ public class Base64
      * and is not equal to the length of the Unicode String.
      * @param base64_ascii8_blob encoded data
      * @return decoded data as a Unicode String
-     * @exception IOException if the input data isn't valid base64 data
+     * @throws IOException if the input data isn't valid base64 data
      * or if there is a problem converting UTF-8 to Unicode
      */
     public String getUnicodeFromBase64Binary(byte[] base64_ascii8_blob) throws IOException
@@ -450,7 +449,7 @@ public class Base64
      * and is not equal to the length of the Unicode String.
      * @param base64 encoded data
      * @return decoded data as a Unicode String
-     * @exception IOException if the input data isn't valid base64 data
+     * @throws IOException if the input data isn't valid base64 data
      * or if there is a problem converting UTF-8 to Unicode
      */
     public String getUnicodeFromBase64String(String base64) throws IOException
@@ -538,7 +537,7 @@ public class Base64
      * For every 3 binary bytes, you'll get 4 base64 bytes.
      * @param ascii8 uncoded data
      * @return encoded data as a byte array
-     * @exception IOException if the input
+     * @throws IOException if the input
      * String contains non-ascii8 characters.
      */
     public byte[] getBase64BinaryFromString(String ascii8) throws IOException
@@ -552,7 +551,7 @@ public class Base64
      * and is not equal to the length of the Unicode String.
      * @param unicode uncoded data
      * @return encoded data as a byte array
-     * @exception IOException if there
+     * @throws IOException if there
      * is a problem converting Unicode to UTF-8.
      */
     public byte[] getBase64BinaryFromUnicode(String unicode) throws IOException
@@ -574,7 +573,7 @@ public class Base64
      * For every 3 binary bytes, you'll get 4 base64 bytes.
      * @param ascii8 uncoded data
      * @return encoded data as a String
-     * @exception IOException if the input
+     * @throws IOException if the input
      * String contains non-ascii8 characters.
      */
     public String getBase64StringFromString(String ascii8) throws IOException
@@ -589,7 +588,7 @@ public class Base64
      * and is not equal to the length of the Unicode String.
      * @param unicode uncoded data
      * @return encoded data as a String
-     * @exception IOException if there
+     * @throws IOException if there
      * is a problem converting Unicode to UTF-8.
      */
     public String getBase64StringFromUnicode(String unicode) throws IOException
@@ -608,7 +607,9 @@ public class Base64
         System.exit (3);
       }
     
-    /** Used for debugging the application.
+    /** 
+     * @param args Command line interface
+     * @throws Exception If anything unexpected happens...
      */
     public static void main(String[] args) throws Exception
       {

@@ -580,7 +580,7 @@ public class ProxyClient
      *  
      * @param truststore_file JKS or PKCS #12 file-name
      * @param password Truststore password
-     * @throws IOException
+     * @throws IOException If something unexpected happens...
      */
     public void setTrustStore (String truststore_file, String password) throws IOException
       {
@@ -593,7 +593,7 @@ public class ProxyClient
      * 
      * @param keystore Instantiated Java KeyStore
      * @param password Key password
-     * @throws IOException
+     * @throws IOException If something unexpected happens...
      */
     public void setKeyStore (KeyStore keystore, String password) throws IOException
       {
@@ -607,7 +607,7 @@ public class ProxyClient
      * 
      * @param keystore_file JKS or PKCS #12 file-name
      * @param password Key password
-     * @throws IOException
+     * @throws IOException If something unexpected happens...
      */
     public void setKeyStore (String keystore_file, String password) throws IOException
       {
@@ -620,7 +620,7 @@ public class ProxyClient
      * For HTTPS client certificate authentication.
      * 
      * @param key_alias Key alias
-     * @throws IOException
+     * @throws IOException If something unexpected happens...
      */
     public void setKeyAlias (String key_alias) throws IOException
       {
@@ -639,6 +639,7 @@ public class ProxyClient
      *          The host name or IP address of the web-proxy server.
      * @param port
      *          The TCP port number to use.
+     * @throws IOException If something unexpected happens...
      */
     public void setWebProxy (String address, int port) throws IOException
       {
@@ -691,6 +692,7 @@ public class ProxyClient
      *          The timeout in seconds for external proxy calls.
      * @param debug
      *          Defines if debug output is to be created or not.
+     * @throws IOException If something unexpected happens...
      */
     public void initProxy (ClientRequestHandler handler,
                            String proxy_url,
@@ -716,7 +718,7 @@ public class ProxyClient
      * MUST NOT be called before {@link #initProxy(ClientRequestHandler, String, int, int, int, boolean)}.
      * 
      * @param upload_object a derived object
-     * @throws IOException 
+     * @throws IOException If something unexpected happens...
      */
     public void addUploadObject (JavaUploadInterface upload_object) throws IOException
       {

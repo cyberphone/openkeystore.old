@@ -42,7 +42,7 @@ public class ASN1Sequence extends Composite
         super(decoder);
       }
     
-    /**
+    /*
      * Try to construct a X509Certificate from this sequence.
      */
     public X509Certificate x509Certificate() 

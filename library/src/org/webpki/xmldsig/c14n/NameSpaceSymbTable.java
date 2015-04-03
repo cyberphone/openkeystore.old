@@ -35,7 +35,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("unchecked")
 public class NameSpaceSymbTable {
     
-    /**The map between prefix-> entry table. */
+    /**The map between prefix entry table. */
     SymbMap symb = new SymbMap();
     /**The level of nameSpaces (for Inclusive visibility).*/
     int nameSpaces=0;
@@ -53,7 +53,7 @@ public class NameSpaceSymbTable {
         symb.put(XMLNS,ne);    
     }
     
-    /**
+    /*
      * Get all the unrendered nodes in the name space.
      * For Inclusive rendering
      * @param result the list where to fill the unrendered xmlns definitions.
@@ -71,7 +71,7 @@ public class NameSpaceSymbTable {
        }       
     }
     
-    /**
+    /*
      * Push a frame for visible namespace. 
      * For Inclusive rendering.
      **/
@@ -80,7 +80,7 @@ public class NameSpaceSymbTable {
         push();
     }
     
-    /**
+    /*
      * Pop a frame for visible namespace.
      **/
     public void outputNodePop() {
@@ -88,7 +88,7 @@ public class NameSpaceSymbTable {
         pop();
     }
     
-    /**
+    /*
      * Push a frame for a node.
      * Inclusive or Exclusive.
      **/
@@ -102,7 +102,7 @@ public class NameSpaceSymbTable {
         cloned=false;
     }
     
-    /**
+    /*
      * Pop a frame.
      * Inclusive or Exclusive.
      **/
@@ -132,7 +132,7 @@ public class NameSpaceSymbTable {
     }
     
     
-    /**
+    /*
      * Gets the attribute node that defines the binding for the prefix.      
      * @param prefix the prefix to obtain the attribute.
      * @return null if there is no need to render the prefix. Otherwise the node of
@@ -159,7 +159,7 @@ public class NameSpaceSymbTable {
         return entry.n;
     }
     
-    /**
+    /*
      * Gets a definition without mark it as render. 
      * For render in exclusive c14n the namespaces in the include prefixes.
      * @param prefix The prefix whose definition is neaded.
@@ -176,7 +176,7 @@ public class NameSpaceSymbTable {
         return entry.n;
     }
     
-    /**
+    /*
      * Adds the mapping for a prefix.
      * @param prefix the prefix of definition
      * @param uri the Uri of the definition
@@ -205,7 +205,7 @@ public class NameSpaceSymbTable {
         return true;
     }
 
-    /**
+    /*
      * Adds a definition and mark it as render.
      * For inclusive c14n.
      * @param prefix the prefix of definition
@@ -241,7 +241,8 @@ public class NameSpaceSymbTable {
         }       
         return ne.n;
     }
-    /** 
+
+    /* 
      * Adds & gets(if needed) the attribute node that defines the binding for the prefix. 
      * Take on account if the rules of rendering in the inclusive c14n.
      * For inclusive c14n.
@@ -300,7 +301,7 @@ class NameSpaceSymbEntry implements Cloneable {
         this.rendered=rendered;
         this.n=n;            
     }
-    /** @inheritDoc */
+    /** {inheritDoc} */
     public Object clone() {         
         try {
             return super.clone();
@@ -367,7 +368,8 @@ class SymbMap implements Cloneable{
         } while (cur != null && (!cur.equals(obj)));       
         return index;
     }
-     /**
+
+    /*
      * rehashes the map to the new capacity.
      *
      * @param newCapacity an <code>int</code> value

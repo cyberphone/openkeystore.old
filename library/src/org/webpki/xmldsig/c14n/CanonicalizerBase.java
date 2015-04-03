@@ -38,7 +38,7 @@ import org.webpki.xml.DOMUtil;
 /**
  * Abstract base class for canonicalization algorithms.
  *
- * @author Christian Geuer-Pollmann <geuerp@apache.org>
+ * @author Christian Geuer-Pollmann
  * @version $Revision: 1.23 $
  */
 @SuppressWarnings("unchecked")
@@ -75,14 +75,14 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
  
    boolean _includeComments;
    Set _xpathNodeSet = null;
-   /**
+   /*
     * The node to be skiped/excluded from the DOM tree 
     * in subtree canonicalizations.
     */
    Node _excludeNode =null;
    OutputStream _writer = new UnsyncByteArrayOutputStream();//null;
 
-   /**
+   /*
     * Constructor CanonicalizerBase
     *
     * @param includeComments
@@ -91,9 +91,9 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
       this._includeComments = includeComments;
    }
 
-   /**
+   /*
     * Method engineCanonicalizeSubTree
-    * @inheritDoc
+    * {inheritDoc}
     * @param rootNode
     * @throws CanonicalizerException
     */
@@ -101,7 +101,8 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
            throws CanonicalizerException {
         return engineCanonicalizeSubTree(rootNode,(Node)null);
    }
-   /**
+
+   /*
      * Canonicalizes a Subtree node.
      * 
      * @param rootNode
@@ -139,7 +140,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
    }
  
    
-   /**
+   /*
     * Method canonicalizeSubTree, this function is a recursive one.
     *    
     * @param currentNode
@@ -246,7 +247,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         } while(true);
     }
 
-   /**
+   /*
     * Checks whether a Comment or ProcessingInstruction is before or after the
     * document element. This is needed for prepending or appending "\n"s.
     *
@@ -277,8 +278,8 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
    }
      
 
-   /**
-    * Canoicalizes all the nodes included in the currentNode and contained in the 
+   /*
+    * Canonicalizes all the nodes included in the currentNode and contained in the 
     * _xpathNodeSet field.
     *
     * @param currentNode
@@ -424,7 +425,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         return true;
     }
 
-    /**
+    /*
      * Adds to ns the definitons from the parent elements of el
      * @param el
      * @param ns
@@ -476,7 +477,8 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
              ns.addMappingAndRender("xmlns","",nullNode);
         }
     }
-   /**
+
+    /*
     * Outputs an Attribute to the internal Writer.
     *
     * The string value of the node is modified by replacing
@@ -614,7 +616,8 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
     }
     
    }
-   /**
+
+   /*
     * Outputs a PI to the internal Writer.
     *
     * @param currentPI
@@ -664,7 +667,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
      }
    }
 
-   /**
+   /*
     * Method outputCommentToWriter
     *
     * @param currentComment
@@ -696,7 +699,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
      }
    }
 
-   /**
+   /*
     * Outputs a Text of CDATA section to the internal Writer.
     *
     * @param text
@@ -739,7 +742,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
       }
    }
 
-   /**
+   /*
     * Obtain the attributes to output for this node in XPathNodeSet c14n. 
     *
     * @param E
@@ -747,10 +750,9 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
     * @return the attributes nodes to output.
     * @throws CanonicalizerException
     */
-   abstract Iterator handleAttributes(Element E, NameSpaceSymbTable ns )
-   throws CanonicalizerException;
+   abstract Iterator handleAttributes(Element E, NameSpaceSymbTable ns ) throws CanonicalizerException;
 
-   /**
+   /*
     * Obtain the attributes to output for this node in a Subtree c14n.
     *
     * @param E
@@ -758,12 +760,11 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
     * @return the attributes nodes to output.
     * @throws CanonicalizerException
     */
-   abstract Iterator handleAttributesSubtree(Element E, NameSpaceSymbTable ns)
-   throws CanonicalizerException;
+   abstract Iterator handleAttributesSubtree(Element E, NameSpaceSymbTable ns) throws CanonicalizerException;
 
 
     
-    /**
+    /*
      * @param _writer The _writer to set.
      */
     public void setWriter(OutputStream _writer) {

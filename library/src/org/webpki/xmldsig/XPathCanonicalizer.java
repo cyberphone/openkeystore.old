@@ -30,7 +30,7 @@ import org.webpki.xmldsig.c14n.Canonicalizer;
  */
 public class XPathCanonicalizer
   {
-    /**
+    /*
      * Serializes the <var>node</var> and all descendants of the <var>node</var>.
      * The result of this method is the same as the result of <code>serializeSubset(XPathCanonicalizer.toNodeList(node), withComments)</code>.
      */

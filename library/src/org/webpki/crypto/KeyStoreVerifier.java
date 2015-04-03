@@ -18,13 +18,13 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-import java.security.cert.X509Certificate;
 import java.security.KeyStore;
 import java.security.GeneralSecurityException;
 
+import java.security.cert.X509Certificate;
 
 /**
- * Verify data using the KeyStore interface. 
+ * Verify certificates using the KeyStore interface. 
  *
  */
 public class KeyStoreVerifier implements VerifierInterface
@@ -41,6 +41,8 @@ public class KeyStoreVerifier implements VerifierInterface
 
     /**
      * Verifier based on a specific keystore.
+     * @param caCertsKS Use this keystore for verification
+     * @throws IOException for various errors
      */
     public KeyStoreVerifier (KeyStore caCertsKS) throws IOException
       {
@@ -56,6 +58,7 @@ public class KeyStoreVerifier implements VerifierInterface
 
     /**
      * Dummy verifier accepting any certificate.
+     * @throws IOException for various errors
      */
     public KeyStoreVerifier () throws IOException
       {

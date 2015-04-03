@@ -44,10 +44,11 @@ public class XMLSymKeySigner extends XMLSignerCore
 
     /**
      * Creates an XMLSymKeySigner.
+     * @param signer Signer interface
      */
-    public XMLSymKeySigner (SymKeySignerInterface sym_signer)
+    public XMLSymKeySigner (SymKeySignerInterface signer)
       {
-        this.sym_signer = sym_signer;
+        this.sym_signer = signer;
       }
     
     public void SetKeyName (String key_name)

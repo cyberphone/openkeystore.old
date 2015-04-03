@@ -55,10 +55,11 @@ public class XMLSigner extends XMLSignerCore
 
     /**
      * Creates an XMLSigner using the given {@link SignerInterface SignerInterface}.
+     * @param signer Signer implementation
      */
-    public XMLSigner (SignerInterface signer_implem)
+    public XMLSigner (SignerInterface signer)
       {
-        this.signer_implem = signer_implem;
+        this.signer_implem = signer;
       }
 
   }

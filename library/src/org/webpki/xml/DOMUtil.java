@@ -61,6 +61,7 @@ public class DOMUtil
      * @param parent The parent of the new element.
      * @param element The name of the new element.
      * @param value The value of the text node.
+     * @return Element
      */
     public static Element appendTextElement (Element parent, String element, String value)
       {
@@ -81,6 +82,7 @@ public class DOMUtil
      * @param parent The parent of the new element.
      * @param element The name of the new element.
      * @param value The value of the text node.
+     * @return Element
      * @see #appendTextElement(Element, String, String)
      */
     public static Element appendTextElement (Element parent, String element, int value)
@@ -97,6 +99,7 @@ public class DOMUtil
      * @param parent The parent of the new element.
      * @param element The name of the new element.
      * @param value The value of the text node.
+     * @return Element
      * @see #appendTextElement(Element, String, String)
      */
     public static Element appendTextElement (Element parent, String element, long value)
@@ -116,6 +119,7 @@ public class DOMUtil
      * @param parent The parent of the new element.
      * @param element The name of the new element.
      * @param value The value of the text node.
+     * @return Element
      * @see #appendTextElement(Element, String, String)
      */
     public static Element appendTextElement (Element parent, String element, Object value)
@@ -128,6 +132,7 @@ public class DOMUtil
     /**
      * Get the first child {@link org.w3c.dom.Element Element} of an {@link org.w3c.dom.Element Element}.
      * <p>{@link org.w3c.dom.Node Nodes} other than {@link org.w3c.dom.Element Elements} are ignored.
+     * @param parent Parent
      * @return The first child {@link org.w3c.dom.Element Element} or null if none exists.
      */
     public static Element firstChildElement(Element parent)
@@ -147,6 +152,7 @@ public class DOMUtil
     /**
      * Get the next sibling {@link org.w3c.dom.Element Element} of a {@link org.w3c.dom.Node Node}.
      * <p>{@link org.w3c.dom.Node Nodes} other than {@link org.w3c.dom.Element Elements} are ignored.
+     * @param n Node
      * @return The first child {@link org.w3c.dom.Element Element} or null if none exists.
      */
     public static Element nextSiblingElement (Node n)
@@ -298,6 +304,9 @@ public class DOMUtil
     
     /**
      * Get the target namespace corresponding to a prefix.
+     * @param e Element
+     * @param prefix Prefix
+     * @return Namespace URI
      */
     public static String getNamespace (Element e, String prefix)
       {
@@ -315,6 +324,8 @@ public class DOMUtil
 
     /**
      * Get the defining target namespace of this element 
+     * @param e Element
+     * @return Namespace URI
      */
     public static String getDefiningNamespace (Element e)
       {
@@ -324,6 +335,9 @@ public class DOMUtil
     /**
      * Write the XML-encoding of a {@link Document Document} to an 
      * {@link java.io.OutputStream OutputStream}.
+     * @param d Document
+     * @param out Stream
+     * @throws IOException If anything unexpected happens...
      */
     public static void writeXML (Document d, OutputStream out) throws IOException
       {
@@ -349,7 +363,7 @@ public class DOMUtil
           }
       }
 
-    /**
+    /*
      * Write the XML-encoding of a {@link Document Document} to a byte array.
      */
     public static byte[] writeXML (Document d) throws IOException

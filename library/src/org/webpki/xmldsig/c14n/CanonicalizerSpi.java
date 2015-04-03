@@ -35,23 +35,22 @@ public abstract class CanonicalizerSpi {
     */
    public abstract String engineGetURI();
    
-   /** Returns the URI if include comments
+   /* Returns the URI if include comments
     * @return true if include.
     */
    public abstract boolean engineGetIncludeComments();
    
 
-   /**
+   /*
     * C14n a node tree.
     *
     * @param rootNode
     * @return the c14n bytes
     * @throws CanonicalizerException
     */
-   public abstract byte[] engineCanonicalizeSubTree(Node rootNode)
-      throws CanonicalizerException;
+   public abstract byte[] engineCanonicalizeSubTree(Node rootNode) throws CanonicalizerException;
 
-   /**
+   /*
     * C14n a node tree.
     *
     * @param rootNode
@@ -59,17 +58,16 @@ public abstract class CanonicalizerSpi {
     * @return the c14n bytes
     * @throws CanonicalizerException
     */
-   public abstract byte[] engineCanonicalizeSubTree(Node rootNode, String inclusiveNamespaces)
-      throws CanonicalizerException;
+   public abstract byte[] engineCanonicalizeSubTree(Node rootNode, String inclusiveNamespaces) throws CanonicalizerException;
    
-   /**
+   /*
     * Sets the writter where the cannocalization ends. ByteArrayOutputStream if 
     * none is setted.
     * @param os
     */
    public abstract void setWriter(OutputStream os);
    
-   /** Reset the writter after a c14n */
+   /* Reset the writter after a c14n */
    protected boolean reset=false;
    //J+
 }

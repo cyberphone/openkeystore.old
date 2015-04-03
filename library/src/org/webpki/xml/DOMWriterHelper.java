@@ -74,7 +74,7 @@ import org.webpki.util.ISODateTime;
  * will then point to the same element as the &quot;element insertion cursor&quot;).
  * 
  * <h3>A small example</h3>
- * <p><pre>
+ * <pre>
  *   DOMWriterHelper helper = new DOMWriterHelper(doc, &quot;example:order&quot;);
  * 
  *   helper.setNamespace(&quot;http://www.example.com/xml-schemas/order&quot;);
@@ -180,6 +180,9 @@ public class DOMWriterHelper
    
     /**
      * Creates a <code>DOMWriterHelper</code> wrapping an <code>XMLObjectWrapper</code>.
+     * @param instance XMLObjectWrapper
+     * @param prefix Prefix
+     * @throws IOException If anything unexpected happens...
      */
     public DOMWriterHelper (XMLObjectWrapper instance, String prefix) throws IOException
       {
@@ -226,6 +229,8 @@ public class DOMWriterHelper
     /**
      * Creates an empty element as a child of the last nontext element created or visited.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
+     * @param name Element name
+     * @return Element
      */
     public Element addChildElement (String name)
       {
@@ -237,6 +242,9 @@ public class DOMWriterHelper
     /**
      * Creates an empty element as a child of the last nontext element created or visited.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
+     * @param ns Namespace URI
+     * @param name Element name
+     * @return Element
      */
     public Element addChildElementNS (String ns, String name)
       {
@@ -249,6 +257,7 @@ public class DOMWriterHelper
      * Add a {@link XMLObjectWrapper wrapped element} as a child of the last nontext element created or visited.
      * @param wrapper The {@link XMLObjectWrapper wrapped element}.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
+     * @throws IOException If anything unexpected happens...
      */
     public void addWrapped (XMLObjectWrapper wrapper) throws IOException
       {
@@ -277,6 +286,7 @@ public class DOMWriterHelper
     /**
      * Creates an empty element as a child of the last nontext element created or visited,
      * but without setting the new element as the target of the next <code>addXXX</code> call.
+     * @param name Element name
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
     public void addEmptyElement (String name)
@@ -302,6 +312,7 @@ public class DOMWriterHelper
      * Add a text element to the current element.
      * @param name The name of the new element.
      * @param value The text content of the new element.
+     * @return Text element
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
     public Text addString (String name, String value)
@@ -316,8 +327,10 @@ public class DOMWriterHelper
     
     /**
      * Add a text element to the current element.
+     * @param ns Namespace URI
      * @param name The name of the new element.
      * @param value The text content of the new element.
+     * @return Text object
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
     public Text addStringNS (String ns, String name, String value)
@@ -334,6 +347,7 @@ public class DOMWriterHelper
      * Add a CDATA element to the current element.
      * @param name The name of the new element.
      * @param value The text content of the new element.
+     * @return CDATASection
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
     public CDATASection addCDATA (String name, String value)

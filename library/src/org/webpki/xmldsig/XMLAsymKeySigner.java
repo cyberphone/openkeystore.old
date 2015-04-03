@@ -42,9 +42,10 @@ public class XMLAsymKeySigner extends XMLSignerCore
 
     /**
      * Creates an XMLAsymKeySigner.
+     * @param signer Signer implementation
      */
-    public XMLAsymKeySigner (AsymKeySignerInterface signer_impl)
+    public XMLAsymKeySigner (AsymKeySignerInterface signer)
       {
-        this.signer_impl = signer_impl;
+        this.signer_impl = signer;
       }
   }

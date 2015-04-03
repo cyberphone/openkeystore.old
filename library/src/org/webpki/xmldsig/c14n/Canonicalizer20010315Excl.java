@@ -29,18 +29,16 @@ import org.w3c.dom.Node;
 /**
  * Implements &quot; <A
  * HREF="http://www.w3.org/TR/2002/REC-xml-exc-c14n-20020718/">Exclusive XML
- * Canonicalization, Version 1.0 </A>&quot; <BR />
+ * Canonicalization, Version 1.0 </A>&quot; <br>
  * Credits: During restructuring of the Canonicalizer framework, Ren??
  * Kollmorgen from Software AG submitted an implementation of ExclC14n which
  * fitted into the old architecture and which based heavily on my old (and slow)
  * implementation of "Canonical XML". A big "thank you" to Ren?? for this.
- * <BR />
+ * <br>
  * <i>THIS </i> implementation is a complete rewrite of the algorithm.
  * 
- * @author Christian Geuer-Pollmann <geuerp@apache.org>
+ * @author Christian Geuer-Pollmann
  * @version $Revision: 1.21 $ 
- * @see <a href="http://www.w3.org/TR/2002/REC-xml-exc-c14n-20020718/ Exclusive#">
- *          XML Canonicalization, Version 1.0</a>
  */
 @SuppressWarnings("unchecked")
 public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
@@ -51,7 +49,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
     TreeSet _inclusiveNSSet = null;
     static final String XMLNS_URI=Constants.NamespaceSpecNS;
     final SortedSet result = new TreeSet(COMPARE);
-    /**
+    /*
      * Constructor Canonicalizer20010315Excl
      * 
      * @param includeComments
@@ -60,9 +58,9 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
         super(includeComments);
     }
 
-    /**
+    /*
      * Method engineCanonicalizeSubTree
-     * @inheritDoc
+     * {inheritDoc}
      * @param rootNode
      * 
      * @throws CanonicalizerException
@@ -71,9 +69,10 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
             throws CanonicalizerException {
         return this.engineCanonicalizeSubTree(rootNode, "",null);
     }
-    /**
+
+    /*
      * Method engineCanonicalizeSubTree
-     *  @inheritDoc
+     *  {inheritDoc}
      * @param rootNode
      * @param inclusiveNamespaces
      * 
@@ -83,7 +82,8 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
             String inclusiveNamespaces) throws CanonicalizerException {
         return this.engineCanonicalizeSubTree(rootNode, inclusiveNamespaces,null);
     }
-    /**
+
+    /*
      * Method engineCanonicalizeSubTree  
      * @param rootNode
      * @param inclusiveNamespaces   
@@ -97,10 +97,10 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
                     .prefixStr2Set(inclusiveNamespaces);            
             return super.engineCanonicalizeSubTree(rootNode,excl);
     }
- 
-    /**
+
+    /*
      * Method handleAttributesSubtree
-     * @inheritDoc
+     * {inheritDoc}
      * @param E
      * @throws CanonicalizerException
      */
@@ -174,9 +174,8 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
         return result.iterator();       
     }
 
-            
-    /**
-     * @inheritDoc
+    /*
+     * {inheritDoc}
      * @param E
      * @throws CanonicalizerException
      */

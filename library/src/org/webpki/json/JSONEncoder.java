@@ -34,17 +34,21 @@ public abstract class JSONEncoder implements Serializable
     protected JSONEncoder () {}
 
     /**
-     * INTERNAL USE ONLY.    
+     * INTERNAL USE ONLY.
+     * @param wr A JSON writer    
+     * @throws IOException For any underlying error
      */
     protected abstract void writeJSONData (JSONObjectWriter wr) throws IOException;
 
     /**
      * Emulation of XML namespace     
+     * @return The context name
      */
     public abstract String getContext ();
 
     /**
      * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
+     * @return The qualifier name
      */
     public String getQualifier ()
       {
@@ -52,8 +56,9 @@ public abstract class JSONEncoder implements Serializable
       }
 
     /**
-     * @return Document in JSON format
-     * @throws IOException
+     * @param output_format The wanted formatting   
+     * @return Document in JSON [binary] format
+     * @throws IOException For any underlying error
      */
     public byte[] serializeJSONDocument (JSONOutputFormats output_format) throws IOException
       {

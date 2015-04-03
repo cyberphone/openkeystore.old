@@ -29,12 +29,17 @@ import java.security.cert.X509Certificate;
 public interface SignerInterface
   {
     /**
-     * Returns the certificate path associated with the key.
+     * @return Returns the certificate path associated with the key.
+     * @throws IOException For various problems...
      */
     public X509Certificate[] getCertificatePath () throws IOException;
 
     /**
      * Signs data using the key.
+     * @param data Data to be signed
+     * @param algorithm Algorithm to use
+     * @return Signed data
+     * @throws IOException For various problems...
      */
     public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException;
   }

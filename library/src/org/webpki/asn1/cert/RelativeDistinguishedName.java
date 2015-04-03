@@ -67,23 +67,17 @@ public class RelativeDistinguishedName
         addOIDName("0.9.2342.19200300.100.1.25", "DC");
       }
     
-    /**
-     * Get the <code>OID</code> corresponding to a <code>RelativeDistinguishedName</code>
-     * part name.
-     * <p>Works for the names <code>CN</code>, <code>SN</code>, <code>C</code>, <code>L</code>,
-     * <code>S</code>, <code>O</code>, <code>OU</code>, <code>T</code>, <code>G</code>, <code>E</code>
+    /*
+     * Get the OID corresponding to a RelativeDistinguishedName part name.
      */
     public static String name2OID(String name)
       {
         return name2OID.get(name.toUpperCase ());
       }
     
-    /**
-     * Get the name corresponding to a <code>RelativeDistinguishedName</code>
-     * part <code>OID</code>.
-     * <p>Works for the names <code>CN</code>, <code>SN</code>, <code>C</code>, <code>L</code>,
-     * <code>S</code>, <code>O</code>, <code>OU</code>, <code>T</code>, <code>G</code>, <code>E</code>
-     */
+    /*
+     * Get the name corresponding to a RelativeDistinguishedName part OID.
+    */
     public static String oid2Name(String oid)
       {
         return oid2Name.get(oid);
@@ -93,9 +87,8 @@ public class RelativeDistinguishedName
     
     private ASN1Set asn1Representation;
     
-    /**
-     * Get the ASN.1 representation of this <code>RelativeDistinguishedName</code>.
-     * @see org.webpki.asn1
+    /*
+     * Get the ASN.1 representation of this RelativeDistinguishedName.
      */
     public ASN1Set toASN1()
       {
@@ -121,9 +114,9 @@ public class RelativeDistinguishedName
         return asn1Representation;
       }
     
-    /**
+    /*
      * Hashvalue used to compare certificate issuers.
-     * <p>Used when comparing two <code>RelativeDistinguishedName</code>s using 
+     * Used when comparing two RelativeDistinguishedNames using 
      * the rules specified in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
      */
     long issuerHash;
@@ -171,11 +164,8 @@ public class RelativeDistinguishedName
                          (ASN1String)new ASN1UTF8String (value));
       }
     
-    /**
-     * Create a <code>RelativeDistinguishedName</code> from a set of <code>OID</code>/value-pairs.
-     * <p><code>OID</code>'s may be given as simple names in the cases handled by the 
-     * {@link #name2OID name2OID} method.
-     * @see RelativeDistinguishedName#name2OID(String)
+    /*
+     * Create a RelativeDistinguishedName from a set of OID value-pairs.
      */
     public RelativeDistinguishedName(Hashtable<String,String> nameOrOIDValuePairs) throws IOException
       {
@@ -188,21 +178,16 @@ public class RelativeDistinguishedName
           }
       }
     
-    /**
-     * Create a <code>RelativeDistinguishedName</code> from a <code>OID</code>/value-pair.
-     * <p>The <code>OID</code> may be given as simple name in the cases handled by the 
-     * {@link #name2OID name2OID} method.
-     * @see RelativeDistinguishedName#name2OID(String)
+    /*
+     * Create a RelativeDistinguishedName from a OID value-pair.
      */
     public RelativeDistinguishedName (String nameOrOID, String value) throws IOException
       {
         add(nameOrOID, value);
       }
     
-    /**
-     * Create a <code>RelativeDistinguishedName</code> from an 
-     * {@link org.webpki.asn1.BaseASN1Object ASN.1 structure}.
-     * @see org.webpki.asn1
+    /*
+     * Create a RelativeDistinguishedName from a BaseASN1Object ASN.1 structure.
      */
     public RelativeDistinguishedName(BaseASN1Object relativeDistinguishedName)
     throws IOException
@@ -216,9 +201,8 @@ public class RelativeDistinguishedName
           }
       }
     
-    /**
-     * The canonical value of an {@link ASN1String ASN1String} when comparing 
-     * <code>RelativeDistinguishedName</code>s
+    /*
+     * The canonical value of an ASN1String when comparing RelativeDistinguishedNames
      */
     private String rdnCanonical(ASN1String s)
       {
@@ -233,9 +217,9 @@ public class RelativeDistinguishedName
           return s.value();
       }
     
-    /**
+    /*
      * Compare two values in PKCS#7 Issuer type.
-     * <p>Compares the two values using to the rules specified
+     * Compares the two values using to the rules specified
      * in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
      */
     public boolean compareValues(ASN1String v1, ASN1String v2)
@@ -244,9 +228,9 @@ public class RelativeDistinguishedName
              rdnCanonical(v1).equals(rdnCanonical(v2));
       }
     
-    /**
+    /*
      * Compare two <code>RelativeDistinguishedName</code>s in PKCS#7 Issuer type.
-     * <p>Compares the two values using to the rules specified
+     * Compares the two values using to the rules specified
      * in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
      */
     public boolean compare(RelativeDistinguishedName rdn)
@@ -267,9 +251,9 @@ public class RelativeDistinguishedName
         return true;
       }
     
-    /**
+    /*
      * Compare two <code>RelativeDistinguishedName</code>s in PKCS#7 Issuer type.
-     * <p>Compares the two values using to the rules specified
+     * Compares the two values using to the rules specified
      * in section 4.1.2.4 (top of p.21) of RFC2459 (X.509 v3).
      */
     public boolean equals(Object o)

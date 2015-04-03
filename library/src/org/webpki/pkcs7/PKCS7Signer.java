@@ -20,8 +20,9 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
@@ -104,9 +105,9 @@ public class PKCS7Signer
               );
             return r.encode ();
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse.getMessage ());
+            throw new IOException (e);
           }
       }
     
@@ -115,6 +116,7 @@ public class PKCS7Signer
      * <p>Creates a detached (not containing the actual data signed) PKCS#7 SignedData message.
      * @param message the message to be signed.
      * @return DER-encoded PKCS#7 SignedData message.
+     * @throws IOException If something unexpected happens...
      */
     public byte[] signDetachedMessage (byte message[]) throws IOException
       {
@@ -126,6 +128,7 @@ public class PKCS7Signer
      * <p>Creates a PKCS#7 SignedData message.
      * @param message the message to be signed.
      * @return DER-encoded PKCS#7 SignedData message.
+     * @throws IOException If something unexpected happens...
      */
     public byte[] signMessage (byte message[]) throws IOException
       {
@@ -133,10 +136,11 @@ public class PKCS7Signer
       }
     /**
      * Creates an PKCS7Signer using the given {@link SignerInterface SignerInterface}.
+     * @param signer The signer
      */
-    public PKCS7Signer (SignerInterface signer_implem)
+    public PKCS7Signer (SignerInterface signer)
       {
-        this.signer_implem = signer_implem;
+        this.signer_implem = signer;
       }
 
   }

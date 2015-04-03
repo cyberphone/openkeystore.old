@@ -40,7 +40,7 @@ public class C14nHelper {
       // don't allow instantiation
    }
 
-   /**
+   /*
     * Method namespaceIsRelative
     *
     * @param namespace
@@ -50,7 +50,7 @@ public class C14nHelper {
       return !namespaceIsAbsolute(namespace);
    }
 
-   /**
+   /*
     * Method namespaceIsRelative
     *
     * @param namespaceValue
@@ -60,7 +60,7 @@ public class C14nHelper {
       return !namespaceIsAbsolute(namespaceValue);
    }
 
-   /**
+   /*
     * Method namespaceIsAbsolute
     *
     * @param namespace
@@ -70,7 +70,7 @@ public class C14nHelper {
       return namespaceIsAbsolute(namespace.getValue());
    }
 
-   /**
+   /*
     * Method namespaceIsAbsolute
     *
     * @param namespaceValue
@@ -85,7 +85,7 @@ public class C14nHelper {
       return namespaceValue.indexOf(':')>0;
    }
 
-   /**
+   /*
     * This method throws an exception if the Attribute value contains
     * a relative URI.
     *
@@ -115,7 +115,7 @@ public class C14nHelper {
       }
    }
 
-   /**
+   /*
     * This method throws a CanonicalizerException if the supplied Document
     * is not able to be traversed using a TreeWalker.
     *
@@ -134,7 +134,7 @@ public class C14nHelper {
       }
    }
 
-   /**
+   /*
     * This method throws a CanonicalizerException if the supplied Element
     * contains any relative namespaces.
     *

@@ -79,7 +79,8 @@ public class JSONObjectWriter implements Serializable
     
     /**
      * For updating already read JSON objects.
-     * @throws IOException 
+     * @param reader Existing object
+     * @throws IOException For any kind of underlying error...
      */
     public JSONObjectWriter (JSONObjectReader reader) throws IOException
       {

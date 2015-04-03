@@ -97,7 +97,7 @@ public class ProxyServer
     /**
      * Create proxy service instance.
      * Note that there can only be one instance of a specific named service running in a single JVM.
-     * @param name_of_service
+     * @param name_of_service Unique name
      * @return ProxyServer
      */
     public static ProxyServer getInstance (String name_of_service)
@@ -536,6 +536,7 @@ public class ProxyServer
      *          The request data object.
      * @param response
      *          The response object of the external call Servlet.
+     * @throws IOException If something unexpected happens...
      */
 
     public void processCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException
@@ -552,6 +553,7 @@ public class ProxyServer
      * @param proxy_request_object
      *          The request data object.
      * @return  A Java object
+     * @throws IOException If something unexpected happens...
      */
     public JavaResponseInterface processCall (JavaRequestInterface proxy_request_object) throws IOException
       {
@@ -665,6 +667,8 @@ public class ProxyServer
      *          The request object of the proxy server Servlet.
      * @param response
      *          The response object of the proxy server Servlet.
+     * @throws IOException If something unexpected happens...
+     * @throws ServletException If something unexpected happens...
      */
     void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {

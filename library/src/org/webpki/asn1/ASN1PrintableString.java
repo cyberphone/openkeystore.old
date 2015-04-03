@@ -51,7 +51,7 @@ public class ASN1PrintableString extends ASN1String
         }
     }
     
-    /**
+    /*
      * Checks if a string contains only characters allowable in a PrintableString.
      * <p>The folliwing characters are allowed (taken from section 3.3.3 of RFC1148)
      * <pre>  printablestring  = *( ps-char )
@@ -59,7 +59,6 @@ public class ASN1PrintableString extends ASN1String
      *                    / "," / "-" / "." / "/" / ":" / "=" / "?"
      *   ps-delim         = "(" / ")"
      *   ps-char          = ps-delim / ps-restricted-char</pre>
-     * @return true iff <code><i>s</i></code> contains only characters allowable in a PrintableString.
      */
     public static boolean isPrintableString(String s)
       {

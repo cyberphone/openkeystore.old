@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
 /**
  * This Object serves as Content for the ds:Transforms for exclusive
  * Canonicalization.
- * <BR />
+ * <br>
  * It implements the {@link Element} interface
  * and can be used directly in a DOM tree.
  *
@@ -48,13 +48,12 @@ public class InclusiveNamespaces {
    public static final String ExclusiveCanonicalizationNamespace =
       "http://www.w3.org/2001/10/xml-exc-c14n#";
 
-   /**
-   /**
+   /*
     * Decodes the <code>inclusiveNamespaces</code> String and returns all
     * selected namespace prefixes as a Set. The <code>#default</code>
     * namespace token is represented as an empty namespace prefix
     * (<code>"xmlns"</code>).
-    * <BR/>
+    * <br>
     * The String <code>inclusiveNamespaces=" xenc    ds #default"</code>
     * is returned as a Set containing the following Strings:
     * <UL>

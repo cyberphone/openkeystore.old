@@ -30,7 +30,7 @@ public abstract class BaseASN1Object implements ASN1Constants
     int tagEncoding;
     int tagNumber;
     
-    /**
+    /*
      * Create object.
      */
     BaseASN1Object(int tagClass, int tagNumber, boolean primitive)
@@ -40,7 +40,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         this.tagEncoding = primitive ? PRIMITIVE : CONSTRUCTED;
       }
 
-    /**
+    /*
      * Create object.
      */
     BaseASN1Object(int tagNumber, boolean primitive)
@@ -55,7 +55,7 @@ public abstract class BaseASN1Object implements ASN1Constants
     int encodedLength = -1;  // Will be set > 0 when the length is known.
     DerDecoder decoder;
     
-    /**
+    /*
      * Decode object.
      */
     BaseASN1Object(DerDecoder decoder) throws IOException
@@ -80,7 +80,7 @@ public abstract class BaseASN1Object implements ASN1Constants
           }
       }
     
-    /**
+    /*
      * Decode substructure.
      * This should be the only way to decode substructures as it updates encodedLength!!!!
      */
@@ -151,7 +151,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         return new ASN1OctetString(encode());
       }
     
-    /**
+    /*
      * Writes the already encoded value to the encoder, prepending the head.
      * The encoding of encodedValue should be primitive.
      */
@@ -161,7 +161,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         encoder.write(encodedValue);
       }
     
-    /**
+    /*
      * Writes a constructed value to the encoder, prepending the head.
      */
     void encode(Encoder encoder, Vector<BaseASN1Object> components) throws IOException
@@ -174,7 +174,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         encoder.write(Encoder.EOC);
       }
     
-    /**
+    /*
      * Write header of this object to the encoder.
      */
     void encodeHeader(Encoder encoder, int length) throws IOException
@@ -182,7 +182,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         encodeHeader(encoder, length, tagEncoding == 0);
       }
 
-    /**
+    /*
      * Write header of this object to the encoder, forcing primitive/constructed flag.
      */
     void encodeHeader(Encoder encoder, int length, boolean primitive) throws IOException
@@ -282,7 +282,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         System.out.println(o);
       }
     
-    /**
+    /*
      * Perform deep comparison. Differences in encoding is ignored.
      */
     public abstract boolean deepCompare(BaseASN1Object o);
@@ -332,7 +332,7 @@ public abstract class BaseASN1Object implements ASN1Constants
         return tagNumber;
       }
     
-    /**
+    /*
      * Comparison help method.
      */
     public boolean sameType(BaseASN1Object o)

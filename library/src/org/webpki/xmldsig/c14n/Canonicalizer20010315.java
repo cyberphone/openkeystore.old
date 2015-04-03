@@ -32,10 +32,10 @@ import org.w3c.dom.Node;
 
 
 /**
- * Implements <A HREF="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">Canonical
- * XML Version 1.0</A>, a W3C Recommendation from 15 March 2001.
+ * Implements Canonical
+ * XML Version 1.0, a W3C Recommendation from 15 March 2001.
  *
- * @author Christian Geuer-Pollmann <geuerp@apache.org>
+ * @author Christian Geuer-Pollmann
  * @version $Revision: 1.37 $
  */
 @SuppressWarnings("unchecked")
@@ -44,7 +44,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
     final SortedSet result= new TreeSet(COMPARE);
     static final String XMLNS_URI=Constants.NamespaceSpecNS;
     static final String XML_LANG_URI=Constants.XML_LANG_SPACE_SpecNS;
-   /**
+   /*
     * Constructor Canonicalizer20010315
     *
     * @param includeComments
@@ -53,7 +53,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
       super(includeComments);
    }
 
-   /**
+   /*
     * Returns the Attr[]s to be outputted for the given element.
     * <br>
     * The code of this method is a copy of {@link #handleAttributes(Element,
@@ -121,7 +121,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
       return result.iterator();
    }
 
-   /**
+   /*
     * Float the xml:* attributes of the parent nodes to the root node of c14n
     * @param E the root node.
     * @param result the xml:* attributes  to output.
@@ -172,7 +172,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
          
       }
 
-   /**
+   /*
     * Returns the Attr[]s to be outputted for the given element.
     * <br>
     * IMPORTANT: This method expects to work on a modified DOM tree, i.e. a DOM which has
@@ -260,7 +260,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
     
     return result.iterator();
    }
-   /**
+   /*
     *  Float the xml:* attributes of the unselected parent nodes to the ciurrent node.
     * @param E
     * @param result
@@ -325,7 +325,7 @@ public abstract class Canonicalizer20010315 extends CanonicalizerBase {
          result.addAll(loa.values());
                
    }
-   /**
+   /*
     * Always throws a CanonicalizationException because this is inclusive c14n.
     *
     * @param rootNode

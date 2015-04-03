@@ -28,12 +28,14 @@ public interface ClientRequestHandler
     /**
      * @param request_object the request
      * @return suitable HTTP return data to the external caller
+     * @throws IOException If something unexpected happens...
      */
     public HTTPResponseWrapper handleHTTPResponseRequest (JavaRequestInterface request_object) throws IOException;
 
     /**
      * @param request_object the request
      * @return suitable Java return object to the external caller
+     * @throws IOException If something unexpected happens...
      */
     public JavaResponseInterface handleJavaResponseRequest (JavaRequestInterface request_object) throws IOException;
 
@@ -42,6 +44,7 @@ public interface ClientRequestHandler
      * This event can (for example) be used for performing initial uploads
      * ({@link JavaUploadInterface})
      * each time the proxy is started or restarts due to errors.
+     * @throws IOException If something unexpected happens...
      */
     public void handleInitialization () throws IOException;
   }

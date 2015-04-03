@@ -116,303 +116,108 @@ public class DOMAttributeReaderHelper
         String value = getStringConditional (name);
         return value == null ? null : new Base64 ().getBinaryFromBase64String (value);
       }
-    
-
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>int</code>.
-     * @param name The name of the attribute.
-     * @return The <code>int</code> value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws NumberFormatException If the value is not a valid <code>int</code>.
-     */
+ 
     public int getInt (String name) throws NoSuchElementException, NumberFormatException
       {
         return Integer.parseInt (getString (name));
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>int</code>.
-     * @param name The name of the attribute.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid <code>int</code>.
-     */
     public int getIntConditional (String name, int defaultValue) throws NoSuchElementException
       {
         String s = getStringConditional (name);
         return s != null ? Integer.parseInt (s) : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>int</code>.
-     * @param name The name of the attribute.
-     * @return The value of the attribute if it exists, 0 otherwise.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid <code>int</code>.
-     */
     public int getIntConditional (String name) throws NoSuchElementException
       {
         return getIntConditional (name, 0);
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>boolean</code>.
-     * @param name The name of the attribute.
-     * @return The <code>int</code> value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws IllegalArgumentException If the value is not a valid <code>boolean</code>.
-     */
     public boolean getBoolean (String name) throws NoSuchElementException
       {
         return DOMUtil.booleanValue (getString (name));
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>boolean</code>.
-     * @param name The name of the attribute.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws IllegalArgumentException If the value is not a valid <code>boolean</code>.
-     */
     public boolean getBooleanConditional (String name, boolean defaultValue) throws NoSuchElementException
       {
         String s = getStringConditional (name);
         return s != null ? DOMUtil.booleanValue (s) : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an <code>boolean</code>.
-     * @param name The name of the attribute.
-     * @return The value of the attribute if it exists, 0 otherwise.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws IllegalArgumentException If the value is not a valid <code>boolean</code>.
-     */
     public boolean getBooleanConditional (String name) throws NoSuchElementException
       {
         return getBooleanConditional (name, false);
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a {@link BigDecimal BigDecimal}.
-     * @param name The name of the attribute.
-     * @return The {@link BigDecimal BigDecimal} value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public BigDecimal getBigDecimal (String name) throws NoSuchElementException, NumberFormatException
       {
         return new BigDecimal (getString (name));
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a {@link BigDecimal BigDecimal}.
-     * @param name The name of the attribute.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public BigDecimal getBigDecimalConditional (String name, BigDecimal defaultValue) throws NoSuchElementException
       {
         String s = getStringConditional (name);
         return s != null ? new BigDecimal (s) : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a {@link BigDecimal BigDecimal}.
-     * @param name The name of the attribute.
-     * @return The value of the attribute if it exists, null otherwise.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public BigDecimal getBigDecimalConditional (String name) throws NoSuchElementException
       {
         return getBigDecimalConditional (name, null);
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as an {@link BigInteger BigInteger}.
-     * @param name The name of the attribute.
-     * @return The {@link BigInteger BigInteger} value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws NumberFormatException If the value is not a valid {@link BigInteger BigInteger}.
-     */
     public BigInteger getBigInteger (String name) throws NoSuchElementException, NumberFormatException
       {
         return new BigInteger (getString (name));
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a {@link BigInteger BigInteger}.
-     * @param name The name of the attribute.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigInteger BigInteger}.
-     */
     public BigInteger getBigIntegerConditional (String name, BigInteger defaultValue) throws NoSuchElementException
       {
         String s = getStringConditional (name);
         return s != null ? new BigInteger (s) : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a {@link BigInteger BigInteger}.
-     * @param name The name of the attribute.
-     * @return The value of the attribute if it exists, null otherwise.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigInteger BigInteger}.
-     */
     public BigInteger getBigIntegerConditional (String name) throws NoSuchElementException
       {
         return getBigIntegerConditional (name, null);
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a 
-     * <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     * @param name The name of the attribute.
-     * @return The <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
-     *         value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws IOException If the value cannot be parsed as
-     *                     <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     */
     public GregorianCalendar getDateTime (String name) throws NoSuchElementException, IOException
       {
         return ISODateTime.parseDateTime (getString (name));
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a 
-     * <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     * @param name The name of the attribute.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
-     *         value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws IOException If the value cannot be parsed as
-     *                     <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     */
     public GregorianCalendar getDateTimeConditional (String name, GregorianCalendar defaultValue) throws IOException
       {
         String s = getStringConditional (name);
         return s != null ? ISODateTime.parseDateTime (s) : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;} as a 
-     * <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     * @param name The name of the attribute.
-     * @return The <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
-     *         value of the attribute if it exists, null otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws IOException If the value cannot be parsed as
-     *                     <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>.
-     */
     public GregorianCalendar getDateTimeConditional (String name) throws IOException
       {
         return getDateTimeConditional (name, null);
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;}, multiplied by 1000 and truncated, as
-     * a <code>long</code>.
-     * <p>This datatype corresponds to <a href="http://www.microsoft.com/sql">MS SQL Server</a>'s
-     * <code>money</code> (and <code>smallmoney</code>) datatypes.
-     * @param name The name of the attribute.
-     * @return The {@link BigInteger BigInteger} value of the attribute.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;} or
-     *                                if that element has no attribute named <i>name</i>.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public long getMoney (String name) throws NoSuchElementException, NumberFormatException
       {
         return getBigDecimal (name).movePointRight (4).longValue ();
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;},
-     * multiplied by 1000 and truncated, as
-     * a <code>long</code>.
-     * <p>This datatype corresponds to <a href="http://www.microsoft.com/sql">MS SQL Server</a>'s
-     * <code>money</code> (and <code>smallmoney</code>) datatypes.
-     * @param defaultValue The value to use if the attribute does not exist.
-     * @return The value of the attribute if it exists, <i>defaultValue</i> otherwise 
-     *         (&quot;exists&quot; meaning being specified in the document or having
-     *         a default value in the schema or DTD, known to the DOM implementation).
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public long getMoneyConditional (String name, long defaultValue) throws NoSuchElementException
       {
         BigDecimal t = getBigDecimalConditional (name);
         return t != null ? t.movePointRight (4).longValue () : defaultValue;
       }
 
-    /**
-     * Get an attribute of the {@link DOMReaderHelper &quot;last visited element&quot;}, multiplied by 1000 and truncated, as
-     * a <code>long</code>.
-     * <p>This datatype corresponds to <a href="http://www.microsoft.com/sql">MS SQL Server</a>'s
-     * <code>money</code> (and <code>smallmoney</code>) datatypes.
-     * @return The value of the attribute if it exists, 0 otherwise.
-     * @throws NoSuchElementException If there is no 
-     *                                {@link DOMReaderHelper &quot;last visited element&quot;}.
-     * @throws NumberFormatException If the value is not a valid {@link BigDecimal BigDecimal}.
-     */
     public long getMoneyConditional (String name) throws NoSuchElementException
       {
         return getMoneyConditional (name, 0);
       }
-    /*
-     * TODO: To be documented.
-     */
+
     public String[] getList (String name) throws NoSuchElementException
       {
         return StringUtil.tokenVector (getString (name));
       }
     
-    /*
-     * TODO: To be documented.
-     */
     public String[] getListConditional (String name) throws NoSuchElementException
       {
         String s = getStringConditional (name);

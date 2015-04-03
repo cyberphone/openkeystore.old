@@ -170,13 +170,14 @@ abstract class XMLSignerCore
 
  
     /**
-     * <p>Creates an enveloped XML signature.  If target_elem <> null then the signature is inserted there
+     * <p>Creates an enveloped XML signature.  If target_elem != null then the signature is inserted there
      * else it is inserted at the end of the document.
      * @param root Top node of document to be signed.
      * @param reference_id The mandatory ID element.
      * @param target_elem Where the top element is (null = element root).
      * @param insert_elem Where the Signature is to be inserted (null = element root).
      * @return "root" as is.
+     * @throws IOException If anything unexpected happens...
      */
     public Document createEnvelopedSignature (Document root, String reference_id, Element target_elem, Element insert_elem) throws IOException
       {
@@ -214,6 +215,7 @@ abstract class XMLSignerCore
      * @param root Top node of document to be signed.
      * @param reference_id The mandatory ID element.
      * @return "root" as is.
+     * @throws IOException If anything unexpected happens...
      */
     public Document createEnvelopedSignature (Document root, String reference_id) throws IOException
       {
@@ -224,6 +226,7 @@ abstract class XMLSignerCore
      * <p>Creates an enveloped XML signature.
      * @param param A descriptor.
      * @return Root to signed XML document.
+     * @throws IOException If anything unexpected happens...
      */
     public Document createEnvelopedSignature (XMLEnvelopedInput param) throws IOException
       {
@@ -237,7 +240,9 @@ abstract class XMLSignerCore
     /**
      * <p>Creates an (enveloping) XML signature.
      * @param document The XML object to be signed.
+     * @param object_id An ID attribute that limits the scope
      * @return XML signature.
+     * @throws IOException If anything unexpected happens...
      */
     public XMLSignatureWrapper signXMLWrapper (XMLObjectWrapper document, String object_id) throws IOException
       {
@@ -266,6 +271,7 @@ abstract class XMLSignerCore
      * <p>Creates an (enveloping) XML signature.
      * @param document The XML object to be signed.
      * @return XML signature.
+     * @throws IOException If anything unexpected happens...
      */
     public XMLSignatureWrapper signXMLWrapper (XMLObjectWrapper document) throws IOException
       {

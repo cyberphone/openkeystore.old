@@ -245,6 +245,9 @@ public class XMLSchemaCache
      * <p>An instance of the appropriate {@link XMLObjectWrapper wrapper class} is created and
      * populated using it's {@link XMLObjectWrapper#fromXML(DOMReaderHelper) fromXML method}
      * <p>The document is not validated.
+     * @param d Document
+     * @return XMLObjectWrapper
+     * @throws IOException If anything unexpected happens...
      */
     public XMLObjectWrapper wrap (Document d) throws IOException
       {
@@ -271,6 +274,8 @@ public class XMLSchemaCache
     
     /**
      * Add a {@link XMLObjectWrapper wrapper class}.
+     * @param instance Class instance
+     * @throws IOException If anything unexpected happens...
      */
     public void addWrapper (XMLObjectWrapper instance) throws IOException
       {
@@ -281,6 +286,8 @@ public class XMLSchemaCache
 
     /**
      * Add a {@link XMLObjectWrapper wrapper class}.
+     * @param wrapperClass Class object
+     * @throws IOException If anything unexpected happens...
      */
     public void addWrapper (Class<? extends XMLObjectWrapper> wrapperClass) throws IOException
       {
@@ -303,6 +310,8 @@ public class XMLSchemaCache
     
     /**
      * Add a {@link XMLObjectWrapper wrapper class}.
+     * @param wrapperClass Wrapper class name
+     * @throws IOException If anything unexpected happens...
      */
     public void addWrapper (String wrapperClass) throws IOException
       {
@@ -319,6 +328,8 @@ public class XMLSchemaCache
     
     /**
      * Add a number of {@link XMLObjectWrapper wrapper classes}.
+     * @param classes String array of wrapper class names
+     * @throws IOException If anything unexpected happens...
      */
     public void addWrappers (String[] classes) throws IOException
       {
@@ -331,6 +342,7 @@ public class XMLSchemaCache
     /**
      * Get the list of registered wrapper classes.
      * <p>Can be used to extract and store the set of wrapper classes between sessions.
+     * @return String of wrapper class names
      */
     public String[] getWrapperClasses ()
       {
@@ -347,6 +359,7 @@ public class XMLSchemaCache
     
     /**
      * Get the XML schema associated with a target namespace.
+     * @param target_namespace The namespace
      * @return The XML schema as a blob.
      */
     public byte[] getSchema (String target_namespace)
@@ -356,6 +369,7 @@ public class XMLSchemaCache
 
     /**
      * Get the list of known target namespaces.
+     * @return String array of namespaces
      */
     public String[] getTargetNamespaces ()
       {

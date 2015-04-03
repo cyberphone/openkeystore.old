@@ -26,12 +26,12 @@ import java.io.IOException;
  */
 public class CanonicalizerException extends IOException {
 
-   /**
+   /*
      * 
      */
     private static final long serialVersionUID = 1L;
 
-   /**
+   /*
     * Constructor CanonicalizerException
     *
     */
@@ -39,7 +39,7 @@ public class CanonicalizerException extends IOException {
       super();
    }
 
-   /**
+   /*
     * Constructor CanonicalizerException
     *
     * @param _msgID
@@ -48,7 +48,7 @@ public class CanonicalizerException extends IOException {
       super(_msgID);
    }
 
-   /**
+   /*
     * Constructor CanonicalizerException
     *
     * @param _msgID
@@ -58,7 +58,7 @@ public class CanonicalizerException extends IOException {
       super(_msgID);
    }
 
-   /**
+   /*
     * Constructor CanonicalizerException
     *
     * @param _msgID
@@ -68,7 +68,7 @@ public class CanonicalizerException extends IOException {
       super(_msgID);
    }
 
-   /**
+   /*
     * Constructor CanonicalizerException
     *
     * @param _msgID

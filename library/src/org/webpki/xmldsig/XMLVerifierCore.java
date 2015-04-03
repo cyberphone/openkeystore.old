@@ -135,6 +135,7 @@ abstract class XMLVerifierCore
      * Verifies a signed message and returns the signed data.
      * @param message The enveloping signed XML object.
      * @return the original XML object.
+     * @throws IOException If anything unexpected happens...
      */
     public XMLObjectWrapper verifyXMLWrapper (XMLSignatureWrapper message) throws IOException
       {
@@ -178,10 +179,11 @@ abstract class XMLVerifierCore
     /**
      * Verifies an enveloped signed message and returns the signed data.
      * @param parent The enveloped signed XML object.
-     * @param element The actual element (null => root).
+     * @param element The actual element (null implies root).
      * @param signature The enveloped signature.
      * @param id The mandatory ID element.
      * @return XML document "as-is").
+     * @throws IOException If anything unexpected happens...
      */
     public XMLObjectWrapper validateEnvelopedSignature (XMLObjectWrapper parent,
                                                         Element element,
@@ -208,9 +210,9 @@ abstract class XMLVerifierCore
             signpar.insertBefore (signature.getRootElement (), signsin);
             verify (signature);
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse.getMessage ());
+            throw new IOException (e);
           }
         return parent;
       }
@@ -220,6 +222,7 @@ abstract class XMLVerifierCore
      * Verifies an enveloped signed message.
      * @param parent The enveloped signed XML object.
      * @return "parent" as is.
+     * @throws IOException If anything unexpected happens...
      */
     public XMLObjectWrapper validateEnvelopedSignature (XMLObjectWrapper parent) throws IOException
       {

@@ -119,6 +119,7 @@ public abstract class XMLObjectWrapper
      * The wrapper may override this method to autmatically register the
      * schemas on which it depends.
      * @see #addSchema(String)
+     * @throws IOException If something unexpected happens...
      */
     protected abstract void init () throws IOException;
     
@@ -130,6 +131,9 @@ public abstract class XMLObjectWrapper
      * which has a known weakness, described in 
      * {@link XMLSchemaCache#wrap(Element) it's documentation}, that should be
      * considered when using this method.
+     * @param e Element
+     * @return Wrapper
+     * @throws IOException If something unexpected happens...
      * @throws IllegalStateException If this wrapper object was not created by an
      *                               {@link XMLSchemaCache XMLSchemaCache}.
      */
@@ -148,6 +152,8 @@ public abstract class XMLObjectWrapper
    
     /**
      * Initialize the object from it's XML-encoding.
+     * @param helper Helper
+     * @throws IOException If something unexpected happens...
      */
     protected abstract void fromXML (DOMReaderHelper helper) throws IOException;
     
@@ -159,10 +165,12 @@ public abstract class XMLObjectWrapper
      * put the element). The document is passed as an argument only 
      * because it is needed to produce nodes. The caller is responsible
      * for inserting the element into the tree.
+     * @param helper Helper
+     * @throws IOException If something unexpected happens...
      */
     protected abstract void toXML (DOMWriterHelper helper) throws IOException;
     
-    /**
+    /*
      * Get a XML document containing the XML-encoding of the object.
      */
     XMLRoot toXMLDocument () throws IOException
@@ -196,6 +204,7 @@ public abstract class XMLObjectWrapper
      * Validate the XML-encoding of the object and validate it against a
      * {@link XMLSchemaCache XMLSchemaCache}.
      * <p>Intended mainly for testing.
+     * @param schemaCache Holds schema cache
      * @throws IOException If validation fails.
      */
     public void validate (XMLSchemaCache schemaCache) throws IOException
@@ -217,17 +226,21 @@ public abstract class XMLObjectWrapper
     /**
      * The <a href="http://www.w3.org/TR/xmlschema-1/#key-targetNS">target namespace)</a>
      * of the element that this class handles.
+     * @return Namespace uri
      */
     public abstract String namespace ();
     
     /**
      * The element in the {@link #namespace target namespace} that this class handles.
+     * @return Element name
      */
     public abstract String element ();
     
     /**
      * Write the XML-encoding of the object (wrapped in a document as returned by 
      * {@link #toXMLDocument toXMLDocument}) to an {@link java.io.OutputStream OutputStream}.
+     * @param out Stream
+     * @throws IOException If something unexpected happens...
      */
     public void writeXML (OutputStream out) throws IOException
       {
@@ -238,6 +251,8 @@ public abstract class XMLObjectWrapper
     /**
      * Write the XML-encoding of the object (wrapped in a document as returned by 
      * {@link #toXMLDocument toXMLDocument}) to a byte array.
+     * @return XML binary
+     * @throws IOException If something unexpected happens...
      */
     public byte[] writeXML () throws IOException
       {
@@ -251,6 +266,9 @@ public abstract class XMLObjectWrapper
      * Convenience method for getting resources through the <code>ClassLoader</code>.
      * <p>This method gets the resource using 
      * {@link Class#getResourceAsStream(String) getClass().getResourceAsStream()}
+     * @param name Name of resource
+     * @return Resource as stream
+     * @throws IOException If something unexpected happens...
      */
     protected InputStream getResource (String name) throws IOException
       {
@@ -271,6 +289,7 @@ public abstract class XMLObjectWrapper
      * Default toString implementation.
      * <p>Returns a string containing the XML representation of this object 
      * (wrapped in a document as returned by {@link #toXMLDocument toXMLDocument}).
+     * @return XML text
      */
     public String toString ()
       {

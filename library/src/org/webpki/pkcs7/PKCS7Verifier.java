@@ -20,8 +20,9 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
-import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
@@ -37,6 +38,7 @@ import org.webpki.asn1.Composite;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.CompositeContextSpecific;
 import org.webpki.asn1.ASN1Sequence;
+
 import org.webpki.asn1.cert.DistinguishedName;
 
 
@@ -50,11 +52,7 @@ public class PKCS7Verifier
 
     private byte[] message;
 
-    @SuppressWarnings("unused")
-    private SignedData signed_data;
-
     private SignerInfo signer_info;
-
 
     class IssuerAndSerialNumber
       {
@@ -236,6 +234,7 @@ public class PKCS7Verifier
     /**
      * Gets the signature algorithm.
      * @return The algorithm identifier.
+     * @throws IOException If anything unexpected happens...
      */
     public AsymSignatureAlgorithms getSignatureAlgorithm () throws IOException
       {
@@ -254,18 +253,19 @@ public class PKCS7Verifier
      * Verifies a signed message and returns the signed data.
      * @param message the signed data (PKCS#7 message blob).
      * @return the original data.
+     * @throws IOException If anything unexpected happens...
      */
     public byte[] verifyMessage (byte message[]) throws IOException
       {
         try
           {
-            signed_data = new SignedData (DerDecoder.decode (message));
+            new SignedData (DerDecoder.decode (message));
             verify ();
             return this.message;
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse.getMessage ());
+            throw new IOException (e);
           }
       }
 
@@ -274,17 +274,18 @@ public class PKCS7Verifier
      * Verifies a detached (not containing the actual data) signed message.
      * @param message the data to be verified.
      * @param signature the signature (PKCS#7 message blob).
+     * @throws IOException If anything unexpected happens...
      */
     public void verifyDetachedMessage (byte message[], byte signature[]) throws IOException
       {
         try
           {
-            signed_data = new SignedData (DerDecoder.decode (signature), message);
+            new SignedData (DerDecoder.decode (signature), message);
             verify ();
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse.getMessage ());
+            throw new IOException (e);
           }
       }
 

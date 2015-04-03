@@ -61,21 +61,6 @@ public final class CompositeContextSpecific extends Composite
                o.tagNumber == tagNumber;
       }
     
-    /**
-     * DIRTY fix to be used ONLY when verifying authenticated attributes of PKCS#7/CMS messages.
-     */
-    public void writeOriginalBlobAs(int tagNumber, java.security.Signature signature)
-    throws java.security.GeneralSecurityException, IOException
-      {
-        if(tagNumber > 30)
-          {
-            throw new IOException("tagNumber > 30 not supported");
-          }
-
-        signature.update((byte)(UNIVERSAL | DerDecoder.CONSTRUCTED | tagNumber));
-        signature.update(blob, blobOffset+1, encodedLength-1);
-      }
-    
     public boolean deepCompare(BaseASN1Object o)
       {
         if(!sameType(o) || 
