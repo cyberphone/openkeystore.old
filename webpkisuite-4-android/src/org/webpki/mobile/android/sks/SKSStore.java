@@ -85,7 +85,7 @@ public abstract class SKSStore
                                                                  ",CN=Android SKS"); 
                     cert_gen.setIssuerDN (x509_name);  
                     cert_gen.setNotBefore (new Date (System.currentTimeMillis() - 1000L * 60 * 10));  // EJBCA also uses 10 minutes predating...
-                    cert_gen.setNotAfter (new Date (System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 25)));  
+                    cert_gen.setNotAfter (new Date (System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 100)));  
                     cert_gen.setSubjectDN (x509_name);  
                     cert_gen.addExtension (X509Extensions.BasicConstraints, true, new BasicConstraints (false));
                     cert_gen.addExtension (X509Extensions.KeyUsage, true, new KeyUsage (KeyUsage.digitalSignature));
