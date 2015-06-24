@@ -66,9 +66,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
           .append (json.createReference (JSONBaseHTML.REF_JOSE))
           .append (", JCS supports the same algorithms, curve names, signature blob representation, and public key objects. " +
-            "The only crypto object that differs is JWS's &quot;<code>x5c</code>&quot; since it (for historical reasons), uses base64 ")
+            "The only crypto object that differs is JWS's &quot;<code>x5c</code>&quot; since it (presumably for historical reasons), uses Base64 ")
           .append (json.createReference (JSONBaseHTML.REF_BASE64))
-          .append (" rather than base64url encoding.");
+          .append (" rather than Base64URL encoding.");
 
         json.addParagraphObject ("Sample Signature").append (
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
