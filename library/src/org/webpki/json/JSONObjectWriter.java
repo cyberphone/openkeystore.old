@@ -64,7 +64,7 @@ public class JSONObjectWriter implements Serializable
     
     boolean pretty_print;
 
-    boolean java_script_string;
+    boolean java_script_mode;
 
     boolean html_mode;
     
@@ -433,7 +433,7 @@ public class JSONObjectWriter implements Serializable
       {
         if (pretty_print)
           {
-            buffer.append (html_mode ? "<br>" : java_script_string ? "\\\n" : "\n");
+            buffer.append (html_mode ? "<br>" : "\n");
           }
       }
 
@@ -704,7 +704,7 @@ public class JSONObjectWriter implements Serializable
             switch (c)
               {
                 case '\\':
-                  if (java_script_string)
+                  if (java_script_mode)
                     {
                       // JS escaping need \\\\ in order to produce a JSON \\
                       buffer.append ('\\');
@@ -735,7 +735,7 @@ public class JSONObjectWriter implements Serializable
                   break;
                   
                 case '\'':
-                  if (java_script_string)
+                  if (java_script_mode && !pretty_print)
                     {
                       // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
                       buffer.append ('\\');
@@ -768,7 +768,7 @@ public class JSONObjectWriter implements Serializable
 
     void escapeCharacter (char c)
       {
-        if (java_script_string)
+        if (java_script_mode)
           {
             buffer.append ('\\');
           }
@@ -813,9 +813,9 @@ public class JSONObjectWriter implements Serializable
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         indent = -indent_factor;
         pretty_print = output_format.pretty;
-        java_script_string = output_format.javascript;
+        java_script_mode = output_format.javascript;
         html_mode = output_format.html;
-        if (java_script_string)
+        if (java_script_mode && !pretty_print)
           {
             buffer.append ('\'');
           }
@@ -827,13 +827,16 @@ public class JSONObjectWriter implements Serializable
           {
             printObject (root, false);
           }
-        if (output_format == JSONOutputFormats.PRETTY_PRINT)
+        if (java_script_mode)
+          {
+            if (!pretty_print)
+              {
+                buffer.append ('\'');
+              }
+          }
+        else if (pretty_print)
           {
             newLine ();
-          }
-        else if (java_script_string)
-          {
-            buffer.append ('\'');
           }
         return buffer.toString ().getBytes ("UTF-8");
       }

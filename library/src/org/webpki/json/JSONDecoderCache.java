@@ -57,10 +57,9 @@ public class JSONDecoderCache implements Serializable
     boolean check_for_unread = true;
     
     Hashtable<String,Class<? extends JSONDecoder>> class_map = new Hashtable<String,Class<? extends JSONDecoder>> ();
-    
-    public JSONDecoder parse (byte[] json_utf8) throws IOException
+
+    public JSONDecoder parse (JSONObjectReader reader) throws IOException
       {
-        JSONObjectReader reader = JSONParser.parse (json_utf8);
         String object_type_identifier = reader.getString (CONTEXT_JSON);
         if (reader.hasProperty (QUALIFIER_JSON))
           {
@@ -90,6 +89,11 @@ public class JSONDecoderCache implements Serializable
           {
             throw new IOException (e);
           }
+      }
+
+    public JSONDecoder parse (byte[] json_utf8) throws IOException
+      {
+        return parse(JSONParser.parse (json_utf8));
       }
 
     public void addToCache (Class<? extends JSONDecoder> json_decoder) throws IOException
