@@ -51,8 +51,8 @@ import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
-    String id;
-    int key_handle;
+    public String id;
+    public int key_handle;
     PublicKey public_key;
     X509Certificate[] cert_path;
     ProvSess prov_sess;
@@ -151,7 +151,7 @@ public class GenKey
         return cert_path;
       }
     
-    void setSymmetricKey (byte[] symmetric_key) throws IOException, GeneralSecurityException
+    public void setSymmetricKey (byte[] symmetric_key) throws IOException, GeneralSecurityException
       {
         MacGenerator symk_mac = getEECertMacBuilder ();
         byte[] encrypted_symmetric_key = prov_sess.server_sess_key.encrypt (symmetric_key);
@@ -159,7 +159,7 @@ public class GenKey
         prov_sess.sks.importSymmetricKey (key_handle, encrypted_symmetric_key, prov_sess.mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY));
       }
 
-    void setPrivateKey (PrivateKey private_key) throws IOException, GeneralSecurityException
+    public void setPrivateKey (PrivateKey private_key) throws IOException, GeneralSecurityException
       {
         MacGenerator privk_mac = getEECertMacBuilder ();
         byte[] encrypted_private_key = prov_sess.server_sess_key.encrypt (private_key.getEncoded ());
@@ -167,7 +167,7 @@ public class GenKey
         prov_sess.sks.importPrivateKey (key_handle, encrypted_private_key, prov_sess.mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY));
       }
 
-    void addExtension (String type, byte sub_type, String qualifier, byte[] extension_data) throws IOException, GeneralSecurityException
+    public void addExtension (String type, byte sub_type, String qualifier, byte[] extension_data) throws IOException, GeneralSecurityException
       {
         MacGenerator ext_mac = getEECertMacBuilder ();
         if (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION)

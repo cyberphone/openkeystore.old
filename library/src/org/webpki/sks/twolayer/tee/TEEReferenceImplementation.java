@@ -756,7 +756,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     @Override
     public void abort (String message) throws SKSException
       {
-        throw new SKSException (message);
+        throw new SKSException (message, SKSException.ERROR_OPTION);
       }
 
     void abort (String message, int option) throws SKSException

@@ -232,7 +232,7 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://cyberphone.github.io/openkeystore/resources/docs/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V0.99, January&nbsp;2015.</span>");
+            ", <span style=\"white-space: nowrap\">V1.00, July&nbsp;2015.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));

@@ -218,6 +218,11 @@ public class SKSTest
 
     void checkException (SKSException e, String compare_message)
       {
+        checkException (e, compare_message, null);
+      }
+
+    void checkException (SKSException e, String compare_message, Integer sks_error_code)
+      {
         String m = e.getMessage ();
         if (reference_implementation && m != null && compare_message.indexOf ('#') == m.indexOf ('#'))
           {
@@ -233,8 +238,13 @@ public class SKSTest
           {
             fail ("Exception: " + m);
           }
+        if (sks_error_code != null)
+          {
+            assertTrue ("Error code: " + sks_error_code.intValue () + " found " + e.getError (),
+                        sks_error_code.intValue () == e.getError ());
+          }
       }
-    
+
     void algOrder (String[] algorithms, String culprit_alg) throws Exception
       {
         try
@@ -258,8 +268,7 @@ public class SKSTest
 
     void authorizationErrorCheck (SKSException e)
       {
-        assertTrue ("Wrong return code", e.getError () == SKSException.ERROR_AUTHORIZATION);
-        checkException (e, "\"" + SecureKeyStore.VAR_AUTHORIZATION + "\" error for key #");
+        checkException (e, "\"" + SecureKeyStore.VAR_AUTHORIZATION + "\" error for key #", SKSException.ERROR_AUTHORIZATION);
       }
     
     void sessionNotOpenCheck (SKSException e)
@@ -393,7 +402,7 @@ public class SKSTest
                     catch (SKSException e)
                       {
                         assertFalse ("Read only", prop.isWritable ());
-                        checkException (e, "\"" + SecureKeyStore.VAR_PROPERTY + "\" not writable: " + prop.getName ());
+                        checkException (e, "\"" + SecureKeyStore.VAR_PROPERTY + "\" not writable: " + prop.getName (), SKSException.ERROR_NOT_ALLOWED);
                       }
                   }
                 assertTrue ("Writables", writes == writables);
@@ -3365,6 +3374,25 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "Duplicate \"" + SecureKeyStore.VAR_TYPE + "\" : " + type);
+          }
+        sess = new ProvSess (device);
+        key = sess.createKey ("Key.1",
+                              KeyAlgorithms.NIST_P_256,
+                              null /* pin_value */,
+                              null,
+                              AppUsage.AUTHENTICATION).setCertificate ( cn());
+        type = "http://example.com/define";
+        sub_type = SecureKeyStore.SUB_TYPE_EXTENSION;
+        key.addExtension (type, sub_type, "", extension_data);
+        sess.closeSession ();
+        try
+          {
+            device.sks.getExtension (key.key_handle, type + "@");
+            fail ("Non-existing");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "No such extension: http://example.com/define@ for key #", SKSException.ERROR_OPTION);
           }
         byte[] ext_data = {4,6,2,9,4};
         extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, ext_data, null);
