@@ -54,8 +54,6 @@ public class JSONObjectWriter implements Serializable
 
     static final int STANDARD_INDENT = 2;
 
-    boolean jose_algorithm_preference;
-    
     JSONObject root;
 
     StringBuffer buffer;
@@ -64,7 +62,7 @@ public class JSONObjectWriter implements Serializable
     
     boolean pretty_print;
 
-    boolean java_script_string;
+    boolean java_script_mode;
 
     boolean html_mode;
     
@@ -339,12 +337,13 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, getAlgorithmID (signer.getAlgorithm ()));
+        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON,
+                                    getAlgorithmID (signer.getAlgorithm (), signer.algorithm_preferences));
         if (signer.keyId != null)
           {
             signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
           }
-        signer.writeKeyData (signature_writer.setJOSEAlgorithmPreference (jose_algorithm_preference));
+        signer.writeKeyData (signature_writer);
         if (signer.extensions != null)
           {
             Vector<JSONValue> array = new Vector<JSONValue> ();
@@ -359,24 +358,22 @@ public class JSONObjectWriter implements Serializable
         return this;
       }
     
-    String getAlgorithmID (SKSAlgorithms algorithm)
+    String getAlgorithmID (SKSAlgorithms algorithm, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
-        if (jose_algorithm_preference && algorithm.getJOSEName () != null)
+        if (algorithm.getJOSEName () == null)
           {
-            return algorithm.getJOSEName ();
+            if (algorithm_preferences == JSONAlgorithmPreferences.JOSE)
+              {
+                throw new IOException("No JOSE algorithm for: " + algorithm.toString ());
+              }
+            return algorithm.getURI ();
           }
-        return algorithm.getURI ();
+        return algorithm_preferences == JSONAlgorithmPreferences.SKS ?
+                                                 algorithm.getURI () : algorithm.getJOSEName ();
       }
  
-    public JSONObjectWriter setJOSEAlgorithmPreference (boolean on)
+    public JSONObjectWriter setPublicKey (PublicKey public_key, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
-        jose_algorithm_preference = on;
-        return this;
-      }
-
-    public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
-      {
-        
         JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
         if (key_alg.isRSAKey ())
@@ -389,12 +386,17 @@ public class JSONObjectWriter implements Serializable
         else
           {
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg));
+            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg, algorithm_preferences));
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
             public_key_writer.setCurvePoint (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
             public_key_writer.setCurvePoint (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
           }
         return this;
+      }
+
+    public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
+      {
+        return setPublicKey (public_key, JSONAlgorithmPreferences.SKS);
       }
 
     public JSONObjectWriter setCertificatePath (X509Certificate[] certificate_path) throws IOException
@@ -433,7 +435,7 @@ public class JSONObjectWriter implements Serializable
       {
         if (pretty_print)
           {
-            buffer.append (html_mode ? "<br>" : java_script_string ? "\\\n" : "\n");
+            buffer.append (html_mode ? "<br>" : "\n");
           }
       }
 
@@ -704,7 +706,7 @@ public class JSONObjectWriter implements Serializable
             switch (c)
               {
                 case '\\':
-                  if (java_script_string)
+                  if (java_script_mode)
                     {
                       // JS escaping need \\\\ in order to produce a JSON \\
                       buffer.append ('\\');
@@ -735,7 +737,7 @@ public class JSONObjectWriter implements Serializable
                   break;
                   
                 case '\'':
-                  if (java_script_string)
+                  if (java_script_mode && !pretty_print)
                     {
                       // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
                       buffer.append ('\\');
@@ -768,7 +770,7 @@ public class JSONObjectWriter implements Serializable
 
     void escapeCharacter (char c)
       {
-        if (java_script_string)
+        if (java_script_mode)
           {
             buffer.append ('\\');
           }
@@ -813,9 +815,9 @@ public class JSONObjectWriter implements Serializable
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         indent = -indent_factor;
         pretty_print = output_format.pretty;
-        java_script_string = output_format.javascript;
+        java_script_mode = output_format.javascript;
         html_mode = output_format.html;
-        if (java_script_string)
+        if (java_script_mode && !pretty_print)
           {
             buffer.append ('\'');
           }
@@ -827,13 +829,16 @@ public class JSONObjectWriter implements Serializable
           {
             printObject (root, false);
           }
-        if (output_format == JSONOutputFormats.PRETTY_PRINT)
+        if (java_script_mode)
+          {
+            if (!pretty_print)
+              {
+                buffer.append ('\'');
+              }
+          }
+        else if (pretty_print)
           {
             newLine ();
-          }
-        else if (java_script_string)
-          {
-            buffer.append ('\'');
           }
         return buffer.toString ().getBytes ("UTF-8");
       }

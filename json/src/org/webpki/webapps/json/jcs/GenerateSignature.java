@@ -17,17 +17,16 @@
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
-
 import java.security.KeyStore;
 import java.security.PublicKey;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
-
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -52,12 +51,12 @@ public class GenerateSignature
 
     ACTION action;
     
-    boolean jose;
+    JSONAlgorithmPreferences jose;
 
     GenerateSignature (ACTION action, boolean jose)
       {
         this.action = action;
-        this.jose = jose;
+        this.jose = jose ? JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER : JSONAlgorithmPreferences.SKS;
       }
 
     static class AsymSignatureHelper extends KeyStoreSigner implements AsymKeySignerInterface
@@ -102,19 +101,18 @@ public class GenerateSignature
 
     byte[] sign (JSONObjectWriter wr) throws IOException
       {
-        wr.setJOSEAlgorithmPreference (jose);
         if (action == ACTION.X509)
           {
-            wr.setSignature (new JSONX509Signer (new AsymSignatureHelper (JCSService.clientkey_rsa).setExtendedCertPath (true)));
+            wr.setSignature (new JSONX509Signer (new AsymSignatureHelper (JCSService.clientkey_rsa).setExtendedCertPath (true)).setAlgorithmPreferences (jose));
           }
         else if (action == ACTION.SYM)
           {
-            wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyId (KEY_NAME));
+            wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setAlgorithmPreferences (jose).setKeyId (KEY_NAME));
           }
         else
           {
             wr.setSignature (new JSONAsymKeySigner (new AsymSignatureHelper (action == ACTION.RSA ?
-                                                                         JCSService.clientkey_rsa : JCSService.clientkey_ec)));
+                                                                         JCSService.clientkey_rsa : JCSService.clientkey_ec)).setAlgorithmPreferences (jose));
           }
         return wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
       }

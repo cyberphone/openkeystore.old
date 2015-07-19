@@ -17,13 +17,10 @@
 package org.webpki.webapps.wcppsignaturedemo;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,21 +31,17 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.SignatureWrapper;
-
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.tools.XML2HTMLPrinter;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
-
 import org.webpki.xml.XMLSchemaCache;
-
 import org.webpki.xmldsig.SignedKeyInfoSpecifier;
 import org.webpki.xmldsig.XMLVerifier;
 
@@ -101,7 +94,7 @@ public class SignedResultServlet extends HttpServlet implements BaseProperties
                     throw new IOException ("Document verification error");                  
                   }
                 VerifierInterface verifier = new KeyStoreVerifier (SignatureDemoService.client_root_kestore);
-                json.getSignature ().verify (new JSONX509Verifier (verifier));
+                json.getSignature (JSONAlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
                 signature = new String (new JSONObjectWriter (json).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8");
               }
             else

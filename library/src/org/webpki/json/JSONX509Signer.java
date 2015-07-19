@@ -40,6 +40,13 @@ public class JSONX509Signer extends JSONSigner
     
     boolean output_signature_certificate_attributes;
     
+    public JSONX509Signer (SignerInterface signer) throws IOException
+      {
+        this.signer = signer;
+        certificate_path = signer.getCertificatePath ();
+        algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
+      }
+
     public JSONX509Signer setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
         this.algorithm = algorithm;
@@ -52,11 +59,10 @@ public class JSONX509Signer extends JSONSigner
         return this;
       }
 
-    public JSONX509Signer (SignerInterface signer) throws IOException
+    public JSONX509Signer setAlgorithmPreferences (JSONAlgorithmPreferences algorithm_preferences)
       {
-        this.signer = signer;
-        certificate_path = signer.getCertificatePath ();
-        algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
+        super.algorithm_preferences = algorithm_preferences;
+        return this;
       }
 
     @Override

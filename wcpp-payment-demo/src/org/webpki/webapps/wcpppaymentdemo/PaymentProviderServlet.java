@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
 import java.security.cert.X509Certificate;
 
 import java.util.Date;
@@ -47,6 +46,7 @@ import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -69,7 +69,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
     private X509Certificate verifyMerchantSignature (JSONObjectReader signed_object) throws IOException
       {
         VerifierInterface verifier = new KeyStoreVerifier (PaymentDemoService.merchant_root);
-        signed_object.getSignature ().verify (new JSONX509Verifier (verifier));
+        signed_object.getSignature (JSONAlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
         return verifier.getSignerCertificatePath ()[0];
       }
 
@@ -151,7 +151,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
                 auth_data = getUserAuthorization (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
                 VerifierInterface verifier = new KeyStoreVerifier (PaymentDemoService.client_root);
-                auth_data.getSignature ().verify (new JSONX509Verifier (verifier));
+                auth_data.getSignature (JSONAlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
               }
             else
               {
@@ -197,8 +197,9 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             KeyStoreSigner signer = new KeyStoreSigner (PaymentDemoService.bank_eecert_key, null);
             signer.setExtendedCertPath (true);
             signer.setKey (null, PaymentDemoService.key_password);
-            result.setJOSEAlgorithmPreference (true);
-            result.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
+            result.setSignature (new JSONX509Signer (signer)
+                .setSignatureCertificateAttributes (true)
+                .setAlgorithmPreferences (JSONAlgorithmPreferences.JOSE));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();
           }

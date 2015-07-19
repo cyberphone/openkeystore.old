@@ -17,14 +17,17 @@
 package org.webpki.webapps.wcpppaymentdemo;
 
 import java.io.IOException;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectReader;
@@ -73,7 +76,7 @@ public class CheckoutServlet extends HttpServlet implements BaseProperties
         writer.setObject (PAYMENT_REQUEST_JSON, payment_request);
         HTML.checkoutPage (response,
                            saved_shopping_cart,
-                           new String (writer.serializeJSONObject (JSONOutputFormats.JS_STRING), "UTF-8"));
+                           new String (writer.serializeJSONObject (JSONOutputFormats.JS_QUOTED_STRING), "UTF-8"));
       }
 
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
