@@ -802,7 +802,7 @@ public class JSONTest
       {
         byte[] spki_bin = Base64URL.decode (spki);
         JSONObjectReader or = JSONParser.parse (jcs);
-        PublicKey public_key = or.getPublicKey ();
+        PublicKey public_key = or.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter ();
         assertTrue ("Public key jcs",
@@ -836,7 +836,8 @@ public class JSONTest
         updated_pub_key_object.setBinary (key_parm, parm_bytes);
         try
           {
-            JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
+            JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT))
+                         .getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
             assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)

@@ -17,18 +17,22 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+
 import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
@@ -36,6 +40,7 @@ import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -70,7 +75,7 @@ public class Keys
         @Override
         protected void readJSONData (JSONObjectReader rd) throws IOException
           {
-            public_key = rd.getPublicKey ();
+            public_key = rd.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
           }
   
         @Override

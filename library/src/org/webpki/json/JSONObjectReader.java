@@ -263,21 +263,26 @@ public class JSONObjectReader implements Serializable, Cloneable
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      * @throws IOException In case there is something wrong with the signature 
      */
-    public JSONSignatureDecoder getSignature (JSONAlgorithmPreferences algorithm_preferencess) throws IOException
+    public JSONSignatureDecoder getSignature (JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
-        return new JSONSignatureDecoder (this, algorithm_preferencess);
+        return new JSONSignatureDecoder (this, algorithm_preferences);
       }
 
     public JSONSignatureDecoder getSignature () throws IOException
       {
         return new JSONSignatureDecoder (this, JSONAlgorithmPreferences.SKS);
       }
-    
+ 
+    public PublicKey getPublicKey (JSONAlgorithmPreferences algorithm_preferences) throws IOException
+      {
+        return JSONSignatureDecoder.getPublicKey (this, algorithm_preferences);
+      }
+
     public PublicKey getPublicKey () throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this);
+        return JSONSignatureDecoder.getPublicKey (this, JSONAlgorithmPreferences.SKS);
       }
-    
+
     public X509Certificate[] getCertificatePath () throws IOException
       {
         return JSONSignatureDecoder.getCertificatePath (this);
