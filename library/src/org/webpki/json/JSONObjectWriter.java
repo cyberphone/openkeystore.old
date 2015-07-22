@@ -842,4 +842,17 @@ public class JSONObjectWriter implements Serializable
           }
         return buffer.toString ().getBytes ("UTF-8");
       }
+
+    @Override
+    public String toString ()
+      {
+        try
+          {
+            return new String (serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+          }
+        catch (IOException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
   }
