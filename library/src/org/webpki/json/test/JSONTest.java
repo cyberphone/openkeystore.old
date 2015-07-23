@@ -50,6 +50,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
+import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.util.ArrayUtil;
@@ -1039,6 +1040,15 @@ public class JSONTest
                 assertTrue ("Ext", exts.length == 1);
                 assertTrue ("type", exts[0].getString (JSONSignatureDecoder.TYPE_JSON).equals ("http://example.com/gg"));
                 assertTrue ("val", exts[0].getInt ("Some") == -4);
+                try
+                  {
+                    dec.verify (JSONSignatureTypes.X509_CERTIFICATE);
+                    fail("Ext not allowed");
+                  }
+                catch (IOException e)
+                  {
+                    checkException (e, BAD_SIGNATURE.ExtensionTest1.error);
+                  }
               }
             else
               {

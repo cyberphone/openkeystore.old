@@ -19,16 +19,22 @@ package org.webpki.json;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -395,12 +401,28 @@ public class JSONSignatureDecoder implements Serializable
         return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
+    /**
+     * Simplified verify that only checks that there are no "keyId" or "extensions", and that the signature type matches.
+     * Note that asymmetric key signatures are always checked for technical correctness.
+     * @param signatureType
+     * @throws IOException
+     */
+    public void verify (JSONSignatureTypes signatureType) throws IOException
+      {
+        verify (new JSONVerifier (signatureType) 
+          {
+            private static final long serialVersionUID = 1L;
+  
+            @Override
+            void verify (JSONSignatureDecoder signature_decoder) throws IOException
+              {
+              }
+          });
+      }
+
     public void verify (JSONVerifier verifier) throws IOException
       {
-        if (verifier.getVerifierType () != getSignatureType ())
-          {
-            throw new IOException ("Verifier type doesn't match the received signature");
-          }
+        checkRequest(verifier.signatureType);
         if (!verifier.extensionsAllowed && extensions != null)
           {
             throw new IOException ("\"" + EXTENSIONS_JSON + "\" requires enabling in the verifier");
