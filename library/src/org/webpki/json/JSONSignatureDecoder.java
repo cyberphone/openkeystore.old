@@ -165,7 +165,7 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    static String algorithmCheck (String identifier, JSONAlgorithmPreferences jose_settings) throws IOException
+    public static String algorithmCheck (String identifier, JSONAlgorithmPreferences jose_settings) throws IOException
       {
         if (identifier.contains (":"))
           {
