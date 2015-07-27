@@ -937,7 +937,7 @@ public class JSONTest
         KeyId ("\"keyId\" requires enabling in the verifier"),
         KeyId2 (null),
         PathOrder (""),
-        Verify ("Unknown CA"),
+        Verify ("Unknown CA: CN=Merchant Network Sub CA5,C=DE"),
         Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
         Certificate2 (null),
         DataAtEnd (null),
