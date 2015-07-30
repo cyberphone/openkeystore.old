@@ -40,7 +40,7 @@ public class JSONObjectReader implements Serializable, Cloneable
   {
     private static final long serialVersionUID = 1L;
 
-    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]+|0)[\\.][0-9]+");
+    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]*|0)[\\.][0-9]+");
 
     JSONObject root;
 
