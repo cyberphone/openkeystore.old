@@ -113,7 +113,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd, JSONAlgorithmPreferences jose_settings) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -121,8 +121,8 @@ public class JSONSignatureDecoder implements Serializable
           {
             throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
           }
-        algorithm_string = algorithmCheck (signature.getString (ALGORITHM_JSON), jose_settings);
-        getKeyInfo (signature, jose_settings);
+        algorithm_string = algorithmCheck (signature.getString (ALGORITHM_JSON), algorithm_preferences);
+        getKeyInfo (signature, algorithm_preferences);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
             extensions = new Vector<JSONObjectReader> ();
@@ -165,18 +165,18 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    public static String algorithmCheck (String identifier, JSONAlgorithmPreferences jose_settings) throws IOException
+    public static String algorithmCheck (String identifier, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
         if (identifier.contains (":"))
           {
-            if (jose_settings == JSONAlgorithmPreferences.JOSE)
+            if (algorithm_preferences == JSONAlgorithmPreferences.JOSE)
               {
                 throw new IOException("Invalid JOSE identifier: " + identifier);
               }
           }
         else
           {
-            if (jose_settings == JSONAlgorithmPreferences.SKS)
+            if (algorithm_preferences == JSONAlgorithmPreferences.SKS)
               {
                 throw new IOException("Invalid SKS identifier: " + identifier);
               }
@@ -184,7 +184,7 @@ public class JSONSignatureDecoder implements Serializable
         return identifier;
       }
 
-    void getKeyInfo (JSONObjectReader rd, JSONAlgorithmPreferences jose_settings) throws IOException
+    void getKeyInfo (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
         key_id = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
@@ -193,7 +193,7 @@ public class JSONSignatureDecoder implements Serializable
           }
         else if (rd.hasProperty (PUBLIC_KEY_JSON))
           {
-            public_key = getPublicKey (rd, jose_settings);
+            public_key = getPublicKey (rd, algorithm_preferences);
           }
         else if (rd.hasProperty (PEM_URL_JSON))
           {
@@ -232,7 +232,7 @@ public class JSONSignatureDecoder implements Serializable
         return new BigInteger (1, crypto_binary);
       }
 
-    static PublicKey getPublicKey (JSONObjectReader rd, JSONAlgorithmPreferences jose_settings) throws IOException
+    static PublicKey getPublicKey (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
         PublicKey public_key = null;
@@ -246,7 +246,7 @@ public class JSONSignatureDecoder implements Serializable
               }
             else if (type.equals (EC_PUBLIC_KEY))
               {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (algorithmCheck (rd.getString (CURVE_JSON), jose_settings));
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (algorithmCheck (rd.getString (CURVE_JSON), algorithm_preferences));
                 if (!ec.isECKey ())
                   {
                     throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
