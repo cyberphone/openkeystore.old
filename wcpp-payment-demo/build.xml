@@ -329,11 +329,18 @@
     </delete>    
   </target>
   
- <target name="zip-distribution">
+  <target name="_unzipit" if="uu">
+    <delete dir="${dd}/${appcorename}"/>
+    <unzip src="${dd}/${appcorename}.zip" dest="${dd}"/>
+  </target>
+
+  <target name="zip-distribution">
     <fail unless="dd" message="-&#10;
 ***************************************************************&#10;
  You must define a distribution directory using the -D option:&#10;
- ant zip-distribution -Ddd=the_path_to_the_directory&#10;
+ ant zip-distribution -Ddd=the_path_to_the_directory.&#10;
+ Optionally you can specify -Duu=0 which deletes ${appcorename}&#10;
+ and replaces the directory with the unzipped content&#10;
 ***************************************************************&#10;"/>
 	<echo message="Producing ${appcorename} .zip and .zip.SHA1 files..."/> 
    	<delete file="${dd}/${appcorename}.zip" failonerror="false"/>
@@ -347,6 +354,7 @@
       </zipfileset>
     </zip>
     <checksum file="${dd}/${appcorename}.zip" fileext=".SHA1" algorithm="sha1" forceOverwrite="yes"/>
+    <antcall target="_unzipit"/>
   </target>
    
 </project>

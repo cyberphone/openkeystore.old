@@ -18,17 +18,12 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.util.GregorianCalendar;
 import java.util.Vector;
-
 import java.util.regex.Pattern;
 
 import org.webpki.util.Base64URL;
@@ -45,7 +40,7 @@ public class JSONObjectReader implements Serializable, Cloneable
   {
     private static final long serialVersionUID = 1L;
 
-    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]+|0)[\\.][0-9]+");
+    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]*|0)[\\.][0-9]+");
 
     JSONObject root;
 
@@ -263,16 +258,26 @@ public class JSONObjectReader implements Serializable, Cloneable
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      * @throws IOException In case there is something wrong with the signature 
      */
+    public JSONSignatureDecoder getSignature (JSONAlgorithmPreferences algorithm_preferences) throws IOException
+      {
+        return new JSONSignatureDecoder (this, algorithm_preferences);
+      }
+
     public JSONSignatureDecoder getSignature () throws IOException
       {
-        return new JSONSignatureDecoder (this);
+        return new JSONSignatureDecoder (this, JSONAlgorithmPreferences.SKS);
       }
-    
+ 
+    public PublicKey getPublicKey (JSONAlgorithmPreferences algorithm_preferences) throws IOException
+      {
+        return JSONSignatureDecoder.getPublicKey (this, algorithm_preferences);
+      }
+
     public PublicKey getPublicKey () throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this);
+        return JSONSignatureDecoder.getPublicKey (this, JSONAlgorithmPreferences.SKS);
       }
-    
+
     public X509Certificate[] getCertificatePath () throws IOException
       {
         return JSONSignatureDecoder.getCertificatePath (this);
@@ -309,5 +314,11 @@ public class JSONObjectReader implements Serializable, Cloneable
           {
             throw new RuntimeException (e);
           }
+      }
+ 
+    @Override
+    public String toString ()
+      {
+        return new JSONObjectWriter (root).toString ();
       }
   }

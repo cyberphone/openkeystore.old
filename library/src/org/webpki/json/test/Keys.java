@@ -33,6 +33,7 @@ import java.util.Vector;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONEncoder;
@@ -74,7 +75,7 @@ public class Keys
         @Override
         protected void readJSONData (JSONObjectReader rd) throws IOException
           {
-            public_key = rd.getPublicKey ();
+            public_key = rd.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
           }
   
         @Override
@@ -88,19 +89,18 @@ public class Keys
     static class Writer extends JSONEncoder
       {
         PublicKey public_key;
-        boolean xml_dsig_curve;
+        JSONAlgorithmPreferences jose_curve;
         
-        Writer (PublicKey public_key, boolean xml_dsig_curve)
+        Writer (PublicKey public_key, JSONAlgorithmPreferences jose_curve)
           {
             this.public_key = public_key;
-            this.xml_dsig_curve = xml_dsig_curve;
+            this.jose_curve = jose_curve;
           }
 
         @Override
         protected void writeJSONData (JSONObjectWriter wr) throws IOException
           {
-            wr.setJOSEAlgorithmPreference (xml_dsig_curve);
-            wr.setPublicKey (public_key);
+            wr.setPublicKey (public_key, jose_curve);
           }
 
         @Override
@@ -116,7 +116,7 @@ public class Keys
         System.exit (0);
       }
 
-    static void Run (boolean rsa, boolean list, boolean xml_dsig_curve) throws GeneralSecurityException, IOException
+    static void Run (boolean rsa, boolean list, JSONAlgorithmPreferences jose_curve) throws GeneralSecurityException, IOException
       {
         AlgorithmParameterSpec alg_par_spec = rsa ?
             new RSAKeyGenParameterSpec (2048, RSAKeyGenParameterSpec.F4)
@@ -126,7 +126,7 @@ public class Keys
         kpg.initialize (alg_par_spec, new SecureRandom ());
         KeyPair key_pair = kpg.generateKeyPair ();
         PublicKey public_key = key_pair.getPublic ();
-        byte[] data = new Writer (public_key, xml_dsig_curve).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+        byte[] data = new Writer (public_key, jose_curve).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse (data);
         boolean ec_flag = false;
         byte[] gen_pk = public_key.getEncoded ();
@@ -176,9 +176,9 @@ public class Keys
             cache.addToCache (Reader.class);
             for (int i = 0; i < ROUNDS; i++)
               {
-                Run (true, new Boolean (argc[0]), false);
-                Run (false, new Boolean (argc[0]), false);
-                Run (false, new Boolean (argc[0]), true);
+                Run (true, new Boolean (argc[0]), JSONAlgorithmPreferences.SKS);
+                Run (false, new Boolean (argc[0]), JSONAlgorithmPreferences.SKS);
+                Run (false, new Boolean (argc[0]), JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
                 ec_index++;
               }
           }

@@ -39,6 +39,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -49,6 +50,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
+import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 import org.webpki.util.ArrayUtil;
@@ -801,11 +803,12 @@ public class JSONTest
       {
         byte[] spki_bin = Base64URL.decode (spki);
         JSONObjectReader or = JSONParser.parse (jcs);
-        PublicKey public_key = or.getPublicKey ();
+        PublicKey public_key = or.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
-        JSONObjectWriter ow = new JSONObjectWriter ().setJOSEAlgorithmPreference (jcs.indexOf ("\"P-") > 0);
+        JSONObjectWriter ow = new JSONObjectWriter ();
         assertTrue ("Public key jcs",
-             ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin)).serializeJSONObject (JSONOutputFormats.NORMALIZED),
+             ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin), (jcs.indexOf ("\"P-") > 0) ?
+                 JSONAlgorithmPreferences.JOSE : JSONAlgorithmPreferences.SKS).serializeJSONObject (JSONOutputFormats.NORMALIZED),
                                 or.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
@@ -834,7 +837,8 @@ public class JSONTest
         updated_pub_key_object.setBinary (key_parm, parm_bytes);
         try
           {
-            JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getPublicKey ();
+            JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT))
+                         .getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
             assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)
@@ -933,7 +937,7 @@ public class JSONTest
         KeyId ("\"keyId\" requires enabling in the verifier"),
         KeyId2 (null),
         PathOrder (""),
-        Verify ("Unknown CA"),
+        Verify ("Unknown CA: CN=Merchant Network Sub CA5,C=DE"),
         Certificate1 ("\"signerCertificate\" doesn't match actual certificate"),
         Certificate2 (null),
         DataAtEnd (null),
@@ -1036,6 +1040,15 @@ public class JSONTest
                 assertTrue ("Ext", exts.length == 1);
                 assertTrue ("type", exts[0].getString (JSONSignatureDecoder.TYPE_JSON).equals ("http://example.com/gg"));
                 assertTrue ("val", exts[0].getInt ("Some") == -4);
+                try
+                  {
+                    dec.verify (JSONSignatureTypes.X509_CERTIFICATE);
+                    fail("Ext not allowed");
+                  }
+                catch (IOException e)
+                  {
+                    checkException (e, BAD_SIGNATURE.ExtensionTest1.error);
+                  }
               }
             else
               {

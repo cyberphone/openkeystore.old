@@ -42,7 +42,16 @@ public class Extension
       {
         return sub_type;
       }
-    
+
+    public byte[] getExtensionData(byte sub_type) throws SKSException
+      {
+        if (this.sub_type != sub_type)
+          {
+            throw new SKSException("Non-matching sub-type: " + this.sub_type);
+          }
+        return extensionData;
+      }
+
     public byte[] getExtensionData ()
       {
         return extensionData;

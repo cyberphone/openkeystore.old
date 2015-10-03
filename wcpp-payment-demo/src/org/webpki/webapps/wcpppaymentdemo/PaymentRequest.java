@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.webpki.crypto.KeyStoreSigner;
 
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
@@ -53,13 +54,14 @@ public class PaymentRequest implements BaseProperties
         signer.setExtendedCertPath (true);
         signer.setKey (null, PaymentDemoService.key_password);
         return new JSONObjectWriter ()
-                     .setJOSEAlgorithmPreference (true)
                      .setString (COMMON_NAME_JSON, common_name)
                      .setInt (AMOUNT_JSON, amount)
                      .setString (CURRENCY_JSON, currency.toString ())
                      .setString (REFERENCE_ID_JSON, reference_id)
                      .setDateTime (DATE_TIME_JSON, date_time, true)
-                     .setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
+                     .setSignature (new JSONX509Signer (signer)
+                        .setSignatureCertificateAttributes (true)
+                        .setAlgorithmPreferences (JSONAlgorithmPreferences.JOSE));
       }
 
     public static PaymentRequest parseJSONData (JSONObjectReader payee) throws IOException

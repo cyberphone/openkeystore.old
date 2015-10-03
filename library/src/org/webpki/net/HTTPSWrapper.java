@@ -451,7 +451,12 @@ public class HTTPSWrapper
     private void setupRequest (String url, boolean output) throws IOException
       {
         ///////////////////////////////////////////////
-        // Clean the response header.
+        // Clear the result
+        ///////////////////////////////////////////////
+        server_data = null;
+
+        ///////////////////////////////////////////////
+        // Clear the response header.
         ///////////////////////////////////////////////
         response_headers.clear ();
 
@@ -581,13 +586,17 @@ public class HTTPSWrapper
         // Read response data
         ////////////////////////////////////////////
         response_code = conn.getResponseCode ();
-        if (response_code >= HttpURLConnection.HTTP_INTERNAL_ERROR)
+        if (response_code == HttpURLConnection.HTTP_OK)
           {
-            server_data = ArrayUtil.getByteArrayFromInputStream (conn.getErrorStream ());
+            server_data = ArrayUtil.getByteArrayFromInputStream (conn.getInputStream ());
           }
         else
           {
-            server_data = ArrayUtil.getByteArrayFromInputStream (conn.getInputStream ());
+            InputStream is = conn.getErrorStream ();
+            if (is != null)
+              {
+                server_data = ArrayUtil.getByteArrayFromInputStream (conn.getErrorStream ());
+              }
           }
 
         ////////////////////////////////////////////
@@ -617,7 +626,7 @@ public class HTTPSWrapper
           {
             throw new IOException ("Unexpected return code [" + response_code + 
                                    (response_message == null ? "" : " " + response_message) +
-                                   "] for url: " + url);
+                                   "] for url: " + url + (server_data == null ? "" : "\n" + getDataUTF8()));
           }
       }
 
@@ -871,11 +880,26 @@ public class HTTPSWrapper
     /** 
      * Gets content type of HTTP response. 
      *
-     * @return The MIME type of the HTTP response, or null if not available.
+     * @return The full <code>Content-Type</code> of the HTTP response, or null if not available.
+     */
+    public String getRawContentType ()
+      {
+        return getHeaderValue ("Content-Type");
+      }
+
+    
+    /** 
+     * Gets content type of HTTP response. 
+     *
+     * @return The <code>Content-Type</code> minus any extra information of the HTTP response, or null if not available.
      */
     public String getContentType ()
       {
-        String ct = getHeaderValue ("Content-Type");
+        String ct = getRawContentType();
+        if (ct == null)
+          {
+            return null;
+          }
         int i = ct.indexOf (';');
         if (i > 0)
           {
@@ -1375,6 +1399,11 @@ public class HTTPSWrapper
                                                     "Accept non-matching host name(s) in certificates",
                                                     CmdFrequency.OPTIONAL);
 
+        CmdLineArgument CMD_require_ok    = create (CmdLineArgumentGroup.GENERAL,
+                                                    "require/success", null,
+                                                    "Do not accept HTTP errors",
+                                                    CmdFrequency.OPTIONAL);
+
         CmdLineArgument CMD_timeout       = create (CmdLineArgumentGroup.GENERAL,
                                                     "timeout", "value",
                                                     "Set timeout in milliseconds",
@@ -1557,6 +1586,11 @@ public class HTTPSWrapper
             if (CMD_badnames_ok.found)
               {
                 wrap.allowDiffHostNames (true);
+              }
+
+            if (CMD_require_ok.found)
+              {
+                wrap.setRequireSuccess (true);
               }
 
             if (CMD_invalid_ok.found)

@@ -17,14 +17,12 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
 import java.security.spec.ECGenParameterSpec;
 
 import org.webpki.crypto.AsymKeySignerInterface;
@@ -32,7 +30,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SignatureWrapper;
-
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;

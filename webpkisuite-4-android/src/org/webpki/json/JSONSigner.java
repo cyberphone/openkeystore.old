@@ -34,6 +34,8 @@ public abstract class JSONSigner implements Serializable
     String keyId;
 
     byte[] normalized_data;
+    
+    JSONAlgorithmPreferences algorithm_preferences = JSONAlgorithmPreferences.SKS;
 
     JSONSigner () {}
 

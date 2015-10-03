@@ -88,7 +88,7 @@ public class KeyStoreVerifier implements VerifierInterface
             trusted = ca_certificates.verifyCertificates (certificate_path);
             if (abort_on_non_trusted && !trusted)
               {
-                throw new IOException ("Unknown CA");
+                throw new IOException ("Unknown CA: " + certificate_path[certificate_path.length - 1].getIssuerX500Principal ().getName ());
               }
           }
         catch (GeneralSecurityException e)

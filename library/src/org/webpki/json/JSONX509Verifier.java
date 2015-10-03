@@ -36,6 +36,7 @@ public class JSONX509Verifier extends JSONVerifier
      */
     public JSONX509Verifier (VerifierInterface verifier)
       {
+        super(JSONSignatureTypes.X509_CERTIFICATE);
         this.verifier = verifier;
       }
 
@@ -43,11 +44,5 @@ public class JSONX509Verifier extends JSONVerifier
     void verify (JSONSignatureDecoder signature_decoder) throws IOException
       {
         verifier.verifyCertificatePath (signature_decoder.certificate_path);
-      }
-
-    @Override
-    JSONSignatureTypes getVerifierType () throws IOException
-      {
-        return JSONSignatureTypes.X509_CERTIFICATE;
       }
   }

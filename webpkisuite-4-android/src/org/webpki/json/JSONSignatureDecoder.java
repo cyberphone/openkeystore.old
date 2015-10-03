@@ -113,7 +113,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, JSONAlgorithmPreferences jose_settings) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -122,6 +122,20 @@ public class JSONSignatureDecoder implements Serializable
             throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
           }
         algorithm_string = signature.getString (ALGORITHM_JSON);
+        if (algorithm_string.contains (":"))
+          {
+            if (jose_settings == JSONAlgorithmPreferences.JOSE)
+              {
+                throw new IOException("Invalid JOSE algorithm: " + algorithm_string);
+              }
+          }
+        else
+          {
+            if (jose_settings == JSONAlgorithmPreferences.SKS)
+              {
+                throw new IOException("Invalid SKS algorithm: " + algorithm_string);
+              }
+          }
         getKeyInfo (signature);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
