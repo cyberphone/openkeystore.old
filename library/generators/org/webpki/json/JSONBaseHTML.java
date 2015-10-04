@@ -975,7 +975,7 @@ public class JSONBaseHTML
         html.append (external_styles)
          .append("</style></head><body style=\"margin:15pt\">" +
                  "<div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;" +
-                 "height:48pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\"" +
+                 "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\"" +
                  " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
           .append (new String(ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.svg")),"UTF-8"))
           .append ("</div>");
