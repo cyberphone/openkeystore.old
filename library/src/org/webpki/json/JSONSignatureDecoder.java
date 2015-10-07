@@ -217,7 +217,7 @@ public class JSONSignatureDecoder implements Serializable
         byte[] fixed_binary = rd.getBinary (property);
         if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
           {
-            throw new IOException ("Public EC key parameter \"" + property + "\" is not nomalized");
+            throw new IOException ("Public EC key parameter \"" + property + "\" is not normalized");
           }
         return new BigInteger (1, fixed_binary);
       }
