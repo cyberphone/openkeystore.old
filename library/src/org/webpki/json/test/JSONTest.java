@@ -309,6 +309,21 @@ public class JSONTest
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDouble ("name") == ref);
       }
 
+    void integerValue (String string, int ref) throws Exception
+      {
+        assertTrue (simpleArrayType (string).getInt () == ref);
+        assertTrue (simpleObjectType (string).getInt ("name") == ref);
+        assertTrue (simpleArrayType (string).getElementType () == JSONTypes.INTEGER);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.INTEGER);
+        assertTrue (simpleArrayType (string + "  ").getElementType () == JSONTypes.INTEGER);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.INTEGER);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setInt (ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getInt () == ref);
+        or = new JSONObjectWriter ().setInt ("name", ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getInt ("name") == ref);
+      }
+
     JSONObjectReader simpleObjectType (String string) throws IOException
       {
         return JSONParser.parse (new StringBuffer ("{\"name\":")
@@ -493,14 +508,15 @@ public class JSONTest
         floatingPoint ("1.0e4", 1.0e4);
         floatingPoint ("0.9999e-99", 0.9999e-99);
         floatingPoint ("1.0E+4", 10000);
+        floatingPoint ("0.00000000000000000001", 1.0e-20);
         floatingPoint (     "1.0e4"    , 1.0e4);
         floatingPoint ("-0.0", -0.0);
         floatingPoint ("+0.0", +0.0);
-        floatingPoint ("+1", +1);
-        floatingPoint ("-0", -0);
         floatingPoint (".1", .1);
         floatingPoint ("1.", 1.0);
-        floatingPoint ("01", 01);
+        integerValue ("+1", +1);
+        integerValue ("-0", -0);
+        integerValue ("01", 01);
         longVariables (1235454234343434l);
         longVariables (0xa885abafaba0l);
         bigDecimalValues (new BigDecimal ("3232323243243234234243234234243243243243243234243"));
@@ -847,7 +863,7 @@ public class JSONTest
             checkException (e, rsa_flag ? 
                 "Public RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes" 
                                         :
-                "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not nomalized");
+                "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not normalized");
           }
       }
 

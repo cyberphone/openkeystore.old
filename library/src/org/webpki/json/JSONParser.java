@@ -37,7 +37,7 @@ public class JSONParser
     static final char COMMA_CHARACTER     = ',';
     static final char BACK_SLASH          = '\\';
     
-    static final Pattern INTEGER_PATTERN  = Pattern.compile ("(0)|(-?[1-9][0-9]*)");
+    static final Pattern INTEGER_PATTERN  = Pattern.compile ("[-+]?[0-9]+");
     static final Pattern BOOLEAN_PATTERN  = Pattern.compile ("true|false");
     static final Pattern DOUBLE_PATTERN   = Pattern.compile ("[-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?");
     
