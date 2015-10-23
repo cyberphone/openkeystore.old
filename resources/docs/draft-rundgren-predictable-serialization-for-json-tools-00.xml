@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+    which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+    There has to be one entity for each item to be referenced. 
+    An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC7159 SYSTEM "http://www.rfc-editor.org/refs/bibxml/reference.RFC.7159.xml">
+<!ENTITY RFC7515 SYSTEM "http://www.rfc-editor.org/refs/bibxml/reference.RFC.7515.xml">
+<!ENTITY RFC3629 SYSTEM "http://www.rfc-editor.org/refs/bibxml/reference.RFC.3629.xml">
+<!ENTITY RFC4648 SYSTEM "http://www.rfc-editor.org/refs/bibxml/reference.RFC.4648.xml">
+<!ENTITY RFC7518 SYSTEM "http://www.rfc-editor.org/refs/bibxml/reference.RFC.7518.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs), 
+    please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+    (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space 
+    (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<rfc category="info" docName="draft-rundgren-predictable-serialization-for-json-tools-00" ipr="trust200902">
+ <!-- category values: std, bcp, info, exp, and historic
+    ipr values: trust200902, noModificationTrust200902, noDerivativesTrust200902,
+       or pre5378Trust200902
+    you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+    they will automatically be output with "(if approved)" -->
+
+ <!-- ***** FRONT MATTER ***** -->
+
+ <front>
+   <!-- The abbreviated title is used in the page header - it is only necessary if the 
+        full title is longer than 39 characters -->
+
+   <title>Predictable Serialization for JSON Tools</title>
+
+   <!-- add 'role="editor"' below for the editors if appropriate -->
+
+   <!-- Another author who claims to be an editor -->
+
+   <author fullname="Anders Rundgren" initials="A.R." role="editor"
+           surname="Rundgren">
+     <organization>WebPKI.org</organization>
+
+     <address>
+       <postal>
+         <street>14 Ave. Du General Leclerc</street>
+
+         <!-- Reorder these if your country does things differently -->
+
+         <city>Perols</city>
+
+         <region></region>
+
+         <code>34470</code>
+
+         <country>France</country>
+       </postal>
+
+       <phone>+33 644 75 23 31</phone>
+
+       <email>anders.rundgren.net@gmail.com</email>
+
+       <!-- uri and facsimile elements may also be added -->
+     </address>
+   </author>
+
+   <date year="2015" />
+
+   <!-- If the month and year are both specified and are the current ones, xml2rfc will fill 
+        in the current day for you. If only the current year is specified, xml2rfc will fill 
+	 in the current day and month for you. If the year is not the current one, it is 
+	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the 
+	 purpose of calculating the expiry date).  With drafts it is normally sufficient to 
+	 specify just the year. -->
+
+   <!-- Meta-data Declarations -->
+
+   <area>General</area>
+
+   <workgroup>Internet Engineering Task Force</workgroup>
+
+   <!-- WG name at the upperleft corner of the doc,
+        IETF is fine for individual submissions.  
+	 If this element is not present, the default is "Network Working Group",
+        which is used by the RFC Editor as a nod to the history of the IETF. -->
+
+   <keyword>JSON</keyword>
+   <keyword>signature</keyword>
+
+   <!-- Keywords will be incorporated into HTML output
+        files in a meta tag but they have no effect on text or nroff
+        output. If you submit your draft to the RFC Editor, the
+        keywords will be used for the search engine. -->
+
+   <abstract>
+     <t>This specification outlines an optional characteristic of JSON tools like
+     parsers, serving two entirely different purposes: 1) Making information-rich
+JSON messages more human-readable by honoring the originator's conventions.  2) Facilitating simple &quot;Signed JSON&quot;
+schemes without necessarily needing specific signature text-processing software.</t>
+   </abstract>
+ </front>
+
+ <middle>
+   <section title="Introduction">
+     <t>There is currently a strong trend moving from XML, EDI, ASN.1,
+and plain-text formats to <xref target="RFC7159">JSON</xref>.
+Although obviously working, JSON's unspecified of ordering of properties as well as the
+lack of a canonical form, sometimes make this switch rather painful.</t>
+<t>This specification describes a simple enhancement to JSON parsers which addresses
+the mentioned drawbacks.</t>
+<t>Note: This is not an attempt to change the JSON language in
+any way;
+it is only about how it is processed!  The next paragraph explains the
+problems in a nutshell.</t>
+<t>Assume the following JSON message is parsed:</t>
+<figure><artwork><![CDATA[
+  {
+    "device": "Pump",
+    "value": 0.000000000000000001
+  }
+]]></artwork></figure>
+<t>After serialization a fully JSON-compliant output may look like:</t>
+<figure><artwork><![CDATA[
+  {
+    "value": 1e-18,
+    "device": "Pump"
+  }
+]]></artwork></figure>
+<t>Note: Whitespace was added for brevity.</t>
+<t>If a JSON object contains dozens of properties the ability for a human to follow a
+message with respect to its specification (which presumably lists
+properties in a &quot;logical&quot; order), becomes considerably harder
+if the properties are serialized in an arbitrary order.
+In addition, changing the representation of numbers also contributes
+to confusion.  Computers however, do not care.</t>
+<t>While limitations in JSON-data for human consumption may only be considered a &quot;nuisance&quot;,
+adding a signature property to a JSON object is infeasible
+unless there is some kind of predictable representation of data.
+This is one of the reasons why <xref target="RFC7515">JSON Web Signature (JWS)</xref>
+specifies that data to be signed must be Base64-encoded which though
+unfortunately makes JWS-signed messages unreadable by humans.</t>
+
+
+     <section title="Notational Conventions">
+       <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+       "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+       document are to be interpreted as described in <xref
+       target="RFC2119">RFC 2119</xref>.</t>
+     </section>
+   </section>
+
+   <section title="Predictable Serialization">
+     <t>To cope with the mentioned drawbacks, this specification introduces
+a simple predictable serialization scheme, preferably implemented directly in
+JSON parsers.</t>
+
+    <section title="Ordering of Properties">
+     <t>The original property order MUST be honored during parsing of JSON objects to
+support a subsequent serialization phase.  Duplicate
+or empty properties MUST be rejected.
+</t>
+   </section>
+   <section title="Element Normalization">
+     <t>In addition to preserving property order, this specification implies
+specific handling of JSON elements, described in the succeeding sub-sections.</t>
+
+    <section title="Whitespace Processing">
+     <t>For dealing with the second use-case (digital signatures), whitespace MUST
+         be removed during serialization.</t>
+   </section>
+
+    <section title="String Normalization">
+     <t>Strings including properties MUST be normalized in a way which is close to
+the de-facto standard for JSON parsers which is:</t>
+     <t><list style="symbols">
+         <t>JSON '\/' escape sequences MUST be honored on input within
+quoted strings but be treated as a &quot;degenerate&quot; equivalents to '/' by rewriting them.</t>
+
+         <t><xref target="UNICODE">Unicode</xref> escape sequences ('\uhhhh') within quoted strings MUST
+be adjusted as follows: If the Unicode value falls within the
+<xref target="RFC20">ASCII</xref> control character range (0x00 - 0x1f), it MUST be rewritten in
+lower-case hexadecimal notation unless it is one of the pre-defined
+JSON escapes ('\n' etc.) because the latter have precedence.
+If the Unicode value is outside of the ASCII control character range,
+it MUST be replaced by the corresponding Unicode character with the
+exception of '&quot;' and '\' which always MUST be escaped as well.</t>
+       </list></t>
+   </section>
+
+    <section title="Number Representation">
+     <t>The textual representation of numbers MUST be preserved during
+parsing and serialization.  That is, 3.50 and -0 MUST
+be serialized as 3.50 and -0 respectively although
+3.5 and 0 would be the most natural outcomes.</t>
+   </section>
+
+    <section title="Other Data Types">
+     <t>No particular action needs to be taken for the remaining JSON elements, 
+         &quot;null&quot;, &quot;true&quot;, or &quot;false&quot;.</t>
+   </section>
+
+   </section>
+</section>
+
+  <section title="Signed JSON Objects">
+     <t>The following section shows the principles for creating and
+verifying in-object signatures built on top of
+the predictable serialization concept.</t>
+   <section title="Creating a Signed JSON object">
+<t>Assume there is a JSON object like the following:</t>
+<figure><artwork type="code"><![CDATA[
+  {
+    "property-1": ...,
+    "property-2": ...,
+    ...
+    "property-n": ...
+  }
+]]></artwork></figure>
+<t>A with this specification compliant serialization would then return:</t>
+<figure><artwork><![CDATA[
+  {"property-1":...,"property-2":...,..."property-n":...}
+]]></artwork></figure>
+<t>This string may after conversion to <xref target="RFC3629">UTF-8</xref> be signed using any suitable algorithm
+like <xref target="RFC7518">HS256</xref> or <xref target="RFC7518">RS256</xref>.
+Using a bare-bones signature scheme the resulting
+JSON object could look like the following:</t>
+<figure><artwork><![CDATA[
+  {
+    "property-1": ...,
+    "property-2": ...,
+    ...
+    "property-n": ...,
+    "signature":"LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
+  }
+]]></artwork></figure>
+<t>The actual signature value would typically be <xref target="RFC4648">Base64URL-encoded</xref>.</t>
+<t>Note: The placement of the &quot;signature&quot; property with respect to the
+other properties (1-n) is insignificant.</t>
+<t>Note: Signed data may very well be &quot;pretty-printed&quot; since whitespace
+is excluded by the serialization process.</t>
+   </section>
+   <section title="Verifying a Signed JSON Object">
+<t>The signed object created in the previous section could then be verified by:</t>
+     <t><list style="numbers">
+         <t>Parsing the JSON object</t>
+         <t>Reading and decoding the value of the &quot;signature&quot; property</t>
+         <t>Removing the &quot;signature&quot; property from the JSON object</t>
+         <t>Serializing the JSON object which then should generate exactly the same result as in the preceding section</t>
+         <t>Applying standard signature verification techniques using the UTF-8 serialization result and data read in step #2 as input arguments</t>
+       </list></t>
+   </section>
+   </section>
+
+
+   <section anchor="Acknowledgements" title="Acknowledgements">
+     <t>During the initial phases of the design of <xref
+     target="JCS">JSON Cleartext Signature (JCS)</xref> which was the &quot;inspiration&quot;
+for this specification, highly
+appreciated feedback were provided by Manu Sporny, Jim Klo,
+James Manger, Jeffrey Walton, David Chadwick, Jim Schaad,
+David Waite, Douglas Crockford, Arne Riiber, Sergey Beryozkin, and Brian Campbell.</t>
+   </section>
+
+   <!-- Possibly a 'Contributors' section ... -->
+
+   <section anchor="IANA" title="IANA Considerations">
+     <t>This memo includes no request to IANA.</t>
+   </section>
+
+   <section anchor="Security" title="Security Considerations">
+     <t>This specification does (according to the author),
+not reduce or add vulnerabilities to JSON processing.
+Bugs in serializing software can though (of course) potentially expose
+sensitive data to attackers, activate protected APIs, or incorrectly validate signatures.</t>
+   </section>
+ </middle>
+
+ <!--  *****BACK MATTER ***** -->
+
+ <back>
+   <!-- References split into informative and normative -->
+
+   <!-- There are 2 ways to insert reference entries from the citation libraries:
+    1. define an ENTITY at the top, and use "ampersand character"RFC2629; here (as shown)
+    2. simply use a PI "less than character"?rfc include="reference.RFC.2119.xml"?> here
+       (for I-Ds: include="reference.I-D.narten-iana-considerations-rfc2434bis.xml")
+
+    Both are cited textually in the same manner: by using xref elements.
+    If you use the PI option, xml2rfc will, by default, try to find included files in the same
+    directory as the including file. You can also define the XML_LIBRARY environment variable
+    with a value containing a set of directories to search.  These can be either in the local
+    filing system or remote ones accessed by http (http://domain/dir/... ).-->
+
+   <references title="Normative References">
+     <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"?-->
+     &RFC2119;
+
+     <reference anchor="RFC20"
+                target="http://www.rfc-editor.org/info/rfc20">
+       <!-- the following is the minimum to make xml2rfc happy -->
+
+       <front>
+         <title>ASCII format for Network Interchange</title>
+
+         <author initials="V.C." surname="Cerf">
+           <organization></organization>
+         </author>
+
+         <date year="1969" month="October" />
+       </front>
+     </reference>
+
+     <!--?rfc include="http://www.rfc-editor.org/refs/bibxml/reference.RFC.7159.xml"?-->
+     &RFC7159;
+
+     <reference anchor="UNICODE"
+                target="http://www.unicode.org/versions/latest/">
+       <!-- the following is the minimum to make xml2rfc happy -->
+
+       <front>
+         <title>The Unicode Standard</title>
+
+         <author>
+           <organization>The Unicode Consortium</organization>
+         </author>
+
+         <date/>
+       </front>
+     </reference>
+   </references>
+
+   <references title="Informative References">
+     <!-- Here we use entities that we defined at the beginning. -->
+
+     <!--?rfc include="http://www.rfc-editor.org/refs/bibxml/reference.RFC.7515.xml"?-->
+     &RFC7515;
+
+     <!--?rfc include="http://www.rfc-editor.org/refs/bibxml/reference.RFC.3629.xml"?-->
+     &RFC3629;
+
+     <!--?rfc include="http://www.rfc-editor.org/refs/bibxml/reference.RFC.4648.xml"?-->
+     &RFC4648;
+
+     <!--?rfc include="http://www.rfc-editor.org/refs/bibxml/reference.RFC.7518.xml"?-->
+     &RFC7518;
+
+     <reference anchor="JCS"
+                target="https://cyberphone.github.io/openkeystore/resources/docs/jcs.html">
+       <!-- the following is the minimum to make xml2rfc happy -->
+
+       <front>
+         <title>JSON Cleartext Signature</title>
+
+         <author initials="A.R." surname="Rundgren">
+           <organization></organization>
+         </author>
+
+         <date year="2015" month="January" />
+       </front>
+     </reference>
+
+     <!-- A reference written by by an organization not a person. -->
+
+   </references>
+
+   <!-- Change Log
+
+v00 2015-10-23     Initial version
+
+  -->
+ </back>
+</rfc>
