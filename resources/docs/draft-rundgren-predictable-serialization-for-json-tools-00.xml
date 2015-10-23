@@ -265,7 +265,7 @@ is excluded by the serialization process.</t>
          <t>Parsing the JSON object</t>
          <t>Reading and decoding the value of the &quot;signature&quot; property</t>
          <t>Removing the &quot;signature&quot; property from the JSON object</t>
-         <t>Serializing the JSON object which then should generate exactly the same result as in the preceding section</t>
+         <t>Serializing the JSON object which should generate exactly the same result as in the preceding section</t>
          <t>Applying an algorithm-dependent signature verification method using the signature key,
               the UTF-8 representation of the serialization result from step #4,
               and the data read in step #2 as input arguments</t>

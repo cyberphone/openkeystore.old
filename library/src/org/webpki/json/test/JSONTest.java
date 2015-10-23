@@ -1136,4 +1136,38 @@ public class JSONTest
         removeProperty ("{\"outer\": {\"inner\":6}}", "inner", "{\"outer\":{}}");
         removeProperty ("{\"outer\": {\"hi\":\"yes?\",\"inner\":6}}", "inner", "{\"outer\":{\"hi\":\"yes?\"}}");
       }
+
+    @Test
+    public void ClearTextNumbers () throws Exception
+      {
+        assertTrue (ArrayUtil.compare (new JSONObjectWriter ()
+                                           .setNumberAsText ("value", "0.0000000000001")
+                                                .serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                       "{\"value\":0.0000000000001}".getBytes ("UTF-8")));
+        assertTrue (ArrayUtil.compare (new JSONArrayWriter ()
+                                           .setNumberAsText ("0.0000000000001")
+                                               .serializeJSONArray (JSONOutputFormats.NORMALIZED),
+                                       "[0.0000000000001]".getBytes ("UTF-8")));
+        assertTrue (JSONParser.parse (new JSONObjectWriter ()
+                        .setNumberAsText ("value", "-0")
+                            .serializeJSONObject (JSONOutputFormats.NORMALIZED)).getInt ("value") == 0);
+        try
+          {
+            new JSONObjectWriter ().setNumberAsText ("value", "0.0000000000001-");
+            fail("bad number");
+          }
+        catch (IOException e)
+          {
+            checkException (e, "Undecodable argument: 0.0000000000001-");
+          }
+        try
+          {
+            new JSONObjectWriter ().setNumberAsText ("value", "0,6");
+            fail("bad syntax");
+          }
+        catch (IOException e)
+          {
+            checkException (e, "Syntax error on number: 0,6");
+          }
+      }
   }
