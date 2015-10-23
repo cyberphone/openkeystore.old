@@ -130,7 +130,7 @@ lack of a canonical form, sometimes make this switch rather painful.</t>
 the mentioned drawbacks.</t>
 <t>Note: This is not an attempt to change the JSON language in
 any way;
-it is only about how it is processed!  The next paragraph explains the
+it is only about how it is processed!  The sample below displays the
 problems in a nutshell.</t>
 <t>Assume the following JSON message is parsed:</t>
 <figure><artwork><![CDATA[
@@ -180,7 +180,7 @@ support a subsequent serialization phase.  Duplicate
 or empty properties MUST be rejected.
 </t>
    </section>
-   <section title="Element Normalization">
+   <section title="Element Handling">
      <t>In addition to preserving property order, this specification implies
 specific handling of JSON elements, described in the succeeding sub-sections.</t>
 
@@ -216,7 +216,7 @@ be serialized as 3.50 and -0 respectively although
 
     <section title="Other Data Types">
      <t>No particular action needs to be taken for the remaining JSON elements, 
-         &quot;null&quot;, &quot;true&quot;, or &quot;false&quot;.</t>
+         &quot;null&quot;, &quot;true&quot;, and &quot;false&quot;.</t>
    </section>
 
    </section>
@@ -266,7 +266,9 @@ is excluded by the serialization process.</t>
          <t>Reading and decoding the value of the &quot;signature&quot; property</t>
          <t>Removing the &quot;signature&quot; property from the JSON object</t>
          <t>Serializing the JSON object which then should generate exactly the same result as in the preceding section</t>
-         <t>Applying standard signature verification techniques using the UTF-8 serialization result and data read in step #2 as input arguments</t>
+         <t>Applying an algorithm-dependent signature verification method using the signature key,
+              the UTF-8 representation of the serialization result from step #4,
+              and the data read in step #2 as input arguments</t>
        </list></t>
    </section>
    </section>
