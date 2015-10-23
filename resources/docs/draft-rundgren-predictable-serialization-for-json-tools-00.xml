@@ -318,7 +318,7 @@ sensitive data to attackers, activate protected APIs, or incorrectly validate si
      &RFC2119;
 
      <reference anchor="RFC20"
-                target="http://www.rfc-editor.org/info/rfc20">
+                target="http://tools.ietf.org/html/rfc20">
        <!-- the following is the minimum to make xml2rfc happy -->
 
        <front>
