@@ -126,12 +126,7 @@ schemes without necessarily needing specific signature text-processing software.
 and plain-text formats to <xref target="RFC7159">JSON</xref>.
 Although obviously working, JSON's unspecified of ordering of properties as well as the
 lack of a canonical form, sometimes make this switch rather painful.</t>
-<t>This specification describes a simple enhancement to JSON parsers which addresses
-the mentioned drawbacks.</t>
-<t>Note: This is not an attempt to change the JSON language in
-any way;
-it is only about how it is processed!  The sample below displays the
-problems in a nutshell.</t>
+<t>The sample below displays the problems in a nutshell.</t>
 <t>Assume the following JSON message is parsed:</t>
 <figure><artwork><![CDATA[
   {
@@ -173,6 +168,8 @@ unfortunately makes JWS-signed messages unreadable by humans.</t>
      <t>To cope with the mentioned drawbacks, this specification introduces
 a simple predictable serialization scheme, preferably implemented directly in
 JSON parsers.</t>
+<t>Note: This is not an attempt to change the JSON language in any way;
+it is only about how it is processed!</t>
 
     <section title="Ordering of Properties">
      <t>The original property order MUST be honored during parsing of JSON objects to
@@ -371,7 +368,7 @@ sensitive data to attackers, activate protected APIs, or incorrectly validate si
        <!-- the following is the minimum to make xml2rfc happy -->
 
        <front>
-         <title>JSON Cleartext Signature</title>
+         <title>JSON Cleartext Signature (JCS)</title>
 
          <author initials="A.R." surname="Rundgren">
            <organization></organization>
