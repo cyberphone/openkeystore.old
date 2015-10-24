@@ -125,9 +125,9 @@ schemes without necessarily needing specific signature text-processing software.
      <t>There is currently a strong trend moving from XML, EDI, ASN.1,
 and plain-text formats to <xref target="RFC7159">JSON</xref>.
 Although obviously working, JSON's unspecified of ordering of properties as well as the
-lack of a canonical form, sometimes make this switch rather painful.</t>
-<t>The sample below displays the problems in a nutshell.</t>
-<t>Assume the following JSON message is parsed:</t>
+lack of a canonical form, sometimes make the transition rather painful.</t>
+<t>The sample below displays the problems in a nutshell.
+Assume the following JSON message is parsed:</t>
 <figure><artwork><![CDATA[
   {
     "device": "Pump",
@@ -152,7 +152,7 @@ to confusion.  Computers however, do not care.</t>
 adding a signature property to a JSON object is infeasible
 unless there is some kind of predictable representation of data.
 This is one of the reasons why <xref target="RFC7515">JSON Web Signature (JWS)</xref>
-specifies that data to be signed must be Base64-encoded which though
+specifies that data to be signed must be Base64URL-encoded which though
 unfortunately makes JWS-signed messages unreadable by humans.</t>
 
 
@@ -179,15 +179,15 @@ or empty properties MUST be rejected.
    </section>
    <section title="Element Handling">
      <t>In addition to preserving property order, this specification implies
-specific handling of JSON elements, described in the succeeding sub-sections.</t>
+specific handling of JSON language elements, described in the succeeding sub-sections.</t>
 
     <section title="Whitespace Processing">
-     <t>For dealing with the second use-case (digital signatures), whitespace MUST
-         be removed during serialization.</t>
+     <t>All whitespace before and after JSON values and structural characters
+         MUST be removed during serialization.</t>
    </section>
 
     <section title="String Normalization">
-     <t>Strings including properties MUST be normalized in a way which is close to
+     <t>Quoted strings including properties MUST be normalized in a way which is close to
 the de-facto standard for JSON parsers which is:</t>
      <t><list style="symbols">
          <t>JSON '\/' escape sequences MUST be honored on input within
@@ -206,14 +206,14 @@ exception of '&quot;' and '\' which always MUST be escaped as well.</t>
 
     <section title="Number Representation">
      <t>The textual representation of numbers MUST be preserved during
-parsing and serialization.  That is, 3.50 and -0 MUST
+parsing and serialization.  That is, if numbers like 3.50 and -0 are
+encountered during a parsing process, they MUST
 be serialized as 3.50 and -0 respectively although
-3.5 and 0 would be the most natural outcomes.</t>
+3.5 and 0 would be the most natural outcome.</t>
    </section>
 
-    <section title="Other Data Types">
-     <t>No particular action needs to be taken for the remaining JSON elements, 
-         &quot;null&quot;, &quot;true&quot;, and &quot;false&quot;.</t>
+    <section title="Other Element Types">
+     <t>No particular action needs to be taken for the remaining JSON language elements.</t>
    </section>
 
    </section>
@@ -257,13 +257,14 @@ other properties (1-n) is insignificant.</t>
 is excluded by the serialization process.</t>
    </section>
    <section title="Verifying a Signed JSON Object">
-<t>The signed object created in the previous section could then be verified by:</t>
+<t>The signed object created in the previous section could be verified
+    by performing the following steps:</t>
      <t><list style="numbers">
-         <t>Parsing the JSON object</t>
-         <t>Reading and decoding the value of the &quot;signature&quot; property</t>
-         <t>Removing the &quot;signature&quot; property from the JSON object</t>
-         <t>Serializing the JSON object which should generate exactly the same result as in the preceding section</t>
-         <t>Applying an algorithm-dependent signature verification method using the signature key,
+         <t>Parse the JSON object</t>
+         <t>Read and decode the value of the &quot;signature&quot; property</t>
+         <t>Remove the &quot;signature&quot; property from the JSON object</t>
+         <t>Serialize the JSON object which should generate exactly the same result as in the preceding section</t>
+         <t>Apply an algorithm-dependent signature verification method using the signature key,
               the UTF-8 representation of the serialization result from step #4,
               and the data read in step #2 as input arguments</t>
        </list></t>
@@ -271,11 +272,23 @@ is excluded by the serialization process.</t>
    </section>
 
 
-   <section anchor="Acknowledgements" title="Acknowledgements">
-     <t>During the initial phases of the design of <xref
-     target="JCS">JSON Cleartext Signature (JCS)</xref> which was the &quot;inspiration&quot;
+  <section title="Out of Scope: Programmatic Creation of JSON Objects">
+      <t>This specification only applies to parsing and serialization of JSON-formatted data.
+          That is, the following <xref target="ECMA-262">ECMAScript</xref>
+          sample is out of scope:</t>
+<figure><artwork><![CDATA[
+    var myObject = {};
+    myObject.device = 'Pump';
+    myObject.value = 0.000000000000000001;
+    var jsonString = JSON.stringify(myObject);
+]]></artwork></figure>
+</section>
+
+  <section anchor="Acknowledgements" title="Acknowledgements">
+     <t>During the initial design of the <xref target="JCS">JSON Cleartext Signature (JCS)</xref>
+     scheme which was the &quot;inspiration&quot;
 for this specification, highly
-appreciated feedback were provided by Manu Sporny, Jim Klo,
+appreciated feedback was provided by Manu Sporny, Jim Klo,
 James Manger, Jeffrey Walton, David Chadwick, Jim Schaad,
 David Waite, Douglas Crockford, Arne Riiber, Sergey Beryozkin, and Brian Campbell.</t>
    </section>
@@ -378,6 +391,21 @@ sensitive data to attackers, activate protected APIs, or incorrectly validate si
        </front>
      </reference>
 
+     <reference anchor="ECMA-262"
+                target="http://www.ecma-international.org/publications/standards/Ecma-262.htm">
+       <!-- the following is the minimum to make xml2rfc happy -->
+
+       <front>
+         <title>ECMAScript Language Specification Edition 6</title>
+
+         <author>
+           <organization>Ecma International</organization>
+         </author>
+
+         <date year="2015" month="June" />
+       </front>
+     </reference>
+     
      <!-- A reference written by by an organization not a person. -->
 
    </references>
