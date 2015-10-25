@@ -220,7 +220,7 @@ be serialized as 3.50 and -0 respectively although
 </section>
 
   <section title="Signed JSON Objects">
-     <t>The following section shows the principles for creating and
+     <t>The following non-normative section shows the principles for creating and
 verifying in-object signatures built on top of
 the predictable serialization concept.</t>
    <section title="Creating a Signed JSON object">
