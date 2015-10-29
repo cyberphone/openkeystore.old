@@ -1,12 +1,19 @@
 package com.example.es6numbers;
 
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.script.*;
 
 public class Test {
 
     public static String es6DoubleSerialization(double value) {
+
+        // 0. Check for JSON compatibility
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException("NaN/Infinity not permitted in JSON");
+        }
 
         // 1. Take care of the sign
         String hyphen = "";
@@ -177,8 +184,10 @@ public class Test {
                 + "body {font-family:verdana}"
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
-                + "</style></head><body><h3>ES6 - Number Canonicalizer</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (unmodified)</th><th>JS (15 digit)</th><th>Result</th></tr>");
+                + "</style></head><body><h3>ES6 - JSON Number Canonicalizer ["
+                + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) 
+                + "]</h3>"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (unmodified)</th><th>JS (15 digit)</th><th>Result (red=error)</th></tr>");
 
         ScriptEngineManager manager = new ScriptEngineManager();
         engine = manager.getEngineByName("JavaScript");
@@ -219,6 +228,18 @@ public class Test {
         test(-0.9999999999999999);
         test(0.9999999999999999);
         test(0.9999999999999999);
+        try {
+            test(Double.POSITIVE_INFINITY);
+            throw new RuntimeException("fallthrough");
+        } catch (IllegalArgumentException e) {
+            
+        }
+        try {
+            test(Double.NaN);
+            throw new RuntimeException("fallthrough");
+        } catch (IllegalArgumentException e) {
+            
+        }
         write("</table></body></html>\n");
 
         fos.close();
