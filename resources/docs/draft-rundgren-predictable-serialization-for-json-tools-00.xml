@@ -116,7 +116,9 @@
      <t>This specification outlines an optional characteristic of JSON tools like
      parsers, serving two entirely different purposes: 1) Making information-rich
 JSON messages more human-readable by honoring the originator's conventions.  2) Facilitating simple &quot;Signed JSON&quot;
-schemes without necessarily needing specific signature text-processing software.</t>
+schemes without necessarily needing specific signature text-processing software.
+Finally, there is a section containing recommendations for interoperability
+with systems based on EcmaScript V6 (AKA JavaScript).</t>
    </abstract>
  </front>
 
@@ -130,7 +132,7 @@ lack of a canonical form, sometimes make the transition rather painful.</t>
 Assume the following JSON message is parsed:</t>
 <figure><artwork><![CDATA[
   {
-    "device": "Pump",
+    "device": "Pump2",
     "value": 0.000000000000000001
   }
 ]]></artwork></figure>
@@ -138,7 +140,7 @@ Assume the following JSON message is parsed:</t>
 <figure><artwork><![CDATA[
   {
     "value": 1e-18,
-    "device": "Pump"
+    "device": "Pump2"
   }
 ]]></artwork></figure>
 <t>Note: Whitespace was added for brevity.</t>
@@ -269,28 +271,62 @@ is excluded by the serialization process.</t>
               and the data read in step #2 as input arguments</t>
        </list></t>
    </section>
-   </section>
 
+  <section title="Interoperability with EcmaScript V6">
+      <t>Since <xref target="ECMA-262">ECMAScript</xref> due its availability in Internet browsers
+          represents the largest base of JSON-tools, it seems likely that &quot;Signed JSON&quot; will
+          also be used in such environments.
+          This is indeed possible but there are some constraints that need to be catered for
+          if interoperability with this specification is desired:</t>
+     <t><list style="symbols">
+         <t>Property names MUST NOT be expressed as integer values like &quot;1&quot;
+             because EmcaScript does not honor creation order for such items as
+             described in section 9.1.12 of the EcmaScript V6 specification.</t>
+         <t>Serialization of floating-point numbers is described in section 7.1.12.1 of
+             the EcmaScript V6 specification. However, since this serialization
+             scheme does not guarantee the correctness of the least significant digit,
+             the following workaround is REQUIRED for maintaining interoperability
+             between different EcmaScript implementations:</t>
+       </list></t>
+       <figure><artwork><![CDATA[
+       var aSmallValue = 0.000000000000000001;
+       var myObject = {};
+       myObject.device = 'Pump2';
+       myObject.value = parseFloat(aSmallValue.toPrecision(15));
 
-  <section title="Out of Scope: Programmatic Creation of JSON Objects">
-      <t>This specification only applies to parsing and serialization of JSON-formatted data.
-          That is, the following <xref target="ECMA-262">ECMAScript</xref>
-          sample is out of scope:</t>
-<figure><artwork><![CDATA[
-    var myObject = {};
-    myObject.device = 'Pump';
-    myObject.value = 0.000000000000000001;
-    var jsonString = JSON.stringify(myObject);
-]]></artwork></figure>
+       // Serialize object to a JSON string
+       var jsonString = JSON.stringify(myObject);
+
+       // This string can now be signed and the value be
+       // added to the object itself (not shown here)]]></artwork></figure>
+         <t>Non-EcmaScript systems targeting EcmaScript environments MUST (of course)
+             apply the measures specified above as well.
+             An externally created signed object could for example be supplied 
+             as in-line EcmaScript in an HTML document like below:</t>
+       <figure><artwork><![CDATA[
+  var inObjectSignedData =
+    {
+      "device": "Pump2",
+      "value": 1e-18,
+      "signature": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"
+    };]]></artwork></figure>
+         <t>Note: Whitespace can be used to make code more readable without
+             affecting signatures.</t>
+         <t>Note: Quotes around property names are actually redundant
+             if you (as in the example), stick to names that are syntactically
+             compatible with the EcmaScript language.</t>
 </section>
-
+   </section>
+  
   <section anchor="Acknowledgements" title="Acknowledgements">
      <t>During the initial design of the <xref target="JCS">JSON Cleartext Signature (JCS)</xref>
      scheme which was the &quot;inspiration&quot;
 for this specification, highly
 appreciated feedback was provided by Manu Sporny, Jim Klo,
-James Manger, Jeffrey Walton, David Chadwick, Jim Schaad,
+Jeffrey Walton, David Chadwick, Jim Schaad,
 David Waite, Douglas Crockford, Arne Riiber, Sergey Beryozkin, and Brian Campbell.</t>
+   <t>A special thank goes to James Manger who helped weeding out bugs in both
+       the specification and in the reference code.</t>
    </section>
 
    <!-- Possibly a 'Contributors' section ... -->
