@@ -15,7 +15,7 @@ public class Test {
             hyphen = "-";
         }
 
-        // We may need to start-over due to rounding of the dropped 16:th digit
+        // We may need to start-over due to rounding in the about to be dropped 16:th digit
         boolean round = true;
         while (true) {
 
@@ -37,7 +37,7 @@ public class Test {
                 num.delete(i, num.length());
             }
 
-            // 5. There must be a decimal point.  Remove it from the string and record the position
+            // 5. There must be a decimal point.  Remove it from the string and record its position
             int dp = num.indexOf(".");
             num.deleteCharAt(dp);
 
@@ -45,7 +45,7 @@ public class Test {
             exp += dp;
             dp = 0;
 
-            // 7. Normalize number so that MSD != 0
+            // 7. Normalize number so that most significant digit is != 0
             int lastNonZero = 0;
             i = 0;
             while (i < num.length()) {
@@ -65,7 +65,7 @@ public class Test {
                 return "0";
             }
 
-            // 9. Check digit 16 for rounding
+            // 9. Check digit 16 for rounding but only once
             if (round && lastNonZero >= 15 && num.charAt(15) >= '5') {
                 value += Math.pow(10, exp - 15) / 2;
                 round = false;
@@ -84,47 +84,59 @@ public class Test {
 
             // 12. Put decimal point and add missing zeroes if needed
             int len = num.length();
+            // 12.a If it is an integer which fits the maximum field width, drop decimal point
             if (exp >= len && exp <= 21) {
-                // It is an integer, drop decimal point
                 exp -= len;
                 while (exp > 0) {
+                    // It is a big integer which still fits the field but lacks some zeroes
                     num.append('0');
                     exp--;
                 }
+                // No decimal point please
                 dp = -1;
             }
+            // 12.b If it is small number which fits the field width, add leading zeroes
             else if (exp <= 0 && exp > -6 && len - exp < 21) {
                 while (exp < 0) {
                     num.insert(0, '0');
                     exp++;
                 }
+            // 12.c If it is small number, move decimal point one step to the right
             } else if (exp < 0) {
+                // If it is just a single digit, remove decimal point
                 dp = len == 1 ? -1 : 1;
                 exp--;
+            // 12.d If it is a decimal number which is within limits, insert decimal point and remove exponent
             } else if (exp < len) {
                 dp = exp;
                 exp = 0;
+            // 12.e Large number with exponent is our final alternative
             } else {
                 dp = 1;
                 exp--;
             }
 
+            // 13. Add optional exponent including +/- sign
             if (exp != 0) {
                 num.append('e').append(exp > 0 ? "+" : "").append(exp);
             }
+
+            // 14. Set optional decimal point
             if (dp == 0) {
+                // Small decimal number without exponent (0.005)
                 num.insert(0, "0.");
             } else if (dp > 0) {
+                // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33)
                 num.insert(dp, '.');
             }
+
+            // 15. Finally, return the assembled number including sign
             return num.insert(0, hyphen).toString();
         }
     }
 
     static ScriptEngine engine;
     
-    static int d15Errors;
-
     static FileOutputStream fos;
 
     static void write(byte[] utf8) throws Exception {
@@ -135,34 +147,13 @@ public class Test {
         write(utf8.getBytes("UTF-8"));
     }
     
-    static String bad(String string) {
-        return "<span style=\"color:red\">" + string + "</span>";
-    }
-    
-    static boolean compare(String js, String calc) {
-        if (js.length() != calc.length()) {
-            return false;
-        }
-        for (int i = 0; i < js.length(); i++) {
-            if (calc.charAt(i) == '#') {
-                if (js.charAt(i) != '0') {
-                    return false;
-                }
-            } else if (calc.charAt(i) != js.charAt(i) && calc.charAt(i) != '@') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static void test(double d) throws Exception {
+    static void test(double d) throws Exception {
         engine.put("fl", d);
         engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
         String js = engine.get("res").toString();
         String d15 = es6DoubleSerialization(d);
-        if (!compare(js, d15)) {
-            d15 = bad(d15);
-            d15Errors++;
+        if (!js.equals(d15)) {
+            d15 = "<span style=\"color:red\">" + d15 + "</span>";
         }
         write("<tr><td>" 
               + Double.toString(d)
@@ -187,7 +178,7 @@ public class Test {
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Number Canonicalizer</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (unmodified)</th><th>JS (15 digit)</th><th>15 digits</th></tr>");
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (unmodified)</th><th>JS (15 digit)</th><th>Result</th></tr>");
 
         ScriptEngineManager manager = new ScriptEngineManager();
         engine = manager.getEngineByName("JavaScript");
