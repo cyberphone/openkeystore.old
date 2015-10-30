@@ -1,8 +1,12 @@
 package com.example.es6numbers;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Vector;
 
 import javax.script.*;
 
@@ -158,6 +162,8 @@ public class Test {
     static ScriptEngine engine;
     
     static FileOutputStream fos;
+    
+    static Vector<String> testValues = new Vector<String>();
 
     static void write(byte[] utf8) throws Exception {
         fos.write(utf8);
@@ -167,16 +173,24 @@ public class Test {
         write(utf8.getBytes("UTF-8"));
     }
     
-    static void test(double d) throws Exception {
-        engine.put("fl", d);
+    static void test(double value) throws Exception {
+        engine.put("fl", value);
         engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
         String js = engine.get("res").toString();
-        String d15 = es6JsonNumberSerialization(d);
+        String d15 = es6JsonNumberSerialization(value);
+        testValues.add(d15);
+        if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(d15)))) {
+            throw new RuntimeException("Roundtrip 1 failed for:" + d15);
+        }
+        DecimalFormat df = new DecimalFormat("0.##############E000");
+        if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(df.format(value))))) {
+            throw new RuntimeException("Roundtrip 2 failed for:" + d15);
+        }
         if (!js.equals(d15)) {
             d15 = "<span style=\"color:red\">" + d15 + "</span>";
         }
         write("<tr><td>" 
-              + Double.toString(d)
+              + Double.toString(value)
               + "</td><td>"
               + js
               + "</td><td>"
@@ -185,9 +199,9 @@ public class Test {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
+        if (args.length != 2) {
             System.out.println("\nUsage: " + Test.class.getCanonicalName()
-                    + "testpage");
+                    + "resultpage browsertestpage");
             System.exit(-3);
         }
         fos = new FileOutputStream(args[0]);
@@ -255,8 +269,40 @@ public class Test {
         } catch (IllegalArgumentException e) {
             
         }
-        write("</table></body></html>\n");
 
+        write("</table>&nbsp;<br>You may also try <a href=\"" + 
+              args[1].substring(args[1].lastIndexOf(File.pathSeparatorChar) + 1) +
+              "\">testing this in a browser</a></body></html>\n");
         fos.close();
+        fos = new FileOutputStream(args[1]);
+        write("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>ES6 - Browser Number Canonicalizer Test</title>"
+                + "<style type=\"text/css\">"
+                + "body {font-family:verdana}"
+                + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
+                + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
+                + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>JS (red=error)</th></tr>"
+                +"<script type=\"text/javascript\">\nvar testSuite = [");
+       boolean comma = false;
+        for (String value : testValues) {
+            if (comma) {
+                write(",\n");
+            }
+            write(value);
+            write(", '");
+            write(value);
+            write("'");
+            comma = true;
+        }
+        write("];\nvar i = 0;\n");
+        write("while (i < testSuite.length) {\n " +
+              "  var num = testSuite[i++].toString();\n" +
+              "  var str = testSuite[i++];\n" +
+              "  if (num != str) str = '<span style=\"color:red\">' + str + '</span>';\n" +
+              "  document.write('<tr><td>' + num + '</td><td>' + str + '</td></tr>');\n" +
+              "}\n");
+        write("</script></table></body></html>\n");
+        fos.close();
+
     }
 }

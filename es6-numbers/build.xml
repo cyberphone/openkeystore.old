@@ -4,7 +4,8 @@
   <property name="src.dir" value="src"/>
   <property name="temp.dir" location=".tmp"/>
   <property name="result.file" location="result/es6numbertest.html"/>
-
+  <property name="browsertest.file" location="result/es6numberbrowsertest.html"/>
+  
   <property name="debug" value="on"/>
 
   <target name="help">
@@ -33,11 +34,7 @@
              <pathelement location="${temp.dir}"/>
           </classpath>
         <arg value="${result.file}"/>
-<!-- 
-        <arg value="${merchantkey}${keyfilext}"/>
-        <arg value="${keypassword}"/>
-        <arg value="${w2nb.webwallet}"/>
- -->
+        <arg value="${browsertest.file}"/>
      </java>
   </target>
   
