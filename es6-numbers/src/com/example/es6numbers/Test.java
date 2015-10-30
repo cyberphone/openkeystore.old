@@ -271,7 +271,7 @@ public class Test {
         }
 
         write("</table>&nbsp;<br>You may also try <a href=\"" + 
-              args[1].substring(args[1].lastIndexOf(File.pathSeparatorChar) + 1) +
+              args[1].substring(args[1].lastIndexOf(File.separatorChar) + 1) +
               "\">testing this in a browser</a></body></html>\n");
         fos.close();
         fos = new FileOutputStream(args[1]);
