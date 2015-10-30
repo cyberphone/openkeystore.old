@@ -3,7 +3,7 @@
   <!-- set properties for this build -->
   <property name="src.dir" value="src"/>
   <property name="temp.dir" location=".tmp"/>
-  <property name="result.file" location="result/test.html"/>
+  <property name="result.file" location="result/es6numbertest.html"/>
 
   <property name="debug" value="on"/>
 
