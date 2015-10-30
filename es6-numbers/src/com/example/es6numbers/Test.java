@@ -281,7 +281,7 @@ public class Test {
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>JS (red=error)</th></tr>"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Browser (red=diff)</th></tr>"
                 +"<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
         for (String value : testValues) {
@@ -298,8 +298,8 @@ public class Test {
         write("while (i < testSuite.length) {\n " +
               "  var num = testSuite[i++].toString();\n" +
               "  var str = testSuite[i++];\n" +
-              "  if (num != str) str = '<span style=\"color:red\">' + str + '</span>';\n" +
-              "  document.write('<tr><td>' + num + '</td><td>' + str + '</td></tr>');\n" +
+              "  if (num != str) num = '<span style=\"color:red\">' + num + '</span>';\n" +
+              "  document.write('<tr><td>' + str + '</td><td>' + num + '</td></tr>');\n" +
               "}\n");
         write("</script></table></body></html>\n");
         fos.close();
