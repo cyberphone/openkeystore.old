@@ -277,29 +277,34 @@ public class Test {
         fos = new FileOutputStream(args[1]);
         write("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>ES6 - Browser Number Canonicalizer Test</title>"
                 + "<style type=\"text/css\">"
-                + "body {font-family:verdana}"
+                + "body {font-family:verdana;font-size:10pt}"
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Browser (red=diff)</th></tr>"
+                + "Note: Test-values are supplied in a JS vector and the &quot;workaround&quot; solution:"
+                + "<div style=\"padding:5pt\"><code style=\"font-size:12pt\">newValue = parseFloat(originalValue.toPrecision(15));</code></div>"
+                + "is applied.<br>&nbsp;"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
                 +"<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
         for (Double value : testValues) {
             if (comma) {
                 write(",\n");
             }
+            write("'");
             write(value.toString());
-            write(", '");
+            write("', '");
             write(es6JsonNumberSerialization(value));
             write("'");
             comma = true;
         }
         write("];\nvar i = 0;\n");
-        write("while (i < testSuite.length) {\n " +
-              "  var num = parseFloat(testSuite[i++].toPrecision(15));\n" +
-              "  var str = testSuite[i++];\n" +
-              "  if (num.toString() != str || parseFloat(str) != num) num = '<span style=\"color:red\">' + num + '</span>';\n" +
-              "  document.write('<tr><td>' + str + '</td><td>' + num + '</td></tr>');\n" +
+        write("while (i < testSuite.length) {\n" +
+              "  var original = testSuite[i++];\n" +
+              "  var browser = parseFloat(parseFloat(original).toPrecision(15));\n" +
+              "  var expected = testSuite[i++];\n" +
+              "  if (browser.toString() != expected || parseFloat(expected) != browser) browser = '<span style=\"color:red\">' + browser + '</span>';\n" +
+              "  document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td>' + browser + '</td></tr>');\n" +
               "}\n");
         write("</script></table></body></html>\n");
         fos.close();
