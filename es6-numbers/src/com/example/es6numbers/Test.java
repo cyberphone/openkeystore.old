@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import javax.script.*;
@@ -162,7 +163,7 @@ public class Test {
     
     static FileOutputStream fos;
     
-    static Vector<Double> testValues = new Vector<Double>();
+    static LinkedHashMap<Double, String> testValues = new LinkedHashMap<Double, String>();
 
     static void write(byte[] utf8) throws Exception {
         fos.write(utf8);
@@ -173,11 +174,13 @@ public class Test {
     }
     
     static void test(double value) throws Exception {
+        String d15 = es6JsonNumberSerialization(value);
+        if (testValues.put(value, d15) != null) {
+            return;
+        }
         engine.put("fl", value);
         engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
         String js = engine.get("res").toString();
-        String d15 = es6JsonNumberSerialization(value);
-        testValues.add(value);
         if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(d15)))) {
             throw new RuntimeException("Roundtrip 1 failed for:" + d15);
         }
@@ -250,6 +253,7 @@ public class Test {
         test(-0.9999999999999995);
         test(0.9999999999999993);
         test(0.9999999999999995);
+        test(0.9999999999999996);
         test(0.9999999999999998);
         test(-0.9999999999999999);
         test(-0.9999999999999999);
@@ -287,15 +291,15 @@ public class Test {
                 + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
                 +"<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
-        for (Double value : testValues) {
+        for (Double value : testValues.keySet()) {
             if (comma) {
                 write(",\n");
             }
-            write("'");
+            write("\"");
             write(value.toString());
-            write("', '");
-            write(es6JsonNumberSerialization(value));
-            write("'");
+            write("\", \"");
+            write(testValues.get(value));
+            write("\"");
             comma = true;
         }
         write("];\nvar i = 0;\n");
