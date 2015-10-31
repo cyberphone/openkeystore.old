@@ -2,7 +2,6 @@ package com.example.es6numbers;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -163,7 +162,7 @@ public class Test {
     
     static FileOutputStream fos;
     
-    static Vector<String> testValues = new Vector<String>();
+    static Vector<Double> testValues = new Vector<Double>();
 
     static void write(byte[] utf8) throws Exception {
         fos.write(utf8);
@@ -178,7 +177,7 @@ public class Test {
         engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
         String js = engine.get("res").toString();
         String d15 = es6JsonNumberSerialization(value);
-        testValues.add(d15);
+        testValues.add(value);
         if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(d15)))) {
             throw new RuntimeException("Roundtrip 1 failed for:" + d15);
         }
@@ -285,19 +284,19 @@ public class Test {
                 + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Browser (red=diff)</th></tr>"
                 +"<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
-        for (String value : testValues) {
+        for (Double value : testValues) {
             if (comma) {
                 write(",\n");
             }
-            write(value);
+            write(value.toString());
             write(", '");
-            write(value);
+            write(es6JsonNumberSerialization(value));
             write("'");
             comma = true;
         }
         write("];\nvar i = 0;\n");
         write("while (i < testSuite.length) {\n " +
-              "  var num = testSuite[i++];\n" +
+              "  var num = parseFloat(testSuite[i++].toPrecision(15));\n" +
               "  var str = testSuite[i++];\n" +
               "  if (num.toString() != str || parseFloat(str) != num) num = '<span style=\"color:red\">' + num + '</span>';\n" +
               "  document.write('<tr><td>' + str + '</td><td>' + num + '</td></tr>');\n" +
