@@ -251,6 +251,7 @@ public class Test {
         test(-0.9999999999999995);
         test(0.9999999999999993);
         test(0.9999999999999995);
+        test(0.9999999999999998);
         test(-0.9999999999999999);
         test(-0.9999999999999999);
         test(0.9999999999999999);
@@ -296,9 +297,9 @@ public class Test {
         }
         write("];\nvar i = 0;\n");
         write("while (i < testSuite.length) {\n " +
-              "  var num = testSuite[i++].toString();\n" +
+              "  var num = testSuite[i++];\n" +
               "  var str = testSuite[i++];\n" +
-              "  if (num != str) num = '<span style=\"color:red\">' + num + '</span>';\n" +
+              "  if (num.toString() != str || parseFloat(str) != num) num = '<span style=\"color:red\">' + num + '</span>';\n" +
               "  document.write('<tr><td>' + str + '</td><td>' + num + '</td></tr>');\n" +
               "}\n");
         write("</script></table></body></html>\n");
