@@ -285,7 +285,7 @@ public class Test {
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
-                + "Note: Test-values are supplied in a JS vector and the &quot;workaround&quot; solution:"
+                + "Note: Test-values are supplied in a JS vector and the &quot;workaround&quot; solution"
                 + "<div style=\"padding:5pt\"><code style=\"font-size:12pt\">newValue = parseFloat(originalValue.toPrecision(15));</code></div>"
                 + "is applied.<br>&nbsp;"
                 + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"

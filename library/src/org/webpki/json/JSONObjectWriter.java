@@ -43,7 +43,7 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Creates JSON objects and performs serialization.
+ * Creates JSON objects and performs serialization (according to ES6).
  * <p>
  * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
  * 
@@ -53,6 +53,8 @@ public class JSONObjectWriter implements Serializable
     private static final long serialVersionUID = 1L;
 
     static final int STANDARD_INDENT = 2;
+    
+    static final long MAX_ES6_SAFE_LONG = 999999999999999l;
 
     JSONObject root;
 
@@ -134,19 +136,206 @@ public class JSONObjectWriter implements Serializable
         return setProperty (name, setNumberAsText(value));
       }
 
+    // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
+    // The purpose is for supporting signed JSON/JavaScript objects which
+    // though forces us dropping (after rounding) the 16:th digit since it
+    // is not deterministic in the ECMA specification (IEEE 754-2008 double
+    // precision values have 15.95 digits of precision).
+    public static String es6JsonNumberSerialization (double value) throws IOException
+      {
+
+        // 0. Check for JSON compatibility.
+        if (Double.isNaN (value) || Double.isInfinite (value))
+          {
+            throw new IOException ("NaN/Infinity are not permitted in JSON");
+          }
+
+        // 1. Take care of the sign.
+        String hyphen = "";
+        if (value < 0)
+          {
+            value = -value;
+            hyphen = "-";
+          }
+
+        // We may need to start-over due to rounding in an about to be dropped 16:th digit.
+        boolean round = true;
+        while (true)
+          {
+
+            // 2. Serialize using Java default.
+            StringBuffer num = new StringBuffer (Double.toString (value));
+
+            // 4. Collect and remove the optional exponent.
+            int exp = 0;
+            int i = num.indexOf ("E");
+            if (i > 0)
+              {
+                int j = i;
+                if (num.indexOf ("-") > 0)
+                  {
+                    j++;
+                  }
+                exp = Integer.valueOf (num.substring (j + 1));
+                if (j != i)
+                  {
+                    exp = -exp;
+                  }
+                num.delete (i, num.length ());
+              }
+
+            // 5. There must be a decimal point.
+            //    Remove it from the string and record its position.
+            int dp = num.indexOf (".");
+            num.deleteCharAt (dp);
+
+            // 6. Normalize decimal point to position 0.
+            //    Update exponent accordingly.
+            exp += dp;
+            dp = 0;
+
+            // 7. Normalize number so that most significant digit is != 0.
+            int lastNonZero = 0;
+            i = 0;
+            while (i < num.length ())
+              {
+                if (num.charAt (0) == '0')
+                  {
+                    num.deleteCharAt (0);
+                    exp--;
+                  }
+                else
+                  {
+                    if (num.charAt (i) != '0')
+                      {
+                        lastNonZero = i;
+                      }
+                    i++;
+                  }
+              }
+
+            // 8. Check if we have anything left.
+            if (num.length () == 0)
+              {
+                // Popular edge-case. We got a true zero.
+                return "0";
+              }
+
+            // 9. Check digit 16 for rounding but only once.
+            if (round && lastNonZero >= 15 && num.charAt (15) >= '5')
+              {
+                value += Math.pow (10, exp - 15) / 2;
+                round = false;
+                continue;
+              }
+
+            // 10. Remove digits beyond 15.
+            if (lastNonZero >= 15)
+              {
+                num.delete (15, num.length ());
+              }
+
+            // 11. Remove trailing zeroes.
+            while (num.charAt (num.length () - 1) == '0')
+              {
+                num.deleteCharAt (num.length () - 1);
+              }
+
+            // 12. This is the really difficult one...
+            //     Compute or remove decimal point.
+            //     Add missing zeroes if needed.
+            //     Update or remove exponent.
+            int len = num.length ();
+            if (exp >= len && exp <= 21)
+              {
+                // 12.a Integer which fits the maximum field width.
+                //      Drop decimal point and remove exponent.
+                exp -= len;
+                while (exp > 0)
+                  {
+                    // It is a big integer which lacks some zeroes.
+                    num.append ('0');
+                    exp--;
+                  }
+                // No decimal point please, we are integers.
+                dp = -1;
+              }
+            else if (exp <= 0 && exp > -6 && len - exp < 21)
+              {
+                // 12.b Small number which fits the field width.
+                //      Add leading zeroes and remove exponent.
+                while (exp < 0)
+                  {
+                    num.insert (0, '0');
+                    exp++;
+                  }
+              }
+            else if (exp < 0)
+              {
+                // 12.c Small number with exponent, move decimal point one step to the right.
+                //      If it is just a single digit we remove decimal point.
+                dp = len == 1 ? -1 : 1;
+                exp--;
+              }
+            else if (exp < len)
+              {
+                // 12.d Decimal number which is within limits.
+                // Update decimal point position and remove exponent.
+                dp = exp;
+                exp = 0;
+              }
+            else
+              {
+                // 12.e Large number with exponent is our final alternative.
+                dp = 1;
+                exp--;
+              }
+
+            // 13. Add optional exponent including +/- sign.
+            if (exp != 0)
+              {
+                num.append ('e').append (exp > 0 ? "+" : "").append (exp);
+              }
+
+            // 14. Set optional decimal point.
+            if (dp == 0)
+              {
+                // Small decimal number without exponent (0.005).
+                num.insert (0, "0.");
+              }
+            else if (dp > 0)
+              {
+                // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33).
+                num.insert (dp, '.');
+              }
+
+            // 15. Finally, return the assembled number including sign.
+            return num.insert (0, hyphen).toString ();
+          }
+      }
+
+    static String es6Long2NumberConversion (long value) throws IOException
+      {
+        if (Math.abs (value) > MAX_ES6_SAFE_LONG)
+          {
+            throw new IOException ("Integer values must not exceed " + MAX_ES6_SAFE_LONG + " for safe ES6 representation");
+          }
+        return es6JsonNumberSerialization (value);
+      }
+
     public JSONObjectWriter setInt (String name, int value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
+        return setLong (name, value);
       }
 
     public JSONObjectWriter setLong (String name, long value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6Long2NumberConversion (value)));
       }
 
     public JSONObjectWriter setDouble (String name, double value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.DOUBLE, Double.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6JsonNumberSerialization (value)));
       }
 
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
@@ -412,7 +601,7 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
-        return setPublicKey (public_key, JSONAlgorithmPreferences.SKS);
+        return setPublicKey (public_key, JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
 
     public JSONObjectWriter setCertificatePath (X509Certificate[] certificate_path) throws IOException
@@ -859,12 +1048,17 @@ public class JSONObjectWriter implements Serializable
         return buffer.toString ().getBytes ("UTF-8");
       }
 
+    public String serializeToString (JSONOutputFormats format) throws IOException
+      {
+        return new String (serializeJSONObject (format), "UTF-8");
+      }
+
     @Override
     public String toString ()
       {
         try
           {
-            return new String (serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+            return serializeToString (JSONOutputFormats.PRETTY_PRINT);
           }
         catch (IOException e)
           {

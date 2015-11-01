@@ -28,6 +28,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONParser;
@@ -66,7 +67,7 @@ public class Verify
                 case OBJECT:
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONSignatureDecoder signature = rd.getSignature ();
+                      JSONSignatureDecoder signature = rd.getSignature (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
                       if (output_file != null)
                         {
                           byte[] old = ArrayUtil.readFile (output_file);

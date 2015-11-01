@@ -82,7 +82,149 @@ public class JSONTest
 
     static final String STRING_LIST = "stringlist";
     static final String[] STRING_LIST_VALUE = {"one","two","three"};
-    static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"; 
+    static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
+    
+    static final String[] ES6_NUMBERS = 
+      {
+        "-3.3333333333333335E21", "-3.33333333333333e+21",
+        "-3.333333333333333E20", "-333333333333333000000",
+        "-3.3333333333333336E19", "-33333333333333300000",
+        "-3.333333333333334E18", "-3333333333333330000",
+        "-3.3333333333333338E17", "-333333333333333000",
+        "-3.333333333333334E16", "-33333333333333300",
+        "-3.333333333333334E15", "-3333333333333330",
+        "-3.333333333333334E14", "-333333333333333",
+        "-3.3333333333333344E13", "-33333333333333.3",
+        "-3.333333333333334E12", "-3333333333333.33",
+        "-3.3333333333333344E11", "-333333333333.333",
+        "-3.333333333333334E10", "-33333333333.3333",
+        "-3.333333333333334E9", "-3333333333.33333",
+        "-3.333333333333334E8", "-333333333.333333",
+        "-3.3333333333333336E7", "-33333333.3333333",
+        "-3333333.3333333335", "-3333333.33333333",
+        "-333333.3333333333", "-333333.333333333",
+        "-33333.333333333336", "-33333.3333333333",
+        "-3333.333333333333", "-3333.33333333333",
+        "-333.3333333333333", "-333.333333333333",
+        "-33.333333333333336", "-33.3333333333333",
+        "-3.3333333333333335", "-3.33333333333333",
+        "-0.3333333333333333", "-0.333333333333333",
+        "-0.03333333333333333", "-0.0333333333333333",
+        "-0.0033333333333333335", "-0.00333333333333333",
+        "-3.333333333333333E-4", "-0.000333333333333333",
+        "-3.3333333333333335E-5", "-0.0000333333333333333",
+        "-3.3333333333333333E-6", "-0.00000333333333333333",
+        "-3.3333333333333335E-7", "-3.33333333333333e-7",
+        "-3.3333333333333334E-8", "-3.33333333333333e-8",
+        "-3.3333333333333334E-9", "-3.33333333333333e-9",
+        "-3.333333333333333E-10", "-3.33333333333333e-10",
+        "-3.3333333333333335E-11", "-3.33333333333333e-11",
+        "-3.333333333333333E-12", "-3.33333333333333e-12",
+        "-3.3333333333333334E-13", "-3.33333333333333e-13",
+        "-3.3333333333333334E-14", "-3.33333333333333e-14",
+        "-3.3333333333333332E-15", "-3.33333333333333e-15",
+        "-3.333333333333333E-16", "-3.33333333333333e-16",
+        "-3.3333333333333335E-17", "-3.33333333333333e-17",
+        "-3.3333333333333333E-18", "-3.33333333333333e-18",
+        "-3.3333333333333334E-19", "-3.33333333333333e-19",
+        "-3.333333333333333E-20", "-3.33333333333333e-20",
+        "-3.3333333333333333E-21", "-3.33333333333333e-21",
+        "-3.333333333333333E-22", "-3.33333333333333e-22",
+        "-3.3333333333333333E-23", "-3.33333333333333e-23",
+        "-3.3333333333333334E-24", "-3.33333333333333e-24",
+        "-3.3333333333333335E-25", "-3.33333333333333e-25",
+        "-3.333333333333333E-26", "-3.33333333333333e-26",
+        "-3.333333333333333E-27", "-3.33333333333333e-27",
+        "-3.3333333333333338E-28", "-3.33333333333333e-28",
+        "3.3333333333333335E21", "3.33333333333333e+21",
+        "3.333333333333333E20", "333333333333333000000",
+        "3.3333333333333336E19", "33333333333333300000",
+        "3.333333333333334E18", "3333333333333330000",
+        "3.3333333333333338E17", "333333333333333000",
+        "3.333333333333334E16", "33333333333333300",
+        "3.333333333333334E15", "3333333333333330",
+        "3.333333333333334E14", "333333333333333",
+        "3.3333333333333344E13", "33333333333333.3",
+        "3.333333333333334E12", "3333333333333.33",
+        "3.3333333333333344E11", "333333333333.333",
+        "3.333333333333334E10", "33333333333.3333",
+        "3.333333333333334E9", "3333333333.33333",
+        "3.333333333333334E8", "333333333.333333",
+        "3.3333333333333336E7", "33333333.3333333",
+        "3333333.3333333335", "3333333.33333333",
+        "333333.3333333333", "333333.333333333",
+        "33333.333333333336", "33333.3333333333",
+        "3333.333333333333", "3333.33333333333",
+        "333.3333333333333", "333.333333333333",
+        "33.333333333333336", "33.3333333333333",
+        "3.3333333333333335", "3.33333333333333",
+        "0.3333333333333333", "0.333333333333333",
+        "0.03333333333333333", "0.0333333333333333",
+        "0.0033333333333333335", "0.00333333333333333",
+        "3.333333333333333E-4", "0.000333333333333333",
+        "3.3333333333333335E-5", "0.0000333333333333333",
+        "3.3333333333333333E-6", "0.00000333333333333333",
+        "3.3333333333333335E-7", "3.33333333333333e-7",
+        "3.3333333333333334E-8", "3.33333333333333e-8",
+        "3.3333333333333334E-9", "3.33333333333333e-9",
+        "3.333333333333333E-10", "3.33333333333333e-10",
+        "3.3333333333333335E-11", "3.33333333333333e-11",
+        "3.333333333333333E-12", "3.33333333333333e-12",
+        "3.3333333333333334E-13", "3.33333333333333e-13",
+        "3.3333333333333334E-14", "3.33333333333333e-14",
+        "3.3333333333333332E-15", "3.33333333333333e-15",
+        "3.333333333333333E-16", "3.33333333333333e-16",
+        "3.3333333333333335E-17", "3.33333333333333e-17",
+        "3.3333333333333333E-18", "3.33333333333333e-18",
+        "3.3333333333333334E-19", "3.33333333333333e-19",
+        "3.333333333333333E-20", "3.33333333333333e-20",
+        "3.3333333333333333E-21", "3.33333333333333e-21",
+        "3.333333333333333E-22", "3.33333333333333e-22",
+        "3.3333333333333333E-23", "3.33333333333333e-23",
+        "3.3333333333333334E-24", "3.33333333333333e-24",
+        "3.3333333333333335E-25", "3.33333333333333e-25",
+        "3.333333333333333E-26", "3.33333333333333e-26",
+        "3.333333333333333E-27", "3.33333333333333e-27",
+        "3.3333333333333338E-28", "3.33333333333333e-28",
+        "10.0", "10",
+        "0.0", "0",
+        "5.0", "5",
+        "0.5", "0.5",
+        "0.05", "0.05",
+        "0.005", "0.005",
+        "5.0E-4", "0.0005",
+        "5.0E-5", "0.00005",
+        "5.0E-6", "0.000005",
+        "5.0E-7", "5e-7",
+        "5.0E-8", "5e-8",
+        "5.0E-9", "5e-9",
+        "5.06E-6", "0.00000506",
+        "5.006E-6", "0.000005006",
+        "5.0006E-6", "0.0000050006",
+        "5.00006E-6", "0.00000500006",
+        "5.000006E-6", "0.000005000006",
+        "5.0000006E-6", "0.0000050000006",
+        "5.00000006E-6", "0.00000500000006",
+        "5.000000006E-6", "0.000005000000006",
+        "5.0000000006E-6", "0.0000050000000006",
+        "5.00000000006E-6", "0.00000500000000006",
+        "5.000000000006E-6", "0.000005000000000006",
+        "5.0000000000006E-6", "0.0000050000000000006",
+        "5.00000000000006E-6", "0.00000500000000000006",
+        "5.000000000000006E-6", "0.00000500000000000001",
+        "1.0", "1",
+        "-1.0", "-1",
+        "-0.9999999999999993", "-0.999999999999999",
+        "-0.9999999999999994", "-0.999999999999999",
+        "0.9999999999999993", "0.999999999999999",
+        "0.9999999999999994", "0.999999999999999",
+        "0.9999999999999996", "1",
+        "0.9999999999999998", "1",
+        "-0.9999999999999999", "-1",
+        "0.9999999999999999", "1",
+        "2.2250738585072014E-308", "2.2250738585072e-308",
+        "4.9E-324", "4.9e-324"
+      };
 
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -273,10 +415,10 @@ public class JSONTest
       {
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setLong (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
         or = new JSONObjectWriter ();
         or.setLong ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
       }
 
     void badArgument (String string)
@@ -298,10 +440,10 @@ public class JSONTest
       {
         assertTrue (simpleArrayType  (string).getDouble () == ref);
         assertTrue (simpleObjectType (string).getDouble ("name") == ref);
-        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
-        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
+        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.NUMBER);
+        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.NUMBER);
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setDouble (ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
@@ -313,15 +455,29 @@ public class JSONTest
       {
         assertTrue (simpleArrayType (string).getInt () == ref);
         assertTrue (simpleObjectType (string).getInt ("name") == ref);
-        assertTrue (simpleArrayType (string).getElementType () == JSONTypes.INTEGER);
-        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.INTEGER);
-        assertTrue (simpleArrayType (string + "  ").getElementType () == JSONTypes.INTEGER);
-        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.INTEGER);
+        assertTrue (simpleArrayType (string).getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.NUMBER);
+        assertTrue (simpleArrayType (string + "  ").getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.NUMBER);
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setInt (ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getInt () == ref);
         or = new JSONObjectWriter ().setInt ("name", ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getInt ("name") == ref);
+      }
+
+    void es6NumberTest () throws Exception
+      {
+        int i = 0;
+        while (i < ES6_NUMBERS.length)
+          {
+            String original = ES6_NUMBERS[i++];
+            String expected = ES6_NUMBERS[i++];
+            String result = new String(new JSONObjectWriter ()
+                .setDouble ("v", Double.valueOf (original))
+                    .serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8");
+            assertTrue("es6num", result.equals ("{\"v\":" + expected + "}"));
+          }
       }
 
     JSONObjectReader simpleObjectType (String string) throws IOException
@@ -517,8 +673,17 @@ public class JSONTest
         integerValue ("+1", +1);
         integerValue ("-0", -0);
         integerValue ("01", 01);
-        longVariables (1235454234343434l);
+        try
+          {
+            longVariables (1000000000000000l);
+            fail("long");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Integer values must not exceed 999999999999999 for safe ES6 representation");
+          }
         longVariables (0xa885abafaba0l);
+        longVariables (999999999999999l);
         bigDecimalValues (new BigDecimal ("3232323243243234234243234234243243243243243234243"));
         bigDecimalValues (new BigDecimal ("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues (new BigInteger ("3232323243243234234243234234243243243243243234243"));
@@ -527,6 +692,39 @@ public class JSONTest
         booleanValues (false);
         blobValues ();
         simpleArrays ();
+        es6NumberTest ();
+        integerRange(Integer.MAX_VALUE, false);
+        integerRange(Integer.MIN_VALUE, false);
+        integerRange(Integer.MAX_VALUE + 1l, true);
+        integerRange(Integer.MIN_VALUE - 1l, true);
+        badInteger (13.1);
+        badInteger (1300000.1);
+      }
+
+    void badInteger (Double value)
+      {
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setDouble ("v", value).toString()).getInt ("v");
+            fail("integer");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Value is not an integer: " + value);
+          }
+      }
+
+    void integerRange (long value, boolean mustFail) throws Exception
+      {
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setLong ("v", value).toString()).getInt ("v");
+            assertFalse("range", mustFail);
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Java \"int\" out of range: " + value);
+          }
       }
 
     private void simpleArrays () throws Exception

@@ -98,7 +98,7 @@ public class JCSSample
           {
             if (argc.length != 2)
               {
-                throw new IOException ("Output-file jose-flag");
+                throw new IOException ("Normlized-data-file-output jose-flag");
               }
             CustomCryptoProvider.conditionalLoad (true);
             String unormalized_json = 
