@@ -18,12 +18,17 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.util.GregorianCalendar;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.util.Base64URL;

@@ -162,7 +162,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the signature algorithms [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_JSON))
+        for (String sig_alg_string : InputValidator.getNonEmptyList (rd, SIGNATURE_ALGORITHMS_JSON))
           {
             AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromID (sig_alg_string);
             if (!algorithms.add (sig_alg))

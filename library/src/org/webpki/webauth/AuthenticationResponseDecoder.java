@@ -17,15 +17,13 @@
 package org.webpki.webauth;
 
 import java.io.IOException;
-
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-
 import java.security.cert.X509Certificate;
 
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.VerifierInterface;
-
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
@@ -51,7 +49,7 @@ public class AuthenticationResponseDecoder extends InputValidator
     
     X509Certificate[] certificate_path;
     
-    String signature_algorithm;
+    AsymSignatureAlgorithms signature_algorithm;
 
     LinkedHashMap<String,LinkedHashSet<String>> client_platform_features = new LinkedHashMap<String,LinkedHashSet<String>> ();
 
@@ -128,7 +126,7 @@ public class AuthenticationResponseDecoder extends InputValidator
         //////////////////////////////////////////////////////////////////////////
         signature = rd.getSignature ();
         certificate_path = signature.getCertificatePath ();
-        signature_algorithm = signature.getAlgorithm ().getURI ();
+        signature_algorithm = (AsymSignatureAlgorithms) signature.getAlgorithm ();
       }
 
     @Override

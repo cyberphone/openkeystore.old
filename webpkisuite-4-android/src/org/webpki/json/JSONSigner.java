@@ -35,7 +35,7 @@ public abstract class JSONSigner implements Serializable
 
     byte[] normalized_data;
     
-    JSONAlgorithmPreferences algorithm_preferences = JSONAlgorithmPreferences.SKS;
+    JSONAlgorithmPreferences algorithm_preferences = JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER;
 
     JSONSigner () {}
 

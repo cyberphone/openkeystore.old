@@ -26,8 +26,7 @@ public enum JSONTypes
   {
     NULL    (false),
     BOOLEAN (false),
-    INTEGER (false),
-    DOUBLE  (false),
+    NUMBER  (false),
     STRING  (false),
     ARRAY   (true),
     OBJECT  (true);
@@ -41,7 +40,7 @@ public enum JSONTypes
 
     static void compatibilityTest (JSONTypes expected_type, JSONValue value) throws IOException
       {
-        if (expected_type != value.type && (expected_type != JSONTypes.DOUBLE || value.type != JSONTypes.INTEGER))
+        if (expected_type != value.type)
           {
             throw new IOException ("Incompatible types, expected: " + expected_type + " actual: " + value.type);
           }

@@ -19,7 +19,7 @@ package org.webpki.webauth;
 
 public interface WebAuthConstants
   {
-    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20150112";
+    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20151101";
     
     String AUTHENTICATION_REQUEST_MSG      = "AuthenticationRequest";
 

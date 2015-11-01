@@ -20,7 +20,7 @@ import org.webpki.sks.SecureKeyStore;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20150112";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20151101";
 
     // JSON properties
 

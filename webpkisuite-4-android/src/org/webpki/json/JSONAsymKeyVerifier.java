@@ -37,6 +37,7 @@ public class JSONAsymKeyVerifier extends JSONVerifier
       */
     public JSONAsymKeyVerifier (PublicKey expected_public_key)
       {
+        super(JSONSignatureTypes.ASYMMETRIC_KEY);
         this.expected_public_key = expected_public_key;
       }
 
@@ -48,10 +49,4 @@ public class JSONAsymKeyVerifier extends JSONVerifier
             throw new IOException ("Provided public key differs from the signature key");
           }
        }
-
-    @Override
-    JSONSignatureTypes getVerifierType () throws IOException
-      {
-        return JSONSignatureTypes.ASYMMETRIC_KEY;
-      }
   }
