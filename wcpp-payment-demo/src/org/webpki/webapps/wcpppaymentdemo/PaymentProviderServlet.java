@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
@@ -46,7 +47,6 @@ import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -69,7 +69,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
     private X509Certificate verifyMerchantSignature (JSONObjectReader signed_object) throws IOException
       {
         VerifierInterface verifier = new KeyStoreVerifier (PaymentDemoService.merchant_root);
-        signed_object.getSignature (JSONAlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
+        signed_object.getSignature (AlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
         return verifier.getSignerCertificatePath ()[0];
       }
 
@@ -103,12 +103,12 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 SymEncryptionAlgorithms sym_alg = SymEncryptionAlgorithms.getAlgorithmFromID (encrypted_auth_data.getString (ALGORITHM_JSON));
                 if (sym_alg != SymEncryptionAlgorithms.AES256_CBC)
                   {
-                    throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + sym_alg.getURI ());
+                    throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + sym_alg.getAlgorithmId (AlgorithmPreferences.SKS));
                   }
                 JSONObjectReader encrypted_key = encrypted_auth_data.getObject (ENCRYPTED_KEY_JSON);
                 String key_encryption_algorithm = encrypted_key.getString (ALGORITHM_JSON);
                 byte[] raw_aes_key = null;
-                if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJOSEName ()))
+                if (key_encryption_algorithm.equals (AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getAlgorithmId (AlgorithmPreferences.JOSE)))
                   {
                     PublicKey received_public_key = encrypted_key.getPublicKey ();
                     if (!ArrayUtil.compare (PaymentDemoService.bank_encryption_key.getEncoded (), received_public_key.getEncoded ()))
@@ -125,12 +125,12 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                       {
                         throw new IOException ("Unexpected \"" + ALGORITHM_JSON + "\": " + key_encryption_algorithm);
                       }
-                    PublicKey received_payment_provider_key = encrypted_key.getObject (PAYMENT_PROVIDER_KEY_JSON).getPublicKey (JSONAlgorithmPreferences.JOSE);
+                    PublicKey received_payment_provider_key = encrypted_key.getObject (PAYMENT_PROVIDER_KEY_JSON).getPublicKey (AlgorithmPreferences.JOSE);
                     if (!ArrayUtil.compare (PaymentDemoService.bank_encryption_key.getEncoded (), received_payment_provider_key.getEncoded ()))
                       {
                         throw new IOException ("Unexpected encryption key:\n" + received_payment_provider_key.toString ());
                       }
-                    PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_CLIENT_KEY_JSON).getPublicKey (JSONAlgorithmPreferences.JOSE);
+                    PublicKey ephemeral_sender_key = encrypted_key.getObject (EPHEMERAL_CLIENT_KEY_JSON).getPublicKey (AlgorithmPreferences.JOSE);
                     KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
                     key_agreement.init (PaymentDemoService.bank_decryption_key.getKey ("mykey", PaymentDemoService.key_password.toCharArray ()));
                     key_agreement.doPhase (ephemeral_sender_key, true);
@@ -151,7 +151,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
                 cipher.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (encrypted_auth_data.getBinary (IV_JSON)));
                 auth_data = getUserAuthorization (cipher.doFinal (encrypted_auth_data.getBinary (CIPHER_TEXT_JSON)));
                 VerifierInterface verifier = new KeyStoreVerifier (PaymentDemoService.client_root);
-                auth_data.getSignature (JSONAlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
+                auth_data.getSignature (AlgorithmPreferences.JOSE).verify (new JSONX509Verifier (verifier));
               }
             else
               {
@@ -165,7 +165,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             HashAlgorithms hash_alg = HashAlgorithms.getAlgorithmFromID (request_hash.getString (ALGORITHM_JSON)); 
             if (hash_alg != HashAlgorithms.SHA256)
               {
-                throw new IOException ("Unexpected hash algorithm: " + hash_alg.getURI ());
+                throw new IOException ("Unexpected hash algorithm: " + hash_alg.getAlgorithmId ());
               }
             if (!ArrayUtil.compare (request_hash.getBinary (VALUE_JSON),
                                     HashAlgorithms.SHA256.digest (new JSONObjectWriter (payee).serializeJSONObject (JSONOutputFormats.NORMALIZED))))
@@ -199,7 +199,7 @@ public class PaymentProviderServlet extends HttpServlet implements BasePropertie
             signer.setKey (null, PaymentDemoService.key_password);
             result.setSignature (new JSONX509Signer (signer)
                 .setSignatureCertificateAttributes (true)
-                .setAlgorithmPreferences (JSONAlgorithmPreferences.JOSE));
+                .setAlgorithmPreferences (AlgorithmPreferences.JOSE));
             auth_data.checkForUnread ();
             trans_req.checkForUnread ();
           }

@@ -30,6 +30,7 @@ import org.webpki.sks.SKSException;
 
 import org.webpki.webauth.AuthenticationResponseEncoder;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
@@ -80,7 +81,7 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
                     public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException
                       {
                         return webauth_activity.sks.signHashedData (key_handle,
-                                                                    sign_alg.getURI (),
+                                                                    sign_alg.getAlgorithmId (AlgorithmPreferences.SKS),
                                                                     null,
                                                                     authorization.getBytes ("UTF-8"),
                                                                     sign_alg.getDigestAlgorithm ().digest (data));

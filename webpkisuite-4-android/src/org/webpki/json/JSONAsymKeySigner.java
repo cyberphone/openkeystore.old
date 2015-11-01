@@ -22,8 +22,8 @@ import java.security.PublicKey;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.crypto.SignatureAlgorithms;
 
 /**
@@ -52,7 +52,7 @@ public class JSONAsymKeySigner extends JSONSigner
         return this;
       }
 
-    public JSONAsymKeySigner setAlgorithmPreferences (JSONAlgorithmPreferences algorithm_preferences)
+    public JSONAsymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithm_preferences)
       {
         this.algorithm_preferences = algorithm_preferences;
         return this;

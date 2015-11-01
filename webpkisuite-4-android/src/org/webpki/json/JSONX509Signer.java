@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
@@ -59,7 +60,7 @@ public class JSONX509Signer extends JSONSigner
         return this;
       }
 
-    public JSONX509Signer setAlgorithmPreferences (JSONAlgorithmPreferences algorithm_preferences)
+    public JSONX509Signer setAlgorithmPreferences (AlgorithmPreferences algorithm_preferences)
       {
         super.algorithm_preferences = algorithm_preferences;
         return this;

@@ -17,6 +17,6 @@
 package org.webpki.crypto;
 
 
-public interface SignatureAlgorithms extends SKSAlgorithms
+public interface SignatureAlgorithms extends CryptoAlgorithms
   {
   }

@@ -29,11 +29,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -79,7 +79,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
               }
             byte[] request_hash = (byte[])session.getAttribute (CheckoutServlet.REQUEST_HASH_ATTR);
             transact.setObject (REQUEST_HASH_JSON)
-                .setString (ALGORITHM_JSON, HashAlgorithms.SHA256.getURI ())
+                .setString (ALGORITHM_JSON, HashAlgorithms.SHA256.getAlgorithmId ())
                 .setBinary (VALUE_JSON, request_hash);
             transact.setObject (AUTH_DATA_JSON, auth_req.getObject (AUTH_DATA_JSON));
             transact.setString (CLIENT_IP_ADDRESS_JSON, request.getRemoteAddr());
@@ -90,7 +90,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
             signer.setKey (null, PaymentDemoService.key_password);
             transact.setSignature (new JSONX509Signer (signer)
                 .setSignatureCertificateAttributes (true)
-                .setAlgorithmPreferences (JSONAlgorithmPreferences.JOSE));
+                .setAlgorithmPreferences (AlgorithmPreferences.JOSE));
             HTTPSWrapper https_wrapper = new HTTPSWrapper ();
             https_wrapper.setRequireSuccess (true);
             https_wrapper.makePostRequest (auth_url, transact.serializeJSONObject (JSONOutputFormats.NORMALIZED));
@@ -105,7 +105,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
               {
                 JSONObjectReader copy = authorized_result.getObject (PAYMENT_REQUEST_JSON);
                 payment_request = PaymentRequest.parseJSONData (copy);
-                copy.getSignature (JSONAlgorithmPreferences.JOSE);                   // Just to keep the parser happy...
+                copy.getSignature (AlgorithmPreferences.JOSE);                   // Just to keep the parser happy...
                 if (!ArrayUtil.compare (HashAlgorithms.SHA256.digest (new JSONObjectWriter (copy).serializeJSONObject (JSONOutputFormats.NORMALIZED)),
                                         request_hash))
                   {
@@ -114,7 +114,7 @@ public class AuthorizeRequestServlet extends HttpServlet implements BaseProperti
                 card_type = authorized_result.getString (CARD_TYPE_JSON);
                 reference_pan = authorized_result.getString (REFERENCE_PAN_JSON);
               }
-            authorized_result.getSignature (JSONAlgorithmPreferences.JOSE)
+            authorized_result.getSignature (AlgorithmPreferences.JOSE)
                 .verify (new JSONX509Verifier (new KeyStoreVerifier (PaymentDemoService.payment_root)));
             authorized_result.getBinary (PAYMENT_TOKEN_JSON);   // No DB etc yet...
             authorized_result.getString (TRANSACTION_ID_JSON);  // No DB etc yet...

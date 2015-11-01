@@ -17,16 +17,17 @@
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
+
 import java.security.KeyStore;
 import java.security.PublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -51,12 +52,12 @@ public class GenerateSignature
 
     ACTION action;
     
-    JSONAlgorithmPreferences jose;
+    AlgorithmPreferences jose;
 
     GenerateSignature (ACTION action, boolean jose)
       {
         this.action = action;
-        this.jose = jose ? JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER : JSONAlgorithmPreferences.SKS;
+        this.jose = jose ? AlgorithmPreferences.JOSE_ACCEPT_PREFER : AlgorithmPreferences.SKS;
       }
 
     static class AsymSignatureHelper extends KeyStoreSigner implements AsymKeySignerInterface

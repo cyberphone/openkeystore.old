@@ -19,6 +19,7 @@ package org.webpki.webapps.json.jcs;
 import java.io.IOException;
 
 import java.math.BigInteger;
+
 import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
@@ -26,15 +27,16 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyAlgorithms;
 
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
+
 import org.webpki.util.DebugFormatter;
 
 /**
@@ -93,7 +95,7 @@ public class ReadSignature
                 case OBJECT:
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONSignatureDecoder signature = rd.getSignature (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                      JSONSignatureDecoder signature = rd.getSignature (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:

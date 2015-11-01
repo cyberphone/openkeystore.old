@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
@@ -579,7 +580,7 @@ public class HTML implements BaseProperties
               "// Finally we send the authorization to the payee\n" +
               "//\n" +
               "function sendAuthorizationData(encrypted_authorization_data) {\n" +
-              "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES256_CBC.getURI () + "';\n" +
+              "    encrypted_data." + ALGORITHM_JSON + " = '" + SymEncryptionAlgorithms.AES256_CBC.getAlgorithmId (AlgorithmPreferences.SKS) + "';\n" +
               "    encrypted_data." + IV_JSON + " = binaryToBase64URL(encryption_algorithm.iv);\n" +
               "    encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
               "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64URL(new Uint8Array(encrypted_authorization_data));\n" +
@@ -596,7 +597,7 @@ public class HTML implements BaseProperties
               "    var asym_alg = {name: 'RSA-OAEP', hash: {name: 'SHA-256'}};\n" +
               "    crypto.subtle.importKey('jwk', selected_card.bank_encryption_key, asym_alg, true, ['encrypt']).then (function(public_key) {\n" +
               "    crypto.subtle.encrypt(asym_alg, public_key, new Uint8Array(raw_aes_key)).then (function(encryped_aes_key) {\n" +
-              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getJOSEName () + "';\n" +
+              "        encrypted_key." + ALGORITHM_JSON + " = '" + AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
               "        var public_key = encrypted_key." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
               "        public_key." + JSONSignatureDecoder.TYPE_JSON + " = '" + JSONSignatureDecoder.RSA_PUBLIC_KEY + "';\n" +
               "        public_key." + JSONSignatureDecoder.N_JSON + " = selected_card.bank_encryption_key.n;\n" +
@@ -643,7 +644,7 @@ public class HTML implements BaseProperties
               "        encrypted_key." + ALGORITHM_JSON + " = '" + ECDH_ALGORITHM_URI + "';\n" +
               "        var concat = encrypted_key." + KEY_DERIVATION_METHOD_JSON + " = {};\n" +
               "        concat."+ ALGORITHM_JSON + " = '" + CONCAT_ALGORITHM_URI + "';\n" +
-              "        concat."+ HASH_ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
+              "        concat."+ HASH_ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getAlgorithmId () + "';\n" +
               "        // Demo parameters at this stage...\n" +
               "        concat."+ ALGORITHM_ID_JSON + " = createBitString('0');\n" +
               "        concat."+ PARTY_U_INFO_JSON + " = createBitString(caller_domain);\n" +
@@ -711,11 +712,11 @@ public class HTML implements BaseProperties
              "    // Sign \"" + AUTH_DATA_JSON + "\"\n" +
              "    var signature_object = {};\n" +
              "    auth_data." + JSONSignatureDecoder.SIGNATURE_JSON + " = signature_object;\n" +
-             "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getJOSEName () + "';\n" +
+             "    signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
              "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
              "    var key_sign_alg = key_import_alg;\n" +
              "    if (selected_card.client_private_key.kty == 'EC') {\n" +
-             "        signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.ECDSA_SHA256.getJOSEName () + "';\n" +
+             "        signature_object." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
              "        key_import_alg = {name: 'ECDSA'};\n" +
              "        key_sign_alg = {name: 'ECDSA', hash: {name: 'SHA-256'}};\n" +
              "    }\n" +
