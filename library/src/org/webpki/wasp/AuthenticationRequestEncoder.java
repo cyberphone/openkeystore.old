@@ -17,22 +17,17 @@
 package org.webpki.wasp;
 
 import java.io.IOException;
-
 import java.util.Date;
 
 import org.w3c.dom.Document;
-
 import org.webpki.xml.DOMWriterHelper;
-
 import org.webpki.xmldsig.XMLSigner;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateFilter;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
-
 import org.webpki.wasp.SignatureRequestEncoder;
 
 import static org.webpki.wasp.WASPConstants.*;
@@ -172,11 +167,11 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
               }
             if (ap.digest_algorithm != null)
               {
-                wr.setStringAttribute (DIGEST_ALG_ATTR, ap.digest_algorithm.getURI ());
+                wr.setStringAttribute (DIGEST_ALG_ATTR, ap.digest_algorithm.getAlgorithmId ());
               }
             if (ap.signature_algorithm != null)
               {
-                wr.setStringAttribute (SIGNATURE_ALG_ATTR, ap.signature_algorithm.getURI ());
+                wr.setStringAttribute (SIGNATURE_ALG_ATTR, ap.signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS));
               }
           }
 

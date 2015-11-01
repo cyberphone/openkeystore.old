@@ -114,7 +114,7 @@ public class DocumentSignatures
       {
         Element elem = output_ns ? 
              wr.addChildElementNS (WASP_NS, DOC_SIGN_ELEM) : wr.addChildElement (DOC_SIGN_ELEM);
-        wr.setStringAttribute (DIGEST_ALG_ATTR, digest_algorithm.getURI ());
+        wr.setStringAttribute (DIGEST_ALG_ATTR, digest_algorithm.getAlgorithmId ());
         wr.setStringAttribute (CN_ALG_ATTR, canonicalization_algorithm);
         for (ContentIDAndDigest t : signatures)
           {
@@ -216,7 +216,7 @@ public class DocumentSignatures
     public String toString ()
       {
         StringBuffer s = new StringBuffer ();
-        s.append (DIGEST_ALG_ATTR + "=" + digest_algorithm.getURI () +
+        s.append (DIGEST_ALG_ATTR + "=" + digest_algorithm.getAlgorithmId () +
                   "\n" + CN_ALG_ATTR + "=" + canonicalization_algorithm);
         for (ContentIDAndDigest t : signatures)
           {

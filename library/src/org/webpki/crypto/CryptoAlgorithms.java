@@ -14,12 +14,24 @@
  *  limitations under the License.
  *
  */
-package org.webpki.json;
+package org.webpki.crypto;
+
+import java.io.IOException;
 
 /**
- * JCS supports JOSE algorithms as an option.
- * The default is SKS algorithms.
- * Algorithms and EC curves like Brainpool which does not have a JOSE counterpart will throw exceptions in the "JOSE" mode.
+ * 
+ * Crypto algorithm base interface
  *
  */
-public enum JSONAlgorithmPreferences {SKS, JOSE, JOSE_ACCEPT_PREFER}
+public interface CryptoAlgorithms
+  {
+    public boolean isMandatorySKSAlgorithm ();
+
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException;
+    
+    public String getOID ();
+
+    public String getJCEName ();
+    
+    public boolean isSymmetric ();
+  }

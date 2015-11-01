@@ -28,6 +28,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 
@@ -145,7 +146,7 @@ public class Key2
                     KeyPair key_pair = kpg.generateKeyPair ();
                     byte[] public_key = key_pair.getPublic ().getEncoded ();
                     int i = -1;
-                    System.out.print (ka.getURI () + "\nnew byte[]\n{");
+                    System.out.print (ka.getAlgorithmId (AlgorithmPreferences.SKS) + "\nnew byte[]\n{");
                     for (byte b : public_key)
                       {
                         if (++i != 0)

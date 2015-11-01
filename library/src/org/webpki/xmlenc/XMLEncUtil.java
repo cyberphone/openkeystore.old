@@ -23,6 +23,7 @@ import org.webpki.xml.DOMReaderHelper;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.EncryptionAlgorithms;
 
 
@@ -52,7 +53,7 @@ class XMLEncUtil
     public static void setEncryptionMethod (DOMWriterHelper wr, EncryptionAlgorithms algorithm) throws IOException
       {
         wr.addChildElement (ENCRYPTION_METHOD_ELEM);
-        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm.getURI ());
+        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm.getAlgorithmId (AlgorithmPreferences.SKS));
         wr.getParent ();
       }
 
@@ -87,7 +88,7 @@ class XMLEncUtil
         String algo = rd.getAttributeHelper ().getString (XMLSignatureWrapper.ALGORITHM_ATTR);
         for (EncryptionAlgorithms enc_algo : wanted_algorithms)
           {
-            if (algo.equals (enc_algo.getURI ()))
+            if (algo.equals (enc_algo.getAlgorithmId (AlgorithmPreferences.SKS)))
               {
                 return enc_algo;
               }

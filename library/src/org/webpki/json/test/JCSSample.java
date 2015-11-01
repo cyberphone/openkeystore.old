@@ -26,11 +26,11 @@ import java.security.PublicKey;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONOutputFormats;
@@ -75,7 +75,7 @@ public class JCSSample
           }
       }
 
-    static void createAsymmetricKeySignature (JSONObjectWriter wr, String file_name, JSONAlgorithmPreferences jose_alg_pref) throws IOException
+    static void createAsymmetricKeySignature (JSONObjectWriter wr, String file_name, AlgorithmPreferences jose_alg_pref) throws IOException
       {
         try
           {
@@ -112,7 +112,7 @@ public class JCSSample
             createAsymmetricKeySignature (wr,
                                           argc[0], 
                                           Boolean.valueOf (argc[1]) ?
-                        JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER : JSONAlgorithmPreferences.SKS);
+                        AlgorithmPreferences.JOSE_ACCEPT_PREFER : AlgorithmPreferences.SKS);
             String res = new String (wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
             res = unormalized_json.substring (0, unormalized_json.indexOf (']')) + res.substring (res.indexOf (']'));
             System.out.println (res);

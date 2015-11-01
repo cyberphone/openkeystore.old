@@ -35,8 +35,8 @@ import java.security.spec.ECPoint;
 import java.util.Date;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SKSAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
@@ -543,7 +543,7 @@ public class JSONObjectWriter implements Serializable
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
         signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON,
-                                    getAlgorithmID (signer.getAlgorithm (), signer.algorithm_preferences));
+                                    signer.getAlgorithm ().getAlgorithmId (signer.algorithm_preferences));
         if (signer.keyId != null)
           {
             signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
@@ -563,21 +563,7 @@ public class JSONObjectWriter implements Serializable
         return this;
       }
     
-    String getAlgorithmID (SKSAlgorithms algorithm, JSONAlgorithmPreferences algorithm_preferences) throws IOException
-      {
-        if (algorithm.getJOSEName () == null)
-          {
-            if (algorithm_preferences == JSONAlgorithmPreferences.JOSE)
-              {
-                throw new IOException("No JOSE algorithm for: " + algorithm.toString ());
-              }
-            return algorithm.getURI ();
-          }
-        return algorithm_preferences == JSONAlgorithmPreferences.SKS ?
-                                                 algorithm.getURI () : algorithm.getJOSEName ();
-      }
- 
-    public JSONObjectWriter setPublicKey (PublicKey public_key, JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    public JSONObjectWriter setPublicKey (PublicKey public_key, AlgorithmPreferences algorithm_preferences) throws IOException
       {
         JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
@@ -591,7 +577,7 @@ public class JSONObjectWriter implements Serializable
         else
           {
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg, algorithm_preferences));
+            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, key_alg.getAlgorithmId (algorithm_preferences));
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
             public_key_writer.setCurvePoint (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
             public_key_writer.setCurvePoint (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
@@ -601,7 +587,7 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
-        return setPublicKey (public_key, JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        return setPublicKey (public_key, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
 
     public JSONObjectWriter setCertificatePath (X509Certificate[] certificate_path) throws IOException

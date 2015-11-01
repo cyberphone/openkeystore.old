@@ -65,6 +65,7 @@ import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
@@ -78,7 +79,6 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SignatureWrapper;
-
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
@@ -134,7 +134,6 @@ import org.webpki.util.ImageData;
 
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 
 /*
@@ -793,7 +792,7 @@ public class KeyGen2Test
                                                        key.getDeleteProtection ().getSksValue (),
                                                        key.getAppUsage ().getSksValue (),
                                                        key.getFriendlyName (),
-                                                       key.getKeySpecifier ().getKeyAlgorithm ().getURI (),
+                                                       key.getKeySpecifier ().getKeyAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS),
                                                        key.getKeySpecifier ().getKeyParameters (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMac ());
@@ -1002,12 +1001,12 @@ public class KeyGen2Test
               }
             if (ask_for_4096)
               {
-                server_state.addFeatureQuery (KeyAlgorithms.RSA4096.getURI ())
-                            .addFeatureQuery (KeyAlgorithms.RSA2048.getURI ());
+                server_state.addFeatureQuery (KeyAlgorithms.RSA4096.getAlgorithmId (AlgorithmPreferences.SKS))
+                            .addFeatureQuery (KeyAlgorithms.RSA2048.getAlgorithmId (AlgorithmPreferences.SKS));
               }
             if (ask_for_exponent)
               {
-                server_state.addFeatureQuery (KeyAlgorithms.RSA2048_EXP.getURI ());
+                server_state.addFeatureQuery (KeyAlgorithms.RSA2048_EXP.getAlgorithmId (AlgorithmPreferences.SKS));
               }
             if (device_pin_protection)
               {
@@ -1048,7 +1047,7 @@ public class KeyGen2Test
             server_state.update (invocation_response);
             if (ask_for_exponent)
               {
-                if (server_state.isFeatureSupported (KeyAlgorithms.RSA2048_EXP.getURI ()))
+                if (server_state.isFeatureSupported (KeyAlgorithms.RSA2048_EXP.getAlgorithmId (AlgorithmPreferences.SKS)))
                   {
                     ask_for_exponent = true;
                   }
@@ -1056,7 +1055,7 @@ public class KeyGen2Test
             if (ask_for_4096)
               {
                 ask_for_4096 = false;
-                if (server_state.isFeatureSupported (KeyAlgorithms.RSA4096.getURI ()))
+                if (server_state.isFeatureSupported (KeyAlgorithms.RSA4096.getAlgorithmId (AlgorithmPreferences.SKS)))
                   {
                     ask_for_4096 = true;
                   }
@@ -1202,7 +1201,7 @@ public class KeyGen2Test
                                                pin_policy);
             if (symmetric_key || encryption_key)
               {
-                kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MACAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getAlgorithmId (AlgorithmPreferences.SKS) : MACAlgorithms.HMAC_SHA1.getAlgorithmId (AlgorithmPreferences.SKS)});
                 kp.setSymmetricKey (encryption_key ? AES32BITKEY : OTP_SEED);
               }
             if (key_agreement)
@@ -1775,7 +1774,7 @@ public class KeyGen2Test
             assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
           }
         assertTrue ("HMAC error", ArrayUtil.compare (sks.performHmac (key_handle,
-                                                                      MACAlgorithms.HMAC_SHA1.getURI (),
+                                                                      MACAlgorithms.HMAC_SHA1.getAlgorithmId (AlgorithmPreferences.SKS),
                                                                       null,
                                                                       USER_DEFINED_PIN, TEST_STRING),
                                                      MACAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
@@ -1792,13 +1791,13 @@ public class KeyGen2Test
         int key_handle = doer.getFirstKey ();
         byte[] iv = null;
         byte[] enc = sks.symmetricKeyEncrypt (key_handle,
-                                              SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                              SymEncryptionAlgorithms.AES256_CBC.getAlgorithmId (AlgorithmPreferences.SKS),
                                               true,
                                               iv,
                                               USER_DEFINED_PIN,
                                               TEST_STRING);
         assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (key_handle,
-                                                                                         SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                                                                         SymEncryptionAlgorithms.AES256_CBC.getAlgorithmId (AlgorithmPreferences.SKS),
                                                                                          false,
                                                                                          iv,
                                                                                          USER_DEFINED_PIN, 
@@ -1852,7 +1851,7 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    AsymSignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                                     null,
                                                     USER_DEFINED_PIN,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1881,7 +1880,7 @@ public class KeyGen2Test
         int key_handle = doer2.getFirstKey ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] result = sks.signHashedData (key_handle,
-                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1909,7 +1908,7 @@ public class KeyGen2Test
         int key_handle = doer2.getFirstKey ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] result = sks.signHashedData (key_handle,
-                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1950,7 +1949,7 @@ public class KeyGen2Test
         doer.perform ();
         int key_handle = doer.getFirstKey ();
         byte[] result = sks.signHashedData (key_handle,
-                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -2031,7 +2030,7 @@ public class KeyGen2Test
             try
               {
                 sks.signHashedData (key_handle,
-                                    AsymSignatureAlgorithms.ECDSA_SHA256.getURI (),
+                                    AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                     null,
                                     BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -2067,7 +2066,7 @@ public class KeyGen2Test
             try
               {
                 sks.signHashedData (key_handle,
-                                    AsymSignatureAlgorithms.ECDSA_SHA256.getURI (),
+                                    AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                     null,
                                     BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));

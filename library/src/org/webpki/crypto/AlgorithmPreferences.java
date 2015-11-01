@@ -16,18 +16,9 @@
  */
 package org.webpki.crypto;
 
-
-public interface SKSAlgorithms
-  {
-    public boolean isMandatorySKSAlgorithm ();
-
-    public String getURI ();
-    
-    public String getOID ();
-
-    public String getJCEName ();
-    
-    public String getJOSEName ();
-
-    public boolean isSymmetric ();
-  }
+/**
+ * The crypto library supports SKS and JOSE algorithms.
+ * Algorithms and EC curves like Brainpool which does not have a JOSE counterpart will throw exceptions in the "JOSE" mode.
+ *
+ */
+public enum AlgorithmPreferences {SKS, JOSE, JOSE_ACCEPT_PREFER}

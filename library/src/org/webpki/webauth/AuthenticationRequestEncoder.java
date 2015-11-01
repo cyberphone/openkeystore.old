@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
@@ -222,7 +223,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         JSONArrayWriter signature_algorithm_array = wr.setArray (SIGNATURE_ALGORITHMS_JSON);
         for (AsymSignatureAlgorithms algorithm : signature_algorithms)
           {
-            signature_algorithm_array.setString (algorithm.getJOSEName () == null ?  algorithm.getURI () : algorithm.getJOSEName ());
+            signature_algorithm_array.setString (algorithm.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER));
           }
 
         //////////////////////////////////////////////////////////////////////////

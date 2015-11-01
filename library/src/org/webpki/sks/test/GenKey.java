@@ -19,7 +19,6 @@ package org.webpki.sks.test;
 import java.io.IOException;
 
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -31,8 +30,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.webpki.asn1.cert.DistinguishedName;
+
 import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
+
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.MACAlgorithms;
@@ -45,6 +47,7 @@ import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.sks.test.ProvSess.MacGenerator;
 
 import org.webpki.util.ArrayUtil;
@@ -243,35 +246,35 @@ public class GenKey
     public byte[] signData (AsymSignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.signHashedData (key_handle,
-                                             alg_id.getURI (),
+                                             alg_id.getAlgorithmId (AlgorithmPreferences.SKS),
                                              null,
                                              getConditionalAuthorization (pin),
                                              alg_id.getDigestAlgorithm () == null ? data : alg_id.getDigestAlgorithm ().digest (data));
       }
 
-    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws SKSException
+    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.asymmetricKeyDecrypt (key_handle,
-                                                   alg_id.getURI (), 
+                                                   alg_id.getAlgorithmId (AlgorithmPreferences.SKS), 
                                                    null,
                                                    getConditionalAuthorization (pin), 
                                                    data);
       }
 
-    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] parameters, String pin, byte[] data) throws SKSException
+    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] parameters, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.symmetricKeyEncrypt (key_handle,
-                                                  alg_id.getURI (),
+                                                  alg_id.getAlgorithmId (AlgorithmPreferences.SKS),
                                                   mode,
                                                   parameters,
                                                   getConditionalAuthorization (pin),
                                                   data);
       }
 
-    public byte[] performHMAC (MACAlgorithms alg_id, String pin, byte[] data) throws SKSException
+    public byte[] performHMAC (MACAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.performHmac (key_handle,
-                                          alg_id.getURI (),
+                                          alg_id.getAlgorithmId (AlgorithmPreferences.SKS),
                                           null,
                                           getConditionalAuthorization (pin),
                                           data);

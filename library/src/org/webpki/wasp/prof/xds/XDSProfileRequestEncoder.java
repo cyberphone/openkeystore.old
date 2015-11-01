@@ -21,16 +21,13 @@ import java.io.IOException;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
-
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
-
 import org.webpki.wasp.SignatureProfileEncoder;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
-
 import static org.webpki.wasp.prof.xds.XDSProfileConstants.*;
 
 
@@ -134,12 +131,12 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
 
         if (digest_algorithm != null)
           {
-            wr.setStringAttribute (DIGEST_ALG_ATTR, digest_algorithm.getURI ());
+            wr.setStringAttribute (DIGEST_ALG_ATTR, digest_algorithm.getAlgorithmId ());
           }
 
         if (signature_algorithm != null)
           {
-            wr.setStringAttribute (SIGNATURE_ALG_ATTR, signature_algorithm.getURI ());
+            wr.setStringAttribute (SIGNATURE_ALG_ATTR, signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS));
           }
 
         if (document_canonicalization_algorithm != null)

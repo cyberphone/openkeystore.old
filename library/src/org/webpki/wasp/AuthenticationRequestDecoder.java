@@ -20,11 +20,10 @@ import java.io.IOException;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
@@ -79,7 +78,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
           {
             if (AsymSignatureAlgorithms.testAlgorithmURI (value))
               {
-                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (value);
+                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (value, AlgorithmPreferences.SKS);
               }
             else
               {

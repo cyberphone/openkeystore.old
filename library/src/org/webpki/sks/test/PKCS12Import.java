@@ -24,12 +24,14 @@ import java.security.PublicKey;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
 
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -47,6 +49,7 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.sks.ws.WSSpecific;
 
 public class PKCS12Import
@@ -101,18 +104,18 @@ public class PKCS12Import
         if (app_usage == AppUsage.ENCRYPTION)
           {
             endorsed_algs = rsa_flag ? 
-                new String[]{AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (),
-                             AsymEncryptionAlgorithms.RSA_OAEP_SHA1_MGF1P.getURI (),
-                             AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()} 
+                new String[]{AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getAlgorithmId (AlgorithmPreferences.SKS),
+                             AsymEncryptionAlgorithms.RSA_OAEP_SHA1_MGF1P.getAlgorithmId (AlgorithmPreferences.SKS),
+                             AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getAlgorithmId (AlgorithmPreferences.SKS)} 
                                  :
                 new String[]{SecureKeyStore.ALGORITHM_ECDH_RAW};
           }
         else if (app_usage == AppUsage.SIGNATURE)
           {
             endorsed_algs = rsa_flag ? 
-                new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (), AsymSignatureAlgorithms.RSA_SHA256.getURI ()}
+                new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS), AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS)}
                                  :
-                new String[]{AsymSignatureAlgorithms.ECDSA_SHA256.getURI ()};
+                new String[]{AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS)};
           }
         SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.client")).newInstance ();
         EnumeratedKey ek = new EnumeratedKey ();

@@ -19,6 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.SignatureAlgorithms;
 
 /**
@@ -35,7 +36,7 @@ public abstract class JSONSigner implements Serializable
 
     byte[] normalized_data;
     
-    JSONAlgorithmPreferences algorithm_preferences = JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER;
+    AlgorithmPreferences algorithm_preferences = AlgorithmPreferences.JOSE_ACCEPT_PREFER;
 
     JSONSigner () {}
 

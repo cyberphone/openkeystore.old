@@ -28,10 +28,13 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
@@ -47,12 +50,12 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
-
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.AppUsage;
@@ -661,7 +664,7 @@ public class ProvSess
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
         key_entry_algorithm = override_key_entry_algorithm == null ? key_entry_algorithm : override_key_entry_algorithm;
-        String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm ().getURI () : custom_key_algorithm;
+        String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS) : custom_key_algorithm;
         byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters () : custom_key_parameters;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSksValue ();
@@ -737,7 +740,7 @@ public class ProvSess
         GenKey key = new GenKey ();
         key.id = id;
         key.key_handle = key_entry.getKeyHandle ();
-        String return_alg = KeyAlgorithms.getKeyAlgorithm (key.public_key = key_entry.getPublicKey (), key_parameters != null).getURI ();
+        String return_alg = KeyAlgorithms.getKeyAlgorithm (key.public_key = key_entry.getPublicKey (), key_parameters != null).getAlgorithmId (AlgorithmPreferences.SKS);
         BigInteger exponent = RSAKeyGenParameterSpec.F4;
         if (key_parameters != null)
           {

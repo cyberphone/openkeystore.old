@@ -18,39 +18,31 @@ package org.webpki.xmldsig;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigInteger;
-
 import java.util.Vector;
 import java.util.Date;
-
 import java.security.SecureRandom;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.w3c.dom.Text;
 import org.w3c.dom.Element;
-
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1Sequence;
 import org.webpki.asn1.ASN1ObjectID;
 import org.webpki.asn1.ASN1BitString;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
@@ -404,11 +396,11 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         String signature_alg = aHelper.getString (ALGORITHM_ATTR);
         if  (AsymSignatureAlgorithms.testAlgorithmURI (signature_alg))
           {
-            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromID (signature_alg);
+            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromID (signature_alg, AlgorithmPreferences.SKS);
           }
         else
           {
-            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromID (signature_alg);
+            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromID (signature_alg, AlgorithmPreferences.SKS);
           }
         rd.getChild ();
         if (rd.hasNext ()) throw new IOException ("No \"SignatureMethod\" elements allowed");
@@ -501,7 +493,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         wr.setStringAttribute (ALGORITHM_ATTR, transform_algorithm.getURI ());
         wr.getParent();
         wr.addEmptyElement(DIGEST_METHOD_ELEM);
-        wr.setStringAttribute (ALGORITHM_ATTR, digest_algorithm.getURI ());
+        wr.setStringAttribute (ALGORITHM_ATTR, digest_algorithm.getAlgorithmId ());
         Text result = wr.addString (DIGEST_VALUE_ELEM, DUMMY_DIGEST);
         wr.getParent ();
         return result;

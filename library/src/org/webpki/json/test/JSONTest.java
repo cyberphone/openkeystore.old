@@ -21,25 +21,31 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.Date;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-import org.webpki.json.JSONAlgorithmPreferences;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -53,6 +59,7 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -1017,12 +1024,12 @@ public class JSONTest
       {
         byte[] spki_bin = Base64URL.decode (spki);
         JSONObjectReader or = JSONParser.parse (jcs);
-        PublicKey public_key = or.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey public_key = or.getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter ();
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin), (jcs.indexOf ("\"P-") > 0) ?
-                 JSONAlgorithmPreferences.JOSE : JSONAlgorithmPreferences.SKS).serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                 AlgorithmPreferences.JOSE : AlgorithmPreferences.SKS).serializeJSONObject (JSONOutputFormats.NORMALIZED),
                                 or.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
@@ -1052,7 +1059,7 @@ public class JSONTest
         try
           {
             JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT))
-                         .getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                         .getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)
@@ -1188,7 +1195,7 @@ public class JSONTest
           {
             signature.setString (JSONSignatureDecoder.KEY_ID_JSON, "MyKey");
           }
-        signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getURI ());
+        signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getAlgorithmId (AlgorithmPreferences.SKS));
         if (test == BAD_SIGNATURE.ExtensionTest1 || test == BAD_SIGNATURE.ExtensionTest2)
           {
             JSONArrayWriter aw = signature.setArray (JSONSignatureDecoder.EXTENSIONS_JSON);

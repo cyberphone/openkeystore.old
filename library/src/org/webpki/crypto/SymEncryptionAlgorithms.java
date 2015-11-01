@@ -48,7 +48,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
                         "AES/CBC/PKCS5Padding", 0,  true,  false, true,   false);
     
 
-    private final String         sks_id;          // As (typically) expressed in protocols
+    private final String         sksname;         // As (typically) expressed in protocols
     private final String         jcename;         // As expressed for JCE
     private final int            key_length;      // 0 => 16, 24 and 32 are ok
     private final boolean        iv_mode;         // CBC
@@ -56,9 +56,9 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     private final boolean        sks_mandatory;   // If required
     private final boolean        needs_padding;   // If that is the case
 
-    private SymEncryptionAlgorithms (String sks_id, String jcename, int key_length, boolean iv_mode, boolean internal_iv, boolean sks_mandatory, boolean needs_padding)
+    private SymEncryptionAlgorithms (String sksname, String jcename, int key_length, boolean iv_mode, boolean internal_iv, boolean sks_mandatory, boolean needs_padding)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.jcename = jcename;
         this.key_length = key_length;
         this.iv_mode = iv_mode;
@@ -90,21 +90,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
 
 
     @Override
-    public String getURI ()
-      {
-        return sks_id;
-      }
-
-
-    @Override
     public String getOID ()
-      {
-        return null;
-      }
-
-
-    @Override
-    public String getJOSEName ()
       {
         return null;
       }
@@ -138,11 +124,22 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
       {
         for (SymEncryptionAlgorithms alg : values ())
           {
-            if (algorithm_id.equals (alg.sks_id))
+            if (algorithm_id.equals (alg.sksname))
               {
                 return alg;
               }
           }
         throw new IOException ("Unknown algorithm: " + algorithm_id);
+      }
+
+
+    @Override
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException
+      {
+        if (algorithmPreferences == AlgorithmPreferences.JOSE)
+          {
+            throw new IOException("There is no JOSE algorithm for: " + toString ());
+          }
+        return sksname;
       }
   }

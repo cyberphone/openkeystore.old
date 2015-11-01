@@ -41,14 +41,14 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
                             null,
                             "RSA/ECB/NoPadding");
 
-    private final String         sks_id;          // As (typically) expressed in protocols
+    private final String         sksname;         // As (typically) expressed in protocols
     private final String         josename;        // Alternative JOSE name
     private final String         oid;             // As expressed in OIDs
     private final String         jcename;         // As expressed for JCE
 
-    private AsymEncryptionAlgorithms (String sks_id, String josename, String oid, String jcename)
+    private AsymEncryptionAlgorithms (String sksname, String josename, String oid, String jcename)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.josename = josename;
         this.oid = oid;
         this.jcename = jcename;
@@ -77,23 +77,9 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
 
 
     @Override
-    public String getURI ()
-      {
-        return sks_id;
-      }
-
-
-    @Override
     public String getOID ()
       {
         return oid;
-      }
-
-
-    @Override
-    public String getJOSEName ()
-      {
-        return josename;
       }
 
 
@@ -110,15 +96,43 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
-    public static AsymEncryptionAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
+    public static AsymEncryptionAlgorithms getAlgorithmFromID (String algorithm_id,
+                                           AlgorithmPreferences algorithmPreferences) throws IOException
       {
         for (AsymEncryptionAlgorithms alg : values ())
           {
-            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
+            if (algorithm_id.equals (alg.sksname))
               {
+                if (algorithmPreferences == AlgorithmPreferences.JOSE)
+                  {
+                    throw new IOException ("JOSE algorithm expected: " + algorithm_id);
+                  }
+                return alg;
+              }
+            if (algorithm_id.equals (alg.josename))
+              {
+                if (algorithmPreferences == AlgorithmPreferences.SKS)
+                  {
+                    throw new IOException ("SKS algorithm expected: " + algorithm_id);
+                  }
                 return alg;
               }
           }
         throw new IOException ("Unknown algorithm: " + algorithm_id);
+      }
+
+
+    @Override
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException
+      {
+        if (josename == null)
+          {
+            if (algorithmPreferences == AlgorithmPreferences.JOSE)
+              {
+                throw new IOException("There is no JOSE algorithm for: " + toString ());
+              }
+            return sksname;
+          }
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
       }
   }

@@ -31,6 +31,8 @@ import java.util.Vector;
 
 import java.util.regex.Pattern;
 
+import org.webpki.crypto.AlgorithmPreferences;
+
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
@@ -291,24 +293,24 @@ public class JSONObjectReader implements Serializable, Cloneable
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      * @throws IOException In case there is something wrong with the signature 
      */
-    public JSONSignatureDecoder getSignature (JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    public JSONSignatureDecoder getSignature (AlgorithmPreferences algorithm_preferences) throws IOException
       {
         return new JSONSignatureDecoder (this, algorithm_preferences);
       }
 
     public JSONSignatureDecoder getSignature () throws IOException
       {
-        return new JSONSignatureDecoder (this, JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        return new JSONSignatureDecoder (this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
  
-    public PublicKey getPublicKey (JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    public PublicKey getPublicKey (AlgorithmPreferences algorithm_preferences) throws IOException
       {
         return JSONSignatureDecoder.getPublicKey (this, algorithm_preferences);
       }
 
     public PublicKey getPublicKey () throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this, JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        return JSONSignatureDecoder.getPublicKey (this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
 
     public X509Certificate[] getCertificatePath () throws IOException

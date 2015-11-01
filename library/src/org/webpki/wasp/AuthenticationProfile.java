@@ -16,9 +16,11 @@
  */
 package org.webpki.wasp;
 
+import java.io.IOException;
+
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
     
@@ -81,13 +83,13 @@ public class AuthenticationProfile
 
     public void setDigestAlgorithm (HashAlgorithms digest_algorithm)
       {
-        digest_algorithm.getURI ();
+        digest_algorithm.getAlgorithmId ();
         this.digest_algorithm = digest_algorithm;
       }
 
-    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm)
+    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm) throws IOException
       {
-        signature_algorithm.getURI ();
+        signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS);
         this.signature_algorithm = signature_algorithm;
       }
   }
