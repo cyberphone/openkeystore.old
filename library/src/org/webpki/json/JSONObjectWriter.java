@@ -154,7 +154,7 @@ public class JSONObjectWriter implements Serializable
 
         // 2. Underflow doesn't interoperate well (edge case)
         if (value < UNDERFLOW_LIMIT_D15) {
-            value = 0;
+            return "0";
         }
 
         // 3. Serialize using Java with 15 digits of precision.
@@ -162,7 +162,7 @@ public class JSONObjectWriter implements Serializable
         
         // 4. Special treatment of zero.
         if (num.charAt(0) == '0') {
-           return "0";
+            return "0";
         }
 
         // 5. Collect and remove the exponent.
