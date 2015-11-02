@@ -3,14 +3,18 @@ package com.example.es6numbers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.Vector;
 
 import javax.script.*;
 
 public class Test {
+    
+    static final double UNDERFLOW_LIMIT_D15 = 2.22507385850721E-308;
 
     // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
     // The purpose is for supporting signed JSON/JavaScript objects which
@@ -23,7 +27,7 @@ public class Test {
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             throw new IllegalArgumentException("NaN/Infinity are not permitted in JSON");
         }
-
+        
         // 1. Take care of the sign.
         String hyphen = "";
         if (value < 0) {
@@ -31,132 +35,105 @@ public class Test {
             hyphen = "-";
         }
 
-        // We may need to start-over due to rounding in an about to be dropped 16:th digit.
-        boolean round = true;
-        while (true) {
-
-            // 2. Serialize using Java default.
-            StringBuffer num = new StringBuffer(Double.toString(value));
-
-            // 4. Collect and remove the optional exponent.
-            int exp = 0;
-            int i = num.indexOf("E");
-            if (i > 0) {
-                int j = i;
-                if (num.indexOf("-") > 0) {
-                    j++;
-                }
-                exp = Integer.valueOf(num.substring(j + 1));
-                if (j != i) {
-                    exp = -exp;
-                }
-                num.delete(i, num.length());
-            }
-
-            // 5. There must be a decimal point.
-            //    Remove it from the string and record its position.
-            int dp = num.indexOf(".");
-            num.deleteCharAt(dp);
-
-            // 6. Normalize decimal point to position 0.
-            //    Update exponent accordingly.
-            exp += dp;
-            dp = 0;
-
-            // 7. Normalize number so that most significant digit is != 0.
-            int lastNonZero = 0;
-            i = 0;
-            while (i < num.length()) {
-                if (num.charAt(0) == '0') {
-                    num.deleteCharAt(0);
-                    exp--;
-                } else {
-                    if (num.charAt(i) != '0') {
-                        lastNonZero = i;
-                    }
-                    i++;
-                }
-            }
-
-            // 8. Check if we have anything left.
-            if (num.length() == 0) {
-                // Popular edge-case.  We got a true zero.
-                return "0";
-            }
-
-            // 9. Check digit 16 for rounding but only once.
-            if (round && lastNonZero >= 15 && num.charAt(15) >= '5') {
-                value += Math.pow(10, exp - 15) / 2;
-                round = false;
-                continue;
-            }
-
-            // 10. Remove digits beyond 15.
-            if (lastNonZero >= 15) {
-                num.delete(15, num.length());
-            }
-
-            // 11. Remove trailing zeroes.
-            while (num.charAt(num.length() - 1) == '0') {
-                num.deleteCharAt(num.length() - 1);
-            }
-
-            // 12. This is the really difficult one...
-            //     Compute or remove decimal point. 
-            //     Add missing zeroes if needed.
-            //     Update or remove exponent.
-            int len = num.length();
-            if (exp >= len && exp <= 21) {
-                // 12.a Integer which fits the maximum field width.
-                //      Drop decimal point and remove exponent.
-                exp -= len;
-                while (exp > 0) {
-                    // It is a big integer which lacks some zeroes.
-                    num.append('0');
-                    exp--;
-                }
-                // No decimal point please, we are integers.
-                dp = -1;
-            } else if (exp <= 0 && exp > -6 && len - exp < 21) {
-                // 12.b Small number which fits the field width.
-                //      Add leading zeroes and remove exponent.
-                while (exp < 0) {
-                    num.insert(0, '0');
-                    exp++;
-                }
-            } else if (exp < 0) {
-                // 12.c Small number with exponent, move decimal point one step to the right.
-                //      If it is just a single digit we remove decimal point.
-                dp = len == 1 ? -1 : 1;
-                exp--;
-            } else if (exp < len) {
-                // 12.d Decimal number which is within limits.
-                //      Update decimal point position and remove exponent.
-                dp = exp;
-                exp = 0;
-            } else {
-                // 12.e Large number with exponent is our final alternative.
-                dp = 1;
-                exp--;
-            }
-
-            // 13. Add optional exponent including +/- sign.
-            if (exp != 0) {
-                num.append('e').append(exp > 0 ? "+" : "").append(exp);
-            }
-
-            // 14. Set optional decimal point.
-            if (dp == 0) {
-                // Small decimal number without exponent (0.005).
-                num.insert(0, "0.");
-            } else if (dp > 0) {
-                // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33).
-                num.insert(dp, '.');
-            }
-
-            // 15. Finally, return the assembled number including sign.
-            return num.insert(0, hyphen).toString();
+        // 2. Underflow doesn't interoperate well (edge case)
+        if (value < UNDERFLOW_LIMIT_D15) {
+            value = 0;
         }
+
+        // 3. Serialize using Java with 15 digits of precision.
+        StringBuffer num = new StringBuffer(new DecimalFormat("0.##############E000").format(value));
+        
+        // 4. Special treatment of zero.
+        if (num.charAt(0) == '0') {
+           return "0";
+        }
+
+        // 5. Collect and remove the exponent.
+        int i = num.indexOf("E");
+        int j = i;
+        if (num.indexOf("-") > 0) {
+            j++;
+        }
+        int exp = Integer.valueOf(num.substring(j + 1));
+        if (j != i) {
+            exp = -exp;
+        }
+        num.delete(i, num.length());
+
+        // 6. There may be a decimal point.
+        //    Remove it from the string and record its position.
+        int dp = num.indexOf(".");
+        if (dp < 0) {;
+            dp = num.length();
+        } else {
+            num.deleteCharAt(dp);
+        }
+
+        // 7. Normalize decimal point to position 0.
+        //    Update exponent accordingly.
+        exp += dp;
+        dp = 0;
+
+        // 8. Remove trailing zeroes.
+        while (num.charAt(num.length() - 1) == '0') {
+            num.deleteCharAt(num.length() - 1);
+        }
+        int len = num.length();
+
+        // 9. This is the really difficult one...
+        //    Compute or remove decimal point. 
+        //    Add missing zeroes if needed.
+        //    Update or remove exponent.
+        if (exp >= len && exp <= 21) {
+            // 9.a Integer which fits the maximum field width.
+            //     Drop decimal point and remove exponent.
+            exp -= len;
+            while (exp > 0) {
+                // It is a big integer which lacks some zeroes.
+                num.append('0');
+                exp--;
+            }
+            // No decimal point please, I'm an integer.
+            dp = -1;
+        } else if (exp <= 0 && exp > -6 && len - exp < 21) {
+            // 9.b Small number which fits the field width.
+            //     Add leading zeroes and remove exponent.
+            while (exp < 0) {
+                num.insert(0, '0');
+                exp++;
+            }
+        } else if (exp < 0) {
+            // 9.c Small number with exponent, move decimal point one step to the right.
+            //     If it is just a single digit we remove decimal point.
+            dp = len == 1 ? -1 : 1;
+            exp--;
+        } else if (exp < len) {
+            // 9.d Decimal number which is within limits.
+            //     Update decimal point position and remove exponent.
+            dp = exp;
+            exp = 0;
+        } else {
+            // 9.e Large number with exponent is our final alternative.
+            dp = 1;
+            exp--;
+        }
+
+        // 10. Add optional exponent including +/- sign.
+        if (exp != 0) {
+            num.append('e').append(exp > 0 ? "+" : "").append(exp);
+        }
+
+        // 11. Set optional decimal point.
+        if (dp == 0) {
+            // Small decimal number without exponent (0.005).
+            num.insert(0, "0.");
+        } else if (dp > 0) {
+            // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33).
+            num.insert(dp, '.');
+        }
+
+        // 12. Finally, return the assembled number including sign.
+        return num.insert(0, hyphen).toString();
     }
 
     static String toJsonString(double d) {
@@ -192,7 +169,7 @@ public class Test {
         pair.d15 = d15;
         testValues.add(pair);
         engine.put("fl", value);
-        engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
+        engine.eval("res=parseFloat((Math.abs(fl) < " + UNDERFLOW_LIMIT_D15 + " ? 0 : fl).toPrecision(15)).toString()");
         String js = engine.get("res").toString();
         if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(d15)))) {
             throw new RuntimeException("Roundtrip 1 failed for:" + d15);
@@ -277,6 +254,7 @@ public class Test {
         test(0.29999999999999993338661852249060757458209991455078125);
         test(0.299999999999999988897769753748434595763683319091796875);
         test(0.3000000000000000444089209850062616169452667236328125);
+        test(2.22507385850721E-308);
         test(Double.MIN_NORMAL);
         test(Double.MIN_VALUE);
         try {
@@ -322,10 +300,10 @@ public class Test {
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
                 + "Note: Test-values are supplied in a JS vector and the &quot;workaround&quot; solution"
-                + "<div style=\"padding:5pt\"><code style=\"font-size:12pt\">newValue = parseFloat(originalValue.toPrecision(15));</code></div>"
+                + "<div style=\"padding:5pt\"><code style=\"font-size:12pt\">newValue = parseFloat((Math.abs(originalValue) &lt; " + UNDERFLOW_LIMIT_D15 + " ? 0 : originalValue).toPrecision(15));</code></div>"
                 + "is applied.<br>&nbsp;"
                 + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
-                +"<script type=\"text/javascript\">\nvar testSuite = [");
+                + "<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
         for (Pair pair : testValues) {
             if (comma) {
@@ -341,7 +319,8 @@ public class Test {
         write("];\nvar i = 0;\n");
         write("while (i < testSuite.length) {\n" +
               "  var original = testSuite[i++];\n" +
-              "  var browser = parseFloat(parseFloat(original).toPrecision(15));\n" +
+              "  var value = parseFloat(original);\n" +
+              "  var browser = parseFloat((Math.abs(value) < " + (UNDERFLOW_LIMIT_D15) + " ? 0 : value).toPrecision(15));\n" +
               "  var expected = testSuite[i++];\n" +
               "  if (browser.toString() != expected || parseFloat(expected) != browser) browser = '<span style=\"color:red\">' + browser + '</span>';\n" +
               "  document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td>' + browser + '</td></tr>');\n" +

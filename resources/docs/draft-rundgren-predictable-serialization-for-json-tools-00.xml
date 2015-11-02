@@ -285,20 +285,24 @@ is excluded by the serialization process.</t>
          <t>Serialization of floating-point numbers is described in section 7.1.12.1 of
              the EcmaScript V6 specification. However, since this serialization
              scheme does not guarantee the correctness of the least significant digit,
-             the following workaround is REQUIRED for maintaining interoperability
+              the following workaround is REQUIRED for maintaining interoperability
              between different EcmaScript implementations:</t>
        </list></t>
        <figure><artwork><![CDATA[
-       var aSmallValue = 0.000000000000000001;
+       var aValue = 0.000000000000000001;
        var myObject = {};
        myObject.device = 'Pump2';
-       myObject.value = parseFloat(aSmallValue.toPrecision(15));
+       myObject.value =
+           parseFloat((Math.abs(aValue) < 2.22507385850721E-308 ?
+               0 : aValue).toPrecision(15));
 
        // Serialize object to a JSON string
        var jsonString = JSON.stringify(myObject);
 
        // This string can now be signed and the value be
        // added to the object itself (not shown here)]]></artwork></figure>
+         <t>The test with 2.22507385850721E-308 is for dealing with underflow
+             and 15 digits of precision at the same time.</t>
          <t>Non-EcmaScript systems targeting EcmaScript environments MUST (of course)
              apply the measures specified above as well.
              An externally created signed object could for example be supplied 
