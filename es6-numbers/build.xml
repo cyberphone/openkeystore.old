@@ -1,7 +1,7 @@
 <project name="Web2Native Bridge - Web Payment Support" default="help" basedir=".">
 
   <!-- set properties for this build -->
-  <property name="src.dir" value="src"/>
+  <property name="src.dir" location="src"/>
   <property name="temp.dir" location=".tmp"/>
   <property name="result.file" location="result/es6numbertest.html"/>
   <property name="browsertest.file" location="result/es6numberbrowsertest.html"/>
@@ -35,6 +35,7 @@
           </classpath>
         <arg value="${result.file}"/>
         <arg value="${browsertest.file}"/>
+        <arg value="${src.dir}/com/example/es6numbers/Test.java"/>
      </java>
   </target>
   

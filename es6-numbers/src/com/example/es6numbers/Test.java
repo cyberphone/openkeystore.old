@@ -1,11 +1,11 @@
 package com.example.es6numbers;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import javax.script.*;
@@ -159,11 +159,23 @@ public class Test {
         }
     }
 
+    static String toJsonString(double d) {
+        double ad = Math.abs(d);
+        if (1e-6d <= ad && ad < 1e21d) return String.format("%f", d).replaceFirst("\\.?0++$", "");
+        else if (ad == 0) return "0";
+        else return String.format("%g", d).replaceFirst("\\.?0++e", "e");
+    }
+
     static ScriptEngine engine;
     
     static FileOutputStream fos;
     
-    static LinkedHashMap<Double, String> testValues = new LinkedHashMap<Double, String>();
+    static class Pair {
+        double value;
+        String d15;
+    }
+    
+    static Vector<Pair> testValues = new Vector<Pair>();
 
     static void write(byte[] utf8) throws Exception {
         fos.write(utf8);
@@ -175,9 +187,10 @@ public class Test {
     
     static void test(double value) throws Exception {
         String d15 = es6JsonNumberSerialization(value);
-        if (testValues.put(value, d15) != null) {
-            return;
-        }
+        Pair pair = new Pair();
+        pair.value = value;
+        pair.d15 = d15;
+        testValues.add(pair);
         engine.put("fl", value);
         engine.eval("res=parseFloat(fl.toPrecision(15)).toString()");
         String js = engine.get("res").toString();
@@ -197,13 +210,15 @@ public class Test {
               + js
               + "</td><td>"
               + d15
+              + "</td><td>"
+              + toJsonString(value)
               + "</td></tr>");
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length != 3) {
             System.out.println("\nUsage: " + Test.class.getCanonicalName()
-                    + "resultpage browsertestpage");
+                    + "resultpage browsertestpage source");
             System.exit(-3);
         }
         fos = new FileOutputStream(args[0]);
@@ -216,7 +231,7 @@ public class Test {
                 + "</style></head><body><h3>ES6 - JSON Number Canonicalizer ["
                 + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) 
                 + "]</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (unmodified)</th><th>JS (15 digit)</th><th>Result (red=error)</th></tr>");
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (parsed)</th><th>JS/Java (15 digit)</th><th>Emulation/Workaround<br>(red=error wrt JS/Java)</th><th>Alternative ES6 formatter</th></tr>");
 
         ScriptEngineManager manager = new ScriptEngineManager();
         engine = manager.getEngineByName("JavaScript");
@@ -259,6 +274,9 @@ public class Test {
         test(-0.9999999999999999);
         test(0.9999999999999999);
         test(0.9999999999999999);
+        test(0.29999999999999993338661852249060757458209991455078125);
+        test(0.299999999999999988897769753748434595763683319091796875);
+        test(0.3000000000000000444089209850062616169452667236328125);
         test(Double.MIN_NORMAL);
         test(Double.MIN_VALUE);
         try {
@@ -276,7 +294,25 @@ public class Test {
 
         write("</table>&nbsp;<br>You may also try <a href=\"" + 
               args[1].substring(args[1].lastIndexOf(File.separatorChar) + 1) +
-              "\">testing this in a browser</a></body></html>\n");
+              "\">testing this in a browser</a><br><pre>");
+        FileInputStream fis = new FileInputStream(args[2]);
+        int c;
+        byte[] buffer = new byte[1];
+        while ((c = fis.read()) != -1) {
+            if (c == '>') {
+                write("&gt;");
+            } else if (c == '<') {
+                write("&lt;");
+            } else if (c == '"') {
+                write("&quot;");
+            } else if (c == '&') {
+                write("&amp;");
+            } else {
+                buffer[0] = (byte) c;
+                write(buffer);
+            }
+        }
+        write("</pre></body></html>\n");
         fos.close();
         fos = new FileOutputStream(args[1]);
         write("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>ES6 - Browser Number Canonicalizer Test</title>"
@@ -291,14 +327,14 @@ public class Test {
                 + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
                 +"<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
-        for (Double value : testValues.keySet()) {
+        for (Pair pair : testValues) {
             if (comma) {
                 write(",\n");
             }
             write("\"");
-            write(value.toString());
+            write(Double.toString(pair.value));
             write("\", \"");
-            write(testValues.get(value));
+            write(pair.d15);
             write("\"");
             comma = true;
         }
