@@ -18,28 +18,20 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECPoint;
-
 import java.text.DecimalFormat;
-
 import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -149,32 +141,32 @@ public class JSONObjectWriter implements Serializable
     public static String es6JsonNumberSerialization (double value) throws IOException
       {
 
-        // 0. Check for JSON compatibility.
+        // 1. Check for JSON compatibility.
         if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IOException("NaN/Infinity are not permitted in JSON");
+            throw new IllegalArgumentException("NaN/Infinity are not permitted in JSON");
         }
         
-        // 1. Take care of the sign.
+        // 2. Take care of the sign.
         String hyphen = "";
         if (value < 0) {
             value = -value;
             hyphen = "-";
         }
 
-        // 2. Underflow doesn't interoperate well (edge case)
+        // 3. Underflow doesn't interoperate well (edge case)
         if (value < UNDERFLOW_LIMIT_D15) {
             return "0";
         }
 
-        // 3. Serialize using Java with 15 digits of precision.
+        // 4. Serialize using Java with 15 digits of precision.
         StringBuffer num = new StringBuffer(new DecimalFormat("0.##############E000").format(value));
         
-        // 4. Special treatment of zero.
+        // 5. Special treatment of zero.
         if (num.charAt(0) == '0') {
             return "0";
         }
 
-        // 5. Collect and remove the exponent.
+        // 6. Collect and remove the exponent.
         int i = num.indexOf("E");
         int j = i;
         if (num.indexOf("-") > 0) {
@@ -186,7 +178,7 @@ public class JSONObjectWriter implements Serializable
         }
         num.delete(i, num.length());
 
-        // 6. There may be a decimal point.
+        // 7. There may be a decimal point.
         //    Remove it from the string and record its position.
         int dp = num.indexOf(".");
         if (dp < 0) {;
@@ -195,21 +187,16 @@ public class JSONObjectWriter implements Serializable
             num.deleteCharAt(dp);
         }
 
-        // 7. Normalize decimal point to position 0.
+        // 8. Normalize decimal point to position 0.
         //    Update exponent accordingly.
         exp += dp;
         dp = 0;
-
-        // 8. Remove trailing zeroes.
-        while (num.charAt(num.length() - 1) == '0') {
-            num.deleteCharAt(num.length() - 1);
-        }
-        int len = num.length();
 
         // 9. This is the really difficult one...
         //    Compute or remove decimal point. 
         //    Add missing zeroes if needed.
         //    Update or remove exponent.
+        int len = num.length();
         if (exp >= len && exp <= 21) {
             // 9.a Integer which fits the maximum field width.
             //     Drop decimal point and remove exponent.
