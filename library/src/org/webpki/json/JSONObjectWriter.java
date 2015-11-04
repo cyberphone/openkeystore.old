@@ -27,7 +27,9 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -140,10 +142,9 @@ public class JSONObjectWriter implements Serializable
     // precision values have 15.95 digits of precision).
     public static String es6JsonNumberSerialization (double value) throws IOException
       {
-
         // 1. Check for JSON compatibility.
         if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("NaN/Infinity are not permitted in JSON");
+            throw new IOException("NaN/Infinity are not permitted in JSON");
         }
         
         // 2. Take care of the sign.
@@ -159,7 +160,10 @@ public class JSONObjectWriter implements Serializable
         }
 
         // 4. Serialize using Java with 15 digits of precision.
-        StringBuffer num = new StringBuffer(new DecimalFormat("0.##############E000").format(value));
+        StringBuffer num = 
+            new StringBuffer(new DecimalFormat("0.##############E000",
+                             new DecimalFormatSymbols(Locale.ENGLISH))
+                .format(value));
         
         // 5. Special treatment of zero.
         if (num.charAt(0) == '0') {
@@ -178,19 +182,14 @@ public class JSONObjectWriter implements Serializable
         }
         num.delete(i, num.length());
 
-        // 7. There may be a decimal point.
-        //    Remove it from the string and record its position.
-        int dp = num.indexOf(".");
-        if (dp < 0) {;
-            dp = num.length();
-        } else {
-            num.deleteCharAt(dp);
+        // 7. Remove possible decimal point at index 1.
+        if (num.indexOf(".") > 0) {
+            num.deleteCharAt(1);
         }
 
-        // 8. Normalize decimal point to position 0.
+        // 8. Assign virtual decimal point to index 0.
         //    Update exponent accordingly.
-        exp += dp;
-        dp = 0;
+        exp ++;
 
         // 9. This is the really difficult one...
         //    Compute or remove decimal point. 
@@ -206,8 +205,6 @@ public class JSONObjectWriter implements Serializable
                 num.append('0');
                 exp--;
             }
-            // No decimal point please, I'm an integer.
-            dp = -1;
         } else if (exp <= 0 && exp > -6 && len - exp < 21) {
             // 9.b Small number which fits the field width.
             //     Add leading zeroes and remove exponent.
@@ -215,19 +212,22 @@ public class JSONObjectWriter implements Serializable
                 num.insert(0, '0');
                 exp++;
             }
+            num.insert(0, "0.");
         } else if (exp < 0) {
-            // 9.c Small number with exponent, move decimal point one step to the right.
-            //     If it is just a single digit we remove decimal point.
-            dp = len == 1 ? -1 : 1;
+            // 9.c Small number with exponent, restore decimal point.
+            //     If it is just a single digit we skip the decimal point.
+            if (len > 1) {
+                num.insert(1, '.');
+            }
             exp--;
         } else if (exp < len) {
             // 9.d Decimal number which is within limits.
-            //     Update decimal point position and remove exponent.
-            dp = exp;
+            //     Update decimal point and remove exponent.
+            num.insert(exp, '.');
             exp = 0;
         } else {
             // 9.e Large number with exponent is our final alternative.
-            dp = 1;
+            num.insert(1, '.');
             exp--;
         }
 
@@ -236,16 +236,7 @@ public class JSONObjectWriter implements Serializable
             num.append('e').append(exp > 0 ? "+" : "").append(exp);
         }
 
-        // 11. Set optional decimal point.
-        if (dp == 0) {
-            // Small decimal number without exponent (0.005).
-            num.insert(0, "0.");
-        } else if (dp > 0) {
-            // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33).
-            num.insert(dp, '.');
-        }
-
-        // 12. Finally, return the assembled number including sign.
+        // 11. Finally, return the assembled number including sign.
         return num.insert(0, hyphen).toString();
       }
 

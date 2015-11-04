@@ -34,6 +34,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.Date;
+import java.util.Locale;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -246,6 +247,7 @@ public class JSONTest
     public static void openFile () throws Exception
       {
         CustomCryptoProvider.forcedLoad (true);
+        Locale.setDefault (Locale.FRANCE);  // Should create HUGE problems :-)
       }
 
     @SuppressWarnings("serial")

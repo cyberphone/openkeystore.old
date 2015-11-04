@@ -3,11 +3,11 @@ package com.example.es6numbers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.script.*;
@@ -41,7 +41,10 @@ public class Test {
         }
 
         // 4. Serialize using Java with 15 digits of precision.
-        StringBuffer num = new StringBuffer(new DecimalFormat("0.##############E000").format(value));
+        StringBuffer num = 
+            new StringBuffer(new DecimalFormat("0.##############E000",
+                             new DecimalFormatSymbols(Locale.ENGLISH))
+                .format(value));
         
         // 5. Special treatment of zero.
         if (num.charAt(0) == '0') {
@@ -60,19 +63,14 @@ public class Test {
         }
         num.delete(i, num.length());
 
-        // 7. There may be a decimal point.
-        //    Remove it from the string and record its position.
-        int dp = num.indexOf(".");
-        if (dp < 0) {;
-            dp = num.length();
-        } else {
-            num.deleteCharAt(dp);
+        // 7. Remove possible decimal point at index 1.
+        if (num.indexOf(".") > 0) {
+            num.deleteCharAt(1);
         }
 
-        // 8. Normalize decimal point to position 0.
+        // 8. Assign virtual decimal point to index 0.
         //    Update exponent accordingly.
-        exp += dp;
-        dp = 0;
+        exp ++;
 
         // 9. This is the really difficult one...
         //    Compute or remove decimal point. 
@@ -88,8 +86,6 @@ public class Test {
                 num.append('0');
                 exp--;
             }
-            // No decimal point please, I'm an integer.
-            dp = -1;
         } else if (exp <= 0 && exp > -6 && len - exp < 21) {
             // 9.b Small number which fits the field width.
             //     Add leading zeroes and remove exponent.
@@ -97,19 +93,22 @@ public class Test {
                 num.insert(0, '0');
                 exp++;
             }
+            num.insert(0, "0.");
         } else if (exp < 0) {
-            // 9.c Small number with exponent, move decimal point one step to the right.
-            //     If it is just a single digit we remove decimal point.
-            dp = len == 1 ? -1 : 1;
+            // 9.c Small number with exponent, restore decimal point.
+            //     If it is just a single digit we skip the decimal point.
+            if (len > 1) {
+                num.insert(1, '.');
+            }
             exp--;
         } else if (exp < len) {
             // 9.d Decimal number which is within limits.
-            //     Update decimal point position and remove exponent.
-            dp = exp;
+            //     Update decimal point and remove exponent.
+            num.insert(exp, '.');
             exp = 0;
         } else {
             // 9.e Large number with exponent is our final alternative.
-            dp = 1;
+            num.insert(1, '.');
             exp--;
         }
 
@@ -118,24 +117,26 @@ public class Test {
             num.append('e').append(exp > 0 ? "+" : "").append(exp);
         }
 
-        // 11. Set optional decimal point.
-        if (dp == 0) {
-            // Small decimal number without exponent (0.005).
-            num.insert(0, "0.");
-        } else if (dp > 0) {
-            // Exponent or normal decimal number (3.5e+24, 3.5, 3333.33).
-            num.insert(dp, '.');
-        }
-
-        // 12. Finally, return the assembled number including sign.
+        // 11. Finally, return the assembled number including sign.
         return num.insert(0, hyphen).toString();
     }
 
-    static String toJsonString(double d) {
+    private static String toJsonString(double d)
+    {
+        // TODO: specify a locale to prevent localization
+        // TODO: consider accepting precision as an argument
+        String s;
         double ad = Math.abs(d);
-        if (1e-6d <= ad && ad < 1e21d) return String.format("%f", d).replaceFirst("\\.?0++$", "");
-        else if (ad == 0) return "0";
-        else return String.format("%g", d).replaceFirst("\\.?0++e", "e");
+        if (1e-6d <= ad && ad < 1e21d) {
+            s = String.format("%.22f", d).replaceFirst("\\.?0++$", "");
+        }
+        else if (ad == 0d) {
+            s = "0";
+        }
+        else {
+            s = String.format("%.16e", d).replaceFirst("\\.?0++e(-?)0*", "e$1");
+        }
+        return s;
     }
 
     static ScriptEngine engine;
