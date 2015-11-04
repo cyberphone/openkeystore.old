@@ -227,7 +227,7 @@ verifying in-object signatures built on top of
 the predictable serialization concept.</t>
    <section title="Creating a Signed JSON object">
 <t>Assume there is a JSON object like the following:</t>
-<figure><artwork type="code"><![CDATA[
+<figure><artwork><![CDATA[
   {
     "property-1": ...,
     "property-2": ...,
