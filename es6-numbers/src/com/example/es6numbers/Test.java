@@ -70,7 +70,7 @@ public class Test {
 
         // 8. Assign virtual decimal point to index 0.
         //    Update exponent accordingly.
-        exp ++;
+        exp++;
 
         // 9. This is the really difficult one...
         //    Compute or remove decimal point. 
