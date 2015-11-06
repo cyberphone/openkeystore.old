@@ -238,7 +238,7 @@ function testBrowser() {
     var escape_me = '{"esc":"\\u000F\\u000aA\'\\u0042\\u0022\\u005c\\\\\\\"\\/"}';
     check('t4', JSON.stringify(JSON.parse(escape_me)) == '{"esc":"\\u000f\\nA\'B\\"\\\\\\\\\\"/"}');
 
-    var fp = '{"problem":0.40}';
+    var fp = '{"problem":-333333333333.33344}';
     check('t5', JSON.stringify(JSON.parse(fp)) == fp);
 }
   

@@ -9,19 +9,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
+import org.webpki.json.v8dtoa.V8NumberCanonicalizer;
+import org.webpki.json.v8dtoa.DToA;
 
 import javax.script.*;
 
 public class Test {
     
     static final double UNDERFLOW_LIMIT_D15 = 2.22507385850721E-308;
+    static final double LOW_PRECISION       = 1.0E-300;
 
     // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
     // The purpose is for supporting signed JSON/JavaScript objects which
     // though forces us dropping (after rounding) the 16:th digit since it
     // is not deterministic in the ECMA specification (IEEE 754-2008 double
     // precision values have 15.95 digits of precision).
-    public static String es6JsonNumberSerialization(double value) {
+    public static String es6numberConverter(double value) {
 
         // 1. Check for JSON compatibility.
         if (Double.isNaN(value) || Double.isInfinite(value)) {
@@ -42,7 +45,8 @@ public class Test {
 
         // 4. Serialize using Java with 15 digits of precision.
         StringBuffer num = 
-            new StringBuffer(new DecimalFormat("0.##############E000",
+            new StringBuffer(new DecimalFormat(Math.abs(value)
+                    < LOW_PRECISION ? "0.#############E000" : "0.##############E000",
                              new DecimalFormatSymbols(Locale.ENGLISH))
                 .format(value));
         
@@ -121,30 +125,13 @@ public class Test {
         return num.insert(0, hyphen).toString();
     }
 
-    private static String toJsonString(double d)
-    {
-        // TODO: specify a locale to prevent localization
-        // TODO: consider accepting precision as an argument
-        String s;
-        double ad = Math.abs(d);
-        if (1e-6d <= ad && ad < 1e21d) {
-            s = String.format("%.22f", d).replaceFirst("\\.?0++$", "");
-        }
-        else if (ad == 0d) {
-            s = "0";
-        }
-        else {
-            s = String.format("%.16e", d).replaceFirst("\\.?0++e(-?)0*", "e$1");
-        }
-        return s;
-    }
-
     static ScriptEngine engine;
     
     static FileOutputStream fos;
     
     static class Pair {
         double value;
+        String full;
         String d15;
     }
     
@@ -159,32 +146,35 @@ public class Test {
     }
     
     static void test(double value) throws Exception {
-        String d15 = es6JsonNumberSerialization(value);
+        String full = V8NumberCanonicalizer.numberToString(value);
+        StringBuilder buffer = new StringBuilder();
+        DToA.JS_dtostr(buffer, DToA.DTOSTR_PRECISION, 15, value);
+        String d15 = V8NumberCanonicalizer.numberToString(Double.valueOf(buffer.toString()));
         Pair pair = new Pair();
         pair.value = value;
+        pair.full = full;
         pair.d15 = d15;
         testValues.add(pair);
         engine.put("fl", value);
-        engine.eval("res=parseFloat((Math.abs(fl) < " + UNDERFLOW_LIMIT_D15 + " ? 0 : fl).toPrecision(15)).toString()");
+        engine.eval("res=fl.toString()");
         String js = engine.get("res").toString();
-        if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(d15)))) {
-            throw new RuntimeException("Roundtrip 1 failed for:" + d15);
+        if (!full.equals(V8NumberCanonicalizer.numberToString(Double.valueOf(full)))) {
+            throw new RuntimeException("Roundtrip 1 failed for:" + full);
         }
-        DecimalFormat df = new DecimalFormat("0.##############E000");
-        if (!d15.equals(es6JsonNumberSerialization(Double.valueOf(df.format(value))))) {
+         if (!d15.equals(V8NumberCanonicalizer.numberToString(Double.valueOf(d15)))) {
             throw new RuntimeException("Roundtrip 2 failed for:" + d15);
         }
-        if (!js.equals(d15)) {
-            d15 = "<span style=\"color:red\">" + d15 + "</span>";
+        if (!js.equals(full)) {
+            full = "<span style=\"color:red\">" + full + "</span>";
         }
         write("<tr><td>" 
               + Double.toString(value)
               + "</td><td>"
               + js
               + "</td><td>"
-              + d15
+              + full
               + "</td><td>"
-              + toJsonString(value)
+              + d15
               + "</td></tr>");
     }
 
@@ -251,6 +241,9 @@ public class Test {
         test(0.299999999999999988897769753748434595763683319091796875);
         test(0.3000000000000000444089209850062616169452667236328125);
         test(2.22507385850721E-308);
+        for (int i = 0; i < 1000; i++) {
+            test(2.2250738585072E-308 + (i * 1e-323));
+        }
         test(Double.MIN_NORMAL);
         test(Double.MIN_VALUE);
         try {
@@ -295,10 +288,8 @@ public class Test {
                 + "th {width:150pt;background:lightgrey;font-family:verdana;font-size:10pt;font-weight:normal;padding:4pt}"
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
-                + "Note: Test-values are supplied in a JS vector and the &quot;workaround&quot; solution"
-                + "<div style=\"padding:5pt\"><code style=\"font-size:12pt\">newValue = parseFloat((Math.abs(originalValue) &lt; " + UNDERFLOW_LIMIT_D15 + " ? 0 : originalValue).toPrecision(15));</code></div>"
-                + "is applied.<br>&nbsp;"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
+                + "Note: Test-values are supplied in a JS vector.<br>&nbsp;"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th><th>Browser.15 (red=diff)</th></tr>"
                 + "<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
         for (Pair pair : testValues) {
@@ -308,20 +299,38 @@ public class Test {
             write("\"");
             write(Double.toString(pair.value));
             write("\", \"");
+            write(pair.full);
+            write("\", ");
             write(pair.d15);
-            write("\"");
             comma = true;
         }
-        write("];\nvar i = 0;\n");
-        write("while (i < testSuite.length) {\n" +
+        write("];\nvar i = 0;\n" +
+              "var errors = 0;\n" +
+              "while (i < testSuite.length) {\n" +
               "  var original = testSuite[i++];\n" +
-              "  var value = parseFloat(original);\n" +
-              "  var browser = parseFloat((Math.abs(value) < " + (UNDERFLOW_LIMIT_D15) + " ? 0 : value).toPrecision(15));\n" +
+              "  var browser = parseFloat(original);\n" +
               "  var expected = testSuite[i++];\n" +
-              "  if (browser.toString() != expected || parseFloat(expected) != browser) browser = '<span style=\"color:red\">' + browser + '</span>';\n" +
-              "  document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td>' + browser + '</td></tr>');\n" +
-              "}\n");
-        write("</script></table></body></html>\n");
+              "  var d15 = testSuite[i++];\n" +
+              "  var bstd = 'black';\n" +
+              "  var bd15 ='black';\n" +
+              "  var failed = false;\n" +
+              "  if (browser.toString() != expected || parseFloat(expected) != browser) {\n" +
+              "    failed = true;\n" +
+              "    bstd = 'red';\n" +
+              "  }\n" +
+              "  if (d15 != parseFloat(parseFloat(expected).toPrecision(15))) {\n" +
+              "    failed = true;\n" +
+              "    bd15 = 'red';\n" +
+              "  }\n" +
+              "  if (failed) {\n" +
+              "    document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td style=\"color:' + bstd + '\">' + browser + '</td><td style=\"color:' + bd15 + '\">' + d15 + '</td></tr>');\n" +
+              "    errors++;\n" +
+              "  }\n" +
+              "}\n" +
+              "document.write('</table><p>');\n" +
+              "document.write(errors ? 'There were ' + errors + ' errors' : 'Success - No errors!');\n" +
+              "document.write('</p>');\n" +
+              "</script></body></html>\n");
         fos.close();
 
     }
