@@ -1622,7 +1622,7 @@ org.webpki.json.JSONParser.RIGHT_BRACKET       = ']';
 org.webpki.json.JSONParser.COMMA_CHARACTER     = ',';
 org.webpki.json.JSONParser.BACK_SLASH          = '\\';
 
-org.webpki.json.JSONParser.INTEGER_PATTERN     = new RegExp ("^((0)|(-?[1-9][0-9]*))$");
+org.webpki.json.JSONParser.INTEGER_PATTERN     = new RegExp ("^([-+]?[0-9]+)$");
 org.webpki.json.JSONParser.BOOLEAN_PATTERN     = new RegExp ("^(true|false)$");
 org.webpki.json.JSONParser.DOUBLE_PATTERN      = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 

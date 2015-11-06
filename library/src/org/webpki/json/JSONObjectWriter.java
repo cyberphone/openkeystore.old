@@ -32,18 +32,22 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SKSAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Creates JSON objects and performs serialization.
+ * Creates JSON objects and performs serialization
+ * (according to ES6 but limited to 15 digits of precision).
  * <p>
  * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
  * 
@@ -53,6 +57,8 @@ public class JSONObjectWriter implements Serializable
     private static final long serialVersionUID = 1L;
 
     static final int STANDARD_INDENT = 2;
+    
+    static final long MAX_ES6_SAFE_LONG = 999999999999999l;
 
     JSONObject root;
 
@@ -118,19 +124,151 @@ public class JSONObjectWriter implements Serializable
         return setProperty (name, new JSONValue (JSONTypes.STRING, value));
       }
 
+    static JSONValue setNumberAsText(String value) throws IOException
+      {
+        JSONArrayReader ar = JSONParser.parse ("[" + value + "]").getJSONArrayReader ();
+        if (ar.array.size () != 1)
+          {
+            throw new IOException ("Syntax error on number: " + value);
+          }
+        ar.getDouble ();
+        return ar.array.firstElement ();
+      }
+
+    public JSONObjectWriter setNumberAsText(String name, String value) throws IOException
+      {
+        return setProperty (name, setNumberAsText(value));
+      }
+
+    static final double UNDERFLOW_LIMIT_D15 = 2.22507385850721E-308;
+
+    // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
+    // The purpose is for supporting signed JSON/JavaScript objects which
+    // though forces us dropping (after rounding) the 16:th digit since it
+    // is not deterministic in the ECMA specification (IEEE 754-2008 double
+    // precision values have 15.95 digits of precision).
+    public static String es6JsonNumberSerialization (double value) throws IOException
+      {
+        // 1. Check for JSON compatibility.
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IOException("NaN/Infinity are not permitted in JSON");
+        }
+        
+        // 2. Take care of the sign.
+        String hyphen = "";
+        if (value < 0) {
+            value = -value;
+            hyphen = "-";
+        }
+
+        // 3. Underflow doesn't interoperate well (edge case)
+        if (value < UNDERFLOW_LIMIT_D15) {
+            return "0";
+        }
+
+        // 4. Serialize using Java with 15 digits of precision.
+        StringBuffer num = 
+            new StringBuffer(new DecimalFormat("0.##############E000",
+                             new DecimalFormatSymbols(Locale.ENGLISH))
+                .format(value));
+        
+        // 5. Special treatment of zero.
+        if (num.charAt(0) == '0') {
+            return "0";
+        }
+
+        // 6. Collect and remove the exponent.
+        int i = num.indexOf("E");
+        int j = i;
+        if (num.indexOf("-") > 0) {
+            j++;
+        }
+        int exp = Integer.valueOf(num.substring(j + 1));
+        if (j != i) {
+            exp = -exp;
+        }
+        num.delete(i, num.length());
+
+        // 7. Remove possible decimal point at index 1.
+        if (num.indexOf(".") > 0) {
+            num.deleteCharAt(1);
+        }
+
+        // 8. Assign virtual decimal point to index 0.
+        //    Update exponent accordingly.
+        exp++;
+
+        // 9. This is the really difficult one...
+        //    Compute or remove decimal point. 
+        //    Add missing zeroes if needed.
+        //    Update or remove exponent.
+        int len = num.length();
+        if (exp >= len && exp <= 21) {
+            // 9.a Integer which fits the maximum field width.
+            //     Drop decimal point and remove exponent.
+            exp -= len;
+            while (exp > 0) {
+                // It is a big integer which lacks some zeroes.
+                num.append('0');
+                exp--;
+            }
+        } else if (exp <= 0 && exp > -6 && len - exp < 21) {
+            // 9.b Small number which fits the field width.
+            //     Add leading zeroes and remove exponent.
+            while (exp < 0) {
+                num.insert(0, '0');
+                exp++;
+            }
+            num.insert(0, "0.");
+        } else if (exp < 0) {
+            // 9.c Small number with exponent, restore decimal point.
+            //     If it is just a single digit we skip the decimal point.
+            if (len > 1) {
+                num.insert(1, '.');
+            }
+            exp--;
+        } else if (exp < len) {
+            // 9.d Decimal number which is within limits.
+            //     Update decimal point and remove exponent.
+            num.insert(exp, '.');
+            exp = 0;
+        } else {
+            // 9.e Large number with exponent is our final alternative.
+            num.insert(1, '.');
+            exp--;
+        }
+
+        // 10. Add optional exponent including +/- sign.
+        if (exp != 0) {
+            num.append('e').append(exp > 0 ? "+" : "").append(exp);
+        }
+
+        // 11. Finally, return the assembled number including sign.
+        return num.insert(0, hyphen).toString();
+      }
+
+    static String es6Long2NumberConversion (long value) throws IOException
+      {
+        if (Math.abs (value) > MAX_ES6_SAFE_LONG)
+          {
+            throw new IOException ("Integer values must not exceed " + MAX_ES6_SAFE_LONG + " for safe ES6 representation");
+          }
+        return es6JsonNumberSerialization (value);
+      }
+
     public JSONObjectWriter setInt (String name, int value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
+        return setLong (name, value);
       }
 
     public JSONObjectWriter setLong (String name, long value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6Long2NumberConversion (value)));
       }
 
     public JSONObjectWriter setDouble (String name, double value) throws IOException
       {
-        return setProperty (name, new JSONValue (JSONTypes.DOUBLE, Double.toString (value)));
+        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6JsonNumberSerialization (value)));
       }
 
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
@@ -338,7 +476,7 @@ public class JSONObjectWriter implements Serializable
       {
         JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
         signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON,
-                                    getAlgorithmID (signer.getAlgorithm (), signer.algorithm_preferences));
+                                    signer.getAlgorithm ().getAlgorithmId (signer.algorithm_preferences));
         if (signer.keyId != null)
           {
             signature_writer.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
@@ -358,21 +496,7 @@ public class JSONObjectWriter implements Serializable
         return this;
       }
     
-    String getAlgorithmID (SKSAlgorithms algorithm, JSONAlgorithmPreferences algorithm_preferences) throws IOException
-      {
-        if (algorithm.getJOSEName () == null)
-          {
-            if (algorithm_preferences == JSONAlgorithmPreferences.JOSE)
-              {
-                throw new IOException("No JOSE algorithm for: " + algorithm.toString ());
-              }
-            return algorithm.getURI ();
-          }
-        return algorithm_preferences == JSONAlgorithmPreferences.SKS ?
-                                                 algorithm.getURI () : algorithm.getJOSEName ();
-      }
- 
-    public JSONObjectWriter setPublicKey (PublicKey public_key, JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    public JSONObjectWriter setPublicKey (PublicKey public_key, AlgorithmPreferences algorithm_preferences) throws IOException
       {
         JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
@@ -386,7 +510,7 @@ public class JSONObjectWriter implements Serializable
         else
           {
             public_key_writer.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, this.getAlgorithmID (key_alg, algorithm_preferences));
+            public_key_writer.setString (JSONSignatureDecoder.CURVE_JSON, key_alg.getAlgorithmId (algorithm_preferences));
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
             public_key_writer.setCurvePoint (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON, key_alg);
             public_key_writer.setCurvePoint (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON, key_alg);
@@ -396,7 +520,7 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
-        return setPublicKey (public_key, JSONAlgorithmPreferences.SKS);
+        return setPublicKey (public_key, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
 
     public JSONObjectWriter setCertificatePath (X509Certificate[] certificate_path) throws IOException
@@ -843,12 +967,17 @@ public class JSONObjectWriter implements Serializable
         return buffer.toString ().getBytes ("UTF-8");
       }
 
+    public String serializeToString (JSONOutputFormats format) throws IOException
+      {
+        return new String (serializeJSONObject (format), "UTF-8");
+      }
+
     @Override
     public String toString ()
       {
         try
           {
-            return new String (serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+            return serializeToString (JSONOutputFormats.PRETTY_PRINT);
           }
         catch (IOException e)
           {

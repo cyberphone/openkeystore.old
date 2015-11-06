@@ -27,11 +27,14 @@ public abstract class JSONVerifier implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    JSONVerifier () {}
+    JSONVerifier (JSONSignatureTypes signatureType)
+      {
+        this.signatureType = signatureType;
+      }
 
     abstract void verify (JSONSignatureDecoder signature_decoder) throws IOException;
 
-    abstract JSONSignatureTypes getVerifierType () throws IOException;
+    JSONSignatureTypes signatureType;
     
     boolean extensionsAllowed;
     

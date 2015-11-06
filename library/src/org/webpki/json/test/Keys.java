@@ -17,30 +17,25 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
-
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
-
-import org.webpki.json.JSONAlgorithmPreferences;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -75,7 +70,7 @@ public class Keys
         @Override
         protected void readJSONData (JSONObjectReader rd) throws IOException
           {
-            public_key = rd.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            public_key = rd.getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
           }
   
         @Override
@@ -89,9 +84,9 @@ public class Keys
     static class Writer extends JSONEncoder
       {
         PublicKey public_key;
-        JSONAlgorithmPreferences jose_curve;
+        AlgorithmPreferences jose_curve;
         
-        Writer (PublicKey public_key, JSONAlgorithmPreferences jose_curve)
+        Writer (PublicKey public_key, AlgorithmPreferences jose_curve)
           {
             this.public_key = public_key;
             this.jose_curve = jose_curve;
@@ -116,7 +111,7 @@ public class Keys
         System.exit (0);
       }
 
-    static void Run (boolean rsa, boolean list, JSONAlgorithmPreferences jose_curve) throws GeneralSecurityException, IOException
+    static void Run (boolean rsa, boolean list, AlgorithmPreferences jose_curve) throws GeneralSecurityException, IOException
       {
         AlgorithmParameterSpec alg_par_spec = rsa ?
             new RSAKeyGenParameterSpec (2048, RSAKeyGenParameterSpec.F4)
@@ -176,9 +171,9 @@ public class Keys
             cache.addToCache (Reader.class);
             for (int i = 0; i < ROUNDS; i++)
               {
-                Run (true, new Boolean (argc[0]), JSONAlgorithmPreferences.SKS);
-                Run (false, new Boolean (argc[0]), JSONAlgorithmPreferences.SKS);
-                Run (false, new Boolean (argc[0]), JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                Run (true, new Boolean (argc[0]), AlgorithmPreferences.SKS);
+                Run (false, new Boolean (argc[0]), AlgorithmPreferences.SKS);
+                Run (false, new Boolean (argc[0]), AlgorithmPreferences.JOSE_ACCEPT_PREFER);
                 ec_index++;
               }
           }

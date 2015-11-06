@@ -22,17 +22,14 @@ import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
-
 import org.webpki.wasp.SignatureProfileDecoder;
 import org.webpki.wasp.SignatureProfileResponseEncoder;
-
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
-
 import static org.webpki.wasp.prof.xds.XDSProfileConstants.*;
 
 
@@ -102,7 +99,8 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
     public AsymSignatureAlgorithms getSignatureAlgorithm () throws IOException
       {
-        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromID (signature_algorithm);
+        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromID (signature_algorithm,
+                                                                                                AlgorithmPreferences.SKS);
       }
 
 

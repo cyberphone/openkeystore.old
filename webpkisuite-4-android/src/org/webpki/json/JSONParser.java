@@ -37,9 +37,8 @@ public class JSONParser
     static final char COMMA_CHARACTER     = ',';
     static final char BACK_SLASH          = '\\';
     
-    static final Pattern INTEGER_PATTERN  = Pattern.compile ("(0)|(-?[1-9][0-9]*)");
     static final Pattern BOOLEAN_PATTERN  = Pattern.compile ("true|false");
-    static final Pattern DOUBLE_PATTERN   = Pattern.compile ("[-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?");
+    static final Pattern NUMBER_PATTERN   = Pattern.compile ("[-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?");
     
     int index;
     
@@ -187,8 +186,8 @@ public class JSONParser
           {
             throw new IOException ("Missing argument");
           }
-        JSONTypes type = JSONTypes.INTEGER;
-        if (!INTEGER_PATTERN.matcher (result).matches ())
+        JSONTypes type = JSONTypes.NUMBER;
+        if (!NUMBER_PATTERN.matcher (result).matches ())
           {
             if (BOOLEAN_PATTERN.matcher (result).matches ())
               {
@@ -200,11 +199,7 @@ public class JSONParser
               }
             else
               {
-                type = JSONTypes.DOUBLE;
-                if (!DOUBLE_PATTERN.matcher (result).matches ())
-                  {
-                    throw new IOException ("Undecodable argument: " + result);
-                  }
+                throw new IOException ("Undecodable argument: " + result);
               }
           }
         return new JSONValue (type, result);

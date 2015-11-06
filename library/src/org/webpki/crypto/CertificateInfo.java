@@ -17,20 +17,15 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
-
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.RSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.util.DebugFormatter;
-
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
 import org.webpki.asn1.ASN1BitString;
@@ -343,7 +338,7 @@ public class CertificateInfo
 
     public String getPublicKeyAlgorithm () throws IOException
       {
-        return KeyAlgorithms.getKeyAlgorithm (certificate.getPublicKey ()).getURI ();
+        return KeyAlgorithms.getKeyAlgorithm (certificate.getPublicKey ()).getAlgorithmId (AlgorithmPreferences.SKS);
       }
 
 

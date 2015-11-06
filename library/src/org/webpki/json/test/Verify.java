@@ -17,17 +17,16 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PublicKey;
 
 import org.webpki.crypto.CertificateInfo;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.test.DemoKeyStore;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONParser;
@@ -36,7 +35,6 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -66,7 +64,7 @@ public class Verify
                 case OBJECT:
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONSignatureDecoder signature = rd.getSignature ();
+                      JSONSignatureDecoder signature = rd.getSignature (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
                       if (output_file != null)
                         {
                           byte[] old = ArrayUtil.readFile (output_file);

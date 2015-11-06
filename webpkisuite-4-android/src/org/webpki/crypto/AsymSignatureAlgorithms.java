@@ -47,7 +47,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
     ECDSA_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",  "ES512",   
                   "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, true,  false);
 
-    private final String sks_id;    // As (typically) expressed in protocols
+    private final String sksname;   // As (typically) expressed in protocols
     private final String josename;  // Alternative JOSE name
     private final String oid;       // As expressed in OIDs
     private final String jcename;   // As expressed for JCE
@@ -55,7 +55,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
     private boolean sks_mandatory;  // If required in SKS
     private boolean rsa;            // RSA algorithm
 
-    private AsymSignatureAlgorithms (String sks_id,
+    private AsymSignatureAlgorithms (String sksname,
                                      String josename,
                                      String oid,
                                      String jcename,
@@ -63,7 +63,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
                                      boolean sks_mandatory,
                                      boolean rsa)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.josename = josename;
         this.oid = oid;
         this.jcename = jcename;
@@ -95,23 +95,9 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
 
 
     @Override
-    public String getURI ()
-      {
-        return sks_id;
-      }
-
-
-    @Override
     public String getOID ()
       {
         return oid;
-      }
-
-
-    @Override
-    public String getJOSEName ()
-      {
-        return josename;
       }
 
 
@@ -127,11 +113,11 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
       }
 
 
-    public static boolean testAlgorithmURI (String sks_id)
+    public static boolean testAlgorithmURI (String sksname)
       {
         for (AsymSignatureAlgorithms alg : values ())
           {
-            if (sks_id.equals (alg.sks_id))
+            if (sksname.equals (alg.sksname))
               {
                 return true;
               }
@@ -140,15 +126,42 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
       }
 
 
-    public static AsymSignatureAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
+    public static AsymSignatureAlgorithms getAlgorithmFromID (String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException
       {
         for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
           {
-            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
+            if (algorithm_id.equals (alg.sksname))
               {
+                if (algorithmPreferences == AlgorithmPreferences.JOSE)
+                  {
+                    throw new IOException ("JOSE algorithm expected: " + algorithm_id);
+                  }
+                return alg;
+              }
+            if (algorithm_id.equals (alg.josename))
+              {
+                if (algorithmPreferences == AlgorithmPreferences.SKS)
+                  {
+                    throw new IOException ("SKS algorithm expected: " + algorithm_id);
+                  }
                 return alg;
               }
           }
         throw new IOException ("Unknown signature algorithm: " + algorithm_id);
+      }
+
+
+    @Override
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException
+      {
+        if (josename == null)
+          {
+            if (algorithmPreferences == AlgorithmPreferences.JOSE)
+              {
+                throw new IOException("There is no JOSE algorithm for: " + toString ());
+              }
+            return sksname;
+          }
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
       }
   }

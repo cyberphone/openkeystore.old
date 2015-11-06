@@ -33,11 +33,12 @@
         <include name="**/crypto/SignerInterface.java"/>
         <include name="**/crypto/AsymKeySignerInterface.java"/>
         <include name="**/crypto/SymKeySignerInterface.java"/>
-        <include name="**/crypto/SKSAlgorithms.java"/>
+        <include name="**/crypto/CryptoAlgorithms.java"/>
         <include name="**/crypto/KeyAlgorithms.java"/>
         <include name="**/crypto/MACAlgorithms.java"/>
         <include name="**/crypto/HashAlgorithms.java"/>
         <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AlgorithmPreferences.java"/>
         <include name="**/crypto/AsymSignatureAlgorithms.java"/>
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
         <include name="**/crypto/SignatureWrapper.java"/>
@@ -104,11 +105,12 @@
         <include name="**/crypto/SignerInterface.java"/>
         <include name="**/crypto/AsymKeySignerInterface.java"/>
         <include name="**/crypto/SymKeySignerInterface.java"/>
-        <include name="**/crypto/SKSAlgorithms.java"/>
+        <include name="**/crypto/CryptoAlgorithms.java"/>
         <include name="**/crypto/KeyAlgorithms.java"/>
         <include name="**/crypto/MACAlgorithms.java"/>
         <include name="**/crypto/HashAlgorithms.java"/>
         <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AlgorithmPreferences.java"/>
         <include name="**/crypto/AsymSignatureAlgorithms.java"/>
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
         <include name="**/crypto/SignatureWrapper.java"/>

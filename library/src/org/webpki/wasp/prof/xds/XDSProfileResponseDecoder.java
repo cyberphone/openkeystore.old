@@ -40,11 +40,11 @@ import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.SignedKeyInfoSpecifier;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.CertificateFilter;
 
 import static org.webpki.wasp.WASPConstants.*;
-
 import static org.webpki.wasp.prof.xds.XDSProfileConstants.*;
 
 
@@ -227,14 +227,14 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
 
         if (enc.digest_algorithm != null && enc.digest_algorithm != ds.getDigestAlgorithm ())
           {
-            bad ("Wrong digest algorithm.  Requested: " + enc.digest_algorithm.getURI () +
-                 ".  Got: " + ds.getDigestAlgorithm ().getURI ());
+            bad ("Wrong digest algorithm.  Requested: " + enc.digest_algorithm.getAlgorithmId () +
+                 ".  Got: " + ds.getDigestAlgorithm ().getAlgorithmId ());
           }
 
         if (enc.signature_algorithm != null && enc.signature_algorithm != ds.getSignatureAlgorithm ())
           {
-            bad ("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getURI () +
-                 ".  Got: " + ds.getSignatureAlgorithm ().getURI ());
+            bad ("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS) +
+                 ".  Got: " + ds.getSignatureAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS));
           }
 
         if (expected_fingerprint != null &&

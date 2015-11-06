@@ -38,6 +38,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
@@ -113,7 +114,7 @@ public class JSONSignatureDecoder implements Serializable
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -121,7 +122,7 @@ public class JSONSignatureDecoder implements Serializable
           {
             throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
           }
-        algorithm_string = algorithmCheck (signature.getString (ALGORITHM_JSON), algorithm_preferences);
+        algorithm_string = signature.getString (ALGORITHM_JSON);
         getKeyInfo (signature, algorithm_preferences);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
@@ -153,38 +154,19 @@ public class JSONSignatureDecoder implements Serializable
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
-              asymmetricSignatureVerification (certificate_path[0].getPublicKey ());
+              asymmetricSignatureVerification (certificate_path[0].getPublicKey (), algorithm_preferences);
               break;
 
             case ASYMMETRIC_KEY:
-              asymmetricSignatureVerification (public_key);
+              asymmetricSignatureVerification (public_key, algorithm_preferences);
               break;
 
             default:
-              algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string);
+              algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string, algorithm_preferences);
           }
       }
 
-    public static String algorithmCheck (String identifier, JSONAlgorithmPreferences algorithm_preferences) throws IOException
-      {
-        if (identifier.contains (":"))
-          {
-            if (algorithm_preferences == JSONAlgorithmPreferences.JOSE)
-              {
-                throw new IOException("Invalid JOSE identifier: " + identifier);
-              }
-          }
-        else
-          {
-            if (algorithm_preferences == JSONAlgorithmPreferences.SKS)
-              {
-                throw new IOException("Invalid SKS identifier: " + identifier);
-              }
-          }
-        return identifier;
-      }
-
-    void getKeyInfo (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    void getKeyInfo (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
       {
         key_id = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
@@ -204,7 +186,8 @@ public class JSONSignatureDecoder implements Serializable
             // Should be a symmetric key then.  Just to be nice we perform a sanity check...
             for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
               {
-                if (algorithm_string.equals (alg.getJOSEName ()) || algorithm_string.equals (alg.getURI ()))
+                if (algorithm_string.equals (alg.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER)) ||
+                    algorithm_string.equals (alg.getAlgorithmId (AlgorithmPreferences.SKS)))
                   {
                     throw new IOException ("Missing key information");
                   }
@@ -217,7 +200,7 @@ public class JSONSignatureDecoder implements Serializable
         byte[] fixed_binary = rd.getBinary (property);
         if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
           {
-            throw new IOException ("Public EC key parameter \"" + property + "\" is not nomalized");
+            throw new IOException ("Public EC key parameter \"" + property + "\" is not normalized");
           }
         return new BigInteger (1, fixed_binary);
       }
@@ -232,7 +215,7 @@ public class JSONSignatureDecoder implements Serializable
         return new BigInteger (1, crypto_binary);
       }
 
-    static PublicKey getPublicKey (JSONObjectReader rd, JSONAlgorithmPreferences algorithm_preferences) throws IOException
+    static PublicKey getPublicKey (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
         PublicKey public_key = null;
@@ -246,7 +229,7 @@ public class JSONSignatureDecoder implements Serializable
               }
             else if (type.equals (EC_PUBLIC_KEY))
               {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (algorithmCheck (rd.getString (CURVE_JSON), algorithm_preferences));
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON), algorithm_preferences);
                 if (!ec.isECKey ())
                   {
                     throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
@@ -328,9 +311,9 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    void asymmetricSignatureVerification (PublicKey public_key) throws IOException
+    void asymmetricSignatureVerification (PublicKey public_key, AlgorithmPreferences algorithm_preferences) throws IOException
       {
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string);
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string, algorithm_preferences);
         if (((AsymSignatureAlgorithms)algorithm).isRSA () != public_key instanceof RSAPublicKey)
           {
             throw new IOException ("\"" + algorithm_string + "\" doesn't match key type: " + public_key.getAlgorithm ());

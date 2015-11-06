@@ -24,13 +24,13 @@ import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SKSAlgorithms;
+import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64;
 
 /**
  * Supports HTML descriptions of JSON protocols.
@@ -1096,10 +1096,10 @@ public class JSONBaseHTML
         new DataTypesTable ();
       }
 
-    public static String enumerateStandardAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter)
+    public static String enumerateStandardAlgorithms (CryptoAlgorithms[] algorithms, boolean symmetric, boolean filter) throws IOException
       {
         StringBuffer buffer = new StringBuffer ("<ul>");
-        for (SKSAlgorithms algorithm : algorithms)
+        for (CryptoAlgorithms algorithm : algorithms)
           {
             if (filter && algorithm instanceof KeyAlgorithms && !((KeyAlgorithms)algorithm).isECKey ())
               {
@@ -1113,18 +1113,18 @@ public class JSONBaseHTML
               {
                 continue;
               }
-            buffer.append ("<li><code>").append (algorithm.getURI ()).append ("</code></li>");
+            buffer.append ("<li><code>").append (algorithm.getAlgorithmId (AlgorithmPreferences.SKS)).append ("</code></li>");
           }
         return buffer.append ("</ul>").toString ();
       }
 
-    public static String enumerateJOSEAlgorithms (SKSAlgorithms[] algorithms)
+    public static String enumerateJOSEAlgorithms (CryptoAlgorithms[] algorithms) throws IOException
       {
         StringBuffer buffer = new StringBuffer ("<ul>");
-        for (SKSAlgorithms algorithm : algorithms)
+        for (CryptoAlgorithms algorithm : algorithms)
           {
-            String joseName = algorithm.getJOSEName ();
-            if (joseName != null)
+            String joseName = algorithm.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            if (!joseName.contains (":"))
               {
                 buffer.append ("<li><code>").append (joseName).append ("</code></li>");
               }
@@ -1258,8 +1258,8 @@ public class JSONBaseHTML
         String jcs = reference ? "" : createReference (REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
-        Vector<SKSAlgorithms> sym_plus_asym = new Vector<SKSAlgorithms> ();
-        for (SKSAlgorithms sks_alg : MACAlgorithms.values ())
+        Vector<CryptoAlgorithms> sym_plus_asym = new Vector<CryptoAlgorithms> ();
+        for (CryptoAlgorithms sks_alg : MACAlgorithms.values ())
           {
             sym_plus_asym.add (sks_alg);
           }
@@ -1298,7 +1298,7 @@ public class JSONBaseHTML
                           enumerateStandardAlgorithms (AsymSignatureAlgorithms.values (), false, true) +
                           (reference ? "For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) +
                           "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JOSE) + " notation:" +
-                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new SKSAlgorithms[0])) : ""));
+                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new CryptoAlgorithms[0])) : ""));
         if (key_id_option)
           {
           row_interface = row_interface
@@ -1471,7 +1471,7 @@ public class JSONBaseHTML
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
                           "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
-              .addString (KeyAlgorithms.NIST_P_521.getURI ())
+              .addString (KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS))
               .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes")
           .newRow ()
             .newColumn ()
@@ -1486,7 +1486,7 @@ public class JSONBaseHTML
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
                           "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
-              .addString (KeyAlgorithms.NIST_P_521.getURI ())
+              .addString (KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS))
               .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
 
         addSubItemTable (JCS_PUBLIC_KEY_RSA)

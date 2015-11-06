@@ -17,9 +17,11 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 
 import javax.crypto.Mac;
+
 import javax.crypto.spec.SecretKeySpec;
 
 public enum MACAlgorithms implements SignatureAlgorithms
@@ -29,14 +31,14 @@ public enum MACAlgorithms implements SignatureAlgorithms
     HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HS384", "HmacSHA384", true),
     HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HS512", "HmacSHA512", true);
 
-    private final String sks_id;    // As (typically) expressed in protocols
+    private final String sksname;   // As (typically) expressed in protocols
     private final String josename;  // JOSE alternative
     private final String jcename;   // As expressed for JCE
     private boolean sks_mandatory;  // If required in SKS
 
-    private MACAlgorithms (String sks_id, String josename, String jcename, boolean sks_mandatory)
+    private MACAlgorithms (String sksname, String josename, String jcename, boolean sks_mandatory)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.josename = josename;
         this.jcename = jcename;
         this.sks_mandatory = sks_mandatory;
@@ -65,23 +67,9 @@ public enum MACAlgorithms implements SignatureAlgorithms
 
 
     @Override
-    public String getURI ()
-      {
-        return sks_id;
-      }
-
-
-    @Override
     public String getOID ()
       {
         return null;
-      }
-
-
-    @Override
-    public String getJOSEName ()
-      {
-        return josename;
       }
 
 
@@ -100,11 +88,11 @@ public enum MACAlgorithms implements SignatureAlgorithms
       }
 
 
-    public static boolean testAlgorithmURI (String sks_id)
+    public static boolean testAlgorithmURI (String sksname)
       {
         for (MACAlgorithms alg : MACAlgorithms.values ())
           {
-            if (sks_id.equals (alg.sks_id))
+            if (sksname.equals (alg.sksname))
               {
                 return true;
               }
@@ -113,15 +101,42 @@ public enum MACAlgorithms implements SignatureAlgorithms
       }
 
 
-    public static MACAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
+    public static MACAlgorithms getAlgorithmFromID (String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException
       {
         for (MACAlgorithms alg : values ())
           {
-            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
+            if (algorithm_id.equals (alg.sksname))
               {
+                if (algorithmPreferences == AlgorithmPreferences.JOSE)
+                  {
+                    throw new IOException ("JOSE algorithm expected: " + algorithm_id);
+                  }
+                return alg;
+              }
+            if (algorithm_id.equals (alg.josename))
+              {
+                if (algorithmPreferences == AlgorithmPreferences.SKS)
+                  {
+                    throw new IOException ("SKS algorithm expected: " + algorithm_id);
+                  }
                 return alg;
               }
           }
         throw new IOException ("Unknown MAC algorithm: " + algorithm_id);
+      }
+
+    
+    @Override
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException
+      {
+        if (josename == null)
+          {
+            if (algorithmPreferences == AlgorithmPreferences.JOSE)
+              {
+                throw new IOException("There is no JOSE algorithm for: " + toString ());
+              }
+            return sksname;
+          }
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
       }
   }

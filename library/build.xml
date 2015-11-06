@@ -98,7 +98,7 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help dist doc testkeygen2 testsks pkcs12import sks-service."/>
+    <echo message="Targets: help dist doc testkeygen2 testsks testjson pkcs12import sks-service."/>
   </target>
 	
   <!-- .NET assumes that NAnt is installed, together with Windows SDK 7.1 and .NET 4 -->

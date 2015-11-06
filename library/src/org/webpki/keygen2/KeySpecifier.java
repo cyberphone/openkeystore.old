@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import java.math.BigInteger;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 
 public class KeySpecifier implements Serializable
@@ -66,7 +67,7 @@ public class KeySpecifier implements Serializable
 
     public KeySpecifier (String uri, byte[] optional_parameters) throws IOException
       {
-        this (KeyAlgorithms.getKeyAlgorithmFromID (uri), optional_parameters);
+        this (KeyAlgorithms.getKeyAlgorithmFromID (uri, AlgorithmPreferences.SKS), optional_parameters);
       }
 
 

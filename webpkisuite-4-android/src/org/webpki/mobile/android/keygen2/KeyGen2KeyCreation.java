@@ -27,6 +27,7 @@ import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
 import org.webpki.util.ArrayUtil;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.keygen2.KeyCreationRequestDecoder;
@@ -180,7 +181,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                                                                         key.getDeleteProtection ().getSksValue (),
                                                                         key.getAppUsage ().getSksValue (),
                                                                         key.getFriendlyName (),
-                                                                        key.getKeySpecifier ().getKeyAlgorithm ().getURI (), 
+                                                                        key.getKeySpecifier ().getKeyAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS), 
                                                                         key.getKeySpecifier ().getKeyParameters (),
                                                                         key.getEndorsedAlgorithms (),
                                                                         key.getMac ());

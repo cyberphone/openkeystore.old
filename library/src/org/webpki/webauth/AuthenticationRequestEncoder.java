@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
@@ -56,7 +57,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     int expires;
     
-    LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
+    LinkedHashSet<AsymSignatureAlgorithms> signature_algorithms = new LinkedHashSet<AsymSignatureAlgorithms> ();
 
     Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter> ();
 
@@ -73,7 +74,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     public AuthenticationRequestEncoder addSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
-        algorithms.add (algorithm.getURI());
+        signature_algorithms.add (algorithm);
         return this;
       }
 
@@ -144,9 +145,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
             bad ("ServerTime attribute");
           }
         boolean sig_alg_found = false;
-        for (String sig_alg : algorithms)
+        for (AsymSignatureAlgorithms sig_alg : signature_algorithms)
           {
-            if (sig_alg.equals (authenication_response.signature_algorithm))
+            if (sig_alg == authenication_response.signature_algorithm)
               {
                 sig_alg_found = true;
                 break;
@@ -215,11 +216,15 @@ public class AuthenticationRequestEncoder extends ServerEncoder
             wr.setBoolean (EXTENDED_CERT_PATH_JSON, extended_cert_path);
           }
         
-        if (algorithms.isEmpty ())
+        if (signature_algorithms.isEmpty ())
           {
             bad ("Missing \"" + SIGNATURE_ALGORITHMS_JSON + "\"");
           }
-        wr.setStringArray (SIGNATURE_ALGORITHMS_JSON, algorithms.toArray (new String[0]));
+        JSONArrayWriter signature_algorithm_array = wr.setArray (SIGNATURE_ALGORITHMS_JSON);
+        for (AsymSignatureAlgorithms algorithm : signature_algorithms)
+          {
+            signature_algorithm_array.setString (algorithm.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER));
+          }
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"

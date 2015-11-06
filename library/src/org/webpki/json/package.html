@@ -1,6 +1,8 @@
 <body>
 <h2>JSON - Encoder, Decoder and Signature Package</h2>
 This package contains classes for parsing and generating messages in JSON.
+<p>To cope with browsers, this implementation targets EcmaScript (JavaScript) version 6.
+In practice this means that numbers are currently limited to 15 digits of precision.</p>
 To make the system slightly more on par with XML Schemas the JSON library also supports:<br>
 <ul>
 <li>Registration of classes extending
@@ -24,10 +26,10 @@ import java.util.Date;
 </pre>
 <h4>1. Writing simple objects:</h4>
 <pre style="margin-left:20pt">
-JSONObjectWriter writer = new JSONObjectWriter ();
+JSONObjectWriter writer = new JSONObjectWriter();
 writer.setInt("i", 5);
 writer.setInt("j", -8).setBoolean("k", true);  // Chain commands
-System.out.println (new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)));
+System.out.println(writer.toString());
 </pre>
 Expected result:
 <pre style="margin-left:40pt;color:green">
@@ -39,13 +41,13 @@ Expected result:
 </pre>
 <h4>2. Writing nested objects:</h4>
 <pre style="margin-left:20pt">
-JSONObjectWriter writer = new JSONObjectWriter ();
+JSONObjectWriter writer = new JSONObjectWriter();
 writer.setInt("i", 5);
 writer.setInt("j", -8).setBoolean("k", true);  // Chain commands
 JSONObjectWriter inner = writer.setObject("o");
 inner.setString("s", "hi");
-inner.setDateTime ("now", new Date (), true);  // Date UTC-only option
-System.out.println (new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)));
+inner.setDateTime("now", new Date(), true);  // Date UTC-only option
+System.out.println(writer.toString());
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
 {
@@ -61,12 +63,12 @@ Expected result:<pre style="margin-left:40pt;color:green">
 </pre>
 <h4>3. Writing arrays:</h4>
 <pre style="margin-left:20pt">
-JSONArrayWriter writer = new JSONArrayWriter ();
+JSONArrayWriter writer = new JSONArrayWriter();
 writer.setInt(5);
 writer.setInt(-8).setBoolean(true);  // Chain commands
 JSONObjectWriter inner = writer.setObject();
-inner.setString("s", "hi").setDateTime ("now", new Date (), true);  // Date UTC-only option
-System.out.println (new String(writer.serializeJSONArray(JSONOutputFormats.PRETTY_PRINT)));
+inner.setString("s", "hi").setDateTime("now", new Date(), true);  // Date UTC-only option
+System.out.println(writer.toString());
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
 [5,-8,true,
@@ -77,7 +79,7 @@ Expected result:<pre style="margin-left:40pt;color:green">
 </pre>
 Using normalized formatting:
 <pre style="margin-left:20pt">
-System.out.println (new String(writer.serializeJSONArray(JSONOutputFormats.NORMALIZED)));
+System.out.println(writer.toString());
 </pre><pre style="margin-left:40pt;color:green">
 [5,-8,true,{"s":"hi","now":"2014-12-26T16:40:28Z"}]
 </pre>
@@ -85,15 +87,15 @@ System.out.println (new String(writer.serializeJSONArray(JSONOutputFormats.NORMA
 <pre style="margin-left:20pt">
 String json = "{\"value\": \"hi\", \"myobj\" : {\"testme\": true}, \"list\":[1,2]}";
 
-JSONObjectReader reader = JSONParser.parse (json);
-String value = reader.getString ("value");
-JSONObjectReader inner = reader.getObject ("myobj");
-boolean testme = inner.getBoolean ("testme");
-JSONArrayReader array = reader.getArray ("list");
-int first = array.getInt ();
-int second = array.getInt ();
+JSONObjectReader reader = JSONParser.parse(json);
+String value = reader.getString("value");
+JSONObjectReader inner = reader.getObject("myobj");
+boolean testme = inner.getBoolean("testme");
+JSONArrayReader array = reader.getArray("list");
+int first = array.getInt();
+int second = array.getInt();
 
-System.out.println (value + ' ' + testme + ' ' + first + ' ' + second);
+System.out.println(value + ' ' + testme + ' ' + first + ' ' + second);
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
 hi true 1 2
@@ -102,15 +104,15 @@ hi true 1 2
 <pre style="margin-left:20pt">
 String json = "[\"hi\", {\"testme\": true}, [1,2]]";
 
-JSONArrayReader reader = JSONParser.parse (json).getJSONArrayReader ();
-String value = reader.getString ();
-JSONObjectReader inner = reader.getObject ();
-boolean testme = inner.getBoolean ("testme");
-JSONArrayReader array = reader.getArray ();
-int first = array.getInt ();
-int second = array.getInt ();
+JSONArrayReader reader = JSONParser.parse(json).getJSONArrayReader();
+String value = reader.getString();
+JSONObjectReader inner = reader.getObject();
+boolean testme = inner.getBoolean("testme");
+JSONArrayReader array = reader.getArray();
+int first = array.getInt();
+int second = array.getInt();
 
-System.out.println (value + ' ' + testme + ' ' + first + ' ' + second);
+System.out.println(value + ' ' + testme + ' ' + first + ' ' + second);
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
 hi true 1 2

@@ -21,25 +21,32 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.Date;
+import java.util.Locale;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-import org.webpki.json.JSONAlgorithmPreferences;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -53,6 +60,7 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -82,7 +90,156 @@ public class JSONTest
 
     static final String STRING_LIST = "stringlist";
     static final String[] STRING_LIST_VALUE = {"one","two","three"};
-    static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"; 
+    static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
+    
+    static final String[] ES6_NUMBERS = 
+      {
+          "-3.3333333333333335E21", "-3.33333333333333e+21",
+          "-3.333333333333333E20", "-333333333333333000000",
+          "-3.3333333333333336E19", "-33333333333333300000",
+          "-3.333333333333334E18", "-3333333333333330000",
+          "-3.3333333333333338E17", "-333333333333333000",
+          "-3.333333333333334E16", "-33333333333333300",
+          "-3.333333333333334E15", "-3333333333333330",
+          "-3.333333333333334E14", "-333333333333333",
+          "-3.3333333333333344E13", "-33333333333333.3",
+          "-3.333333333333334E12", "-3333333333333.33",
+          "-3.3333333333333344E11", "-333333333333.333",
+          "-3.333333333333334E10", "-33333333333.3333",
+          "-3.333333333333334E9", "-3333333333.33333",
+          "-3.333333333333334E8", "-333333333.333333",
+          "-3.3333333333333336E7", "-33333333.3333333",
+          "-3333333.3333333335", "-3333333.33333333",
+          "-333333.3333333333", "-333333.333333333",
+          "-33333.333333333336", "-33333.3333333333",
+          "-3333.333333333333", "-3333.33333333333",
+          "-333.3333333333333", "-333.333333333333",
+          "-33.333333333333336", "-33.3333333333333",
+          "-3.3333333333333335", "-3.33333333333333",
+          "-0.3333333333333333", "-0.333333333333333",
+          "-0.03333333333333333", "-0.0333333333333333",
+          "-0.0033333333333333335", "-0.00333333333333333",
+          "-3.333333333333333E-4", "-0.000333333333333333",
+          "-3.3333333333333335E-5", "-0.0000333333333333333",
+          "-3.3333333333333333E-6", "-0.00000333333333333333",
+          "-3.3333333333333335E-7", "-3.33333333333333e-7",
+          "-3.3333333333333334E-8", "-3.33333333333333e-8",
+          "-3.3333333333333334E-9", "-3.33333333333333e-9",
+          "-3.333333333333333E-10", "-3.33333333333333e-10",
+          "-3.3333333333333335E-11", "-3.33333333333333e-11",
+          "-3.333333333333333E-12", "-3.33333333333333e-12",
+          "-3.3333333333333334E-13", "-3.33333333333333e-13",
+          "-3.3333333333333334E-14", "-3.33333333333333e-14",
+          "-3.3333333333333332E-15", "-3.33333333333333e-15",
+          "-3.333333333333333E-16", "-3.33333333333333e-16",
+          "-3.3333333333333335E-17", "-3.33333333333333e-17",
+          "-3.3333333333333333E-18", "-3.33333333333333e-18",
+          "-3.3333333333333334E-19", "-3.33333333333333e-19",
+          "-3.333333333333333E-20", "-3.33333333333333e-20",
+          "-3.3333333333333333E-21", "-3.33333333333333e-21",
+          "-3.333333333333333E-22", "-3.33333333333333e-22",
+          "-3.3333333333333333E-23", "-3.33333333333333e-23",
+          "-3.3333333333333334E-24", "-3.33333333333333e-24",
+          "-3.3333333333333335E-25", "-3.33333333333333e-25",
+          "-3.333333333333333E-26", "-3.33333333333333e-26",
+          "-3.333333333333333E-27", "-3.33333333333333e-27",
+          "-3.3333333333333338E-28", "-3.33333333333333e-28",
+          "3.3333333333333335E21", "3.33333333333333e+21",
+          "3.333333333333333E20", "333333333333333000000",
+          "3.3333333333333336E19", "33333333333333300000",
+          "3.333333333333334E18", "3333333333333330000",
+          "3.3333333333333338E17", "333333333333333000",
+          "3.333333333333334E16", "33333333333333300",
+          "3.333333333333334E15", "3333333333333330",
+          "3.333333333333334E14", "333333333333333",
+          "3.3333333333333344E13", "33333333333333.3",
+          "3.333333333333334E12", "3333333333333.33",
+          "3.3333333333333344E11", "333333333333.333",
+          "3.333333333333334E10", "33333333333.3333",
+          "3.333333333333334E9", "3333333333.33333",
+          "3.333333333333334E8", "333333333.333333",
+          "3.3333333333333336E7", "33333333.3333333",
+          "3333333.3333333335", "3333333.33333333",
+          "333333.3333333333", "333333.333333333",
+          "33333.333333333336", "33333.3333333333",
+          "3333.333333333333", "3333.33333333333",
+          "333.3333333333333", "333.333333333333",
+          "33.333333333333336", "33.3333333333333",
+          "3.3333333333333335", "3.33333333333333",
+          "0.3333333333333333", "0.333333333333333",
+          "0.03333333333333333", "0.0333333333333333",
+          "0.0033333333333333335", "0.00333333333333333",
+          "3.333333333333333E-4", "0.000333333333333333",
+          "3.3333333333333335E-5", "0.0000333333333333333",
+          "3.3333333333333333E-6", "0.00000333333333333333",
+          "3.3333333333333335E-7", "3.33333333333333e-7",
+          "3.3333333333333334E-8", "3.33333333333333e-8",
+          "3.3333333333333334E-9", "3.33333333333333e-9",
+          "3.333333333333333E-10", "3.33333333333333e-10",
+          "3.3333333333333335E-11", "3.33333333333333e-11",
+          "3.333333333333333E-12", "3.33333333333333e-12",
+          "3.3333333333333334E-13", "3.33333333333333e-13",
+          "3.3333333333333334E-14", "3.33333333333333e-14",
+          "3.3333333333333332E-15", "3.33333333333333e-15",
+          "3.333333333333333E-16", "3.33333333333333e-16",
+          "3.3333333333333335E-17", "3.33333333333333e-17",
+          "3.3333333333333333E-18", "3.33333333333333e-18",
+          "3.3333333333333334E-19", "3.33333333333333e-19",
+          "3.333333333333333E-20", "3.33333333333333e-20",
+          "3.3333333333333333E-21", "3.33333333333333e-21",
+          "3.333333333333333E-22", "3.33333333333333e-22",
+          "3.3333333333333333E-23", "3.33333333333333e-23",
+          "3.3333333333333334E-24", "3.33333333333333e-24",
+          "3.3333333333333335E-25", "3.33333333333333e-25",
+          "3.333333333333333E-26", "3.33333333333333e-26",
+          "3.333333333333333E-27", "3.33333333333333e-27",
+          "3.3333333333333338E-28", "3.33333333333333e-28",
+          "10.0", "10",
+          "0.0", "0",
+          "5.0", "5",
+          "0.5", "0.5",
+          "0.05", "0.05",
+          "0.005", "0.005",
+          "5.0E-4", "0.0005",
+          "5.0E-5", "0.00005",
+          "5.0E-6", "0.000005",
+          "5.0E-7", "5e-7",
+          "5.0E-8", "5e-8",
+          "5.0E-9", "5e-9",
+          "5.06E-6", "0.00000506",
+          "5.006E-6", "0.000005006",
+          "5.0006E-6", "0.0000050006",
+          "5.00006E-6", "0.00000500006",
+          "5.000006E-6", "0.000005000006",
+          "5.0000006E-6", "0.0000050000006",
+          "5.00000006E-6", "0.00000500000006",
+          "5.000000006E-6", "0.000005000000006",
+          "5.0000000006E-6", "0.0000050000000006",
+          "5.00000000006E-6", "0.00000500000000006",
+          "5.000000000006E-6", "0.000005000000000006",
+          "5.0000000000006E-6", "0.0000050000000000006",
+          "5.00000000000006E-6", "0.00000500000000000006",
+          "5.000000000000006E-6", "0.00000500000000000001",
+          "5.0E-6", "0.000005",
+          "1.0", "1",
+          "-1.0", "-1",
+          "-0.9999999999999993", "-0.999999999999999",
+          "-0.9999999999999994", "-0.999999999999999",
+          "0.9999999999999993", "0.999999999999999",
+          "0.9999999999999994", "0.999999999999999",
+          "0.9999999999999996", "1",
+          "0.9999999999999998", "1",
+          "-0.9999999999999999", "-1",
+          "-0.9999999999999999", "-1",
+          "0.9999999999999999", "1",
+          "0.9999999999999999", "1",
+          "0.29999999999999993", "0.3",
+          "0.3", "0.3",
+          "0.30000000000000004", "0.3",
+          "2.22507385850721E-308", "2.22507385850721e-308",
+          "2.2250738585072014E-308", "0",
+          "4.9E-324", "0"
+      };
 
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -90,6 +247,7 @@ public class JSONTest
     public static void openFile () throws Exception
       {
         CustomCryptoProvider.forcedLoad (true);
+        Locale.setDefault (Locale.FRANCE);  // Should create HUGE problems :-)
       }
 
     @SuppressWarnings("serial")
@@ -273,10 +431,10 @@ public class JSONTest
       {
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setLong (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
         or = new JSONObjectWriter ();
         or.setLong ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
       }
 
     void badArgument (String string)
@@ -298,15 +456,44 @@ public class JSONTest
       {
         assertTrue (simpleArrayType  (string).getDouble () == ref);
         assertTrue (simpleObjectType (string).getDouble ("name") == ref);
-        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
-        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
+        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.NUMBER);
+        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.NUMBER);
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setDouble (ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
         or = new JSONObjectWriter ().setDouble ("name", ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDouble ("name") == ref);
+      }
+
+    void integerValue (String string, int ref) throws Exception
+      {
+        assertTrue (simpleArrayType (string).getInt () == ref);
+        assertTrue (simpleObjectType (string).getInt ("name") == ref);
+        assertTrue (simpleArrayType (string).getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.NUMBER);
+        assertTrue (simpleArrayType (string + "  ").getElementType () == JSONTypes.NUMBER);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.NUMBER);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setInt (ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getInt () == ref);
+        or = new JSONObjectWriter ().setInt ("name", ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getInt ("name") == ref);
+      }
+
+    void es6NumberTest () throws Exception
+      {
+        int i = 0;
+        while (i < ES6_NUMBERS.length)
+          {
+            String original = ES6_NUMBERS[i++];
+            String expected = ES6_NUMBERS[i++];
+            String result = new String(new JSONObjectWriter ()
+                .setDouble ("v", Double.valueOf (original))
+                    .serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8");
+            assertTrue("es6num", result.equals ("{\"v\":" + expected + "}"));
+          }
       }
 
     JSONObjectReader simpleObjectType (String string) throws IOException
@@ -493,16 +680,26 @@ public class JSONTest
         floatingPoint ("1.0e4", 1.0e4);
         floatingPoint ("0.9999e-99", 0.9999e-99);
         floatingPoint ("1.0E+4", 10000);
+        floatingPoint ("0.00000000000000000001", 1.0e-20);
         floatingPoint (     "1.0e4"    , 1.0e4);
         floatingPoint ("-0.0", -0.0);
         floatingPoint ("+0.0", +0.0);
-        floatingPoint ("+1", +1);
-        floatingPoint ("-0", -0);
         floatingPoint (".1", .1);
         floatingPoint ("1.", 1.0);
-        floatingPoint ("01", 01);
-        longVariables (1235454234343434l);
+        integerValue ("+1", +1);
+        integerValue ("-0", -0);
+        integerValue ("01", 01);
+        try
+          {
+            longVariables (1000000000000000l);
+            fail("long");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Integer values must not exceed 999999999999999 for safe ES6 representation");
+          }
         longVariables (0xa885abafaba0l);
+        longVariables (999999999999999l);
         bigDecimalValues (new BigDecimal ("3232323243243234234243234234243243243243243234243"));
         bigDecimalValues (new BigDecimal ("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues (new BigInteger ("3232323243243234234243234234243243243243243234243"));
@@ -511,6 +708,39 @@ public class JSONTest
         booleanValues (false);
         blobValues ();
         simpleArrays ();
+        es6NumberTest ();
+        integerRange(Integer.MAX_VALUE, false);
+        integerRange(Integer.MIN_VALUE, false);
+        integerRange(Integer.MAX_VALUE + 1l, true);
+        integerRange(Integer.MIN_VALUE - 1l, true);
+        badInteger (13.1);
+        badInteger (1300000.1);
+      }
+
+    void badInteger (Double value)
+      {
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setDouble ("v", value).toString()).getInt ("v");
+            fail("integer");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Value is not an integer: " + value);
+          }
+      }
+
+    void integerRange (long value, boolean mustFail) throws Exception
+      {
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter ().setLong ("v", value).toString()).getInt ("v");
+            assertFalse("range", mustFail);
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Java \"int\" out of range: " + value);
+          }
       }
 
     private void simpleArrays () throws Exception
@@ -803,12 +1033,12 @@ public class JSONTest
       {
         byte[] spki_bin = Base64URL.decode (spki);
         JSONObjectReader or = JSONParser.parse (jcs);
-        PublicKey public_key = or.getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey public_key = or.getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue ("Public key", ArrayUtil.compare (public_key.getEncoded (), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter ();
         assertTrue ("Public key jcs",
              ArrayUtil.compare (ow.setPublicKey (getPublicKeyFromSPKI (spki_bin), (jcs.indexOf ("\"P-") > 0) ?
-                 JSONAlgorithmPreferences.JOSE : JSONAlgorithmPreferences.SKS).serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                 AlgorithmPreferences.JOSE : AlgorithmPreferences.SKS).serializeJSONObject (JSONOutputFormats.NORMALIZED),
                                 or.serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         JSONObjectReader pub_key_object = or.getObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
         boolean rsa_flag = pub_key_object.getString (JSONSignatureDecoder.TYPE_JSON).equals (JSONSignatureDecoder.RSA_PUBLIC_KEY);
@@ -838,7 +1068,7 @@ public class JSONTest
         try
           {
             JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT))
-                         .getPublicKey (JSONAlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                         .getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             assertFalse ("Should have failed", must_fail);
           }
         catch (Exception e)
@@ -847,7 +1077,7 @@ public class JSONTest
             checkException (e, rsa_flag ? 
                 "Public RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes" 
                                         :
-                "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not nomalized");
+                "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not normalized");
           }
       }
 
@@ -974,7 +1204,7 @@ public class JSONTest
           {
             signature.setString (JSONSignatureDecoder.KEY_ID_JSON, "MyKey");
           }
-        signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getURI ());
+        signature.setString (JSONSignatureDecoder.ALGORITHM_JSON, signAlg.getAlgorithmId (AlgorithmPreferences.SKS));
         if (test == BAD_SIGNATURE.ExtensionTest1 || test == BAD_SIGNATURE.ExtensionTest2)
           {
             JSONArrayWriter aw = signature.setArray (JSONSignatureDecoder.EXTENSIONS_JSON);
@@ -1119,5 +1349,39 @@ public class JSONTest
         removeProperty ("{\"outer\": 5}", "outer", "{}");
         removeProperty ("{\"outer\": {\"inner\":6}}", "inner", "{\"outer\":{}}");
         removeProperty ("{\"outer\": {\"hi\":\"yes?\",\"inner\":6}}", "inner", "{\"outer\":{\"hi\":\"yes?\"}}");
+      }
+
+    @Test
+    public void ClearTextNumbers () throws Exception
+      {
+        assertTrue (ArrayUtil.compare (new JSONObjectWriter ()
+                                           .setNumberAsText ("value", "0.0000000000001")
+                                                .serializeJSONObject (JSONOutputFormats.NORMALIZED),
+                                       "{\"value\":0.0000000000001}".getBytes ("UTF-8")));
+        assertTrue (ArrayUtil.compare (new JSONArrayWriter ()
+                                           .setNumberAsText ("0.0000000000001")
+                                               .serializeJSONArray (JSONOutputFormats.NORMALIZED),
+                                       "[0.0000000000001]".getBytes ("UTF-8")));
+        assertTrue (JSONParser.parse (new JSONObjectWriter ()
+                        .setNumberAsText ("value", "-0")
+                            .serializeJSONObject (JSONOutputFormats.NORMALIZED)).getInt ("value") == 0);
+        try
+          {
+            new JSONObjectWriter ().setNumberAsText ("value", "0.0000000000001-");
+            fail("bad number");
+          }
+        catch (IOException e)
+          {
+            checkException (e, "Undecodable argument: 0.0000000000001-");
+          }
+        try
+          {
+            new JSONObjectWriter ().setNumberAsText ("value", "0,6");
+            fail("bad syntax");
+          }
+        catch (IOException e)
+          {
+            checkException (e, "Syntax error on number: 0,6");
+          }
       }
   }

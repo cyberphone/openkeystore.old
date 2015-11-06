@@ -73,12 +73,17 @@ public class JSONArrayReader implements Serializable
 
     public int getInt () throws IOException
       {
-        return Integer.parseInt ((String) get (JSONTypes.INTEGER));
+        return JSONObjectReader.parseInt ((String) get (JSONTypes.NUMBER));
       }
 
     public long getLong () throws NumberFormatException, IOException
       {
-        return Long.parseLong ((String) get (JSONTypes.INTEGER));
+        return JSONObjectReader.parseLong ((String) get (JSONTypes.NUMBER));
+      }
+
+    public double getDouble () throws IOException
+      {
+        return Double.valueOf ((String) get (JSONTypes.NUMBER));
       }
 
     public BigInteger getBigInteger () throws IOException
@@ -99,11 +104,6 @@ public class JSONArrayReader implements Serializable
     public byte[] getBinary () throws IOException
       {
         return Base64URL.decode (getString ());
-      }
-
-    public double getDouble () throws IOException
-      {
-        return new Double ((String) get (JSONTypes.DOUBLE));
       }
 
     public boolean getBoolean () throws IOException

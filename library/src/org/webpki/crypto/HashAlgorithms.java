@@ -17,6 +17,7 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
+
 import java.security.MessageDigest;
 import java.security.GeneralSecurityException;
 
@@ -28,21 +29,21 @@ public enum HashAlgorithms
     SHA384 ("http://www.w3.org/2001/04/xmldsig-more#sha384", "2.16.840.1.101.3.4.2.2", "SHA-384"),
     SHA512 ("http://www.w3.org/2001/04/xmlenc#sha512",       "2.16.840.1.101.3.4.2.3", "SHA-512");
 
-    private final String sks_id;    // As (typically) expressed in protocols
+    private final String sksname;   // As (typically) expressed in protocols
     private final String oid;       // As expressed in ASN.1 messages
     private final String jcename;   // As expressed for JCE
 
-    private HashAlgorithms (String sks_id, String oid, String jcename)
+    private HashAlgorithms (String sksname, String oid, String jcename)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.oid = oid;
         this.jcename = jcename;
       }
 
 
-    public String getURI ()
+    public String getAlgorithmId ()
       {
-        return sks_id;
+        return sksname;
       }
 
 
@@ -58,11 +59,11 @@ public enum HashAlgorithms
       }
 
     
-    public static boolean testAlgorithmURI (String sks_id)
+    public static boolean testAlgorithmURI (String sksname)
       {
         for (HashAlgorithms alg : HashAlgorithms.values ())
           {
-            if (sks_id.equals (alg.sks_id))
+            if (sksname.equals (alg.sksname))
               {
                 return true;
               }
@@ -88,7 +89,7 @@ public enum HashAlgorithms
       {
         for (HashAlgorithms alg : values ())
           {
-            if (algorithm_id.equals (alg.sks_id))
+            if (algorithm_id.equals (alg.sksname))
               {
                 return alg;
               }
@@ -108,5 +109,4 @@ public enum HashAlgorithms
           }
         throw new IOException ("Unknown algorithm: " + oid);
       }
-
   }

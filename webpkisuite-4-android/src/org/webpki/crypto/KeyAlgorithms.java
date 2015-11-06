@@ -26,9 +26,10 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECParameterSpec;
 import java.security.spec.EllipticCurve;
+
 import java.security.spec.X509EncodedKeySpec;
 
-public enum KeyAlgorithms implements SKSAlgorithms
+public enum KeyAlgorithms implements CryptoAlgorithms
   {
     RSA1024     ("http://xmlns.webpki.org/sks/algorithm#rsa1024", null,
                  "RSA",
@@ -296,7 +297,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
                      (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
 
-    private final String sks_id;                     // As (typically) expressed in protocols
+    private final String sksname;                     // As (typically) expressed in protocols
     private final String josename;                   // As expressed in JOSE.  Only applicable EC curves
     private final String jcename;                    // As expressed for JCE
     private final int length_in_bits;                // You guessed it :-)
@@ -308,7 +309,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
     public static final String XML_DSIG_CURVE_PREFIX = "urn:oid:";
 
-    private KeyAlgorithms (String sks_id,
+    private KeyAlgorithms (String sksname,
                            String josename,
                            String jcename,
                            int length_in_bits,
@@ -318,7 +319,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                            String ec_domain_oid,
                            byte[] sample_public_key)
       {
-        this.sks_id = sks_id;
+        this.sksname = sksname;
         this.josename = josename;
         this.jcename = jcename;
         this.length_in_bits = length_in_bits;
@@ -365,23 +366,9 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
 
     @Override
-    public String getURI ()
-      {
-        return sks_id;
-      }
-
-
-    @Override
     public String getOID ()
       {
         return null;
-      }
-
-    
-    @Override
-    public String getJOSEName ()
-      {
-         return josename;
       }
 
     
@@ -467,16 +454,42 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
 
-    public static KeyAlgorithms getKeyAlgorithmFromID (String algorithm_id) throws IOException
+    public static KeyAlgorithms getKeyAlgorithmFromID (String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException
       {
         for (KeyAlgorithms alg : values ())
           {
-            if (algorithm_id.equals (alg.sks_id) || algorithm_id.equals (alg.josename))
+            if (algorithm_id.equals (alg.sksname))
               {
+                if (algorithmPreferences == AlgorithmPreferences.JOSE)
+                  {
+                    throw new IOException ("JOSE algorithm expected: " + algorithm_id);
+                  }
+                return alg;
+              }
+            if (algorithm_id.equals (alg.josename))
+              {
+                if (algorithmPreferences == AlgorithmPreferences.SKS)
+                  {
+                    throw new IOException ("SKS algorithm expected: " + algorithm_id);
+                  }
                 return alg;
               }
           }
         throw new IOException ("Unknown algorithm: " + algorithm_id);
       }
 
+
+    @Override
+    public String getAlgorithmId (AlgorithmPreferences algorithmPreferences) throws IOException
+      {
+        if (josename == null)
+          {
+            if (algorithmPreferences == AlgorithmPreferences.JOSE)
+              {
+                throw new IOException("There is no JOSE algorithm for: " + toString ());
+              }
+            return sksname;
+          }
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
+      }
   }

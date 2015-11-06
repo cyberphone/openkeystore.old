@@ -46,6 +46,7 @@ import org.webpki.sks.AppUsage;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyAttributes;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
@@ -54,7 +55,6 @@ import org.webpki.webauth.AuthenticationRequestDecoder;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
-
 import org.webpki.mobile.android.util.CredentialListDataFactory;
 
 public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
@@ -111,7 +111,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                 AsymSignatureAlgorithms signature_algorithm = null;
                 for (AsymSignatureAlgorithms sig_alg : webauth_activity.authentication_request.getSignatureAlgorithms ())
                   {
-                    if (rsa_flag == sig_alg.isRSA () && SKSStore.isSupported (sig_alg.getURI ()))
+                    if (rsa_flag == sig_alg.isRSA () && SKSStore.isSupported (sig_alg.getAlgorithmId (AlgorithmPreferences.SKS)))
                       {
                         signature_algorithm = sig_alg;
                         did_it = true;

@@ -1,0 +1,42 @@
+<project name="Web2Native Bridge - Web Payment Support" default="help" basedir=".">
+
+  <!-- set properties for this build -->
+  <property name="src.dir" location="src"/>
+  <property name="temp.dir" location=".tmp"/>
+  <property name="result.file" location="result/es6numbertest.html"/>
+  <property name="browsertest.file" location="result/es6numberbrowsertest.html"/>
+  
+  <property name="debug" value="on"/>
+
+  <target name="help">
+      <echo message="es6numbers"/>
+  </target>
+ 
+  <target name="es6numbers">
+    <delete file="${result.file}"/>
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+    <fixcrlf srcdir="${src.dir}"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java"/>
+    <javac debug="${debug}"
+           srcdir="${src.dir}"
+           destdir="${temp.dir}" 
+           includeAntRuntime="false">
+    </javac>
+    <java fork="yes"
+          classname="com.example.es6numbers.Test"
+          failonerror="true">
+          <classpath>
+             <pathelement location="${temp.dir}"/>
+          </classpath>
+        <arg value="${result.file}"/>
+        <arg value="${browsertest.file}"/>
+        <arg value="${src.dir}/com/example/es6numbers/Test.java"/>
+     </java>
+  </target>
+  
+</project>

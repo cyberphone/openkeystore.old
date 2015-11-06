@@ -39,7 +39,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build jcs ejbca-jcs zip-distribution createcerts"/>
+      <echo message="build tomcat ejbca-jcs zip-distribution createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -118,7 +118,7 @@
     </war>
   </target>
 
-  <target name="jcs" depends="_init">
+  <target name="tomcat" depends="_init">
      <antcall target="build"/>
      <copy file="${dist_dir}/${application}" todir="${env.CATALINA_HOME}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>

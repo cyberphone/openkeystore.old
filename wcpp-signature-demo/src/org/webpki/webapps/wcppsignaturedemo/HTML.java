@@ -24,6 +24,7 @@ import java.util.TimeZone;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.ExtendedKeyUsages;
@@ -638,7 +639,7 @@ public class HTML implements BaseProperties
         "    addXMLAttribute ('" + MIME_TYPE_JSON + "', mime_type);\n" +
         "    if (detached_flag) {\n" +
         "        signature_response += '><" + DOCUMENT_HASH_JSON + "';\n" +
-        "        addXMLAttribute ('" + ALGORITHM_JSON + "', '" + HashAlgorithms.SHA256.getURI () + "');\n" +
+        "        addXMLAttribute ('" + ALGORITHM_JSON + "', '" + HashAlgorithms.SHA256.getAlgorithmId () + "');\n" +
         "        crypto.subtle.digest({name: 'SHA-256'}, document_binary).then (function(result) {\n" +
         "            addXMLAttribute ('" + VALUE_JSON + "', binaryToBase64STD(new Uint8Array(result)));\n" +
         "            signature_response += '></" + DOCUMENT_HASH_JSON + "';\n" +
@@ -719,13 +720,13 @@ public class HTML implements BaseProperties
         "    document_data." + MIME_TYPE_JSON + " = mime_type;\n" +
         "    var key_import_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
         "    var key_signature_alg = {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}};\n" +
-        "    var jcs_alg = '" + AsymSignatureAlgorithms.RSA_SHA256.getJOSEName () + "';\n" +
+        "    var jcs_alg = '" + AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
         "    if (client_private_key.kty == 'EC') {\n" +
         "        error('Not implemented yet');\n" +
         "    }\n" +
         "    if (detached_flag) {\n" +
         "        var document_hash = document_data." + DOCUMENT_HASH_JSON + " = {};\n" +
-        "        document_hash." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getURI () + "';\n" +
+        "        document_hash." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + HashAlgorithms.SHA256.getAlgorithmId () + "';\n" +
         "        crypto.subtle.digest({name: 'SHA-256'}, document_binary).then (function(result) {\n" +
         "            document_hash." + VALUE_JSON + " = binaryToBase64URL(new Uint8Array(result));\n" +
         "            createSignatureAndSend(key_import_alg, key_signature_alg, jcs_alg);\n" +
@@ -968,8 +969,8 @@ public class HTML implements BaseProperties
         "        invoke_object." + SIGNATURE_FORMAT_JSON + " = '" + (json_flag ? (jws_flag ? SIGNATURE_FORMAT_JWS_COMP : SIGNATURE_FORMAT_JCS) : SIGNATURE_FORMAT_XML_DSIG) + "';\n" +
         "        invoke_object." + SIGNATURE_TYPE_JSON + " = '" + (detached_flag ? SIGNATURE_TYPE_DETACHED : SIGNATURE_TYPE_EMBEDDING) + "';\n" +
         "        invoke_object." + SIGNATURE_ALGORITHMS_JSON + " = ['" + 
-                     AsymSignatureAlgorithms.ECDSA_SHA256.getURI () + "','" +
-                     AsymSignatureAlgorithms.RSA_SHA256.getURI () + "'];\n" +
+                     AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "','" +
+                     AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "'];\n" +
         "        invoke_object." + CERTIFICATE_FILTERS_JSON + " = " + SignatureDemoService.certificate_filter_js + ";\n" +
         "        var object_to_sign = invoke_object." + OBJECT_TO_SIGN_JSON + " = {};\n" +
         "        object_to_sign." + MIME_TYPE_JSON + " = '" + mime_type + "';\n" +

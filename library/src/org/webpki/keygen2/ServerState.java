@@ -25,7 +25,6 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
@@ -34,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.DeviceID;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
@@ -994,7 +994,7 @@ public class ServerState implements Serializable
                        DeleteProtection.NONE.getSksValue () : delete_protection.getSksValue ());
             key_pair_mac.addByte (app_usage.getSksValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_pair_mac.addString (keySpecifier.getKeyAlgorithm ().getURI ());
+            key_pair_mac.addString (keySpecifier.getKeyAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS));
             key_pair_mac.addArray (keySpecifier.getKeyParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keySpecifier.getKeyParameters ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {
@@ -1049,7 +1049,7 @@ public class ServerState implements Serializable
 
             wr.setString (APP_USAGE_JSON, app_usage.getProtocolName ());
 
-            wr.setString (KEY_ALGORITHM_JSON, keySpecifier.getKeyAlgorithm ().getURI ());
+            wr.setString (KEY_ALGORITHM_JSON, keySpecifier.getKeyAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS));
             if (keySpecifier.getKeyParameters () != null)
               {
                 wr.setBinary (KEY_PARAMETERS_JSON, keySpecifier.getKeyParameters ());

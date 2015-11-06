@@ -51,6 +51,7 @@ import org.junit.rules.TestName;
 
 import static org.junit.Assert.*;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
@@ -74,7 +75,6 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.Property;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
-
 import org.webpki.sks.ws.TrustedGUIAuthorization;
 import org.webpki.sks.ws.WSSpecific;
 
@@ -919,7 +919,7 @@ public class SKSTest
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error" + encryption_algorithm,
             ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                encryption_algorithm.getURI (), 
+                                                                encryption_algorithm.getAlgorithmId (AlgorithmPreferences.SKS), 
                                                                 null,
                                                                 good_pin.getBytes ("UTF-8"), 
                                                                 enc), TEST_STRING) ||
@@ -927,7 +927,7 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             AsymSignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS), 
                                              null,
                                              good_pin.getBytes ("UTF-8"), 
                                              enc);
@@ -940,7 +940,7 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             encryption_algorithm.getURI (), 
+                                             encryption_algorithm.getAlgorithmId (AlgorithmPreferences.SKS), 
                                              new byte[]{6},
                                              good_pin.getBytes ("UTF-8"), 
                                              enc);
@@ -1186,7 +1186,7 @@ public class SKSTest
               {
                 for (String algorithm : device.device_info.getSupportedAlgorithms ())
                   {
-                    if (key_algorithm.getURI ().equals (algorithm))
+                    if (key_algorithm.getAlgorithmId (AlgorithmPreferences.SKS).equals (algorithm))
                       {
                         doit = true;
                         break;
@@ -1838,7 +1838,7 @@ public class SKSTest
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getAlgorithmId (AlgorithmPreferences.SKS), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1875,7 +1875,7 @@ public class SKSTest
           }
         key.unlockKey (good_puk);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getAlgorithmId (AlgorithmPreferences.SKS), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -2178,7 +2178,7 @@ public class SKSTest
                                          good_pin /* pin_value */,
                                          pin_policy,
                                          key_usage,
-                                         new String[]{MACAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
+                                         new String[]{MACAlgorithms.HMAC_SHA1.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
             assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
@@ -2204,7 +2204,7 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy,
                                      AppUsage.AUTHENTICATION,
-                                     new String[]{MACAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
+                                     new String[]{MACAlgorithms.HMAC_SHA1.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
@@ -2213,7 +2213,7 @@ public class SKSTest
         try
           {
             sess.sks.performHmac (key.key_handle, 
-                                  MACAlgorithms.HMAC_SHA256.getURI (),
+                                  MACAlgorithms.HMAC_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
                                   null,
                                   good_pin.getBytes ("UTF-8"),
                                   TEST_STRING);
@@ -2225,7 +2225,7 @@ public class SKSTest
         try
           {
             sess.sks.performHmac (key.key_handle,
-                                  SymEncryptionAlgorithms.AES128_CBC.getURI (),
+                                  SymEncryptionAlgorithms.AES128_CBC.getAlgorithmId (AlgorithmPreferences.SKS),
                                   null,
                                   good_pin.getBytes ("UTF-8"), TEST_STRING);
             fail ("Algorithm not allowed");
@@ -2270,13 +2270,13 @@ public class SKSTest
                                       good_pin /* pin_value */,
                                       pin_policy,
                                       AppUsage.AUTHENTICATION,
-                                      new String[]{sym_enc.getURI ()}).setCertificate (cn ());
+                                      new String[]{sym_enc.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
                 key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
               {
                 assertFalse ("Should not throw", sym_enc.isMandatorySKSAlgorithm ());
-                checkException (e, "Unsupported algorithm: " + sym_enc.getURI ());
+                checkException (e, "Unsupported algorithm: " + sym_enc.getAlgorithmId (AlgorithmPreferences.SKS));
                 continue;
               }
             sess.closeSession ();
@@ -2352,13 +2352,13 @@ public class SKSTest
                                       good_pin /* pin_value */,
                                       pin_policy,
                                       AppUsage.AUTHENTICATION,
-                                      new String[]{hmac.getURI ()}).setCertificate (cn ());
+                                      new String[]{hmac.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
                 key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
               {
                 assertFalse ("Should not throw", hmac.isMandatorySKSAlgorithm ());
-                checkException (e, "Unsupported algorithm: " + hmac.getURI ());
+                checkException (e, "Unsupported algorithm: " + hmac.getAlgorithmId (AlgorithmPreferences.SKS));
                 continue;
               }
             sess.closeSession ();
@@ -2386,7 +2386,7 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy,
                                      AppUsage.AUTHENTICATION,
-                                     new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
+                                     new String[]{SymEncryptionAlgorithms.AES128_CBC.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
         try
           {
             key.setSymmetricKey (symmetric_key);
@@ -2458,7 +2458,7 @@ public class SKSTest
                        good_pin /* pin_value */,
                        pin_policy /* pin_policy */,
                        AppUsage.AUTHENTICATION,
-                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
+                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
         try
           {
             sess.closeSession ();
@@ -2488,7 +2488,7 @@ public class SKSTest
                         good_pin /* pin_value */,
                         pin_policy,
                         AppUsage.ENCRYPTION,
-                        new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
+                        new String[]{SymEncryptionAlgorithms.AES128_CBC.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
          try
           {
             sess.closeSession ();
@@ -2587,7 +2587,7 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy,
                                      AppUsage.ENCRYPTION,
-                                     new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate (cn ());
+                                     new String[]{SymEncryptionAlgorithms.AES192_CBC.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
         try
           {
             key.setSymmetricKey (symmetric_key);
@@ -2842,14 +2842,14 @@ public class SKSTest
     @Test
     public void test57 () throws Exception
       {
-        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (),
-                               AsymSignatureAlgorithms.RSA_SHA1.getURI ()},
-                  AsymSignatureAlgorithms.RSA_SHA1.getURI ());
-        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA256.getURI (),
-                               AsymSignatureAlgorithms.RSA_SHA1.getURI ()},
-                  AsymSignatureAlgorithms.RSA_SHA1.getURI ());
-        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (),
-                               AsymSignatureAlgorithms.RSA_SHA256.getURI ()},
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS),
+                               AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS)},
+                  AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS));
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS),
+                               AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS)},
+                  AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS));
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS),
+                               AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.SKS)},
                   null);
       }
     @Test
@@ -2990,7 +2990,7 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy,
                                      AppUsage.AUTHENTICATION,
-                                     new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
+                                     new String[]{SymEncryptionAlgorithms.AES128_CBC.getAlgorithmId (AlgorithmPreferences.SKS)}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         try
           {
@@ -3196,13 +3196,13 @@ public class SKSTest
     @Test
     public void test68 () throws Exception
       {
-        badKeySpec (KeyAlgorithms.RSA1024.getURI (), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
-        badKeySpec (KeyAlgorithms.NIST_P_256.getURI (), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+        badKeySpec (KeyAlgorithms.RSA1024.getAlgorithmId (AlgorithmPreferences.SKS), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+        badKeySpec (KeyAlgorithms.NIST_P_256.getAlgorithmId (AlgorithmPreferences.SKS), new byte[]{0,0,0,3}, "Unexpected \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
         badKeySpec ("http://badcrypto/snakeoil-1", null, "Unsupported \"" + SecureKeyStore.VAR_KEY_ALGORITHM + "\": http://badcrypto/snakeoil-1");
         boolean supports_var_exp = false;
         for (String algorithm : device.device_info.getSupportedAlgorithms ())
           {
-            if (algorithm.equals (KeyAlgorithms.RSA1024_EXP.getURI ()))
+            if (algorithm.equals (KeyAlgorithms.RSA1024_EXP.getAlgorithmId (AlgorithmPreferences.SKS)))
               {
                 supports_var_exp = true;
                 break;
@@ -3210,9 +3210,9 @@ public class SKSTest
           }
         if (supports_var_exp)
           {
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,0,0,0,0,3}, "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 9");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[0], "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 0");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getAlgorithmId (AlgorithmPreferences.SKS), null, "Missing \"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\"");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getAlgorithmId (AlgorithmPreferences.SKS), new byte[]{0,0,0,0,0,0,0,0,3}, "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 9");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getAlgorithmId (AlgorithmPreferences.SKS), new byte[0], "\"" + SecureKeyStore.VAR_KEY_PARAMETERS + "\" length error: 0");
           }
         ProvSess sess = new ProvSess (device);
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
@@ -3589,7 +3589,7 @@ public class SKSTest
             byte[] result = tk.signData (alg, null, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper (alg, tk.getPublicKey ());
             verify.update (TEST_STRING);
-            assertTrue ("Bad signature " + alg.getURI (), verify.verify (result));
+            assertTrue ("Bad signature " + alg.getAlgorithmId (AlgorithmPreferences.SKS), verify.verify (result));
           }
       }
 

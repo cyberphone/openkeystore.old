@@ -30,6 +30,7 @@ import org.webpki.util.Base64;
 
 import org.webpki.xml.XMLObjectWrapper;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
@@ -121,7 +122,7 @@ abstract class XMLSignerCore
         dsig_wrapper.KeyInfo_Reference_create = write_keyinfo_ref_flag;
         if (this instanceof XMLSymKeySigner)
           {
-            dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).sym_signer.getMacAlgorithm ().getURI ();
+            dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).sym_signer.getMacAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS);
             dsig_wrapper.symmetric_key_name = ((XMLSymKeySigner)this).key_name;
           }
         else
@@ -131,7 +132,7 @@ abstract class XMLSignerCore
               {
                 signature_algorithm = KeyAlgorithms.getKeyAlgorithm (public_key).getRecommendedSignatureAlgorithm ();
               }
-            dsig_wrapper.signature_algorithm = signature_algorithm.getURI ();
+            dsig_wrapper.signature_algorithm = signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS);
           }
 
         // Setup all declared algorithms

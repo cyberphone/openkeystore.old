@@ -22,16 +22,14 @@ import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
-
 import org.webpki.wasp.SignatureProfileDecoder;
 import org.webpki.wasp.SignatureProfileResponseEncoder;
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
-
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
-
 import static org.webpki.wasp.prof.pdf.PDFProfileConstants.*;
 
 public class PDFProfileRequestDecoder extends XMLObjectWrapper implements SignatureProfileDecoder
@@ -96,9 +94,9 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
         canonicalization_algorithm = ah.getStringConditional (CN_ALG_ATTR, CanonicalizationAlgorithms.C14N_EXCL.getURI ());
 
-        digest_algorithm = ah.getStringConditional (DIGEST_ALG_ATTR, HashAlgorithms.SHA1.getURI ());
+        digest_algorithm = ah.getStringConditional (DIGEST_ALG_ATTR, HashAlgorithms.SHA1.getAlgorithmId ());
 
-        signature_algorithm = ah.getStringConditional (SIGNATURE_ALG_ATTR, AsymSignatureAlgorithms.RSA_SHA1.getURI ());
+        signature_algorithm = ah.getStringConditional (SIGNATURE_ALG_ATTR, AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId (AlgorithmPreferences.SKS));
 
         document_canonicalization_algorithm = ah.getStringConditional (DOC_CN_ALG_ATTR, DOC_SIGN_CN_ALG);
       }
