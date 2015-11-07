@@ -32,10 +32,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -46,8 +43,7 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Creates JSON objects and performs serialization
- * (according to ES6 but limited to 15 digits of precision).
+ * Creates JSON objects and performs serialization according to ES6.
  * <p>
  * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
  * 
@@ -57,8 +53,8 @@ public class JSONObjectWriter implements Serializable
     private static final long serialVersionUID = 1L;
 
     static final int STANDARD_INDENT = 2;
-    
-    static final long MAX_ES6_SAFE_LONG = 999999999999999l;
+
+    public static final long MAX_SAFE_INTEGER = 9007199254740991l;
 
     JSONObject root;
 
@@ -140,13 +136,8 @@ public class JSONObjectWriter implements Serializable
         return setProperty (name, setNumberAsText(value));
       }
 
-    static final double UNDERFLOW_LIMIT_D15 = 2.22507385850721E-308;
-
     // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
-    // The purpose is for supporting signed JSON/JavaScript objects which
-    // though forces us dropping (after rounding) the 16:th digit since it
-    // is not deterministic in the ECMA specification (IEEE 754-2008 double
-    // precision values have 15.95 digits of precision).
+    // The purpose is for supporting signed JSON/JavaScript objects.
     public static String es6JsonNumberSerialization (double value) throws IOException
       {
         // 1. Check for JSON compatibility.
@@ -154,104 +145,17 @@ public class JSONObjectWriter implements Serializable
             throw new IOException("NaN/Infinity are not permitted in JSON");
         }
         
-        // 2. Take care of the sign.
-        String hyphen = "";
-        if (value < 0) {
-            value = -value;
-            hyphen = "-";
-        }
-
-        // 3. Underflow doesn't interoperate well (edge case)
-        if (value < UNDERFLOW_LIMIT_D15) {
-            return "0";
-        }
-
-        // 4. Serialize using Java with 15 digits of precision.
-        StringBuffer num = 
-            new StringBuffer(new DecimalFormat("0.##############E000",
-                             new DecimalFormatSymbols(Locale.ENGLISH))
-                .format(value));
-        
-        // 5. Special treatment of zero.
-        if (num.charAt(0) == '0') {
-            return "0";
-        }
-
-        // 6. Collect and remove the exponent.
-        int i = num.indexOf("E");
-        int j = i;
-        if (num.indexOf("-") > 0) {
-            j++;
-        }
-        int exp = Integer.valueOf(num.substring(j + 1));
-        if (j != i) {
-            exp = -exp;
-        }
-        num.delete(i, num.length());
-
-        // 7. Remove possible decimal point at index 1.
-        if (num.indexOf(".") > 0) {
-            num.deleteCharAt(1);
-        }
-
-        // 8. Assign virtual decimal point to index 0.
-        //    Update exponent accordingly.
-        exp++;
-
-        // 9. This is the really difficult one...
-        //    Compute or remove decimal point. 
-        //    Add missing zeroes if needed.
-        //    Update or remove exponent.
-        int len = num.length();
-        if (exp >= len && exp <= 21) {
-            // 9.a Integer which fits the maximum field width.
-            //     Drop decimal point and remove exponent.
-            exp -= len;
-            while (exp > 0) {
-                // It is a big integer which lacks some zeroes.
-                num.append('0');
-                exp--;
-            }
-        } else if (exp <= 0 && exp > -6 && len - exp < 21) {
-            // 9.b Small number which fits the field width.
-            //     Add leading zeroes and remove exponent.
-            while (exp < 0) {
-                num.insert(0, '0');
-                exp++;
-            }
-            num.insert(0, "0.");
-        } else if (exp < 0) {
-            // 9.c Small number with exponent, restore decimal point.
-            //     If it is just a single digit we skip the decimal point.
-            if (len > 1) {
-                num.insert(1, '.');
-            }
-            exp--;
-        } else if (exp < len) {
-            // 9.d Decimal number which is within limits.
-            //     Update decimal point and remove exponent.
-            num.insert(exp, '.');
-            exp = 0;
-        } else {
-            // 9.e Large number with exponent is our final alternative.
-            num.insert(1, '.');
-            exp--;
-        }
-
-        // 10. Add optional exponent including +/- sign.
-        if (exp != 0) {
-            num.append('e').append(exp > 0 ? "+" : "").append(exp);
-        }
-
-        // 11. Finally, return the assembled number including sign.
-        return num.insert(0, hyphen).toString();
-      }
+        // 2. Call the DToA algorithm cruncher
+        StringBuilder buffer = new StringBuilder();
+        DToA.JS_dtostr(buffer, DToA.DTOSTR_STANDARD, 0, value);
+        return buffer.toString();
+     }
 
     static String es6Long2NumberConversion (long value) throws IOException
       {
-        if (Math.abs (value) > MAX_ES6_SAFE_LONG)
+        if (Math.abs (value) > MAX_SAFE_INTEGER)
           {
-            throw new IOException ("Integer values must not exceed " + MAX_ES6_SAFE_LONG + " for safe ES6 representation");
+            throw new IOException ("Integer values must not exceed " + MAX_SAFE_INTEGER + " for safe representation");
           }
         return es6JsonNumberSerialization (value);
       }

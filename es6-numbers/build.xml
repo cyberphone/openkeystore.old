@@ -35,7 +35,7 @@
           </classpath>
         <arg value="${result.file}"/>
         <arg value="${browsertest.file}"/>
-        <arg value="${src.dir}/com/example/es6numbers/Test.java"/>
+        <arg value="${src.dir}/org/webpki/json/v8dtoa/DToA.java"/>
      </java>
   </target>
   
