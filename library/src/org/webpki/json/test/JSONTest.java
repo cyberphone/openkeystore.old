@@ -2558,6 +2558,18 @@ public class JSONTest
         json = "'" + toJavaScript (json, true) + "'";
         jsn = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.JS_QUOTED_STRING), "UTF-8");
         assertTrue ("JS Quoted", jsn.equals (json));
+        JSONObjectWriter writer = new JSONObjectWriter ().setString ("a%", "five");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        assertTrue("JS", json.equals ("{\n  \"a%\": \"five\"\n}"));
+        writer = new JSONObjectWriter ().setString ("a5", "five");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        assertTrue("JS", json.equals ("{\n  a5: \"five\"\n}"));
+        writer = new JSONObjectWriter ().setString ("a", "five");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        assertTrue("JS", json.equals ("{\n  a: \"five\"\n}"));
+        writer = new JSONObjectWriter ().setString ("5", "five");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        assertTrue("JS", json.equals ("{\n  \"5\": \"five\"\n}"));
       }
 
     String toJavaScript (String json, boolean quote)

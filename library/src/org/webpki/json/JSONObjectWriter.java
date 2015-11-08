@@ -18,26 +18,20 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECPoint;
-
 import java.util.Date;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -55,6 +49,8 @@ public class JSONObjectWriter implements Serializable
     static final int STANDARD_INDENT = 2;
 
     public static final long MAX_SAFE_INTEGER = 9007199254740991l;
+    
+    static final Pattern JS_ID_PATTERN  = Pattern.compile ("[a-z,A-Z,$,_]+[a-z,A-Z,$,_,0-9]*");
 
     JSONObject root;
 
@@ -694,13 +690,15 @@ public class JSONObjectWriter implements Serializable
               }
             return;
           }
+        boolean quoted = !property || !java_script_mode || !pretty_print ||
+                         !JS_ID_PATTERN.matcher (string).matches ();
         if (html_mode)
           {
             buffer.append ("&quot;<span style=\"color:")
                   .append (property ? string.startsWith ("@") ? html_keyword_color : html_property_color : html_string_color)
                   .append ("\">");
           }
-        else
+        else if (quoted)
           {
             buffer.append ('"');
           }
@@ -790,7 +788,7 @@ public class JSONObjectWriter implements Serializable
           {
             buffer.append ("</span>&quot;");
           }
-        else
+        else if (quoted)
           {
             buffer.append ('"');
           }
