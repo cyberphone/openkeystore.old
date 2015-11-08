@@ -18,20 +18,30 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
+
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
+
 import java.util.Date;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
+
+import org.webpki.json.v8dtoa.FastDtoa;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -140,8 +150,19 @@ public class JSONObjectWriter implements Serializable
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             throw new IOException("NaN/Infinity are not permitted in JSON");
         }
-        
-        // 2. Call the DToA algorithm cruncher
+
+        // 2.Deal with zero separately
+        if (value == 0.0) {
+            return "0";
+        }
+
+        // 3. Call the DtoA algorithm crunchers
+        // V8 FastDtoa can't convert all numbers, so try it first but
+        // fall back to old DToA in case it fails
+        String result = FastDtoa.numberToString(value);
+        if (result != null) {
+            return result;
+        }
         StringBuilder buffer = new StringBuilder();
         DToA.JS_dtostr(buffer, DToA.DTOSTR_STANDARD, 0, value);
         return buffer.toString();
