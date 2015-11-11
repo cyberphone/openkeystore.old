@@ -101,10 +101,10 @@ public class JSONObjectReader implements Serializable, Cloneable
     static long parseLong (String value) throws IOException
       {
         double number = Double.valueOf (value);
-        if (Math.abs (number) > JSONObjectWriter.MAX_ES6_SAFE_LONG)
+        if (Math.abs (number) > JSONObjectWriter.MAX_SAFE_INTEGER)
           {
             throw new IOException ("Integer values must not exceeed " + 
-                                   JSONObjectWriter.MAX_ES6_SAFE_LONG  +
+                                   JSONObjectWriter.MAX_SAFE_INTEGER  +
                                    ", found: " + value);
           }
         long longValue = (long) number;
