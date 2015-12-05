@@ -65,11 +65,11 @@ public class JSONBaseHTML
     
     public static final String REF_JCS                 = "JCS";
     
-    public static final String REF_JOSE                = "JOSE";
+    public static final String REF_JWS                 = "RFC7515";
     
     public static final String REF_BASE64              = "RFC4648";
     
-    public static final String REF_PEM                 = "PEM";
+    public static final String REF_PEM                 = "RFC7468";
     
     public static final String REF_URI                 = "RFC3986";
 
@@ -242,10 +242,9 @@ public class JSONBaseHTML
             "April&nbsp;2012. <br>" +
             externalWebReference ("http://www.w3.org/TR/2012/CR-WebIDL-20120419/"));
 
-       addReferenceEntry (REF_JOSE,
-            "M. Jones, et al, Work in progress, " +
-            externalWebReference ("https://ietf.org/wg/jose/") +
-            ", <span style=\"white-space: nowrap\">January&nbsp;2015.</span>");
+        addReferenceEntry (REF_JWS,
+           "M. Jones, J. Bradley, N. Sakimura, \"JSON Web Signature (JWS)\", " +
+           "RFC&nbsp;7515, May&nbsp;2015.");
 
         addReferenceEntry (REF_X509,
             "D. Cooper, S. Santesson, S. Farrell, S. Boeyen, " +
@@ -258,12 +257,13 @@ public class JSONBaseHTML
             "Encodings\", RFC&nbsp;4648, October&nbsp;2006.");
 
         addReferenceEntry (REF_PEM,
-            "S. Josefsson, \"Text Encodings of PKIX and CMS Structures\", " +
-            "I-D, draft-josefsson-pkix-textual-02, October&nbsp;2013.");
+            "S. Josefsson, S. Leonard, \"Textual Encodings of PKIX, PKCS, and CMS Structures\", " +
+            "RFC&nbsp;7468, April&nbsp;2015.");
 
         addReferenceEntry (REF_DSKPP,
             "A. Doherty, M. Pei, S. Machani, M. Nystrom, " +
-            "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", RFC&nbsp;6063, December&nbsp;2010.");
+            "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", " +
+            "RFC&nbsp;6063, December&nbsp;2010.");
 
         addReferenceEntry (REF_CMP, "C. Adams, S. Farrell, T. Kause, T. Mononen, " +
              "\"Internet X.509 Public Key Infrastructure Certificate Management Protocol (CMP)\", " +
@@ -1297,7 +1297,7 @@ public class JSONBaseHTML
                           "The currently recognized asymmetric key algorithms include:" +
                           enumerateStandardAlgorithms (AsymSignatureAlgorithms.values (), false, true) +
                           (reference ? "For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) +
-                          "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JOSE) + " notation:" +
+                          "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JWS) + " notation:" +
                           enumerateJOSEAlgorithms (sym_plus_asym.toArray (new CryptoAlgorithms[0])) : ""));
         if (key_id_option)
           {
@@ -1405,7 +1405,7 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("The signature data.")
-              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the JOSE " +  createReference (REF_JOSE) + " specifications.":"")
+              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the JOSE " +  createReference (REF_JWS) + " specifications.":"")
                        .setNotes (reference ? 
                    "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
@@ -1456,7 +1456,7 @@ public class JSONBaseHTML
   "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
   ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference (REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
   "The algorithm names were derived from the SKS " + createReference (REF_SKS) + " specification. " + Types.LINE_SEPARATOR +
-  "A subset of the EC curves may also be expressed in the JOSE " +  createReference (REF_JOSE) + 
+  "A subset of the EC curves may also be expressed in the JOSE " +  createReference (REF_JWS) + 
   " notation: " + enumerateJOSEAlgorithms (KeyAlgorithms.values ()) : "")
           .newRow ()
             .newColumn ()

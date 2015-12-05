@@ -1,14 +1,19 @@
 package com.example.es6numbers;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
+
 import org.webpki.json.v8dtoa.V8NumberCanonicalizer;
 import org.webpki.json.v8dtoa.DToA;
 
@@ -132,7 +137,6 @@ public class Test {
     static class Pair {
         double value;
         String full;
-        String d15;
     }
     
     static Vector<Pair> testValues = new Vector<Pair>();
@@ -147,13 +151,9 @@ public class Test {
     
     static void test(double value) throws Exception {
         String full = V8NumberCanonicalizer.numberToString(value);
-        StringBuilder buffer = new StringBuilder();
-        DToA.JS_dtostr(buffer, DToA.DTOSTR_PRECISION, 15, value);
-        String d15 = V8NumberCanonicalizer.numberToString(Double.valueOf(buffer.toString()));
         Pair pair = new Pair();
         pair.value = value;
         pair.full = full;
-        pair.d15 = d15;
         testValues.add(pair);
         engine.put("fl", value);
         engine.eval("res=fl.toString()");
@@ -161,8 +161,8 @@ public class Test {
         if (!full.equals(V8NumberCanonicalizer.numberToString(Double.valueOf(full)))) {
             throw new RuntimeException("Roundtrip 1 failed for:" + full);
         }
-         if (!d15.equals(V8NumberCanonicalizer.numberToString(Double.valueOf(d15)))) {
-            throw new RuntimeException("Roundtrip 2 failed for:" + d15);
+        if (value != Double.valueOf(full)) {
+            throw new RuntimeException("Roundtrip 2 failed for:" + full);
         }
         if (!js.equals(full)) {
             full = "<span style=\"color:red\">" + full + "</span>";
@@ -173,8 +173,6 @@ public class Test {
               + js
               + "</td><td>"
               + full
-              + "</td><td>"
-              + d15
               + "</td></tr>");
     }
 
@@ -194,7 +192,7 @@ public class Test {
                 + "</style></head><body><h3>ES6 - JSON Number Canonicalizer ["
                 + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) 
                 + "]</h3>"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (parsed)</th><th>JS/Java (15 digit)</th><th>Emulation/Workaround<br>(red=error wrt JS/Java)</th><th>Alternative ES6 formatter</th></tr>");
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Java (parsed)</th><th>JS/Java (15 digit)</th><th>Emulation/Workaround<br>(red=error wrt JS/Java)</th></tr>");
 
         ScriptEngineManager manager = new ScriptEngineManager();
         engine = manager.getEngineByName("JavaScript");
@@ -244,6 +242,18 @@ public class Test {
         for (int i = 0; i < 1000; i++) {
             test(2.2250738585072E-308 + (i * 1e-323));
         }
+        SecureRandom random = new SecureRandom();
+        byte[] rawDouble = new byte[8];
+        
+        for (int i = 0; i < 1000; i++) {
+            random.nextBytes(rawDouble);
+            ByteArrayInputStream baos = new ByteArrayInputStream(rawDouble);
+            Double randomDouble = new DataInputStream(baos).readDouble();
+            if (randomDouble.isInfinite() || randomDouble.isNaN()) {
+                continue;
+            }
+            test(randomDouble);
+        }
         test(Double.MIN_NORMAL);
         test(Double.MIN_VALUE);
         try {
@@ -289,7 +299,7 @@ public class Test {
                 + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
                 + "</style></head><body><h3>ES6 - Browser Number Canonicalizer Test</h3>"
                 + "Note: Test-values are supplied in a JS vector.<br>&nbsp;"
-                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th><th>Browser.15 (red=diff)</th></tr>"
+                + "<table border=\"1\" cellspacing=\"0\"><tr><th>Original</th><th>Expected</th><th>Browser (red=diff)</th></tr>"
                 + "<script type=\"text/javascript\">\nvar testSuite = [");
        boolean comma = false;
         for (Pair pair : testValues) {
@@ -300,8 +310,7 @@ public class Test {
             write(Double.toString(pair.value));
             write("\", \"");
             write(pair.full);
-            write("\", ");
-            write(pair.d15);
+            write("\"");
             comma = true;
         }
         write("];\nvar i = 0;\n" +
@@ -310,20 +319,8 @@ public class Test {
               "  var original = testSuite[i++];\n" +
               "  var browser = parseFloat(original);\n" +
               "  var expected = testSuite[i++];\n" +
-              "  var d15 = testSuite[i++];\n" +
-              "  var bstd = 'black';\n" +
-              "  var bd15 ='black';\n" +
-              "  var failed = false;\n" +
               "  if (browser.toString() != expected || parseFloat(expected) != browser) {\n" +
-              "    failed = true;\n" +
-              "    bstd = 'red';\n" +
-              "  }\n" +
-              "  if (d15 != parseFloat(parseFloat(expected).toPrecision(15))) {\n" +
-              "    failed = true;\n" +
-              "    bd15 = 'red';\n" +
-              "  }\n" +
-              "  if (failed) {\n" +
-              "    document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td style=\"color:' + bstd + '\">' + browser + '</td><td style=\"color:' + bd15 + '\">' + d15 + '</td></tr>');\n" +
+              "    document.write('<tr><td>' + original + '</td><td>' + expected + '</td><td style=\"color:red\">' + browser + '</td></tr>');\n" +
               "    errors++;\n" +
               "  }\n" +
               "}\n" +

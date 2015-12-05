@@ -645,7 +645,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     " message, i.e. strictly following SOP (Same Origin Policy).");
 
         json.addParagraphSubObject ("JCS Profile").append ("Although KeyGen2 makes extensive use of the JSON Cleartext Signature scheme " + json.createReference (JSONBaseHTML.REF_JCS) +
-                                    " a compliant implementation <b>must not</b> accept JOSE " +  json.createReference (JSONBaseHTML.REF_JOSE) + 
+                                    " a compliant implementation <b>must not</b> accept JOSE " +  json.createReference (JSONBaseHTML.REF_JWS) + 
                                     " algorithm identifiers since these are not natively supported by the target. See " + json.createReference (JSONBaseHTML.REF_SKS) + 
                                     " <i>Algorithm Support</i>." + LINE_SEPARATOR +
                                     "In addition, the JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code> " +

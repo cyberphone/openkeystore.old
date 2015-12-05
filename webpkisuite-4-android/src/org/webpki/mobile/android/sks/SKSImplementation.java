@@ -1462,7 +1462,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     @Override
     public void abort (String message) throws SKSException
       {
-        throw new SKSException (message);
+        abort (message, SKSException.ERROR_OPTION);
       }
 
     void abort (String message, int option) throws SKSException
