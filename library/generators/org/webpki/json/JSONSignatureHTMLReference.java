@@ -54,7 +54,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "simple to implement and use.  That is, JCS follows the &quot;spirit&quot; of JSON." +
             Types.LINE_SEPARATOR +
             "Unlike IETF's JWS ")
-          .append (json.createReference (JSONBaseHTML.REF_JOSE))
+          .append (json.createReference (JSONBaseHTML.REF_JWS))
           .append (
             ", <i>JCS was designed to be an integral part of a JSON object</i> " +
             "rather than embedding the signed data.  There are (of course) pros and cons to both " +
@@ -64,7 +64,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "canonicalization), this part has been extremely simplified. "+
             "In fact, JCS only relies on <i>predictable serialization</i> of JSON data." + Types.LINE_SEPARATOR +
             "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
-          .append (json.createReference (JSONBaseHTML.REF_JOSE))
+          .append (json.createReference (JSONBaseHTML.REF_JWS))
           .append (", JCS supports the same algorithms, curve names, signature blob representation, and public key objects. " +
             "The only crypto object that differs is JWS's &quot;<code>x5c</code>&quot; since it (presumably for historical reasons), uses Base64 ")
           .append (json.createReference (JSONBaseHTML.REF_BASE64))
@@ -288,8 +288,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "</code> option");
         json.addDocumentHistoryLine ("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
         json.addDocumentHistoryLine ("2014-09-17", "0.54", "Changed canonicalization to normalization");
-        json.addDocumentHistoryLine ("2014-09-23", "0.55", "Aligned EC parameter representation with " + json.createReference (JSONBaseHTML.REF_JOSE));
-        json.addDocumentHistoryLine ("2014-12-08", "0.56", "Major upgrade including removal of " + json.createReference (JSONBaseHTML.REF_XMLDSIG) + " bloat and adding support for " + json.createReference (JSONBaseHTML.REF_JOSE) + " algorithm identifiers");
+        json.addDocumentHistoryLine ("2014-09-23", "0.55", "Aligned EC parameter representation with " + json.createReference (JSONBaseHTML.REF_JWS));
+        json.addDocumentHistoryLine ("2014-12-08", "0.56", "Major upgrade including removal of " + json.createReference (JSONBaseHTML.REF_XMLDSIG) + " bloat and adding support for " + json.createReference (JSONBaseHTML.REF_JWS) + " algorithm identifiers");
         json.addDocumentHistoryLine ("2014-12-19", "0.57", "Added an interoperability section");
         json.addDocumentHistoryLine ("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
 
