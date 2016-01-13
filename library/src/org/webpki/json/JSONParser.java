@@ -42,16 +42,16 @@ public class JSONParser
     
     int index;
     
-    int max_length;
+    int maxLength;
     
-    String json_data;
+    String jsonData;
     
     JSONParser () {}
     
-    JSONObjectReader internal_parse (String json_string) throws IOException
+    JSONObjectReader internalParse (String jsonString) throws IOException
       {
-        json_data = json_string;
-        max_length = json_data.length ();
+        jsonData = jsonString;
+        maxLength = jsonData.length ();
         JSONObject root = new JSONObject ();
         if (testNextNonWhiteSpaceChar () == LEFT_BRACKET)
           {
@@ -63,9 +63,9 @@ public class JSONParser
             scanFor (LEFT_CURLY_BRACKET);
             scanObject (root);
           }
-        while (index < max_length)
+        while (index < maxLength)
           {
-            if (!isWhiteSpace (json_data.charAt (index++)))
+            if (!isWhiteSpace (jsonData.charAt (index++)))
               {
                 throw new IOException ("Improperly terminated JSON object");
               }
@@ -73,9 +73,9 @@ public class JSONParser
         return new JSONObjectReader (root);
       }
 
-    public static JSONObjectReader parse (String json_string) throws IOException
+    public static JSONObjectReader parse (String jsonString) throws IOException
       {
-        return new JSONParser ().internal_parse (json_string);
+        return new JSONParser ().internalParse (jsonString);
       }
 
     public static JSONObjectReader parse (byte[] json_utf8) throws IOException
@@ -321,9 +321,9 @@ public class JSONParser
 
     char nextChar () throws IOException
       {
-        if (index < max_length)
+        if (index < maxLength)
           {
-            return json_data.charAt (index++);
+            return jsonData.charAt (index++);
           }
         throw new IOException ("Unexpected EOF reached");
       }

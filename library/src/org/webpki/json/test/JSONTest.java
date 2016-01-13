@@ -21,24 +21,19 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
 import java.security.spec.X509EncodedKeySpec;
-
 import java.util.Date;
 import java.util.Locale;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
@@ -46,7 +41,6 @@ import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -60,7 +54,6 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -3394,6 +3387,34 @@ public class JSONTest
         catch (IOException e)
           {
             checkException (e, "Syntax error on number: 0,6");
+          }
+      }
+
+    @Test
+    public void PrettyPrinting () throws Exception
+      {
+        StringBuffer json = new StringBuffer();
+        int index = 0;
+        for (byte c : ArrayUtil.getByteArrayFromInputStream (getClass ().getResourceAsStream ("pretty.txt")))
+          {
+            if (c == '\n')
+              {
+                if (index == 0)
+                  {
+                    String input = json.toString ();
+                    if (input.length () == 0)
+                      {
+                        continue;
+                      }
+                    String output = JSONParser.parse (input).toString();
+                    assertTrue("'" + output + "'" + input + "'", input.equals(output));
+                    json.setLength (0);
+                    continue;
+                  }
+                index = -1;
+              }
+            index++;
+            json.append ((char)c);
           }
       }
   }

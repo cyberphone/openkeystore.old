@@ -37,82 +37,69 @@ import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
 
 /**
  * Demo code for JDOC
  */
-public class DemoCode
-  {
-    static
-      {
-        CustomCryptoProvider.conditionalLoad (true);
-      }
+public class DemoCode {
+    static {
+        CustomCryptoProvider.conditionalLoad(true);
+    }
 
-    public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
-      {
+    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+
         // Create an empty JSON document
-        JSONObjectWriter writer = new JSONObjectWriter ();
+        JSONObjectWriter writer = new JSONObjectWriter();
 
         // Fill it with some data
-        writer.setString ("myProperty", "Some data");
+        writer.setString("myProperty", "Some data");
         
         // Sign document
-        writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
-          {
+        writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
             @Override
-            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
-              {
-                try
-                  {
-                    return new SignatureWrapper (algorithm, private_key)
-                        .update (data)
-                        .sign ();
-                  }
-                catch (GeneralSecurityException e)
-                  {
-                    throw new IOException (e);
-                  }
-              }
+            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+                try {
+                    return new SignatureWrapper(algorithm, privateKey)
+                        .update(data)
+                        .sign();
+                } catch (GeneralSecurityException e) {
+                    throw new IOException(e);
+                }
+            }
    
             @Override
-            public PublicKey getPublicKey () throws IOException
-              {
-                 return public_key;
-              }
-          }));
+            public PublicKey getPublicKey() throws IOException {
+                return publicKey;
+            }
+        }));
         
         // Serialize document
-        byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
+        String json = writer.toString();
 
         // Print document on the console
-        System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
+        System.out.println("Signed doc:\n" + json);
         
         // Parse document
-        JSONObjectReader reader = JSONParser.parse (json);
+        JSONObjectReader reader = JSONParser.parse(json);
         
         // Get and verify signature
-        JSONSignatureDecoder json_signature = reader.getSignature ();
-        json_signature.verify (new JSONAsymKeyVerifier (public_key));
+        JSONSignatureDecoder signature = reader.getSignature();
+        signature.verify(new JSONAsymKeyVerifier(publicKey));
         
         // Print document payload on the console
-        System.out.println ("Returned data: " + reader.getString ("myProperty"));
-      }
+        System.out.println("Returned data: " + reader.getString("myProperty"));
+    }
 
-    public static void main (String[] argc)
-      {
-        try
-          {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("EC");
-            kpg.initialize (new ECGenParameterSpec (KeyAlgorithms.NIST_P_256.getJCEName ()), new SecureRandom ());
-            KeyPair key_pair = kpg.generateKeyPair ();
-            new DemoCode ().signAndVerifyJCS (key_pair.getPublic (), key_pair.getPrivate ());
-          }
-        catch (Exception e)
-          {
+    public static void main (String[] argc) {
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+            kpg.initialize (new ECGenParameterSpec(KeyAlgorithms.NIST_P_256.getJCEName()), new SecureRandom());
+            KeyPair keyPair = kpg.generateKeyPair();
+            new DemoCode ().signAndVerifyJCS(keyPair.getPublic(), keyPair.getPrivate());
+        } catch (Exception e) {
             e.printStackTrace();
-          }
-      }
-  }
+        }
+    }
+}

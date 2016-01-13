@@ -17,9 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.net.URLEncoder;
-
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -29,7 +27,6 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -63,8 +60,12 @@ public class JSONBaseHTML
     
     public static final String REF_XMLENC              = "XMLENC";
     
-    public static final String REF_JCS                 = "JCS";
+    public static final String REF_ES6                 = "ES6";
     
+    public static final String REF_V8                  = "V8";
+    
+    public static final String REF_JCS                 = "JCS";
+
     public static final String REF_JWS                 = "RFC7515";
     
     public static final String REF_BASE64              = "RFC4648";
@@ -79,6 +80,8 @@ public class JSONBaseHTML
 
     public static final String REF_CMP                 = "RFC4210";
 
+    public static final String REF_WEB_CRYPTO          = "WCRYPT";
+
     public static final String REF_LDAP_NAME           = "RFC4514";
 
     public static final String REF_PKCS8               = "RFC5208";
@@ -88,6 +91,8 @@ public class JSONBaseHTML
     public static final String REF_FIPS186             = "FIPS-186-4";
 
     public static final String REF_WEBPKI_FOR_ANDROID  = "PKIDROID";
+
+    public static final String REF_OPENKEYSTORE        = "OPENKEY";
 
     public static final String REF_WEBIDL              = "WEBIDL";
     
@@ -218,17 +223,22 @@ public class JSONBaseHTML
             "D. Eastlake, J. Reagle, D. Solo, F. Hirsch, M. Nystrom, T. Roessler, K. Yiu, " +
             "\"XML Signature Syntax and Processing Version 1.1.\", W3C Recommendation, " +
             "April&nbsp;2013. <br>" +
-            externalWebReference ("http://www.w3.org/TR/2013/REC-xmldsig-core1-20130411/"));
+            externalWebReference ("https://www.w3.org/TR/2013/REC-xmldsig-core1-20130411/"));
 
         addReferenceEntry (REF_XMLENC,
             "\"XML Encryption Syntax and Processing\", J. Reagle, " +
             "D. Eastlake, April&nbsp;2013. " +
-            externalWebReference ("http://www.w3.org/TR/xmlenc-core1/"));
+            externalWebReference ("https://www.w3.org/TR/xmlenc-core1/"));
+
+        addReferenceEntry (REF_WEB_CRYPTO,
+            "\"Web Cryptography API\", R. Sleevi, " +
+            "M. Watson, W3C&nbsp;Candidate&nbsp;Recommendation, December&nbsp;2014. " +
+            externalWebReference ("https://www.w3.org/TR/WebCryptoAPI/"));
 
         addReferenceEntry (REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://cyberphone.github.io/openkeystore/resources/docs/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.58, January&nbsp;2015.</span>");
+            ", <span style=\"white-space: nowrap\">V0.59, January&nbsp;2016.</span>");
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://cyberphone.github.io/openkeystore/resources/docs/sks-api-arch.pdf") +
@@ -237,10 +247,22 @@ public class JSONBaseHTML
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
 
+        addReferenceEntry (REF_OPENKEYSTORE, "\"OpenKeyStore Project\", " +
+            externalWebReference ("https://github.com/cyberphone/openkeystore"));
+
         addReferenceEntry (REF_WEBIDL, "C. McCormack, " +
             "\"Web IDL\", W3C Candidate Recommendation, " +
             "April&nbsp;2012. <br>" +
-            externalWebReference ("http://www.w3.org/TR/2012/CR-WebIDL-20120419/"));
+            externalWebReference ("https://www.w3.org/TR/2012/CR-WebIDL-20120419/"));
+
+        addReferenceEntry (REF_ES6, "A. Wirfs-Brock, " +
+            "\"ECMAScript 2015 Language Specification\", ECMA-262, " +
+            "June&nbsp;2015. <br>" +
+            externalWebReference ("http://www.ecma-international.org/ecma-262/6.0/ECMA-262.pdf"));
+
+        addReferenceEntry (REF_V8,
+            "\"Chrome V8\", Google Chrome JavaScript Engine, " +
+            externalWebReference ("https://developers.google.com/v8/"));
 
         addReferenceEntry (REF_JWS,
            "M. Jones, J. Bradley, N. Sakimura, \"JSON Web Signature (JWS)\", " +
@@ -1066,7 +1088,7 @@ public class JSONBaseHTML
                                  .append ("</td></tr></table>");
       }
 
-    static String makeLink (String header) throws IOException
+    public static String makeLink (String header) throws IOException
       {
         StringBuffer buffer = new StringBuffer ();
         for (char c : header.toCharArray ())
@@ -1297,8 +1319,10 @@ public class JSONBaseHTML
                           "The currently recognized asymmetric key algorithms include:" +
                           enumerateStandardAlgorithms (AsymSignatureAlgorithms.values (), false, true) +
                           (reference ? "For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) +
-                          "." + Types.LINE_SEPARATOR + "A subset of the signature algorithms may also be expressed in the " + createReference (REF_JWS) + " notation:" +
-                          enumerateJOSEAlgorithms (sym_plus_asym.toArray (new CryptoAlgorithms[0])) : ""));
+                          "." + Types.LINE_SEPARATOR : ""))
+              .addString ("A subset of the signature algorithms may also be expressed in the JWS " +
+                          createReference (REF_JWS) + " notation:")
+              .addString (enumerateJOSEAlgorithms (sym_plus_asym.toArray (new CryptoAlgorithms[0])));
         if (key_id_option)
           {
           row_interface = row_interface
@@ -1312,7 +1336,7 @@ public class JSONBaseHTML
                .setUsage (false)
             .newColumn ()
               .addString (option)
-              .addString ("Application-specific string identifying the signature key.");
+              .addString ("Application specific string identifying the signature key.");
           }
         row_interface
           .newRow ()
@@ -1370,13 +1394,15 @@ public class JSONBaseHTML
         .newColumn ()
           .addString (option)
           .addString ("Signature certificate attribute data for usage with the <code>" +
-                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
+                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option.")
+          .addString (reference ?
+                      Types.LINE_SEPARATOR +
                       "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
                       "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                       "</code>." + Types.LINE_SEPARATOR +
                       "Note: due to the fact that X.500 name comparisons have turned out (in practice) to " +
                       "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + 
-                      "</code> option <i>should only be used in specific environments</i>.");
+                      "</code> option <i>should only be used in specific environments</i>." : "");
        if (extension_option != null)
           {
             row_interface = row_interface
@@ -1405,7 +1431,7 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("The signature data.")
-              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the JOSE " +  createReference (REF_JWS) + " specifications.":"")
+              .addString (reference ? " Note that the <i>binary</i> representation <b>must</b> follow the JWS " +  createReference (REF_JWS) + " specifications.":"")
                        .setNotes (reference ? 
                    "Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
@@ -1455,9 +1481,11 @@ public class JSONBaseHTML
                 .addString (reference ?
   "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
   ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference (REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
-  "The algorithm names were derived from the SKS " + createReference (REF_SKS) + " specification. " + Types.LINE_SEPARATOR +
-  "A subset of the EC curves may also be expressed in the JOSE " +  createReference (REF_JWS) + 
-  " notation: " + enumerateJOSEAlgorithms (KeyAlgorithms.values ()) : "")
+  "The algorithm names were derived from the SKS " + createReference (REF_SKS) + " specification. " + 
+  Types.LINE_SEPARATOR : "")
+                 .addString ("A subset of the EC curves may also be expressed in the JWS " +  createReference (REF_JWS) + 
+                             " notation:")
+                 .addString (enumerateJOSEAlgorithms (KeyAlgorithms.values ()))
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X_JSON)
@@ -1467,12 +1495,14 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point X. The length of this field <b>must</b> " +
+              .addString ("EC curve point X.")
+              .addString (reference ?
+                          " The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
-              .addString (KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS))
-              .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes")
+                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS) +
+                          "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.Y_JSON)
@@ -1482,12 +1512,14 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("EC curve point Y. The length of this field <b>must</b> " +
+              .addString ("EC curve point Y.")
+              .addString (reference ?
+                          " The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>")
-              .addString (KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS))
-              .addString ("</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
+                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS) +
+                          "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "");
 
         addSubItemTable (JCS_PUBLIC_KEY_RSA)
           .newRow ()
