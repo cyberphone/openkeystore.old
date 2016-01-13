@@ -10,7 +10,7 @@
             "publicKey": 
                 {
                     "type": "EC", 
-                    "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+                    "curve": "P-256",
                     "x": "tQXczn7qxGgcLpOVBuw5i-tMHxbJTUF6k3RZGsjdauc",
                     "y": "jIlm8sXwknZeQQDTxkfwXKUdhubt6JcqQYA6S8Dm3AE"
                 }
@@ -26,7 +26,7 @@
     "serverCertificateFingerPrint": "HwKCofkqkTFXRmyyb_CnWhAcTbQF7w8rl1OqCwyM4TM",
     "signature": 
         {
-            "algorithm": "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
+            "algorithm": "HS256",
             "value": "nnzNSZUZw1qlGVydZZ3ssCVIZTznyHwDXlOpLMpI3Lo"
         }
 }

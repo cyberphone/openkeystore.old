@@ -73,7 +73,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 "step is handled by a specific request/response pair as outlined below:" + 
                       "<table style=\"width:600pt;margin-top:10pt;margin-left:auto;margin-right:auto;border-collapse:collapse\">");
             bar (10);
-            sign ("Invocation", "Protocol invocation. During this step the user should be alerted by a browser-defined dialog " +
+            sign ("Invocation", "Protocol invocation. During this step the user should be alerted by a browser defined dialog " +
                   "telling what is supposed to happen giving as well as providing an option aborting the process. "+
                   "In addition, the issuer <i>may</i> perform a client platform capability query.");
             bar (14);
@@ -83,9 +83,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             sign ("CredentialDiscovery", "<i>Optional</i>: Issuer lookup of already provisioned SKS credentials. " +
                   "This is primarily used when keys need to be updated or unlocked.");
             bar (14);
-            sign ("KeyCreation", "Creation of asymmetric key-pairs in the SKS. " +
+            sign ("KeyCreation", "Creation of asymmetric key pairs in the SKS. " +
                   "If user-defined PINs are to be set, this is carried out during " + json.globalLinkRef (KeyGen2Messages.KEY_CREATION_REQUEST.getName ()) + ". " +
-                  "After key-pairs have been created the public keys are sent to the issuer for certification.");
+                  "After key pairs have been created the public keys are sent to the issuer for certification.");
             bar (14);
             sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes as well as " +
                   "key management operations are performed in this step. " +
@@ -410,34 +410,34 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         createOption (CertificateFilter.CF_ISSUER_REG_EX, WEBPKI_DATA_TYPES.STRING, false, 
             "Regular expression matching any issuer in the <i>certificate path</i>. " +
             "Issuer names are assumed to be expressed in LDAP " + json.createReference (JSONBaseHTML.REF_LDAP_NAME) + " notation.");
-        createOption (CertificateFilter.CF_SERIAL_NUMBER, WEBPKI_DATA_TYPES.BIGINT, false, "Serial number matching that of the <i>end-entity certificate</i>.");
+        createOption (CertificateFilter.CF_SERIAL_NUMBER, WEBPKI_DATA_TYPES.BIGINT, false, "Serial number matching that of the <i>end entity certificate</i>.");
         createOption (CertificateFilter.CF_SUBJECT_REG_EX, WEBPKI_DATA_TYPES.STRING, false, 
-            "Regular expression matching the subject in the <i>end-entity certificate</i>. " + 
+            "Regular expression matching the subject in the <i>end entity certificate</i>. " + 
             "Subject names are assumed to be expressed in LDAP " + json.createReference (JSONBaseHTML.REF_LDAP_NAME) + " notation.");
-        createOption (CertificateFilter.CF_EMAIL_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>." + LINE_SEPARATOR +
+        createOption (CertificateFilter.CF_EMAIL_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end entity certificate</i>." + LINE_SEPARATOR +
             "Note that both RFC&nbsp;822 subject attributes and <code>subjectAltName</code> fields are in scope.");
         createOption (CertificateFilter.CF_POLICY_RULES, WEBPKI_DATA_TYPES.STRING, true,
              "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
              "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
-             "Policy OIDs encountered in <i>end-entity certificates</i> that " +
+             "Policy OIDs encountered in <i>end entity certificates</i> that " +
              "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (CertificateFilter.CF_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
              "List of X.509 key usage flags using the notation <code>&quot;" +
              KeyUsageBits.DIGITAL_SIGNATURE.getX509Name () + "&quot;</code> and <code style=\"white-space:nowrap\">&quot;-" +
              KeyUsageBits.DATA_ENCIPHERMENT.getX509Name () + "&quot;</code> " +
              "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
-             "Key usage flags encountered in <i>end-entity certificates</i> that " +
+             "Key usage flags encountered in <i>end entity certificates</i> that " +
              "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>. " + LINE_SEPARATOR +
              "The set of permitted flags include:" + getKeyUsageBits ());
         createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
              "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
              "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
-             "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
+             "Extended key usage OIDs encountered in <i>end entity certificates</i> that " +
              "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
-        createOption (ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued before this date." + LINE_SEPARATOR +
+        createOption (ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end entity certificates</i> issued before this date." + LINE_SEPARATOR +
              "Note that you can combine this condition with an <code>" + 
              ISSUED_AFTER_JSON + "</code> condition using an earlier date, effectively creating a time window.");
-        createOption (ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued after this date.");
+        createOption (ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end entity certificates</i> issued after this date.");
         createOption (GROUPING_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createPinPolicy." + GROUPING_JSON + "</code> attribute." + LINE_SEPARATOR +
              "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
         createOption (APP_USAGE_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createKeyEntry." + APP_USAGE_JSON + "</code> attribute.");
@@ -594,7 +594,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                      "mandates a two-layer client architecture</i> where the " +
                      "outermost part is talking to the outside world (user and issuer), " +
                      "while an inner part does the communication with the SKS. " +
-                     "That is, the client implementation acts as &quot;proxy&quot; enabling the use of a cleartext, JSON-based, " +
+                     "That is, the client implementation acts as &quot;proxy&quot; enabling the use of a cleartext, JSON based, " +
                      "fairly high-level protocol with issuer, in spite of the fact that SKS only deals with " +
                      "low-level binary data." + LINE_SEPARATOR +
                      "Another core proxy task is minimizing network roundtrips through SKS command aggregation." + LINE_SEPARATOR +
@@ -610,7 +610,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphSubObject ("Invocation").append (json.addInvocationText ("KeyGen2",
                                                           InvocationRequestDecoder.class));
 
-        json.addParagraphSubObject (SECTION_HTTP_DEPENDENCIES).append ("KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json;&nbsp;charset=utf-8</code>."  + LINE_SEPARATOR +
+        json.addParagraphSubObject (SECTION_HTTP_DEPENDENCIES).append ("KeyGen2 objects transferred through HTTP <b>must</b> use the Content-Type <code>application/json</code>."  + LINE_SEPARATOR +
                                     "Since KeyGen2 is to be regarded as an intrinsic part of the browser, HTTP cookies <b>must</b> be handled as for other HTTP requests.");
 
         json.addParagraphSubObject ("Error Handling").append ("Errors occurring on the <i>client's side</i> <b>must</b> terminate the session " +
@@ -620,7 +620,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                     json.globalLinkRef (SECTION_HTTP_DEPENDENCIES) + "), the client session <b>must</b> be terminated." + LINE_SEPARATOR +
                                     "Whenever a KeyGen2 client session is aborted, the proxy <i>should</i> also abort the associated, potentially active SKS provisioning session (see <code>abortProvisioningSession</code>).");
         
-        json.addParagraphSubObject ("Key Management Operations").append ("KeyGen2 provides built-in support for the SKS key-management operations " +
+        json.addParagraphSubObject ("Key Management Operations").append ("KeyGen2 provides built-in support for the SKS key management operations " +
                                     "<code>postUnlockKey</code>, <code>postDeleteKey</code>, <code>postUpdateKey</code> and <code>postCloneKeyProtection</code>." + LINE_SEPARATOR +
                                     "In the case the exact key is not known in advance, you <b>must</b> include a key discovery sequence as described in " +
                                     json.createReference (JSONBaseHTML.REF_SKS) + " <i>Appendix D, Remote Key Lookup</i>."); 
@@ -672,11 +672,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
  "<tr><td colspan=\"2\">The following provider wants to create a<br>login credential for you:</td></tr>" +
  "<tr><td colspan=\"2\" style=\"text-align:center;padding-bottom:15pt\"><div style=\"display:inline-block\" class=\"dlgtext\">issuer.example.com</div></td></tr>") +
  "If the user accepts the request, the following response is sent to the server at the address specified by " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName (), SUBMIT_URL_JSON) + ":"),
-                        new ProtocolStep ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key-pair</i> and returns the public part to the client<br>together with other session parameters:"),
-                        new ProtocolStep ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key-pair</i> and sends the public part back to the server " +
- "including a client<br>session-ID, key-attestation, device-certificate, etc.:"),
+                        new ProtocolStep ("InvocationResponse.json", "When the server has received the response above, it creates an <i>ephemeral EC key pair</i> and returns the public part to the client<br>together with other session parameters:"),
+                        new ProtocolStep ("ProvisioningInitializationRequest.json", "Next the client generates a <i>matching ephemeral EC key pair</i> and sends the public part back to the server " +
+ "including a client<br>session-ID, key attestation, device-certificate, etc.:"),
                         new ProtocolStep ("ProvisioningInitializationResponse.json", "After these message exchanges, the SKS and server (issuer) have established a <i>shared session-key</i>, " +
- "which is used for securing the<br>rest of the session through MAC- and encryption-operations." +
+ "which is used for securing the<br>rest of the session through MAC and encryption operations." +
  "<br>&nbsp;<br>SKS API Reference: <code>createProvisioningSession</code>.<br>&nbsp;<br>" +
  "In the sample a request for creating a key is subsequently returned to the client:"),
                         new ProtocolStep ("KeyCreationRequest.json", "After the browser has received this message, a dialog like the following is " +
@@ -686,7 +686,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 "<tr><td colspan=\"2\" style=\"padding-top:0px\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>" +
 "<tr><td colspan=\"2\">Repeat PIN:</td></tr>" +
 "<tr><td colspan=\"2\" style=\"padding-top:0px;padding-bottom:15pt\"><div class=\"dlgtext\">&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;</div></td></tr>") +
-"When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key-pair is created and the public part of the<br>key-pair is sent to the server for certification as shown " +
+"When the user has set a PIN <i>matching the issuer's policy</i> and hit &quot;OK&quot;, the requested key pair is created and the public part of the<br>key pair is sent to the server for certification as shown " +
 "in the response below." +
 "<br>&nbsp;<br>SKS API References: <code>createPinPolicy</code>, <code>createKeyEntry</code>."),
                         new ProtocolStep ("KeyCreationResponse.json", "The server responds by issuing a matching certificate including an associated logotype." +
@@ -707,8 +707,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-12-08", "0.71", "Aligned KeyGen2 with the updated " + json.createReference (JSONBaseHTML.REF_SKS) + " and " + 
                                      json.createReference (JSONBaseHTML.REF_JCS) + " specifications");
         json.addDocumentHistoryLine ("2015-01-12", "0.72", "Updated version to match ECDSA signature encoding change");
+        json.addDocumentHistoryLine ("2016-01-11", "0.73", "Added JOSE algorithm support");
 
-        json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
+        json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
+                                     "of the OpenKeyStore project " +
+                                     json.createReference (JSONBaseHTML.REF_OPENKEYSTORE)  + ".");
 
         preAmble (KeyGen2Messages.INVOCATION_REQUEST.getName ())
           .newRow ()
@@ -893,7 +896,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "The <code>" + VIRTUAL_ENVIRONMENT_JSON + "</code> option is intended to support BYOD " +
                           "use-cases where the provisioning process bootstraps an alternative " +
                           "environment and associated policies." + LINE_SEPARATOR +
-                          "Since the exact nature of such an environment is platform-dependent, it is necessary " +
+                          "Since the exact nature of such an environment is platform dependent, it is necessary " +
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
@@ -906,13 +909,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addLink (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
               .addString (" could be:" + LINE_SEPARATOR +
                           "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITIES_JSON +
-                          "&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                          "&quot;:&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
                           "&quot;" + TYPE_JSON + "&quot;:&nbsp;" +
                           "&quot;" +
                           KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT +
-                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + VALUES_JSON +
+                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + VALUES_JSON +
                           "&quot;:&nbsp;[&quot;http://extreme-vm.com/type.3" +
-                          "&quot;]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]</code>" + LINE_SEPARATOR + 
+                          "&quot;]<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
                           "If a virtual environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
                           "Note that the <code>" +
                           VIRTUAL_ENVIRONMENT_JSON +
@@ -1067,7 +1070,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                                      "List of key entries to be created. " +
                                                      "See <code>SKS:createKeyEntry</code>."))
           .newExtensionRow (new OptionalSignature ()).setNotes (
-              "Due to the stateful MAC-scheme featured in SKS, " +
+              "Due to the stateful MAC scheme featured in SKS, " +
               "the properties beginning with <code>" + PUK_POLICY_SPECIFIERS_JSON + "</code> " +
               "and ending with <code>" + KEY_ENTRY_SPECIFIERS_JSON + "</code>, <b>must</b> " +
               "<i>be generated (by the issuer) and executed (by the SKS) in " +
@@ -1084,10 +1087,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC-scheme featured in SKS, " +
+              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC scheme featured in SKS, " +
                           "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
                           "<i>be encoded (by the SKS) and decoded (by the issuer) in exactly the same " +
-                          "order (message-wise) as they are encountered in the associated</i>  <a href=\"#" +
+                          "order (message wise) as they are encountered in the associated</i>  <a href=\"#" +
                            KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
                            "(including those embedded by <a href=\"#" +
                            KeyGen2Messages.KEY_CREATION_REQUEST.getName () + "." + PIN_POLICY_SPECIFIERS_JSON + "\">" + PIN_POLICY_SPECIFIERS_JSON + "</a>).");
@@ -1099,7 +1102,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                                      1,
                  "<i>Optional:</i> List of issued credentials. See <code>" +
                  "SKS:setCertificatePath</code>.")).setNotes (
-                     "Due to the stateful MAC-scheme featured in SKS, " +
+                     "Due to the stateful MAC scheme featured in SKS, " +
                      "the properties beginning with <code>" + ISSUED_CREDENTIALS_JSON + "</code> " +
                      "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <b>must</b> " +
                      "<i>be generated (by the issuer) and executed (by the SKS) in exactly " +
@@ -1124,7 +1127,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("See <code>SKS:closeProvisioningSession</code>.")
           .newExtensionRow (new MAC ("closeProvisioningSession"))
             .addString (LINE_SEPARATOR +
-                 "Due to the stateful MAC-scheme featured in SKS, this " +
+                 "Due to the stateful MAC scheme featured in SKS, this " +
                  "<code>" + MAC_JSON + "</code> " +
                  "<b>must</b> be the final of a provisioning session both during encoding and decoding.")
           .newExtensionRow (new OptionalSignature ());
@@ -1710,7 +1713,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               1,
               "<i>Optional:</i> List of logotype objects. See <code>" +
               "SKS:addExtension</code>.")).setNotes (
-                  "Due to the stateful MAC-scheme featured in SKS, " +
+                  "Due to the stateful MAC scheme featured in SKS, " +
                   "the properties beginning with <code>" + IMPORT_SYMMETRIC_KEY_JSON + "</code> " +
                   "and ending with <code>" + LOGOTYPES_JSON + "</code>, <b>must</b> " +
                   "<i>be generated (by the issuer) and executed (by the SKS) in " +

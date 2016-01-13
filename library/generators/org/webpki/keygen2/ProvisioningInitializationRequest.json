@@ -12,7 +12,7 @@
             "publicKey": 
                 {
                     "type": "EC", 
-                    "curve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+                    "curve": "P-256",
                     "x": "cpxUxJVt-is8bgWRFm6RuvUkxyv7xJ7PbeT1BCQNNws",
                     "y": "De7jXYsdL46ikHOWeC-V-AcNM/RURpu6ZgcVAxLUwns"
                 }
