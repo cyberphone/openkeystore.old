@@ -342,56 +342,47 @@ public class JSONObjectWriter implements Serializable
            .
            .
 
-        public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
-          {
-            // Create an empty JSON document
-            JSONObjectWriter writer = new JSONObjectWriter ();
-        
-            // Fill it with some data
-            writer.setString ("MyProperty", "Some data");
-             
-            // Sign the document
-            writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
-              {
-                {@literal @}Override
-                public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
-                  {
-                    try
-                      {
-                        return new SignatureWrapper (algorithm, private_key)
-                            .update (data)
-                            .sign ();
-                      }
-                    catch (GeneralSecurityException e)
-                      {
-                        throw new IOException (e);
-                      }
-                  }
-        
-                {@literal @}Override
-                public PublicKey getPublicKey () throws IOException
-                  {
-                    return public_key;
-                  }
-              }));
-              
-            // Serialize the document
-            byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
-        
-            // Print the signed document on the console
-            System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
-              
-            // Parse the document
-            JSONObjectReader reader = JSONParser.parse (json);
-             
-            // Get and verify the signature
-            JSONSignatureDecoder json_signature = reader.getSignature ();
-            json_signature.verify (new JSONAsymKeyVerifier (public_key));
-             
-            // Print the document payload on the console
-            System.out.println ("Returned data: " + reader.getString ("MyProperty"));
+    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+    
+      // Create an empty JSON document
+      JSONObjectWriter writer = new JSONObjectWriter();
+    
+      // Fill it with some data
+      writer.setString("myProperty", "Some data");
+    
+      // Sign document
+      writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
+        @Override
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+          try {
+            return new SignatureWrapper(algorithm, privateKey).update(data).sign();
+          } catch (GeneralSecurityException e) {
+            throw new IOException(e);
           }
-     </pre>
+        }
+        @Override
+        public PublicKey getPublicKey() throws IOException {
+          return publicKey;
+        }
+      }));
+    
+      // Serialize document
+      String json = writer.toString();
+    
+      // Print document on the console
+      System.out.println("Signed doc: " + json);
+    
+      // Parse document
+      JSONObjectReader reader = JSONParser.parse(json);
+    
+      // Get and verify signature
+      JSONSignatureDecoder signature = reader.getSignature();
+      signature.verify(new JSONAsymKeyVerifier(publicKey));
+    
+      // Print document payload on the console
+      System.out.println("Returned data: " + reader.getString("myProperty"));
+    }
+</pre>
 */
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
@@ -463,19 +454,6 @@ public class JSONObjectWriter implements Serializable
         return this;
       }
 
-    void beginObject (boolean array_flag)
-      {
-        indentLine ();
-        spaceOut ();
-        if (array_flag)
-          {
-            indent++;
-            buffer.append ('[');
-          }
-        buffer.append ('{');
-        indentLine ();
-      }
-
     void newLine ()
       {
         if (pretty_print)
@@ -494,15 +472,6 @@ public class JSONObjectWriter implements Serializable
         indent -= indent_factor;
       }
 
-    void endObject ()
-      {
-        newLine ();
-        undentLine ();
-        spaceOut ();
-        undentLine ();
-        buffer.append ('}');
-      }
-
     @SuppressWarnings("unchecked")
     void printOneElement (JSONValue json_value)
       {
@@ -513,8 +482,7 @@ public class JSONObjectWriter implements Serializable
               break;
   
             case OBJECT:
-              newLine ();
-              printObject ((JSONObject) json_value.value, false);
+              printObject ((JSONObject) json_value.value);
               break;
   
             default:
@@ -522,9 +490,24 @@ public class JSONObjectWriter implements Serializable
           }
       }
 
-    void printObject (JSONObject object, boolean array_flag)
+    void newUndentSpace ()
       {
-        beginObject (array_flag);
+        newLine ();
+        undentLine ();
+        spaceOut ();
+      }
+
+    void newIndentSpace ()
+      {
+        newLine ();
+        indentLine ();
+        spaceOut ();
+      }
+
+    void printObject (JSONObject object)
+      {
+        buffer.append ('{');
+        indentLine ();
         boolean next = false;
         for (String property : object.properties.keySet ())
           {
@@ -538,17 +521,19 @@ public class JSONObjectWriter implements Serializable
             printProperty (property);
             printOneElement (json_value);
           }
-        endObject ();
+        newUndentSpace ();
+        buffer.append ('}');
       }
 
     @SuppressWarnings("unchecked")
     void printArray (Vector<JSONValue> array, boolean array_flag)
       {
-         if (array.isEmpty ())
+        if (array_flag) 
           {
-            buffer.append ('[');
+            newIndentSpace ();
           }
-        else
+         buffer.append ('[');
+         if (!array.isEmpty ())
           {
             boolean mixed = false;
             JSONTypes first_type = array.firstElement ().type;
@@ -564,7 +549,6 @@ public class JSONObjectWriter implements Serializable
               }
             if (mixed)
               {
-                buffer.append ('[');
                 boolean next = false;
                 for (JSONValue value : array)
                   {
@@ -585,10 +569,7 @@ public class JSONObjectWriter implements Serializable
               }
             else if (first_type == JSONTypes.ARRAY)
               {
-                newLine ();
-                indentLine ();
-                spaceOut ();
-                buffer.append ('[');
+                newIndentSpace ();
                 boolean next = false;
                 for (JSONValue value : array)
                   {
@@ -604,9 +585,7 @@ public class JSONObjectWriter implements Serializable
                       }
                     if (extra_pretty)
                       {
-                        newLine ();
-                        indentLine ();
-                        spaceOut ();
+                        newIndentSpace ();
                       }
                     printArray (sub_array, true);
                     if (extra_pretty)
@@ -614,19 +593,21 @@ public class JSONObjectWriter implements Serializable
                         undentLine ();
                       }
                   }
-                newLine ();
-                spaceOut ();
-                undentLine ();
+                newUndentSpace ();
               }
             else
               {
-                printArraySimple (array, array_flag);
+                printArraySimple (array);
               }
+          }
+        if (array_flag) 
+          {
+            newUndentSpace ();
           }
         buffer.append (']');
       }
 
-    void printArraySimple (Vector<JSONValue> array, boolean array_flag)
+    void printArraySimple (Vector<JSONValue> array)
       {
         int i = 0;
         for (JSONValue value : array)
@@ -635,13 +616,6 @@ public class JSONObjectWriter implements Serializable
           }
         boolean broken_lines = i > 100;
         boolean next = false;
-        if (broken_lines && !array_flag)
-          {
-            indentLine ();
-            newLine ();
-            spaceOut ();
-          }
-        buffer.append ('[');
         if (broken_lines)
           {
             indentLine ();
@@ -666,30 +640,26 @@ public class JSONObjectWriter implements Serializable
           }
         if (broken_lines)
           {
-            undentLine ();
-            newLine ();
-            spaceOut ();
-            if (!array_flag)
-              {
-                undentLine ();
-              }
+            newUndentSpace ();
           }
       }
 
     void printArrayObjects (Vector<JSONValue> array)
       {
+        newIndentSpace ();
         boolean next = false;
         for (JSONValue value : array)
           {
             if (next)
               {
                 buffer.append (',');
+                newLine ();
+                spaceOut ();
               }
-            newLine ();
-            printObject ((JSONObject)value.value, !next);
+            printObject ((JSONObject)value.value);
             next = true;
           }
-        indent--;
+        newUndentSpace ();
       }
 
     @SuppressWarnings("fallthrough")
@@ -860,7 +830,6 @@ public class JSONObjectWriter implements Serializable
       {
         buffer = new StringBuffer ();
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
-        indent = -indent_factor;
         pretty_print = output_format.pretty;
         java_script_mode = output_format.javascript;
         html_mode = output_format.html;
@@ -874,7 +843,7 @@ public class JSONObjectWriter implements Serializable
           }
         else
           {
-            printObject (root, false);
+            printObject (root);
           }
         if (java_script_mode)
           {

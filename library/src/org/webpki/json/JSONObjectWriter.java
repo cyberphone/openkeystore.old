@@ -342,56 +342,47 @@ public class JSONObjectWriter implements Serializable
            .
            .
 
-        public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
-          {
-            // Create an empty JSON document
-            JSONObjectWriter writer = new JSONObjectWriter ();
-        
-            // Fill it with some data
-            writer.setString ("MyProperty", "Some data");
-             
-            // Sign the document
-            writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
-              {
-                {@literal @}Override
-                public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
-                  {
-                    try
-                      {
-                        return new SignatureWrapper (algorithm, private_key)
-                            .update (data)
-                            .sign ();
-                      }
-                    catch (GeneralSecurityException e)
-                      {
-                        throw new IOException (e);
-                      }
-                  }
-        
-                {@literal @}Override
-                public PublicKey getPublicKey () throws IOException
-                  {
-                    return public_key;
-                  }
-              }));
-              
-            // Serialize the document
-            byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
-        
-            // Print the signed document on the console
-            System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
-              
-            // Parse the document
-            JSONObjectReader reader = JSONParser.parse (json);
-             
-            // Get and verify the signature
-            JSONSignatureDecoder json_signature = reader.getSignature ();
-            json_signature.verify (new JSONAsymKeyVerifier (public_key));
-             
-            // Print the document payload on the console
-            System.out.println ("Returned data: " + reader.getString ("MyProperty"));
+    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+    
+      // Create an empty JSON document
+      JSONObjectWriter writer = new JSONObjectWriter();
+    
+      // Fill it with some data
+      writer.setString("myProperty", "Some data");
+    
+      // Sign document
+      writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
+        @Override
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+          try {
+            return new SignatureWrapper(algorithm, privateKey).update(data).sign();
+          } catch (GeneralSecurityException e) {
+            throw new IOException(e);
           }
-     </pre>
+        }
+        @Override
+        public PublicKey getPublicKey() throws IOException {
+          return publicKey;
+        }
+      }));
+    
+      // Serialize document
+      String json = writer.toString();
+    
+      // Print document on the console
+      System.out.println("Signed doc: " + json);
+    
+      // Parse document
+      JSONObjectReader reader = JSONParser.parse(json);
+    
+      // Get and verify signature
+      JSONSignatureDecoder signature = reader.getSignature();
+      signature.verify(new JSONAsymKeyVerifier(publicKey));
+    
+      // Print document payload on the console
+      System.out.println("Returned data: " + reader.getString("myProperty"));
+    }
+</pre>
 */
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
