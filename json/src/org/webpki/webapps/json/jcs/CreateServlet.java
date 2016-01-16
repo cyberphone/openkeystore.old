@@ -154,6 +154,7 @@ public class CreateServlet extends HttpServlet
                   arrayWriter.setDouble (arrayReader.getDouble ());
                   break;
                 case NULL:
+                  arrayReader.scanAway ();
                   arrayWriter.setNULL ();
                   break;
                 case BOOLEAN:
