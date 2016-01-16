@@ -10,7 +10,8 @@
   <property name="keypassword" value="foo123"/>
   <property name="keyfilext" value=".p12"/>
   <property name="key_dir" location="keys"/>
-
+  <property name="logotype_dir" location="logotype"/>
+  
   <property name="clientroot" value="mybank-clientroot"/>
   <property name="clientkey_rsa" value="mybank-client-key-rsa"/>
   <property name="clientkey_ec" value="mybank-client-key-ec"/>
@@ -115,7 +116,8 @@
       </lib>
       <fileset dir="web"/>
       <zipfileset dir="${key_dir}" prefix="${class_war_path}"/>
-    </war>
+      <zipfileset dir="${logotype_dir}" prefix="${class_war_path}"/>
+      </war>
   </target>
 
   <target name="tomcat" depends="_init">

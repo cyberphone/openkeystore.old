@@ -16,8 +16,9 @@
  */
 package org.webpki.webapps.json.jcs;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,9 +26,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.webpki.crypto.CustomCryptoProvider;
-
 import org.webpki.crypto.KeyStoreReader;
-
+import org.webpki.util.ArrayUtil;
 import org.webpki.webutil.InitPropertyReader;
 
 public class JCSService extends InitPropertyReader implements ServletContextListener
@@ -39,6 +39,16 @@ public class JCSService extends InitPropertyReader implements ServletContextList
     static KeyStore clientkey_rsa;
 
     static KeyStore clientkey_ec;
+    
+    static String logotype;
+
+    InputStream getResource(String name) throws IOException {
+      InputStream is = this.getClass().getResourceAsStream(name);
+      if (is == null) {
+          throw new IOException("Resource fail for: " + name);
+      }
+      return is;
+    }
 
     @Override
     public void contextDestroyed (ServletContextEvent event)
@@ -51,10 +61,19 @@ public class JCSService extends InitPropertyReader implements ServletContextList
         initProperties (event);
         try
           {
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Logotype
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            logotype = new String(
+                ArrayUtil.getByteArrayFromInputStream(getResource("webpki-logo.svg")), "UTF-8");
+
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Keys
+            ////////////////////////////////////////////////////////////////////////////////////////////
             CustomCryptoProvider.forcedLoad (getPropertyBoolean ("bouncycastle_first"));
             key_password = getPropertyString ("key_password");
-            clientkey_rsa = KeyStoreReader.loadKeyStore (JCSService.class.getResourceAsStream (getPropertyString ("clientkey_rsa")), key_password);
-            clientkey_ec = KeyStoreReader.loadKeyStore (JCSService.class.getResourceAsStream (getPropertyString ("clientkey_ec")), key_password);
+            clientkey_rsa = KeyStoreReader.loadKeyStore (getResource (getPropertyString ("clientkey_rsa")), key_password);
+            clientkey_ec = KeyStoreReader.loadKeyStore (getResource (getPropertyString ("clientkey_ec")), key_password);
             logger.info ("JCS Demo Successfully Initiated");
           }
         catch (Exception e)

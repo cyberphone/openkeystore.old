@@ -129,9 +129,13 @@ public class HTML
           {
             s.append (' ').append (bodyscript);
           }
-        s.append ("><div style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\">" +
-                  "<a href=\"http://webpki.org\" title=\"WebPKI.org\"><img src=\"images/webpki-logo.gif\" style=\"border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0\" alt=\"WebPKI.org logo...\"></a></div>" +
-                  "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">").append (box).append ("</table></body></html>");
+        s.append (
+            "><div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;" +
+            "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\"" +
+            " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
+         .append (JCSService.logotype)
+         .append ("</div><table cellapdding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
+            .append(box).append("</table></body></html>");
         return s.toString ();
       }
     
@@ -178,8 +182,6 @@ public class HTML
                    "<tr><td align=\"left\"><a href=\"" + baseurl + "/create\">Create a JCS on the server</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\"><i>Experimental:</i> <a href=\"" + baseurl + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\">URL for testing with a client device: <a href=\"" + request_url + "\">" + request_url + "</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/openkeystore/resources/docs/jcs.html\">JCS Documentation</a></td></tr>" +
                  "</table></td></tr>"));
@@ -427,12 +429,13 @@ public class HTML
                          "}") +
                      "</td></tr>" +
                "<tr><td align=\"center\"><table>" +
-                 "<tr><td valign=\"middle\" rowspan=\"5\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
+                 "<tr><td valign=\"middle\" rowspan=\"6\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
                  "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.JOSE_FLAG + "\" checked value=\"true\">JOSE Algorithms</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.ES6_FLAG + "\" value=\"true\">Normalize data according to ES6/V8</td><td>" +
                  "</table></td></tr>" +
                "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>" +
              "</form></table></td></tr>"));

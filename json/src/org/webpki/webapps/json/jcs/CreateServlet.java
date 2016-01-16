@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 
@@ -34,8 +37,9 @@ public class CreateServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
-    static final String KEY_TYPE = "keytype";
+    static final String KEY_TYPE  = "keytype";
     static final String JOSE_FLAG = "jose";
+    static final String ES6_FLAG  = "es6";
     
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
@@ -65,6 +69,7 @@ public class CreateServlet extends HttpServlet
         request.setCharacterEncoding ("UTF-8");
         String json_object = getTextArea (request);
         GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
+        boolean es6 = new Boolean (request.getParameter (ES6_FLAG));
         String key_type = request.getParameter (KEY_TYPE);
         boolean jose = new Boolean (request.getParameter (JOSE_FLAG));
         for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values ())
@@ -77,12 +82,14 @@ public class CreateServlet extends HttpServlet
           }
         try
           {
-            byte[] signed_json = new GenerateSignature (action, jose).sign (new JSONObjectWriter (JSONParser.parse (json_object)));
-/*
-            response.sendRedirect (ServletUtil.getContextURL (request) + 
-                                   "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                                   Base64URL.encode (signed_json));
-*/
+            JSONObjectReader reader = JSONParser.parse (json_object);
+            JSONObjectWriter writer = new JSONObjectWriter (reader);
+            if (es6) 
+              {
+                writer = new JSONObjectWriter ();
+                es6Normalize (reader, writer);
+              }
+            byte[] signed_json = new GenerateSignature (action, jose).sign (writer);
             RequestDispatcher rd = request.getRequestDispatcher ("request?" + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode (signed_json));
             rd.forward (request, response); 
           }
@@ -90,5 +97,86 @@ public class CreateServlet extends HttpServlet
           {
             HTML.errorPage (response,  e.getMessage ());
           }
+      }
+
+    void es6Normalize (JSONObjectReader reader, JSONObjectWriter writer) throws IOException
+      {
+        String[] properties = reader.getProperties ();
+        boolean changes = false;
+        do
+          {
+            changes = false;
+            int i = properties.length;
+            while (--i > 0)
+              {
+                if (getValue(properties[i - 1]) > getValue(properties[i]))
+                  {
+                    String save = properties[i - 1];
+                    properties[i - 1] =  properties[i];
+                    properties[i] = save;
+                    changes = true;
+                  }
+              }
+          }
+        while (changes);
+        for (String property : properties)
+          {
+            switch (reader.getPropertyType (property)) 
+              {
+                case NUMBER:
+                  writer.setDouble (property, reader.getDouble (property));
+                  break;
+                case NULL:
+                  writer.setNULL (property);
+                  break;
+                case BOOLEAN:
+                  writer.setBoolean (property, reader.getBoolean (property));
+                  break;
+                case STRING:
+                  writer.setString (property, reader.getString (property));
+                  break;
+                case ARRAY:
+                  rewriteArray(reader.getArray (property), writer.setArray (property));
+                  break;
+                default:
+                  es6Normalize(reader.getObject (property), writer.setObject (property));
+              }
+          }
+      }
+
+    void rewriteArray (JSONArrayReader arrayReader, JSONArrayWriter arrayWriter) throws IOException
+      {
+        while (arrayReader.hasMore ())
+          {
+            switch (arrayReader.getElementType ())
+              {
+                case NUMBER:
+                  arrayWriter.setDouble (arrayReader.getDouble ());
+                  break;
+                case NULL:
+                  arrayWriter.setNULL ();
+                  break;
+                case BOOLEAN:
+                  arrayWriter.setBoolean (arrayReader.getBoolean ());
+                  break;
+                case STRING:
+                  arrayWriter.setString (arrayReader.getString ());
+                  break;
+                case ARRAY:
+                  rewriteArray (arrayReader.getArray (), arrayWriter.setArray ());
+                  break;
+                default:
+                  es6Normalize (arrayReader.getObject (), arrayWriter.setObject ());
+              }
+          }
+      }
+
+    long getValue (String property)
+      {
+        if (property.matches("\\d+"))
+          {
+            return Long.parseLong (property);
+          }
+        return Long.MAX_VALUE;
       }
   }
