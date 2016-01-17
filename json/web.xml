@@ -51,6 +51,12 @@
         <servlet-name>WebCryptoServlet</servlet-name>
         <servlet-class>org.webpki.webapps.json.jcs.WebCryptoServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>NoWebCryptoServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.json.jcs.NoWebCryptoServlet</servlet-class>
+    </servlet>
+
     <servlet>
         <servlet-name>CreateServlet</servlet-name>
         <servlet-class>org.webpki.webapps.json.jcs.CreateServlet</servlet-class>
@@ -75,7 +81,12 @@
         <servlet-name>WebCryptoServlet</servlet-name>
         <url-pattern>/webcrypto</url-pattern>
     </servlet-mapping>
-    
+
+    <servlet-mapping>
+        <servlet-name>NoWebCryptoServlet</servlet-name>
+        <url-pattern>/nowebcrypto</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>CreateServlet</servlet-name>
         <url-pattern>/create</url-pattern>
