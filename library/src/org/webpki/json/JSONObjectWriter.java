@@ -547,7 +547,7 @@ public class JSONObjectWriter implements Serializable
                     break;
                   }
               }
-            if (mixed)
+            if (mixed || (array.size() == 1 && first_type == JSONTypes.OBJECT))
               {
                 boolean next = false;
                 for (JSONValue value : array)

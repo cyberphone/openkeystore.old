@@ -235,6 +235,7 @@ public class HTML
              "</style></head>\n" +
             "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\"" + HOME + ">\n" +
             "<h3>WebCrypto / JCS Demo</h3>\n\n" +
+            "This demo only relies on ES6 and WebCrypto features and does not refer to any external libraries either." +
             "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n" +
             "<div id=\"pub.key\"></div>\n\n" +
             "<script>\n\n  // This code is supposed to be compliant with the WebCrypto draft...\n\n" +
@@ -296,9 +297,9 @@ public class HTML
               "//////////////////////////////////////////////////////////////////////////\n" +
               "// Nice-looking text-boxes                                              //\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
-              "function fancyDiv(header, content) {\n" +
-              "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;\\\n" + 
-              "           max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + content + '</div>';\n" +
+              "function fancyJSONBox(header, json) {\n" +
+              "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;" + 
+                        "max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + JSON.stringify(json) + '</div>';\n" +
               "}\n\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
               "// Error message helper                                                 //\n" +
@@ -324,11 +325,11 @@ public class HTML
               "    crypto.subtle.exportKey('jwk', pubKey).then(function(key) {\n" +
               "      publicKeyInJWKFormat = key;\n" +
               "      console.log('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-              "      document.getElementById('pub.key').innerHTML = fancyDiv('Generated public key in JWK format', JSON.stringify(publicKeyInJWKFormat)) +\n" +
-              "        '<br>&nbsp;<br>Editable sample data in JSON Format:<br>' + \n" +
-              "        '<textarea style=\"margin-top:3pt;margin-left:0pt;padding:10px;background:#FFFFD0;min-width:805pt;border-width:1px;border-style:solid;border-color:grey;box-shadow:3pt 3pt 3pt #D0D0D0\" ' +\n" +
-              "        'rows=\"5\" maxlength=\"1000\" id=\"json.text\">" + javaScript (SAMPLE_DATA) + "</textarea>' +\n" +
-              "        '<p><input type=\"button\" value=\"Sign Sample Data\" onClick=\"signSampleData()\"/></p><p id=\"sign.res\"><p>';\n" +
+              "      document.getElementById('pub.key').innerHTML = fancyJSONBox('Generated public key in JWK format', publicKeyInJWKFormat) + " +
+                        "'<br>&nbsp;<br>Editable sample data in JSON Format:<br>" +
+                        "<textarea style=\"margin-top:3pt;margin-left:0pt;padding:10px;background:#FFFFD0;min-width:805pt;border-width:1px;border-style:solid;border-color:grey;box-shadow:3pt 3pt 3pt #D0D0D0\" " +
+                        "rows=\"5\" maxlength=\"1000\" id=\"json.text\">" + javaScript (SAMPLE_DATA) + "</textarea>" +
+                        "<p><input type=\"button\" value=\"Sign Sample Data\" onClick=\"signSampleData()\"/></p><p id=\"sign.res\"><p>';\n" +
               "    });\n" +
               "  }).then(undefined, function() {\n" + 
               "    bad('pub.key', 'WebCrypto failed for unknown reasons');\n" +
@@ -355,9 +356,8 @@ public class HTML
               "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n" +
               "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
               "    signatureObject." + JSONSignatureDecoder.VALUE_JSON + " = convertToBase64URL(new Uint8Array(signature));\n" +
-              "    document.getElementById('sign.res').innerHTML = fancyDiv('Signed data in JCS format',\n" +
-              "      JSON.stringify(jsonObject)) +\n" +
-              "      '<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n" +
+              "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + " +
+              "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n" +
               "  }).then(undefined, function() {\n" +
               "    bad('sign.res', 'WebCrypto failed for unknown reasons');\n" +
               "  });\n" +
@@ -366,8 +366,8 @@ public class HTML
               "// Optional validation is in this demo/test happening on the server     //\n" +
               "//////////////////////////////////////////////////////////////////////////\n" +
               "function verifySignatureOnServer() {\n" +
-              "  document.location.href = 'request?" + RequestServlet.JCS_ARGUMENT + "=" + "' +\n" +
-              "    convertToBase64URL(convertToUTF8(JSON.stringify(jsonObject)));\n" +
+              "  document.location.href = 'request?" + RequestServlet.JCS_ARGUMENT + "=" + "' + " +
+                   "convertToBase64URL(convertToUTF8(JSON.stringify(jsonObject)));\n" +
               "}\n");
              
         HTML.output (response, html.append ("</script></body></html>").toString ());

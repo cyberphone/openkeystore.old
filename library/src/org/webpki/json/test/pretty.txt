@@ -4,12 +4,10 @@
 {
   "serverSessionId": "15212cd6e341Zcnn9miYUMB3C6DCAp_6",
   "nonce": "rI2WgzLLHtQ4Z2sZWIbSvw",
-  "clientCapabilities": [
-    {
-      "type": "http://xmlns.webpki.org/keygen2/feature#ve",
-      "values": ["http://platforms.extreme-vm.com/type.3"]
-    }
-  ]
+  "clientCapabilities": [{
+    "type": "http://xmlns.webpki.org/keygen2/feature#ve",
+    "values": ["http://platforms.extreme-vm.com/type.3"]
+  }]
 }
 
 {
