@@ -342,6 +342,14 @@ public class HTML
               "  try {\n" +
               "    document.getElementById('sign.res').innerHTML = '';\n" +
               "    jsonObject = JSON.parse(document.getElementById('json.text').value);\n" +
+              "    if (typeof jsonObject !== 'object' || Array.isArray(jsonObject)) {\n" +
+              "      bad('sign.res', 'Only JSON objects can be signed');\n" +
+              "      return;\n" +
+              "    }\n" +
+              "    if (jsonObject." + JSONSignatureDecoder.SIGNATURE_JSON + ") {\n" +
+              "      bad('sign.res', 'Object is already signed');\n" +
+              "      return;\n" +
+              "    }\n" +
               "    var signatureObject = jsonObject." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
               "    signatureObject." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
               "    var publicKeyObject = signatureObject." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
