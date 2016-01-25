@@ -242,7 +242,7 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://cyberphone.github.io/openkeystore/resources/docs/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V1.00, July&nbsp;2015.</span>");
+            ", <span style=\"white-space: nowrap\">V1.01, January&nbsp;2016.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
@@ -1148,7 +1148,11 @@ public class JSONBaseHTML
             String joseName = algorithm.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             if (!joseName.contains (":"))
               {
-                buffer.append ("<li><code>").append (joseName).append ("</code></li>");
+                buffer.append ("<li><code>")
+                      .append (joseName)
+                      .append ("&nbsp;&nbsp;=&nbsp;&nbsp;")
+                      .append (algorithm.getAlgorithmId (AlgorithmPreferences.SKS))
+                      .append ("</code></li>");
               }
           }
         return buffer.append ("</ul>").toString ();

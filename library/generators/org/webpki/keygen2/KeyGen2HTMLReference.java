@@ -707,7 +707,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addDocumentHistoryLine ("2014-12-08", "0.71", "Aligned KeyGen2 with the updated " + json.createReference (JSONBaseHTML.REF_SKS) + " and " + 
                                      json.createReference (JSONBaseHTML.REF_JCS) + " specifications");
         json.addDocumentHistoryLine ("2015-01-12", "0.72", "Updated version to match ECDSA signature encoding change");
-        json.addDocumentHistoryLine ("2016-01-11", "0.73", "Added JOSE algorithm support");
+        json.addDocumentHistoryLine ("2016-01-25", "0.73", "Added JOSE algorithm support");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                      "of the OpenKeyStore project " +
@@ -909,13 +909,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addLink (KeyGen2Messages.INVOCATION_RESPONSE.getName ())
               .addString (" could be:" + LINE_SEPARATOR +
                           "<code>&nbsp;&nbsp;&quot;" + CLIENT_CAPABILITIES_JSON +
-                          "&quot;:&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                          "&quot;:&nbsp;[{<br>&nbsp;&nbsp;&nbsp;&nbsp;" +
                           "&quot;" + TYPE_JSON + "&quot;:&nbsp;" +
                           "&quot;" +
                           KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT +
-                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + VALUES_JSON +
+                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + VALUES_JSON +
                           "&quot;:&nbsp;[&quot;http://extreme-vm.com/type.3" +
-                          "&quot;]<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
+                          "&quot;]<br>&nbsp;&nbsp;}]</code>" + LINE_SEPARATOR + 
                           "If a virtual environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
                           "Note that the <code>" +
                           VIRTUAL_ENVIRONMENT_JSON +

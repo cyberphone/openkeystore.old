@@ -352,7 +352,7 @@ public class JSONObjectWriter implements Serializable
     
       // Sign document
       writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
-        @Override
+        {@literal @}Override
         public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
           try {
             return new SignatureWrapper(algorithm, privateKey).update(data).sign();
@@ -360,7 +360,7 @@ public class JSONObjectWriter implements Serializable
             throw new IOException(e);
           }
         }
-        @Override
+        {@literal @}Override
         public PublicKey getPublicKey() throws IOException {
           return publicKey;
         }
