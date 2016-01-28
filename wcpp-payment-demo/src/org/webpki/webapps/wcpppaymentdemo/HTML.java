@@ -584,7 +584,7 @@ public class HTML implements BaseProperties
               "    encrypted_data." + IV_JSON + " = binaryToBase64URL(encryption_algorithm.iv);\n" +
               "    encrypted_data." + ENCRYPTED_KEY_JSON + " = encrypted_key;\n" +
               "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64URL(new Uint8Array(encrypted_authorization_data));\n" +
-              "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n" +
+              "    window.parent.postMessage(authorize_command, window.document.referrer);\n" +
               "}\n\n" +
               "//\n" +
               "// RSA encrypted authorization\n" +
@@ -687,7 +687,7 @@ public class HTML implements BaseProperties
            s.append (
              "    // For a lame GUI-demo base64 is \"encryption\", right?\n" +
              "    encrypted_data." + CIPHER_TEXT_JSON + " = binaryToBase64URL(signed_auth_data);\n" +
-             "    window.parent.postMessage(JSON.stringify(authorize_command), window.document.referrer);\n");
+             "    window.parent.postMessage(authorize_command, window.document.referrer);\n");
          }
        s.append (
        "}\n" +
@@ -858,12 +858,12 @@ public class HTML implements BaseProperties
        "// There is a timeout associated with the (currently only) request.\n" +
        "//\n" +
        "window.addEventListener('message', function(event) {\n" +
-        "    console.debug(event.origin + ' => PaymentAppFrame:\\n' + event.data);\n" +
+        "    console.debug(event.origin + ' => PaymentAppFrame:\\n' + JSON.stringify(event.data));\n" +
         "    if (aborted_operation) return;\n" +
         "    if (timeouter_handle) {\n" +
         "        clearTimeout(timeouter_handle);\n" +
         "        timeouter_handle = null;\n" +
-        "        json_request = JSON.parse(event.data);\n" +
+        "        json_request = event.data;\n" +
         "        if (getJSONProperty('" + JSONDecoderCache.CONTEXT_JSON + "') == '" + WCPP_DEMO_CONTEXT_URI + "' && " +
                  "getJSONProperty('" + JSONDecoderCache.QUALIFIER_JSON + "') == '" + Messages.INVOKE + "') {\n" +
         "            document.getElementById('busy').style.visibility = 'hidden';\n" +
@@ -883,9 +883,8 @@ public class HTML implements BaseProperties
         "    if (checkNoErrors()) {\n" +
         "        console.debug('Init Payment Application');\n" +
         "        checkTiming(" + PAYMENT_TIMEOUT_INIT + ");\n" +
-        "        window.parent.postMessage(JSON.stringify(createJSONBaseCommand('" + 
-                 Messages.INITIALIZE +
-                 "')), window.document.referrer);\n" +
+        "        window.parent.postMessage(createJSONBaseCommand('" + 
+                 Messages.INITIALIZE + "'), window.document.referrer);\n" +
         "    }\n" +
         "}\n" +
         "</script>" +
@@ -1135,8 +1134,8 @@ public class HTML implements BaseProperties
         "\n\n\"use strict\";\n\n" +
         "var message_state = '" + Messages.INITIALIZE + "';\n\n" +
          "window.addEventListener('message', function(event) {\n" +
-        "    console.debug (event.origin + ' = > Checkout message:\\n' + event.data);\n" +
-        "    var received_json = JSON.parse(event.data);\n" +
+        "    console.debug (event.origin + ' = > Checkout message:\\n' + JSON.stringify(event.data));\n" +
+        "    var received_json = event.data;\n" +
         "    if (received_json['" + JSONDecoderCache.CONTEXT_JSON + "'] != '" + WCPP_DEMO_CONTEXT_URI + "') {\n" +
         "        console.debug('UNDECODABLE MESSAGE');\n" +
         "        return;\n" +

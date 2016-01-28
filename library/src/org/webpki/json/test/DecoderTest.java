@@ -30,7 +30,7 @@ public class DecoderTest
       {
         if (argc.length != 4)
           {
-            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.NORMALIZED + "|" + JSONOutputFormats.JS_QUOTED_STRING + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
+            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.NORMALIZED + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
             System.exit (0);
           }
         try

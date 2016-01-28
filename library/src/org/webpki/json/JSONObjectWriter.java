@@ -27,6 +27,7 @@ import java.security.PublicKey;
 
 
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -681,8 +682,7 @@ public class JSONObjectWriter implements Serializable
               }
             return;
           }
-        boolean quoted = !property || !java_script_mode || !pretty_print ||
-                         !JS_ID_PATTERN.matcher (string).matches ();
+        boolean quoted = !property || !java_script_mode || !JS_ID_PATTERN.matcher (string).matches ();
         if (html_mode)
           {
             buffer.append ("&quot;<span style=\"color:")
@@ -723,12 +723,6 @@ public class JSONObjectWriter implements Serializable
             switch (c)
               {
                 case '\\':
-                  if (java_script_mode)
-                    {
-                      // JS escaping need \\\\ in order to produce a JSON \\
-                      buffer.append ('\\');
-                    }
-
                 case '"':
                   escapeCharacter (c);
                   break;
@@ -753,13 +747,6 @@ public class JSONObjectWriter implements Serializable
                   escapeCharacter ('t');
                   break;
                   
-                case '\'':
-                  if (java_script_mode && !pretty_print)
-                    {
-                      // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
-                      buffer.append ('\\');
-                    }
-
                 default:
                   if (c < 0x20)
                     {
@@ -787,10 +774,6 @@ public class JSONObjectWriter implements Serializable
 
     void escapeCharacter (char c)
       {
-        if (java_script_mode)
-          {
-            buffer.append ('\\');
-          }
         buffer.append ('\\').append (c);
       }
 
@@ -833,10 +816,6 @@ public class JSONObjectWriter implements Serializable
         pretty_print = output_format.pretty;
         java_script_mode = output_format.javascript;
         html_mode = output_format.html;
-        if (java_script_mode && !pretty_print)
-          {
-            buffer.append ('\'');
-          }
         if (root.properties.containsKey (null))
           {
             printArray ((Vector<JSONValue>)root.properties.get (null).value, false);
@@ -845,14 +824,7 @@ public class JSONObjectWriter implements Serializable
           {
             printObject (root);
           }
-        if (java_script_mode)
-          {
-            if (!pretty_print)
-              {
-                buffer.append ('\'');
-              }
-          }
-        else if (pretty_print)
+        if (pretty_print && !java_script_mode)
           {
             newLine ();
           }

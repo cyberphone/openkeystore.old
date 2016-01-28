@@ -76,7 +76,7 @@ public class CheckoutServlet extends HttpServlet implements BaseProperties
         writer.setObject (PAYMENT_REQUEST_JSON, payment_request);
         HTML.checkoutPage (response,
                            saved_shopping_cart,
-                           new String (writer.serializeJSONObject (JSONOutputFormats.JS_QUOTED_STRING), "UTF-8"));
+                           new String (writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8"));
       }
 
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException

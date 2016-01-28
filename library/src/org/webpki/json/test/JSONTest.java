@@ -2546,23 +2546,21 @@ public class JSONTest
       {
         String json = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
         json = toJavaScript (json.substring (0, json.length () - 1), false);
-        String jsn = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        String jsn = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue ("JS Native", jsn.equals (json));
         json = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8");
         json = "'" + toJavaScript (json, true) + "'";
-        jsn = new String(JSONParser.parse (ESCAPING).serializeJSONObject (JSONOutputFormats.JS_QUOTED_STRING), "UTF-8");
-        assertTrue ("JS Quoted", jsn.equals (json));
         JSONObjectWriter writer = new JSONObjectWriter ().setString ("a%", "five");
-        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals ("{\n  \"a%\": \"five\"\n}"));
         writer = new JSONObjectWriter ().setString ("a5", "five");
-        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals ("{\n  a5: \"five\"\n}"));
         writer = new JSONObjectWriter ().setString ("a", "five");
-        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals ("{\n  a: \"five\"\n}"));
         writer = new JSONObjectWriter ().setString ("5", "five");
-        json = new String(writer.serializeJSONObject (JSONOutputFormats.JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals ("{\n  \"5\": \"five\"\n}"));
       }
 
@@ -2571,7 +2569,7 @@ public class JSONTest
         StringBuffer s = new StringBuffer ();
         for (char c : json.toCharArray ())
           {
-            if (c == '\\' || (quote && c == '\''))
+            if (quote && c == '\'')
               {
                 s.append ('\\');
               }
