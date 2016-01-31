@@ -9,6 +9,9 @@ The project also defines KeyGen2 which is a credential provisioning and manageme
 for SKS:<br>
 https://cyberphone.github.io/openkeystore/resources/docs/keygen2.html
 
+The JSON library supports a clear text signature system called JCS:<br>
+https://cyberphone.github.io/openkeystore/resources/docs/jcs.html
+
 ##Requirements
 * Java SDK Version 6, 7 or 8
 * Ant 1.8 or later
@@ -20,6 +23,7 @@ $ cd library
 $ ant
 $ ant testsks
 $ ant testkeygen2
+$ ant testjson
 ```
 ##Proof of Concept Implementation
 There also is an Android proof-of-concept implementation which allows you to test provisioning
