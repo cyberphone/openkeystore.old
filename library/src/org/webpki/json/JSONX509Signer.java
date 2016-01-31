@@ -37,15 +37,15 @@ public class JSONX509Signer extends JSONSigner
 
     SignerInterface signer;
     
-    X509Certificate[] certificate_path;
+    X509Certificate[] certificatePath;
     
-    boolean output_signature_certificate_attributes;
+    boolean outputSignatureCertificateAttributes;
     
     public JSONX509Signer (SignerInterface signer) throws IOException
       {
         this.signer = signer;
-        certificate_path = signer.getCertificatePath ();
-        algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
+        certificatePath = signer.getCertificatePath ();
+        algorithm = KeyAlgorithms.getKeyAlgorithm (certificatePath[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
       }
 
     public JSONX509Signer setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
@@ -56,13 +56,13 @@ public class JSONX509Signer extends JSONSigner
 
     public JSONX509Signer setSignatureCertificateAttributes (boolean flag)
       {
-        output_signature_certificate_attributes = flag;
+        outputSignatureCertificateAttributes = flag;
         return this;
       }
 
-    public JSONX509Signer setAlgorithmPreferences (AlgorithmPreferences algorithm_preferences)
+    public JSONX509Signer setAlgorithmPreferences (AlgorithmPreferences algorithmPreferences)
       {
-        super.algorithm_preferences = algorithm_preferences;
+        super.algorithmPreferences = algorithmPreferences;
         return this;
       }
 
@@ -81,14 +81,14 @@ public class JSONX509Signer extends JSONSigner
     @Override
     void writeKeyData (JSONObjectWriter wr) throws IOException
       {
-        if (output_signature_certificate_attributes)
+        if (outputSignatureCertificateAttributes)
           {
-            X509Certificate signer_cert = certificate_path[0];
-            JSONObjectWriter signature_certificate_info_writer = wr.setObject (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON);
-            signature_certificate_info_writer.setString (JSONSignatureDecoder.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            signature_certificate_info_writer.setBigInteger (JSONSignatureDecoder.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-            signature_certificate_info_writer.setString (JSONSignatureDecoder.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+            X509Certificate signerCertificate = certificatePath[0];
+            wr.setObject (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
+              .setString (JSONSignatureDecoder.ISSUER_JSON, signerCertificate.getIssuerX500Principal ().getName ())
+              .setBigInteger (JSONSignatureDecoder.SERIAL_NUMBER_JSON, signerCertificate.getSerialNumber ())
+              .setString (JSONSignatureDecoder.SUBJECT_JSON, signerCertificate.getSubjectX500Principal ().getName ());
           }
-        wr.setCertificatePath (certificate_path);
+        wr.setCertificatePath (certificatePath);
       }
   }

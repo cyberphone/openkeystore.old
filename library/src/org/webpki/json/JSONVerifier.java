@@ -32,7 +32,7 @@ public abstract class JSONVerifier implements Serializable
         this.signatureType = signatureType;
       }
 
-    abstract void verify (JSONSignatureDecoder signature_decoder) throws IOException;
+    abstract void verify (JSONSignatureDecoder signatureDecoder) throws IOException;
 
     JSONSignatureTypes signatureType;
     

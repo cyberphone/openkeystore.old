@@ -83,7 +83,7 @@ public class JSONObjectReader implements Serializable, Cloneable
       {
         JSONValue value = getProperty (name);
         JSONTypes.compatibilityTest (expected_type, value);
-        value.read_flag = true;
+        value.readFlag = true;
         return value;
       }
 
@@ -243,15 +243,15 @@ public class JSONObjectReader implements Serializable, Cloneable
         return hasProperty (name) ? getStringArray (name) : null;
       }
 
-    String [] getSimpleArray (String name, JSONTypes expected_type) throws IOException
+    String [] getSimpleArray (String name, JSONTypes expectedType) throws IOException
       {
         Vector<String> array = new Vector<String> ();
         @SuppressWarnings("unchecked")
-        Vector<JSONValue> array_elements = ((Vector<JSONValue>) getProperty (name, JSONTypes.ARRAY).value);
-        for (JSONValue value : array_elements)
+        Vector<JSONValue> arrayElements = ((Vector<JSONValue>) getProperty (name, JSONTypes.ARRAY).value);
+        for (JSONValue value : arrayElements)
           {
-            JSONTypes.compatibilityTest (expected_type, value);
-            value.read_flag = true;
+            JSONTypes.compatibilityTest (expectedType, value);
+            value.readFlag = true;
             array.add ((String)value.value);
           }
         return array.toArray (new String[0]);
@@ -293,9 +293,9 @@ public class JSONObjectReader implements Serializable, Cloneable
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      * @throws IOException In case there is something wrong with the signature 
      */
-    public JSONSignatureDecoder getSignature (AlgorithmPreferences algorithm_preferences) throws IOException
+    public JSONSignatureDecoder getSignature (AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        return new JSONSignatureDecoder (this, algorithm_preferences);
+        return new JSONSignatureDecoder (this, algorithmPreferences);
       }
 
     public JSONSignatureDecoder getSignature () throws IOException
@@ -303,9 +303,9 @@ public class JSONObjectReader implements Serializable, Cloneable
         return new JSONSignatureDecoder (this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
  
-    public PublicKey getPublicKey (AlgorithmPreferences algorithm_preferences) throws IOException
+    public PublicKey getPublicKey (AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this, algorithm_preferences);
+        return JSONSignatureDecoder.getPublicKey (this, algorithmPreferences);
       }
 
     public PublicKey getPublicKey () throws IOException

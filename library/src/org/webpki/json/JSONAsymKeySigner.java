@@ -52,9 +52,9 @@ public class JSONAsymKeySigner extends JSONSigner
         return this;
       }
 
-    public JSONAsymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithm_preferences)
+    public JSONAsymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithmPreferences)
       {
-        this.algorithm_preferences = algorithm_preferences;
+        this.algorithmPreferences = algorithmPreferences;
         return this;
       }
 
@@ -73,6 +73,6 @@ public class JSONAsymKeySigner extends JSONSigner
     @Override
     void writeKeyData (JSONObjectWriter wr) throws IOException
       {
-        wr.setPublicKey (public_key, algorithm_preferences);
+        wr.setPublicKey (public_key, algorithmPreferences);
       }
   }

@@ -40,9 +40,9 @@ public class JSONSymKeySigner extends JSONSigner
         algorithm = signer.getMacAlgorithm ();
       }
 
-    public JSONSymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithm_preferences)
+    public JSONSymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithmPreferences)
       {
-        this.algorithm_preferences = algorithm_preferences;
+        this.algorithmPreferences = algorithmPreferences;
         return this;
       }
 

@@ -34,9 +34,9 @@ public abstract class JSONSigner implements Serializable
     
     String keyId;
 
-    byte[] normalized_data;
+    byte[] normalizedData;
     
-    AlgorithmPreferences algorithm_preferences = AlgorithmPreferences.JOSE_ACCEPT_PREFER;
+    AlgorithmPreferences algorithmPreferences = AlgorithmPreferences.JOSE_ACCEPT_PREFER;
 
     JSONSigner () {}
 
@@ -60,6 +60,6 @@ public abstract class JSONSigner implements Serializable
 
     public byte[] getNormalizedData ()
       {
-        return normalized_data;
+        return normalizedData;
       }
   }

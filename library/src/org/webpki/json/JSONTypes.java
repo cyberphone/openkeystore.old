@@ -38,11 +38,11 @@ public enum JSONTypes
         this.complex = complex;
       }
 
-    static void compatibilityTest (JSONTypes expected_type, JSONValue value) throws IOException
+    static void compatibilityTest (JSONTypes expectedType, JSONValue value) throws IOException
       {
-        if (expected_type != value.type)
+        if (expectedType != value.type)
           {
-            throw new IOException ("Incompatible types, expected: " + expected_type + " actual: " + value.type);
+            throw new IOException ("Incompatible types, expected: " + expectedType + " actual: " + value.type);
           }
       }
   }

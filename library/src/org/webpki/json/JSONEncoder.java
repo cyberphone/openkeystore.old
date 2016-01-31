@@ -56,11 +56,11 @@ public abstract class JSONEncoder implements Serializable
       }
 
     /**
-     * @param output_format The wanted formatting   
+     * @param outputFormat The wanted formatting   
      * @return Document in JSON [binary] format
      * @throws IOException For any underlying error
      */
-    public byte[] serializeJSONDocument (JSONOutputFormats output_format) throws IOException
+    public byte[] serializeJSONDocument (JSONOutputFormats outputFormat) throws IOException
       {
         JSONObjectWriter wr = new JSONObjectWriter ();
         root = wr.root;
@@ -70,6 +70,6 @@ public abstract class JSONEncoder implements Serializable
             wr.setString (JSONDecoderCache.QUALIFIER_JSON, getQualifier ());
           }
         writeJSONData (wr);
-        return wr.serializeJSONObject (output_format);
+        return wr.serializeJSONObject (outputFormat);
       }
   }

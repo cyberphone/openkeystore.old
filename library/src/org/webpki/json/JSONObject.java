@@ -49,12 +49,12 @@ class JSONObject implements Serializable
           }
       }
 
-    static void checkObjectForUnread (JSONObject json_object) throws IOException
+    static void checkObjectForUnread (JSONObject jsonObject) throws IOException
       {
-        for (String name : json_object.properties.keySet ())
+        for (String name : jsonObject.properties.keySet ())
           {
-            JSONValue value = json_object.properties.get (name);
-            if (!value.read_flag)
+            JSONValue value = jsonObject.properties.get (name);
+            if (!value.readFlag)
               {
                 throw new IOException ("Property \"" + name + "\" was never read");
               }
@@ -72,19 +72,19 @@ class JSONObject implements Serializable
     @SuppressWarnings("unchecked")
     static void checkArrayForUnread (JSONValue array, String name) throws IOException
       {
-        for (JSONValue array_element : (Vector<JSONValue>)array.value)
+        for (JSONValue arrayElement : (Vector<JSONValue>)array.value)
           {
-            if (array_element.type == JSONTypes.OBJECT)
+            if (arrayElement.type == JSONTypes.OBJECT)
               {
-                checkObjectForUnread ((JSONObject)array_element.value);
+                checkObjectForUnread ((JSONObject)arrayElement.value);
               }
-            else if (array_element.type == JSONTypes.ARRAY)
+            else if (arrayElement.type == JSONTypes.ARRAY)
               {
-                checkArrayForUnread (array_element, name);
+                checkArrayForUnread (arrayElement, name);
               }
-            else if (!array_element.read_flag)
+            else if (!arrayElement.readFlag)
               {
-                throw new IOException ("Value \"" + (String)array_element.value + "\" of array \"" + name + "\" was never read");
+                throw new IOException ("Value \"" + (String)arrayElement.value + "\" of array \"" + name + "\" was never read");
               }
           }
       }

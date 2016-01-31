@@ -57,12 +57,12 @@ public class JSONArrayReader implements Serializable
           }
       }
     
-    Object get (JSONTypes expected_type) throws IOException
+    Object get (JSONTypes expectedType) throws IOException
       {
         inRangeCheck ();
         JSONValue value = array.elementAt (index++);
-        value.read_flag = true;
-        JSONTypes.compatibilityTest (expected_type, value);
+        value.readFlag = true;
+        JSONTypes.compatibilityTest (expectedType, value);
         return value.value;
       }
 

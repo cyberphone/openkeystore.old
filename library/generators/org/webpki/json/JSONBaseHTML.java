@@ -653,14 +653,14 @@ public class JSONBaseHTML
 
                 public Column addContext (String argument) throws IOException
                   {
-                    keyWord (JSONDecoderCache.CONTEXT_JSON, JSONObjectWriter.html_keyword_color, true);
-                    return keyWord (argument, JSONObjectWriter.html_string_color, false);
+                    keyWord (JSONDecoderCache.CONTEXT_JSON, JSONObjectWriter.htmlKeywordColor, true);
+                    return keyWord (argument, JSONObjectWriter.htmlStringColor, false);
                   }
 
                 public Column addQualifier (String argument) throws IOException
                   {
-                    keyWord (JSONDecoderCache.QUALIFIER_JSON, JSONObjectWriter.html_keyword_color, true);
-                    return keyWord (argument, JSONObjectWriter.html_string_color, false);
+                    keyWord (JSONDecoderCache.QUALIFIER_JSON, JSONObjectWriter.htmlKeywordColor, true);
+                    return keyWord (argument, JSONObjectWriter.htmlStringColor, false);
                   }
 
                 private Column keyWord (String string, String color, boolean property) throws IOException
@@ -702,7 +702,7 @@ public class JSONBaseHTML
 
                 public Column addProperty (String property) throws IOException
                   {
-                    return keyWord (property, JSONObjectWriter.html_property_color, true);
+                    return keyWord (property, JSONObjectWriter.htmlPropertyColor, true);
                   }
 
                 public Column addSymbolicValue (String symbol_value) throws IOException
@@ -804,7 +804,7 @@ public class JSONBaseHTML
 
                 public Column addValue (String value) throws IOException
                   {
-                    keyWord (value, JSONObjectWriter.html_string_color, false);
+                    keyWord (value, JSONObjectWriter.htmlStringColor, false);
                     return this;
                   }
 
@@ -1175,7 +1175,7 @@ public class JSONBaseHTML
 
     public void renderProtocolSteps (@SuppressWarnings("rawtypes") Class parent, StringBuffer buffer, ProtocolStep[] protocol_steps) throws IOException
       {
-        JSONObjectWriter.html_indent = 2;
+        JSONObjectWriter.htmlIndent = 2;
         buffer.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
         boolean next = false;
         for (ProtocolStep protocol_step : protocol_steps)
@@ -1678,11 +1678,11 @@ public class JSONBaseHTML
           "&nbsp;&nbsp;readonly attribute WebPKI webpki;<br>" +
           "};</code></div>The JavaScript (presumably embedded in an HTML page) below shows how to use the interface:" +
           "<div style=\"padding:10pt 0pt 15pt 20pt\"><code>" +
-          "if (!window.webpki.invoke('{&quot;</code><code style=\"color:" + JSONObjectWriter.html_keyword_color + "\">" + 
-          JSONDecoderCache.CONTEXT_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.html_string_color + "\">"+ decoder.getContext () + "</code><code>&quot;,' +<br>" +
+          "if (!window.webpki.invoke('{&quot;</code><code style=\"color:" + JSONObjectWriter.htmlKeywordColor + "\">" + 
+          JSONDecoderCache.CONTEXT_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.htmlStringColor + "\">"+ decoder.getContext () + "</code><code>&quot;,' +<br>" +
           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
-          "&quot;</code><code style=\"color:" + JSONObjectWriter.html_keyword_color + "\">" + 
-          JSONDecoderCache.QUALIFIER_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.html_string_color + "\">" + decoder.getQualifier () + "</code><code>&quot;,' +<br>" +
+          "&quot;</code><code style=\"color:" + JSONObjectWriter.htmlKeywordColor + "\">" + 
+          JSONDecoderCache.QUALIFIER_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.htmlStringColor + "\">" + decoder.getQualifier () + "</code><code>&quot;,' +<br>" +
           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
           "</code><i>Other properties associated with the request object</i><code>}') {<br>" +
           "&nbsp;&nbsp;alert('Not supported');<br>" +
