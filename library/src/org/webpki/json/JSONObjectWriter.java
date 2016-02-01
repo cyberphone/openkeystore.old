@@ -480,7 +480,7 @@ public class JSONObjectWriter implements Serializable
         switch (jsonValue.type)
           {
             case ARRAY:
-              printArray ((Vector<JSONValue>) jsonValue.value, false);
+              printArray ((Vector<JSONValue>) jsonValue.value);
               break;
   
             case OBJECT:
@@ -528,12 +528,8 @@ public class JSONObjectWriter implements Serializable
       }
 
     @SuppressWarnings("unchecked")
-    void printArray (Vector<JSONValue> array, boolean arrayFlag)
+    void printArray (Vector<JSONValue> array)
       {
-        if (arrayFlag) 
-          {
-            newIndentSpace ();
-          }
          buffer.append ('[');
          if (!array.isEmpty ())
           {
@@ -576,7 +572,6 @@ public class JSONObjectWriter implements Serializable
                 for (JSONValue value : array)
                   {
                     Vector<JSONValue> subArray = (Vector<JSONValue>) value.value;
-                    boolean extraPretty = subArray.isEmpty () || !subArray.firstElement ().type.complex;
                     if (next)
                       {
                         buffer.append (',');
@@ -585,15 +580,7 @@ public class JSONObjectWriter implements Serializable
                       {
                         next = true;
                       }
-                    if (extraPretty)
-                      {
-                        newIndentSpace ();
-                      }
-                    printArray (subArray, true);
-                    if (extraPretty)
-                      {
-                        undentLine ();
-                      }
+                    printArray (subArray);
                   }
                 newUndentSpace ();
               }
@@ -601,10 +588,6 @@ public class JSONObjectWriter implements Serializable
               {
                 printArraySimple (array);
               }
-          }
-        if (arrayFlag) 
-          {
-            newUndentSpace ();
           }
         buffer.append (']');
       }
@@ -819,7 +802,7 @@ public class JSONObjectWriter implements Serializable
         htmlMode = outputFormat.html;
         if (root.properties.containsKey (null))
           {
-            printArray ((Vector<JSONValue>)root.properties.get (null).value, false);
+            printArray ((Vector<JSONValue>)root.properties.get (null).value);
           }
         else
           {
