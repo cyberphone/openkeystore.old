@@ -1,8 +1,8 @@
 package com.example.es6numbers;
 
 import java.io.FileOutputStream;
-
 import java.util.LinkedHashMap;
+import java.util.Vector;
 
 public class PropertyTest {
 
@@ -37,12 +37,8 @@ public class PropertyTest {
     
     static void test(int numberOfProperties) throws Exception {
         write("<tr><td>" + numberOfProperties + "</td><td id=\"n" + numberOfProperties + "\">Not tested yet</td></tr>");
-        testCalls.append("  test('n" + 
-                         numberOfProperties + "', string" +
-                         numberOfProperties + ", inline" +
-                         numberOfProperties + ", object" +
-                         numberOfProperties + "());\n");
         LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
+        Vector<String> deletes = new Vector<String> ();
         int q = 1;
         while (q <= numberOfProperties) {
             String value = String.valueOf(q);
@@ -51,12 +47,30 @@ public class PropertyTest {
             } else if (q % 3 == 0) {
                 value = "{\"test\":" + value + "}";
             }
-            if (values.put(getProperty(), value) == null) {
+            String property = getProperty();
+            if (values.put(property, value) == null) {
+                if (q == 1 || q == numberOfProperties - 1 || q % 10 == 0) {
+                    deletes.add(property);
+                }
                 q++;
             }
         }
-        testData.append("\n// In-line declarated object\nvar inline" + numberOfProperties + " = {\n");
+        testCalls.append("  test('n" + 
+                numberOfProperties + "', string" +
+                numberOfProperties + ", inline" +
+                numberOfProperties + ", object" +
+                numberOfProperties + "(),[");
         boolean next = false;
+        for (String property : deletes) {
+            if (next) {
+                testCalls.append(',');
+            }
+            next = true;
+            testCalls.append('\'').append(property).append('\'');
+        }
+        testCalls.append("]);\n");
+        testData.append("\n// In-line declarated object\nvar inline" + numberOfProperties + " = {\n");
+        next = false;
         for (String property : values.keySet()) {
             if (next) {
                 testData.append(",\n");
@@ -134,10 +148,11 @@ public class PropertyTest {
         test(5);
         test(10);
         test(100);
+        test(1000);
         test(10000);
         write("</table><script type=\"text/javascript\">\n\n\"use strict\";\n");
         write(testData.toString());
-        write("\nfunction test(id, stringForm, inlineDeclaration, dynamicCreated) {\n" +
+        write("\nfunction test(id, stringForm, inlineDeclaration, dynamicCreated, deleteProperties) {\n" +
               "  var result = 'passed';\n" +
               "  if (stringForm != JSON.stringify(inlineDeclaration)) {\n" +
               "    result = 'fail-1';\n" +
@@ -145,6 +160,37 @@ public class PropertyTest {
               "    result = 'fail-2';\n" +
               "  } else if (stringForm != JSON.stringify(dynamicCreated)) {\n" +
               "    result = 'fail-3';\n" +
+              "  } else {\n" +
+              "    for (var q = 0; q < deleteProperties.length; q++) {\n" +
+              "      var cloneString = JSON.stringify(JSON.parse(stringForm));\n" +
+              "      var cloneInline = Object.assign({},inlineDeclaration);\n" +
+              "      delete cloneInline[deleteProperties[q]];\n" +
+              "      var i = cloneString.indexOf('\"' + deleteProperties[q] + '\"');\n" +
+              "      var prop = cloneString.substring(i);\n" +
+              "      var j = prop.indexOf(':') + 1;\n" +
+              "      if (prop.charAt(j) == '{') {\n" +
+              "        j = prop.indexOf('}') + 1;\n" +
+              "      }\n" +
+              "      while(true) {\n" +
+              "        if (prop.charAt(j) == '}') {\n" +
+              "          if (cloneString.charAt(i - 1) == ',') {\n" +
+              "            i--; j ++;\n" +
+              "          }\n" +
+              "          break;\n" +
+              "        } else if (prop.charAt(j) == ',') {\n" +
+              "          j++;\n" +
+              "          break;\n" +
+              "        }\n" +
+              "        j++;\n" +
+              "      }\n" +
+              "      cloneString = cloneString.substring(0,i) + cloneString.substring(i + j);\n" +
+              "      if (cloneString != JSON.stringify(cloneInline)) {\n" +
+              "        console.debug(cloneString);\n" +
+              "        console.debug(JSON.stringify(cloneInline));\n" +
+              "        result = 'fail-4=' + deleteProperties[q];\n" +
+              "        break;\n" +
+              "      }\n" +
+              "    }\n" +
               "  }\n" +
               "  document.getElementById(id).innerHTML = result;\n" +
               "}\n" +
