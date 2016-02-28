@@ -36,7 +36,7 @@ public class KeyStore2PEMConverter
     private static void fail ()
       {
         System.out.println (KeyStore2PEMConverter.class.getName () + "  keystore-file password PEM-file qualifier\n" +
-                           "   qualifier = [public private certificate]");
+                           "   qualifier = [public private certificate trust]");
         System.exit (3);
       }
 
@@ -49,6 +49,7 @@ public class KeyStore2PEMConverter
         boolean private_key = false;
         boolean public_key = false;
         boolean certificate = false;
+        boolean trust = false;
         for (int i = 3; i < argv.length; i++) {
           if (argv[i].equals ("public"))
             {
@@ -61,6 +62,10 @@ public class KeyStore2PEMConverter
           else if (argv[i].equals ("certificate"))
             {
               certificate = true;
+            }
+          else if (argv[i].equals ("trust"))
+            {
+              trust = true;
             }
           else
             {
@@ -86,18 +91,14 @@ public class KeyStore2PEMConverter
                   }
                 if (public_key)
                   {
-                    writePublicKey (fis, ks.getCertificateChain (alias)[0].getPublicKey ());
+                    writeObject (fis, "PUBLIC KEY", ks.getCertificateChain (alias)[0].getPublicKey ().getEncoded ());
                   }
               }
             else if (ks.isCertificateEntry (alias))
               {
-                if (certificate)
+                if (trust)
                   {
                     writeCert (fis, ks.getCertificate (alias));
-                  }
-                if (public_key)
-                  {
-                    writePublicKey (fis, ks.getCertificate (alias).getPublicKey ());
                   }
               }
             else
@@ -117,10 +118,5 @@ public class KeyStore2PEMConverter
     private static void writeCert (FileOutputStream fis, Certificate cert) throws Exception
       {
         writeObject (fis, "CERTIFICATE", cert.getEncoded ());
-      }
-
-    private static void writePublicKey (FileOutputStream fis, PublicKey publicKey) throws Exception
-      {
-        writeObject (fis, "PUBLIC KEY", publicKey.getEncoded ());
       }
   }
