@@ -48,7 +48,7 @@ public class JSONObjectReader implements Serializable, Cloneable
     private static final long serialVersionUID = 1L;
 
     static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]*|0)[\\.][0-9]+");
-    static final Pattern INTEGER_PATTERN = Pattern.compile ("-?[0-9]+");
+    static final Pattern INTEGER_PATTERN = Pattern.compile ("-?[1-9][0-9]*|0");
 
     JSONObject root;
 
@@ -100,19 +100,18 @@ public class JSONObjectReader implements Serializable, Cloneable
 
     static long parseLong (String value) throws IOException
       {
-        double number = Double.valueOf (value);
-        if (Math.abs (number) > JSONObjectWriter.MAX_SAFE_INTEGER)
+        if (INTEGER_PATTERN.matcher (value).matches ())
           {
-            throw new IOException ("Integer values must not exceeed " + 
-                                   JSONObjectWriter.MAX_SAFE_INTEGER  +
-                                   ", found: " + value);
+            double number = Double.valueOf (value);
+            if (Math.abs (number) > JSONObjectWriter.MAX_SAFE_INTEGER)
+              {
+                throw new IOException ("Integer values must not exceeed " + 
+                                       JSONObjectWriter.MAX_SAFE_INTEGER  +
+                                       ", found: " + value);
+              }
+            return (long) number;
           }
-        long longValue = (long) number;
-        if (longValue != number)
-          {
-            throw new IOException ("Value is not an integer: " + value);
-          }
-        return longValue;
+        throw new IOException ("Value is not an integer: " + value);
       }
 
     static int parseInt (String value) throws IOException

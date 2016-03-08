@@ -2460,8 +2460,21 @@ public class JSONTest
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDouble ("name") == ref);
       }
 
-    void integerValue (String string, int ref) throws Exception
+    void integerValue (String string, boolean mustFail) throws Exception
       {
+        int ref = (int)Double.parseDouble (string);
+        if (mustFail)
+          {
+            try
+              {
+                JSONParser.parse ("{\"i\":" + string + "}").getInt ("i");
+                fail("Should fail");
+              }
+            catch (IOException e)
+              {
+                return;
+              }
+          }
         assertTrue (simpleArrayType (string).getInt () == ref);
         assertTrue (simpleObjectType (string).getInt ("name") == ref);
         assertTrue (simpleArrayType (string).getElementType () == JSONTypes.NUMBER);
@@ -2689,9 +2702,14 @@ public class JSONTest
         floatingPoint ("+0.0", +0.0);
         floatingPoint (".1", .1);
         floatingPoint ("1.", 1.0);
-        integerValue ("+1", +1);
-        integerValue ("-0", -0);
-        integerValue ("01", 01);
+        integerValue ("+1", true);
+        integerValue ("-0", true);
+        integerValue ("01", true);
+        integerValue ("1.0", true);
+        integerValue ("-1", false);
+        integerValue ("-9", false);
+        integerValue ("0", false);
+        integerValue ("10", false);
         try
           {
             longVariables (JSONObjectWriter.MAX_SAFE_INTEGER + 1);
@@ -3366,7 +3384,7 @@ public class JSONTest
                                                .serializeJSONArray (JSONOutputFormats.NORMALIZED),
                                        "[0.0000000000001]".getBytes ("UTF-8")));
         assertTrue (JSONParser.parse (new JSONObjectWriter ()
-                        .setNumberAsText ("value", "-0")
+                        .setNumberAsText ("value", "0")
                             .serializeJSONObject (JSONOutputFormats.NORMALIZED)).getInt ("value") == 0);
         try
           {
