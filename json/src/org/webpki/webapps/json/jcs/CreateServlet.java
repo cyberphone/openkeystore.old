@@ -40,6 +40,7 @@ public class CreateServlet extends HttpServlet
     static final String KEY_TYPE  = "keytype";
     static final String JOSE_FLAG = "jose";
     static final String ES6_FLAG  = "es6";
+    static final String JS_FLAG   = "js";
     
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
@@ -70,6 +71,7 @@ public class CreateServlet extends HttpServlet
         String json_object = getTextArea (request);
         GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
         boolean es6 = new Boolean (request.getParameter (ES6_FLAG));
+        boolean jsFlag = new Boolean (request.getParameter (JS_FLAG));
         String key_type = request.getParameter (KEY_TYPE);
         boolean jose = new Boolean (request.getParameter (JOSE_FLAG));
         for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values ())
@@ -90,7 +92,7 @@ public class CreateServlet extends HttpServlet
                 es6Normalize (reader, writer);
               }
             byte[] signed_json = new GenerateSignature (action, jose).sign (writer);
-            RequestDispatcher rd = request.getRequestDispatcher ("request?" + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode (signed_json));
+            RequestDispatcher rd = request.getRequestDispatcher ((jsFlag ? "jssignature?" : "request?") + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode (signed_json));
             rd.forward (request, response); 
           }
         catch (IOException e)

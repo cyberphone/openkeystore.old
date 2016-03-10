@@ -731,13 +731,27 @@ public class JSONObjectWriter implements Serializable
                   escapeCharacter ('t');
                   break;
 
+                case '&':
+                  if (javaScriptMode)
+                    {
+                      buffer.append ("\\u0026");
+                      break;
+                    }
+
+                case '>':
+                  if (javaScriptMode)
+                    {
+                      buffer.append ("\\u003e");
+                      break;
+                    }
+
                 case '<':
                   if (javaScriptMode)
                     {
                       buffer.append ("\\u003c");
                       break;
                     }
- 
+
                 default:
                   if (c < 0x20)
                     {

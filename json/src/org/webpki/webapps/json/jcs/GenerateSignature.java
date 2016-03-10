@@ -92,7 +92,7 @@ public class GenerateSignature
         @Override
         public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException
           {
-            if (key_id.equals (KEY_NAME))
+            if (KEY_NAME.equals (key_id))
               {
                 return ArrayUtil.compare (digest, getMacAlgorithm ().digest (SYMMETRIC_KEY, data));
               }

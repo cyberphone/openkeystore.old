@@ -62,6 +62,11 @@
         <servlet-class>org.webpki.webapps.json.jcs.CreateServlet</servlet-class>
     </servlet>
     
+    <servlet>
+        <servlet-name>JavaScriptSignatureServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.json.jcs.JavaScriptSignatureServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>RequestServlet</servlet-name>
         <url-pattern>/request</url-pattern>
@@ -90,6 +95,11 @@
     <servlet-mapping>
         <servlet-name>CreateServlet</servlet-name>
         <url-pattern>/create</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>JavaScriptSignatureServlet</servlet-name>
+        <url-pattern>/jssignature</url-pattern>
     </servlet-mapping>
 
     <security-constraint>

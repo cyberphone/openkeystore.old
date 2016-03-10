@@ -2575,13 +2575,13 @@ public class JSONTest
         writer = new JSONObjectWriter ().setString ("5", "five");
         json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals ("{\n  \"5\": \"five\"\n}"));
-        writer = new JSONObjectWriter().setString ("trouble", "</script>");
+        writer = new JSONObjectWriter().setString ("trouble", "</script>&");
         json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
-        assertTrue("JS", json.equals ("{\n  trouble: \"\\u003c/script>\"\n}"));
+        assertTrue("JS", json.equals ("{\n  trouble: \"\\u003c/script\\u003e\\u0026\"\n}"));
         json = new String(writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT), "UTF-8");
-        assertTrue("JS", json.equals ("{\n  \"trouble\": \"</script>\"\n}\n"));
+        assertTrue("JS", json.equals ("{\n  \"trouble\": \"</script>&\"\n}\n"));
         json = new String(writer.serializeJSONObject (JSONOutputFormats.NORMALIZED), "UTF-8");
-        assertTrue("JS", json.equals ("{\"trouble\":\"</script>\"}"));
+        assertTrue("JS", json.equals ("{\"trouble\":\"</script>&\"}"));
       }
 
     String toJavaScript (String json, boolean quote)
