@@ -730,7 +730,14 @@ public class JSONObjectWriter implements Serializable
                 case '\t':
                   escapeCharacter ('t');
                   break;
-                  
+
+                case '<':
+                  if (javaScriptMode)
+                    {
+                      buffer.append ("\\u003c");
+                      break;
+                    }
+ 
                 default:
                   if (c < 0x20)
                     {
