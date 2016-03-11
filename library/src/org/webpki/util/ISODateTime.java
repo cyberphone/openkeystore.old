@@ -25,103 +25,78 @@ import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
+import java.util.regex.Pattern;
+
 /**
  * Useful functions for ISO time.
  */
 public class ISODateTime
   {
     private ISODateTime () {}  // No instantiation please
+    
+    static final Pattern DATE_PATTERN =
+        Pattern.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)");
+
 
     /**
-     * Parse <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code> type:
      * 
-     *   _date       = ["-"] 2*C 2Y "-" 2M "-" 2D
-     *   _time       = 2h ":" 2m ":" 2s ["." 1*s]
-     *   _timeZone   = "Z" / ("+" / "-" 2h ":" 2m)
-     *   dateTime    = _date "T" _time [_timeZone]
+     * Always: YYYY-MM-DDThh:mm:ss
+     * Optionally: a '.' followed by 1-3 digits giving millisecond
+     * Finally: 'Z' for UTC or an UTC time-zone difference expressed as +hh:mm or -hh:mm
      *   
-     * @param s String to be parsed
+     * @param dateTime String to be parsed
      * @return GregorianCalendar
      * @throws IOException If anything unexpected is found...
      */
-    public static GregorianCalendar parseDateTime (String s) throws IOException
+    public static GregorianCalendar parseDateTime (String dateTime) throws IOException
       {
+        if (!DATE_PATTERN.matcher(dateTime).matches ())
+          {
+            throw new IOException("DateTime syntax error: " + dateTime);
+          }
+
         GregorianCalendar gc = new GregorianCalendar ();
         gc.clear ();
         
-        String t = s;
-        int i;
+        gc.set (GregorianCalendar.ERA, GregorianCalendar.AD);
+        gc.set (GregorianCalendar.YEAR, Integer.parseInt (dateTime.substring (0, 4)));
+ 
+        gc.set (GregorianCalendar.MONTH, Integer.parseInt (dateTime.substring (5,7)) - 1);
 
-        if(t.startsWith ("-"))
-          {
-            gc.set (GregorianCalendar.ERA, GregorianCalendar.BC);
-            gc.set (GregorianCalendar.YEAR, Integer.parseInt (t.substring (1, i = t.indexOf("-", 1))));
-          }
-        else
-          {
-            gc.set (GregorianCalendar.ERA, GregorianCalendar.AD);
-            gc.set (GregorianCalendar.YEAR, Integer.parseInt (t.substring (0, i = t.indexOf ("-"))));
-          }
-        t = t.substring (i+1);
+        gc.set (GregorianCalendar.DAY_OF_MONTH, Integer.parseInt (dateTime.substring (8,10)));
+ 
+        gc.set (GregorianCalendar.HOUR_OF_DAY, Integer.parseInt (dateTime.substring (11,13)));
 
-        // Check delimiters (whos positions are now known).
-        if (t.charAt(2) != '-' || t.charAt(5) != 'T' ||
-            t.charAt(8) != ':' || t.charAt(11) != ':')
-          throw new IOException ("Malformed dateTime (" + s + ").");
+        gc.set (GregorianCalendar.MINUTE, Integer.parseInt (dateTime.substring (14,16)));
 
-        gc.set (GregorianCalendar.MONTH, Integer.parseInt (t.substring (0,2)) - 1);
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.DAY_OF_MONTH, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.HOUR_OF_DAY, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.MINUTE, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.SECOND, Integer.parseInt(t.substring (0,2)));
-        t = t.substring (2);
-            
+        gc.set (GregorianCalendar.SECOND, Integer.parseInt(dateTime.substring (17,19)));
+        
+        String milliSeconds = null;
+        
         // Find time zone info.
-        if (t.endsWith ("Z"))
+        if (dateTime.endsWith("Z"))
           {
             gc.setTimeZone (TimeZone.getTimeZone("UTC"));
-            t = t.substring (0, t.length() - 1);
-          }
-        else if ((i = t.indexOf ("+")) != -1 || (i = t.indexOf ("-")) != -1)
-          {
-            if (t.charAt (t.length() - 3) != ':')
-              throw new IOException ("Malformed dateTime (" + s + ").");
-              
-            int tzHour = Integer.parseInt(t.substring (t.charAt(i) == '+' ? i + 1 : i, t.length() - 3)),
-                tzMinute = Integer.parseInt(t.substring (t.length() - 2));
-            gc.setTimeZone (new SimpleTimeZone (((60 * tzHour) + tzMinute) * 60 * 1000, ""));
-
-            t = t.substring (0, i);
+            milliSeconds = dateTime.substring (19, dateTime.length() - 1);
           }
         else
           {
-            gc.setTimeZone (TimeZone.getTimeZone("UTC"));
+            int factor = 60 * 1000;
+            int i = dateTime.indexOf ('+');
+            if (i < 0) {
+              i = dateTime.lastIndexOf ('-');
+              factor = -factor;
+            }
+            milliSeconds = dateTime.substring (19, i);
+            int tzHour = Integer.parseInt(dateTime.substring (++i, i + 2)),
+                tzMinute = Integer.parseInt(dateTime.substring (i + 3, i + 5));
+            gc.setTimeZone (new SimpleTimeZone (((60 * tzHour) + tzMinute) * factor, ""));
           }
-
-        if (t.length() > 0)
+        if (milliSeconds.length() > 0)
           {
             // Milliseconds.
-            if(t.charAt(0) != '.' || t.length () < 2)
-              throw new IOException ("Malformed dateTime (" + s + ").");
-
-            t = t.substring (1);
-
-            // We can only handle (exactly) millisecond precision.
-            gc.set (GregorianCalendar.MILLISECOND, Integer.parseInt ((t + "000").substring (0, 3)));
-
-            // Round up when necessary.
-            if (t.length() > 3 && t.charAt(3) > '4')
-              {
-                gc.add (GregorianCalendar.MILLISECOND, 1);
-              }
+            gc.set (GregorianCalendar.MILLISECOND, 
+                    Integer.parseInt ((milliSeconds.substring (1) + "00").substring (0, 3)));
           }
         return gc;
       }
@@ -153,7 +128,7 @@ public class ISODateTime
           {
             s.append ("Z");
           }
-
         return s.toString ();
       }
   }
+
