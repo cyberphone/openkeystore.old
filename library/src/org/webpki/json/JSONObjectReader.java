@@ -163,12 +163,17 @@ public class JSONObjectReader implements Serializable, Cloneable
         throw new IOException ("Malformed \"BigInteger\": " + value);
       }
 
-    static BigDecimal parseBigDecimal (String value) throws IOException
+    static BigDecimal parseBigDecimal (String value, Integer decimals) throws IOException
       {
         if (INTEGER_PATTERN.matcher (value).matches () ||
             DECIMAL_PATTERN.matcher (value).matches ())
           {
-            return new BigDecimal (value);
+            BigDecimal parsed = new BigDecimal (value);
+            if (decimals != null && parsed.scale () != decimals)
+              {
+                throw new IOException ("Incorrect number of decimals in \"BigDecimal\": " + parsed.scale ());
+              }
+            return parsed;
           }
         throw new IOException ("Malformed \"BigDecimal\": " + value);
       }
@@ -180,7 +185,12 @@ public class JSONObjectReader implements Serializable, Cloneable
 
     public BigDecimal getBigDecimal (String name) throws IOException
       {
-        return parseBigDecimal (getString (name));
+        return parseBigDecimal (getString (name), null);
+      }
+
+    public BigDecimal getBigDecimal (String name, Integer decimals) throws IOException
+      {
+        return parseBigDecimal (getString (name), decimals);
       }
 
     @SuppressWarnings("unchecked")

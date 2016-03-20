@@ -199,9 +199,19 @@ public class JSONObjectWriter implements Serializable
         return setString (name, value.toString ());
       }
 
+    static String bigDecimalToString (BigDecimal value, Integer decimals)
+      {
+        return (decimals == null ? value : value.setScale (decimals)).toPlainString ();
+      }
+
     public JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
       {
-        return setString (name, value.toString ());
+        return setString (name, bigDecimalToString(value, null));
+      }
+
+    public JSONObjectWriter setBigDecimal (String name, BigDecimal value, Integer decimals) throws IOException
+      {
+        return setString (name, bigDecimalToString(value, decimals));
       }
 
     public JSONObjectWriter setBoolean (String name, boolean value) throws IOException

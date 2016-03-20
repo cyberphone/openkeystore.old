@@ -93,7 +93,12 @@ public class JSONArrayReader implements Serializable
 
     public BigDecimal getBigDecimal () throws IOException
       {
-        return JSONObjectReader.parseBigDecimal (getString ());
+        return JSONObjectReader.parseBigDecimal (getString (), null);
+      }
+
+    public BigDecimal getBigDecimal (Integer decimals) throws IOException
+      {
+        return JSONObjectReader.parseBigDecimal (getString (), decimals);
       }
 
     public GregorianCalendar getDateTime () throws IOException

@@ -2743,6 +2743,23 @@ public class JSONTest
         integerRange(Integer.MIN_VALUE - 1l, true);
         badInteger (13.1);
         badInteger (1300000.1);
+        assertTrue (JSONParser.parse (new JSONObjectWriter()
+          .setBigDecimal ("big", new BigDecimal("5.00"))
+             .toString ()).getBigDecimal ("big").compareTo(BigDecimal.valueOf (5)) == 0);
+        assertTrue (JSONParser.parse (new JSONObjectWriter()
+        .setBigDecimal ("big", new BigDecimal("5.00"))
+           .toString ()).getBigDecimal ("big", 2).compareTo(BigDecimal.valueOf (5)) == 0);
+        try
+          {
+            JSONParser.parse (new JSONObjectWriter()
+            .setBigDecimal ("big", new BigDecimal("5"))
+               .toString ()).getBigDecimal ("big", 2);
+            fail("bd");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Incorrect number of decimals in \"BigDecimal\": 0");
+          }
       }
 
     void badInteger (Double value)
