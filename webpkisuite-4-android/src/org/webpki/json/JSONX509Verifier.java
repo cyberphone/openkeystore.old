@@ -41,8 +41,8 @@ public class JSONX509Verifier extends JSONVerifier
       }
 
     @Override
-    void verify (JSONSignatureDecoder signature_decoder) throws IOException
+    void verify (JSONSignatureDecoder signatureDecoder) throws IOException
       {
-        verifier.verifyCertificatePath (signature_decoder.certificate_path);
+        verifier.verifyCertificatePath (signatureDecoder.certificatePath);
       }
   }

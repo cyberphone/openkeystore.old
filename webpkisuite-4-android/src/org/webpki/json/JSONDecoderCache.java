@@ -54,28 +54,28 @@ public class JSONDecoderCache implements Serializable
     
     static final char CONTEXT_QUALIFIER_DIVIDER = '$';
 
-    boolean check_for_unread = true;
+    boolean checkForUnread = true;
     
-    Hashtable<String,Class<? extends JSONDecoder>> class_map = new Hashtable<String,Class<? extends JSONDecoder>> ();
+    Hashtable<String,Class<? extends JSONDecoder>> classMap = new Hashtable<String,Class<? extends JSONDecoder>> ();
 
     public JSONDecoder parse (JSONObjectReader reader) throws IOException
       {
-        String object_type_identifier = reader.getString (CONTEXT_JSON);
+        String objectTypeIdentifier = reader.getString (CONTEXT_JSON);
         if (reader.hasProperty (QUALIFIER_JSON))
           {
-            object_type_identifier += CONTEXT_QUALIFIER_DIVIDER + reader.getString (QUALIFIER_JSON);
+            objectTypeIdentifier += CONTEXT_QUALIFIER_DIVIDER + reader.getString (QUALIFIER_JSON);
           }
-        Class<? extends JSONDecoder> decoder_class = class_map.get (object_type_identifier);
-        if (decoder_class == null)
+        Class<? extends JSONDecoder> decoderClass = classMap.get (objectTypeIdentifier);
+        if (decoderClass == null)
           {
-            throw new IOException ("Unknown JSONDecoder type: " + object_type_identifier);
+            throw new IOException ("Unknown JSONDecoder type: " + objectTypeIdentifier);
           }
         try
           {
-            JSONDecoder decoder = decoder_class.newInstance ();
+            JSONDecoder decoder = decoderClass.newInstance ();
             decoder.root = reader.root;
             decoder.readJSONData (reader);
-            if (check_for_unread)
+            if (checkForUnread)
               {
                 reader.checkForUnread ();
               }
@@ -91,50 +91,50 @@ public class JSONDecoderCache implements Serializable
           }
       }
 
-    public JSONDecoder parse (byte[] json_utf8) throws IOException
+    public JSONDecoder parse (byte[] jsonUtf8) throws IOException
       {
-        return parse(JSONParser.parse (json_utf8));
+        return parse(JSONParser.parse (jsonUtf8));
       }
 
-    public void addToCache (Class<? extends JSONDecoder> json_decoder) throws IOException
+    public void addToCache (Class<? extends JSONDecoder> jsonDecoder) throws IOException
       {
         try
           {
-            JSONDecoder decoder = json_decoder.newInstance ();
-            String object_type_identifier = decoder.getContext ();
+            JSONDecoder decoder = jsonDecoder.newInstance ();
+            String objectTypeIdentifier = decoder.getContext ();
             if (decoder.getQualifier () != null)
               {
-                object_type_identifier += CONTEXT_QUALIFIER_DIVIDER + decoder.getQualifier ();
+                objectTypeIdentifier += CONTEXT_QUALIFIER_DIVIDER + decoder.getQualifier ();
               }
-            if (class_map.put (object_type_identifier, decoder.getClass ()) != null)
+            if (classMap.put (objectTypeIdentifier, decoder.getClass ()) != null)
               {
-                throw new IOException ("JSON document type already defined: " + object_type_identifier);
+                throw new IOException ("JSON document type already defined: " + objectTypeIdentifier);
               }
           }
-        catch (InstantiationException ie)
+        catch (InstantiationException e)
           {
-            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder", ie);
+            throw new IOException ("Class " + jsonDecoder.getName () + " is not a valid JSONDecoder", e);
           }
-        catch (IllegalAccessException iae)
+        catch (IllegalAccessException e)
           {
-            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder", iae);
+            throw new IOException ("Class " + jsonDecoder.getName () + " is not a valid JSONDecoder", e);
           }
       }
 
-    public void addToCache (String json_decoder_path) throws IOException
+    public void addToCache (String jsonDecoderPath) throws IOException
       {
         try
           {
-            addToCache (Class.forName (json_decoder_path).asSubclass (JSONDecoder.class));
+            addToCache (Class.forName (jsonDecoderPath).asSubclass (JSONDecoder.class));
           }
-        catch (ClassNotFoundException cnfe)
+        catch (ClassNotFoundException e)
           {
-            throw new IOException ("Class " + json_decoder_path + " can't be found", cnfe);
+            throw new IOException ("Class " + jsonDecoderPath + " can't be found", e);
           }
       }
 
     public void setCheckForUnreadProperties (boolean flag)
       {
-        check_for_unread = flag;
+        checkForUnread = flag;
       }
   }

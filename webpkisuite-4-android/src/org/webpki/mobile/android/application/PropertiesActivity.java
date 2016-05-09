@@ -17,32 +17,25 @@
 package org.webpki.mobile.android.application;
 
 import org.webpki.crypto.DeviceID;
-
 import org.webpki.sks.SKSException;
-
 import org.webpki.mobile.android.R;
-
 import org.webpki.mobile.android.keygen2.KeyGen2Activity;
 import org.webpki.mobile.android.webauth.WebAuthActivity;
-
+import org.webpki.mobile.android.saturn.SaturnActivity;
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
 
 import android.os.Bundle;
-
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -125,6 +118,7 @@ public class PropertiesActivity extends ListActivity
              menu.setHeaderTitle ("Show last run with:");
              menu.add (KeyGen2Activity.KEYGEN2);
              menu.add (WebAuthActivity.WEBAUTH);
+             menu.add (SaturnActivity.SATURN);
            }
       }    
 

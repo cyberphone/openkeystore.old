@@ -171,7 +171,7 @@ public class JSONParser
     JSONValue scanSimpleType () throws IOException
       {
         index--;
-        StringBuffer temp_buffer = new StringBuffer ();
+        StringBuffer tempBuffer = new StringBuffer ();
         char c;
         while ((c = testNextNonWhiteSpaceChar ()) != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
           {
@@ -179,9 +179,9 @@ public class JSONParser
               {
                 break;
               }
-            temp_buffer.append (c);
+            tempBuffer.append (c);
           }
-        String result = temp_buffer.toString ();
+        String result = tempBuffer.toString ();
         if (result.length () == 0)
           {
             throw new IOException ("Missing argument");

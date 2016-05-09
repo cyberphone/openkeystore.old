@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.webpki.mobile.android"
-    android:versionCode="12"
-    android:versionName="1.12">
+    android:versionCode="13"
+    android:versionName="1.13">
 
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="16"/>
 
@@ -75,6 +75,21 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data android:scheme="webpkiproxy" android:host="webauth"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:taskAffinity=".saturn.SaturnActivity"
+            android:name=".saturn.SaturnActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_saturn"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="webpkiproxy" android:host="saturn"/>
             </intent-filter>
         </activity>
         <activity

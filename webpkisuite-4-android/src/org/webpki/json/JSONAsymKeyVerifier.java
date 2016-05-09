@@ -27,24 +27,24 @@ public class JSONAsymKeyVerifier extends JSONVerifier
   {
     private static final long serialVersionUID = 1L;
 
-    PublicKey expected_public_key;
+    PublicKey expectedPublicKey;
 
     /**
      * Verifier for asymmetric keys.
      * Note that you can access the received public key from {@link JSONSignatureDecoder}
      * which is useful if there are multiple keys possible.
-     * @param expected_public_key Expected public key
+     * @param expectedPublicKey Expected public key
       */
-    public JSONAsymKeyVerifier (PublicKey expected_public_key)
+    public JSONAsymKeyVerifier (PublicKey expectedPublicKey)
       {
         super(JSONSignatureTypes.ASYMMETRIC_KEY);
-        this.expected_public_key = expected_public_key;
+        this.expectedPublicKey = expectedPublicKey;
       }
 
     @Override
-    void verify (JSONSignatureDecoder signature_decoder) throws IOException
+    void verify (JSONSignatureDecoder signatureDecoder) throws IOException
       {
-        if (!expected_public_key.equals (signature_decoder.public_key))
+        if (!expectedPublicKey.equals (signatureDecoder.publicKey))
           {
             throw new IOException ("Provided public key differs from the signature key");
           }

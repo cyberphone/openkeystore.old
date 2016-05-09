@@ -100,21 +100,21 @@ public class JSONSignatureDecoder implements Serializable
   
     SignatureAlgorithms algorithm;
     
-    String algorithm_string;
+    String algorithmString;
     
-    byte[] normalized_data;
+    byte[] normalizedData;
     
-    byte[] signature_value;
+    byte[] signatureValue;
     
-    X509Certificate[] certificate_path;
+    X509Certificate[] certificatePath;
 
-    PublicKey public_key;
+    PublicKey publicKey;
 
-    String key_id;
+    String keyId;
 
     Vector<JSONObjectReader> extensions;
     
-    JSONSignatureDecoder (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -122,8 +122,8 @@ public class JSONSignatureDecoder implements Serializable
           {
             throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
           }
-        algorithm_string = signature.getString (ALGORITHM_JSON);
-        getKeyInfo (signature, algorithm_preferences);
+        algorithmString = signature.getString (ALGORITHM_JSON);
+        getKeyInfo (signature, algorithmPreferences);
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
             extensions = new Vector<JSONObjectReader> ();
@@ -136,46 +136,57 @@ public class JSONSignatureDecoder implements Serializable
               }
             while (ar.hasMore ());
           }
-        signature_value = signature.getBinary (VALUE_JSON);
+        signatureValue = signature.getBinary (VALUE_JSON);
 
-        ////////////////////////////////////////////////////////////////////////
-        // Begin JCS normalization                                            // 1. Make a shallow copy of the signature object property list
-        LinkedHashMap<String,JSONValue> saved_properties = new LinkedHashMap<String,JSONValue> (signature.root.properties);
-        //                                                                    //
-        signature.root.properties.remove (VALUE_JSON);                        // 2. Hide property for the serializer..
-        //                                                                    // 3. Serialize ("JSON.stringify()")
-        normalized_data = rd.serializeJSONObject (JSONOutputFormats.NORMALIZED);
-        signature.root.properties.remove (EXTENSIONS_JSON);                   // Hide the optional extensions property for the check method..
-        signature.checkForUnread ();                                          // Check for unread data - extensions
-        signature.root.properties = saved_properties;                         // 4. Restore signature property list
-        // End JCS normalization                                              //
-        ////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+        // Begin JCS normalization                                              //
+        //                                                                      //
+        // 1. Make a shallow copy of the signature object property list         //
+        LinkedHashMap<String,JSONValue> savedProperties =
+            new LinkedHashMap<String,JSONValue> (signature.root.properties);
+        //                                                                      //
+        // 2. Hide property for the serializer..                                //
+        signature.root.properties.remove (VALUE_JSON);                          //
+        //                                                                      //
+        // 3. Serialize ("JSON.stringify()")                                    //
+        normalizedData = rd.serializeJSONObject (JSONOutputFormats.NORMALIZED);
+        //                                                                      //
+        //    Hide the optional extensions property for the check method..      //
+        signature.root.properties.remove (EXTENSIONS_JSON);                     //
+        //    Check for unread data - extensions                                //
+        signature.checkForUnread ();                                            //
+        //                                                                      //
+        // 4. Restore signature property list                                   //
+        signature.root.properties = savedProperties;
+        //                                                                      //
+        // End JCS normalization                                                //
+        //////////////////////////////////////////////////////////////////////////
 
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
-              asymmetricSignatureVerification (certificate_path[0].getPublicKey (), algorithm_preferences);
+              asymmetricSignatureVerification (certificatePath[0].getPublicKey (), algorithmPreferences);
               break;
 
             case ASYMMETRIC_KEY:
-              asymmetricSignatureVerification (public_key, algorithm_preferences);
+              asymmetricSignatureVerification (publicKey, algorithmPreferences);
               break;
 
             default:
-              algorithm = MACAlgorithms.getAlgorithmFromID (algorithm_string, algorithm_preferences);
+              algorithm = MACAlgorithms.getAlgorithmFromID (algorithmString, algorithmPreferences);
           }
       }
 
-    void getKeyInfo (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
+    void getKeyInfo (JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        key_id = rd.getStringConditional (KEY_ID_JSON);
+        keyId = rd.getStringConditional (KEY_ID_JSON);
         if (rd.hasProperty (CERTIFICATE_PATH_JSON))
           {
             readCertificateData (rd);
           }
         else if (rd.hasProperty (PUBLIC_KEY_JSON))
           {
-            public_key = getPublicKey (rd, algorithm_preferences);
+            publicKey = getPublicKey (rd, algorithmPreferences);
           }
         else if (rd.hasProperty (PEM_URL_JSON))
           {
@@ -186,8 +197,8 @@ public class JSONSignatureDecoder implements Serializable
             // Should be a symmetric key then.  Just to be nice we perform a sanity check...
             for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
               {
-                if (algorithm_string.equals (alg.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER)) ||
-                    algorithm_string.equals (alg.getAlgorithmId (AlgorithmPreferences.SKS)))
+                if (algorithmString.equals (alg.getAlgorithmId (AlgorithmPreferences.JOSE_ACCEPT_PREFER)) ||
+                    algorithmString.equals (alg.getAlgorithmId (AlgorithmPreferences.SKS)))
                   {
                     throw new IOException ("Missing key information");
                   }
@@ -197,52 +208,52 @@ public class JSONSignatureDecoder implements Serializable
 
     static BigInteger getCurvePoint (JSONObjectReader rd, String property, KeyAlgorithms ec) throws IOException
       {
-        byte[] fixed_binary = rd.getBinary (property);
-        if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
+        byte[] fixedBinary = rd.getBinary (property);
+        if (fixedBinary.length != (ec.getPublicKeySizeInBits () + 7) / 8)
           {
             throw new IOException ("Public EC key parameter \"" + property + "\" is not normalized");
           }
-        return new BigInteger (1, fixed_binary);
+        return new BigInteger (1, fixedBinary);
       }
 
     static BigInteger getCryptoBinary (JSONObjectReader rd, String property) throws IOException
       {
-        byte[] crypto_binary = rd.getBinary (property);
-        if (crypto_binary[0] == 0x00)
+        byte[] cryptoBinary = rd.getBinary (property);
+        if (cryptoBinary[0] == 0x00)
           {
             throw new IOException ("Public RSA key parameter \"" + property + "\" contains leading zeroes");
           }
-        return new BigInteger (1, crypto_binary);
+        return new BigInteger (1, cryptoBinary);
       }
 
-    static PublicKey getPublicKey (JSONObjectReader rd, AlgorithmPreferences algorithm_preferences) throws IOException
+    static PublicKey getPublicKey (JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
-        PublicKey public_key = null;
+        PublicKey publicKey = null;
         try
           {
             String type = rd.getString (TYPE_JSON);
             if (type.equals (RSA_PUBLIC_KEY))
               {
-                public_key = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, N_JSON),
-                                                                                                  getCryptoBinary (rd, E_JSON)));
+                publicKey = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, N_JSON),
+                                                                                                 getCryptoBinary (rd, E_JSON)));
               }
             else if (type.equals (EC_PUBLIC_KEY))
               {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON), algorithm_preferences);
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON), algorithmPreferences);
                 if (!ec.isECKey ())
                   {
                     throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
                   }
                 ECPoint w = new ECPoint (getCurvePoint (rd, X_JSON, ec), getCurvePoint (rd, Y_JSON, ec));
-                public_key = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
+                publicKey = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
               }
             else
               {
                 throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
               }
             rd.checkForUnread ();
-            return public_key;
+            return publicKey;
           }
         catch (GeneralSecurityException e)
           {
@@ -252,7 +263,7 @@ public class JSONSignatureDecoder implements Serializable
 
     static X509Certificate[] getCertificatePath (JSONObjectReader rd) throws IOException
       {
-        X509Certificate last_certificate = null;
+        X509Certificate lastCertificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
         for (byte[] certificate_blob : rd.getBinaryArray (CERTIFICATE_PATH_JSON))
           {
@@ -260,7 +271,7 @@ public class JSONSignatureDecoder implements Serializable
               {
                 CertificateFactory cf = CertificateFactory.getInstance ("X.509");
                 X509Certificate certificate = (X509Certificate)cf.generateCertificate (new ByteArrayInputStream (certificate_blob));
-                certificates.add (pathCheck (last_certificate, last_certificate = certificate));
+                certificates.add (pathCheck (lastCertificate, lastCertificate = certificate));
               }
             catch (GeneralSecurityException e)
               {
@@ -272,17 +283,17 @@ public class JSONSignatureDecoder implements Serializable
 
     void readCertificateData (JSONObjectReader rd) throws IOException
       {
-        certificate_path = getCertificatePath (rd);
+        certificatePath = getCertificatePath (rd);
         if (rd.hasProperty (SIGNER_CERTIFICATE_JSON))
           {
             rd = rd.getObject (SIGNER_CERTIFICATE_JSON);
             String issuer = rd.getString (ISSUER_JSON);
-            BigInteger serial_number = rd.getBigInteger (SERIAL_NUMBER_JSON);
+            BigInteger serialNumber = rd.getBigInteger (SERIAL_NUMBER_JSON);
             String subject = rd.getString (SUBJECT_JSON);
-            X509Certificate signature_certificate = certificate_path[0];
-            if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
-                !signature_certificate.getSerialNumber ().equals (serial_number) ||
-                !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
+            X509Certificate signatureCertificate = certificatePath[0];
+            if (!signatureCertificate.getIssuerX500Principal ().getName ().equals (issuer) ||
+                !signatureCertificate.getSerialNumber ().equals (serialNumber) ||
+                !signatureCertificate.getSubjectX500Principal ().getName ().equals (subject))
               {
                 throw new IOException ("\"" + SIGNER_CERTIFICATE_JSON + "\" doesn't match actual certificate");
               }
@@ -297,11 +308,11 @@ public class JSONSignatureDecoder implements Serializable
             switch (getSignatureType ())
               {
                 case X509_CERTIFICATE:
-                  key = certificate_path[0].getPublicKey ().toString ();
+                  key = certificatePath[0].getPublicKey ().toString ();
                   break;
   
                 case ASYMMETRIC_KEY:
-                  key = public_key.toString ();
+                  key = publicKey.toString ();
                   break;
   
                 default:
@@ -311,18 +322,18 @@ public class JSONSignatureDecoder implements Serializable
           }
       }
 
-    void asymmetricSignatureVerification (PublicKey public_key, AlgorithmPreferences algorithm_preferences) throws IOException
+    void asymmetricSignatureVerification (PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithm_string, algorithm_preferences);
-        if (((AsymSignatureAlgorithms)algorithm).isRSA () != public_key instanceof RSAPublicKey)
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID (algorithmString, algorithmPreferences);
+        if (((AsymSignatureAlgorithms)algorithm).isRSA () != publicKey instanceof RSAPublicKey)
           {
-            throw new IOException ("\"" + algorithm_string + "\" doesn't match key type: " + public_key.getAlgorithm ());
+            throw new IOException ("\"" + algorithmString + "\" doesn't match key type: " + publicKey.getAlgorithm ());
           }
         try
           {
-            checkVerification (new SignatureWrapper ((AsymSignatureAlgorithms) algorithm, public_key)
-                                   .update (normalized_data)
-                                   .verify (signature_value));
+            checkVerification (new SignatureWrapper ((AsymSignatureAlgorithms) algorithm, publicKey)
+                                   .update (normalizedData)
+                                   .verify (signatureValue));
           }
         catch (GeneralSecurityException e)
           {
@@ -332,7 +343,7 @@ public class JSONSignatureDecoder implements Serializable
 
     public byte[] getValue ()
       {
-        return signature_value;
+        return signatureValue;
       }
 
     public SignatureAlgorithms getAlgorithm ()
@@ -345,9 +356,9 @@ public class JSONSignatureDecoder implements Serializable
         return extensions == null ? null : extensions.toArray (new JSONObjectReader[0]);
       }
 
-    void checkRequest (JSONSignatureTypes signature_type) throws IOException
+    void checkRequest (JSONSignatureTypes signatureType) throws IOException
       {
-        if (signature_type != getSignatureType ())
+        if (signatureType != getSignatureType ())
           {
             throw new IOException ("Request doesn't match received signature: " + getSignatureType ().toString ());
           }
@@ -356,32 +367,32 @@ public class JSONSignatureDecoder implements Serializable
     public X509Certificate[] getCertificatePath () throws IOException
       {
         checkRequest (JSONSignatureTypes.X509_CERTIFICATE);
-        return certificate_path;
+        return certificatePath;
       }
 
     public PublicKey getPublicKey () throws IOException
       {
         checkRequest (JSONSignatureTypes.ASYMMETRIC_KEY);
-        return public_key;
+        return publicKey;
       }
 
     public String getKeyId ()
       {
-        return key_id;
+        return keyId;
       }
 
     public byte[] getNormalizedData ()
       {
-        return normalized_data;
+        return normalizedData;
       }
 
     public JSONSignatureTypes getSignatureType ()
       {
-        if (certificate_path != null)
+        if (certificatePath != null)
           {
             return JSONSignatureTypes.X509_CERTIFICATE;
           }
-        return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
+        return publicKey == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
     /**
@@ -410,7 +421,7 @@ public class JSONSignatureDecoder implements Serializable
           {
             throw new IOException ("\"" + EXTENSIONS_JSON + "\" requires enabling in the verifier");
           }
-        if (!verifier.keyIdAllowed && key_id != null)
+        if (!verifier.keyIdAllowed && keyId != null)
           {
             throw new IOException ("\"" + KEY_ID_JSON + "\" requires enabling in the verifier");
           }
