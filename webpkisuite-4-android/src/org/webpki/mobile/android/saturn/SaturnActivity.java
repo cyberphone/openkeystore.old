@@ -17,18 +17,25 @@
 package org.webpki.mobile.android.saturn;
 
 import java.security.PublicKey;
-import java.util.LinkedHashMap;
+import java.util.Vector;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.mobile.android.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
+import org.webpki.util.ArrayUtil;
 
 public class SaturnActivity extends BaseProxyActivity {
 
@@ -40,47 +47,99 @@ public class SaturnActivity extends BaseProxyActivity {
 
     String amountString;
     
+    Account selectedCard;
+    
     WebView saturnView;
+    int factor;
+    StringBuffer standardHtml;
+    DisplayMetrics displayMetrics;
 
     static class Account {
         AccountDescriptor accountDescriptor;
         boolean cardFormatAccountId;
-        byte[] cardIcon;
+        String cardSvgIcon;
         AsymSignatureAlgorithms signatureAlgorithm;
         String authorityUrl;
+        int keyHandle;
         String dataEncryptionAlgorithm;
         String keyEncryptionAlgorithm;
         PublicKey keyEncryptionKey;
 
         Account(AccountDescriptor accountDescriptor,
                 boolean cardFormatAccountId,
-                byte[] cardIcon,
+                String cardSvgIcon,
+                int keyHandle,
                 AsymSignatureAlgorithms signatureAlgorithm,
                 String authorityUrl) {
             this.accountDescriptor = accountDescriptor;
             this.cardFormatAccountId = cardFormatAccountId;
-            this.cardIcon = cardIcon;
+            this.cardSvgIcon = cardSvgIcon;
+            this.keyHandle = keyHandle;
             this.signatureAlgorithm = signatureAlgorithm;
             this.authorityUrl = authorityUrl;
         }
     }
 
-    LinkedHashMap<Integer,Account> cardCollection = new LinkedHashMap<Integer,Account>();
+    Vector<Account> cardCollection = new Vector<Account>();
 
+    void loadHtml(String html) {
+        saturnView.loadData(new StringBuffer(standardHtml).append(html).append("</table></td></tr></table></body></html>").toString(),
+                            "text/html",
+                            null);
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saturn);
         saturnView = (WebView) findViewById(R.id.saturnMain);
-        StringBuffer log_message = new StringBuffer("<html><body>Hi There!");
-        saturnView.loadData(log_message.append ("</body></html>").toString (), "text/html", null);
+        WebSettings webSettings = saturnView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        saturnView.addJavascriptInterface (this, "Saturn");
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        factor = displayMetrics.densityDpi / 96;
+        try {
+            byte[] saturnLogo = ArrayUtil.getByteArrayFromInputStream(getResources().openRawResource(R.drawable.saturnlogo));
+            standardHtml = new StringBuffer("<html><body><img src=\"data:image/png;base64,")
+                .append(Base64.encodeToString(saturnLogo, Base64.NO_WRAP))
+                .append("\" style=\"z-index:5;position:absolute\">" +
+                        "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">" +
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table cellpadding=\"0\" cellspacing=\"0\">");
+            loadHtml("<tr><td>Initializing...</td></tr>");
+/*
+                <tr><td align=\"center\">Select Payment Card</td></tr><tr><td style=\"padding-top:10pt\">" +
+              "<div style=\"width:" + (displayMetrics.widthPixels / factor) + "px;height:" + (displayMetrics.widthPixels * 6)/(10 * factor) + "px\">")
+                     .append (new String(ArrayUtil.getByteArrayFromInputStream(getResources().openRawResource(R.drawable.supercard1))))
+                //             .append ("Hi")
+                     .append ("</div></td></tr>");
+*/
+        } catch (Exception e) {
+          unconditionalAbort("Saturn didn't initialize!");
+          return;
+        }
 
         showHeavyWork (PROGRESS_INITIALIZING);
 
         // Start of Saturn
         new SaturnProtocolInit(this).execute();
     }
-
+    
+    @JavascriptInterface
+    public void selectCard(String index) {
+        selectedCard = cardCollection.elementAt(Integer.parseInt(index));
+        StringBuffer html = new StringBuffer("<tr><td align=\"center\">Selected Card</td></tr>");
+        html.append("<tr><td style=\"padding-top:10pt\"><div style=\"width:")
+            .append(displayMetrics.widthPixels / factor)
+            .append("px;height:")
+            .append((displayMetrics.widthPixels * 6) / (10 * factor))
+            .append("px\">")
+            .append(selectedCard.cardSvgIcon)
+            .append("</div></td></tr>");
+        loadHtml(html.toString());
+    }
+    
     @Override
     protected String getProtocolName() {
         return SATURN;

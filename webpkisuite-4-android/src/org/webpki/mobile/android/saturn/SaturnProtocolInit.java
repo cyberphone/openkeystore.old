@@ -17,10 +17,13 @@
 package org.webpki.mobile.android.saturn;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import android.os.AsyncTask;
+import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.view.View;
 import android.util.Log;
 
@@ -99,7 +102,27 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         }
         saturnActivity.noMoreWorkToDo();
         if (success) {
-            Log.i(SaturnActivity.SATURN, "CARDS=" + saturnActivity.cardCollection.size ());
+            if (saturnActivity.cardCollection.isEmpty()) {
+                saturnActivity.loadHtml("<tr><td align=\"center\">You do not seem to have any payment cards. " +
+                                         "For a selection of test cards, you can get such at the Saturn proof-of-concept site.</td></tr>");
+            } else if (saturnActivity.cardCollection.size () == 1) {
+               saturnActivity.selectCard("0");
+            } else {
+                StringBuffer html = new StringBuffer("<tr><td align=\"center\">Select Payment Card</td></tr>");
+                int index = 0;
+                for (SaturnActivity.Account account : saturnActivity.cardCollection) {
+                    html.append("<tr><td style=\"padding-top:10pt\"><div style=\"width:")
+                        .append(saturnActivity.displayMetrics.widthPixels / saturnActivity.factor)
+                        .append("px;height:")
+                        .append((saturnActivity.displayMetrics.widthPixels * 6) / (10 * saturnActivity.factor))
+                        .append("px\" onClick=\"Saturn.selectCard('")
+                        .append(String.valueOf(index++))
+                        .append ("')\">")
+                        .append(account.cardSvgIcon)
+                        .append("</div></td></tr>");
+                }
+                saturnActivity.loadHtml(html.toString ());
+            }
 /*
             ((TextView) saturnActivity.findViewById (R.id.partyInfo)).setText (saturnActivity.getRequestingHost ());
             saturnActivity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
@@ -137,8 +160,9 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 Account card =
                     new Account(cardAccount,
                                 cardProperties.getBoolean(BaseProperties.CARD_FORMAT_ACCOUNT_ID_JSON),
-                                saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
-                                    .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE),
+                                new String(saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
+                                    .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE), "UTF-8"),
+                                keyHandle,
                                 AsymSignatureAlgorithms
                                     .getAlgorithmFromID(cardProperties.getString(BaseProperties.SIGNATURE_ALGORITHM_JSON),
                                                         AlgorithmPreferences.JOSE),
@@ -161,7 +185,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 card.keyEncryptionKey = encryptionParameters.getPublicKey(AlgorithmPreferences.JOSE);
 
                 // We found a useful card!
-                saturnActivity.cardCollection.put(keyHandle, card);
+                saturnActivity.cardCollection.add(card);
                 break;
             }
         }
