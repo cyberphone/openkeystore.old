@@ -16,6 +16,7 @@
  */
 package org.webpki.mobile.android.saturn;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Vector;
 
@@ -30,12 +31,19 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.mobile.android.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
+import org.webpki.mobile.android.saturn.common.ChallengeResult;
+import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
+import org.webpki.sks.KeyProtectionInfo;
+import org.webpki.sks.SKSException;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLEncoder;
 
@@ -51,10 +59,14 @@ public class SaturnActivity extends BaseProxyActivity {
     WalletRequestDecoder walletRequest;
 
     String payeeCommonName;
-
+    
     String amountString;
     
     Account selectedCard;
+    
+    String pin;
+    
+    byte[] dataEncryptionKey;
     
     WebView saturnView;
     int factor;
@@ -170,16 +182,115 @@ public class SaturnActivity extends BaseProxyActivity {
                .append(amountString)
                .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
                        "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
-                       "<input type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus></td></tr>" +
+                       "<input id=\"pin\" type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus></td></tr>" +
                        "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
-                       "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment()\"></td></tr>" +
+                       "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
                        "</table></td></tr>");
         loadHtml(payHtml.toString());
     }
 
+    boolean pinBlockCheck() throws SKSException {
+        if (sks.getKeyProtectionInfo(selectedCard.keyHandle).isPinBlocked()) {
+            unconditionalAbort("Card blocked due to previous PIN errors!");
+            return true;
+        }
+        return false;
+    }
+
+    boolean userAuthorizationSucceeded(ChallengeResult[] challengeResults) {
+        try {
+            if (pinBlockCheck()) {
+                return false;
+            }
+            try {
+                // User authorizations are always signed by a key that only needs to be
+                // understood by the issuing Payment Provider (bank).
+                JSONObjectWriter authorizationData = AuthorizationData.encode(
+                    walletRequest.getPaymentRequest(),
+                    getRequestingHost(),
+                    selectedCard.accountDescriptor,
+                    dataEncryptionKey,
+                    Encryption.JOSE_A128CBC_HS256_ALG_ID,
+                    challengeResults,
+                    selectedCard.signatureAlgorithm,
+                    new AsymKeySignerInterface () {
+                        @Override
+                        public PublicKey getPublicKey() throws IOException {
+                            return sks.getKeyAttributes(selectedCard.keyHandle).getCertificatePath()[0].getPublicKey();
+                        }
+                        @Override
+                        public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+                            return sks.signHashedData(selectedCard.keyHandle,
+                                                      algorithm.getAlgorithmId (AlgorithmPreferences.SKS),
+                                                      null,
+                                                      new String(pin).getBytes("UTF-8"),
+                                                      algorithm.getDigestAlgorithm().digest(data));
+                        }
+                    });
+                Log.i(SATURN, "Authorization before encryption:\n" + authorizationData);
+
+                // Since user authorizations are pushed through the Payees they must be encrypted in order
+                // to not leak user information to Payees.  Only the proper Payment Provider can decrypt
+                // and process user authorizations.
+/*
+                resultMessage = PayerAuthorization.encode(paymentRequest,
+                                                          authorizationData,
+                                                          selectedCard.authorityUrl,
+                                                          selectedCard.accountDescriptor.getAccountType(),
+                                                          selectedCard.dataEncryptionAlgorithm,
+                                                          selectedCard.keyEncryptionKey,
+                                                          selectedCard.keyEncryptionAlgorithm);
+                logger.info("About to send to the browser:\n" + resultMessage);
+*/
+                return true;
+            } catch (SKSException e) {
+                if (e.getError() != SKSException.ERROR_AUTHORIZATION) {
+                    throw new Exception(e);
+                }
+            }
+            if (!pinBlockCheck()) {
+                Log.w(SATURN, "Incorrect PIN");
+/*
+                KeyProtectionInfo pi = sks.getKeyProtectionInfo(keyHandle);
+                showProblemDialog(false,
+                        "<html>Incorrect PIN.<br>There are " +
+                         (pi.getPinRetryLimit() - pi.getPinErrorCount()) +
+                         " tries left.</html>",
+                        new WindowAdapter() {});
+*/
+            }
+            return false;
+        } catch (Exception e) {
+            unconditionalAbort(e.getMessage());
+            return false;  
+        }
+    }
+
+    void paymentEvent(ChallengeResult[] challengeResults) {
+        if (userAuthorizationSucceeded(challengeResults)) {
+/*
+            // The user have done his/her part, now it is up to the rest of
+            // the infrastructure carry out the user's request.  This may take
+            // a few seconds so we put up the "Waiting" sign again.
+            waitingText.setText("Payment processing - Please wait");
+            ((CardLayout)views.getLayout()).show(views, VIEW_WAITING);
+
+            // This is a multi-threaded application, yes!
+            new PerformPayment().start();
+*/
+            Toast.makeText (getApplicationContext(), "Yay!", Toast.LENGTH_SHORT).show ();
+        }
+        
+    }
+
     @JavascriptInterface
-    public void performPayment() {
-        Toast.makeText (getApplicationContext(), "Not implemented!", Toast.LENGTH_SHORT).show ();
+    public void performPayment(String pin) {
+        this.pin = pin;
+        if (pin.isEmpty()) {
+            Toast.makeText (getApplicationContext(), "Empty PIN, ignored", Toast.LENGTH_SHORT).show ();
+        } else {
+            paymentEvent(null);
+        }
     }
 
     void showCardCollection() {

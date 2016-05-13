@@ -87,6 +87,11 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 collectPotentialCard(ek.getKeyHandle(),
                                      JSONParser.parse(ext.getExtensionData(SecureKeyStore.SUB_TYPE_EXTENSION)),
                                      saturnActivity.walletRequest.getAccountTypes());
+
+                // The key we use for decrypting private information from our bank
+                saturnActivity.dataEncryptionKey = 
+                    Encryption.generateDataEncryptionKey(Encryption.JOSE_A128CBC_HS256_ALG_ID);
+
             }
             return true;
         } catch (Exception e) {
