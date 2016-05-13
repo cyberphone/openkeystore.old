@@ -37,10 +37,16 @@ import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.HTMLEncoder;
 
 public class SaturnActivity extends BaseProxyActivity {
 
     public static final String SATURN = "Saturn";
+    
+    static final String LABEL_STYLE = "text-align:right;padding-right:3pt";
+    
+    static final String FIELD_STYLE = "padding:1pt 4pt 1pt 4pt;border-width:1px;border-style:solid;" +
+                                      "border-color:#adadad;background-color:#f4fdf7";
 
     WalletRequestDecoder walletRequest;
 
@@ -85,7 +91,7 @@ public class SaturnActivity extends BaseProxyActivity {
 
     void loadHtml(String html) {
         saturnView.loadData(new StringBuffer(standardHtml).append(html).append("</table></td></tr></table></body></html>").toString(),
-                            "text/html",
+                            "text/html; charset=utf-8",
                             null);
     }
 
@@ -151,10 +157,29 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     @JavascriptInterface
-    public void selectCard(String index) {
-        loadHtml(htmlOneCard(selectedCard = cardCollection.elementAt(Integer.parseInt(index)),
-                 "",
-                 ""));
+    public void showPaymentRequest(String index) {
+        StringBuffer payHtml = 
+            new StringBuffer(htmlOneCard(selectedCard = cardCollection.elementAt(Integer.parseInt(index)),
+                                         "",
+                                         ""));
+        payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
+                       "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
+               .append(HTMLEncoder.encode(payeeCommonName))
+               .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
+                       "</tr><tr><td style=\"" + LABEL_STYLE + "\">Amount</td><td style=\"" + FIELD_STYLE + "\">")
+               .append(amountString)
+               .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
+                       "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
+                       "<input type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus></td></tr>" +
+                       "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
+                       "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment()\"></td></tr>" +
+                       "</table></td></tr>");
+        loadHtml(payHtml.toString());
+    }
+
+    @JavascriptInterface
+    public void performPayment() {
+        Toast.makeText (getApplicationContext(), "Not implemented!", Toast.LENGTH_SHORT).show ();
     }
 
     void showCardCollection() {
@@ -163,7 +188,7 @@ public class SaturnActivity extends BaseProxyActivity {
         for (SaturnActivity.Account account : cardCollection) {
             html.append(htmlOneCard(account,
                         " style=\"padding-top:10pt\"",
-                        " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
+                        " onClick=\"Saturn.showPaymentRequest('" + (index++) + "')\""));
   
         }
         loadHtml(html.toString());
