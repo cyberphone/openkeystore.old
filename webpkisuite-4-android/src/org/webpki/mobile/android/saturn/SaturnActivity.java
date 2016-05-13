@@ -34,6 +34,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.mobile.android.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
+import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 import org.webpki.util.ArrayUtil;
 
@@ -125,21 +126,49 @@ public class SaturnActivity extends BaseProxyActivity {
         // Start of Saturn
         new SaturnProtocolInit(this).execute();
     }
-    
-    @JavascriptInterface
-    public void selectCard(String index) {
-        selectedCard = cardCollection.elementAt(Integer.parseInt(index));
-        StringBuffer html = new StringBuffer("<tr><td align=\"center\">Selected Card</td></tr>");
-        html.append("<tr><td style=\"padding-top:10pt\"><div style=\"width:")
+
+    static String formatAccountId(Account card) {
+        return card.cardFormatAccountId ?
+            AuthorizationData.formatCardNumber(card.accountDescriptor.getAccountId()) 
+                                        :
+            card.accountDescriptor.getAccountId();
+    }
+
+    String htmlOneCard(Account account, String topStyle, String clickOption) {
+        return new StringBuffer("<tr><td")
+            .append(topStyle)
+            .append("><div style=\"width:")
             .append(displayMetrics.widthPixels / factor)
             .append("px;height:")
             .append((displayMetrics.widthPixels * 6) / (10 * factor))
-            .append("px\">")
-            .append(selectedCard.cardSvgIcon)
-            .append("</div></td></tr>");
+            .append("px\"")
+            .append(clickOption)
+            .append(">")
+            .append(account.cardSvgIcon)
+            .append("</div></td></tr><tr><td style=\"text-align:center;font-size:8pt;font-family:courier\">")
+            .append(formatAccountId(account))
+            .append("</td></tr>").toString();
+    }
+
+    @JavascriptInterface
+    public void selectCard(String index) {
+        loadHtml(htmlOneCard(selectedCard = cardCollection.elementAt(Integer.parseInt(index)),
+                 "",
+                 ""));
+    }
+
+    void showCardCollection() {
+        StringBuffer html = new StringBuffer("<tr><td align=\"center\">Select Payment Card</td></tr>");
+        int index = 0;
+        for (SaturnActivity.Account account : cardCollection) {
+            html.append(htmlOneCard(account,
+                        " style=\"padding-top:10pt\"",
+                        " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
+  
+        }
         loadHtml(html.toString());
     }
-    
+
     @Override
     protected String getProtocolName() {
         return SATURN;
@@ -164,7 +193,11 @@ public class SaturnActivity extends BaseProxyActivity {
 
     @Override
     public void onBackPressed() {
-        conditionalAbort(null);
+        if (selectedCard == null || cardCollection.size() == 1) {
+            conditionalAbort(null);
+        }
+        selectedCard = null;
+        showCardCollection();
     }
 
     @Override

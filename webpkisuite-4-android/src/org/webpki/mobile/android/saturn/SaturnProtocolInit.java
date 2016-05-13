@@ -103,25 +103,12 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         saturnActivity.noMoreWorkToDo();
         if (success) {
             if (saturnActivity.cardCollection.isEmpty()) {
-                saturnActivity.loadHtml("<tr><td align=\"center\">You do not seem to have any payment cards. " +
-                                         "For a selection of test cards, you can get such at the Saturn proof-of-concept site.</td></tr>");
+                saturnActivity.loadHtml("<tr><td style=\"padding:20pt\"><p>You do not seem to have any payment cards.</p>" +
+                                         "For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</td></tr>");
             } else if (saturnActivity.cardCollection.size () == 1) {
-               saturnActivity.selectCard("0");
+                saturnActivity.selectCard("0");
             } else {
-                StringBuffer html = new StringBuffer("<tr><td align=\"center\">Select Payment Card</td></tr>");
-                int index = 0;
-                for (SaturnActivity.Account account : saturnActivity.cardCollection) {
-                    html.append("<tr><td style=\"padding-top:10pt\"><div style=\"width:")
-                        .append(saturnActivity.displayMetrics.widthPixels / saturnActivity.factor)
-                        .append("px;height:")
-                        .append((saturnActivity.displayMetrics.widthPixels * 6) / (10 * saturnActivity.factor))
-                        .append("px\" onClick=\"Saturn.selectCard('")
-                        .append(String.valueOf(index++))
-                        .append ("')\">")
-                        .append(account.cardSvgIcon)
-                        .append("</div></td></tr>");
-                }
-                saturnActivity.loadHtml(html.toString ());
+                saturnActivity.showCardCollection();
             }
 /*
             ((TextView) saturnActivity.findViewById (R.id.partyInfo)).setText (saturnActivity.getRequestingHost ());
