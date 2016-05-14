@@ -29,6 +29,7 @@ import android.util.Log;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 import org.webpki.keygen2.KeyGen2URIs;
@@ -37,6 +38,7 @@ import org.webpki.mobile.android.saturn.SaturnActivity.Account;
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.BaseProperties;
 import org.webpki.mobile.android.saturn.common.Encryption;
+import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
 import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 import org.webpki.sks.EnumeratedKey;
@@ -55,36 +57,21 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
     @Override
     protected Boolean doInBackground (Void... params) {
         try {
-            saturnActivity.getProtocolInvocationData();
-            saturnActivity.addDecoder(WalletRequestDecoder.class);
-            saturnActivity.walletRequest = (WalletRequestDecoder) saturnActivity.getInitialReguest();
-            saturnActivity.setAbortURL(saturnActivity.walletRequest.getCancelUrl());
+            // Since user authorizations are pushed through the Payees they must be encrypted in order
+            // to not leak user information to Payees.  Only the proper Payment Provider can decrypt
+            // and process user authorizations.
+            saturnActivity.postJSONData(
+                saturnActivity.walletRequest.getAndroidTransactionUrl(),
+                new PayerAuthorizationEncoder(saturnActivity.walletRequest.getPaymentRequest(),
+                                              saturnActivity.authorizationData,
+                                              saturnActivity.selectedCard.authorityUrl,
+                                              saturnActivity.selectedCard.accountDescriptor.getAccountType(),
+                                              saturnActivity.selectedCard.dataEncryptionAlgorithm,
+                                              saturnActivity.selectedCard.keyEncryptionKey,
+                                              saturnActivity.selectedCard.keyEncryptionAlgorithm),
+                false);
+    //        JSONDecoder jsonDecoder = saturnActivity.parseJSONResponse();
 
-            // Primary information to the user...
-            PaymentRequest paymentRequest = saturnActivity.walletRequest.getPaymentRequest();
-            saturnActivity.amountString = paymentRequest.getCurrency()
-                .amountToDisplayString(paymentRequest.getAmount());
-            saturnActivity.payeeCommonName = paymentRequest.getPayee().getCommonName();
-
-            // Enumerate keys but only go for those who are intended for
-            // Web Payments (according to our fictitious payment schemes...)
-            EnumeratedKey ek = new EnumeratedKey();
-            while ((ek = saturnActivity.sks.enumerateKeys(ek.getKeyHandle())) != null) {
-                Extension ext = null;
-                try {
-                    ext = saturnActivity.sks.getExtension(ek.getKeyHandle(),
-                                                          BaseProperties.SATURN_WEB_PAY_CONTEXT_URI);
-                } catch (SKSException e) {
-                    if (e.getError() == SKSException.ERROR_OPTION) {
-                        continue;
-                    }
-                    throw new Exception(e);
-                }
-
-                // This key had the attribute signifying that it is a payment credential
-                // for the fictitious payment schemes this system is supporting but it
-                // might still not match the Payee's list of supported account types.
-            }
             return true;
         } catch (Exception e) {
             saturnActivity.logException(e);
@@ -99,7 +86,13 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
         }
         saturnActivity.noMoreWorkToDo();
         if (success) {
-            saturnActivity.loadHtml("<tr><td style=\"padding:20pt\">YES!</td></tr>");
+            String url = saturnActivity.walletRequest.getAndroidSuccessUrl();
+            if (url.equals("local")) {
+                saturnActivity.done = true;
+                saturnActivity.loadHtml("<tr><td>The operation was successful!</td></tr>");
+            } else {    
+                saturnActivity.launchBrowser(url);
+            }
         } else {
             saturnActivity.showFailLog();
         }

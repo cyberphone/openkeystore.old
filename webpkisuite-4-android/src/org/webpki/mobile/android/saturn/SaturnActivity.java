@@ -41,6 +41,7 @@ import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
 import org.webpki.mobile.android.saturn.common.Encryption;
+import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
@@ -67,6 +68,10 @@ public class SaturnActivity extends BaseProxyActivity {
     String pin;
     
     byte[] dataEncryptionKey;
+    
+    JSONObjectWriter authorizationData;
+    
+    boolean done;
     
     WebView saturnView;
     int factor;
@@ -127,19 +132,12 @@ public class SaturnActivity extends BaseProxyActivity {
                         "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">" +
                         "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table cellpadding=\"0\" cellspacing=\"0\">");
             loadHtml("<tr><td>Initializing...</td></tr>");
-/*
-                <tr><td align=\"center\">Select Payment Card</td></tr><tr><td style=\"padding-top:10pt\">" +
-              "<div style=\"width:" + (displayMetrics.widthPixels / factor) + "px;height:" + (displayMetrics.widthPixels * 6)/(10 * factor) + "px\">")
-                     .append (new String(ArrayUtil.getByteArrayFromInputStream(getResources().openRawResource(R.drawable.supercard1))))
-                //             .append ("Hi")
-                     .append ("</div></td></tr>");
-*/
         } catch (Exception e) {
-          unconditionalAbort("Saturn didn't initialize!");
-          return;
+            unconditionalAbort("Saturn didn't initialize!");
+            return;
         }
 
-        showHeavyWork (PROGRESS_INITIALIZING);
+        showHeavyWork(PROGRESS_INITIALIZING);
 
         // Start of Saturn
         new SaturnProtocolInit(this).execute();
@@ -205,7 +203,7 @@ public class SaturnActivity extends BaseProxyActivity {
             try {
                 // User authorizations are always signed by a key that only needs to be
                 // understood by the issuing Payment Provider (bank).
-                JSONObjectWriter authorizationData = AuthorizationData.encode(
+                authorizationData = AuthorizationData.encode(
                     walletRequest.getPaymentRequest(),
                     getRequestingHost(),
                     selectedCard.accountDescriptor,
@@ -228,20 +226,6 @@ public class SaturnActivity extends BaseProxyActivity {
                         }
                     });
                 Log.i(SATURN, "Authorization before encryption:\n" + authorizationData);
-
-                // Since user authorizations are pushed through the Payees they must be encrypted in order
-                // to not leak user information to Payees.  Only the proper Payment Provider can decrypt
-                // and process user authorizations.
-/*
-                resultMessage = PayerAuthorization.encode(paymentRequest,
-                                                          authorizationData,
-                                                          selectedCard.authorityUrl,
-                                                          selectedCard.accountDescriptor.getAccountType(),
-                                                          selectedCard.dataEncryptionAlgorithm,
-                                                          selectedCard.keyEncryptionKey,
-                                                          selectedCard.keyEncryptionAlgorithm);
-                logger.info("About to send to the browser:\n" + resultMessage);
-*/
                 return true;
             } catch (SKSException e) {
                 if (e.getError() != SKSException.ERROR_AUTHORIZATION) {
@@ -250,14 +234,10 @@ public class SaturnActivity extends BaseProxyActivity {
             }
             if (!pinBlockCheck()) {
                 Log.w(SATURN, "Incorrect PIN");
-/*
-                KeyProtectionInfo pi = sks.getKeyProtectionInfo(keyHandle);
-                showProblemDialog(false,
-                        "<html>Incorrect PIN.<br>There are " +
-                         (pi.getPinRetryLimit() - pi.getPinErrorCount()) +
-                         " tries left.</html>",
-                        new WindowAdapter() {});
-*/
+                KeyProtectionInfo pi = sks.getKeyProtectionInfo(selectedCard.keyHandle);
+                showAlert("Incorrect PIN. There are " +
+                          (pi.getPinRetryLimit() - pi.getPinErrorCount()) +
+                          " tries left.");
             }
             return false;
         } catch (Exception e) {
@@ -268,19 +248,12 @@ public class SaturnActivity extends BaseProxyActivity {
 
     void paymentEvent(ChallengeResult[] challengeResults) {
         if (userAuthorizationSucceeded(challengeResults)) {
-/*
-            // The user have done his/her part, now it is up to the rest of
-            // the infrastructure carry out the user's request.  This may take
-            // a few seconds so we put up the "Waiting" sign again.
-            waitingText.setText("Payment processing - Please wait");
-            ((CardLayout)views.getLayout()).show(views, VIEW_WAITING);
 
-            // This is a multi-threaded application, yes!
-            new PerformPayment().start();
-*/
-            Toast.makeText (getApplicationContext(), "Yay!", Toast.LENGTH_SHORT).show ();
+            showHeavyWork(PROGRESS_PAYMENT);
+
+            // Threaded payment process
+            new SaturnProtocolPerform(this).execute();
         }
-        
     }
 
     @JavascriptInterface
@@ -329,11 +302,15 @@ public class SaturnActivity extends BaseProxyActivity {
 
     @Override
     public void onBackPressed() {
-        if (selectedCard == null || cardCollection.size() == 1) {
-            conditionalAbort(null);
+        if (done) {
+            closeProxy();
+        } else {
+            if (selectedCard == null || cardCollection.size() == 1) {
+                conditionalAbort(null);
+            }
+            selectedCard = null;
+            showCardCollection();
         }
-        selectedCard = null;
-        showCardCollection();
     }
 
     @Override

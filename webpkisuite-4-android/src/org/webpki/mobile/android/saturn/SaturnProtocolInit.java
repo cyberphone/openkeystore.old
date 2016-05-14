@@ -58,7 +58,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
             saturnActivity.getProtocolInvocationData();
             saturnActivity.addDecoder(WalletRequestDecoder.class);
             saturnActivity.walletRequest = (WalletRequestDecoder) saturnActivity.getInitialReguest();
-            saturnActivity.setAbortURL(saturnActivity.walletRequest.getCancelUrl());
+            saturnActivity.setAbortURL(saturnActivity.walletRequest.getAndroidCancelUrl());
 
             // Primary information to the user...
             PaymentRequest paymentRequest = saturnActivity.walletRequest.getPaymentRequest();
@@ -115,31 +115,6 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
             } else {
                 saturnActivity.showCardCollection();
             }
-/*
-            ((TextView) saturnActivity.findViewById (R.id.partyInfo)).setText (saturnActivity.getRequestingHost ());
-            saturnActivity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
-            final Button ok = (Button) saturnActivity.findViewById (R.id.OKbutton);
-            final Button cancel = (Button) saturnActivity.findViewById (R.id.cancelButton);
-            ok.requestFocus ();
-            ok.setOnClickListener (new View.OnClickListener ()
-              {
-                @Override
-                public void onClick (View v)
-                  {
-                    saturnActivity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
-                    saturnActivity.logOK ("The user hit OK");
-                    new KeyGen2SessionCreation (saturnActivity).execute ();
-                  }
-              });
-            cancel.setOnClickListener (new View.OnClickListener ()
-              {
-                @Override
-                public void onClick (View v)
-                  {
-                    saturnActivity.conditionalAbort (null);
-                  }
-              });
-*/
         } else {
             saturnActivity.showFailLog();
         }

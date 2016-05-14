@@ -35,27 +35,33 @@ public class WalletRequestDecoder extends JSONDecoder implements BaseProperties 
         return accountTypes;
     }
 
-    String cancelUrl;
-    public String getCancelUrl() {
-        return cancelUrl;
+    String androidCancelUrl;
+    public String getAndroidCancelUrl() {
+        return androidCancelUrl;
     }
 
-    String successUrl;
-    public String getSuccessUrl() {
-        return successUrl;
+    String androidSuccessUrl;
+    public String getAndroidSuccessUrl() {
+        return androidSuccessUrl;
+    }
+
+    String androidTransactionUrl;
+    public String getAndroidTransactionUrl() {
+        return androidTransactionUrl;
     }
 
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
         accountTypes = rd.getStringArray(ACCEPTED_ACCOUNT_TYPES_JSON);
         paymentRequest = new PaymentRequest(rd.getObject(PAYMENT_REQUEST_JSON));
-        cancelUrl = rd.getString(CANCEL_URL_JSON);
-        successUrl = rd.getString(SUCCESS_URL_JSON);
+        androidCancelUrl = rd.getString(ANDROID_CANCEL_URL_JSON);
+        androidSuccessUrl = rd.getString(ANDROID_SUCCESS_URL_JSON);
+        androidTransactionUrl = rd.getString(ANDROID_TRANSACTION_URL_JSON);
     }
 
     @Override
     public String getContext() {
-        return BaseProperties.SATURN_WEB_PAY_CONTEXT_URI;
+        return SATURN_WEB_PAY_CONTEXT_URI;
     }
 
     @Override

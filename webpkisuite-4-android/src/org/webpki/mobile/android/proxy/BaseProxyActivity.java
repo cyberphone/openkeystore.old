@@ -69,6 +69,7 @@ public abstract class BaseProxyActivity extends Activity
     public static final String PROGRESS_LOOKUP          = "Credential lookup...";
     public static final String PROGRESS_DEPLOY_CERTS    = "Receiving credentials...";
     public static final String PROGRESS_FINAL           = "Finish message...";
+    public static final String PROGRESS_PAYMENT         = "Payment processing...";
     public static final String PROGRESS_AUTHENTICATING  = "Authenticating...";
 
     public static final String CONTINUE_EXECUTION  = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
