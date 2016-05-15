@@ -18,29 +18,24 @@ package org.webpki.mobile.android.saturn.common;
 
 import java.io.IOException;
 
+import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
 
-public class WalletAlertMessage implements BaseProperties {
+public class WalletSuccessDecoder extends JSONDecoder implements BaseProperties {
+
+    private static final long serialVersionUID = 1L;
     
-    public WalletAlertMessage(JSONObjectReader rd) throws IOException {
-        Messages.parseBaseMessage(Messages.WALLET_ALERT, root = rd);
-        text = rd.getString(TEXT_JSON);
-        rd.checkForUnread();
+    @Override
+    protected void readJSONData(JSONObjectReader rd) throws IOException {
     }
 
-    JSONObjectReader root;
-    public JSONObjectReader getRoot() {
-        return root;
+    @Override
+    public String getContext() {
+        return SATURN_WEB_PAY_CONTEXT_URI;
     }
 
-    String text;
-    public String getText() {
-        return text;
-    }
-
-    public static JSONObjectWriter encode(String text) throws IOException {
-        return Messages.createBaseMessage(Messages.WALLET_ALERT)
-            .setString(TEXT_JSON, text);
+    @Override
+    public String getQualifier() {
+        return Messages.WALLET_SUCCESS.toString ();
     }
 }

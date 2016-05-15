@@ -41,7 +41,6 @@ import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
 import org.webpki.mobile.android.saturn.common.Encryption;
-import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
@@ -110,6 +109,15 @@ public class SaturnActivity extends BaseProxyActivity {
         saturnView.loadData(new StringBuffer(standardHtml).append(html).append("</table></td></tr></table></body></html>").toString(),
                             "text/html; charset=utf-8",
                             null);
+    }
+    
+    @Override
+    public void launchBrowser(String url) {
+        if (url.startsWith("get:")) {
+            new QRCancel(this, url.substring(4)).execute();
+        } else {
+            super.launchBrowser(url);
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

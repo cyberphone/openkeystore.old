@@ -17,28 +17,30 @@
 package org.webpki.mobile.android.saturn;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import android.os.AsyncTask;
-import android.webkit.JavascriptInterface;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.view.View;
+
 import android.util.Log;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
+
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.mobile.android.R;
+
 import org.webpki.mobile.android.saturn.SaturnActivity.Account;
+
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.BaseProperties;
 import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.PaymentRequest;
+import org.webpki.mobile.android.saturn.common.ProviderUserResponseDecoder;
+import org.webpki.mobile.android.saturn.common.WalletAlertDecoder;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
+import org.webpki.mobile.android.saturn.common.WalletSuccessDecoder;
+
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.Extension;
 import org.webpki.sks.SKSException;
@@ -57,6 +59,9 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         try {
             saturnActivity.getProtocolInvocationData();
             saturnActivity.addDecoder(WalletRequestDecoder.class);
+            saturnActivity.addDecoder(WalletSuccessDecoder.class);
+            saturnActivity.addDecoder(WalletAlertDecoder.class);
+            saturnActivity.addDecoder(ProviderUserResponseDecoder.class);
             saturnActivity.walletRequest = (WalletRequestDecoder) saturnActivity.getInitialReguest();
             saturnActivity.setAbortURL(saturnActivity.walletRequest.getAndroidCancelUrl());
 

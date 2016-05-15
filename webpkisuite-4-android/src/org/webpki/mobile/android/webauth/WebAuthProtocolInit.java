@@ -55,6 +55,7 @@ import org.webpki.webauth.AuthenticationRequestDecoder;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
+
 import org.webpki.mobile.android.util.CredentialListDataFactory;
 
 public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>

@@ -20,19 +20,18 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
 
-public class ProviderUserResponse implements BaseProperties {
+public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProperties {
+
+    private static final long serialVersionUID = 1L;
 
     public class PrivateMessage {
-        
         
         private PrivateMessage(JSONObjectReader rd) {
             this.root = rd;
@@ -61,12 +60,6 @@ public class ProviderUserResponse implements BaseProperties {
         }
     }
 
-    public ProviderUserResponse(JSONObjectReader rd) throws IOException {
-        Messages.parseBaseMessage(Messages.PROVIDER_USER_RESPONSE, rd);
-        encryptedData = EncryptedData.parse(rd.getObject(PRIVATE_MESSAGE_JSON), true);
-        rd.checkForUnread();
-    }
-
     EncryptedData encryptedData;
     
     public PrivateMessage getPrivateMessage(byte[] dataEncryptionKey,
@@ -92,22 +85,18 @@ public class ProviderUserResponse implements BaseProperties {
         return privateMessage;
     }
 
-    public static JSONObjectWriter encode(String commonName,
-                                          String text,
-                                          ChallengeField[] optionalChallengeFields,
-                                          byte[] dataEncryptionKey,
-                                          String dataEncryptionAlgorithm) throws IOException, GeneralSecurityException {
-        JSONObjectWriter wr = new JSONObjectWriter()
-            .setString(COMMON_NAME_JSON, commonName)
-            .setString(TEXT_JSON, text);
-        if (optionalChallengeFields != null && optionalChallengeFields.length > 0) {
-            JSONArrayWriter aw = wr.setArray(CHALLENGE_FIELDS_JSON);
-            for (ChallengeField challengeField : optionalChallengeFields) {
-                aw.setObject(challengeField.writeObject());
-            }
-        }
-        wr.setDateTime(TIME_STAMP_JSON, new Date(), true);
-        return Messages.createBaseMessage(Messages.PROVIDER_USER_RESPONSE)
-            .setObject(PRIVATE_MESSAGE_JSON, EncryptedData.encode(wr, dataEncryptionAlgorithm, dataEncryptionKey));
-     }
+    @Override
+    protected void readJSONData(JSONObjectReader rd) throws IOException {
+        encryptedData = EncryptedData.parse(rd.getObject(PRIVATE_MESSAGE_JSON), true);
+    }
+
+    @Override
+    public String getContext() {
+        return SATURN_WEB_PAY_CONTEXT_URI;
+    }
+
+    @Override
+    public String getQualifier() {
+        return Messages.PROVIDER_USER_RESPONSE.toString();
+    }
 }
