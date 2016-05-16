@@ -82,8 +82,7 @@
             android:name=".saturn.SaturnActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
-            android:label="@string/title_activity_saturn"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:label="@string/title_activity_saturn">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 

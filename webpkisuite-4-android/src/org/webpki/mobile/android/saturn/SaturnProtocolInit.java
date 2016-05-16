@@ -112,6 +112,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         }
         saturnActivity.noMoreWorkToDo();
         if (success) {
+            saturnActivity.setTitle("Requester: " + saturnActivity.getRequestingHost());
             if (saturnActivity.cardCollection.isEmpty()) {
                 saturnActivity.loadHtml("<tr><td style=\"padding:20pt\"><p>You do not seem to have any payment cards.</p>" +
                                          "For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</td></tr>");
