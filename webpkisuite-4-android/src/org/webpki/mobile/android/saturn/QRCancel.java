@@ -35,7 +35,7 @@ public class QRCancel extends AsyncTask<Void, String, Boolean> {
             new HTTPSWrapper().makeGetRequest(cancelUrl);
         } catch (Exception e) {
         }
-        return null;
+        return true;
     }
 
     @Override

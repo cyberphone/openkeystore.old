@@ -293,19 +293,6 @@ public class SaturnActivity extends BaseProxyActivity {
 
     @Override
     protected void abortTearDown() {
-/*
-        if (provisioning_handle != 0)
-          {
-            try
-              {
-                sks.abortProvisioningSession (provisioning_handle);
-              }
-            catch (Exception e)
-              {
-                Log.e (SATURN, "Failed to abort SKS session");
-              }
-          }
-*/
     }
 
     @Override
