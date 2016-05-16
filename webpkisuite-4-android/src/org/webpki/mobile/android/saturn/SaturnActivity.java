@@ -87,7 +87,7 @@ public class SaturnActivity extends BaseProxyActivity {
     
     boolean done;
     
-    WebView saturnView;
+    SaturnView saturnView;
     int factor;
     StringBuffer standardHtml;
     DisplayMetrics displayMetrics;
@@ -140,7 +140,7 @@ public class SaturnActivity extends BaseProxyActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saturn);
-        saturnView = (WebView) findViewById(R.id.saturnMain);
+        saturnView = (SaturnView) findViewById(R.id.saturnMain);
         WebSettings webSettings = saturnView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         saturnView.addJavascriptInterface (this, "Saturn");
@@ -190,6 +190,7 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     void ShowPaymentRequest() {
+        saturnView.numbericPin = true;
         StringBuffer payHtml = 
                 new StringBuffer(htmlOneCard(selectedCard, "", ""));
             payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +

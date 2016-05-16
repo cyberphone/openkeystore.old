@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <WebView
+    <org.webpki.mobile.android.saturn.SaturnView
         android:id="@+id/saturnMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

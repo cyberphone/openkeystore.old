@@ -90,6 +90,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
         if (alertUser == null) {
             saturnActivity.showFailLog();
         } else if (alertUser) {
+            saturnActivity.saturnView.numbericPin = false;
             StringBuffer text = new StringBuffer();
             if (merchantHtmlAlert == null) {
                 text.append(header(privateMessage.getCommonName(), privateMessage.getText()));
