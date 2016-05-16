@@ -17,15 +17,19 @@
 package org.webpki.mobile.android.saturn;
 
 import java.io.IOException;
+
 import java.security.PublicKey;
+
 import java.util.Vector;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
+
 import android.os.Bundle;
+
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -34,16 +38,25 @@ import android.widget.Toast;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONParser;
+
 import org.webpki.mobile.android.R;
+
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
+
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
 import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
+
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLEncoder;
 
@@ -64,7 +77,9 @@ public class SaturnActivity extends BaseProxyActivity {
     
     Account selectedCard;
     
-    String pin;
+    String pin = "";
+    
+    ChallengeResult[] challengeResults;
     
     byte[] dataEncryptionKey;
     
@@ -174,25 +189,48 @@ public class SaturnActivity extends BaseProxyActivity {
             .append("</td></tr>").toString();
     }
 
-    @JavascriptInterface
-    public void showPaymentRequest(String index) {
+    void ShowPaymentRequest() {
         StringBuffer payHtml = 
-            new StringBuffer(htmlOneCard(selectedCard = cardCollection.elementAt(Integer.parseInt(index)),
-                                         "",
-                                         ""));
-        payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
-                       "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
-               .append(HTMLEncoder.encode(payeeCommonName))
-               .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
-                       "</tr><tr><td style=\"" + LABEL_STYLE + "\">Amount</td><td style=\"" + FIELD_STYLE + "\">")
-               .append(amountString)
-               .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
-                       "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
-                       "<input id=\"pin\" type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus></td></tr>" +
-                       "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
-                       "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
-                       "</table></td></tr>");
-        loadHtml(payHtml.toString());
+                new StringBuffer(htmlOneCard(selectedCard, "", ""));
+            payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
+                           "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
+                   .append(HTMLEncoder.encode(payeeCommonName))
+                   .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
+                           "</tr><tr><td style=\"" + LABEL_STYLE + "\">Amount</td><td style=\"" + FIELD_STYLE + "\">")
+                   .append(amountString)
+                   .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
+                           "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
+                           "<input id=\"pin\" type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus value=\"")
+                   .append(HTMLEncoder.encode(pin))
+                   .append("\"></td></tr>" +
+                           "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
+                           "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
+                           "</table></td></tr>");
+            loadHtml(payHtml.toString());
+    }
+
+    @JavascriptInterface
+    public void selectCard(String index) {
+        selectedCard = cardCollection.elementAt(Integer.parseInt(index));
+        ShowPaymentRequest();
+    }
+
+    @JavascriptInterface
+    public void getChallengeJSON(String json) {
+        try {
+            Vector<ChallengeResult> temp = new Vector<ChallengeResult>();
+            JSONArrayReader challengeArray = JSONParser.parse(json).getJSONArrayReader();
+             do {
+                 JSONObjectReader challengeObject = challengeArray.getObject();
+                 String id = challengeObject.getProperties()[0];
+                 temp.add(new ChallengeResult(id, challengeObject.getString(id)));
+            } while (challengeArray.hasMore());
+            challengeResults = temp.toArray(new ChallengeResult[0]);
+            ShowPaymentRequest();
+            paymentEvent();
+        } catch (Exception e) {
+            unconditionalAbort("Challenge data read failure");
+        }
     }
 
     boolean pinBlockCheck() throws SKSException {
@@ -203,7 +241,7 @@ public class SaturnActivity extends BaseProxyActivity {
         return false;
     }
 
-    boolean userAuthorizationSucceeded(ChallengeResult[] challengeResults) {
+    boolean userAuthorizationSucceeded() {
         try {
             if (pinBlockCheck()) {
                 return false;
@@ -211,13 +249,15 @@ public class SaturnActivity extends BaseProxyActivity {
             try {
                 // User authorizations are always signed by a key that only needs to be
                 // understood by the issuing Payment Provider (bank).
+                ChallengeResult[] tempChallenge = challengeResults;
+                challengeResults = null;
                 authorizationData = AuthorizationData.encode(
                     walletRequest.getPaymentRequest(),
                     getRequestingHost(),
                     selectedCard.accountDescriptor,
                     dataEncryptionKey,
                     Encryption.JOSE_A128CBC_HS256_ALG_ID,
-                    challengeResults,
+                    tempChallenge,
                     selectedCard.signatureAlgorithm,
                     new AsymKeySignerInterface () {
                         @Override
@@ -254,8 +294,8 @@ public class SaturnActivity extends BaseProxyActivity {
         }
     }
 
-    void paymentEvent(ChallengeResult[] challengeResults) {
-        if (userAuthorizationSucceeded(challengeResults)) {
+    void paymentEvent() {
+        if (userAuthorizationSucceeded()) {
 
             showHeavyWork(PROGRESS_PAYMENT);
 
@@ -270,7 +310,7 @@ public class SaturnActivity extends BaseProxyActivity {
         if (pin.isEmpty()) {
             Toast.makeText (getApplicationContext(), "Empty PIN, ignored", Toast.LENGTH_SHORT).show ();
         } else {
-            paymentEvent(null);
+            paymentEvent();
         }
     }
 
@@ -280,7 +320,7 @@ public class SaturnActivity extends BaseProxyActivity {
         for (SaturnActivity.Account account : cardCollection) {
             html.append(htmlOneCard(account,
                         " style=\"padding-top:10pt\"",
-                        " onClick=\"Saturn.showPaymentRequest('" + (index++) + "')\""));
+                        " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
   
         }
         loadHtml(html.toString());

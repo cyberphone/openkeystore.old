@@ -20,7 +20,13 @@ import android.os.AsyncTask;
 
 import org.webpki.json.JSONDecoder;
 
+import org.webpki.mobile.android.saturn.common.ChallengeField;
+import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
+import org.webpki.mobile.android.saturn.common.ProviderUserResponseDecoder;
+import org.webpki.mobile.android.saturn.common.WalletAlertDecoder;
+
+import org.webpki.util.HTMLEncoder;
 
 public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
     private SaturnActivity saturnActivity;
@@ -28,6 +34,10 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
     public SaturnProtocolPerform (SaturnActivity saturnActivity) {
         this.saturnActivity = saturnActivity;
     }
+    
+    ProviderUserResponseDecoder.PrivateMessage privateMessage;
+    
+    String merchantHtmlAlert;
 
     @Override
     protected Boolean doInBackground (Void... params) {
@@ -45,22 +55,78 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                                               saturnActivity.selectedCard.keyEncryptionKey,
                                               saturnActivity.selectedCard.keyEncryptionAlgorithm),
                 false);
-            JSONDecoder jsonDecoder = saturnActivity.parseJSONResponse();
-
-            return true;
+            JSONDecoder returnMessage = saturnActivity.parseJSONResponse();
+            if (returnMessage instanceof ProviderUserResponseDecoder) {
+                privateMessage =
+                    ((ProviderUserResponseDecoder)returnMessage)
+                        .getPrivateMessage(saturnActivity.dataEncryptionKey, 
+                                           Encryption.JOSE_A128CBC_HS256_ALG_ID);
+                return true;
+            } else if (returnMessage instanceof WalletAlertDecoder) {
+                merchantHtmlAlert = ((WalletAlertDecoder)returnMessage).getText();
+                return true;
+            }
         } catch (Exception e) {
             saturnActivity.logException(e);
+            return null;
         }
         return false;
     }
 
+    StringBuffer header(String party, String message) {
+        return new StringBuffer("<tr><td style=\"text-align:center\">Message from <b><i>")
+            .append(HTMLEncoder.encode(party))
+            .append("</i></b></td></tr><tr><td style=\"padding-top:20pt\">")
+            .append(message.replace("${width}", "100%").replace("${submit}", "Validate"))
+            .append("</td></tr>");
+    }
+
     @Override
-    protected void onPostExecute(Boolean success) {
+    protected void onPostExecute(Boolean alertUser) {
         if (saturnActivity.userHasAborted() || saturnActivity.initWasRejected()) {
             return;
         }
         saturnActivity.noMoreWorkToDo();
-        if (success) {
+        if (alertUser == null) {
+            saturnActivity.showFailLog();
+        } else if (alertUser) {
+            StringBuffer text = new StringBuffer();
+            if (merchantHtmlAlert == null) {
+                text.append(header(privateMessage.getCommonName(), privateMessage.getText()));
+                if (privateMessage.getOptionalChallengeFields() != null) {
+                    text.append("<script type=\"text/javascript\">\n" +
+                                "function getChallengeData() {\n" +
+                                "  var data = [];\n");
+                    for (ChallengeField challengeField : privateMessage.getOptionalChallengeFields()) {
+                        text.append("  data.push({'")
+                            .append(challengeField.getId())
+                            .append("': document.getElementById('")
+                            .append(challengeField.getId())
+                            .append("').value});\n");
+                    }
+                    text.append("  return JSON.stringify(data);\n" +
+                                "}\n" +
+                                "</script>");
+                    for (ChallengeField challengeField : privateMessage.getOptionalChallengeFields()) {
+                        text.append("<tr><td style=\"padding-top:10pt\">");
+                        if (challengeField.getOptionalLabel() != null) {
+                            text.append(challengeField.getOptionalLabel())
+                                .append(":<br>");
+                        }
+                        text.append("<input type=\"password\" id=\"")
+                            .append(challengeField.getId())
+                            .append("\" size=\"")
+                            .append(challengeField.getLength())
+                            .append("\"></td></tr>");
+                    }
+                    text.append("<tr><td style=\"text-align:center;padding-top:20pt\">" +
+                                "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.getChallengeJSON(getChallengeData())\"></td></tr>");
+                }
+             } else {
+                 text.append(header(saturnActivity.payeeCommonName, merchantHtmlAlert));
+            }
+            saturnActivity.loadHtml(text.toString());
+       } else {
             String url = saturnActivity.walletRequest.getAndroidSuccessUrl();
             if (url.equals("local")) {
                 saturnActivity.done = true;
@@ -68,8 +134,6 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
             } else {    
                 saturnActivity.launchBrowser(url);
             }
-        } else {
-            saturnActivity.showFailLog();
         }
     }
 }

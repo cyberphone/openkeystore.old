@@ -116,7 +116,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 saturnActivity.loadHtml("<tr><td style=\"padding:20pt\"><p>You do not seem to have any payment cards.</p>" +
                                          "For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</td></tr>");
             } else if (saturnActivity.cardCollection.size () == 1) {
-                saturnActivity.showPaymentRequest("0");
+                saturnActivity.selectCard("0");
             } else {
                 saturnActivity.showCardCollection();
             }
