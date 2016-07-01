@@ -1,5 +1,5 @@
 <body>
-<h2>JSON - Encoder, Decoder and Signature Package</h2>
+<h2>JSON - Encoder, Decoder, Signature, and Encryption Package</h2>
 This package contains classes for parsing and generating messages in JSON.
 <p>To cope with browsers, this implementation targets EcmaScript (JavaScript) version 6.
 In practice this means that numbers are currently limited to 15 digits of precision.</p>
@@ -18,7 +18,11 @@ enveloped XML signatures:
 <a href="https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html" target="_blank">JSON Cleartext Signature</a>.
 <br>See {@link org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)} for programming information.
 </p>
-<h3>Reading and Writing JSON Data</h3>
+<p>
+There is also a class for encrypting data using JSON formatted containers:
+<a href="https://openkeystore.googlecode.com/svn/resources/trunk/docs/jef.html" target="_blank">JSON Encryption Format</a>.
+<br>See {@link org.webpki.json.JSONEncryption} for more information.
+</p><h3>Reading and Writing JSON Data</h3>
 The following examples should be sufficient for getting started with generating JSON-formated data from java.
 <pre>
 import org.webpki.json.*;
