@@ -96,6 +96,8 @@ public class JSONBaseHTML
 
     public static final String REF_OPENKEYSTORE        = "OPENKEY";
 
+    public static final String REF_SATURN              = "SATURN";
+
     public static final String REF_WEBIDL              = "WEBIDL";
     
     public static final String JCS_PUBLIC_KEY_RSA      = "publicKey RSA";
@@ -251,6 +253,9 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_OPENKEYSTORE, "\"OpenKeyStore Project\", " +
             externalWebReference ("https://github.com/cyberphone/openkeystore"));
+
+        addReferenceEntry (REF_SATURN, "\"Saturn Project\", " +
+                externalWebReference ("https://github.com/cyberphone/saturn"));
 
         addReferenceEntry (REF_WEBIDL, "C. McCormack, " +
             "\"Web IDL\", W3C Candidate Recommendation, " +
