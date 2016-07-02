@@ -38,8 +38,8 @@ import android.widget.Toast;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONEncryption;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
@@ -51,7 +51,6 @@ import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
-import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 
 import org.webpki.sks.KeyProtectionInfo;
@@ -257,7 +256,7 @@ public class SaturnActivity extends BaseProxyActivity {
                     getRequestingHost(),
                     selectedCard.accountDescriptor,
                     dataEncryptionKey,
-                    Encryption.JOSE_A128CBC_HS256_ALG_ID,
+                    JSONEncryption.JOSE_A128CBC_HS256_ALG_ID,
                     tempChallenge,
                     selectedCard.signatureAlgorithm,
                     new AsymKeySignerInterface () {

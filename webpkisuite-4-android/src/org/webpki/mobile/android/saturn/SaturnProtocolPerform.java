@@ -19,9 +19,9 @@ package org.webpki.mobile.android.saturn;
 import android.os.AsyncTask;
 
 import org.webpki.json.JSONDecoder;
+import org.webpki.json.JSONEncryption;
 
 import org.webpki.mobile.android.saturn.common.ChallengeField;
-import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
 import org.webpki.mobile.android.saturn.common.ProviderUserResponseDecoder;
 import org.webpki.mobile.android.saturn.common.WalletAlertDecoder;
@@ -60,7 +60,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                 privateMessage =
                     ((ProviderUserResponseDecoder)returnMessage)
                         .getPrivateMessage(saturnActivity.dataEncryptionKey, 
-                                           Encryption.JOSE_A128CBC_HS256_ALG_ID);
+                                           JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
                 return true;
             } else if (returnMessage instanceof WalletAlertDecoder) {
                 merchantHtmlAlert = ((WalletAlertDecoder)returnMessage).getText();

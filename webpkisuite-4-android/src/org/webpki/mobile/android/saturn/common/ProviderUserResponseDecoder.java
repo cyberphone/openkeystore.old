@@ -25,7 +25,9 @@ import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONDecoder;
+import org.webpki.json.JSONEncryption;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONParser;
 
 public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProperties {
 
@@ -60,12 +62,12 @@ public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProp
         }
     }
 
-    EncryptedData encryptedData;
+    JSONEncryption encryptedData;
     
     public PrivateMessage getPrivateMessage(byte[] dataEncryptionKey,
                                             String dataEncryptionAlgorithm)
     throws IOException, GeneralSecurityException {
-        JSONObjectReader rd = encryptedData.getDecryptedData(dataEncryptionKey); 
+        JSONObjectReader rd = JSONParser.parse(encryptedData.getDecryptedData(dataEncryptionKey)); 
         PrivateMessage privateMessage = new PrivateMessage(rd);
         privateMessage.commonName = rd.getString(COMMON_NAME_JSON);
         privateMessage.text = rd.getString(TEXT_JSON);
@@ -87,7 +89,7 @@ public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProp
 
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
-        encryptedData = EncryptedData.parse(rd.getObject(PRIVATE_MESSAGE_JSON), true);
+        encryptedData = JSONEncryption.parse(rd.getObject(PRIVATE_MESSAGE_JSON), true);
     }
 
     @Override

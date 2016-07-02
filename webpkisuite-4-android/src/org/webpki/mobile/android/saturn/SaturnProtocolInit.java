@@ -19,14 +19,16 @@ package org.webpki.mobile.android.saturn;
 import java.io.IOException;
 
 import android.os.AsyncTask;
-
 import android.util.Log;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
+import org.webpki.json.JSONEncryption;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
+
+import org.webpki.json.encryption.EncryptionCore;
 
 import org.webpki.keygen2.KeyGen2URIs;
 
@@ -34,7 +36,6 @@ import org.webpki.mobile.android.saturn.SaturnActivity.Account;
 
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.BaseProperties;
-import org.webpki.mobile.android.saturn.common.Encryption;
 import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.ProviderUserResponseDecoder;
 import org.webpki.mobile.android.saturn.common.WalletAlertDecoder;
@@ -95,7 +96,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
 
                 // The key we use for decrypting private information from our bank
                 saturnActivity.dataEncryptionKey = 
-                    Encryption.generateDataEncryptionKey(Encryption.JOSE_A128CBC_HS256_ALG_ID);
+                    EncryptionCore.generateDataEncryptionKey(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
 
             }
             return true;
@@ -142,14 +143,14 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                                 cardProperties.getString(BaseProperties.PROVIDER_AUTHORITY_URL_JSON));
                 JSONObjectReader encryptionParameters = cardProperties.getObject(BaseProperties.ENCRYPTION_PARAMETERS_JSON);
                 card.keyEncryptionAlgorithm = encryptionParameters.getString(BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON);
-                if (!Encryption.permittedKeyEncryptionAlgorithm(card.keyEncryptionAlgorithm)) {
+                if (!EncryptionCore.permittedKeyEncryptionAlgorithm(card.keyEncryptionAlgorithm)) {
                     Log.w(SaturnActivity.SATURN,
                           "Account " + cardAccount.getAccountId() + " contained an unknown \"" +
                               BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON + "\": " + card.keyEncryptionAlgorithm);
                     break;
                 }
                 card.dataEncryptionAlgorithm = encryptionParameters.getString (BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON);
-                if (!Encryption.permittedDataEncryptionAlgorithm (card.dataEncryptionAlgorithm)) {
+                if (!EncryptionCore.permittedDataEncryptionAlgorithm (card.dataEncryptionAlgorithm)) {
                     Log.w(SaturnActivity.SATURN,
                           "Account " + cardAccount.getAccountId () + " contained an unknown \"" +
                               BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON + "\": " + card.dataEncryptionAlgorithm);

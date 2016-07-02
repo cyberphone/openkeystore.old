@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.mobile.android.saturn.common;
+package org.webpki.json.encryption;
 
 import java.io.IOException;
 
@@ -40,17 +40,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.KeyAlgorithms;
 
+import org.webpki.json.JSONEncryption;
+
 import org.webpki.util.ArrayUtil;
 
 // Core encryption class
 
-public final class Encryption {
+public final class EncryptionCore {
     
-    private Encryption() {} // Static and final class
-
-    public static final String JOSE_RSA_OAEP_256_ALG_ID   = "RSA-OAEP-256";
-    public static final String JOSE_ECDH_ES_ALG_ID        = "ECDH-ES";
-    public static final String JOSE_A128CBC_HS256_ALG_ID  = "A128CBC-HS256";
+    private EncryptionCore() {} // Static and final class
 
     private static byte[] getTag(byte[] key,
                                  byte[] cipherText,
@@ -84,7 +82,7 @@ public final class Encryption {
 
     private static byte[] rsaCore(int mode, Key key, byte[] data, String keyEncryptionAlgorithm)
     throws GeneralSecurityException {
-        if (!keyEncryptionAlgorithm.equals(JOSE_RSA_OAEP_256_ALG_ID)) {
+        if (!keyEncryptionAlgorithm.equals(JSONEncryption.JOSE_RSA_OAEP_256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding");
@@ -184,10 +182,10 @@ public final class Encryption {
                                               String dataEncryptionAlgorithm,
                                               ECPublicKey receivedPublicKey,
                                               PrivateKey privateKey) throws GeneralSecurityException, IOException {
-        if (!keyEncryptionAlgorithm.equals(JOSE_ECDH_ES_ALG_ID)) {
+        if (!keyEncryptionAlgorithm.equals(JSONEncryption.JOSE_ECDH_ES_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported ECDH algorithm: " + keyEncryptionAlgorithm);
         }
-        if (!dataEncryptionAlgorithm.equals(JOSE_A128CBC_HS256_ALG_ID)) {
+        if (!dataEncryptionAlgorithm.equals(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported data encryption algorithm: " + dataEncryptionAlgorithm);
         }
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
@@ -226,11 +224,11 @@ public final class Encryption {
     }
 
     public static boolean permittedKeyEncryptionAlgorithm(String algorithm) {
-        return algorithm.equals(JOSE_ECDH_ES_ALG_ID) ||
-               algorithm.equals(JOSE_RSA_OAEP_256_ALG_ID);
+        return algorithm.equals(JSONEncryption.JOSE_ECDH_ES_ALG_ID) ||
+               algorithm.equals(JSONEncryption.JOSE_RSA_OAEP_256_ALG_ID);
     }
 
     public static boolean permittedDataEncryptionAlgorithm(String algorithm) {
-        return algorithm.equals(JOSE_A128CBC_HS256_ALG_ID);
+        return algorithm.equals(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
     }
 }

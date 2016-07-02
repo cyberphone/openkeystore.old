@@ -114,6 +114,7 @@
         <include name="**/crypto/AsymSignatureAlgorithms.java"/>
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
         <include name="**/crypto/SignatureWrapper.java"/>
+        <include name="**/crypto/DecryptionKeyHolder.java"/>
       </fileset>
       </copy>
 
