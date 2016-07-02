@@ -14,10 +14,9 @@
  *  limitations under the License.
  *
  */
-package org.webpki.json;
+package org.webpki.json.encryption;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -26,20 +25,17 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
 import java.security.interfaces.ECPublicKey;
-
 import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
-
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.KeyAlgorithms;
-
+import org.webpki.json.JSONEncryption;
 import org.webpki.util.ArrayUtil;
 
 // Core encryption class

@@ -28,15 +28,20 @@ import java.util.Vector;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.DecryptionKeyHolder;
 
+import org.webpki.json.encryption.EncryptionCore;
+
 
 ////////////////////////////////////////////////////////////////////////////////
-// This is effectively a "remake" of a subset of JWE.  Why a remake?          //
+// JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
 // Because the encryption system (naturally) borrows heavily from JCS         //
 // including public key structures and property naming conventions.           //
 //                                                                            //
 // The supported algorithms are though JOSE compatible including their names. //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Creates and decodes JEF (JSON Encryption Format) containers.
+ */
 public class JSONEncryption {
 
     public static final String JOSE_RSA_OAEP_256_ALG_ID   = "RSA-OAEP-256";
@@ -100,16 +105,16 @@ public class JSONEncryption {
         encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
     }
 
-    public JSONObjectReader getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
-        return JSONParser.parse(EncryptionCore.contentDecryption(dataEncryptionAlgorithm,
-                                                                 dataDecryptionKey,
-                                                                 encryptedData,
-                                                                 iv,
-                                                                 authenticatedData,
-                                                                 tag));
+    public byte[] getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
+        return EncryptionCore.contentDecryption(dataEncryptionAlgorithm,
+                                                dataDecryptionKey,
+                                                encryptedData,
+                                                iv,
+                                                authenticatedData,
+                                                tag);
     }
 
-    public JSONObjectReader getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
+    public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
     throws IOException, GeneralSecurityException {
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
@@ -131,7 +136,7 @@ public class JSONEncryption {
         throw new IOException(notFound ? "No matching key found" : "No matching key+algorithm found");
     }
 
-    public static JSONObjectWriter encode(JSONObjectWriter unencryptedData,
+    public static JSONObjectWriter encode(byte[] unencryptedData,
                                           String dataEncryptionAlgorithm,
                                           PublicKey keyEncryptionKey,
                                           String keyEncryptionAlgorithm)
@@ -163,7 +168,7 @@ public class JSONEncryption {
                       encryptedKey);
     }
 
-    public static JSONObjectWriter encode(JSONObjectWriter unencryptedData,
+    public static JSONObjectWriter encode(byte[] unencryptedData,
                                           String dataEncryptionAlgorithm,
                                           byte[] dataEncryptionKey)
     throws IOException, GeneralSecurityException {
@@ -171,7 +176,7 @@ public class JSONEncryption {
     }
     
 
-    private static JSONObjectWriter encode(JSONObjectWriter unencryptedData,
+    private static JSONObjectWriter encode(byte[] unencryptedData,
                                            String dataEncryptionAlgorithm,
                                            byte[] dataEncryptionKey,
                                            JSONObjectWriter encryptedKey)
@@ -188,7 +193,7 @@ public class JSONEncryption {
         EncryptionCore.AuthEncResult result =
             EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
                                              dataEncryptionKey,
-                                             unencryptedData.serializeJSONObject(JSONOutputFormats.NORMALIZED),
+                                             unencryptedData,
                                              authenticatedData);
         encryptedData.setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm)
             .setBinary(IV_JSON, result.getIv())
