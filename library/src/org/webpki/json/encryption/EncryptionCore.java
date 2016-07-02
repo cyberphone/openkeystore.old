@@ -17,6 +17,7 @@
 package org.webpki.json.encryption;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -25,17 +26,22 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONEncryption;
+
 import org.webpki.util.ArrayUtil;
 
 // Core encryption class
@@ -53,7 +59,7 @@ public final class EncryptionCore {
         for (int q = 24, i = 4; q >= 0; q -= 8, i++) {
             al[i] = (byte)(value >>> q);
         }
-        Mac mac = Mac.getInstance("HmacSHA256", "BC");
+        Mac mac = Mac.getInstance("HmacSHA256");
         mac.init (new SecretKeySpec (key, 0, 16, "RAW"));
         mac.update(authenticatedData);
         mac.update(iv);
@@ -69,7 +75,7 @@ public final class EncryptionCore {
         if (!permittedDataEncryptionAlgorithm(dataEncryptionAlgorithm)) {
             throw new GeneralSecurityException("Unsupported AES algorithm: " + dataEncryptionAlgorithm);
         }
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(mode, new SecretKeySpec(key, 16, 16, "AES"), new IvParameterSpec(iv));
         return cipher.doFinal(data);
     }
@@ -79,7 +85,7 @@ public final class EncryptionCore {
         if (!keyEncryptionAlgorithm.equals(JSONEncryption.JOSE_RSA_OAEP_256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding", "BC");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding");
         cipher.init(mode, key);
         return cipher.doFinal(data);
     }
@@ -182,11 +188,11 @@ public final class EncryptionCore {
         if (!dataEncryptionAlgorithm.equals(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported data encryption algorithm: " + dataEncryptionAlgorithm);
         }
-        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH", "BC");
+        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(receivedPublicKey, true);
         // NIST Concat KDF
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256", "BC");
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         // Round 1 indicator
         addInt4(messageDigest, 1);
         // Z
@@ -206,7 +212,7 @@ public final class EncryptionCore {
     public static EcdhSenderResult senderKeyAgreement(String keyEncryptionAlgorithm,
                                                       String dataEncryptionAlgorithm,
                                                       PublicKey staticKey) throws GeneralSecurityException, IOException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "BC");
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJCEName());
         generator.initialize (eccgen, new SecureRandom());
         KeyPair keyPair = generator.generateKeyPair();
