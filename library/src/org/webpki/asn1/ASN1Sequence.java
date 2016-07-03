@@ -18,6 +18,7 @@ package org.webpki.asn1;
 
 import java.util.*;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.security.cert.*;
 
 public class ASN1Sequence extends Composite
@@ -46,7 +47,7 @@ public class ASN1Sequence extends Composite
      * Try to construct a X509Certificate from this sequence.
      */
     public X509Certificate x509Certificate() 
-    throws IOException, CertificateException
+    throws IOException, GeneralSecurityException
       {
         // TODO !!!!!! This should be changed (moved and used more generally).
         if(blob == null)
