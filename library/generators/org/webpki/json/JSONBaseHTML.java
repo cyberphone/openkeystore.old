@@ -194,6 +194,8 @@ public class JSONBaseHTML
     
     boolean appendix_mode;
     
+    boolean arrays_found;
+    
     String externalWebReference (String url)
       {
         return "<a target=\"_blank\" title=\"External link opened in a new window\" href=\"" + url + "\"><span style=\"white-space: nowrap\">" + url + "</span></a>";
@@ -465,9 +467,29 @@ public class JSONBaseHTML
                      .append ("</td></tr>");
                   }
               }
-            return buffer.append ("</table><div>Note that &quot;Type&quot; refers to the element type for arrays." + Types.LINE_SEPARATOR + "</div>").toString ();
+            return buffer.append ("</table>" +  (arrays_found ? "<div>Note that &quot;Type&quot; refers to the element type for arrays." + Types.LINE_SEPARATOR + "</div>" : Types.LINE_SEPARATOR)).toString ();
           }
       }
+
+    class DataTypeDescription extends Content {
+        DataTypeDescription() {
+            super();
+        }
+
+        @Override
+        String getHTML() throws IOException {
+            return new StringBuffer(
+                    "<div style=\"padding:0\">JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#Notation\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
+                    "Properties may either be <i>mandatory</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
+                    (arrays_found? "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR : "") +
+                    "In some JSON objects there is a choice " +
+                    "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
+                    "<table class=\"tftable\" style=\"font-style:italic;margin-top:10pt;margin-bottom:5pt\">" +
+                    "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Req</td><td>Comment selection 1</td></tr>" +
+                    "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
+                    "</table></div>").toString();
+        }
+    }
 
     class Paragraph extends Content
       {
@@ -763,6 +785,7 @@ public class JSONBaseHTML
 
                 public Column addArrayLink (String link, int array_min) throws IOException
                   {
+                    arrays_found = true;
                     leftArray ();
                     link (link, link, " style=\"margin-left:2pt;margin-right:2pt;\"");
                     rightArray (array_min);
@@ -1115,16 +1138,8 @@ public class JSONBaseHTML
 
     public void addDataTypesDescription (String intro) throws IOException
       {
-        addParagraphObject ("Notation").append (intro).append (
-            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#Notation\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
-            "Properties may either be <i>mandatory</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
-            "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
-            "In some JSON objects there is a choice " +
-            "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
-            "<table class=\"tftable\" style=\"font-style:italic;margin-top:10pt;margin-bottom:5pt\">" +
-            "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Req</td><td>Comment selection 1</td></tr>" +
-            "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
-            "</table>");
+        addParagraphObject ("Notation").append (intro);
+        new DataTypeDescription();
         addParagraphObject ("Data Types").append ("The table below shows how the data types used by this specification are mapped into native JSON types:");
         new DataTypesTable ();
       }

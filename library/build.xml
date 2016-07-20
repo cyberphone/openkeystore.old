@@ -281,9 +281,22 @@
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2014 WebPKI.org.</i>]]></bottom>
     </javadoc>
-    <antcall target="dockeygen2"/>
-    <antcall target="docjcs"/>
-    </target>
+    <!-- HTML Doc task for KeyGen2 -->
+    <antcall target="_java2html">
+       <param name="doc.class" value="org.webpki.keygen2.KeyGen2HTMLReference"/>
+       <param name="doc.file" value="${public_doc_dir}/keygen2.html"/>
+     </antcall>
+     <!-- HTML Doc task for JCS -->
+     <antcall target="_java2html">
+       <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
+       <param name="doc.file" value="${public_doc_dir}/jcs.html"/>
+     </antcall>
+     <!-- HTML Doc task for JEF -->
+     <antcall target="_java2html">
+       <param name="doc.class" value="org.webpki.json.JSONEncryptionHTMLReference"/>
+       <param name="doc.file" value="${public_doc_dir}/jef.html"/>
+     </antcall>
+  </target>
 
   <target name="dist" depends="clean,compile">    
     <!-- Create the distribution directory -->
@@ -462,26 +475,15 @@
     </javac>
     <java fork="yes"
           classname="${doc.class}"
-          failonerror="true"
-          classpath="${temp_dir}">
+          failonerror="true">
+  		<classpath>
+            <pathelement path="${temp_dir}"/>
+  			 <fileset dir="${ext.jar}">
+  		        <include name="*.jar"/>
+  			 </fileset>
+  		</classpath>
         <arg value="${doc.file}"/>
-    </java>
-  </target>
-  
-  <!-- HTML Doc task for KeyGen2 -->
-  <target name="dockeygen2">
-    <antcall target="_java2html">
-       <param name="doc.class" value="org.webpki.keygen2.KeyGen2HTMLReference"/>
-       <param name="doc.file" value="${public_doc_dir}/keygen2.html"/>
-     </antcall>
-  </target>
-
-  <!-- HTML Doc task for JCS -->
-  <target name="docjcs">
-    <antcall target="_java2html">
-       <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
-       <param name="doc.file" value="${public_doc_dir}/jcs.html"/>
-     </antcall>
+     </java>
   </target>
   
   <!-- A web service that accepts SKS WS calls from applications and in turn

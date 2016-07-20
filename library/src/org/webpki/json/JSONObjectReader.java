@@ -314,13 +314,27 @@ public class JSONObjectReader implements Serializable, Cloneable
  
     public PublicKey getPublicKey (AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this, algorithmPreferences);
+        return JSONSignatureDecoder.getPublicKey (getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON), algorithmPreferences);
       }
 
     public PublicKey getPublicKey () throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        return getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
       }
+
+    void clearReadFlags() {
+        for (JSONValue value : root.properties.values()) {
+            value.readFlag = false;
+        }
+    }
+
+    public PublicKey getCorePublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
+        return JSONSignatureDecoder.getPublicKey(this, algorithmPreferences);
+    }
+
+    public JSONDecryptionDecoder getEncryptionObject() throws IOException {
+        return new JSONDecryptionDecoder(this);
+    }
 
     public X509Certificate[] getCertificatePath () throws IOException
       {

@@ -186,7 +186,7 @@ public class JSONSignatureDecoder implements Serializable
           }
         else if (rd.hasProperty (PUBLIC_KEY_JSON))
           {
-            publicKey = getPublicKey (rd, algorithmPreferences);
+            publicKey = rd.getPublicKey (algorithmPreferences);
           }
         else if (rd.hasProperty (PEM_URL_JSON))
           {
@@ -228,7 +228,7 @@ public class JSONSignatureDecoder implements Serializable
 
     static PublicKey getPublicKey (JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        rd = rd.getObject (PUBLIC_KEY_JSON);
+        rd.clearReadFlags();
         PublicKey publicKey = null;
         try
           {

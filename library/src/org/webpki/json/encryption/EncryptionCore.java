@@ -40,7 +40,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.KeyAlgorithms;
 
-import org.webpki.json.JSONEncryption;
+import org.webpki.json.JSONDecryptionDecoder;
 
 import org.webpki.util.ArrayUtil;
 
@@ -82,7 +82,7 @@ public final class EncryptionCore {
 
     private static byte[] rsaCore(int mode, Key key, byte[] data, String keyEncryptionAlgorithm)
     throws GeneralSecurityException {
-        if (!keyEncryptionAlgorithm.equals(JSONEncryption.JOSE_RSA_OAEP_256_ALG_ID)) {
+        if (!keyEncryptionAlgorithm.equals(JSONDecryptionDecoder.JOSE_RSA_OAEP_256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding");
@@ -182,10 +182,10 @@ public final class EncryptionCore {
                                               String dataEncryptionAlgorithm,
                                               ECPublicKey receivedPublicKey,
                                               PrivateKey privateKey) throws GeneralSecurityException, IOException {
-        if (!keyEncryptionAlgorithm.equals(JSONEncryption.JOSE_ECDH_ES_ALG_ID)) {
+        if (!keyEncryptionAlgorithm.equals(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported ECDH algorithm: " + keyEncryptionAlgorithm);
         }
-        if (!dataEncryptionAlgorithm.equals(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID)) {
+        if (!dataEncryptionAlgorithm.equals(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID)) {
             throw new GeneralSecurityException("Unsupported data encryption algorithm: " + dataEncryptionAlgorithm);
         }
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
@@ -224,11 +224,11 @@ public final class EncryptionCore {
     }
 
     public static boolean permittedKeyEncryptionAlgorithm(String algorithm) {
-        return algorithm.equals(JSONEncryption.JOSE_ECDH_ES_ALG_ID) ||
-               algorithm.equals(JSONEncryption.JOSE_RSA_OAEP_256_ALG_ID);
+        return algorithm.equals(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID) ||
+               algorithm.equals(JSONDecryptionDecoder.JOSE_RSA_OAEP_256_ALG_ID);
     }
 
     public static boolean permittedDataEncryptionAlgorithm(String algorithm) {
-        return algorithm.equals(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
+        return algorithm.equals(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID);
     }
 }
