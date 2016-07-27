@@ -17,18 +17,16 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.interfaces.ECPublicKey;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.DecryptionKeyHolder;
-
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
+import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,11 +42,6 @@ import org.webpki.json.encryption.EncryptionCore;
  */
 public class JSONDecryptionDecoder {
 
-    public static final String JOSE_RSA_OAEP_256_ALG_ID   = "RSA-OAEP-256";
-    public static final String JOSE_ECDH_ES_ALG_ID        = "ECDH-ES";
-    public static final String JOSE_A128CBC_HS256_ALG_ID  = "A128CBC-HS256";
-    public static final String JOSE_A256CBC_HS512_ALG_ID  = "A256CBC-HS512";
-
     public static final String ENCRYPTION_VERSION_ID      = "http://xmlns.webpki.org/jef/v1";
 
     public static final String ENCRYPTED_KEY_JSON         = "encryptedKey";
@@ -61,7 +54,7 @@ public class JSONDecryptionDecoder {
 
     private ECPublicKey ephemeralPublicKey;  // For ECHD only
 
-    private String dataEncryptionAlgorithm;
+    private DataEncryptionAlgorithms dataEncryptionAlgorithm;
 
     private byte[] iv;
 
@@ -69,17 +62,13 @@ public class JSONDecryptionDecoder {
     
     private String keyId;
 
-    private String keyEncryptionAlgorithm;
+    private KeyEncryptionAlgorithms keyEncryptionAlgorithm;
 
     private byte[] encryptedKeyData;  // For RSA only
 
     private byte[] encryptedData;
     
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
-    
-    static boolean isRsaKey(String keyEncryptionAlgorithm) {
-        return keyEncryptionAlgorithm.contains("RSA");
-    }
     
     private JSONObjectReader checkVersion(JSONObjectReader rd) throws IOException {
        rd.clearReadFlags();
@@ -102,17 +91,27 @@ public class JSONDecryptionDecoder {
         return keyId;
     }
 
+    public DataEncryptionAlgorithms getDataEncryptionAlgorithm() {
+        return dataEncryptionAlgorithm;
+    }
+
+    public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
+        return keyEncryptionAlgorithm;
+    }
+
     JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
         JSONObjectReader rd = checkVersion(encryptionObject);
-        dataEncryptionAlgorithm = rd.getString(JSONSignatureDecoder.ALGORITHM_JSON);
+        dataEncryptionAlgorithm = DataEncryptionAlgorithms
+            .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(ENCRYPTED_KEY_JSON)) {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(ENCRYPTED_KEY_JSON));
             authenticatedData = encryptedKey.serializeJSONObject(JSONOutputFormats.NORMALIZED);
-            keyEncryptionAlgorithm = encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON);
+            keyEncryptionAlgorithm = KeyEncryptionAlgorithms
+                    .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
             publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
-            if (isRsaKey(keyEncryptionAlgorithm)) {
+            if (keyEncryptionAlgorithm.isRsa()) {
                 encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
             } else {
                 ephemeralPublicKey = 
@@ -120,7 +119,7 @@ public class JSONDecryptionDecoder {
             }
         } else {
             keyId = rd.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
-            authenticatedData = dataEncryptionAlgorithm.getBytes("UTF-8");
+            authenticatedData = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
         }
         encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
         rd.checkForUnread();
@@ -142,7 +141,7 @@ public class JSONDecryptionDecoder {
             if (decryptionKey.getPublicKey().equals(publicKey)) {
                 notFound = false;
                 if (decryptionKey.getKeyEncryptionAlgorithm().equals(keyEncryptionAlgorithm)) {
-                    return getDecryptedData(isRsaKey(keyEncryptionAlgorithm) ?
+                    return getDecryptedData(keyEncryptionAlgorithm.isRsa() ?
                          EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
                                                       encryptedKeyData,
                                                       decryptionKey.getPrivateKey())

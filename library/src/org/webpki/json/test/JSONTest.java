@@ -59,14 +59,12 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-import org.webpki.crypto.DecryptionKeyHolder;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
-import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -76,7 +74,10 @@ import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
+import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
@@ -3544,7 +3545,7 @@ public class JSONTest
 
         byte[] t = DebugFormatter.getByteArrayFromHex("652c3fa36b0a7c5b3219fab3a30bc1c4");
 
-        byte[] pout = EncryptionCore.contentDecryption(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+        byte[] pout = EncryptionCore.contentDecryption(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                        k,
                                                        e,
                                                        iv,
@@ -3552,11 +3553,11 @@ public class JSONTest
                                                        t);
         assertTrue("pout 1", ArrayUtil.compare(p, pout));
 
-        EncryptionCore.AuthEncResult aer = EncryptionCore.contentEncryption(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+        EncryptionCore.AuthEncResult aer = EncryptionCore.contentEncryption(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                                             k,
                                                                             p,
                                                                             a);
-        pout = EncryptionCore.contentDecryption(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+        pout = EncryptionCore.contentDecryption(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                 k,
                                                 aer.getCipherText(),
                                                 aer.getIv(),
@@ -3564,11 +3565,11 @@ public class JSONTest
                                                 aer.getTag());
         assertTrue("pout 2", ArrayUtil.compare(p, pout));
 
-        byte[] dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID);
+        byte[] dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
         JSONObjectReader json = JSONParser.parse(aliceKey);
         String encrec = new JSONObjectWriter()
             .setEncryptionObject(json.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                                 JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+                                 DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                  null,
                                  dataEncryptionKey).toString();
         assertTrue("Symmetric",
@@ -3578,35 +3579,35 @@ public class JSONTest
         KeyPair bob = getKeyPairFromJwk(bobKey);
         KeyPair alice = getKeyPairFromJwk(aliceKey);
         assertTrue("Bad ECDH", 
-                   Base64URL.encode(EncryptionCore.receiverKeyAgreement(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID,
-                                                                        JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+                   Base64URL.encode(EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                                         (ECPublicKey) bob.getPublic(),
                                                                         alice.getPrivate())).equals(ECDH_RESULT_WITH_KDF));
 
         EncryptionCore.EcdhSenderResult ecdhRes = 
-            EncryptionCore.senderKeyAgreement(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID,
-                                              JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+            EncryptionCore.senderKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                              DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                               alice.getPublic());
         assertTrue("Bad ECDH", 
                    ArrayUtil.compare(ecdhRes.getSharedSecret(),
-                                     EncryptionCore.receiverKeyAgreement(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID,
-                                                                         JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+                                     EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                                          ecdhRes.getEphemeralKey(),
                                                                          alice.getPrivate())));
         KeyPairGenerator mallet = KeyPairGenerator.getInstance("RSA");
         mallet.initialize(2048);
         KeyPair malletKeys = mallet.generateKeyPair();
         Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
-        decryptionKeys.add(new DecryptionKeyHolder(alice.getPublic(), alice.getPrivate(), JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID));
-        decryptionKeys.add(new DecryptionKeyHolder(bob.getPublic(), bob.getPrivate(), JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID));
-        decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(), malletKeys.getPrivate(), JSONDecryptionDecoder.JOSE_RSA_OAEP_256_ALG_ID));
+        decryptionKeys.add(new DecryptionKeyHolder(alice.getPublic(), alice.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
+        decryptionKeys.add(new DecryptionKeyHolder(bob.getPublic(), bob.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
+        decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(), malletKeys.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
 
         JSONObjectReader unEncJson = JSONParser.parse("{\"hi\":\"\\u20ac\\u00e5\\u00f6k\"}");
         String encJson = new JSONObjectWriter()
             .setEncryptionObject(unEncJson.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                                 JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
+                                 DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                  bob.getPublic(),
-                                 JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID).toString();
+                                 KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                    unEncJson.toString()
                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()
@@ -3614,9 +3615,9 @@ public class JSONTest
 
         encJson = new JSONObjectWriter()
             .setEncryptionObject(unEncJson.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                                        JSONDecryptionDecoder.JOSE_A128CBC_HS256_ALG_ID,
-                                        malletKeys.getPublic(),
-                                        JSONDecryptionDecoder.JOSE_RSA_OAEP_256_ALG_ID).toString();
+                                 DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                 malletKeys.getPublic(),
+                                 KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                    unEncJson.toString()
                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()

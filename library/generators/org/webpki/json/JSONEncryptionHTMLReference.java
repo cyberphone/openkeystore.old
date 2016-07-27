@@ -21,10 +21,13 @@ import java.io.IOException;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.json.JSONBaseHTML.Types.WEBPKI_DATA_TYPES;
 
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+
 /**
- * Create an HTML description of the JSON Clear-text Signature system.
+ * Create an HTML description of JEF (JSON Encryption Format).
  * 
  * @author Anders Rundgren
  */
@@ -463,9 +466,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
         preAmble("encryptedKey")
                 .addString ("Key encryption algorithm. Currently the following JWE " +
                           json.createReference (JSONBaseHTML.REF_JWE) + " algorithms are recognized:<ul>" +
-                 "<li>" + code20(JSONDecryptionDecoder.JOSE_ECDH_ES_ALG_ID) + "See: ")
+                 "<li>" + code20(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID.toString()) + "See: ")
                 .addLink (ECDH_PROPERTIES)
-        .addString ("</li><li>" + code20(JSONDecryptionDecoder.JOSE_RSA_OAEP_256_ALG_ID) + "See: ")
+        .addString ("</li><li>" + code20(KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID.toString()) + "See: ")
         .addLink (RSA_PROPERTIES)
         .addString ("</li></ul>");
         

@@ -18,22 +18,34 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
+
 import java.util.Date;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
+
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.EncryptionCore;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+
 import org.webpki.json.v8dtoa.FastDtoa;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -458,14 +470,14 @@ public class JSONObjectWriter implements Serializable
       }
 
     private JSONObjectWriter encryptData(byte[] unencryptedData,
-                                         String dataEncryptionAlgorithm,
+                                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                          String keyId,
                                          byte[] dataEncryptionKey,
                                          JSONObjectWriter encryptedKey)
     throws IOException, GeneralSecurityException {
         byte[] authenticatedData = null;
         if (encryptedKey == null) {
-            authenticatedData = dataEncryptionAlgorithm.getBytes("UTF-8");
+            authenticatedData = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
             if (keyId != null) {
                 setString(JSONSignatureDecoder.KEY_ID_JSON, keyId);
             }
@@ -478,7 +490,7 @@ public class JSONObjectWriter implements Serializable
                                                  dataEncryptionKey,
                                                  unencryptedData,
                                                  authenticatedData);
-        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm);
+        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
         setBinary(JSONDecryptionDecoder.IV_JSON, result.getIv());
         setBinary(JSONDecryptionDecoder.TAG_JSON, result.getTag());
         setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getCipherText());
@@ -486,15 +498,15 @@ public class JSONObjectWriter implements Serializable
     }
 
     public JSONObjectWriter setEncryptionObject(byte[] unencryptedData,
-                                                String dataEncryptionAlgorithm,
+                                                DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                 PublicKey keyEncryptionKey,
-                                                String keyEncryptionAlgorithm) 
+                                                KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
     throws IOException, GeneralSecurityException {
         JSONObjectWriter encryptedKey = new JSONObjectWriter()
-            .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm);
+            .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
         byte[] dataEncryptionKey = null;
         encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
-        if (JSONDecryptionDecoder.isRsaKey(keyEncryptionAlgorithm)) {
+        if (keyEncryptionAlgorithm.isRsa()) {
             dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dataEncryptionAlgorithm);
             encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
                                    EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
@@ -517,7 +529,7 @@ public class JSONObjectWriter implements Serializable
     }
 
     public JSONObjectWriter setEncryptionObject(byte[] unencryptedData,
-                                                String dataEncryptionAlgorithm,
+                                                DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                 String keyId,
                                                 byte[] dataEncryptionKey)
     throws IOException, GeneralSecurityException {
