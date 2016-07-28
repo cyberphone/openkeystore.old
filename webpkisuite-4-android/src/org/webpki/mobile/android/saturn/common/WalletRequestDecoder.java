@@ -18,22 +18,35 @@ package org.webpki.mobile.android.saturn.common;
 
 import java.io.IOException;
 
+import java.util.Vector;
+
+import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 
 public class WalletRequestDecoder extends JSONDecoder implements BaseProperties {
 
     private static final long serialVersionUID = 1L;
-    
-    PaymentRequest paymentRequest;
-    public PaymentRequest getPaymentRequest() {
-        return paymentRequest;
+
+    public class PaymentNetwork {
+        PaymentRequest paymentRequest;
+        String[] accountTypes;
+
+        private PaymentNetwork(PaymentRequest paymentRequest, String[] accountTypes) {
+            this.paymentRequest = paymentRequest;
+            this.accountTypes = accountTypes;
+        }
+
+        public PaymentRequest getPaymentRequest() {
+            return paymentRequest;
+        }
+
+        public String[] getAccountTypes() {
+            return accountTypes;
+        }
     }
 
-    String[] accountTypes;
-    public String[] getAccountTypes() {
-        return accountTypes;
-    }
+    Vector<PaymentNetwork> paymentNetworks = new Vector<PaymentNetwork>();
 
     String androidCancelUrl;
     public String getAndroidCancelUrl() {
@@ -50,10 +63,24 @@ public class WalletRequestDecoder extends JSONDecoder implements BaseProperties 
         return androidTransactionUrl;
     }
 
+    public PaymentNetwork[] getPaymentNetworks() {
+        return paymentNetworks.toArray(new PaymentNetwork[0]);
+    }
+
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
-        accountTypes = rd.getStringArray(ACCEPTED_ACCOUNT_TYPES_JSON);
-        paymentRequest = new PaymentRequest(rd.getObject(PAYMENT_REQUEST_JSON));
+        JSONArrayReader ar = rd.getArray(PAYMENT_NETWORKS_JSON);
+        PaymentRequest previous = null;
+        do {
+            JSONObjectReader paymentNetwork = ar.getObject();
+            String[] accountTypes = paymentNetwork.getStringArray(ACCEPTED_ACCOUNT_TYPES_JSON);
+            PaymentRequest paymentRequest = new PaymentRequest(paymentNetwork.getObject(PAYMENT_REQUEST_JSON));
+            if (previous != null) {
+                previous.consistencyCheck(paymentRequest);
+            }
+            previous = paymentRequest;
+            paymentNetworks.add(new PaymentNetwork(paymentRequest, accountTypes));
+        } while (ar.hasMore());
         androidCancelUrl = rd.getString(ANDROID_CANCEL_URL_JSON);
         androidSuccessUrl = rd.getString(ANDROID_SUCCESS_URL_JSON);
         androidTransactionUrl = rd.getString(ANDROID_TRANSACTION_URL_JSON);

@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
@@ -40,6 +39,10 @@ import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
+
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
+import org.webpki.json.encryption.EncryptionCore;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.json.v8dtoa.FastDtoa;
 
@@ -419,28 +422,28 @@ public class JSONObjectWriter implements Serializable
                                    signer.signData (signer.normalizedData = serializeJSONObject (JSONOutputFormats.NORMALIZED)));
         return this;
       }
-    
-    public JSONObjectWriter setPublicKey (PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException
-      {
-        JSONObjectWriter publicKeyWriter = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        KeyAlgorithms keyAlg = KeyAlgorithms.getKeyAlgorithm (publicKey);
-        if (keyAlg.isRSAKey ())
-          {
-            publicKeyWriter.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
-            RSAPublicKey rsaPublicKey = (RSAPublicKey)publicKey;
-            publicKeyWriter.setCryptoBinary (rsaPublicKey.getModulus (), JSONSignatureDecoder.N_JSON);
-            publicKeyWriter.setCryptoBinary (rsaPublicKey.getPublicExponent (), JSONSignatureDecoder.E_JSON);
-          }
-        else
-          {
-            publicKeyWriter.setString (JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            publicKeyWriter.setString (JSONSignatureDecoder.CURVE_JSON, keyAlg.getAlgorithmId (algorithmPreferences));
-            ECPoint ecPoint = ((ECPublicKey)publicKey).getW ();
-            publicKeyWriter.setCurvePoint (ecPoint.getAffineX (), JSONSignatureDecoder.X_JSON, keyAlg);
-            publicKeyWriter.setCurvePoint (ecPoint.getAffineY (), JSONSignatureDecoder.Y_JSON, keyAlg);
-          }
+
+    public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
+        setObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).setCorePublicKey(publicKey, algorithmPreferences);
         return this;
-      }
+    }
+
+    public JSONObjectWriter setCorePublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
+        KeyAlgorithms keyAlg = KeyAlgorithms.getKeyAlgorithm(publicKey);
+        if (keyAlg.isRSAKey()) {
+            setString(JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
+            RSAPublicKey rsaPublicKey = (RSAPublicKey)publicKey;
+            setCryptoBinary (rsaPublicKey.getModulus(), JSONSignatureDecoder.N_JSON);
+            setCryptoBinary (rsaPublicKey.getPublicExponent(), JSONSignatureDecoder.E_JSON);
+        } else {
+            setString(JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
+            setString(JSONSignatureDecoder.CURVE_JSON, keyAlg.getAlgorithmId(algorithmPreferences));
+            ECPoint ecPoint = ((ECPublicKey)publicKey).getW();
+            setCurvePoint(ecPoint.getAffineX(), JSONSignatureDecoder.X_JSON, keyAlg);
+            setCurvePoint(ecPoint.getAffineY(), JSONSignatureDecoder.Y_JSON, keyAlg);
+        }
+        return this;
+    }
 
     public JSONObjectWriter setPublicKey (PublicKey publicKey) throws IOException
       {
@@ -465,6 +468,73 @@ public class JSONObjectWriter implements Serializable
         setBinaryArray (JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
         return this;
       }
+
+    private JSONObjectWriter encryptData(byte[] unencryptedData,
+                                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                         String keyId,
+                                         byte[] dataEncryptionKey,
+                                         JSONObjectWriter encryptedKey)
+    throws IOException, GeneralSecurityException {
+        byte[] authenticatedData = null;
+        if (encryptedKey == null) {
+            authenticatedData = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
+            if (keyId != null) {
+                setString(JSONSignatureDecoder.KEY_ID_JSON, keyId);
+            }
+        } else {
+            setObject(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON, encryptedKey);
+            authenticatedData = encryptedKey.serializeJSONObject(JSONOutputFormats.NORMALIZED);
+        }
+        EncryptionCore.AuthEncResult result =
+                EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
+                                                 dataEncryptionKey,
+                                                 unencryptedData,
+                                                 authenticatedData);
+        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
+        setBinary(JSONDecryptionDecoder.IV_JSON, result.getIv());
+        setBinary(JSONDecryptionDecoder.TAG_JSON, result.getTag());
+        setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getCipherText());
+        return this;
+    }
+
+    public JSONObjectWriter setEncryptionObject(byte[] unencryptedData,
+                                                DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                PublicKey keyEncryptionKey,
+                                                KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
+    throws IOException, GeneralSecurityException {
+        JSONObjectWriter encryptedKey = new JSONObjectWriter()
+            .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
+        byte[] dataEncryptionKey = null;
+        encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
+        if (keyEncryptionAlgorithm.isRsa()) {
+            dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dataEncryptionAlgorithm);
+            encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
+                                   EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
+                                                                dataEncryptionKey,
+                                                                keyEncryptionKey));
+        } else {
+            EncryptionCore.EcdhSenderResult result =
+                EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
+                                                  dataEncryptionAlgorithm,
+                                                  keyEncryptionKey);
+            dataEncryptionKey = result.getSharedSecret();
+            encryptedKey.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
+                .setCorePublicKey(result.getEphemeralKey(), AlgorithmPreferences.JOSE);
+        }
+        return encryptData(unencryptedData,
+                           dataEncryptionAlgorithm,
+                           null,
+                           dataEncryptionKey,
+                           encryptedKey);
+    }
+
+    public JSONObjectWriter setEncryptionObject(byte[] unencryptedData,
+                                                DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                String keyId,
+                                                byte[] dataEncryptionKey)
+    throws IOException, GeneralSecurityException {
+        return encryptData(unencryptedData, dataEncryptionAlgorithm, keyId, dataEncryptionKey, null);
+    }
 
     void newLine ()
       {

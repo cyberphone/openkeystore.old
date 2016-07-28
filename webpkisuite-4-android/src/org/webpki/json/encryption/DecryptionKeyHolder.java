@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.crypto;
+package org.webpki.json.encryption;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -25,7 +25,7 @@ public class DecryptionKeyHolder {
     
     PrivateKey privateKey;
     
-    String keyEncryptionAlgorithm;
+    KeyEncryptionAlgorithms keyEncryptionAlgorithm;
 
     public PublicKey getPublicKey() {
         return publicKey;
@@ -35,11 +35,11 @@ public class DecryptionKeyHolder {
         return privateKey;
     }
 
-    public String getKeyEncryptionAlgorithm() {
+    public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
         return keyEncryptionAlgorithm;
     }
 
-    public DecryptionKeyHolder(PublicKey publicKey, PrivateKey privateKey, String keyEncryptionAlgorithm) {
+    public DecryptionKeyHolder(PublicKey publicKey, PrivateKey privateKey, KeyEncryptionAlgorithms keyEncryptionAlgorithm) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;

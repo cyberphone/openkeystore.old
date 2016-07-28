@@ -17,6 +17,7 @@
 package org.webpki.asn1;
 
 import java.util.*;
+import java.security.GeneralSecurityException;
 import java.security.cert.*;
 import java.io.*;
 
@@ -48,19 +49,19 @@ public class ASN1Util
       }
 
     public static X509Certificate x509Certificate(BaseASN1Object o, int[] path) 
-    throws IOException, CertificateException
+    throws IOException, GeneralSecurityException
       {
         return ParseUtil.sequence(o.get(path)).x509Certificate();
       }
 
     public static X509Certificate x509Certificate(BaseASN1Object o) 
-    throws IOException, CertificateException
+    throws IOException, GeneralSecurityException
       {
         return ParseUtil.sequence(o).x509Certificate();
       }
 
     public static ASN1Sequence x509Certificate(Certificate c)
-    throws IOException, CertificateEncodingException
+    throws IOException, GeneralSecurityException
       {
         return ParseUtil.sequence(new DerDecoder(c.getEncoded()).readNext());
       }

@@ -16,12 +16,6 @@
  */
 package org.webpki.mobile.android.saturn;
 
-import java.io.IOException;
-
-import java.security.PublicKey;
-
-import java.util.Vector;
-
 import android.annotation.SuppressLint;
 
 import android.os.Bundle;
@@ -32,25 +26,35 @@ import android.util.Log;
 
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
+
 import android.widget.Toast;
+
+import org.webpki.mobile.android.R;
+
+import java.io.IOException;
+
+import java.security.PublicKey;
+
+import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONEncryption;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 
-import org.webpki.mobile.android.R;
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
+import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 
 import org.webpki.sks.KeyProtectionInfo;
@@ -70,10 +74,6 @@ public class SaturnActivity extends BaseProxyActivity {
 
     WalletRequestDecoder walletRequest;
 
-    String payeeCommonName;
-    
-    String amountString;
-    
     Account selectedCard;
     
     String pin = "";
@@ -92,17 +92,19 @@ public class SaturnActivity extends BaseProxyActivity {
     DisplayMetrics displayMetrics;
 
     static class Account {
+        PaymentRequest paymentRequest;
         AccountDescriptor accountDescriptor;
         boolean cardFormatAccountId;
         String cardSvgIcon;
         AsymSignatureAlgorithms signatureAlgorithm;
         String authorityUrl;
         int keyHandle;
-        String dataEncryptionAlgorithm;
-        String keyEncryptionAlgorithm;
+        DataEncryptionAlgorithms dataEncryptionAlgorithm;
+        KeyEncryptionAlgorithms keyEncryptionAlgorithm;
         PublicKey keyEncryptionKey;
 
-        Account(AccountDescriptor accountDescriptor,
+        Account(PaymentRequest paymentRequest,
+                AccountDescriptor accountDescriptor,
                 boolean cardFormatAccountId,
                 String cardSvgIcon,
                 int keyHandle,
@@ -188,16 +190,16 @@ public class SaturnActivity extends BaseProxyActivity {
             .append("</td></tr>").toString();
     }
 
-    void ShowPaymentRequest() {
+    void ShowPaymentRequest() throws IOException {
         saturnView.numbericPin = true;
         StringBuffer payHtml = 
                 new StringBuffer(htmlOneCard(selectedCard, "", ""));
             payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
                            "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
-                   .append(HTMLEncoder.encode(payeeCommonName))
+                   .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
                    .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
                            "</tr><tr><td style=\"" + LABEL_STYLE + "\">Amount</td><td style=\"" + FIELD_STYLE + "\">")
-                   .append(amountString)
+                   .append(selectedCard.paymentRequest.getCurrency().amountToDisplayString(selectedCard.paymentRequest.getAmount()))
                    .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
                            "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
                            "<input id=\"pin\" type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus value=\"")
@@ -210,7 +212,7 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     @JavascriptInterface
-    public void selectCard(String index) {
+    public void selectCard(String index) throws IOException {
         selectedCard = cardCollection.elementAt(Integer.parseInt(index));
         ShowPaymentRequest();
     }
@@ -252,11 +254,11 @@ public class SaturnActivity extends BaseProxyActivity {
                 ChallengeResult[] tempChallenge = challengeResults;
                 challengeResults = null;
                 authorizationData = AuthorizationData.encode(
-                    walletRequest.getPaymentRequest(),
+                    selectedCard.paymentRequest,
                     getRequestingHost(),
                     selectedCard.accountDescriptor,
                     dataEncryptionKey,
-                    JSONEncryption.JOSE_A128CBC_HS256_ALG_ID,
+                    DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                     tempChallenge,
                     selectedCard.signatureAlgorithm,
                     new AsymKeySignerInterface () {

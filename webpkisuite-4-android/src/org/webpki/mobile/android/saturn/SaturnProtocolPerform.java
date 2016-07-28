@@ -19,7 +19,8 @@ package org.webpki.mobile.android.saturn;
 import android.os.AsyncTask;
 
 import org.webpki.json.JSONDecoder;
-import org.webpki.json.JSONEncryption;
+
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
 
 import org.webpki.mobile.android.saturn.common.ChallengeField;
 import org.webpki.mobile.android.saturn.common.PayerAuthorizationEncoder;
@@ -47,7 +48,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
             // and process user authorizations.
             saturnActivity.postJSONData(
                 saturnActivity.walletRequest.getAndroidTransactionUrl(),
-                new PayerAuthorizationEncoder(saturnActivity.walletRequest.getPaymentRequest(),
+                new PayerAuthorizationEncoder(saturnActivity.selectedCard.paymentRequest,
                                               saturnActivity.authorizationData,
                                               saturnActivity.selectedCard.authorityUrl,
                                               saturnActivity.selectedCard.accountDescriptor.getAccountType(),
@@ -60,7 +61,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                 privateMessage =
                     ((ProviderUserResponseDecoder)returnMessage)
                         .getPrivateMessage(saturnActivity.dataEncryptionKey, 
-                                           JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
+                                           DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
                 return true;
             } else if (returnMessage instanceof WalletAlertDecoder) {
                 merchantHtmlAlert = ((WalletAlertDecoder)returnMessage).getText();
@@ -124,7 +125,9 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                                 "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.getChallengeJSON(getChallengeData())\"></td></tr>");
                 }
              } else {
-                 text.append(header(saturnActivity.payeeCommonName, merchantHtmlAlert));
+                 text.append(header(saturnActivity.selectedCard == null ?
+                         "Unknown" : saturnActivity.selectedCard.paymentRequest.getPayee().getCommonName(),
+                                    merchantHtmlAlert));
             }
             saturnActivity.loadHtml(text.toString());
        } else {

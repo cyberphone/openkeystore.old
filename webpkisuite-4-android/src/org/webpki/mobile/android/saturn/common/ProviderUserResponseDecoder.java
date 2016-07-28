@@ -25,9 +25,11 @@ import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONDecoder;
-import org.webpki.json.JSONEncryption;
+import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
+
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
 
 public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProperties {
 
@@ -62,11 +64,14 @@ public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProp
         }
     }
 
-    JSONEncryption encryptedData;
+    JSONDecryptionDecoder encryptedData;
     
     public PrivateMessage getPrivateMessage(byte[] dataEncryptionKey,
-                                            String dataEncryptionAlgorithm)
+                                            DataEncryptionAlgorithms dataEncryptionAlgorithm)
     throws IOException, GeneralSecurityException {
+        if (encryptedData.getDataEncryptionAlgorithm() != dataEncryptionAlgorithm) {
+            throw new IOException("Unexpected data encryption algorithm:" + encryptedData.getDataEncryptionAlgorithm().toString());
+        }
         JSONObjectReader rd = JSONParser.parse(encryptedData.getDecryptedData(dataEncryptionKey)); 
         PrivateMessage privateMessage = new PrivateMessage(rd);
         privateMessage.commonName = rd.getString(COMMON_NAME_JSON);
@@ -89,7 +94,7 @@ public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProp
 
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
-        encryptedData = JSONEncryption.parse(rd.getObject(PRIVATE_MESSAGE_JSON), true);
+        encryptedData = rd.getObject(ENCRYPTED_MESSAGE_JSON).getEncryptionObject().require(true);
     }
 
     @Override

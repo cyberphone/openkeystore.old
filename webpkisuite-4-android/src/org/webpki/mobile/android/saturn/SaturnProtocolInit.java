@@ -19,16 +19,18 @@ package org.webpki.mobile.android.saturn;
 import java.io.IOException;
 
 import android.os.AsyncTask;
+
 import android.util.Log;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
-import org.webpki.json.JSONEncryption;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.EncryptionCore;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.keygen2.KeyGen2URIs;
 
@@ -36,7 +38,6 @@ import org.webpki.mobile.android.saturn.SaturnActivity.Account;
 
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.BaseProperties;
-import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.ProviderUserResponseDecoder;
 import org.webpki.mobile.android.saturn.common.WalletAlertDecoder;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
@@ -66,11 +67,9 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
             saturnActivity.walletRequest = (WalletRequestDecoder) saturnActivity.getInitialReguest();
             saturnActivity.setAbortURL(saturnActivity.walletRequest.getAndroidCancelUrl());
 
-            // Primary information to the user...
-            PaymentRequest paymentRequest = saturnActivity.walletRequest.getPaymentRequest();
-            saturnActivity.amountString = paymentRequest.getCurrency()
-                .amountToDisplayString(paymentRequest.getAmount());
-            saturnActivity.payeeCommonName = paymentRequest.getPayee().getCommonName();
+            // The key we use for decrypting private information from our bank
+            saturnActivity.dataEncryptionKey = 
+                EncryptionCore.generateDataEncryptionKey(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
 
             // Enumerate keys but only go for those who are intended for
             // Web Payments (according to our fictitious payment schemes...)
@@ -92,12 +91,7 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 // might still not match the Payee's list of supported account types.
                 collectPotentialCard(ek.getKeyHandle(),
                                      JSONParser.parse(ext.getExtensionData(SecureKeyStore.SUB_TYPE_EXTENSION)),
-                                     saturnActivity.walletRequest.getAccountTypes());
-
-                // The key we use for decrypting private information from our bank
-                saturnActivity.dataEncryptionKey = 
-                    EncryptionCore.generateDataEncryptionKey(JSONEncryption.JOSE_A128CBC_HS256_ALG_ID);
-
+                                     saturnActivity.walletRequest);
             }
             return true;
         } catch (Exception e) {
@@ -118,7 +112,12 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                 saturnActivity.loadHtml("<tr><td style=\"padding:20pt\"><p>You do not seem to have any payment cards.</p>" +
                                          "For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</td></tr>");
             } else if (saturnActivity.cardCollection.size () == 1) {
-                saturnActivity.selectCard("0");
+                try {
+                    saturnActivity.selectCard("0");
+                } catch (IOException e) {
+                    saturnActivity.logException(e);
+                    saturnActivity.showFailLog();
+                }
             } else {
                 saturnActivity.showCardCollection();
             }
@@ -127,40 +126,45 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         }
     }
 
-    void collectPotentialCard(int keyHandle, JSONObjectReader cardProperties, String[] accountTypes) throws IOException {
+    void collectPotentialCard(int keyHandle, JSONObjectReader cardProperties, WalletRequestDecoder wrd) throws IOException {
         AccountDescriptor cardAccount = new AccountDescriptor(cardProperties.getObject(BaseProperties.ACCOUNT_JSON));
-        for (String accountType : accountTypes) {
-            if (cardAccount.getAccountType().equals(accountType)) {
-                Account card =
-                    new Account(cardAccount,
-                                cardProperties.getBoolean(BaseProperties.CARD_FORMAT_ACCOUNT_ID_JSON),
-                                new String(saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
-                                    .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE), "UTF-8"),
-                                keyHandle,
-                                AsymSignatureAlgorithms
-                                    .getAlgorithmFromID(cardProperties.getString(BaseProperties.SIGNATURE_ALGORITHM_JSON),
-                                                        AlgorithmPreferences.JOSE),
-                                cardProperties.getString(BaseProperties.PROVIDER_AUTHORITY_URL_JSON));
-                JSONObjectReader encryptionParameters = cardProperties.getObject(BaseProperties.ENCRYPTION_PARAMETERS_JSON);
-                card.keyEncryptionAlgorithm = encryptionParameters.getString(BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON);
-                if (!EncryptionCore.permittedKeyEncryptionAlgorithm(card.keyEncryptionAlgorithm)) {
-                    Log.w(SaturnActivity.SATURN,
-                          "Account " + cardAccount.getAccountId() + " contained an unknown \"" +
-                              BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON + "\": " + card.keyEncryptionAlgorithm);
+        for (WalletRequestDecoder.PaymentNetwork paymentNetwork : wrd.getPaymentNetworks()) {
+            for (String accountType : paymentNetwork.getAccountTypes()) {
+                if (cardAccount.getAccountType().equals(accountType)) {
+                    Account card =
+                        new Account(paymentNetwork.getPaymentRequest(),
+                                    cardAccount,
+                                    cardProperties.getBoolean(BaseProperties.CARD_FORMAT_ACCOUNT_ID_JSON),
+                                    new String(saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
+                                        .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE), "UTF-8"),
+                                    keyHandle,
+                                    AsymSignatureAlgorithms
+                                        .getAlgorithmFromID(cardProperties.getString(BaseProperties.SIGNATURE_ALGORITHM_JSON),
+                                                            AlgorithmPreferences.JOSE),
+                                    cardProperties.getString(BaseProperties.PROVIDER_AUTHORITY_URL_JSON));
+                    JSONObjectReader encryptionParameters = cardProperties.getObject(BaseProperties.ENCRYPTION_PARAMETERS_JSON);
+                    card.keyEncryptionAlgorithm = KeyEncryptionAlgorithms
+                        .getAlgorithmFromString(encryptionParameters.getString(BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON));
+                    if (!EncryptionCore.permittedKeyEncryptionAlgorithm(card.keyEncryptionAlgorithm)) {
+                        Log.w(SaturnActivity.SATURN,
+                              "Account " + cardAccount.getAccountId() + " contained an unknown \"" +
+                                  BaseProperties.KEY_ENCRYPTION_ALGORITHM_JSON + "\": " + card.keyEncryptionAlgorithm);
+                        break;
+                    }
+                    card.dataEncryptionAlgorithm = DataEncryptionAlgorithms
+                        .getAlgorithmFromString(encryptionParameters.getString (BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON));
+                    if (!EncryptionCore.permittedDataEncryptionAlgorithm (card.dataEncryptionAlgorithm)) {
+                        Log.w(SaturnActivity.SATURN,
+                              "Account " + cardAccount.getAccountId () + " contained an unknown \"" +
+                                  BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON + "\": " + card.dataEncryptionAlgorithm);
+                        break;
+                    }
+                    card.keyEncryptionKey = encryptionParameters.getPublicKey(AlgorithmPreferences.JOSE);
+    
+                    // We found a useful card!
+                    saturnActivity.cardCollection.add(card);
                     break;
                 }
-                card.dataEncryptionAlgorithm = encryptionParameters.getString (BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON);
-                if (!EncryptionCore.permittedDataEncryptionAlgorithm (card.dataEncryptionAlgorithm)) {
-                    Log.w(SaturnActivity.SATURN,
-                          "Account " + cardAccount.getAccountId () + " contained an unknown \"" +
-                              BaseProperties.DATA_ENCRYPTION_ALGORITHM_JSON + "\": " + card.dataEncryptionAlgorithm);
-                    break;
-                }
-                card.keyEncryptionKey = encryptionParameters.getPublicKey(AlgorithmPreferences.JOSE);
-
-                // We found a useful card!
-                saturnActivity.cardCollection.add(card);
-                break;
             }
         }
     }
