@@ -17,12 +17,16 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
+
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
@@ -87,6 +91,13 @@ public class JSONDecryptionDecoder {
         return publicKey == null;
     }
 
+    public JSONDecryptionDecoder require(boolean publicKeyEncryption) throws IOException {
+        if (publicKeyEncryption == isSharedSecret()) {
+            throw new IOException((publicKeyEncryption ? "Missing" : "Unexpected") + " public key");
+        }
+        return this;
+    }
+
     public String getKeyId() {
         return keyId;
     }
@@ -125,7 +136,7 @@ public class JSONDecryptionDecoder {
         rd.checkForUnread();
     }
 
-    public byte[] getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
+    private byte[] localDecrypt(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
         return EncryptionCore.contentDecryption(dataEncryptionAlgorithm,
                                                 dataDecryptionKey,
                                                 encryptedData,
@@ -134,14 +145,20 @@ public class JSONDecryptionDecoder {
                                                 tag);
     }
 
+    public byte[] getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
+        require(false);
+        return localDecrypt(dataDecryptionKey);
+    }
+
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
     throws IOException, GeneralSecurityException {
+        require(true);
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
             if (decryptionKey.getPublicKey().equals(publicKey)) {
                 notFound = false;
                 if (decryptionKey.getKeyEncryptionAlgorithm().equals(keyEncryptionAlgorithm)) {
-                    return getDecryptedData(keyEncryptionAlgorithm.isRsa() ?
+                    return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
                          EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
                                                       encryptedKeyData,
                                                       decryptionKey.getPrivateKey())
