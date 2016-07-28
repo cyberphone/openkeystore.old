@@ -110,6 +110,7 @@ public class SaturnActivity extends BaseProxyActivity {
                 int keyHandle,
                 AsymSignatureAlgorithms signatureAlgorithm,
                 String authorityUrl) {
+            this.paymentRequest = paymentRequest;
             this.accountDescriptor = accountDescriptor;
             this.cardFormatAccountId = cardFormatAccountId;
             this.cardSvgIcon = cardSvgIcon;

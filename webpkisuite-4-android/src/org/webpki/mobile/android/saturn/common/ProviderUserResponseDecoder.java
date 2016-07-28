@@ -94,7 +94,7 @@ public class ProviderUserResponseDecoder extends JSONDecoder implements BaseProp
 
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
-        encryptedData = rd.getObject(ENCRYPTED_MESSAGE_JSON).getEncryptionObject().require(true);
+        encryptedData = rd.getObject(ENCRYPTED_MESSAGE_JSON).getEncryptionObject().require(false);
     }
 
     @Override
