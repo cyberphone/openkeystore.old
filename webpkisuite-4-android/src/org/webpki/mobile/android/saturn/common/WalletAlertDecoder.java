@@ -42,6 +42,6 @@ public class WalletAlertDecoder extends JSONDecoder implements BaseProperties {
 
     @Override
     public String getQualifier() {
-        return Messages.WALLET_ALERT.toString();
+        return Messages.PAYMENT_CLIENT_ALERT.toString();
     }
 }

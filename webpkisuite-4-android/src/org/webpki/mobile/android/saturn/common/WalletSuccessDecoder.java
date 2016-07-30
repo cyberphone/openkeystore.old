@@ -36,6 +36,6 @@ public class WalletSuccessDecoder extends JSONDecoder implements BaseProperties 
 
     @Override
     public String getQualifier() {
-        return Messages.WALLET_SUCCESS.toString ();
+        return Messages.PAYMENT_CLIENT_SUCCESS.toString ();
     }
 }

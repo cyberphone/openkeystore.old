@@ -93,6 +93,6 @@ public class WalletRequestDecoder extends JSONDecoder implements BaseProperties 
 
     @Override
     public String getQualifier() {
-        return Messages.WALLET_REQUEST.toString ();
+        return Messages.PAYMENT_CLIENT_REQUEST.toString ();
     }
 }
