@@ -475,6 +475,7 @@ public class JSONObjectWriter implements Serializable
                                          byte[] dataEncryptionKey,
                                          JSONObjectWriter encryptedKey)
     throws IOException, GeneralSecurityException {
+        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
         byte[] authenticatedData = null;
         if (encryptedKey == null) {
             authenticatedData = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
@@ -490,7 +491,6 @@ public class JSONObjectWriter implements Serializable
                                                  dataEncryptionKey,
                                                  unencryptedData,
                                                  authenticatedData);
-        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
         setBinary(JSONDecryptionDecoder.IV_JSON, result.getIv());
         setBinary(JSONDecryptionDecoder.TAG_JSON, result.getTag());
         setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getCipherText());
