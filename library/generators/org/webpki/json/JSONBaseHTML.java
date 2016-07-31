@@ -17,7 +17,9 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.net.URLEncoder;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -27,6 +29,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -100,9 +103,9 @@ public class JSONBaseHTML
 
     public static final String REF_WEBIDL              = "WEBIDL";
     
-    public static final String JCS_PUBLIC_KEY_RSA      = "publicKey RSA";
+    public static final String JCS_PUBLIC_KEY_RSA      = "Additional RSA properties";
 
-    public static final String JCS_PUBLIC_KEY_EC       = "publicKey EC";
+    public static final String JCS_PUBLIC_KEY_EC       = "Additional EC properties";
 
     String file_name;
     String subsystem_name;
@@ -595,6 +598,15 @@ public class JSONBaseHTML
             return buffer.append ("</table></div>").toString ();
           }
       }
+
+    public static String codeVer(String string, int width) {
+        StringBuffer s = new StringBuffer("<code>").append(string);
+        int i = string.length();
+        while (i++ <= width) {
+            s.append("&nbsp;");
+        }
+        return s.append("</code>").toString();
+    }
 
     public static class ProtocolStep
       {
@@ -1469,30 +1481,24 @@ public class JSONBaseHTML
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
                    "</code> property since the key may be given by the context or through the <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code> property." : null);
 
+        
         addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newRow ()
               .newColumn ()
                 .addProperty (JSONSignatureDecoder.TYPE_JSON)
-                .addValue (JSONSignatureDecoder.EC_PUBLIC_KEY)
-              .newColumn ()
-                .setType (Types.WEBPKI_DATA_TYPES.STRING)
-              .newColumn ()
-                 .setChoice (true, 2)
-              .newColumn ()
-                .addString (jcs)
-                .addString ("EC key type indicator.  For the additional properties see: ")
-                .addLink (JCS_PUBLIC_KEY_EC)
-            .newRow ()
-              .newColumn ()
-                .addProperty (JSONSignatureDecoder.TYPE_JSON)
-                .addValue (JSONSignatureDecoder.RSA_PUBLIC_KEY)
+                .addSymbolicValue (JSONSignatureDecoder.TYPE_JSON)
               .newColumn ()
                 .setType (Types.WEBPKI_DATA_TYPES.STRING)
               .newColumn ()
               .newColumn ()
                 .addString (jcs)
-                .addString ("RSA key type indicator. For the additional properties see: ")
-                .addLink (JCS_PUBLIC_KEY_RSA);
+                .addString ("Key type indicator.  Currently the following types are recognized:<ul>" +
+                        "<li>" + JSONBaseHTML.codeVer(JSONSignatureDecoder.EC_PUBLIC_KEY, 6) + "See: ")
+                        .addLink (JCS_PUBLIC_KEY_EC)
+                .addString ("</li><li>" + 
+                         JSONBaseHTML.codeVer(JSONSignatureDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
+                .addLink (JCS_PUBLIC_KEY_RSA)
+                .addString ("</li></ul>");
 
         addSubItemTable (JCS_PUBLIC_KEY_EC)
            .newRow ()
@@ -1531,7 +1537,7 @@ public class JSONBaseHTML
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
                           "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
-                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS) +
+                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                           "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "")
           .newRow ()
             .newColumn ()
@@ -1548,7 +1554,7 @@ public class JSONBaseHTML
                           "be the full size of a coordinate for the curve specified in the <code>" + 
                           JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
                           "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
-                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.SKS) +
+                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                           "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "");
 
         addSubItemTable (JCS_PUBLIC_KEY_RSA)
