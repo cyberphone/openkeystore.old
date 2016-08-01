@@ -1,21 +1,21 @@
 {
-        "algorithm": "A128CBC-HS256",
-        "encryptedKey": {
-          "algorithm": "ECDH-ES",
-          "publicKey": {
-            "type": "EC",
-            "curve": "P-256",
-            "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-            "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw"
-          },
-          "ephemeralKey": {
-            "type": "EC",
-            "curve": "P-256",
-            "x": "MfhpnKoLdlzQ1XXZR_qzwFTe3clmBJZJUZ-FAmujt8A",
-            "y": "HDAeAuLwNvAQOVO2_upiJUz-2qmPsu3YLumH5ifTyq8"
-          }
-        },
-        "iv": "KyZz-xCl2jvC5T_VyVpf0g",
-        "tag": "HBNkgUTp73e2_5bWwaG19Q",
-        "cipherText": "ZJS4-fUFRLSNhs-RpKC2VGMqPYAae9JCwFW03-k-7Fs"
+  "algorithm": "A128CBC-HS256",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES",
+    "publicKey": {
+      "type": "EC",
+      "curve": "P-256",
+      "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+      "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw"
+    },
+    "ephemeralKey": {
+      "type": "EC",
+      "curve": "P-256",
+      "x": "cE3IC433cIKWIec9o1PkQyFIffjQA2k5DAsPX0pf704",
+      "y": "NmRFMXoBG8JafNmPjpMgindolKt3Axcmzs2lVtOcjiI"
+    }
+  },
+  "iv": "eBhaWBO67OYntG0oeWyACw",
+  "tag": "uTcJgBgXhGqX-pVbi5n-4g",
+  "cipherText": "aHk6ZB9eNv5_1V5MXOvtxxi_GgtGaItG2KeXv7Y4NVY"
 }

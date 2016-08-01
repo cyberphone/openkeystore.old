@@ -72,6 +72,10 @@ public class JSONBaseHTML
     public static final String REF_JWS                 = "RFC7515";
 
     public static final String REF_JWE                 = "RFC7516";
+
+    public static final String REF_JWK                 = "RFC7517";
+
+    public static final String REF_JWA                 = "RFC7518";
     
     public static final String REF_BASE64              = "RFC4648";
     
@@ -283,6 +287,14 @@ public class JSONBaseHTML
         addReferenceEntry (REF_JWE,
                 "M. Jones, J. Hildebrand, \"JSON Web Encryption (JWE)\", " +
                 "RFC&nbsp;7516, May&nbsp;2015.");
+
+        addReferenceEntry (REF_JWK,
+                "M. Jones, \"JSON Web Key (JWK)\", " +
+                "RFC&nbsp;7517, May&nbsp;2015.");
+
+        addReferenceEntry (REF_JWA,
+                "M. Jones, \"JSON Web Algorithms (JWA)\", " +
+                "RFC&nbsp;7518, May&nbsp;2015.");
 
         addReferenceEntry (REF_X509,
             "D. Cooper, S. Santesson, S. Farrell, S. Boeyen, " +

@@ -23,6 +23,7 @@ import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -112,13 +113,32 @@ public class JSONDecryptionDecoder {
 
     JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
         JSONObjectReader rd = checkVersion(encryptionObject);
+        //////////////////////////////////////////////////////////////////////////
+        // Begin JEF normalization                                              //
+        //                                                                      //
+        // 1. Make a shallow copy of the signature object property list         //
+        LinkedHashMap<String,JSONValue> savedProperties =
+            new LinkedHashMap<String,JSONValue>(rd.root.properties);
+        //                                                                      //
+        // 2. Hide properties for the serializer..                              //
+        rd.root.properties.remove(IV_JSON);                                     //
+        rd.root.properties.remove(TAG_JSON);                                    //
+        rd.root.properties.remove(CIPHER_TEXT_JSON);                            //
+        //                                                                      //
+        // 3. Serialize ("JSON.stringify()")                                    //
+        authenticatedData = rd.serializeJSONObject(JSONOutputFormats.NORMALIZED);
+        //                                                                      //
+        // 4. Restore encryption property list                                  //
+        rd.root.properties = savedProperties;
+        //                                                                      //
+        // End JEF normalization                                                //
+        //////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
             .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(ENCRYPTED_KEY_JSON)) {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(ENCRYPTED_KEY_JSON));
-            authenticatedData = encryptedKey.serializeJSONObject(JSONOutputFormats.NORMALIZED);
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
             publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
@@ -130,7 +150,6 @@ public class JSONDecryptionDecoder {
             }
         } else {
             keyId = rd.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
-            authenticatedData = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
         }
         encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
         rd.checkForUnread();
