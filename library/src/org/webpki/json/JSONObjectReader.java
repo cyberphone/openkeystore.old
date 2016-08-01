@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.KeyPair;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
@@ -314,7 +315,7 @@ public class JSONObjectReader implements Serializable, Cloneable
  
     public PublicKey getPublicKey (AlgorithmPreferences algorithmPreferences) throws IOException
       {
-        return JSONSignatureDecoder.getPublicKey (getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON), algorithmPreferences);
+        return getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).getCorePublicKey(algorithmPreferences);
       }
 
     public PublicKey getPublicKey () throws IOException
@@ -329,7 +330,25 @@ public class JSONObjectReader implements Serializable, Cloneable
     }
 
     public PublicKey getCorePublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return JSONSignatureDecoder.getPublicKey(this, algorithmPreferences);
+        clearReadFlags();
+        PublicKey publicKey = JSONSignatureDecoder.decodePublicKey(this,
+                                                                   algorithmPreferences, 
+                                                                   JSONSignatureDecoder.TYPE_JSON,
+                                                                   JSONSignatureDecoder.CURVE_JSON);
+        checkForUnread ();
+        return publicKey;
+    }
+
+    public PublicKey getPublicKeyFromJwk() throws IOException {
+        return JSONSignatureDecoder.decodePublicKey(this,
+                                                    AlgorithmPreferences.JOSE, 
+                                                    JSONSignatureDecoder.JWK_KTY_JSON,
+                                                    JSONSignatureDecoder.JWK_CRV_JSON);
+    }
+
+    public KeyPair getKeyPairFromJwk() throws IOException {
+        PublicKey publicKey = getPublicKeyFromJwk();
+        return new KeyPair(publicKey, JSONSignatureDecoder.decodeJwkPrivateKey(this, publicKey));
     }
 
     public JSONDecryptionDecoder getEncryptionObject() throws IOException {

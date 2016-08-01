@@ -1,0 +1,15 @@
+{
+  "algorithm": "A128CBC-HS256",
+  "encryptedKey": {
+    "algorithm": "RSA-OAEP-256",
+    "publicKey": {
+      "type": "RSA",
+      "n": "y__yOXXaisKqCW2UCcOxpZRCCIdz04074KrnQXMOjSulnaB-kBUUV49Gc8jBI1k7IP0gLdtIPjv2WVFaewt3bm2P2tymRYNw6trisoVtSswWhPDNR12ZEhUNh4vIyJsyYsZRg2y11_ghmK5PeRRxSqVwdga-HOuhXhN_KyD-CL7VxHQwpeAmwWXDvPweTpLWzlVoRzOSkCbsluzCW9Sh0rBHPe4pBScaY2oXQsiWt8nm3p6rgfBALsP_8pEdt5W-dHMihTYfsuLNroJRngocnvPhv44F1ODafUwfuLPe-LpG8zIzMGHnaD4GECOatrzOqPjUCnyiHchNFap1HU8khQ",
+      "e": "AQAB"
+    },
+    "cipherText": "qVE9F-NqLgqTxhnAlktBw-MPMeXVzYSwig2Kf9xmgzV4fdFMLglXR-tEafnpJr9VxtPshIK2J7fwcqTsKjFsOc1lAjOWqSkABr2cfsSIvtq4fKTm8Kpuxixg5c28idHE4Qie0zRhTmK2lIO8WjICIpgwfbiWnc-nCeJ51UopxPtgRqbYkjTZjPZ9NbTFk0-DSAZFux4n21afs0SMphWyn74-jSj29iZA3IypYVCMfwaVuor8hfR751JGUChXTF5P6PwPtcR1He0EJja3QUSsfQtBVxHdfWYIwxXzb3BMfwmvemKY-YBI4aFl7TPG_XWg6waOLfhLiUXs5M-VOr93Uw"
+  },
+  "iv": "mcU4v2iGU1AKqH1XSGkizA",
+  "tag": "uag4vfcpjSkNDqmLg_Qx1g",
+  "cipherText": "wzELA53UG9kcvz4KTAJrX9rnOCZ0_ibJ5lPAE7eO638"
+}

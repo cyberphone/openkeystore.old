@@ -1,4 +1,5 @@
 {
+        "algorithm": "A128CBC-HS256",
         "encryptedKey": {
           "algorithm": "ECDH-ES",
           "publicKey": {
@@ -14,7 +15,6 @@
             "y": "HDAeAuLwNvAQOVO2_upiJUz-2qmPsu3YLumH5ifTyq8"
           }
         },
-        "algorithm": "A128CBC-HS256",
         "iv": "KyZz-xCl2jvC5T_VyVpf0g",
         "tag": "HBNkgUTp73e2_5bWwaG19Q",
         "cipherText": "ZJS4-fUFRLSNhs-RpKC2VGMqPYAae9JCwFW03-k-7Fs"

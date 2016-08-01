@@ -17,27 +17,25 @@
 package org.webpki.json;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyFactory;
+
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
+
 import java.util.Vector;
 
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
+
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64URL;
 
 /**
  * Create an HTML description of JEF (JSON Encryption Format).
@@ -53,12 +51,17 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
     static String RSA_PROPERTIES = "Additional RSA encryption properties";
     static String JCS_PUBLIC_KEY_EC = "Additional EC key properties";
     static String JCS_PUBLIC_KEY_RSA = "Additional RSA key properties";
+    static final String JEF_TEST_STRING = "Hello encrypted world";
+    static final String JEF_SYM_KEY     = "ooQSGRnwUQYbvHjCMi0zPNARka2BuksLM7UK1RHiQwI";
+    
+    static final String ENCRYPTED_DATA  = "encryptedData";
+
     
     private static final String INTEROPERABILITY = "Interoperability";
 
-    private static final String ECMASCRIPT_MODE  = "ECMAScript Compatibility Mode";
+    private static final String TEST_VECTORS  = "Test Vectors";
     
-    private static final String SAMPLE_SIGNATURE = "Sample Signature";
+    private static final String SAMPLE_OBJECT = "Sample Object";
     
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer ("<ul>");
@@ -75,33 +78,14 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
         return buffer.append ("</ul>").toString ();
     }
 
-    static BigInteger getCurvePoint (JSONObjectReader rd, String property, KeyAlgorithms ec) throws IOException {
-        byte[] fixed_binary = rd.getBinary (property);
-        if (fixed_binary.length != (ec.getPublicKeySizeInBits () + 7) / 8) {
-            throw new IOException ("Public EC key parameter \"" + property + "\" is not nomalized");
-        }
-        return new BigInteger (1, fixed_binary);
-    }
-    
-    static KeyPair getKeyPair (JSONObjectReader rd) throws Exception {
-        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString ("crv"),
-                                                                AlgorithmPreferences.JOSE);
-        if (!ec.isECKey ()) {
-            throw new IOException ("\"crv\" is not an EC type");
-        }
-        ECPoint w = new ECPoint (getCurvePoint (rd, "x", ec), getCurvePoint (rd, "y", ec));
-        PublicKey publicKey = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
-        PrivateKey privateKey = KeyFactory.getInstance ("EC").generatePrivate (new ECPrivateKeySpec (getCurvePoint (rd, "d", ec), ec.getECParameterSpec ()));
-        return new KeyPair (publicKey, privateKey);
-    }
-
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream (name)));
     }
     
-    static String format(JSONObjectReader rd) {
+    static String formatCode(JSONObjectReader rd) {
         String res = rd.toString();
-        return res.substring(0, res.length() - 1).replace(" ", "&nbsp").replace("\n", "<br>");
+        res = res.substring(0, res.length() - 1).replace(" ", "&nbsp").replace("\n", "<br>");
+        return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" + res + "</code></div>";
     }
 
     static Column preAmble (String qualifier) throws IOException {
@@ -131,13 +115,22 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
       {
         CustomCryptoProvider.forcedLoad (true);
 
-        JSONObjectReader ecdhEncryption = readJSON("ecdh.json");
+        JSONObjectReader ecdhEncryption = readJSON("ecdh-es.json");
         JSONDecryptionDecoder dec = ecdhEncryption.getEncryptionObject();
         JSONObjectReader ecprivatekey = readJSON("ecprivatekey.json");
-        KeyPair keyPair = getKeyPair(ecprivatekey);
+        KeyPair keyPair = ecprivatekey.getKeyPairFromJwk();
         Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
         keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
-        dec.getDecryptedData(keys);
+        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.json");
+        keyPair = rsaprivatekey.getKeyPairFromJwk();
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
+        verifyDecryption(dec.getDecryptedData(keys));
+        JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
+        dec = rsaEncryption.getEncryptionObject();
+        verifyDecryption(dec.getDecryptedData(keys));
+        JSONObjectReader aesEncryption = readJSON("a128cbc-hs256.json");
+        dec = aesEncryption.getEncryptionObject();
+        verifyDecryption(dec.getDecryptedData(Base64URL.decode(JEF_SYM_KEY)));
 
         json = new JSONBaseHTML (args, "JEF - JSON Encryption Format");
         
@@ -175,24 +168,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .append (json.createReference (JSONBaseHTML.REF_ES6))
           .append (", JCS may also be used for &quot;in-object&quot; JavaScript signatures, " +
              "making JCS ideal for HTML5 applications. See " +
-             "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
+             "<a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
              "\"><span style=\"white-space:nowrap\">" +
-             ECMASCRIPT_MODE + "</span></a>.");
+             TEST_VECTORS + "</span></a>.");
 
-        json.addParagraphObject (SAMPLE_SIGNATURE).append (
-"The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
-"<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" + format(ecdhEncryption) +
-"</code></div>" +
-"The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
-"Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
+        json.addParagraphObject (SAMPLE_OBJECT).append (
+              "The following sample object is used to visualize the JEF specification:" +
+               formatCode(ecdhEncryption) +
+               "The sample object can be verified for correctness by using the EC private key.");
 
-        json.addParagraphObject ("Signature Scope").append (
-            "The scope of a signature (what is actually signed) comprises all " +
-            "properties including possible child objects of the JSON " +
-            "object holding the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
-            "</code> property except for the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property (shaded area in the sample).");
-
-        json.addParagraphObject ("Normalization and Signature Validation").append (
+        json.addParagraphObject ("Operation").append (
             "Prerequisite: A JSON object in accordance with ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
           .append (" containing a properly formatted <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub-object." + LINE_SEPARATOR +
@@ -218,9 +203,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
             "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
             "properties internally in order to support JCS normalization requirements. " + LINE_SEPARATOR +
             "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a> and " +
-            "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
+            "<a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
             "\"><span style=\"white-space:nowrap\">" +
-            ECMASCRIPT_MODE + "</span></a>." + LINE_SEPARATOR +
+            TEST_VECTORS + "</span></a>." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
              JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
@@ -245,31 +230,28 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
         json.addDataTypesDescription ("JEF containers always start with a top-level JSON object. " + LINE_SEPARATOR);
 
         json.addProtocolTableEntry ("JEF Objects")
-          .append ("The following tables describe the JEF JSON structures in detail.");
+          .append ("The following tables describe the JEF JSON structures in detail." +
+                   " Note that <a href=\"#" + JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + "\">" + 
+                   JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + "</a>" +
+                   " can be used as a stand-alone object as well as a part of an <a href=\"#" + 
+                   ENCRYPTED_DATA + "\">" + ENCRYPTED_DATA + "</a> object.");
         
         json.setAppendixMode ();
 
-        json.addParagraphObject (ECMASCRIPT_MODE).append ("ECMAScript mode in this context refers to " +
-           "the ability to sign JavaScript objects as well as using the standard JSON support for parsing and " +
-           "creating signed data." + LINE_SEPARATOR + 
-           "The code snippet below shows a signed JavaScript object:" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>var&nbsp;signedObject&nbsp;=&nbsp;{<br>" +
-           "&nbsp;&nbsp;<span style=\"color:green\">// The data</span><br>" +
-           "&nbsp;&nbsp;statement:&nbsp;&quot;Hello&nbsp;signed&nbsp;world!&quot;,<br>" +
-           "&nbsp;&nbsp;otherProperties:&nbsp;[2000,&nbsp;true],<br>" +
-           "&nbsp;&nbsp;<span style=\"color:green\">// The signature</span><br>" +
-           "&nbsp;&nbsp;signature:&nbsp;{<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;algorithm:&nbsp;&quot;ES256&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;publicKey:&nbsp;{<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type:&nbsp;&quot;EC&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curve:&nbsp;&quot;P-256&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x:&nbsp;&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y:&nbsp;&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;value:&nbsp;&quot;2H__TkcV28QpGWPkyVbR1CW0I8L4xARrVGL0LjOeHJLOPozdzRqCTyYfmAippJXqdzgNAonnFPVCSI5A6novMQ&quot;<br>" +
-           "&nbsp;&nbsp;}<br>" +
-           "};</code></div>" +
-           "This signature could be verified by the following code:" +
+        json.addParagraphObject (TEST_VECTORS).append ("The following test data can be used to verify the correctness " +
+            "of a JEF implementation." + LINE_SEPARATOR + 
+           "All encryption tests encrypt the following string (after conversion to UTF-8):" +
+           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot" + JEF_TEST_STRING +
+           "&quot</code></div>" + LINE_SEPARATOR +
+           "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
+            " can be decrypted with the following private key:" +
+           formatCode(ecprivatekey) + LINE_SEPARATOR +
+           "AES encrypted data using RSA for key encryption:" +
+           formatCode(rsaEncryption) +
+           "Matching RSA private (decryption) key:" +
+           formatCode(rsaprivatekey) + LINE_SEPARATOR +
+           "AES encrypted data relying on a known symmetric key:" +
+           formatCode(aesEncryption) +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>function&nbsp;convertToUTF8(string)&nbsp;{<br>" +
             "&nbsp;&nbsp;var&nbsp;buffer&nbsp;=&nbsp;[];<br>" +
             "&nbsp;&nbsp;for&nbsp;(var&nbsp;i&nbsp;=&nbsp;0;&nbsp;i&nbsp;&lt;&nbsp;string.length;&nbsp;i++)&nbsp;{<br>" +
@@ -329,9 +311,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
             .append (" using the improved serialization algorithm featured in Google's V8 JavaScript engine ")
             .append (json.createReference (JSONBaseHTML.REF_V8))
             .append (". That is, in the ECMAScript compatibility mode <i>there are no requirements saving the textual value of numbers</i>. " +
-                     "This also means that the JCS <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + 
+                     "This also means that the JCS <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + 
             "\"><span style=\"white-space:nowrap\">" +
-            SAMPLE_SIGNATURE + "</span></a> in <i>incompatible</i> with the ECMAScript mode since it uses unnormalized numbers.</li>" +
+            SAMPLE_OBJECT + "</span></a> in <i>incompatible</i> with the ECMAScript mode since it uses unnormalized numbers.</li>" +
             "<li style=\"padding-top:4pt\">If numeric property names are used, they <b>must</b> be " +
             "<i>provided in ascending numeric order</i> and inserted <i>before</i> possible non-numeric properties.</li>" +
             "</ul>" +
@@ -427,15 +409,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
          "<a href=\"#" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
          "\">certificate serial numbers</a> in JCS." + LINE_SEPARATOR +
          "JSON tool designers could also consider implementing the " +
-         "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
+         "<a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
          "\"><span style=\"white-space:nowrap\">" +
-         ECMASCRIPT_MODE + "</span></a> since it presumably requires very moderate adjustments of existing code." + LINE_SEPARATOR +
+         TEST_VECTORS + "</span></a> since it presumably requires very moderate adjustments of existing code." + LINE_SEPARATOR +
          "Fully JCS compatible reference implementations ")
          .append(json.createReference (JSONBaseHTML.REF_OPENKEYSTORE))
          .append (" are available both for Java and JavaScript." +
          " These implementations use ECMAScript number serialization when <i>creating</i> JSON data, making them compliant "+
-         "with the <a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
-         "\"><span style=\"white-space:nowrap\">" + ECMASCRIPT_MODE + "</span></a> as well." + LINE_SEPARATOR + 
+         "with the <a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
+         "\"><span style=\"white-space:nowrap\">" + TEST_VECTORS + "</span></a> as well." + LINE_SEPARATOR + 
          "Pyhton users can get the required parser behavior (modulo floating point data...) by using the following constructs:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
          "jsonObject = json.loads(jcsSignedData,object_pairs_hook=collections.OrderedDict)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\"># Parse JSON while keeping original property order</span><br>" +
          "signatureObject = jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + 
@@ -491,7 +473,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
                                     .append(dea.toString())
                                     .append("</code></li>");
         }
-        preAmble("encryptedData")
+
+        preAmble(ENCRYPTED_DATA)
             .addString (dataEnccryptionAlgorithm.append("</ul>").toString())
             .newRow ()
         .newColumn ()
@@ -546,7 +529,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
                       "</code> nor <code>" + JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + 
                       "</code> are defined, the (symmetric) encryption key is assumed to known by the recepient.");
           
-        preAmble("encryptedKey")
+        preAmble(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
                 .addString ("Key encryption algorithm. Currently the following JWE " +
                           json.createReference (JSONBaseHTML.REF_JWE) + " algorithms are recognized:<ul>" +
                  "<li>" + JSONBaseHTML.codeVer(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID.toString(), 16) + "See: ")
@@ -680,4 +663,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
 
         json.writeHTML ();
       }
+
+    static void verifyDecryption(byte[] decryptedData) throws IOException {
+        if (!ArrayUtil.compare(JEF_TEST_STRING.getBytes("UTF-8"), decryptedData)) {
+            throw new IOException("Decrypt");
+        }
+    }
   }
