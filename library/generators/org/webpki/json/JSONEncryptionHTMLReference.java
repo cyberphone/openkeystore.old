@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,13 +56,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
     static final String JEF_SYM_KEY     = "ooQSGRnwUQYbvHjCMi0zPNARka2BuksLM7UK1RHiQwI";
     
     static final String ENCRYPTED_DATA  = "encryptedData";
-
     
-    private static final String INTEROPERABILITY = "Interoperability";
-
-    private static final String TEST_VECTORS  = "Test Vectors";
+    static final String TEST_VECTORS    = "Test Vectors";
     
-    private static final String SAMPLE_OBJECT = "Sample Object";
+    static final String SAMPLE_OBJECT   = "Sample Object";
     
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer ("<ul>");
@@ -85,7 +82,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
     
     static String formatCode(JSONObjectReader rd) {
         String res = rd.toString();
-        res = res.substring(0, res.length() - 1).replace(" ", "&nbsp").replace("\n", "<br>");
+        res = res.substring(0, res.length() - 1).replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>");
         return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" + res + "</code></div>";
     }
 
@@ -172,60 +169,44 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Operation").append (
                 "Prerequisite: A JSON object in accordance with ")
               .append (json.createReference (JSONBaseHTML.REF_JSON))
-              .append (" containing a properly formatted <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub-object." + LINE_SEPARATOR +
+              .append (" containing properly formatted JEF data." + LINE_SEPARATOR +
                 "Parsing restrictions:<ul>" +
                 "<li>The original property serialization order <b>must</b> be <i>preserved</i>.</li>" +
-                "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
-                "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
-                "</ul>The normalization steps are as follows:<ul>" +
+                "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of a JEF object.</li>" +
+                "</ul>Since JEF uses the same algorithms as JWE " +
+                json.createReference (JSONBaseHTML.REF_JWE) +
+                " the JWA " + json.createReference (JSONBaseHTML.REF_JWA) +
+                " reference apply with one important exception: <i>Additional Authenticated Data</i> " +
+                "used by the symmetric chipers. " +
+                "This difference is due to the way encryption meta-data is formatted. " +
+                "The process for creating <i>Additional Authenticated Data</i> is as follows:<ul>" +
                 "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
                 "having a value of x09, x0a, x0d or x20.</li>" +
-                "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
-                "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be adjusted as follows: " +
-                "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
-                "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
-                "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
-                "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
-                "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-                "<li style=\"padding-top:4pt\">The JSON object associated with the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> now be " +
-                "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
-                "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
-                "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
-                "trailing zero being redundant. To cope with this " +
-                "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
-                "properties internally in order to support JCS normalization requirements. " + LINE_SEPARATOR +
-                "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a> and " +
-                "<a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
-                "\"><span style=\"white-space:nowrap\">" +
-                TEST_VECTORS + "</span></a>." + LINE_SEPARATOR +
-                "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
-                "property including the comma (leading or trailing depending on the position of <code>" +
-                 JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
-                 "</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
-                "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
+                "<li style=\"padding-top:4pt\">The properties <code>" + JSONDecryptionDecoder.IV_JSON + "</code>, " +
+                "<code>" + JSONDecryptionDecoder.TAG_JSON + "</code>, and <code>" + JSONDecryptionDecoder.CIPHER_TEXT_JSON +
+                "</code> <b>must</b> " + "be removed and the JEF object be " +
+                "<i>recreated</i> using the actual text left after applying the previous measures.</li></ul>" +
+                "Applied on the <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT +
+                "</a>, a conforming JEF <i>Additional Authenticated Data</i> process should return the following JSON string:" +
                 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 
-                "{&quot;now&quot;:&quot;2015-01-12T09:22:36Z&quot;,&quot;escapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">&#x20AC;</b>$<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B\\&quot;\\\\</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;signature&quot;:<br>" +
-                "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWW<br>" +
-                "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
-                "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
+                "{&quot;algorithm&quot;:&quot;A128CBC-HS256&quot;,&quot;encryptedKey&quot;:{&quot;algorithm&quot;:&quot;ECDH-ES&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,<br>" +
+                "&quot;x&quot;:&quot;Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0&quot;,&quot;y&quot;:&quot;HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw&quot;},&quot;epheme<br>"+
+                "ralKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;cE3IC433cIKWIec9o1PkQyFIffjQA2k5DAsPX0pf704&quot;,&quot;y&quot;:&quot;NmRFMXoBG8JafNmP<br>" +
+                "jpMgindolKt3Axcmzs2lVtOcjiI&quot;}}}" +
+
+                "</code></div>" +
                 "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-                "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in the <code>" +
-                      JSONSignatureDecoder.ALGORITHM_JSON + "</code> property using the signature key over the " +
-                      "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
-                      "normalized data." + LINE_SEPARATOR +
-                "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
-                json.createReference (JSONBaseHTML.REF_X509) +
-                "." + LINE_SEPARATOR +
-                "The next sections cover the JCS format.");
+                "The <i>Additional Authenticated Data</i> string is subsequently <span style=\"white-space:nowrap\">UTF-8</span> encoded " +
+                "before being applied to the encryption algorithm.");
 
         json.setAppendixMode ();
 
         json.addParagraphObject (TEST_VECTORS).append ("The following test data can be used to verify the correctness " +
             "of a JEF implementation." + LINE_SEPARATOR + 
            "All encryption tests encrypt the following string (after first having coverted it to UTF-8):" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot" + JEF_TEST_STRING +
-           "&quot</code></div>" + LINE_SEPARATOR +
+           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_TEST_STRING +
+           "&quot;</code></div>" + LINE_SEPARATOR +
            "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
             " can be decrypted by the following private key in JWK " + 
            json.createReference (JSONBaseHTML.REF_JWK) + " format:" +
@@ -238,8 +219,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
            "AES encrypted data relying on a known symmetric key:" +
            formatCode(aesEncryption) + 
            "Matching AES key, here is Base64URL notation:" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot" + JEF_SYM_KEY +
-           "&quot</code></div>");
+           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_SYM_KEY +
+           "&quot;</code></div>");
 
         json.addReferenceTable ();
         

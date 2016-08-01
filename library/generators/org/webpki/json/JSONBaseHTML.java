@@ -382,7 +382,7 @@ public class JSONBaseHTML
             BASE64  ("base64", "<i>string</i>",                           REF_BASE64,
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
-            CRYPTO  ("crypto", "<i>string</i>",                           REF_XMLDSIG,
+            CRYPTO  ("crypto", "<i>string</i>",                           null,
                      "Base64URL-encoded positive integer with arbitrary precision. Note that leading zero-valued bytes <b>must</b> be discarded"),
                      
             DATE    ("date",   "<i>string</i>",                           null,

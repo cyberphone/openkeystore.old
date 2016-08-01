@@ -115,6 +115,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "<li>The original property serialization order <b>must</b> be <i>preserved</i>.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
+            "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub-object." +
             "</ul>The normalization steps are as follows:<ul>" +
             "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
