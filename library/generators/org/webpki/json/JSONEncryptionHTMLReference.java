@@ -208,7 +208,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphObject (TEST_VECTORS).append ("The following test data can be used to verify the correctness " +
             "of a JEF implementation." + LINE_SEPARATOR + 
-           "All encryption tests encrypt the following string (after first having coverted it to UTF-8):" +
+           "All encryption tests encrypt the following string (after first having converted it to UTF-8):" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_TEST_STRING +
            "&quot;</code></div>" + LINE_SEPARATOR +
            "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
@@ -228,7 +228,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
 
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2016-08-01", "0.3", "Initial publication in HTML5");
+        json.addDocumentHistoryLine ("2016-08-03", "0.3", "Initial publication in HTML5");
 
         json.addParagraphObject ("Author").append ("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the OpenKeyStore project " +
