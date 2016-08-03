@@ -146,7 +146,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .append (
             " and supports a <i>subset</i> of the same algorithms while utilizing the JCS ")
           .append (json.createReference (JSONBaseHTML.REF_JCS))
-          .append (" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures.");
+          .append (" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures."
+                  + LINE_SEPARATOR +
+                  "The JEF encryption scheme is fully compatible with the ES6 ")
+          .append (json.createReference (JSONBaseHTML.REF_ES6))
+          .append(" JSON/JavaScript serialization and parsing specification.");
 
         json.addParagraphObject (SAMPLE_OBJECT).append (
               "The following sample object is used to visualize the JEF specification:" +
