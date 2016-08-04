@@ -24,6 +24,7 @@ import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import java.security.cert.CertificateFactory;
@@ -32,7 +33,9 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
 import java.util.LinkedHashMap;
@@ -97,6 +100,10 @@ public class JSONSignatureDecoder implements Serializable
     public static final String CERTIFICATE_PATH_JSON      = "certificatePath";
     
     public static final String Y_JSON                     = "y";
+
+    public static final String JWK_KTY_JSON               = "kty";
+
+    public static final String JWK_CRV_JSON               = "crv";
   
     SignatureAlgorithms algorithm;
     
@@ -226,13 +233,15 @@ public class JSONSignatureDecoder implements Serializable
         return new BigInteger (1, cryptoBinary);
       }
 
-    static PublicKey getPublicKey (JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException
+    static PublicKey decodePublicKey (JSONObjectReader rd, 
+                                      AlgorithmPreferences algorithmPreferences,
+                                      String typeJson,
+                                      String curveJson) throws IOException
       {
-        rd.clearReadFlags();
         PublicKey publicKey = null;
         try
           {
-            String type = rd.getString (TYPE_JSON);
+            String type = rd.getString (typeJson);
             if (type.equals (RSA_PUBLIC_KEY))
               {
                 publicKey = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getCryptoBinary (rd, N_JSON),
@@ -240,10 +249,10 @@ public class JSONSignatureDecoder implements Serializable
               }
             else if (type.equals (EC_PUBLIC_KEY))
               {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (CURVE_JSON), algorithmPreferences);
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID (rd.getString (curveJson), algorithmPreferences);
                 if (!ec.isECKey ())
                   {
-                    throw new IOException ("\"" + CURVE_JSON + "\" is not an EC type");
+                    throw new IOException ("\"" + curveJson + "\" is not an EC type");
                   }
                 ECPoint w = new ECPoint (getCurvePoint (rd, X_JSON, ec), getCurvePoint (rd, Y_JSON, ec));
                 publicKey = KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
@@ -252,7 +261,6 @@ public class JSONSignatureDecoder implements Serializable
               {
                 throw new IOException ("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
               }
-            rd.checkForUnread ();
             return publicKey;
           }
         catch (GeneralSecurityException e)
@@ -449,4 +457,26 @@ public class JSONSignatureDecoder implements Serializable
           }
         return parent;
       }
+
+    static PrivateKey decodeJwkPrivateKey(JSONObjectReader rd, PublicKey publicKey) throws IOException {
+        try {
+            KeyAlgorithms keyAlgorithm = KeyAlgorithms.getKeyAlgorithm(publicKey);
+            if (keyAlgorithm.isECKey()) {
+                return KeyFactory.getInstance("EC")
+                    .generatePrivate(new ECPrivateKeySpec(getCurvePoint(rd, "d", keyAlgorithm), 
+                                                          keyAlgorithm.getECParameterSpec()));
+            }
+            return KeyFactory.getInstance("RSA")
+                .generatePrivate(new RSAPrivateCrtKeySpec(((RSAPublicKey)publicKey).getModulus(),
+                                                          ((RSAPublicKey)publicKey).getPublicExponent(),
+                                                          getCryptoBinary(rd,"d"),
+                                                          getCryptoBinary(rd,"p"),
+                                                          getCryptoBinary(rd,"q"),
+                                                          getCryptoBinary(rd,"dp"),
+                                                          getCryptoBinary(rd,"dq"),
+                                                          getCryptoBinary(rd,"qi")));
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
+        }
+    }
   }
