@@ -11,7 +11,7 @@ https://cyberphone.github.io/doc/security/keygen2.html
 
 The JSON library supports a clear text signature system called JCS:<br>
 https://cyberphone.github.io/doc/security/jcs.html<br>
-as well as a "matching" encryption schemed coined JEF:<br>
+as well as a "matching" encryption scheme coined JEF:<br>
 https://cyberphone.github.io/doc/security/jef.html
 
 ##Requirements
