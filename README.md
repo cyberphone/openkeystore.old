@@ -10,7 +10,9 @@ for SKS:<br>
 https://cyberphone.github.io/doc/security/keygen2.html
 
 The JSON library supports a clear text signature system called JCS:<br>
-https://cyberphone.github.io/doc/security/jcs.html
+https://cyberphone.github.io/doc/security/jcs.html<br>
+as well as a "matching" encryption schemed coined JEF:<br>
+https://cyberphone.github.io/doc/security/jef.html
 
 ##Requirements
 * Java SDK Version 6, 7 or 8
