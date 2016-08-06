@@ -19,7 +19,7 @@ https://cyberphone.github.io/doc/security/jef.html
 * Ant 1.8 or later
 * The projects are being developed using Eclipse but there's no dependence on Eclipse.
 
-Currently only the "library" and "resources" projects are suitable for download:
+Currently only the "library" and "resources" projects are suitable public use:
 ```
 $ cd library
 $ ant
