@@ -187,7 +187,7 @@ public class HTML
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\"><a href=\"" + baseurl + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/openkeystore/resources/docs/jcs.html\">JCS Documentation</a></td></tr>" +
+                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jcs.html\">JCS Documentation</a></td></tr>" +
                  "</table></td></tr>"));
       }
 
