@@ -17,6 +17,7 @@
 package org.webpki.mobile.android.saturn;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 
 import android.os.Bundle;
 
@@ -95,7 +96,7 @@ public class SaturnActivity extends BaseProxyActivity {
         PaymentRequest paymentRequest;
         AccountDescriptor accountDescriptor;
         boolean cardFormatAccountId;
-        String cardSvgIcon;
+        byte[] cardSvgIcon;
         AsymSignatureAlgorithms signatureAlgorithm;
         String authorityUrl;
         int keyHandle;
@@ -106,7 +107,7 @@ public class SaturnActivity extends BaseProxyActivity {
         Account(PaymentRequest paymentRequest,
                 AccountDescriptor accountDescriptor,
                 boolean cardFormatAccountId,
-                String cardSvgIcon,
+                byte[] cardSvgIcon,
                 int keyHandle,
                 AsymSignatureAlgorithms signatureAlgorithm,
                 String authorityUrl) {
@@ -123,10 +124,15 @@ public class SaturnActivity extends BaseProxyActivity {
     Vector<Account> cardCollection = new Vector<Account>();
 
     void loadHtml(String html) {
-        saturnView.loadData(new StringBuffer(standardHtml).append(html).append("</table></td></tr></table></body></html>").toString(),
-                            "text/html; charset=utf-8",
-                            null);
-    }
+        final String str = html;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                saturnView.loadData(new StringBuffer(standardHtml).append(str).append("</table></td></tr></table></body></html>").toString(),
+                        "text/html; charset=utf-8",
+                        null);                }
+        });
+    } 
     
     @Override
     public void launchBrowser(String url) {
@@ -137,6 +143,18 @@ public class SaturnActivity extends BaseProxyActivity {
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+        }
+    }
+  
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -182,11 +200,13 @@ public class SaturnActivity extends BaseProxyActivity {
             .append(displayMetrics.widthPixels / factor)
             .append("px;height:")
             .append((displayMetrics.widthPixels * 6) / (10 * factor))
-            .append("px\"")
+            .append("px;border-style:groove;border-width:2px;border-color:#C0C0C0;border-radius:15px;" +
+                    "box-shadow:5px 5px 5px #D0D0D0;background-size:cover;background-repeat:no-repeat;" +
+                    "background-image:url(data:image/svg+xml;base64,")
+            .append(Base64.encodeToString(account.cardSvgIcon, Base64.NO_WRAP))
+            .append(")\"")
             .append(clickOption)
-            .append(">")
-            .append(account.cardSvgIcon)
-            .append("</div></td></tr><tr><td style=\"text-align:center;font-size:8pt;font-family:courier\">")
+            .append("></div></td></tr><tr><td style=\"text-align:center;padding-top:8px;font-size:8pt;font-family:courier\">")
             .append(formatAccountId(account))
             .append("</td></tr>").toString();
     }

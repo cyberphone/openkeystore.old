@@ -135,8 +135,8 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
                         new Account(paymentNetwork.getPaymentRequest(),
                                     cardAccount,
                                     cardProperties.getBoolean(BaseProperties.CARD_FORMAT_ACCOUNT_ID_JSON),
-                                    new String(saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
-                                        .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE), "UTF-8"),
+                                    saturnActivity.sks.getExtension(keyHandle, KeyGen2URIs.LOGOTYPES.CARD)
+                                        .getExtensionData(SecureKeyStore.SUB_TYPE_LOGOTYPE),
                                     keyHandle,
                                     AsymSignatureAlgorithms
                                         .getAlgorithmFromID(cardProperties.getString(BaseProperties.SIGNATURE_ALGORITHM_JSON),

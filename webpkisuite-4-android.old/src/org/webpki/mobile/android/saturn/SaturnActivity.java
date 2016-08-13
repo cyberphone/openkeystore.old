@@ -95,7 +95,7 @@ public class SaturnActivity extends BaseProxyActivity {
         PaymentRequest paymentRequest;
         AccountDescriptor accountDescriptor;
         boolean cardFormatAccountId;
-        String cardSvgIcon;
+        byte[] cardSvgIcon;
         AsymSignatureAlgorithms signatureAlgorithm;
         String authorityUrl;
         int keyHandle;
@@ -106,7 +106,7 @@ public class SaturnActivity extends BaseProxyActivity {
         Account(PaymentRequest paymentRequest,
                 AccountDescriptor accountDescriptor,
                 boolean cardFormatAccountId,
-                String cardSvgIcon,
+                byte[] cardSvgIcon,
                 int keyHandle,
                 AsymSignatureAlgorithms signatureAlgorithm,
                 String authorityUrl) {
@@ -187,11 +187,13 @@ public class SaturnActivity extends BaseProxyActivity {
             .append(displayMetrics.widthPixels / factor)
             .append("px;height:")
             .append((displayMetrics.widthPixels * 6) / (10 * factor))
-            .append("px\"")
+            .append("px;border-style:groove;border-width:2px;border-color:#C0C0C0;border-radius:15px;" +
+                    "box-shadow:5px 5px 5px #D0D0D0;background-size:cover;background-repeat:no-repeat;" +
+                    "background-image:url(data:image/svg+xml;base64,")
+            .append(Base64.encodeToString(account.cardSvgIcon, Base64.NO_WRAP))
+            .append(")\"")
             .append(clickOption)
-            .append(">")
-            .append(account.cardSvgIcon)
-            .append("</div></td></tr><tr><td style=\"text-align:center;font-size:8pt;font-family:courier\">")
+            .append("></div></td></tr><tr><td style=\"text-align:center;padding-top:8px;font-size:8pt;font-family:courier\">")
             .append(formatAccountId(account))
             .append("</td></tr>").toString();
     }
