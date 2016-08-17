@@ -17,6 +17,7 @@
 package org.webpki.mobile.android.saturn;
 
 import android.annotation.SuppressLint;
+
 import android.content.res.Configuration;
 
 import android.os.Bundle;
@@ -27,7 +28,6 @@ import android.util.Log;
 
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
-
 import android.widget.Toast;
 
 import org.webpki.mobile.android.R;
@@ -68,12 +68,27 @@ public class SaturnActivity extends BaseProxyActivity {
 
     public static final String SATURN = "Saturn";
     
-    static final String LABEL_STYLE = "text-align:right;padding-right:3pt";
-    
-    static final String FIELD_STYLE = "padding:1pt 4pt 1pt 4pt;border-width:1px;border-style:solid;" +
-                                      "border-color:#adadad;background-color:#f4fdf7";
+    static final String HTML_HEADER = "<html><head><style type='text/css'>\n" +
+                                      "body {margin:0;font-size:12pt;color:#000000;font-family:Roboto;background-color:white}\n" +
+                                      "td.label {text-align:right;padding:2pt 3pt 3pt 0pt}\n" +
+                                      "td.field {padding:2pt 6pt 3pt 6pt;border-width:1px;" +
+                                      "border-style:solid;border-color:#adadad;background-color:#f4fdf7;min-width:10em}\n" +
+                                      "td.pan {text-align:center;padding:5pt 0 0 0;font-size:9pt;font-family:monospace}\n" +
+                                      "div.cardimage {border-style:groove;border-width:2px;border-color:#c0c0c0;border-radius:15px;" +
+                                      "box-shadow:5px 5px 5px #d0d0d0;background-size:cover;background-repeat:no-repeat}\n" +
+                                      "</style>\n" +
+                                      "<script type='text/javascript'>\n" +
+                                      "function positionElements() {\n";
 
+    String htmlBodyPrefix;
+ 
+    boolean landscapeMode;
+    
     WalletRequestDecoder walletRequest;
+    
+    enum FORM {INITIALIZE, COLLECTION, PAYMENTREQUEST};
+    
+    FORM currentForm = FORM.INITIALIZE;
 
     Account selectedCard;
     
@@ -89,7 +104,6 @@ public class SaturnActivity extends BaseProxyActivity {
     
     SaturnView saturnView;
     int factor;
-    StringBuffer standardHtml;
     DisplayMetrics displayMetrics;
 
     static class Account {
@@ -123,14 +137,21 @@ public class SaturnActivity extends BaseProxyActivity {
 
     Vector<Account> cardCollection = new Vector<Account>();
 
-    void loadHtml(String html) {
-        final String str = html;
+    void loadHtml(String positionScript, String body) {
+        final String positionScriptArgument = positionScript;
+        final String bodyArgument = body;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                saturnView.loadData(new StringBuffer(standardHtml).append(str).append("</table></td></tr></table></body></html>").toString(),
-                        "text/html; charset=utf-8",
-                        null);                }
+                 String html = new StringBuffer(HTML_HEADER)
+                    .append(positionScriptArgument)
+                    .append(htmlBodyPrefix)
+                    .append(bodyArgument)
+                    .append("</body></html>").toString();
+               Log.i(SATURN,html);
+               saturnView.loadData(html, "text/html; charset=utf-8", null);
+               saturnView.reload();
+            }
         });
     } 
     
@@ -146,12 +167,23 @@ public class SaturnActivity extends BaseProxyActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+            landscapeMode = true;
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+            landscapeMode = false;
+        } else {
+            return;
+        }
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        switch (currentForm) {
+            case COLLECTION:
+                showCardCollection();
+                break;
+            case INITIALIZE:
+            default:
+                break;
         }
     }
   
@@ -166,20 +198,27 @@ public class SaturnActivity extends BaseProxyActivity {
         saturnView.addJavascriptInterface (this, "Saturn");
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        factor = displayMetrics.densityDpi / 96;
+        factor = (int)(displayMetrics.density * 100);
+        landscapeMode = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        Log.i(SATURN,"LS" + landscapeMode);
         try {
-            byte[] saturnLogo = ArrayUtil.getByteArrayFromInputStream(getResources().openRawResource(R.drawable.saturnlogo));
-            standardHtml = new StringBuffer("<html><body><img src=\"data:image/png;base64,")
-                .append(Base64.encodeToString(saturnLogo, Base64.NO_WRAP))
-                .append("\" style=\"z-index:5;position:absolute\">" +
-                        "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">" +
-                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\"><table cellpadding=\"0\" cellspacing=\"0\">");
-            loadHtml("<tr><td>Initializing...</td></tr>");
+            htmlBodyPrefix = new StringBuffer("}\n" +
+                                              "</script>" +
+                                              "</head><body onload=\"positionElements()\">" +
+                                              "<img src='data:image/png;base64,")
+                .append(Base64.encodeToString(ArrayUtil.getByteArrayFromInputStream(getResources()
+                                                  .openRawResource(R.drawable.saturnlogo)),
+                                              Base64.NO_WRAP))
+                .append("'>").toString();
+             loadHtml("var init = document.getElementById('init');\n" +
+                      "init.style.top = ((window.innerHeight - init.offsetHeight) / 2) + 'px';\n" +
+                      "init.style.visibility='visible';\n",
+                      "<div id='init' style='visibility:hidden;position:absolute;width:100%;text-align:center'>Initializing...</div>");
         } catch (Exception e) {
             unconditionalAbort("Saturn didn't initialize!");
             return;
         }
-
+        
         showHeavyWork(PROGRESS_INITIALIZING);
 
         // Start of Saturn
@@ -193,29 +232,28 @@ public class SaturnActivity extends BaseProxyActivity {
             card.accountDescriptor.getAccountId();
     }
 
-    String htmlOneCard(Account account, String topStyle, String clickOption) {
-        return new StringBuffer("<tr><td")
-            .append(topStyle)
-            .append("><div style=\"width:")
-            .append(displayMetrics.widthPixels / factor)
+    String htmlOneCard(Account account, int width, String card, String clickOption) {
+        return new StringBuffer("<table id='")
+            .append(card)
+            .append("' style='visibility:hidden;position:absolute'><tr><td><div class='cardimage' style='width:")
+            .append((width * 100) / factor)
             .append("px;height:")
-            .append((displayMetrics.widthPixels * 6) / (10 * factor))
-            .append("px;border-style:groove;border-width:2px;border-color:#C0C0C0;border-radius:15px;" +
-                    "box-shadow:5px 5px 5px #D0D0D0;background-size:cover;background-repeat:no-repeat;" +
-                    "background-image:url(data:image/svg+xml;base64,")
+            .append((width * 60) / factor)
+            .append("px;background-image:url(data:image/svg+xml;base64,")
             .append(Base64.encodeToString(account.cardSvgIcon, Base64.NO_WRAP))
-            .append(")\"")
+            .append(")'")
             .append(clickOption)
-            .append("></div></td></tr><tr><td style=\"text-align:center;padding-top:8px;font-size:8pt;font-family:courier\">")
+            .append("></div></td></tr><tr><td class='pan'>")
             .append(formatAccountId(account))
-            .append("</td></tr>").toString();
+            .append("</td></tr></table>").toString();
     }
 
     void ShowPaymentRequest() throws IOException {
         saturnView.numbericPin = true;
         StringBuffer payHtml = 
-                new StringBuffer(htmlOneCard(selectedCard, "", ""));
-            payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
+                new StringBuffer(htmlOneCard(selectedCard, displayMetrics.widthPixels, "", ""));
+/*
+        payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
                            "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
                    .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
                    .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
@@ -230,6 +268,7 @@ public class SaturnActivity extends BaseProxyActivity {
                            "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
                            "</table></td></tr>");
             loadHtml(payHtml.toString());
+*/
     }
 
     @JavascriptInterface
@@ -338,15 +377,44 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     void showCardCollection() {
-        StringBuffer html = new StringBuffer("<tr><td align=\"center\">Select Payment Card</td></tr>");
+        currentForm = FORM.COLLECTION;
+        StringBuffer js = new StringBuffer("var header = document.getElementById('header');\n");
+        StringBuffer html = 
+            new StringBuffer("<div id='header' style='visibility:hidden;position:absolute;width:100%;text-align:center'>Select Payment Card</div>");
+        int width = displayMetrics.widthPixels;
+        Log.i(SATURN,"W=" + width);
         int index = 0;
         for (SaturnActivity.Account account : cardCollection) {
+            String card = "card" + String.valueOf(index);
+            js.append("var " + card + " = document.getElementById('" + card + "');\n");
+            if (index == 0) {
+                js.append("var next = ")
+                  .append(landscapeMode ? 
+                          "(window.innerHeight - " + card + ".offsetHeight) / 2;\n" 
+                                        :
+                          "(window.innerHeight - Math.floor(" + card + ".offsetHeight * 2.3)) / 2;\n");
+                js.append("header.style.top = (next - header.offsetHeight) / 2 + 'px';\n");
+            }
+            js.append(card + ".style.top = next;\n");
+            if (landscapeMode) {
+                double left = 1.0 / 11;
+                if (index % 2 == 1) {
+                    js.append("next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
+                    left = 6.0 / 11;
+                }
+                js.append(card + ".style.left = Math.floor(window.innerWidth * " + String.valueOf(left) + ") + 'px';\n");
+            } else {
+                js.append(card + ".style.left = ((window.innerWidth - " + card + ".offsetWidth) / 2) + 'px';\n" +
+                          "next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
+            }
+            js.append(card + ".style.visibility = 'visible';\n");
             html.append(htmlOneCard(account,
-                        " style=\"padding-top:10pt\"",
-                        " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
-  
+                                    landscapeMode ? (width * 4) / 11 : (width * 3) / 5,
+                                    card,
+                                    " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
         }
-        loadHtml(html.toString());
+        js.append("header.style.visibility='visible';\n");
+        loadHtml(js.toString(), html.toString());
     }
 
     @Override

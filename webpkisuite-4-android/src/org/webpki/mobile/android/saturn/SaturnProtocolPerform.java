@@ -129,12 +129,12 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                          "Unknown" : saturnActivity.selectedCard.paymentRequest.getPayee().getCommonName(),
                                     merchantHtmlAlert));
             }
-            saturnActivity.loadHtml(text.toString());
+//            saturnActivity.loadHtml(text.toString());
        } else {
             String url = saturnActivity.walletRequest.getAndroidSuccessUrl();
             if (url.equals("local")) {
                 saturnActivity.done = true;
-                saturnActivity.loadHtml("<tr><td>The operation was successful!</td></tr>");
+ //               saturnActivity.loadHtml("<tr><td>The operation was successful!</td></tr>");
             } else {    
                 saturnActivity.launchBrowser(url);
             }
