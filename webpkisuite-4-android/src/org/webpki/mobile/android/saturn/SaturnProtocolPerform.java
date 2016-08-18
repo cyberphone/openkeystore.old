@@ -115,14 +115,14 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                             text.append(challengeField.getOptionalLabel())
                                 .append(":<br>");
                         }
-                        text.append("<input type=\"password\" id=\"")
+                        text.append("<input type='password' id='")
                             .append(challengeField.getId())
-                            .append("\" size=\"")
+                            .append("' size='")
                             .append(challengeField.getLength())
-                            .append("\"></td></tr>");
+                            .append("'></td></tr>");
                     }
                     text.append("<tr><td style=\"text-align:center;padding-top:20pt\">" +
-                                "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.getChallengeJSON(getChallengeData())\"></td></tr>");
+                                "<input type=\"button\" value=\"Submit\" onClick=\"Saturn.getChallengeJSON(getChallengeData())\"></td></tr>");
                 }
              } else {
                  text.append(header(saturnActivity.selectedCard == null ?
@@ -134,8 +134,8 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
             String url = saturnActivity.walletRequest.getAndroidSuccessUrl();
             if (url.equals("local")) {
                 saturnActivity.done = true;
- //               saturnActivity.loadHtml("<tr><td>The operation was successful!</td></tr>");
-            } else {    
+                saturnActivity.simpleDisplay("The operation was successful!");
+             } else {    
                 saturnActivity.launchBrowser(url);
             }
         }

@@ -17,12 +17,16 @@
 package org.webpki.mobile.android.saturn;
 
 import android.annotation.SuppressLint;
+
 import android.content.res.Configuration;
+
 import android.os.Build;
 import android.os.Bundle;
+
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.widget.Toast;
@@ -30,26 +34,34 @@ import android.widget.Toast;
 import org.webpki.mobile.android.R;
 
 import java.io.IOException;
+
 import java.security.PublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
+
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
 import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
+
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLEncoder;
 
@@ -77,9 +89,9 @@ public class SaturnActivity extends BaseProxyActivity {
     
     WalletRequestDecoder walletRequest;
     
-    enum FORM {INITIALIZE, COLLECTION, PAYMENTREQUEST};
+    enum FORM {SIMPLE, COLLECTION, PAYMENTREQUEST};
     
-    FORM currentForm = FORM.INITIALIZE;
+    FORM currentForm = FORM.SIMPLE;
 
     Account selectedCard;
     
@@ -171,23 +183,38 @@ public class SaturnActivity extends BaseProxyActivity {
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         switch (currentForm) {
-            case COLLECTION:
-                showCardCollection();
-                break;
+        case COLLECTION:
+            showCardCollection();
+            break;
 
-            case PAYMENTREQUEST:
-                try {
-                    ShowPaymentRequest();
-                } catch (IOException e) {
+        case PAYMENTREQUEST:
+            try {
+                ShowPaymentRequest();
+            } catch (IOException e) {
+            }
+            break;
+
+        default:
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                   saturnView.reload();
                 }
-                break;
-
-            case INITIALIZE:
-            default:
-                break;
+            });
         }
     }
-  
+
+    public void simpleDisplay(String simpleHtml) {
+        currentForm = FORM.SIMPLE;
+        loadHtml("var simple = document.getElementById('simple');\n" +
+                 "simple.style.top = ((window.innerHeight - simple.offsetHeight) / 2) + 'px';\n" +
+                 "simple.style.visibility='visible';\n",
+                 "<table id='simple' style='visibility:hidden;position:absolute;width:100%'>" +
+                 "<tr><td style='text-align:center;padding:20pt'>" +
+                 simpleHtml +
+                 "</td></tr></table>");
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -216,10 +243,7 @@ public class SaturnActivity extends BaseProxyActivity {
                                                   .openRawResource(R.drawable.saturnlogo)),
                                               Base64.NO_WRAP))
                 .append("'>").toString();
-             loadHtml("var init = document.getElementById('init');\n" +
-                      "init.style.top = ((window.innerHeight - init.offsetHeight) / 2) + 'px';\n" +
-                      "init.style.visibility='visible';\n",
-                      "<div id='init' style='visibility:hidden;position:absolute;width:100%;text-align:center'>Initializing...</div>");
+            simpleDisplay("Initializing...");
         } catch (Exception e) {
             unconditionalAbort("Saturn didn't initialize!");
             return;
@@ -278,11 +302,18 @@ public class SaturnActivity extends BaseProxyActivity {
             "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
             "function showPin() {\n" +
             "var pinfield = document.getElementById('pinfield');\n" +
-            "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:lightgrey'>Please enter PIN</span>\" : pin;\n" +
+            "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:#a0a0a0'>Please enter PIN</span>\" : pin;\n" +
             "}\n" +
             "function addDigit(digit) {\n" +
             "pin += digit;\n" +
             "showPin();\n" +
+            "}\n" +
+            "function validatePin() {\n" +
+            "if (pin.length == 0) {\n" +
+            "Saturn.toast('Empty PIN - Ignored');\n" +
+            "} else {\n" +
+            "Saturn.performPayment(pin);\n" +
+            "}\n" +
             "}\n" +
             "function deleteDigit() {\n" +
             "if (pin.length > 0) {\n" +
@@ -299,8 +330,9 @@ public class SaturnActivity extends BaseProxyActivity {
           .append(selectedCard.paymentRequest.getCurrency().amountToDisplayString(selectedCard.paymentRequest.getAmount()))
           .append("</td></tr>" + 
             "<tr><td colspan='2' style='height:5pt'></td></tr>" +
-            "<tr><td class='label'>PIN</td><td id='pinfield' class='field' style='background-color:white;border-color:#0000ff'>" +
-            "</td></tr>" +
+            "<tr><td class='label'>PIN</td>" +
+            "<td id='pinfield' class='field' style='background-color:white;border-color:#0000ff' " +
+            "onClick=\"Saturn.toast('Use the keyboard below...')\"></td></tr>" +
             "</table>" + 
             "<div id='kbd' style='visibility:hidden;position:absolute;width:")
           .append((width * 86) / factor)
@@ -311,24 +343,6 @@ public class SaturnActivity extends BaseProxyActivity {
           .append("</div>");
          saturnView.numbericPin = true;
         html.append(htmlOneCard(selectedCard, (width * 3) / 5, "card", ""));
-/*
-      .append(pin.length() == 0 ? "<span style='color:lightgrey'>Please enter PIN</span>" : HTMLEncoder.encode(pin))
-
-        payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
-                           "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
-                   .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
-                   .append("</td><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
-                           "</tr><tr><td style=\"" + LABEL_STYLE + "\">Amount</td><td style=\"" + FIELD_STYLE + "\">")
-                   .append(selectedCard.paymentRequest.getCurrency().amountToDisplayString(selectedCard.paymentRequest.getAmount()))
-                   .append("</td></tr><tr><td colspan=\"2\" style=\"height:5pt\"></td></tr>" +
-                           "<tr><td style=\"" + LABEL_STYLE + "\">PIN</td><td style=\"padding:0\">" +
-                           "<input id=\"pin\" type=\"password\" size=\"10\" style=\"padding:0;margin:0\" autofocus value=\"")
-                   .append(HTMLEncoder.encode(pin))
-                   .append("\"></td></tr>" +
-                           "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
-                           "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
-                           "</table></td></tr>");
-*/
         loadHtml(js.toString(), html.toString());
     }
 
@@ -470,11 +484,12 @@ public class SaturnActivity extends BaseProxyActivity {
     @JavascriptInterface
     public void performPayment(String pin) {
         this.pin = pin;
-        if (pin.isEmpty()) {
-            Toast.makeText (getApplicationContext(), "Empty PIN, ignored", Toast.LENGTH_SHORT).show ();
-        } else {
-            paymentEvent();
-        }
+        paymentEvent();
+    }
+
+    @JavascriptInterface
+    public void toast(String message) {
+        Toast.makeText (getApplicationContext(), message, Toast.LENGTH_SHORT).show ();
     }
 
     @Override

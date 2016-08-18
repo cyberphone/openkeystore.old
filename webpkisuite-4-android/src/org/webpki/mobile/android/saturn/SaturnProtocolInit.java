@@ -109,15 +109,9 @@ public class SaturnProtocolInit extends AsyncTask<Void, String, Boolean> {
         if (success) {
             saturnActivity.setTitle("Requester: " + saturnActivity.getRequestingHost());
             if (saturnActivity.cardCollection.isEmpty()) {
-                Log.w(SaturnActivity.SATURN, "NO CARDS");
-                saturnActivity.loadHtml("var nocards = document.getElementById('nocards');\n" +
-                        "nocards.style.top = ((window.innerHeight - nocards.offsetHeight) / 2) + 'px';\n" +
-                        "nocards.style.maxWidth = window.innerWidth + 'px';\n" +
-                        "nocards.style.visibility='visible';\n",
-                        "<div id='nocards' style='visibility:hidden;position:absolute;text-align:center;padding:20pt'>" +
-                        "You do not seem to have any payment cards." +
-                        "<p>For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</p></div>");
-     Log.w(SaturnActivity.SATURN, "NO CARDS2");
+                saturnActivity.simpleDisplay(
+                    "You do not seem to have any payment cards." +
+                    "<p>For a selection of test cards, you can enroll such at the Saturn proof-of-concept site.</p>");
             } else if (saturnActivity.cardCollection.size () == 1) {
                 try {
                     saturnActivity.selectCard("0");
