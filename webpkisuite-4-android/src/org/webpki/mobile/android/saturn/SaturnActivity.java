@@ -72,7 +72,7 @@ public class SaturnActivity extends BaseProxyActivity {
                                       "body {margin:0;font-size:12pt;color:#000000;font-family:Roboto;background-color:white}\n" +
                                       "td.label {text-align:right;padding:2pt 3pt 3pt 0pt}\n" +
                                       "td.field {padding:2pt 6pt 3pt 6pt;border-width:1px;" +
-                                      "border-style:solid;border-color:#adadad;background-color:#f4fdf7;min-width:10em}\n" +
+                                      "border-style:solid;border-color:#808080;background-color:#fafafa;min-width:10em}\n" +
                                       "td.pan {text-align:center;padding:5pt 0 0 0;font-size:9pt;font-family:monospace}\n" +
                                       "div.cardimage {border-style:groove;border-width:2px;border-color:#c0c0c0;border-radius:15px;" +
                                       "box-shadow:5px 5px 5px #d0d0d0;background-size:cover;background-repeat:no-repeat}\n" +
@@ -97,6 +97,8 @@ public class SaturnActivity extends BaseProxyActivity {
     ChallengeResult[] challengeResults;
     
     byte[] dataEncryptionKey;
+    
+    String keyboardSvg;
     
     JSONObjectWriter authorizationData;
     
@@ -181,6 +183,14 @@ public class SaturnActivity extends BaseProxyActivity {
             case COLLECTION:
                 showCardCollection();
                 break;
+
+            case PAYMENTREQUEST:
+                try {
+                    ShowPaymentRequest();
+                } catch (IOException e) {
+                }
+                break;
+
             case INITIALIZE:
             default:
                 break;
@@ -202,6 +212,8 @@ public class SaturnActivity extends BaseProxyActivity {
         landscapeMode = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         Log.i(SATURN,"LS" + landscapeMode);
         try {
+            keyboardSvg = new String(ArrayUtil.getByteArrayFromInputStream(getResources()
+                    .openRawResource(R.raw.pinkeyboard)), "utf-8");
             htmlBodyPrefix = new StringBuffer("}\n" +
                                               "</script>" +
                                               "</head><body onload=\"positionElements()\">" +
@@ -249,9 +261,41 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     void ShowPaymentRequest() throws IOException {
-        saturnView.numbericPin = true;
-        StringBuffer payHtml = 
-                new StringBuffer(htmlOneCard(selectedCard, displayMetrics.widthPixels, "", ""));
+        currentForm = FORM.PAYMENTREQUEST;
+        int width = displayMetrics.widthPixels;
+        StringBuffer js = new StringBuffer(
+            "var card = document.getElementById('card');\n" +
+            "var paydata = document.getElementById('paydata');\n" +
+            "var payfield = document.getElementById('payfield');\n" +
+            "var kbd = document.getElementById('kbd');\n" +
+            "card.style.left = ((window.innerWidth - card.offsetWidth) / 2) + 'px';\n" +
+            "paydata.style.left = ((window.innerWidth - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
+            "var kbdTop = window.innerHeight - Math.floor(kbd.offsetHeight * 1.26);\n" +
+            "kbd.style.top = kbdTop + 'px';\n" +
+            "kbd.style.left = ((window.innerWidth - kbd.offsetWidth) / 2) + 'px';\n" +
+            "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
+            "card.style.top = gutter * 3 + 'px';\n" +
+            "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n" +
+            "card.style.visibility='visible';\n" +
+            "paydata.style.visibility='visible';\n" +
+            "kbd.style.visibility='visible';\n");
+        StringBuffer html = new StringBuffer(
+            "<table id='paydata' style='visibility:hidden;position:absolute'>" +
+            "<tr><td id='payfield' class='label'>Payee</td><td class='field'>Demo Merchant</td></tr>" +
+            "<tr><td colspan='2' style='height:5pt'></td></tr>" +
+            "<tr><td class='label'>Amount</td><td class='field'>$1,999.25</td></tr>" + 
+            "<tr><td colspan='2' style='height:5pt'></td></tr>" +
+            "<tr><td class='label'>PIN</td><td class='field' style='background-color:white;border-color:#0000ff'>****</td></tr>" +
+            "</table>" + 
+            "<div id='kbd' style='visibility:hidden;position:absolute;width:")
+          .append((width * 86) / factor)
+          .append("px;height:")
+          .append((width * ((86 * 150) / 404)) / factor)
+          .append("'>")
+          .append(keyboardSvg)
+          .append("</div>");
+         saturnView.numbericPin = true;
+        html.append(htmlOneCard(selectedCard, (width * 3) / 5, "card", ""));
 /*
         payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
                            "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
@@ -267,8 +311,48 @@ public class SaturnActivity extends BaseProxyActivity {
                            "<tr><td colspan=\"2\" style=\"text-align:center;padding-top:20pt\">" +
                            "<input type=\"button\" value=\"Validate\" onClick=\"Saturn.performPayment(document.getElementById('pin').value)\"></td></tr>" +
                            "</table></td></tr>");
-            loadHtml(payHtml.toString());
 */
+        loadHtml(js.toString(), html.toString());
+    }
+
+    void showCardCollection() {
+        currentForm = FORM.COLLECTION;
+        StringBuffer js = new StringBuffer("var header = document.getElementById('header');\n");
+        StringBuffer html = 
+            new StringBuffer("<div id='header' style='visibility:hidden;position:absolute;width:100%;text-align:center'>Select Payment Card</div>");
+        int width = displayMetrics.widthPixels;
+        int index = 0;
+        for (SaturnActivity.Account account : cardCollection) {
+            String card = "card" + String.valueOf(index);
+            js.append("var " + card + " = document.getElementById('" + card + "');\n");
+            if (index == 0) {
+                js.append("var next = ")
+                  .append(landscapeMode ? 
+                          "(window.innerHeight - " + card + ".offsetHeight) / 2;\n" 
+                                        :
+                          "(window.innerHeight - Math.floor(" + card + ".offsetHeight * 2.3)) / 2;\n");
+                js.append("header.style.top = (next - header.offsetHeight) / 2 + 'px';\n");
+            }
+            js.append(card + ".style.top = next;\n");
+            if (landscapeMode) {
+                double left = 1.0 / 11;
+                if (index % 2 == 1) {
+                    js.append("next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
+                    left = 6.0 / 11;
+                }
+                js.append(card + ".style.left = Math.floor(window.innerWidth * " + String.valueOf(left) + ") + 'px';\n");
+            } else {
+                js.append(card + ".style.left = ((window.innerWidth - " + card + ".offsetWidth) / 2) + 'px';\n" +
+                          "next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
+            }
+            js.append(card + ".style.visibility = 'visible';\n");
+            html.append(htmlOneCard(account,
+                                    landscapeMode ? (width * 4) / 11 : (width * 3) / 5,
+                                    card,
+                                    " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
+        }
+        js.append("header.style.visibility='visible';\n");
+        loadHtml(js.toString(), html.toString());
     }
 
     @JavascriptInterface
@@ -374,47 +458,6 @@ public class SaturnActivity extends BaseProxyActivity {
         } else {
             paymentEvent();
         }
-    }
-
-    void showCardCollection() {
-        currentForm = FORM.COLLECTION;
-        StringBuffer js = new StringBuffer("var header = document.getElementById('header');\n");
-        StringBuffer html = 
-            new StringBuffer("<div id='header' style='visibility:hidden;position:absolute;width:100%;text-align:center'>Select Payment Card</div>");
-        int width = displayMetrics.widthPixels;
-        Log.i(SATURN,"W=" + width);
-        int index = 0;
-        for (SaturnActivity.Account account : cardCollection) {
-            String card = "card" + String.valueOf(index);
-            js.append("var " + card + " = document.getElementById('" + card + "');\n");
-            if (index == 0) {
-                js.append("var next = ")
-                  .append(landscapeMode ? 
-                          "(window.innerHeight - " + card + ".offsetHeight) / 2;\n" 
-                                        :
-                          "(window.innerHeight - Math.floor(" + card + ".offsetHeight * 2.3)) / 2;\n");
-                js.append("header.style.top = (next - header.offsetHeight) / 2 + 'px';\n");
-            }
-            js.append(card + ".style.top = next;\n");
-            if (landscapeMode) {
-                double left = 1.0 / 11;
-                if (index % 2 == 1) {
-                    js.append("next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
-                    left = 6.0 / 11;
-                }
-                js.append(card + ".style.left = Math.floor(window.innerWidth * " + String.valueOf(left) + ") + 'px';\n");
-            } else {
-                js.append(card + ".style.left = ((window.innerWidth - " + card + ".offsetWidth) / 2) + 'px';\n" +
-                          "next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
-            }
-            js.append(card + ".style.visibility = 'visible';\n");
-            html.append(htmlOneCard(account,
-                                    landscapeMode ? (width * 4) / 11 : (width * 3) / 5,
-                                    card,
-                                    " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
-        }
-        js.append("header.style.visibility='visible';\n");
-        loadHtml(js.toString(), html.toString());
     }
 
     @Override
