@@ -5,62 +5,62 @@
 </filter>
 </defs>
 <g>
-<a xlink:href="javascript:addDigit('0')">
+<a onTouchStart="addDigit('0')">
 <rect x="1" y="1" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="3" y="3" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="23.5" y="28" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">0</text>
 </a>
-<a xlink:href="javascript:addDigit('1')">
+<a onTouchStart="addDigit('1')">
 <rect x="81" y="1" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="83" y="3" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="103.5" y="28" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">1</text>
 </a>
-<a xlink:href="javascript:addDigit('2')">
+<a onTouchStart="addDigit('2')">
 <rect x="161" y="1" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="163" y="3" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="183.5" y="28" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">2</text>
 </a>
-<a xlink:href="javascript:addDigit('3')">
+<a onTouchStart="addDigit('3')">
 <rect x="241" y="1" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="243" y="3" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="263.5" y="28" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">3</text>
 </a>
-<a xlink:href="javascript:addDigit('4')">
+<a onTouchStart="addDigit('4')">
 <rect x="1" y="57" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="3" y="59" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="23.5" y="84" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">4</text>
 </a>
-<a xlink:href="javascript:addDigit('5')">
+<a onTouchStart="addDigit('5')">
 <rect x="81" y="57" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="83" y="59" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="103.5" y="84" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">5</text>
 </a>
-<a xlink:href="javascript:addDigit('6')">
+<a onTouchStart="addDigit('6')">
 <rect x="161" y="57" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="163" y="59" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="183.5" y="84" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">6</text>
 </a>
-<a xlink:href="javascript:addDigit('7')">
+<a onTouchStart="addDigit('7')">
 <rect x="1" y="113" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="3" y="115" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="23.5" y="140" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">7</text>
 </a>
-<a xlink:href="javascript:addDigit('8')">
+<a onTouchStart="addDigit('8')">
 <rect x="81" y="113" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="83" y="115" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="103.5" y="140" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">8</text>
 </a>
-<a xlink:href="javascript:addDigit('9')">
+<a onTouchStart="addDigit('9')">
 <rect x="161" y="113" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="163" y="115" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="183.5" y="140" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold">9</text>
 </a>
-<a xlink:href="javascript:deleteDigit()">
+<a onTouchStart="deleteDigit()">
 <rect x="359" y="1" width="44" height="36" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="361" y="3" width="40" height="32" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
-<text x="381.5" y="30" font-family="Roboto" font-size="44" text-anchor="middle" fill="#be1018">&#171;</text>
+<text x="381.5" y="31" font-family="Roboto" font-size="45" text-anchor="middle" fill="#be1018">&#171;</text>
 </a>
-<a xlink:href="javascript:validatePin()">
+<a onTouchStart="validatePin()">
 <rect x="277" y="89" width="126" height="60" stroke="#969191" stroke-width="1" fill="#a5a5a5" rx="10" ry="10"/>
 <rect x="279" y="91" width="122" height="56" fill="#fcfcfc" rx="9" ry="9" filter="url(#actorsBlur)"/>
 <text x="340.5" y="128" font-family="Roboto" font-size="26" text-anchor="middle" font-weight="bold" fill="#009900">Validate</text>

@@ -17,15 +17,12 @@
 package org.webpki.mobile.android.saturn;
 
 import android.annotation.SuppressLint;
-
 import android.content.res.Configuration;
-
+import android.os.Build;
 import android.os.Bundle;
-
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.widget.Toast;
@@ -33,34 +30,26 @@ import android.widget.Toast;
 import org.webpki.mobile.android.R;
 
 import java.io.IOException;
-
 import java.security.PublicKey;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
-
 import org.webpki.mobile.android.saturn.common.AccountDescriptor;
 import org.webpki.mobile.android.saturn.common.AuthorizationData;
 import org.webpki.mobile.android.saturn.common.ChallengeResult;
 import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
-
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLEncoder;
 
@@ -83,6 +72,8 @@ public class SaturnActivity extends BaseProxyActivity {
     String htmlBodyPrefix;
  
     boolean landscapeMode;
+    
+    boolean oldAndroid;
     
     WalletRequestDecoder walletRequest;
     
@@ -210,10 +201,13 @@ public class SaturnActivity extends BaseProxyActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         factor = (int)(displayMetrics.density * 100);
         landscapeMode = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        Log.i(SATURN,"LS" + landscapeMode);
+        oldAndroid = Build.VERSION.SDK_INT < 21;
         try {
             keyboardSvg = new String(ArrayUtil.getByteArrayFromInputStream(getResources()
                     .openRawResource(R.raw.pinkeyboard)), "utf-8");
+            if (oldAndroid) {
+                keyboardSvg = keyboardSvg.replace("onTouchStart=\"", "xlink:href=\"javascript:");
+            }
             htmlBodyPrefix = new StringBuffer("}\n" +
                                               "</script>" +
                                               "</head><body onload=\"positionElements()\">" +
@@ -268,6 +262,7 @@ public class SaturnActivity extends BaseProxyActivity {
             "var paydata = document.getElementById('paydata');\n" +
             "var payfield = document.getElementById('payfield');\n" +
             "var kbd = document.getElementById('kbd');\n" +
+            "showPin();\n" +
             "card.style.left = ((window.innerWidth - card.offsetWidth) / 2) + 'px';\n" +
             "paydata.style.left = ((window.innerWidth - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
             "var kbdTop = window.innerHeight - Math.floor(kbd.offsetHeight * 1.26);\n" +
@@ -278,14 +273,34 @@ public class SaturnActivity extends BaseProxyActivity {
             "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n" +
             "card.style.visibility='visible';\n" +
             "paydata.style.visibility='visible';\n" +
-            "kbd.style.visibility='visible';\n");
+            "kbd.style.visibility='visible';\n" + 
+            "}\n" +
+            "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
+            "function showPin() {\n" +
+            "var pinfield = document.getElementById('pinfield');\n" +
+            "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:lightgrey'>Please enter PIN</span>\" : pin;\n" +
+            "}\n" +
+            "function addDigit(digit) {\n" +
+            "pin += digit;\n" +
+            "showPin();\n" +
+            "}\n" +
+            "function deleteDigit() {\n" +
+            "if (pin.length > 0) {\n" +
+            "pin = pin.substring(0, pin.length - 1);\n" +
+            "showPin();\n" +
+            "}\n");
         StringBuffer html = new StringBuffer(
             "<table id='paydata' style='visibility:hidden;position:absolute'>" +
-            "<tr><td id='payfield' class='label'>Payee</td><td class='field'>Demo Merchant</td></tr>" +
+            "<tr><td id='payfield' class='label'>Payee</td><td class='field'>")
+          .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
+          .append("</td></tr>" +
             "<tr><td colspan='2' style='height:5pt'></td></tr>" +
-            "<tr><td class='label'>Amount</td><td class='field'>$1,999.25</td></tr>" + 
+            "<tr><td class='label'>Amount</td><td class='field'>")
+          .append(selectedCard.paymentRequest.getCurrency().amountToDisplayString(selectedCard.paymentRequest.getAmount()))
+          .append("</td></tr>" + 
             "<tr><td colspan='2' style='height:5pt'></td></tr>" +
-            "<tr><td class='label'>PIN</td><td class='field' style='background-color:white;border-color:#0000ff'>****</td></tr>" +
+            "<tr><td class='label'>PIN</td><td id='pinfield' class='field' style='background-color:white;border-color:#0000ff'>" +
+            "</td></tr>" +
             "</table>" + 
             "<div id='kbd' style='visibility:hidden;position:absolute;width:")
           .append((width * 86) / factor)
@@ -297,6 +312,8 @@ public class SaturnActivity extends BaseProxyActivity {
          saturnView.numbericPin = true;
         html.append(htmlOneCard(selectedCard, (width * 3) / 5, "card", ""));
 /*
+      .append(pin.length() == 0 ? "<span style='color:lightgrey'>Please enter PIN</span>" : HTMLEncoder.encode(pin))
+
         payHtml.append("<tr><td align=\"center\"><table style=\"margin-right:20pt\"><tr><td colspan=\"2\" style=\"height:25pt\"></td></tr>" +
                            "<tr><td style=\"" + LABEL_STYLE + "\">Payee</td><td style=\"" + FIELD_STYLE + "\">")
                    .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
@@ -349,7 +366,7 @@ public class SaturnActivity extends BaseProxyActivity {
             html.append(htmlOneCard(account,
                                     landscapeMode ? (width * 4) / 11 : (width * 3) / 5,
                                     card,
-                                    " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
+                                    (oldAndroid ? " onClick=\"Saturn.selectCard('" : " onTouchStart=\"Saturn.selectCard('") + (index++) + "')\""));
         }
         js.append("header.style.visibility='visible';\n");
         loadHtml(js.toString(), html.toString());
