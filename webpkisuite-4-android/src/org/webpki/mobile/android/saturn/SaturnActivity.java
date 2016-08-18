@@ -232,9 +232,6 @@ public class SaturnActivity extends BaseProxyActivity {
         try {
             keyboardSvg = new String(ArrayUtil.getByteArrayFromInputStream(getResources()
                     .openRawResource(R.raw.pinkeyboard)), "utf-8");
-            if (oldAndroid) {
-                keyboardSvg = keyboardSvg.replace("onTouchStart=\"", "xlink:href=\"javascript:");
-            }
             htmlBodyPrefix = new StringBuffer("}\n" +
                                               "</script>" +
                                               "</head><body onload=\"positionElements()\">" +
@@ -289,7 +286,7 @@ public class SaturnActivity extends BaseProxyActivity {
             "showPin();\n" +
             "card.style.left = ((window.innerWidth - card.offsetWidth) / 2) + 'px';\n" +
             "paydata.style.left = ((window.innerWidth - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
-            "var kbdTop = window.innerHeight - Math.floor(kbd.offsetHeight * 1.26);\n" +
+            "var kbdTop = window.innerHeight - Math.floor(kbd.offsetHeight * 1.20);\n" +
             "kbd.style.top = kbdTop + 'px';\n" +
             "kbd.style.left = ((window.innerWidth - kbd.offsetWidth) / 2) + 'px';\n" +
             "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
@@ -335,9 +332,9 @@ public class SaturnActivity extends BaseProxyActivity {
             "onClick=\"Saturn.toast('Use the keyboard below...')\"></td></tr>" +
             "</table>" + 
             "<div id='kbd' style='visibility:hidden;position:absolute;width:")
-          .append((width * 86) / factor)
+          .append((width * 88) / factor)
           .append("px;height:")
-          .append((width * ((86 * 150) / 404)) / factor)
+          .append((width * ((88 * 162) / 416)) / factor)
           .append("'>")
           .append(keyboardSvg)
           .append("</div>");
@@ -380,7 +377,7 @@ public class SaturnActivity extends BaseProxyActivity {
             html.append(htmlOneCard(account,
                                     landscapeMode ? (width * 4) / 11 : (width * 3) / 5,
                                     card,
-                                    (oldAndroid ? " onClick=\"Saturn.selectCard('" : " onTouchStart=\"Saturn.selectCard('") + (index++) + "')\""));
+                                    " onClick=\"Saturn.selectCard('" + (index++) + "')\""));
         }
         js.append("header.style.visibility='visible';\n");
         loadHtml(js.toString(), html.toString());
