@@ -18,14 +18,19 @@ package org.webpki.mobile.android.saturn;
 
 import android.annotation.SuppressLint;
 
-import android.content.res.Configuration;
+import android.content.Context;
 
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
+import android.view.View;
+
+import android.view.inputmethod.InputMethodManager;
 
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -148,14 +153,13 @@ public class SaturnActivity extends BaseProxyActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                 String html = new StringBuffer(HTML_HEADER)
+                String html = new StringBuffer(HTML_HEADER)
                     .append(positionScriptArgument)
                     .append(htmlBodyPrefix)
                     .append(bodyArgument)
                     .append("</body></html>").toString();
-               Log.i(SATURN,html);
-               saturnView.loadData(html, "text/html; charset=utf-8", null);
-               saturnView.reload();
+                saturnView.loadData(html, "text/html; charset=utf-8", null);
+                saturnView.reload();
             }
         });
     } 
@@ -389,6 +393,15 @@ public class SaturnActivity extends BaseProxyActivity {
         ShowPaymentRequest();
     }
 
+    public void hideSoftKeyBoard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if (view != null) {  
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
     @JavascriptInterface
     public void getChallengeJSON(String json) {
         try {
@@ -400,6 +413,7 @@ public class SaturnActivity extends BaseProxyActivity {
                  temp.add(new ChallengeResult(id, challengeObject.getString(id)));
             } while (challengeArray.hasMore());
             challengeResults = temp.toArray(new ChallengeResult[0]);
+            hideSoftKeyBoard();
             ShowPaymentRequest();
             paymentEvent();
         } catch (Exception e) {
@@ -486,7 +500,12 @@ public class SaturnActivity extends BaseProxyActivity {
 
     @JavascriptInterface
     public void toast(String message) {
-        Toast.makeText (getApplicationContext(), message, Toast.LENGTH_SHORT).show ();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @JavascriptInterface
+    public void log(String message) {
+        Log.i(SATURN, message);
     }
 
     @Override
