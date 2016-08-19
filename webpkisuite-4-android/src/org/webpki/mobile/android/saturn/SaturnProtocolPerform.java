@@ -96,7 +96,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
             StringBuffer html = new StringBuffer();
             StringBuffer js = 
                 new StringBuffer("var msg = document.getElementById('msg');\n" +
-                                 "msg.style.top = ((window.innerHeight - msg.offsetHeight) / 2) + 'px';\n" +
+                                 "msg.style.top = ((Saturn.height() - msg.offsetHeight) / 2) + 'px';\n" +
                                  "msg.style.visibility='visible';\n");
 
             if (merchantHtmlAlert == null) {

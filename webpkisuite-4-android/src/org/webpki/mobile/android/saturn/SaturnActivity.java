@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.content.res.Configuration;
+
 import android.os.Build;
 import android.os.Bundle;
 
@@ -153,6 +154,7 @@ public class SaturnActivity extends BaseProxyActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                saturnView.clearView();
                 String html = new StringBuffer(HTML_HEADER)
                     .append(positionScriptArgument)
                     .append(htmlBodyPrefix)
@@ -211,7 +213,7 @@ public class SaturnActivity extends BaseProxyActivity {
     public void simpleDisplay(String simpleHtml) {
         currentForm = FORM.SIMPLE;
         loadHtml("var simple = document.getElementById('simple');\n" +
-                 "simple.style.top = ((window.innerHeight - simple.offsetHeight) / 2) + 'px';\n" +
+                 "simple.style.top = ((Saturn.height() - simple.offsetHeight) / 2) + 'px';\n" +
                  "simple.style.visibility='visible';\n",
                  "<table id='simple' style='visibility:hidden;position:absolute;width:100%'>" +
                  "<tr><td style='text-align:center;padding:20pt'>" +
@@ -288,11 +290,11 @@ public class SaturnActivity extends BaseProxyActivity {
             "var payfield = document.getElementById('payfield');\n" +
             "var kbd = document.getElementById('kbd');\n" +
             "showPin();\n" +
-            "card.style.left = ((window.innerWidth - card.offsetWidth) / 2) + 'px';\n" +
-            "paydata.style.left = ((window.innerWidth - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
-            "var kbdTop = window.innerHeight - Math.floor(kbd.offsetHeight * 1.20);\n" +
+            "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
+            "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
+            "var kbdTop = Saturn.height() - Math.floor(kbd.offsetHeight * 1.20);\n" +
             "kbd.style.top = kbdTop + 'px';\n" +
-            "kbd.style.left = ((window.innerWidth - kbd.offsetWidth) / 2) + 'px';\n" +
+            "kbd.style.left = ((Saturn.width() - kbd.offsetWidth) / 2) + 'px';\n" +
             "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
             "card.style.top = gutter * 3 + 'px';\n" +
             "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n" +
@@ -360,9 +362,9 @@ public class SaturnActivity extends BaseProxyActivity {
             if (index == 0) {
                 js.append("var next = ")
                   .append(landscapeMode ? 
-                          "(window.innerHeight - " + card + ".offsetHeight) / 2;\n" 
+                          "(Saturn.height() - " + card + ".offsetHeight) / 2;\n" 
                                         :
-                          "(window.innerHeight - Math.floor(" + card + ".offsetHeight * 2.3)) / 2;\n");
+                          "(Saturn.height() - Math.floor(" + card + ".offsetHeight * 2.3)) / 2;\n");
                 js.append("header.style.top = (next - header.offsetHeight) / 2 + 'px';\n");
             }
             js.append(card + ".style.top = next;\n");
@@ -372,9 +374,9 @@ public class SaturnActivity extends BaseProxyActivity {
                     js.append("next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
                     left = 6.0 / 11;
                 }
-                js.append(card + ".style.left = Math.floor(window.innerWidth * " + String.valueOf(left) + ") + 'px';\n");
+                js.append(card + ".style.left = Math.floor(Saturn.width() * " + String.valueOf(left) + ") + 'px';\n");
             } else {
-                js.append(card + ".style.left = ((window.innerWidth - " + card + ".offsetWidth) / 2) + 'px';\n" +
+                js.append(card + ".style.left = ((Saturn.width() - " + card + ".offsetWidth) / 2) + 'px';\n" +
                           "next += Math.floor(" + card + ".offsetHeight * 1.3);\n");
             }
             js.append(card + ".style.visibility = 'visible';\n");
@@ -506,6 +508,16 @@ public class SaturnActivity extends BaseProxyActivity {
     @JavascriptInterface
     public void log(String message) {
         Log.i(SATURN, message);
+    }
+    
+    @JavascriptInterface
+    public int width() {
+        return (saturnView.getWidth() * 100) / factor;
+    }
+
+    @JavascriptInterface
+    public int height() {
+        return (saturnView.getHeight() * 100) / factor;
     }
 
     @Override
