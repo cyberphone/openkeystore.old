@@ -81,8 +81,8 @@ public class SaturnActivity extends BaseProxyActivity {
                                       "td.field {padding:2pt 6pt 3pt 6pt;border-width:1px;" +
                                       "border-style:solid;border-color:#808080;background-color:#fafafa;min-width:10em}\n" +
                                       "td.pan {text-align:center;padding:5pt 0 0 0;font-size:9pt;font-family:monospace}\n" +
-                                      "div.cardimage {border-style:groove;border-width:2px;border-color:#c0c0c0;border-radius:15px;" +
-                                      "box-shadow:5px 5px 5px #d0d0d0;background-size:cover;background-repeat:no-repeat}\n" +
+                                      "div.cardimage {border-style:groove;border-width:2px;border-color:#c0c0c0;border-radius:12pt;" +
+                                      "box-shadow:3pt 3pt 3pt #d0d0d0;background-size:cover;background-repeat:no-repeat}\n" +
                                       "</style>\n" +
                                       "<script type='text/javascript'>\n" +
                                       "function positionElements() {\n";
@@ -391,6 +391,7 @@ public class SaturnActivity extends BaseProxyActivity {
 
     @JavascriptInterface
     public void selectCard(String index) throws IOException {
+        pin = "";
         selectedCard = cardCollection.elementAt(Integer.parseInt(index));
         ShowPaymentRequest();
     }
