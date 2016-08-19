@@ -113,6 +113,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                           .append("').value});\n");
                     }
                     js.append("  return JSON.stringify(data);\n");
+                    html.append("<form onsubmit=\"Saturn.getChallengeJSON(getChallengeData())\">");
                     for (ChallengeField challengeField : privateMessage.getOptionalChallengeFields()) {
                         html.append("<tr><td style='padding:10pt 20pt 0 20pt'>");
                         if (challengeField.getOptionalLabel() != null) {
@@ -126,7 +127,8 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                             .append("'></td></tr>");
                     }
                     html.append("<tr><td style='text-align:center;padding-top:20pt'>" +
-                                "<input type='button' value='Submit' onClick=\"Saturn.getChallengeJSON(getChallengeData())\"></td></tr>");
+                                "<input type='submit' value='Submit'></td></tr>" +
+                                "</form>");
                 }
              } else {
                  html.append(header(saturnActivity.selectedCard == null ?
