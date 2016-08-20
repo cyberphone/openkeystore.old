@@ -18,19 +18,12 @@ package org.webpki.mobile.android.saturn;
 
 import android.content.Context;
 
-import android.text.InputType;
-
 import android.util.AttributeSet;
-
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 
 import android.webkit.WebView;
 
 public class SaturnView extends WebView {
     
-    boolean numbericPin;
-
     public SaturnView(Context context) {
         super(context);
     }
@@ -41,14 +34,5 @@ public class SaturnView extends WebView {
 
     public SaturnView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    @Override
-    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
-        if (numbericPin) {
-            outAttrs.inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER;
-        }
-        return inputConnection; 
     }
 }

@@ -92,7 +92,6 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
         if (alertUser == null) {
             saturnActivity.showFailLog();
         } else if (alertUser) {
-            saturnActivity.saturnView.numbericPin = false;
             StringBuffer html = new StringBuffer();
             StringBuffer js = 
                 new StringBuffer("var msg = document.getElementById('msg');\n" +

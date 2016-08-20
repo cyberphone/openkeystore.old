@@ -35,6 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
+
 import android.widget.Toast;
 
 import org.webpki.mobile.android.R;
@@ -66,6 +67,7 @@ import org.webpki.mobile.android.saturn.common.PaymentRequest;
 import org.webpki.mobile.android.saturn.common.WalletRequestDecoder;
 
 import org.webpki.sks.KeyProtectionInfo;
+import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SKSException;
 
 import org.webpki.util.ArrayUtil;
@@ -284,14 +286,31 @@ public class SaturnActivity extends BaseProxyActivity {
 
     void ShowPaymentRequest() throws IOException {
         currentForm = FORM.PAYMENTREQUEST;
+        boolean numericPin = sks.getKeyProtectionInfo(selectedCard.keyHandle).getPinFormat() == PassphraseFormat.NUMERIC;
         int width = displayMetrics.widthPixels;
         StringBuffer js = new StringBuffer(
             "var card = document.getElementById('card');\n" +
-            "var paydata = document.getElementById('paydata');\n" +
-            "var payfield = document.getElementById('payfield');\n" +
-            "var kbd = document.getElementById('kbd');\n" +
-            "showPin();\n");
-            if (landscapeMode) {
+            "var pinfield = document.getElementById('pinfield');\n" +
+            "var paydata = document.getElementById('paydata');\n");
+        if (numericPin) {
+            js.append(
+                "var payfield = document.getElementById('payfield');\n" +
+                "var kbd = document.getElementById('kbd');\n" +
+                "showPin();\n");
+        }
+        if (landscapeMode) {
+            if (numericPin) {
+                js.append(
+                    "var gutter = Math.floor((Saturn.width() - kbd.offsetWidth - card.offsetWidth) / 3);\n" +
+                    "card.style.right = gutter + 'px';\n" +
+                    "card.style.top = gutter + 'px';\n" +
+                    "kbd.style.left = gutter + 'px';\n" +
+                    "var kbdTop = Math.floor(Saturn.height() - gutter - kbd.offsetHeight);\n" +
+                    "kbd.style.top = kbdTop + 'px';\n" +
+                    "paydata.style.left = gutter + 'px';\n" +
+                    "paydata.style.top = Math.floor((kbdTop - paydata.offsetHeight) / 2) + 'px';\n"+
+                    "kbd.style.visibility='visible';\n");
+            } else {
                 js.append(
                     "var gutter = Math.floor((Saturn.width() - kbd.offsetWidth - card.offsetWidth) / 3);\n" +
                     "card.style.right = gutter + 'px';\n" +
@@ -301,8 +320,9 @@ public class SaturnActivity extends BaseProxyActivity {
                     "kbd.style.top = kbdTop + 'px';\n" +
                     "paydata.style.left = gutter + 'px';\n" +
                     "paydata.style.top = Math.floor((kbdTop - paydata.offsetHeight) / 2) + 'px';\n");
-                
-            } else {
+            }
+        } else {
+            if (numericPin) {
                 js.append(
                     "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
                     "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
@@ -311,34 +331,52 @@ public class SaturnActivity extends BaseProxyActivity {
                     "kbd.style.left = ((Saturn.width() - kbd.offsetWidth) / 2) + 'px';\n" +
                     "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
                     "card.style.top = gutter * 3 + 'px';\n" +
-                    "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n");
+                    "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n" +
+                    "kbd.style.visibility='visible';\n");
+            } else {
+                js.append(
+                    "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
+                    "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
+                    "var gutter = Math.floor((Saturn.height() - card.offsetHeight - paydata.offsetHeight) / 7);\n" +
+                    "card.style.top = (gutter * 2) + 'px';\n" +
+                    "paydata.style.top = (gutter * 4 + card.offsetHeight) + 'px';\n");
             }
+        }
         js.append(
             "card.style.visibility='visible';\n" +
             "paydata.style.visibility='visible';\n" +
-            "kbd.style.visibility='visible';\n" + 
-            "}\n" +
-            "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
-            "function showPin() {\n" +
-            "var pinfield = document.getElementById('pinfield');\n" +
-            "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:#a0a0a0'>Please enter PIN</span>\" : pin;\n" +
-            "}\n" +
-            "function addDigit(digit) {\n" +
-            "pin += digit;\n" +
-            "showPin();\n" +
-            "}\n" +
-            "function validatePin() {\n" +
-            "if (pin.length == 0) {\n" +
-            "Saturn.toast('Empty PIN - Ignored');\n" +
-            "} else {\n" +
-            "Saturn.performPayment(pin);\n" +
-            "}\n" +
-            "}\n" +
-            "function deleteDigit() {\n" +
-            "if (pin.length > 0) {\n" +
-            "pin = pin.substring(0, pin.length - 1);\n" +
-            "showPin();\n" +
             "}\n");
+        if (numericPin) {
+            js.append(
+                "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
+                "function showPin() {\n" +
+                "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:#a0a0a0'>Please enter PIN</span>\" : pin;\n" +
+                "}\n" +
+                "function addDigit(digit) {\n" +
+                "pin += digit;\n" +
+                "showPin();\n" +
+                "}\n" +
+                "function validatePin() {\n" +
+                "if (pin.length == 0) {\n" +
+                "Saturn.toast('Empty PIN - Ignored');\n" +
+                "} else {\n" +
+                "Saturn.performPayment(pin);\n" +
+                "}\n" +
+                "}\n" +
+                "function deleteDigit() {\n" +
+                "if (pin.length > 0) {\n" +
+                "pin = pin.substring(0, pin.length - 1);\n" +
+                "showPin();\n" +
+                "}\n");
+        } else {
+            js.append(
+                "function validatePin() {\n" +
+                "if (pin.length == 0) {\n" +
+                "Saturn.toast('Empty PIN - Ignored');\n" +
+                "} else {\n" +
+                "Saturn.performPayment(pin);\n" +
+                "}\n");
+        }
         StringBuffer html = new StringBuffer(
             "<table id='paydata' style='visibility:hidden;position:absolute'>" +
             "<tr><td id='payfield' class='label'>Payee</td><td class='field'>")
@@ -349,18 +387,26 @@ public class SaturnActivity extends BaseProxyActivity {
           .append(selectedCard.paymentRequest.getCurrency().amountToDisplayString(selectedCard.paymentRequest.getAmount()))
           .append("</td></tr>" + 
             "<tr><td colspan='2' style='height:5pt'></td></tr>" +
-            "<tr><td class='label'>PIN</td>" +
-            "<td id='pinfield' class='field' style='background-color:white;border-color:#0000ff' " +
-            "onClick=\"Saturn.toast('Use the keyboard below...')\"></td></tr>" +
-            "</table>" + 
-            "<div id='kbd' style='visibility:hidden;position:absolute;width:")
-          .append(landscapeMode ? (width * 50) / factor : (width * 88) / factor)
-          .append("px;height:")
-          .append(landscapeMode ? (width * ((50 * 162) / 416)) / factor : (width * ((88 * 162) / 416)) / factor)
-          .append("'>")
-          .append(keyboardSvg)
-          .append("</div>");
-         saturnView.numbericPin = true;
+            "<tr><td class='label'>PIN</td>");
+
+        if (numericPin) {
+            html.append("<td id='pinfield' class='field' style='background-color:white;border-color:#0000ff' " +
+                        "onClick=\"Saturn.toast('Use the keyboard below...')\"></td></tr>" +
+                        "</table>" +
+                        "<div id='kbd' style='visibility:hidden;position:absolute;width:")
+                .append(landscapeMode ? (width * 50) / factor : (width * 88) / factor)
+                .append("px;height:")
+                .append(landscapeMode ? (width * ((50 * 162) / 416)) / factor : (width * ((88 * 162) / 416)) / factor)
+                .append("'>")
+                .append(keyboardSvg)
+                .append("</div>");
+        } else {
+            html.append("<td><input id='pinfield' style='font-size:inherit' autofocus type='password' size='15'></td></tr>" +
+                        "<tr><td></td><td style='padding-top:12pt;text-align:center'>" +
+                        "<form onsubmit=\"Saturn.log('hi')\"><input type='submit' style='font-size:inherit' value='Validate'></form></td></tr>" +
+                        "</table>");
+        }
+          
         html.append(htmlOneCard(selectedCard, landscapeMode ? (width * 4) / 11 : (width * 3) / 5, "card", ""));
         loadHtml(js.toString(), html.toString());
     }
