@@ -337,9 +337,9 @@ public class SaturnActivity extends BaseProxyActivity {
                 js.append(
                     "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
                     "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
-                    "var gutter = Math.floor((Saturn.height() - card.offsetHeight - paydata.offsetHeight) / 7);\n" +
-                    "card.style.top = (gutter * 2) + 'px';\n" +
-                    "paydata.style.top = (gutter * 4 + card.offsetHeight) + 'px';\n");
+                    "var gutter = Math.floor((Saturn.height() - card.offsetHeight - paydata.offsetHeight) / 8);\n" +
+                    "card.style.top = (gutter * 3) + 'px';\n" +
+                    "paydata.style.top = (gutter * 5 + card.offsetHeight) + 'px';\n");
             }
         }
         js.append(
