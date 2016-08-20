@@ -113,20 +113,24 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                     }
                     js.append("  return JSON.stringify(data);\n");
                     html.append("<form onsubmit=\"Saturn.getChallengeJSON(getChallengeData())\">");
+                    String autofocus = "autofocus ";
                     for (ChallengeField challengeField : privateMessage.getOptionalChallengeFields()) {
                         html.append("<tr><td style='padding:10pt 20pt 0 20pt'>");
                         if (challengeField.getOptionalLabel() != null) {
                             html.append(challengeField.getOptionalLabel())
                                 .append(":<br>");
                         }
-                        html.append("<input type='password' id='")
+                        html.append("<input style='font-size:inherit' ")
+                            .append(autofocus)
+                            .append("type='password' id='")
                             .append(challengeField.getId())
                             .append("' size='")
                             .append(challengeField.getLength())
                             .append("'></td></tr>");
+                        autofocus = "";
                     }
                     html.append("<tr><td style='text-align:center;padding-top:20pt'>" +
-                                "<input type='submit' value='Submit'></td></tr>" +
+                                "<input type='submit' style='font-size:inherit' value='Submit'></td></tr>" +
                                 "</form>");
                 }
              } else {
