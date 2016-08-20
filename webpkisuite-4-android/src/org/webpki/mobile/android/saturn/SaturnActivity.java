@@ -244,7 +244,9 @@ public class SaturnActivity extends BaseProxyActivity {
                 .append(Base64.encodeToString(ArrayUtil.getByteArrayFromInputStream(getResources()
                                                   .openRawResource(R.drawable.saturnlogo)),
                                               Base64.NO_WRAP))
-                .append("'>").toString();
+                .append("' style='height:")
+                .append((int)((Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels)  * 5) / factor))
+                .append("px'>").toString();
             simpleDisplay("Initializing...");
         } catch (Exception e) {
             unconditionalAbort("Saturn didn't initialize!");
@@ -288,15 +290,30 @@ public class SaturnActivity extends BaseProxyActivity {
             "var paydata = document.getElementById('paydata');\n" +
             "var payfield = document.getElementById('payfield');\n" +
             "var kbd = document.getElementById('kbd');\n" +
-            "showPin();\n" +
-            "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
-            "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
-            "var kbdTop = Saturn.height() - Math.floor(kbd.offsetHeight * 1.20);\n" +
-            "kbd.style.top = kbdTop + 'px';\n" +
-            "kbd.style.left = ((Saturn.width() - kbd.offsetWidth) / 2) + 'px';\n" +
-            "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
-            "card.style.top = gutter * 3 + 'px';\n" +
-            "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n" +
+            "showPin();\n");
+            if (landscapeMode) {
+                js.append(
+                    "var gutter = Math.floor((Saturn.width() - kbd.offsetWidth - card.offsetWidth) / 3);\n" +
+                    "card.style.right = gutter + 'px';\n" +
+                    "card.style.top = gutter + 'px';\n" +
+                    "kbd.style.left = gutter + 'px';\n" +
+                    "var kbdTop = Math.floor(Saturn.height() - gutter - kbd.offsetHeight);\n" +
+                    "kbd.style.top = kbdTop + 'px';\n" +
+                    "paydata.style.left = gutter + 'px';\n" +
+                    "paydata.style.top = Math.floor((kbdTop - paydata.offsetHeight) / 2) + 'px';\n");
+                
+            } else {
+                js.append(
+                    "card.style.left = ((Saturn.width() - card.offsetWidth) / 2) + 'px';\n" +
+                    "paydata.style.left = ((Saturn.width() - paydata.offsetWidth - payfield.offsetWidth) / 2) + 'px';\n" +
+                    "var kbdTop = Saturn.height() - Math.floor(kbd.offsetHeight * 1.20);\n" +
+                    "kbd.style.top = kbdTop + 'px';\n" +
+                    "kbd.style.left = ((Saturn.width() - kbd.offsetWidth) / 2) + 'px';\n" +
+                    "var gutter = (kbdTop - card.offsetHeight - paydata.offsetHeight) / 7;\n" +
+                    "card.style.top = gutter * 3 + 'px';\n" +
+                    "paydata.style.top = (5 * gutter + card.offsetHeight) + 'px';\n");
+            }
+        js.append(
             "card.style.visibility='visible';\n" +
             "paydata.style.visibility='visible';\n" +
             "kbd.style.visibility='visible';\n" + 
@@ -337,14 +354,14 @@ public class SaturnActivity extends BaseProxyActivity {
             "onClick=\"Saturn.toast('Use the keyboard below...')\"></td></tr>" +
             "</table>" + 
             "<div id='kbd' style='visibility:hidden;position:absolute;width:")
-          .append((width * 88) / factor)
+          .append(landscapeMode ? (width * 50) / factor : (width * 88) / factor)
           .append("px;height:")
-          .append((width * ((88 * 162) / 416)) / factor)
+          .append(landscapeMode ? (width * ((50 * 162) / 416)) / factor : (width * ((88 * 162) / 416)) / factor)
           .append("'>")
           .append(keyboardSvg)
           .append("</div>");
          saturnView.numbericPin = true;
-        html.append(htmlOneCard(selectedCard, (width * 3) / 5, "card", ""));
+        html.append(htmlOneCard(selectedCard, landscapeMode ? (width * 4) / 11 : (width * 3) / 5, "card", ""));
         loadHtml(js.toString(), html.toString());
     }
 
