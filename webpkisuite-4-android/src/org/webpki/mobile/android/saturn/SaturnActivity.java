@@ -371,14 +371,20 @@ public class SaturnActivity extends BaseProxyActivity {
         } else {
             js.append(
                 "function validatePin() {\n" +
+                "var pin = pinfield.value;\n" +
                 "if (pin.length == 0) {\n" +
                 "Saturn.toast('Empty PIN - Ignored');\n" +
                 "} else {\n" +
                 "Saturn.performPayment(pin);\n" +
-                "}\n");
+                "}\n" +
+                "return false;\n");
         }
         StringBuffer html = new StringBuffer(
-            "<table id='paydata' style='visibility:hidden;position:absolute'>" +
+            "<table id='paydata' style='visibility:hidden;position:absolute'>");
+        if (!numericPin) {
+            html.append("<form onsubmit=\"return validatePin()\">");
+        }
+        html.append(
             "<tr><td id='payfield' class='label'>Payee</td><td class='field'>")
           .append(HTMLEncoder.encode(selectedCard.paymentRequest.getPayee().getCommonName()))
           .append("</td></tr>" +
@@ -403,8 +409,8 @@ public class SaturnActivity extends BaseProxyActivity {
         } else {
             html.append("<td><input id='pinfield' style='font-size:inherit' autofocus type='password' size='15'></td></tr>" +
                         "<tr><td></td><td style='padding-top:12pt;text-align:center'>" +
-                        "<form onsubmit=\"Saturn.log('hi')\"><input type='submit' style='font-size:inherit' value='Validate'></form></td></tr>" +
-                        "</table>");
+                        "<input type='submit' style='font-size:inherit' value='Validate'></td></tr>" +
+                        "</form></table>");
         }
           
         html.append(htmlOneCard(selectedCard, landscapeMode ? (width * 4) / 11 : (width * 3) / 5, "card", ""));
@@ -468,7 +474,7 @@ public class SaturnActivity extends BaseProxyActivity {
     }
 
     @JavascriptInterface
-    public void getChallengeJSON(String json) {
+    public boolean getChallengeJSON(String json) {
         try {
             Vector<ChallengeResult> temp = new Vector<ChallengeResult>();
             JSONArrayReader challengeArray = JSONParser.parse(json).getJSONArrayReader();
@@ -484,6 +490,7 @@ public class SaturnActivity extends BaseProxyActivity {
         } catch (Exception e) {
             unconditionalAbort("Challenge data read failure");
         }
+        return false;
     }
 
     boolean pinBlockCheck() throws SKSException {
