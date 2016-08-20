@@ -112,7 +112,7 @@ public class SaturnProtocolPerform extends AsyncTask<Void, String, Boolean> {
                           .append("').value});\n");
                     }
                     js.append("  return JSON.stringify(data);\n");
-                    html.append("<form onsubmit=\"Saturn.getChallengeJSON(getChallengeData())\">");
+                    html.append("<form onsubmit=\"return Saturn.getChallengeJSON(getChallengeData())\">");
                     String autofocus = "autofocus ";
                     for (ChallengeField challengeField : privateMessage.getOptionalChallengeFields()) {
                         html.append("<tr><td style='padding:10pt 20pt 0 20pt'>");

@@ -312,14 +312,11 @@ public class SaturnActivity extends BaseProxyActivity {
                     "kbd.style.visibility='visible';\n");
             } else {
                 js.append(
-                    "var gutter = Math.floor((Saturn.width() - kbd.offsetWidth - card.offsetWidth) / 3);\n" +
+                    "var gutter = Math.floor((Saturn.width() - paydata.offsetWidth - card.offsetWidth) / 3);\n" +
                     "card.style.right = gutter + 'px';\n" +
-                    "card.style.top = gutter + 'px';\n" +
-                    "kbd.style.left = gutter + 'px';\n" +
-                    "var kbdTop = Math.floor(Saturn.height() - gutter - kbd.offsetHeight);\n" +
-                    "kbd.style.top = kbdTop + 'px';\n" +
                     "paydata.style.left = gutter + 'px';\n" +
-                    "paydata.style.top = Math.floor((kbdTop - paydata.offsetHeight) / 2) + 'px';\n");
+                    "card.style.top = Math.floor((Saturn.height() - card.offsetHeight) / 2) + 'px';\n" +
+                    "paydata.style.top = Math.floor((Saturn.height() - paydata.offsetHeight) / 2) + 'px';\n");
             }
         } else {
             if (numericPin) {
@@ -407,7 +404,9 @@ public class SaturnActivity extends BaseProxyActivity {
                 .append(keyboardSvg)
                 .append("</div>");
         } else {
-            html.append("<td><input id='pinfield' style='font-size:inherit' autofocus type='password' size='15'></td></tr>" +
+            html.append("<td><input id='pinfield' style='font-size:inherit' autofocus type='password' size='15' value='")
+                .append(HTMLEncoder.encode(pin))
+                .append("'></td></tr>" +
                         "<tr><td></td><td style='padding-top:12pt;text-align:center'>" +
                         "<input type='submit' style='font-size:inherit' value='Validate'></td></tr>" +
                         "</form></table>");
@@ -567,6 +566,7 @@ public class SaturnActivity extends BaseProxyActivity {
     @JavascriptInterface
     public void performPayment(String pin) {
         this.pin = pin;
+        hideSoftKeyBoard();
         paymentEvent();
     }
 
