@@ -154,14 +154,13 @@ public class SaturnActivity extends BaseProxyActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                saturnView.clearView();
+                saturnView.loadUrl("about:blank");
                 String html = new StringBuffer(HTML_HEADER)
                     .append(positionScriptArgument)
                     .append(htmlBodyPrefix)
                     .append(bodyArgument)
                     .append("</body></html>").toString();
                 saturnView.loadData(html, "text/html; charset=utf-8", null);
-                saturnView.reload();
             }
         });
     } 
