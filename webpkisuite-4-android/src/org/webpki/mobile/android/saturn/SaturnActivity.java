@@ -347,11 +347,22 @@ public class SaturnActivity extends BaseProxyActivity {
             js.append(
                 "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
                 "function showPin() {\n" +
-                "pinfield.innerHTML = pin.length == 0 ? \"<span style='color:#a0a0a0'>Please enter PIN</span>\" : pin;\n" +
+                "if (pin.length == 0) {\n" +
+                "pinfield.innerHTML = \"<span style='color:#a0a0a0'>Please enter PIN</span>\";\n" +
+                "} else {\n"+
+                "var pwd = \"<span style='font-size:10pt'>\";\n" +
+                "for (var i = 0; i < pin.length; i++) {\n" +
+                "pwd += '\u25cf\u2009';\n" +
+                "}\n" +
+                "pinfield.innerHTML = pwd + '</span>';\n" +
+                "}\n" +
                 "}\n" +
                 "function addDigit(digit) {\n" +
+                "pinfield.innerHTML = pin.length == 0 ? digit : pinfield.innerHTML + digit;\n" +
                 "pin += digit;\n" +
+                "setTimeout(function() {\n" +
                 "showPin();\n" +
+                "}, 500);\n" +
                 "}\n" +
                 "function validatePin() {\n" +
                 "if (pin.length == 0) {\n" +
