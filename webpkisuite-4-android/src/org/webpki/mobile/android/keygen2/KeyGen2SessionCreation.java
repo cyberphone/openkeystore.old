@@ -23,21 +23,28 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Iterator;
 
+import android.content.Context;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import android.os.AsyncTask;
 
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+
 import android.view.KeyEvent;
 import android.view.View;
+
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import android.widget.TextView.OnEditorActionListener;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
@@ -284,11 +291,21 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               }
             else
               {
+                hideSoftKeyBoard();
                 keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
                 new KeyGen2KeyCreation (keygen2_activity).execute ();
               }
           }
       }
+
+    public void hideSoftKeyBoard() {
+        // Check if no view has focus:
+        View view = this.keygen2_activity.getCurrentFocus();
+        if (view != null) {  
+            InputMethodManager imm = (InputMethodManager)this.keygen2_activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 
     public KeyGen2SessionCreation (KeyGen2Activity keygen2_activity)
       {
