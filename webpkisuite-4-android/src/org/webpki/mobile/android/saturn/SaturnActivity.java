@@ -242,9 +242,9 @@ public class SaturnActivity extends BaseProxyActivity {
             htmlBodyPrefix = new StringBuffer("}\n" +
                                               "</script>" +
                                               "</head><body onload=\"positionElements()\">" +
-                                              "<img src='data:image/png;base64,")
+                                              "<img src='data:image/svg+xml;base64,")
                 .append(Base64.encodeToString(ArrayUtil.getByteArrayFromInputStream(getResources()
-                                                  .openRawResource(R.drawable.saturnlogo)),
+                                                  .openRawResource(R.raw.saturnlogo)),
                                               Base64.NO_WRAP))
                 .append("' style='height:")
                 .append((int)((Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels)  * 5) / factor))
