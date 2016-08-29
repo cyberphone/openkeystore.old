@@ -87,6 +87,7 @@ public class SaturnActivity extends BaseProxyActivity {
                                       "box-shadow:3pt 3pt 3pt #d0d0d0;background-size:cover;background-repeat:no-repeat}\n" +
                                       "</style>\n" +
                                       "<script type='text/javascript'>\n" +
+                                      "'use strict';\n" +
                                       "function positionElements() {\n";
 
     String htmlBodyPrefix;
@@ -289,8 +290,8 @@ public class SaturnActivity extends BaseProxyActivity {
         boolean numericPin = sks.getKeyProtectionInfo(selectedCard.keyHandle).getPinFormat() == PassphraseFormat.NUMERIC;
         int width = displayMetrics.widthPixels;
         StringBuffer js = new StringBuffer(
+            "pinfield = document.getElementById('pinfield');\n" +
             "var card = document.getElementById('card');\n" +
-            "var pinfield = document.getElementById('pinfield');\n" +
             "var paydata = document.getElementById('paydata');\n");
         if (numericPin) {
             js.append(
@@ -345,6 +346,7 @@ public class SaturnActivity extends BaseProxyActivity {
             "}\n");
         if (numericPin) {
             js.append(
+                "var pinfield;\n" +
                 "var pin = '" + HTMLEncoder.encode(pin) + "';\n" +
                 "function showPin() {\n" +
                 "if (pin.length == 0) {\n" +
