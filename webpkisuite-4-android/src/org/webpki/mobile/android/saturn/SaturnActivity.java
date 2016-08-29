@@ -356,11 +356,11 @@ public class SaturnActivity extends BaseProxyActivity {
                 "for (var i = 0; i < pin.length; i++) {\n" +
                 "pwd += '\u25cf\u2009';\n" +
                 "}\n" +
-                "pinfield.innerHTML = pwd + '</span>';\n" +
+                "pinfield.innerHTML = pwd + \"</span><span style='color:white'>K</span>\";\n" +
                 "}\n" +
                 "}\n" +
                 "function addDigit(digit) {\n" +
-                "pinfield.innerHTML = pin.length == 0 ? digit : pinfield.innerHTML + digit;\n" +
+                "pinfield.innerHTML = pin.length == 0 ? digit : pinfield.innerHTML.substring(0, pinfield.innerHTML.length - 34)  + digit;\n" +
                 "pin += digit;\n" +
                 "setTimeout(function() {\n" +
                 "showPin();\n" +
