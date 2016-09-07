@@ -1,6 +1,0 @@
-{"@context":"http://xmlns.webpki.org/wcpp-payment-demo","@qualifier":"Invoke","cardTypes":["NeverHeardOfCard","SuperCard","CoolCard"],"paymentRequest":
-{"commonName":"Demo Merchant","amount":8600550,"currency":"USD","referenceId":"#1000000","dateTime":"2014-12-18T13:39:35Z","signature":{"algorithm":"RS256","signerCertificate":{"issuer":"CN=Merchant Network Sub CA5,C=DE","serialNumber":"1413983542582","subject":"CN=Demo Merchant,2.5.4.5=#1306383936333235,C=DE"},
-"certificatePath":["MIIDQzCCAiugAwIBAgIGAUk3_J02M...eMGlY734U3NasQfAhTUhxrdDbphEvsWTc",
-                   "MIIEPzCCAiegAwIBAgIBBTANBgkqh...gU1IyRGA7IbdHOeDB2RUpsXloU2QKfLrk"],
- "value":"Ny4Qe6FQhd5_qcSc3xiH8Kt7tIZ9Z...9LEjC6_Rulg_G20fGxJ-wzezFpsAGbmuFQg"}}
- }

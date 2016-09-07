@@ -1,8 +1,0 @@
-{"@context":"http://xmlns.webpki.org/wcpp-payment-demo","@qualifier":"Authorize","authUrl":"https://payserv.mybank.com/transact","authData":
-{
-"encryptedData":{"algorithm":"http://www.w3.org/2001/04/xmlenc#aes256-cbc","iv":"rI_rZ_qkkmVlYsLkWpq1ZQ",
-"encryptedKey":{"algorithm":"RSA-OAEP-256","publicKey":{"type":"RSA","n":
-"yz1k8Hbi5aTE4t9nChu6qp0FzhVi6T...cocS7TLbePJXkJQY4-3Rjo2tYM7DZrHNTQAfvw","e":"AQAB"},
-"cipherText":"cxxikLlfAASd9xFNT7zSWbWwQ...53a6Lf2eh6niqHn0IdSzc00NPx1rOZww"},
-"cipherText":"HCe0ZxWXcy9eFCCyGEVOHL5kei1NlJfBZqYpEFa9UffYx-K9qvIHLV8X7hxw_VdMIUo-klTvm9rUNEDJ8j5wljV7ca6-JhJ...bl-a84xFylpm5C4om6rbbt2AlrtRJfCPCxO4ZVd-QoDBze46Y4sEY4CqV572zZ90ObLZ70orFG0lGyKFF2VfEqhwWUPG"}}
-}
