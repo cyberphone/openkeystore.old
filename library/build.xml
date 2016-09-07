@@ -13,10 +13,12 @@
   <property name="temp_dir" value=".tmp" />
   <property name="test_dir" value="test" />
   <property name="dist_dir"  value="dist" />
+  <property name="bin_dir" value="bin" />
   <property name="wsdl_dir"  value="wsdl" />
   <property name="spts_dir"  value="securityproxy-test" />
   <property name="ext.jar"  value="../resources/third-party-jars"/>
   <property name="public_doc_dir"  location="../../doc/security"/>
+  <property name="webpki-android" value="webpki.org-4-android-v1.00"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
   <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar" />
   <property name="webpki-sksws" value="webpki.org-sksws-1.00.jar" />
@@ -349,7 +351,111 @@
     <delete dir="${dist_dir}"/>
   </target>
 
-  <target name="_tomcat-server-bck" unless="tomcat.server.bck">
+  <target name="android">    
+    <delete file="${dist_dir}/${webpki-android}.zip"/>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${bin_dir}" />
+    <mkdir dir="${temp_dir}"/>
+    <mkdir dir="${bin_dir}" />
+
+    <copy todir="${temp_dir}/org/webpki" preservelastmodified="true">
+      <fileset dir="${src_dir}/org/webpki">
+        <exclude name="**/test/**"/>
+        <exclude name="**/infocard/**"/>
+        <exclude name="**/tools/**"/>
+        <exclude name="**/kg2xml/**"/>
+        <exclude name="**/wasp/**"/>
+        <exclude name="**/xml/**"/>
+        <exclude name="**/crypto/**"/>
+        <exclude name="**/util/**"/>
+        <exclude name="**/xmldsig/**"/>
+        <exclude name="**/xmlenc/**"/>
+        <exclude name="**/pdf/**"/>
+        <exclude name="**/sks/ws/**"/>
+        <exclude name="**/sks/twolayer/**"/>
+        <exclude name="**/securityproxy/**"/>
+        <exclude name="**/ca/**"/>
+        <exclude name="**/pkcs7/**"/>
+        <exclude name="**/webutil/**"/>
+        <exclude name="**/keygen2/*RequestEncoder.java"/>
+        <exclude name="**/keygen2/*ResponseDecoder.java"/>
+        <exclude name="**/keygen2/ServerState.java"/>
+        <exclude name="**/keygen2/ServerEncoder.java"/>
+        <exclude name="**/keygen2/ServerCryptoInterface.java"/>
+        <exclude name="**/webauth/*RequestEncoder.java"/>
+        <exclude name="**/webauth/*ResponseDecoder.java"/>
+      </fileset>
+      <fileset dir="${src_dir}/org/webpki">
+        <include name="**/util/ISODateTime.java"/>
+        <include name="**/util/DebugFormatter.java"/>
+        <include name="**/util/ArrayUtil.java"/>
+        <include name="**/util/StringUtil.java"/>
+        <include name="**/util/Base64URL.java"/>
+        <include name="**/util/HTMLEncoder.java"/>
+        <include name="**/crypto/KeyStoreReader.java"/>
+        <include name="**/crypto/KeyContainerTypes.java"/>
+        <include name="**/crypto/CertificateFilter.java"/>
+        <include name="**/crypto/CertificateUtil.java"/>
+        <include name="**/crypto/CertificateInfo.java"/>
+        <include name="**/crypto/CertificateExtensions.java"/>
+        <include name="**/crypto/ExtendedKeyUsages.java"/>
+        <include name="**/crypto/DeviceID.java"/>
+        <include name="**/crypto/KeyUsageBits.java"/>
+        <include name="**/crypto/VerifierInterface.java"/>
+        <include name="**/crypto/SymKeyVerifierInterface.java"/>
+        <include name="**/crypto/SignerInterface.java"/>
+        <include name="**/crypto/AsymKeySignerInterface.java"/>
+        <include name="**/crypto/SymKeySignerInterface.java"/>
+        <include name="**/crypto/CryptoAlgorithms.java"/>
+        <include name="**/crypto/KeyAlgorithms.java"/>
+        <include name="**/crypto/MACAlgorithms.java"/>
+        <include name="**/crypto/HashAlgorithms.java"/>
+        <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AlgorithmPreferences.java"/>
+        <include name="**/crypto/AsymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SignatureWrapper.java"/>
+        <include name="**/crypto/DecryptionKeyHolder.java"/>
+      </fileset>
+      </copy>
+
+    <replaceregexp file="${temp_dir}/org/webpki/crypto/KeyStoreReader.java"
+        match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
+        replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
+        flags="s"/>
+
+    <replaceregexp
+        match="&quot;SunX509&quot;"
+        replace="&quot;X509&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+    
+    <replaceregexp
+        match="&quot;JKS&quot;"
+        replace="&quot;BKS&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+
+    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${bin_dir}" includeAntRuntime="false"/>
+    
+    <!-- Create Android java library -->
+    <zip destfile="${dist_dir}/${webpki-android}.zip">
+      <zipfileset dir="${temp_dir}">
+          <exclude name="**/*.html"/>
+          <exclude name="**/doc-files/*"/>
+       </zipfileset>
+    </zip>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${bin_dir}" />
+  </target>
+	
+	<target name="_tomcat-server-bck" unless="tomcat.server.bck">
   	<echo message="IMPORTANT: ${env.CATALINA_HOME}/conf/server.xml copied to server.xml.bck !!!"/>
     <copy tofile="${env.CATALINA_HOME}/conf/server.xml.bck" preservelastmodified="true" overwrite="true" file="${env.CATALINA_HOME}/conf/server.xml"/>
   </target>
