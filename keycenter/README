@@ -1,4 +1,0 @@
-This project creates the web emulator
-Note: it can only be built using ANT build.xml in the /build directory
-
-Dependencies: library, jce
