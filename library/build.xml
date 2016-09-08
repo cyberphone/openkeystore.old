@@ -424,7 +424,18 @@
         replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
         flags="s"/>
 
-    <replaceregexp
+  	<!-- No need for decorated OIDs in Android -->
+    <replaceregexp file="${temp_dir}/org/webpki/asn1/ASN1ObjectID.java"
+        match="(public\ static\ void\ tryReadOIDNames.+\{)(.+)(\n.+Hashtable)"
+        replace="\1 \3"
+        flags="s"/>
+
+  	<replaceregexp file="${temp_dir}/org/webpki/asn1/ASN1ObjectID.java"
+        match="(no\ =\ new\ Hashtable&lt;String,String&gt;\(\);)(.+)(\n.+oidToName)"
+        replace="\1 \3"
+        flags="s"/>
+
+  	<replaceregexp
         match="&quot;SunX509&quot;"
         replace="&quot;X509&quot;"
         flags="g">
@@ -447,8 +458,7 @@
     <!-- Create Android java library -->
     <zip destfile="${dist_dir}/${webpki-android}.zip">
       <zipfileset dir="${temp_dir}">
-          <exclude name="**/*.html"/>
-          <exclude name="**/doc-files/*"/>
+          <include name="**/*.java"/>
        </zipfileset>
     </zip>
     <delete dir="${temp_dir}"/>
