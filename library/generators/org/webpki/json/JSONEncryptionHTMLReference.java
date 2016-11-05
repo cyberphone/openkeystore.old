@@ -273,7 +273,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty(JSONDecryptionDecoder.IV_JSON)
           .addSymbolicValue(JSONDecryptionDecoder.IV_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("Initialization vector.")
@@ -282,7 +282,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty(JSONDecryptionDecoder.TAG_JSON)
           .addSymbolicValue(JSONDecryptionDecoder.TAG_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("Authentication tag.")
@@ -291,7 +291,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
           .addSymbolicValue(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
@@ -342,7 +342,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
           .addSymbolicValue(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("Encrypted symmetric key.");
@@ -380,7 +380,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty (JSONSignatureDecoder.X_JSON)
           .addSymbolicValue (JSONSignatureDecoder.X_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("EC curve point X." +
@@ -395,7 +395,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types
           .addProperty (JSONSignatureDecoder.Y_JSON)
           .addSymbolicValue (JSONSignatureDecoder.Y_JSON)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString ("EC curve point Y." +

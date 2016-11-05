@@ -88,4 +88,29 @@ class JSONObject implements Serializable
               }
           }
       }
-  }
+
+    static void setObjectAsRead (JSONObject jsonObject) throws IOException {
+        for (String name : jsonObject.properties.keySet ()) {
+            JSONValue value = jsonObject.properties.get (name);
+            value.readFlag = true;
+            if (value.type == JSONTypes.OBJECT) {
+                setObjectAsRead ((JSONObject)value.value);
+            } else if (value.type == JSONTypes.ARRAY) {
+                setArrayAsRead (value);
+            }
+        }
+     }
+
+    @SuppressWarnings("unchecked")
+    static void setArrayAsRead (JSONValue array) throws IOException {
+        for (JSONValue arrayElement : (Vector<JSONValue>)array.value) {
+            if (arrayElement.type == JSONTypes.OBJECT) {
+                setObjectAsRead ((JSONObject)arrayElement.value);
+            } else if (arrayElement.type == JSONTypes.ARRAY) {
+                setArrayAsRead (arrayElement);
+            } else {
+                arrayElement.readFlag = true;
+            }
+        }
+    }
+ }

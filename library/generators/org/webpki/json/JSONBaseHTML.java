@@ -379,7 +379,7 @@ public class JSONBaseHTML
             ID      ("id",     "<i>string</i>",                           null,
                      "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
                      
-            BASE64  ("base64", "<i>string</i>",                           REF_BASE64,
+            BYTE_ARRAY  ("byte[]", "<i>string</i>",                           REF_BASE64,
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           null,
@@ -1429,7 +1429,7 @@ public class JSONBaseHTML
           .addProperty (JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
           .addArrayList (Types.SORTED_CERT_PATH, 1)
         .newColumn ()
-          .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+          .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn ()
         .newColumn ()
           .addString (option)
@@ -1480,7 +1480,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.VALUE_JSON)
               .addSymbolicValue (JSONSignatureDecoder.VALUE_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+              .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
@@ -1539,7 +1539,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.X_JSON)
               .addSymbolicValue (JSONSignatureDecoder.X_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+              .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn ()
             .newColumn ()
               .addString (jcs)
@@ -1556,7 +1556,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureDecoder.Y_JSON)
               .addSymbolicValue (JSONSignatureDecoder.Y_JSON)
             .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
+              .setType (Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn ()
             .newColumn ()
               .addString (jcs)

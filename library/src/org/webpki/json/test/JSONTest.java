@@ -3035,6 +3035,30 @@ public class JSONTest
           {
             checkException (e, "Property \"intv\" was never read");
           }
+        ow = new JSONObjectWriter();
+        ow.setInt("intv", 3);
+        JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).scanAway("intv").checkForUnread();
+        ow = new JSONObjectWriter();
+        ow.setInt ("intb", 3);
+        ow.setInt ("intv", 3);
+        or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
+        try
+          {
+            or.scanAway("intb");
+            or.checkForUnread ();
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Property \"intv\" was never read");
+          }
+        ow = new JSONObjectWriter();
+        ow.setObject ("o").setString("yes", "welll...");
+        ow.setInt ("intv", 3);
+        or = JSONParser.parse (ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
+        or.getInt("intv");
+        or.scanAway("o");
+        or.checkForUnread();
       }
     
     static final String p521_jcs =
