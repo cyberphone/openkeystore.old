@@ -2449,11 +2449,11 @@ public class JSONTest
     void longVariables (long value) throws IOException
       {
         JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setLong (value);
-        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
+        or.setArray ("name").setInt53 (value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getInt53 () == value);
         or = new JSONObjectWriter ();
-        or.setLong ("name", value);
-        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
+        or.setInt53 ("name", value);
+        assertTrue ("long", JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getInt53 ("name") == value);
       }
 
     void badArgument (String string)
@@ -2826,7 +2826,7 @@ public class JSONTest
       {
         try
           {
-            JSONParser.parse (new JSONObjectWriter ().setLong ("v", value).toString()).getInt ("v");
+            JSONParser.parse (new JSONObjectWriter ().setInt53 ("v", value).toString()).getInt ("v");
             assertFalse("range", mustFail);
           }
         catch (Exception e)

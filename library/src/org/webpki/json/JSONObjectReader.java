@@ -130,7 +130,7 @@ public class JSONObjectReader implements Serializable, Cloneable
         return parseInt (getString (name, JSONTypes.NUMBER));
       }
 
-    public long getLong (String name) throws IOException
+    public long getInt53 (String name) throws IOException
       {
         return parseLong (getString (name, JSONTypes.NUMBER));
       }

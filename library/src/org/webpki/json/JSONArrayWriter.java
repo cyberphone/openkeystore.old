@@ -61,10 +61,10 @@ public class JSONArrayWriter implements Serializable
 
     public JSONArrayWriter setInt (int value) throws IOException
       {
-        return setLong (value);
+        return setInt53 (value);
       }
 
-    public JSONArrayWriter setLong (long value) throws IOException
+    public JSONArrayWriter setInt53 (long value) throws IOException
       {
         return add (JSONTypes.NUMBER, JSONObjectWriter.es6Long2NumberConversion (value));
       }

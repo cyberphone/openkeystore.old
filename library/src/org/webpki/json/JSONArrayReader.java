@@ -76,7 +76,7 @@ public class JSONArrayReader implements Serializable
         return JSONObjectReader.parseInt ((String) get (JSONTypes.NUMBER));
       }
 
-    public long getLong () throws NumberFormatException, IOException
+    public long getInt53 () throws NumberFormatException, IOException
       {
         return JSONObjectReader.parseLong ((String) get (JSONTypes.NUMBER));
       }

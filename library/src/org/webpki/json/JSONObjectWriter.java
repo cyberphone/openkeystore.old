@@ -62,7 +62,7 @@ public class JSONObjectWriter implements Serializable
 
     static final int STANDARD_INDENT = 2;
 
-    public static final long MAX_SAFE_INTEGER = 9007199254740991l;
+    public static final long MAX_SAFE_INTEGER = 9007199254740991l; // 2^53 - 1 ("53-bit precision")
     
     static final Pattern JS_ID_PATTERN  = Pattern.compile ("[a-z,A-Z,$,_]+[a-z,A-Z,$,_,0-9]*");
 
@@ -184,10 +184,10 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setInt (String name, int value) throws IOException
       {
-        return setLong (name, value);
+        return setInt53 (name, value);
       }
 
-    public JSONObjectWriter setLong (String name, long value) throws IOException
+    public JSONObjectWriter setInt53 (String name, long value) throws IOException
       {
         return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6Long2NumberConversion (value)));
       }
