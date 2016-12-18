@@ -62,9 +62,9 @@ public class JSONObjectWriter implements Serializable
 
     static final int STANDARD_INDENT = 2;
 
-    public static final long MAX_SAFE_INTEGER = 9007199254740991l; // 2^53 - 1 ("53-bit precision")
+    public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
     
-    static final Pattern JS_ID_PATTERN  = Pattern.compile ("[a-z,A-Z,$,_]+[a-z,A-Z,$,_,0-9]*");
+    static final Pattern JS_ID_PATTERN  = Pattern.compile ("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
 
     JSONObject root;
 
