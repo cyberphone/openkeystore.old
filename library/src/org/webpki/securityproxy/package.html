@@ -1,67 +1,71 @@
 <body>
 <h2>HTTP-based Security Proxy Framework</h2>
 It is often desirable protecting sensitive resources from direct incoming
-calls while still being able to handle external requests.  This
-usually leads to the use of some kind of reverse proxy solution.  The
+calls while still being able to handle external requests. This
+usually leads to the use of some kind of reverse proxy solution. The
 following Java library provides a minute proxy solution that is
-designed for integration in Java applications.  That is, this is not a
-tunnel scheme like SSH.  The illustration below shows a typical
+designed for integration in Java applications. That is, this is not a
+tunnel scheme like SSH. The illustration below shows a typical
 configuration:
 <br><IMG SRC="doc-files/securityproxy.png"><BR>
 <h3><B>Core Features</B></h3>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>HTTP-based</I>.&nbsp;
-	 Builds on the "push-mail" concept where <i>outgoing</i> HTTP requests either terminate and
-	return after a predefined but long time, or immediately return when request data is found</P>
+    Builds on the "push-mail" concept where <i>outgoing</i> HTTP requests either terminate and
+    return after a predefined but long time, or immediately return when request data is found</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Speedy</I>.&nbsp;
-	 Request latency is essentially a network &quot;roundtrip&quot;</P>
+    Request latency is essentially a network &quot;roundtrip&quot;</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Network-friendly</I>.&nbsp;
-	 When there are no incoming requests, proxy network load is	negliable</P>
+    When there are no incoming requests, proxy network load is negliable</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Secure</I>.&nbsp;
-	 The proxy supports two-way TLS authentication using X.509
-	certificates</P>
+    The proxy supports two-way TLS authentication using X.509
+    certificates</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Self-healing</I>.&nbsp;
-	 The proxy proxy channel is automatically restored in case of a
-	network error or malfunction in any of the two end-points.  The
-	inner service is notified if the outer service is restarted</P>
+    The proxy proxy channel is automatically restored in case of a
+    network error or malfunction in any of the two end-points. The
+    inner service is notified if the outer service is restarted</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Bidirectional</I>.&nbsp;
-	 Although the primary purpose of the proxy is catering for incoming
-	requests, the same channel can also be used for &quot;upload&quot;
-	of data that the outer service may need</P>
+    Although the primary purpose of the proxy is catering for incoming
+    requests, the same channel can also be used for &quot;upload&quot;
+    of data that the outer service may need</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Java-centric</I>.&nbsp;
-	 The proxy accepts requests that are based on serializable Java
-	objects</P>
+    The proxy accepts requests that are based on serializable Java
+    objects</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Load-configurable</I>.&nbsp;
-	 The proxy enables you to define the maximum number of parallel HTTP
-	&quot;workers&quot;</P>
+    The proxy enables you to define the maximum number of parallel HTTP
+    &quot;workers&quot;</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Multi-serviceble</I>.&nbsp;
-	  There may be multiple and entirely different proxy services
-	running in the same JVM instance or JBoss application</P>
-<p><h3><B>Testing the Proxy</B></p></h3>
+    There may be multiple and entirely different proxy services
+    running in the same JVM instance or JBoss application</P>
+<p>
+<h3><B>Testing the Proxy</B></p></h3>
 <p>In the subdirectory "securityproxy-test" you will find a file README that
-contains instructions on how to compile and run supplied proxy test code.</p>
-<p><h3><B>Secure Operation</B></p></h3>
+    contains instructions on how to compile and run supplied proxy test code.</p>
+<p>
+<h3><B>Secure Operation</B></p></h3>
 <p>In order to improve security a number of steps should be considered.</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt">
-	<I>Filter incoming data</I>.&nbsp;
-	 It is recommended verifying incoming data with respect to syntax so
-	that malformed request data isn't forwared to the inner service.</P>
+    <I>Filter incoming data</I>.&nbsp;
+    It is recommended verifying incoming data with respect to syntax so
+    that malformed request data isn't forwared to the inner service.</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt">
-	<I>Pre-authenticate
-	requests</I>.&nbsp;  If incoming requests must be authenticated, it is
-	recommended performing pre-authentication in the outer service
-	before transferring request data to the inner service.  The &quot;upload&quot;
-	facility may be used for providing the outer service with
-	information needed for pre-authentication.</P>
+    <I>Pre-authenticate
+        requests</I>.&nbsp; If incoming requests must be authenticated, it is
+    recommended performing pre-authentication in the outer service
+    before transferring request data to the inner service. The &quot;upload&quot;
+    facility may be used for providing the outer service with
+    information needed for pre-authentication.</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Discriminate ports</I>.&nbsp;
     The outer service and its proxy server channel are
-	preferably bound to different HTTP ports.  This requires specific
-	settings in &quot;server.xml&quot; in Tomcat or Jboss.</P>
-<P><h3><B>Configuration</B></h3></P>
-<P>The security proxy requires a minimum of configuration data.  The following
-sample sections cover both the client- and server-part of the proxy.</P>
-<P><h3><B>Inner Service Code Sample</B></h3></P>
+    preferably bound to different HTTP ports. This requires specific
+    settings in &quot;server.xml&quot; in Tomcat or Jboss.</P>
+<P>
+<h3><B>Configuration</B></h3></P>
+<P>The security proxy requires a minimum of configuration data. The following
+    sample sections cover both the client- and server-part of the proxy.</P>
+<P>
+<h3><B>Inner Service Code Sample</B></h3></P>
 <P>The code snippet below shows how the proxy could be utilized in
-an "Inner&nbsp;Service" web application where one class holds servlet initialization code.</P>
+    an "Inner&nbsp;Service" web application where one class holds servlet initialization code.</P>
 <pre style="margin-left:20pt">
 package com.example.innerservice;
 
@@ -266,9 +270,10 @@ a "web.xml" file is needed:
 
 &lt;/web-app&gt;
 </pre>
-<P><h3><B>Outer Service Code Sample</B></h3></P>
+<P>
+<h3><B>Outer Service Code Sample</B></h3></P>
 <P>The following code snippets shows how the proxy could be utilized in
-an "Outer&nbsp;Service" web application.</P>
+    an "Outer&nbsp;Service" web application.</P>
 <pre style="margin-left:20pt">
 package com.example.outerservice;
 
@@ -435,7 +440,8 @@ JBoss applications may also put "securityproxy.jar" in an "ear" file.
 
 &lt;/web-app&gt;
 </pre>
-<P><h3><B>Common Objects</B></h3></P>
+<P>
+<h3><B>Common Objects</B></h3></P>
 The following shows the sample objects used in this tutorial:
 <pre style="margin-left:20pt">
 package com.example.common;
@@ -511,6 +517,7 @@ public class SampleUploadObject implements {@link org.webpki.securityproxy.JavaU
       }
   }
 </pre>
-<P><h3><B>Tomcat/JBoss Port Configuration</B></h3></P>
+<P>
+<h3><B>Tomcat/JBoss Port Configuration</B></h3></P>
 See supplied test code...
 </body>

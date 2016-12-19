@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,112 +18,99 @@ package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
 
-public class DeviceInfo
-  {
+public class DeviceInfo {
     ///////////////////////////////////////////////////////////////////////////////////
     // "DeviceType" constants
     ///////////////////////////////////////////////////////////////////////////////////
-    public static final byte LOCATION_EXTERNAL           = 0x00;
-    public static final byte LOCATION_EMBEDDED           = 0x01;
-    public static final byte LOCATION_SOCKETED           = 0x02;
-    public static final byte LOCATION_SIM                = 0x03;
-    public static final byte LOCATION_MASK               = 0x03;
-    
-    public static final byte TYPE_SOFTWARE               = 0x00;
-    public static final byte TYPE_HARDWARE               = 0x04;
-    public static final byte TYPE_HSM                    = 0x08;
-    public static final byte TYPE_CPU                    = 0x0C;
-    public static final byte TYPE_MASK                   = 0x0C;
-    
+    public static final byte LOCATION_EXTERNAL = 0x00;
+    public static final byte LOCATION_EMBEDDED = 0x01;
+    public static final byte LOCATION_SOCKETED = 0x02;
+    public static final byte LOCATION_SIM      = 0x03;
+    public static final byte LOCATION_MASK     = 0x03;
+
+    public static final byte TYPE_SOFTWARE     = 0x00;
+    public static final byte TYPE_HARDWARE     = 0x04;
+    public static final byte TYPE_HSM          = 0x08;
+    public static final byte TYPE_CPU          = 0x0C;
+    public static final byte TYPE_MASK         = 0x0C;
+
     short apiLevel;
-    
-    public short getApiLevel ()
-      {
+
+    public short getApiLevel() {
         return apiLevel;
-      }
-    
+    }
+
     private byte deviceType;
 
-    public byte getDeviceType ()
-      {
+    public byte getDeviceType() {
         return deviceType;
-      }
+    }
 
     String updateUrl;
-    
-    public String getUpdateUrl ()
-      {
+
+    public String getUpdateUrl() {
         return updateUrl;
-      }
+    }
 
     String vendorName;
-    
-    public String getVendorName ()
-      {
+
+    public String getVendorName() {
         return vendorName;
-      }
-    
+    }
+
     String vendorDescription;
-    
-    public String getVendorDescription ()
-      {
+
+    public String getVendorDescription() {
         return vendorDescription;
-      }
-    
+    }
+
     X509Certificate[] certificatePath;
-    
-    public X509Certificate[] getCertificatePath ()
-      {
+
+    public X509Certificate[] getCertificatePath() {
         return certificatePath;
-      }
-    
+    }
+
     String[] supportedAlgorithms;
-    
-    public String[] getSupportedAlgorithms ()
-      {
+
+    public String[] getSupportedAlgorithms() {
         return supportedAlgorithms;
-      }
+    }
 
     int cryptoDataSize;
-    
-    public int getCryptoDataSize ()
-      {
+
+    public int getCryptoDataSize() {
         return cryptoDataSize;
-      }
-    
+    }
+
     int extensionDataSize;
-    
-    public int getExtensionDataSize ()
-      {
+
+    public int getExtensionDataSize() {
         return extensionDataSize;
-      }
-    
+    }
+
     boolean devicePinSupport;
-    
-    public boolean getDevicePinSupport ()
-      {
+
+    public boolean getDevicePinSupport() {
         return devicePinSupport;
-      }
-    
+    }
+
     boolean biometricSupport;
-    
-    public boolean getBiometricSupport ()
-      {
+
+    public boolean getBiometricSupport() {
         return biometricSupport;
-      }
-    
-    public DeviceInfo (short apiLevel,
-                       byte deviceType,
-                       String updateUrl,  // May be null
-                       String vendorName,
-                       String vendorDescription,
-                       X509Certificate[] certificatePath,
-                       String[] supportedAlgorithms,
-                       int cryptoDataSize,
-                       int extensionDataSize,
-                       boolean devicePinSupport,
-                       boolean biometricSupport)
-      {
+    }
+
+    public DeviceInfo(short apiLevel,
+                      byte deviceType,
+                      String updateUrl,  // May be null
+                      String vendorName,
+                      String vendorDescription,
+                      X509Certificate[] certificatePath,
+                      String[] supportedAlgorithms,
+                      int cryptoDataSize,
+                      int extensionDataSize,
+                      boolean devicePinSupport,
+                      boolean biometricSupport) {
         this.apiLevel = apiLevel;
         this.deviceType = deviceType;
         this.updateUrl = updateUrl;
@@ -135,5 +122,5 @@ public class DeviceInfo
         this.extensionDataSize = extensionDataSize;
         this.devicePinSupport = devicePinSupport;
         this.biometricSupport = biometricSupport;
-      }
-  }
+    }
+}

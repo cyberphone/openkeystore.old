@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,30 +54,29 @@ import org.webpki.util.ISODateTime;
  * Creates JSON objects and performs serialization according to ES6.
  * <p>
  * Also provides built-in support for JCS (JSON Cleartext Signatures) encoding.</p>
- * 
  */
-public class JSONObjectWriter implements Serializable
-  {
+public class JSONObjectWriter implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     static final int STANDARD_INDENT = 2;
 
     public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
-    
-    static final Pattern JS_ID_PATTERN  = Pattern.compile ("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
+
+    static final Pattern JS_ID_PATTERN = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
 
     JSONObject root;
 
     StringBuffer buffer;
-    
+
     int indent;
-    
+
     boolean prettyPrint;
 
     boolean javaScriptMode;
 
     boolean htmlMode;
-    
+
     int indentFactor;
 
     static String htmlVariableColor = "#008000";
@@ -85,72 +84,62 @@ public class JSONObjectWriter implements Serializable
     static String htmlPropertyColor = "#C00000";
     static String htmlKeywordColor  = "#606060";
 
-    static int htmlIndent           = 4;
-    
-    
+    static int htmlIndent = 4;
+
+
     /**
      * For updating already read JSON objects.
+     *
      * @param reader Existing object
      * @throws IOException For any kind of underlying error...
      */
-    public JSONObjectWriter (JSONObjectReader reader) throws IOException
-      {
-        this (reader.root);
-        if (reader.root.properties.containsKey (null))
-          {
-            throw new IOException ("You cannot update array objects");
-          }
-      }
+    public JSONObjectWriter(JSONObjectReader reader) throws IOException {
+        this(reader.root);
+        if (reader.root.properties.containsKey(null)) {
+            throw new IOException("You cannot update array objects");
+        }
+    }
 
     /**
      * Creates a fresh JSON object and associated writer.
      */
-    public JSONObjectWriter ()
-      {
-        this (new JSONObject ());
-      }
+    public JSONObjectWriter() {
+        this(new JSONObject());
+    }
 
-    JSONObjectWriter (JSONObject root)
-      {
+    JSONObjectWriter(JSONObject root) {
         this.root = root;
-      }
-    
-    JSONObjectWriter setProperty (String name, JSONValue value) throws IOException
-      {
-        root.setProperty (name, value);
+    }
+
+    JSONObjectWriter setProperty(String name, JSONValue value) throws IOException {
+        root.setProperty(name, value);
         return this;
-      }
+    }
 
-    public void setupForRewrite (String name)
-      {
-        root.properties.put (name, null);
-      }
+    public void setupForRewrite(String name) {
+        root.properties.put(name, null);
+    }
 
-    public JSONObjectWriter setString (String name, String value) throws IOException
-      {
-        return setProperty (name, new JSONValue (JSONTypes.STRING, value));
-      }
+    public JSONObjectWriter setString(String name, String value) throws IOException {
+        return setProperty(name, new JSONValue(JSONTypes.STRING, value));
+    }
 
-    static JSONValue setNumberAsText(String value) throws IOException
-      {
-        JSONArrayReader ar = JSONParser.parse ("[" + value + "]").getJSONArrayReader ();
-        if (ar.array.size () != 1)
-          {
-            throw new IOException ("Syntax error on number: " + value);
-          }
-        ar.getDouble ();
-        return ar.array.firstElement ();
-      }
+    static JSONValue setNumberAsText(String value) throws IOException {
+        JSONArrayReader ar = JSONParser.parse("[" + value + "]").getJSONArrayReader();
+        if (ar.array.size() != 1) {
+            throw new IOException("Syntax error on number: " + value);
+        }
+        ar.getDouble();
+        return ar.array.firstElement();
+    }
 
-    public JSONObjectWriter setNumberAsText(String name, String value) throws IOException
-      {
-        return setProperty (name, setNumberAsText(value));
-      }
+    public JSONObjectWriter setNumberAsText(String name, String value) throws IOException {
+        return setProperty(name, setNumberAsText(value));
+    }
 
     // This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
     // The purpose is for supporting signed JSON/JavaScript objects.
-    public static String es6JsonNumberSerialization (double value) throws IOException
-      {
+    public static String es6JsonNumberSerialization(double value) throws IOException {
         // 1. Check for JSON compatibility.
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             throw new IOException("NaN/Infinity are not permitted in JSON");
@@ -171,257 +160,224 @@ public class JSONObjectWriter implements Serializable
         StringBuilder buffer = new StringBuilder();
         DToA.JS_dtostr(buffer, DToA.DTOSTR_STANDARD, 0, value);
         return buffer.toString();
-     }
-
-    static String es6Long2NumberConversion (long value) throws IOException
-      {
-        if (Math.abs (value) > MAX_SAFE_INTEGER)
-          {
-            throw new IOException ("Integer values must not exceed " + MAX_SAFE_INTEGER + " for safe representation");
-          }
-        return es6JsonNumberSerialization (value);
-      }
-
-    public JSONObjectWriter setInt (String name, int value) throws IOException
-      {
-        return setInt53 (name, value);
-      }
-
-    public JSONObjectWriter setInt53 (String name, long value) throws IOException
-      {
-        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6Long2NumberConversion (value)));
-      }
-
-    public JSONObjectWriter setDouble (String name, double value) throws IOException
-      {
-        return setProperty (name, new JSONValue (JSONTypes.NUMBER, es6JsonNumberSerialization (value)));
-      }
-
-    public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
-      {
-        return setString (name, value.toString ());
-      }
-
-    static String bigDecimalToString (BigDecimal value, Integer decimals)
-      {
-        return (decimals == null ? value : value.setScale (decimals)).toPlainString ();
-      }
-
-    public JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
-      {
-        return setString (name, bigDecimalToString(value, null));
-      }
-
-    public JSONObjectWriter setBigDecimal (String name, BigDecimal value, Integer decimals) throws IOException
-      {
-        return setString (name, bigDecimalToString(value, decimals));
-      }
-
-    public JSONObjectWriter setBoolean (String name, boolean value) throws IOException
-      {
-        return setProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
-      }
-
-    public JSONObjectWriter setNULL (String name) throws IOException
-      {
-        return setProperty (name, new JSONValue (JSONTypes.NULL, "null"));
-      }
-
-    public JSONObjectWriter setDateTime (String name, Date dateTime, boolean forceUtc) throws IOException
-      {
-        return setString (name, ISODateTime.formatDateTime (dateTime, forceUtc));
-      }
-
-    public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
-      {
-        return setString (name, Base64URL.encode (value));
-      }
-
-    public JSONObjectWriter setObject (String name, JSONObjectReader reader) throws IOException
-      {
-        setProperty (name, new JSONValue (JSONTypes.OBJECT, reader.root));
-        return this;
-      }
-
-    public JSONObjectWriter setObject (String name, JSONObjectWriter writer) throws IOException
-      {
-        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
-        return this;
-      }
-
-    public JSONObjectWriter setObject (String name) throws IOException
-      {
-        JSONObjectWriter writer = new JSONObjectWriter ();
-        setProperty (name, new JSONValue (JSONTypes.OBJECT, writer.root));
-        return writer;
-      }
-
-    public JSONArrayWriter setArray (String name) throws IOException
-      {
-        JSONArrayWriter writer = new JSONArrayWriter ();
-        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
-        return writer;
-      }
-
-    public JSONObjectWriter setArray (String name, JSONArrayWriter writer) throws IOException
-      {
-        setProperty (name, new JSONValue (JSONTypes.ARRAY, writer.array));
-        return this;
-      }
-
-    JSONObjectWriter setStringArray (String name, String[] values, JSONTypes jsonType) throws IOException
-      {
-        Vector<JSONValue> array = new Vector<JSONValue> ();
-        for (String value : values)
-          {
-            array.add (new JSONValue (jsonType, value));
-          }
-        return setProperty (name, new JSONValue (JSONTypes.ARRAY, array));
-      }
-
-    public JSONObjectWriter setBinaryArray (String name, Vector<byte[]> values) throws IOException
-      {
-        Vector<String> array = new Vector<String> ();
-        for (byte[] value : values)
-          {
-            array.add (Base64URL.encode (value));
-          }
-        return setStringArray (name, array.toArray (new String[0]));
-      }
-
-    public JSONObjectWriter setStringArray (String name, String[] values) throws IOException
-      {
-        return setStringArray (name, values, JSONTypes.STRING);
-      }
-
-    void setCurvePoint (BigInteger value, String name, KeyAlgorithms ec) throws IOException
-      {
-        byte[] curvePoint = value.toByteArray ();
-        if (curvePoint.length > (ec.getPublicKeySizeInBits () + 7) / 8)
-          {
-            if (curvePoint[0] != 0)
-              {
-                throw new IOException ("Unexpected EC \"" + name + "\" value");
-              }
-            setCryptoBinary (value, name);
-          }
-        else
-          {
-            while (curvePoint.length < (ec.getPublicKeySizeInBits () + 7) / 8)
-              {
-                curvePoint = ArrayUtil.add (new byte[]{0}, curvePoint);
-              }
-            setBinary (name, curvePoint);
-          }
-      }
-
-    void setCryptoBinary (BigInteger value, String name) throws IOException
-      {
-        byte[] cryptoBinary = value.toByteArray ();
-        if (cryptoBinary[0] == 0x00)
-          {
-            byte[] woZero = new byte[cryptoBinary.length - 1];
-            System.arraycopy (cryptoBinary, 1, woZero, 0, woZero.length);
-            cryptoBinary = woZero;
-          }
-        setBinary (name, cryptoBinary);
-      }
-
-/**
- * Set signature property in JSON object.
- * This is the JCS signature creation method.
- * @param signer The interface to the signing key and type
- * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
- * @throws IOException In case there a problem with keys etc.
- * <br>&nbsp;<br><b>Sample Code:</b>
-     <pre>
-    import java.io.IOException;
-
-    import java.security.PrivateKey;
-    import java.security.PublicKey;
-    import java.security.SecureRandom;
-
-    import org.webpki.crypto.AsymKeySignerInterface;
-    import org.webpki.crypto.AsymSignatureAlgorithms;
-    import org.webpki.crypto.SignatureWrapper;
-
-    import org.webpki.json.JSONAsymKeySigner;
-    import org.webpki.json.JSONAsymKeyVerifier;
-    import org.webpki.json.JSONObjectReader;
-    import org.webpki.json.JSONObjectWriter;
-    import org.webpki.json.JSONOutputFormats;
-    import org.webpki.json.JSONParser;
-    import org.webpki.json.JSONSignatureDecoder;
-
-           .
-           .
-           .
-
-    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
-    
-      // Create an empty JSON document
-      JSONObjectWriter writer = new JSONObjectWriter();
-    
-      // Fill it with some data
-      writer.setString("myProperty", "Some data");
-    
-      // Sign document
-      writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
-        {@literal @}Override
-        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
-          try {
-            return new SignatureWrapper(algorithm, privateKey).update(data).sign();
-          } catch (GeneralSecurityException e) {
-            throw new IOException(e);
-          }
-        }
-        {@literal @}Override
-        public PublicKey getPublicKey() throws IOException {
-          return publicKey;
-        }
-      }));
-    
-      // Serialize document
-      String json = writer.toString();
-    
-      // Print document on the console
-      System.out.println("Signed doc: " + json);
-    
-      // Parse document
-      JSONObjectReader reader = JSONParser.parse(json);
-    
-      // Get and verify signature
-      JSONSignatureDecoder signature = reader.getSignature();
-      signature.verify(new JSONAsymKeyVerifier(publicKey));
-    
-      // Print document payload on the console
-      System.out.println("Returned data: " + reader.getString("myProperty"));
     }
-</pre>
-*/
-    public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
-      {
-        JSONObjectWriter signatureWriter = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
-        signatureWriter.setString (JSONSignatureDecoder.ALGORITHM_JSON,
-                                   signer.getAlgorithm ().getAlgorithmId (signer.algorithmPreferences));
-        if (signer.keyId != null)
-          {
-            signatureWriter.setString (JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
-          }
-        signer.writeKeyData (signatureWriter);
-        if (signer.extensions != null)
-          {
-            Vector<JSONValue> array = new Vector<JSONValue> ();
-            for (JSONObjectWriter jor : signer.extensions)
-              {
-                array.add (new JSONValue (JSONTypes.OBJECT, jor.root));
-              }
-            signatureWriter.setProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
-          }
-        signatureWriter.setBinary (JSONSignatureDecoder.VALUE_JSON, 
-                                   signer.signData (signer.normalizedData = serializeJSONObject (JSONOutputFormats.NORMALIZED)));
+
+    static String es6Long2NumberConversion(long value) throws IOException {
+        if (Math.abs(value) > MAX_SAFE_INTEGER) {
+            throw new IOException("Integer values must not exceed " + MAX_SAFE_INTEGER + " for safe representation");
+        }
+        return es6JsonNumberSerialization(value);
+    }
+
+    public JSONObjectWriter setInt(String name, int value) throws IOException {
+        return setInt53(name, value);
+    }
+
+    public JSONObjectWriter setInt53(String name, long value) throws IOException {
+        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6Long2NumberConversion(value)));
+    }
+
+    public JSONObjectWriter setDouble(String name, double value) throws IOException {
+        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6JsonNumberSerialization(value)));
+    }
+
+    public JSONObjectWriter setBigInteger(String name, BigInteger value) throws IOException {
+        return setString(name, value.toString());
+    }
+
+    static String bigDecimalToString(BigDecimal value, Integer decimals) {
+        return (decimals == null ? value : value.setScale(decimals)).toPlainString();
+    }
+
+    public JSONObjectWriter setBigDecimal(String name, BigDecimal value) throws IOException {
+        return setString(name, bigDecimalToString(value, null));
+    }
+
+    public JSONObjectWriter setBigDecimal(String name, BigDecimal value, Integer decimals) throws IOException {
+        return setString(name, bigDecimalToString(value, decimals));
+    }
+
+    public JSONObjectWriter setBoolean(String name, boolean value) throws IOException {
+        return setProperty(name, new JSONValue(JSONTypes.BOOLEAN, Boolean.toString(value)));
+    }
+
+    public JSONObjectWriter setNULL(String name) throws IOException {
+        return setProperty(name, new JSONValue(JSONTypes.NULL, "null"));
+    }
+
+    public JSONObjectWriter setDateTime(String name, Date dateTime, boolean forceUtc) throws IOException {
+        return setString(name, ISODateTime.formatDateTime(dateTime, forceUtc));
+    }
+
+    public JSONObjectWriter setBinary(String name, byte[] value) throws IOException {
+        return setString(name, Base64URL.encode(value));
+    }
+
+    public JSONObjectWriter setObject(String name, JSONObjectReader reader) throws IOException {
+        setProperty(name, new JSONValue(JSONTypes.OBJECT, reader.root));
         return this;
-      }
+    }
+
+    public JSONObjectWriter setObject(String name, JSONObjectWriter writer) throws IOException {
+        setProperty(name, new JSONValue(JSONTypes.OBJECT, writer.root));
+        return this;
+    }
+
+    public JSONObjectWriter setObject(String name) throws IOException {
+        JSONObjectWriter writer = new JSONObjectWriter();
+        setProperty(name, new JSONValue(JSONTypes.OBJECT, writer.root));
+        return writer;
+    }
+
+    public JSONArrayWriter setArray(String name) throws IOException {
+        JSONArrayWriter writer = new JSONArrayWriter();
+        setProperty(name, new JSONValue(JSONTypes.ARRAY, writer.array));
+        return writer;
+    }
+
+    public JSONObjectWriter setArray(String name, JSONArrayWriter writer) throws IOException {
+        setProperty(name, new JSONValue(JSONTypes.ARRAY, writer.array));
+        return this;
+    }
+
+    JSONObjectWriter setStringArray(String name, String[] values, JSONTypes jsonType) throws IOException {
+        Vector<JSONValue> array = new Vector<JSONValue>();
+        for (String value : values) {
+            array.add(new JSONValue(jsonType, value));
+        }
+        return setProperty(name, new JSONValue(JSONTypes.ARRAY, array));
+    }
+
+    public JSONObjectWriter setBinaryArray(String name, Vector<byte[]> values) throws IOException {
+        Vector<String> array = new Vector<String>();
+        for (byte[] value : values) {
+            array.add(Base64URL.encode(value));
+        }
+        return setStringArray(name, array.toArray(new String[0]));
+    }
+
+    public JSONObjectWriter setStringArray(String name, String[] values) throws IOException {
+        return setStringArray(name, values, JSONTypes.STRING);
+    }
+
+    void setCurvePoint(BigInteger value, String name, KeyAlgorithms ec) throws IOException {
+        byte[] curvePoint = value.toByteArray();
+        if (curvePoint.length > (ec.getPublicKeySizeInBits() + 7) / 8) {
+            if (curvePoint[0] != 0) {
+                throw new IOException("Unexpected EC \"" + name + "\" value");
+            }
+            setCryptoBinary(value, name);
+        } else {
+            while (curvePoint.length < (ec.getPublicKeySizeInBits() + 7) / 8) {
+                curvePoint = ArrayUtil.add(new byte[]{0}, curvePoint);
+            }
+            setBinary(name, curvePoint);
+        }
+    }
+
+    void setCryptoBinary(BigInteger value, String name) throws IOException {
+        byte[] cryptoBinary = value.toByteArray();
+        if (cryptoBinary[0] == 0x00) {
+            byte[] woZero = new byte[cryptoBinary.length - 1];
+            System.arraycopy(cryptoBinary, 1, woZero, 0, woZero.length);
+            cryptoBinary = woZero;
+        }
+        setBinary(name, cryptoBinary);
+    }
+
+    /**
+     * Set signature property in JSON object.
+     * This is the JCS signature creation method.
+     *
+     * @param signer The interface to the signing key and type
+     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException In case there a problem with keys etc.
+     * <br>&nbsp;<br><b>Sample Code:</b>
+     *                     <pre>
+     *                     import java.io.IOException;
+     *
+     *                     import java.security.PrivateKey;
+     *                     import java.security.PublicKey;
+     *                     import java.security.SecureRandom;
+     *
+     *                     import org.webpki.crypto.AsymKeySignerInterface;
+     *                     import org.webpki.crypto.AsymSignatureAlgorithms;
+     *                     import org.webpki.crypto.SignatureWrapper;
+     *
+     *                     import org.webpki.json.JSONAsymKeySigner;
+     *                     import org.webpki.json.JSONAsymKeyVerifier;
+     *                     import org.webpki.json.JSONObjectReader;
+     *                     import org.webpki.json.JSONObjectWriter;
+     *                     import org.webpki.json.JSONOutputFormats;
+     *                     import org.webpki.json.JSONParser;
+     *                     import org.webpki.json.JSONSignatureDecoder;
+     *
+     *                     .
+     *                     .
+     *                     .
+     *
+     *                     public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+     *
+     *                     // Create an empty JSON document
+     *                     JSONObjectWriter writer = new JSONObjectWriter();
+     *
+     *                     // Fill it with some data
+     *                     writer.setString("myProperty", "Some data");
+     *
+     *                     // Sign document
+     *                     writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
+     *                     {@literal @}Override
+     *                     public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+     *                     try {
+     *                     return new SignatureWrapper(algorithm, privateKey).update(data).sign();
+     *                     } catch (GeneralSecurityException e) {
+     *                     throw new IOException(e);
+     *                     }
+     *                     }
+     *                     {@literal @}Override
+     *                     public PublicKey getPublicKey() throws IOException {
+     *                     return publicKey;
+     *                     }
+     *                     }));
+     *
+     *                     // Serialize document
+     *                     String json = writer.toString();
+     *
+     *                     // Print document on the console
+     *                     System.out.println("Signed doc: " + json);
+     *
+     *                     // Parse document
+     *                     JSONObjectReader reader = JSONParser.parse(json);
+     *
+     *                     // Get and verify signature
+     *                     JSONSignatureDecoder signature = reader.getSignature();
+     *                     signature.verify(new JSONAsymKeyVerifier(publicKey));
+     *
+     *                     // Print document payload on the console
+     *                     System.out.println("Returned data: " + reader.getString("myProperty"));
+     *                     }
+     *                     </pre>
+     */
+    public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
+        JSONObjectWriter signatureWriter = setObject(JSONSignatureDecoder.SIGNATURE_JSON);
+        signatureWriter.setString(JSONSignatureDecoder.ALGORITHM_JSON,
+                signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
+        if (signer.keyId != null) {
+            signatureWriter.setString(JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+        }
+        signer.writeKeyData(signatureWriter);
+        if (signer.extensions != null) {
+            Vector<JSONValue> array = new Vector<JSONValue>();
+            for (JSONObjectWriter jor : signer.extensions) {
+                array.add(new JSONValue(JSONTypes.OBJECT, jor.root));
+            }
+            signatureWriter.setProperty(JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue(JSONTypes.ARRAY, array));
+        }
+        signatureWriter.setBinary(JSONSignatureDecoder.VALUE_JSON,
+                                  signer.signData(signer.normalizedData = 
+                                      serializeJSONObject(JSONOutputFormats.NORMALIZED)));
+        return this;
+    }
 
     public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
         setObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).setCorePublicKey(publicKey, algorithmPreferences);
@@ -432,52 +388,47 @@ public class JSONObjectWriter implements Serializable
         KeyAlgorithms keyAlg = KeyAlgorithms.getKeyAlgorithm(publicKey);
         if (keyAlg.isRSAKey()) {
             setString(JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
-            RSAPublicKey rsaPublicKey = (RSAPublicKey)publicKey;
-            setCryptoBinary (rsaPublicKey.getModulus(), JSONSignatureDecoder.N_JSON);
-            setCryptoBinary (rsaPublicKey.getPublicExponent(), JSONSignatureDecoder.E_JSON);
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            setCryptoBinary(rsaPublicKey.getModulus(), JSONSignatureDecoder.N_JSON);
+            setCryptoBinary(rsaPublicKey.getPublicExponent(), JSONSignatureDecoder.E_JSON);
         } else {
             setString(JSONSignatureDecoder.TYPE_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
             setString(JSONSignatureDecoder.CURVE_JSON, keyAlg.getAlgorithmId(algorithmPreferences));
-            ECPoint ecPoint = ((ECPublicKey)publicKey).getW();
+            ECPoint ecPoint = ((ECPublicKey) publicKey).getW();
             setCurvePoint(ecPoint.getAffineX(), JSONSignatureDecoder.X_JSON, keyAlg);
             setCurvePoint(ecPoint.getAffineY(), JSONSignatureDecoder.Y_JSON, keyAlg);
         }
         return this;
     }
 
-    public JSONObjectWriter setPublicKey (PublicKey publicKey) throws IOException
-      {
-        return setPublicKey (publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-      }
+    public JSONObjectWriter setPublicKey(PublicKey publicKey) throws IOException {
+        return setPublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+    }
 
-    public JSONObjectWriter setCertificatePath (X509Certificate[] certificatePath) throws IOException
-      {
+    public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
         X509Certificate lastCertificate = null;
-        Vector<byte[]> certificates = new Vector<byte[]> ();
-        for (X509Certificate certificate : certificatePath)
-          {
-            try
-              {
-                certificates.add (JSONSignatureDecoder.pathCheck (lastCertificate, lastCertificate = certificate).getEncoded ());
-              }
-            catch (GeneralSecurityException e)
-              {
-                throw new IOException (e);
-              }
-          }
-        setBinaryArray (JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
+        Vector<byte[]> certificates = new Vector<byte[]>();
+        for (X509Certificate certificate : certificatePath) {
+            try {
+                certificates.add(JSONSignatureDecoder.pathCheck(lastCertificate, 
+                                                                lastCertificate = certificate).getEncoded());
+            } catch (GeneralSecurityException e) {
+                throw new IOException(e);
+            }
+        }
+        setBinaryArray(JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
         return this;
-      }
+    }
 
     private JSONObjectWriter encryptData(byte[] unencryptedData,
                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                          String keyId,
                                          byte[] dataEncryptionKey,
                                          JSONObjectWriter encryptedKey)
-    throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException {
         setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
         if (encryptedKey == null) {
-             if (keyId != null) {
+            if (keyId != null) {
                 setString(JSONSignatureDecoder.KEY_ID_JSON, keyId);
             }
         } else {
@@ -497,26 +448,26 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setEncryptionObject(byte[] unencryptedData,
                                                 DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                 PublicKey keyEncryptionKey,
-                                                KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
-    throws IOException, GeneralSecurityException {
+                                                KeyEncryptionAlgorithms keyEncryptionAlgorithm)
+            throws IOException, GeneralSecurityException {
         JSONObjectWriter encryptedKey = new JSONObjectWriter()
-            .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
+                .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
         byte[] dataEncryptionKey = null;
         encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
         if (keyEncryptionAlgorithm.isRsa()) {
             dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dataEncryptionAlgorithm);
             encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
-                                   EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
-                                                                dataEncryptionKey,
-                                                                keyEncryptionKey));
+                    EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
+                                                 dataEncryptionKey,
+                                                 keyEncryptionKey));
         } else {
             EncryptionCore.EcdhSenderResult result =
-                EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
-                                                  dataEncryptionAlgorithm,
-                                                  keyEncryptionKey);
+                    EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
+                                                      dataEncryptionAlgorithm,
+                                                      keyEncryptionKey);
             dataEncryptionKey = result.getSharedSecret();
             encryptedKey.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
-                .setCorePublicKey(result.getEphemeralKey(), AlgorithmPreferences.JOSE);
+                    .setCorePublicKey(result.getEphemeralKey(), AlgorithmPreferences.JOSE);
         }
         return encryptData(unencryptedData,
                            dataEncryptionAlgorithm,
@@ -529,405 +480,327 @@ public class JSONObjectWriter implements Serializable
                                                 DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                 String keyId,
                                                 byte[] dataEncryptionKey)
-    throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException {
         return encryptData(unencryptedData, dataEncryptionAlgorithm, keyId, dataEncryptionKey, null);
     }
 
-    void newLine ()
-      {
-        if (prettyPrint)
-          {
-            buffer.append (htmlMode ? "<br>" : "\n");
-          }
-      }
+    void newLine() {
+        if (prettyPrint) {
+            buffer.append(htmlMode ? "<br>" : "\n");
+        }
+    }
 
-    void indentLine ()
-      {
+    void indentLine() {
         indent += indentFactor;
-      }
+    }
 
-    void undentLine ()
-      {
+    void undentLine() {
         indent -= indentFactor;
-      }
+    }
 
     @SuppressWarnings("unchecked")
-    void printOneElement (JSONValue jsonValue)
-      {
-        switch (jsonValue.type)
-          {
+    void printOneElement(JSONValue jsonValue) {
+        switch (jsonValue.type) {
             case ARRAY:
-              printArray ((Vector<JSONValue>) jsonValue.value);
-              break;
-  
+                printArray((Vector<JSONValue>) jsonValue.value);
+                break;
+
             case OBJECT:
-              printObject ((JSONObject) jsonValue.value);
-              break;
-  
+                printObject((JSONObject) jsonValue.value);
+                break;
+
             default:
-              printSimpleValue (jsonValue, false);
-          }
-      }
+                printSimpleValue(jsonValue, false);
+        }
+    }
 
-    void newUndentSpace ()
-      {
-        newLine ();
-        undentLine ();
-        spaceOut ();
-      }
+    void newUndentSpace() {
+        newLine();
+        undentLine();
+        spaceOut();
+    }
 
-    void newIndentSpace ()
-      {
-        newLine ();
-        indentLine ();
-        spaceOut ();
-      }
+    void newIndentSpace() {
+        newLine();
+        indentLine();
+        spaceOut();
+    }
 
-    void printObject (JSONObject object)
-      {
-        buffer.append ('{');
-        indentLine ();
+    void printObject(JSONObject object) {
+        buffer.append('{');
+        indentLine();
         boolean next = false;
-        for (String property : object.properties.keySet ())
-          {
-            JSONValue jsonValue = object.properties.get (property);
-            if (next)
-              {
-                buffer.append (',');
-              }
-            newLine ();
+        for (String property : object.properties.keySet()) {
+            JSONValue jsonValue = object.properties.get(property);
+            if (next) {
+                buffer.append(',');
+            }
+            newLine();
             next = true;
-            printProperty (property);
-            printOneElement (jsonValue);
-          }
-        newUndentSpace ();
-        buffer.append ('}');
-      }
+            printProperty(property);
+            printOneElement(jsonValue);
+        }
+        newUndentSpace();
+        buffer.append('}');
+    }
 
     @SuppressWarnings("unchecked")
-    void printArray (Vector<JSONValue> array)
-      {
-         buffer.append ('[');
-         if (!array.isEmpty ())
-          {
+    void printArray(Vector<JSONValue> array) {
+        buffer.append('[');
+        if (!array.isEmpty()) {
             boolean mixed = false;
-            JSONTypes firstType = array.firstElement ().type;
-            for (JSONValue jsonValue : array)
-              {
+            JSONTypes firstType = array.firstElement().type;
+            for (JSONValue jsonValue : array) {
                 if (firstType.complex != jsonValue.type.complex ||
-                    (firstType.complex && firstType != jsonValue.type))
-                    
-                  {
+                        (firstType.complex && firstType != jsonValue.type))
+
+                {
                     mixed = true;
                     break;
-                  }
-              }
-            if (mixed || (array.size() == 1 && firstType == JSONTypes.OBJECT))
-              {
+                }
+            }
+            if (mixed || (array.size() == 1 && firstType == JSONTypes.OBJECT)) {
                 boolean next = false;
-                for (JSONValue value : array)
-                  {
-                    if (next)
-                      {
-                        buffer.append (',');
-                      }
-                    else
-                      {
+                for (JSONValue value : array) {
+                    if (next) {
+                        buffer.append(',');
+                    } else {
                         next = true;
-                      }
-                    printOneElement (value);
-                  }
-              }
-            else if (firstType == JSONTypes.OBJECT)
-              {
-                printArrayObjects (array);
-              }
-            else if (firstType == JSONTypes.ARRAY)
-              {
-                newIndentSpace ();
+                    }
+                    printOneElement(value);
+                }
+            } else if (firstType == JSONTypes.OBJECT) {
+                printArrayObjects(array);
+            } else if (firstType == JSONTypes.ARRAY) {
+                newIndentSpace();
                 boolean next = false;
-                for (JSONValue value : array)
-                  {
+                for (JSONValue value : array) {
                     Vector<JSONValue> subArray = (Vector<JSONValue>) value.value;
-                    if (next)
-                      {
-                        buffer.append (',');
-                      }
-                    else
-                      {
+                    if (next) {
+                        buffer.append(',');
+                    } else {
                         next = true;
-                      }
-                    printArray (subArray);
-                  }
-                newUndentSpace ();
-              }
-            else
-              {
-                printArraySimple (array);
-              }
-          }
-        buffer.append (']');
-      }
+                    }
+                    printArray(subArray);
+                }
+                newUndentSpace();
+            } else {
+                printArraySimple(array);
+            }
+        }
+        buffer.append(']');
+    }
 
-    void printArraySimple (Vector<JSONValue> array)
-      {
+    void printArraySimple(Vector<JSONValue> array) {
         int i = 0;
-        for (JSONValue value : array)
-          {
-            i += ((String)value.value).length ();
-          }
+        for (JSONValue value : array) {
+            i += ((String) value.value).length();
+        }
         boolean brokenLines = i > 100;
         boolean next = false;
-        if (brokenLines)
-          {
-            indentLine ();
-            newLine ();
-          }
-        for (JSONValue value : array)
-          {
-            if (next)
-              {
-                buffer.append (',');
-                if (brokenLines)
-                  {
-                    newLine ();
-                  }
-              }
-            if (brokenLines)
-              {
-                spaceOut ();
-              }
-            printSimpleValue (value, false);
+        if (brokenLines) {
+            indentLine();
+            newLine();
+        }
+        for (JSONValue value : array) {
+            if (next) {
+                buffer.append(',');
+                if (brokenLines) {
+                    newLine();
+                }
+            }
+            if (brokenLines) {
+                spaceOut();
+            }
+            printSimpleValue(value, false);
             next = true;
-          }
-        if (brokenLines)
-          {
-            newUndentSpace ();
-          }
-      }
+        }
+        if (brokenLines) {
+            newUndentSpace();
+        }
+    }
 
-    void printArrayObjects (Vector<JSONValue> array)
-      {
-        newIndentSpace ();
+    void printArrayObjects(Vector<JSONValue> array) {
+        newIndentSpace();
         boolean next = false;
-        for (JSONValue value : array)
-          {
-            if (next)
-              {
-                buffer.append (',');
-                newLine ();
-                spaceOut ();
-              }
-            printObject ((JSONObject)value.value);
+        for (JSONValue value : array) {
+            if (next) {
+                buffer.append(',');
+                newLine();
+                spaceOut();
+            }
+            printObject((JSONObject) value.value);
             next = true;
-          }
-        newUndentSpace ();
-      }
+        }
+        newUndentSpace();
+    }
 
     @SuppressWarnings("fallthrough")
-    void printSimpleValue (JSONValue value, boolean property)
-      {
+    void printSimpleValue(JSONValue value, boolean property) {
         String string = (String) value.value;
-        if (value.type != JSONTypes.STRING)
-          {
-            if (htmlMode)
-              {
-                buffer.append ("<span style=\"color:")
-                      .append (htmlVariableColor)
-                      .append ("\">");
-              }
-            buffer.append (string);
-            if (htmlMode)
-              {
-                buffer.append ("</span>");
-              }
+        if (value.type != JSONTypes.STRING) {
+            if (htmlMode) {
+                buffer.append("<span style=\"color:")
+                        .append(htmlVariableColor)
+                        .append("\">");
+            }
+            buffer.append(string);
+            if (htmlMode) {
+                buffer.append("</span>");
+            }
             return;
-          }
-        boolean quoted = !property || !javaScriptMode || !JS_ID_PATTERN.matcher (string).matches ();
-        if (htmlMode)
-          {
-            buffer.append ("&quot;<span style=\"color:")
-                  .append (property ? string.startsWith ("@") ? htmlKeywordColor : htmlPropertyColor : htmlStringColor)
-                  .append ("\">");
-          }
-        else if (quoted)
-          {
-            buffer.append ('"');
-          }
-        for (char c : string.toCharArray ())
-          {
-            if (htmlMode)
-              {
-                switch (c)
-                  {
+        }
+        boolean quoted = !property || !javaScriptMode || !JS_ID_PATTERN.matcher(string).matches();
+        if (htmlMode) {
+            buffer.append("&quot;<span style=\"color:")
+                    .append(property ? string.startsWith("@") ? htmlKeywordColor : htmlPropertyColor : htmlStringColor)
+                    .append("\">");
+        } else if (quoted) {
+            buffer.append('"');
+        }
+        for (char c : string.toCharArray()) {
+            if (htmlMode) {
+                switch (c) {
 /* 
       HTML needs specific escapes...
 */
                     case '<':
-                      buffer.append ("&lt;");
-                      continue;
-    
+                        buffer.append("&lt;");
+                        continue;
+
                     case '>':
-                      buffer.append ("&gt;");
-                      continue;
-    
+                        buffer.append("&gt;");
+                        continue;
+
                     case '&':
-                      buffer.append ("&amp;");
-                      continue;
+                        buffer.append("&amp;");
+                        continue;
 
                     case '"':
-                      buffer.append ("\\&quot;");
-                      continue;
-                  }
-              }
+                        buffer.append("\\&quot;");
+                        continue;
+                }
+            }
 
-            switch (c)
-              {
+            switch (c) {
                 case '\\':
                 case '"':
-                  escapeCharacter (c);
-                  break;
+                    escapeCharacter(c);
+                    break;
 
                 case '\b':
-                  escapeCharacter ('b');
-                  break;
+                    escapeCharacter('b');
+                    break;
 
                 case '\f':
-                  escapeCharacter ('f');
-                  break;
+                    escapeCharacter('f');
+                    break;
 
                 case '\n':
-                  escapeCharacter ('n');
-                  break;
+                    escapeCharacter('n');
+                    break;
 
                 case '\r':
-                  escapeCharacter ('r');
-                  break;
+                    escapeCharacter('r');
+                    break;
 
                 case '\t':
-                  escapeCharacter ('t');
-                  break;
+                    escapeCharacter('t');
+                    break;
 
                 case '&':
-                  if (javaScriptMode)
-                    {
-                      buffer.append ("\\u0026");
-                      break;
+                    if (javaScriptMode) {
+                        buffer.append("\\u0026");
+                        break;
                     }
 
                 case '>':
-                  if (javaScriptMode)
-                    {
-                      buffer.append ("\\u003e");
-                      break;
+                    if (javaScriptMode) {
+                        buffer.append("\\u003e");
+                        break;
                     }
 
                 case '<':
-                  if (javaScriptMode)
-                    {
-                      buffer.append ("\\u003c");
-                      break;
+                    if (javaScriptMode) {
+                        buffer.append("\\u003c");
+                        break;
                     }
 
                 default:
-                  if (c < 0x20)
-                    {
-                      escapeCharacter ('u');
-                      for (int i = 0; i < 4; i++)
-                        {
-                          int hex = c >>> 12;
-                          buffer.append ((char)(hex > 9 ? hex + 'a' - 10 : hex + '0'));
-                          c <<= 4;
+                    if (c < 0x20) {
+                        escapeCharacter('u');
+                        for (int i = 0; i < 4; i++) {
+                            int hex = c >>> 12;
+                            buffer.append((char) (hex > 9 ? hex + 'a' - 10 : hex + '0'));
+                            c <<= 4;
                         }
-                      break;
+                        break;
                     }
-                  buffer.append (c);
-              }
-          }
-        if (htmlMode)
-          {
-            buffer.append ("</span>&quot;");
-          }
-        else if (quoted)
-          {
-            buffer.append ('"');
-          }
-      }
+                    buffer.append(c);
+            }
+        }
+        if (htmlMode) {
+            buffer.append("</span>&quot;");
+        } else if (quoted) {
+            buffer.append('"');
+        }
+    }
 
-    void escapeCharacter (char c)
-      {
-        buffer.append ('\\').append (c);
-      }
+    void escapeCharacter(char c) {
+        buffer.append('\\').append(c);
+    }
 
-    void singleSpace ()
-      {
-        if (prettyPrint)
-          {
-            if (htmlMode)
-              {
-                buffer.append ("&nbsp;");
-              }
-            else
-              {
-                buffer.append (' ');
-              }
-          }
-      }
+    void singleSpace() {
+        if (prettyPrint) {
+            if (htmlMode) {
+                buffer.append("&nbsp;");
+            } else {
+                buffer.append(' ');
+            }
+        }
+    }
 
-    void printProperty (String name)
-      {
-        spaceOut ();
-        printSimpleValue (new JSONValue (JSONTypes.STRING, name), true);
-        buffer.append (':');
-        singleSpace ();
-      }
+    void printProperty(String name) {
+        spaceOut();
+        printSimpleValue(new JSONValue(JSONTypes.STRING, name), true);
+        buffer.append(':');
+        singleSpace();
+    }
 
-    void spaceOut ()
-      {
-        for (int i = 0; i < indent; i++)
-          {
-            singleSpace ();
-          }
-      }
+    void spaceOut() {
+        for (int i = 0; i < indent; i++) {
+            singleSpace();
+        }
+    }
 
     @SuppressWarnings("unchecked")
-    public byte[] serializeJSONObject (JSONOutputFormats outputFormat) throws IOException
-      {
-        buffer = new StringBuffer ();
+    public byte[] serializeJSONObject(JSONOutputFormats outputFormat) throws IOException {
+        buffer = new StringBuffer();
         indentFactor = outputFormat == JSONOutputFormats.PRETTY_HTML ? htmlIndent : STANDARD_INDENT;
         prettyPrint = outputFormat.pretty;
         javaScriptMode = outputFormat.javascript;
         htmlMode = outputFormat.html;
-        if (root.properties.containsKey (null))
-          {
-            printArray ((Vector<JSONValue>)root.properties.get (null).value);
-          }
-        else
-          {
-            printObject (root);
-          }
-        if (!javaScriptMode)
-          {
-            newLine ();
-          }
-        return buffer.toString ().getBytes ("UTF-8");
-      }
+        if (root.properties.containsKey(null)) {
+            printArray((Vector<JSONValue>) root.properties.get(null).value);
+        } else {
+            printObject(root);
+        }
+        if (!javaScriptMode) {
+            newLine();
+        }
+        return buffer.toString().getBytes("UTF-8");
+    }
 
-    public String serializeToString (JSONOutputFormats format) throws IOException
-      {
-        return new String (serializeJSONObject (format), "UTF-8");
-      }
+    public String serializeToString(JSONOutputFormats format) throws IOException {
+        return new String(serializeJSONObject(format), "UTF-8");
+    }
 
     @Override
-    public String toString ()
-      {
-        try
-          {
-            return serializeToString (JSONOutputFormats.PRETTY_PRINT);
-          }
-        catch (IOException e)
-          {
-            throw new RuntimeException (e);
-          }
-      }
-  }
+    public String toString() {
+        try {
+            return serializeToString(JSONOutputFormats.PRETTY_PRINT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

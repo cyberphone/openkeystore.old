@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,77 +20,64 @@ import java.io.UnsupportedEncodingException;
 
 import java.util.LinkedHashMap;
 
-public class Extension
-  {
+public class Extension {
     String qualifier;
     byte[] extensionData;
     byte sub_type;
 
-    public Extension (byte sub_type, String qualifier, byte[] extensionData)
-      {
+    public Extension(byte sub_type, String qualifier, byte[] extensionData) {
         this.sub_type = sub_type;
         this.qualifier = qualifier;
         this.extensionData = extensionData;
-      }
-    
-    public String getQualifier ()
-      {
+    }
+
+    public String getQualifier() {
         return qualifier;
-      }
-    
-    public byte getSubType ()
-      {
+    }
+
+    public byte getSubType() {
         return sub_type;
-      }
+    }
 
-    public byte[] getExtensionData(byte sub_type) throws SKSException
-      {
-        if (this.sub_type != sub_type)
-          {
+    public byte[] getExtensionData(byte sub_type) throws SKSException {
+        if (this.sub_type != sub_type) {
             throw new SKSException("Non-matching sub-type: " + this.sub_type);
-          }
+        }
         return extensionData;
-      }
+    }
 
-    public byte[] getExtensionData ()
-      {
+    public byte[] getExtensionData() {
         return extensionData;
-      }
-    
-    
-    private int getShort (int index)
-      {
+    }
+
+
+    private int getShort(int index) {
         return ((extensionData[index++] << 8) & 0xFF00) + (extensionData[index] & 0xFF);
-      }
-    
-    public Property[] getProperties () throws SKSException
-      {
-        LinkedHashMap<String,Property> properties = new LinkedHashMap<String,Property> ();
-        if (sub_type != SecureKeyStore.SUB_TYPE_PROPERTY_BAG) throw new SKSException ("Not a \"PropertyBag\"");
+    }
+
+    public Property[] getProperties() throws SKSException {
+        LinkedHashMap<String, Property> properties = new LinkedHashMap<String, Property>();
+        if (sub_type != SecureKeyStore.SUB_TYPE_PROPERTY_BAG)
+            throw new SKSException("Not a \"PropertyBag\"");
         int i = 0;
-        try
-          {
-            while (i != extensionData.length)
-              {
-                int nam_len = getShort (i);
+        try {
+            while (i != extensionData.length) {
+                int nam_len = getShort(i);
                 i += 2;
-                String name = new String (extensionData, i, nam_len, "UTF-8");
+                String name = new String(extensionData, i, nam_len, "UTF-8");
                 i += nam_len;
                 boolean writable = extensionData[i] == 0x01;
-                int val_len = getShort (++i);
+                int val_len = getShort(++i);
                 i += 2;
-                String value = new String (extensionData, i, val_len, "UTF-8");
+                String value = new String(extensionData, i, val_len, "UTF-8");
                 i += val_len;
-                if (properties.put (name, new Property (name, writable, value)) != null)
-                  {
-                    throw new SKSException ("Duplicate property: " + name);
-                  }
-              }
-            return properties.values ().toArray (new Property[0]);
-          }
-        catch (UnsupportedEncodingException e)
-          {
-            throw new SKSException (e, SKSException.ERROR_INTERNAL);
-          }
-      }
-  }
+                if (properties.put(name, new Property(name, writable, value)) != null) {
+                    throw new SKSException("Duplicate property: " + name);
+                }
+            }
+            return properties.values().toArray(new Property[0]);
+        } catch (UnsupportedEncodingException e) {
+            throw new SKSException(e, SKSException.ERROR_INTERNAL);
+        }
+    }
+}

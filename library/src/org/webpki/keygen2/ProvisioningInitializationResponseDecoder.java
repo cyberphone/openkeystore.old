@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,74 +26,69 @@ import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
+public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator {
 
-public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
-  {
     private static final long serialVersionUID = 1L;
 
     String server_session_id;
-    
+
     String client_session_id;
 
     Date server_time;
-    
+
     Date client_time;
-    
+
     ECPublicKey client_ephemeral_key;
-    
+
     byte[] attestation;
-    
+
     X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
-    
+
     byte[] server_certificate_fingerprint;  // Optional
 
     JSONSignatureDecoder signature;
 
-    public X509Certificate[] getDeviceCertificatePath ()
-      {
+    public X509Certificate[] getDeviceCertificatePath() {
         return device_certificate_path;
-      }
+    }
 
     @Override
-    protected void readJSONData (JSONObjectReader rd) throws IOException
-      {
+    protected void readJSONData(JSONObjectReader rd) throws IOException {
         /////////////////////////////////////////////////////////////////////////////////////////
         // The core session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        attestation = rd.getBinary (ATTESTATION_JSON);
-        
-        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
+        attestation = rd.getBinary(ATTESTATION_JSON);
 
-        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
+        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
 
-        server_time = rd.getDateTime (SERVER_TIME_JSON).getTime ();
+        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        client_time = rd.getDateTime (CLIENT_TIME_JSON).getTime ();
+        server_time = rd.getDateTime(SERVER_TIME_JSON).getTime();
 
-        server_certificate_fingerprint = rd.getBinaryConditional (SERVER_CERT_FP_JSON);
-        
+        client_time = rd.getDateTime(CLIENT_TIME_JSON).getTime();
+
+        server_certificate_fingerprint = rd.getBinaryConditional(SERVER_CERT_FP_JSON);
+
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the ephemeral client key
         /////////////////////////////////////////////////////////////////////////////////////////
-        client_ephemeral_key = (ECPublicKey) rd.getObject (CLIENT_EPHEMERAL_KEY_JSON).getPublicKey ();
+        client_ephemeral_key = (ECPublicKey) rd.getObject(CLIENT_EPHEMERAL_KEY_JSON).getPublicKey();
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasProperty (DEVICE_ID_JSON))
-          {
-            device_certificate_path = rd.getObject (DEVICE_ID_JSON).getCertificatePath ();
-          }
+        if (rd.hasProperty(DEVICE_ID_JSON)) {
+            device_certificate_path = rd.getObject(DEVICE_ID_JSON).getCertificatePath();
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the mandatory provisioning session data signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature ();
-      }
+        signature = rd.getSignature();
+    }
 
     @Override
-    public String getQualifier ()
-      {
-        return KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName ();
-      }
-  }
+    public String getQualifier() {
+        return KeyGen2Messages.PROVISIONING_INITIALIZATION_RESPONSE.getName();
+    }
+}

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,34 +21,30 @@ import java.io.Serializable;
 
 /**
  * Support class for signature verifiers.
- * 
  */
-public abstract class JSONVerifier implements Serializable
-  {
+public abstract class JSONVerifier implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
-    JSONVerifier (JSONSignatureTypes signatureType)
-      {
+    JSONVerifier(JSONSignatureTypes signatureType) {
         this.signatureType = signatureType;
-      }
+    }
 
-    abstract void verify (JSONSignatureDecoder signatureDecoder) throws IOException;
+    abstract void verify(JSONSignatureDecoder signatureDecoder) throws IOException;
 
     JSONSignatureTypes signatureType;
-    
+
     boolean extensionsAllowed;
-    
+
     boolean keyIdAllowed;
-    
-    public JSONVerifier permitExtensions (boolean flag)
-      {
+
+    public JSONVerifier permitExtensions(boolean flag) {
         extensionsAllowed = flag;
         return this;
-      }
+    }
 
-    public JSONVerifier permitKeyId (boolean flag)
-      {
+    public JSONVerifier permitKeyId(boolean flag) {
         keyIdAllowed = flag;
         return this;
-      }
-  }
+    }
+}

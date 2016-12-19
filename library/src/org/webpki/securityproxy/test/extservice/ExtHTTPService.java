@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,18 +31,16 @@ import org.webpki.securityproxy.test.common.SampleRequestObject;
 /**
  * This is the external service java-2-http variant.
  */
-public class ExtHTTPService extends HttpServlet
-  {
+public class ExtHTTPService extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private static Logger logger = Logger.getLogger (ExtHTTPService.class.getName ());
+    private static Logger logger = Logger.getLogger(ExtHTTPService.class.getName());
 
     @Override
-    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        Init.proxy_server.processCall (new SampleRequestObject (new Double (request.getParameter ("X")),
-                                                                new Double (request.getParameter ("Y")),
-                                                                new Long (request.getParameter ("WAIT"))),
-                                       response);
-      }
-  }
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        Init.proxy_server.processCall(new SampleRequestObject(new Double(request.getParameter("X")),
+                        new Double(request.getParameter("Y")),
+                        new Long(request.getParameter("WAIT"))),
+                response);
+    }
+}

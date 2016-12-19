@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,45 +27,39 @@ import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 
-public class XMLCookie implements Serializable
-  {
+public class XMLCookie implements Serializable {
     private static final long serialVersionUID = 1L;
 
     Element element;
 
-    XMLCookie () { }
+    XMLCookie() {
+    }
 
-    public XMLCookie (Element element)
-      {
+    public XMLCookie(Element element) {
         this.element = element;
-      }
+    }
 
-    public XMLCookie (Document d)
-      {
-        this (d.getDocumentElement ());
-      }
-
-
-    public XMLCookie (XMLObjectWrapper wrapper) throws IOException
-      {
-        this (wrapper.toXMLDocument ().document);
-      }
+    public XMLCookie(Document d) {
+        this(d.getDocumentElement());
+    }
 
 
-    public byte[] getData () throws IOException
-      {
-        return DOMUtil.writeXML (element);
-      }
+    public XMLCookie(XMLObjectWrapper wrapper) throws IOException {
+        this(wrapper.toXMLDocument().document);
+    }
 
 
-    public byte[] getC14NData () throws IOException
-      {
-        return XPathCanonicalizer.serializeSubset (element, CanonicalizationAlgorithms.C14N_EXCL);
-      }
+    public byte[] getData() throws IOException {
+        return DOMUtil.writeXML(element);
+    }
 
-    public boolean equals (XMLCookie ref) throws IOException
-      {
-        return ArrayUtil.compare (getC14NData (), ref.getC14NData ());
-      }
-  }
+
+    public byte[] getC14NData() throws IOException {
+        return XPathCanonicalizer.serializeSubset(element, CanonicalizationAlgorithms.C14N_EXCL);
+    }
+
+    public boolean equals(XMLCookie ref) throws IOException {
+        return ArrayUtil.compare(getC14NData(), ref.getC14NData());
+    }
+}
 

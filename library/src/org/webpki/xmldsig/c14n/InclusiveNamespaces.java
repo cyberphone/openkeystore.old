@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  *
  */
 package org.webpki.xmldsig.c14n;
-
 
 
 import java.util.SortedSet;
@@ -37,56 +36,62 @@ import org.w3c.dom.Element;
 @SuppressWarnings("unchecked")
 public class InclusiveNamespaces {
 
-   /** Field _TAG_EC_INCLUSIVENAMESPACES */
-   public static final String _TAG_EC_INCLUSIVENAMESPACES =
-      "InclusiveNamespaces";
+    /**
+     * Field _TAG_EC_INCLUSIVENAMESPACES
+     */
+    public static final String _TAG_EC_INCLUSIVENAMESPACES =
+            "InclusiveNamespaces";
 
-   /** Field _ATT_EC_PREFIXLIST */
-   public static final String _ATT_EC_PREFIXLIST = "PrefixList";
+    /**
+     * Field _ATT_EC_PREFIXLIST
+     */
+    public static final String _ATT_EC_PREFIXLIST = "PrefixList";
 
-   /** Field ExclusiveCanonicalizationNamespace */
-   public static final String ExclusiveCanonicalizationNamespace =
-      "http://www.w3.org/2001/10/xml-exc-c14n#";
+    /**
+     * Field ExclusiveCanonicalizationNamespace
+     */
+    public static final String ExclusiveCanonicalizationNamespace =
+            "http://www.w3.org/2001/10/xml-exc-c14n#";
 
-   /*
-    * Decodes the <code>inclusiveNamespaces</code> String and returns all
-    * selected namespace prefixes as a Set. The <code>#default</code>
-    * namespace token is represented as an empty namespace prefix
-    * (<code>"xmlns"</code>).
-    * <br>
-    * The String <code>inclusiveNamespaces=" xenc    ds #default"</code>
-    * is returned as a Set containing the following Strings:
-    * <UL>
-    * <LI><code>xmlns</code></LI>
-    * <LI><code>xenc</code></LI>
-    * <LI><code>ds</code></LI>
-    * </UL>
-    *
-    * @param inclusiveNamespaces
-    * @return A set to string
-    */
-   public static SortedSet prefixStr2Set(String inclusiveNamespaces) {
+    /*
+     * Decodes the <code>inclusiveNamespaces</code> String and returns all
+     * selected namespace prefixes as a Set. The <code>#default</code>
+     * namespace token is represented as an empty namespace prefix
+     * (<code>"xmlns"</code>).
+     * <br>
+     * The String <code>inclusiveNamespaces=" xenc    ds #default"</code>
+     * is returned as a Set containing the following Strings:
+     * <UL>
+     * <LI><code>xmlns</code></LI>
+     * <LI><code>xenc</code></LI>
+     * <LI><code>ds</code></LI>
+     * </UL>
+     *
+     * @param inclusiveNamespaces
+     * @return A set to string
+     */
+    public static SortedSet prefixStr2Set(String inclusiveNamespaces) {
 
-      SortedSet prefixes = new TreeSet();
+        SortedSet prefixes = new TreeSet();
 
-      if ((inclusiveNamespaces == null)
-              || (inclusiveNamespaces.length() == 0)) {
-         return prefixes;
-      }
+        if ((inclusiveNamespaces == null)
+                || (inclusiveNamespaces.length() == 0)) {
+            return prefixes;
+        }
 
-      StringTokenizer st = new StringTokenizer(inclusiveNamespaces, " \t\r\n");
+        StringTokenizer st = new StringTokenizer(inclusiveNamespaces, " \t\r\n");
 
-      while (st.hasMoreTokens()) {
-         String prefix = st.nextToken();
+        while (st.hasMoreTokens()) {
+            String prefix = st.nextToken();
 
-         if (prefix.equals("#default")) {
-            prefixes.add("xmlns" );
-         } else {
-            prefixes.add( prefix);
-         }
-      }
+            if (prefix.equals("#default")) {
+                prefixes.add("xmlns");
+            } else {
+                prefixes.add(prefix);
+            }
+        }
 
-      return prefixes;
-   }
+        return prefixes;
+    }
 
 } 

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,61 +24,49 @@ import java.math.BigInteger;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 
-public class KeySpecifier implements Serializable
-  {
+public class KeySpecifier implements Serializable {
     private static final long serialVersionUID = 1L;
 
     byte[] parameters;
-    
+
     KeyAlgorithms key_algorithm;
-    
-    public KeySpecifier (KeyAlgorithms key_algorithm)
-      {
+
+    public KeySpecifier(KeyAlgorithms key_algorithm) {
         this.key_algorithm = key_algorithm;
-      }
+    }
 
 
-    KeySpecifier (KeyAlgorithms key_algorithm, byte[] optional_parameter) throws IOException
-      {
-        this (key_algorithm);
-        if (optional_parameter != null)
-          {
-            if (!key_algorithm.hasParameters ())
-              {
-                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' does not use a \"Parameters\"");
-              }
-            if (key_algorithm.isRSAKey ())
-              {
-                parameters = optional_parameter; 
-              }
-            else
-              {
-                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' not fu implemented");
-              }
-          }
-      }
+    KeySpecifier(KeyAlgorithms key_algorithm, byte[] optional_parameter) throws IOException {
+        this(key_algorithm);
+        if (optional_parameter != null) {
+            if (!key_algorithm.hasParameters()) {
+                throw new IOException("Algorithm '" + key_algorithm.toString() + "' does not use a \"Parameters\"");
+            }
+            if (key_algorithm.isRSAKey()) {
+                parameters = optional_parameter;
+            } else {
+                throw new IOException("Algorithm '" + key_algorithm.toString() + "' not fu implemented");
+            }
+        }
+    }
 
 
-    public KeySpecifier (KeyAlgorithms key_algorithm, long parameter) throws IOException
-      {
-        this (key_algorithm, BigInteger.valueOf (parameter).toByteArray ());
-      }
+    public KeySpecifier(KeyAlgorithms key_algorithm, long parameter) throws IOException {
+        this(key_algorithm, BigInteger.valueOf(parameter).toByteArray());
+    }
 
 
-    public KeySpecifier (String uri, byte[] optional_parameters) throws IOException
-      {
-        this (KeyAlgorithms.getKeyAlgorithmFromID (uri, AlgorithmPreferences.SKS), optional_parameters);
-      }
+    public KeySpecifier(String uri, byte[] optional_parameters) throws IOException {
+        this(KeyAlgorithms.getKeyAlgorithmFromID(uri, AlgorithmPreferences.SKS), optional_parameters);
+    }
 
 
-    public byte[] getParameters () throws IOException
-      {
+    public byte[] getParameters() throws IOException {
         return parameters;
-      }
+    }
 
 
-    public KeyAlgorithms getKeyAlgorithm ()
-      {
+    public KeyAlgorithms getKeyAlgorithm() {
         return key_algorithm;
-      }
-  }
+    }
+}

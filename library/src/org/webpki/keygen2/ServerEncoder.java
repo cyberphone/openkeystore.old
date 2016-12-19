@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,94 +27,75 @@ import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
-abstract class ServerEncoder extends JSONEncoder
-  {
+abstract class ServerEncoder extends JSONEncoder {
+
     private static final long serialVersionUID = 1L;
 
-    abstract void writeServerRequest (JSONObjectWriter wr) throws IOException;
-    
-    final void bad (String message) throws IOException
-      {
-        throw new IOException (message);
-      }
-    
-    @Override
-    public final String getContext ()
-      {
-        return KeyGen2Constants.KEYGEN2_NS;
-      }
+    abstract void writeServerRequest(JSONObjectWriter wr) throws IOException;
+
+    final void bad(String message) throws IOException {
+        throw new IOException(message);
+    }
 
     @Override
-    final protected void writeJSONData (JSONObjectWriter wr) throws IOException
-      {
-        writeServerRequest (wr);
+    public final String getContext() {
+        return KeyGen2Constants.KEYGEN2_NS;
+    }
+
+    @Override
+    final protected void writeJSONData(JSONObjectWriter wr) throws IOException {
+        writeServerRequest(wr);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional signature
         ////////////////////////////////////////////////////////////////////////
-        if (signer == null)
-          {
-            checkIfSignatureIsRequired ();
-          }
-        else
-          {
-            checkIfNonceIsSpecified ();
-            wr.setSignature (new JSONX509Signer (signer));
-          }
-      }
+        if (signer == null) {
+            checkIfSignatureIsRequired();
+        } else {
+            checkIfNonceIsSpecified();
+            wr.setSignature(new JSONX509Signer(signer));
+        }
+    }
 
-    void checkIfNonceIsSpecified () throws IOException
-      {
-      }
+    void checkIfNonceIsSpecified() throws IOException {
+    }
 
-    void checkIfSignatureIsRequired () throws IOException
-      {
-      }
+    void checkIfSignatureIsRequired() throws IOException {
+    }
 
     private SignerInterface signer;
-    
-    public void setRequestSigner (SignerInterface signer) throws IOException
-      {
+
+    public void setRequestSigner(SignerInterface signer) throws IOException {
         this.signer = signer;
-      }
-    
-    void setOptionalString (JSONObjectWriter wr, String name, String value) throws IOException
-      {
-        if (value != null)
-          {
-            wr.setString (name, value);
-          }
-      }
+    }
 
-    void setOptionalStringArray (JSONObjectWriter wr, String name, String[] values) throws IOException
-      {
-        if (values != null)
-          {
-            wr.setStringArray (name, values);
-          }
-      }
+    void setOptionalString(JSONObjectWriter wr, String name, String value) throws IOException {
+        if (value != null) {
+            wr.setString(name, value);
+        }
+    }
 
-    void setOptionalBigInteger (JSONObjectWriter wr, String name, BigInteger value) throws IOException
-      {
-        if (value != null)
-          {
-            wr.setBigInteger (name, value);
-          }
-      }
+    void setOptionalStringArray(JSONObjectWriter wr, String name, String[] values) throws IOException {
+        if (values != null) {
+            wr.setStringArray(name, values);
+        }
+    }
 
-    void setOptionalBinary (JSONObjectWriter wr, String name, byte[] value) throws IOException
-      {
-        if (value != null)
-          {
-            wr.setBinary (name, value);
-          }
-      }
+    void setOptionalBigInteger(JSONObjectWriter wr, String name, BigInteger value) throws IOException {
+        if (value != null) {
+            wr.setBigInteger(name, value);
+        }
+    }
 
-    void setOptionalDateTime (JSONObjectWriter wr, String name, Date date_time) throws IOException
-      {
-        if (date_time != null)
-          {
-            wr.setDateTime (name, date_time, true);  // Server UTC
-          }
-      }
-  }
+    void setOptionalBinary(JSONObjectWriter wr, String name, byte[] value) throws IOException {
+        if (value != null) {
+            wr.setBinary(name, value);
+        }
+    }
+
+    void setOptionalDateTime(JSONObjectWriter wr, String name, Date date_time) throws IOException {
+        if (date_time != null) {
+            wr.setDateTime(name, date_time, true);  // Server UTC
+        }
+    }
+}

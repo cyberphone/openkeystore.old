@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,125 +40,97 @@ import org.webpki.util.ArrayUtil;
 /**
  * Simple signature verify program
  */
-public class Verify
-  {
+public class Verify {
     String output_file;
-    
-    static
-      {
-        CustomCryptoProvider.conditionalLoad (true);
-      }
 
-    void setFile (String output_file) throws IOException
-      {
+    static {
+        CustomCryptoProvider.conditionalLoad(true);
+    }
+
+    void setFile(String output_file) throws IOException {
         this.output_file = output_file;
-        ArrayUtil.writeFile(output_file,"Normalized Data\n".getBytes ("UTF-8"));
-      }
- 
-    void recurseObject (JSONObjectReader rd) throws IOException
-      {
-        for (String property : rd.getProperties ())
-          {
-            switch (rd.getPropertyType (property))
-              {
+        ArrayUtil.writeFile(output_file, "Normalized Data\n".getBytes("UTF-8"));
+    }
+
+    void recurseObject(JSONObjectReader rd) throws IOException {
+        for (String property : rd.getProperties()) {
+            switch (rd.getPropertyType(property)) {
                 case OBJECT:
-                  if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
-                    {
-                      JSONSignatureDecoder signature = rd.getSignature (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-                      if (output_file != null)
-                        {
-                          byte[] old = ArrayUtil.readFile (output_file);
-                          ArrayUtil.writeFile (output_file, ArrayUtil.add (old, ArrayUtil.add(new byte[]{'\n','\n'}, signature.getNormalizedData ())));
+                    if (property.equals(JSONSignatureDecoder.SIGNATURE_JSON)) {
+                        JSONSignatureDecoder signature = rd.getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                        if (output_file != null) {
+                            byte[] old = ArrayUtil.readFile(output_file);
+                            ArrayUtil.writeFile(output_file, ArrayUtil.add(old, ArrayUtil.add(new byte[]{'\n', '\n'}, signature.getNormalizedData())));
                         }
-                      switch (signature.getSignatureType ())
-                        {
-                          case ASYMMETRIC_KEY:
-                            try
-                              {
-                                KeyStore ks = ((AsymSignatureAlgorithms)signature.getAlgorithm ()).isRSA () ? 
-                                    DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
-                                PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
-                                signature.verify (new JSONAsymKeyVerifier (public_key));
-                                debugOutput ("Asymmetric key signature validated for: " + public_key.toString ());
-                              }
-                            catch (GeneralSecurityException e)
-                              {
-                                throw new IOException (e);
-                              }
-                            break;
-  
-                          case SYMMETRIC_KEY:
-                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()).permitKeyId (true));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyId ());
-                            break;
-  
-                          default:
-                            KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getExampleDotComKeyStore ());
-                            signature.verify (new JSONX509Verifier (verifier));
-                            debugOutput ("X509 signature validated for: " + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
-                            break;
+                        switch (signature.getSignatureType()) {
+                            case ASYMMETRIC_KEY:
+                                try {
+                                    KeyStore ks = ((AsymSignatureAlgorithms) signature.getAlgorithm()).isRSA() ?
+                                            DemoKeyStore.getMybankDotComKeyStore() : DemoKeyStore.getECDSAStore();
+                                    PublicKey public_key = ks.getCertificate("mykey").getPublicKey();
+                                    signature.verify(new JSONAsymKeyVerifier(public_key));
+                                    debugOutput("Asymmetric key signature validated for: " + public_key.toString());
+                                } catch (GeneralSecurityException e) {
+                                    throw new IOException(e);
+                                }
+                                break;
+
+                            case SYMMETRIC_KEY:
+                                signature.verify(new JSONSymKeyVerifier(new Sign.SymmetricOperations()).permitKeyId(true));
+                                debugOutput("Symmetric key signature validated for Key ID: " + signature.getKeyId());
+                                break;
+
+                            default:
+                                KeyStoreVerifier verifier = new KeyStoreVerifier(DemoKeyStore.getExampleDotComKeyStore());
+                                signature.verify(new JSONX509Verifier(verifier));
+                                debugOutput("X509 signature validated for: " + new CertificateInfo(verifier.getSignerCertificate()).toString());
+                                break;
                         }
+                    } else {
+                        recurseObject(rd.getObject(property));
                     }
-                  else
-                    {
-                      recurseObject (rd.getObject (property));
-                    }
-                  break;
+                    break;
 
                 case ARRAY:
-                  recurseArray (rd.getArray (property));
-                  break;
+                    recurseArray(rd.getArray(property));
+                    break;
 
                 default:
-                  rd.scanAway (property);
-              }
-          }
-      }
+                    rd.scanAway(property);
+            }
+        }
+    }
 
-    void recurseArray (JSONArrayReader array) throws IOException
-      {
-        while (array.hasMore ())
-          {
-            if (array.getElementType () == JSONTypes.OBJECT)
-              {
-                recurseObject (array.getObject ());
-              }
-            else if (array.getElementType () == JSONTypes.ARRAY)
-              {
-                recurseArray (array.getArray ());
-              }
-            else
-              {
-                array.scanAway ();
-              }
-          }        
-      }
+    void recurseArray(JSONArrayReader array) throws IOException {
+        while (array.hasMore()) {
+            if (array.getElementType() == JSONTypes.OBJECT) {
+                recurseObject(array.getObject());
+            } else if (array.getElementType() == JSONTypes.ARRAY) {
+                recurseArray(array.getArray());
+            } else {
+                array.scanAway();
+            }
+        }
+    }
 
-    void debugOutput (String string)
-      {
-        System.out.println (string);
-      }
+    void debugOutput(String string) {
+        System.out.println(string);
+    }
 
-    public static void main (String[] argc)
-      {
-        if (argc.length != 1 && argc.length != 2)
-          {
-            System.out.println ("\ninstance-document-file [normalize-debug-file]");
-            System.exit (0);
-          }
-        try
-          {
-            Verify doc = new Verify ();
-            if (argc.length == 2)
-              {
-                doc.setFile (argc[1]);
-              }
-            doc.recurseObject (JSONParser.parse (ArrayUtil.readFile (argc[0])));
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
-          }
-      }
-  }
+    public static void main(String[] argc) {
+        if (argc.length != 1 && argc.length != 2) {
+            System.out.println("\ninstance-document-file [normalize-debug-file]");
+            System.exit(0);
+        }
+        try {
+            Verify doc = new Verify();
+            if (argc.length == 2) {
+                doc.setFile(argc[1]);
+            }
+            doc.recurseObject(JSONParser.parse(ArrayUtil.readFile(argc[0])));
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}

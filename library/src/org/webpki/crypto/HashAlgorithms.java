@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@ import java.security.MessageDigest;
 import java.security.GeneralSecurityException;
 
 
-public enum HashAlgorithms
-  {
+public enum HashAlgorithms {
+
     SHA1   ("http://www.w3.org/2000/09/xmldsig#sha1",        "1.3.14.3.2.26",          "SHA-1"),
     SHA256 ("http://www.w3.org/2001/04/xmlenc#sha256",       "2.16.840.1.101.3.4.2.1", "SHA-256"),
     SHA384 ("http://www.w3.org/2001/04/xmldsig-more#sha384", "2.16.840.1.101.3.4.2.2", "SHA-384"),
@@ -33,80 +33,63 @@ public enum HashAlgorithms
     private final String oid;       // As expressed in ASN.1 messages
     private final String jcename;   // As expressed for JCE
 
-    private HashAlgorithms (String sksname, String oid, String jcename)
-      {
+    private HashAlgorithms(String sksname, String oid, String jcename) {
         this.sksname = sksname;
         this.oid = oid;
         this.jcename = jcename;
-      }
+    }
 
 
-    public String getAlgorithmId ()
-      {
+    public String getAlgorithmId() {
         return sksname;
-      }
+    }
 
 
-    public String getOID ()
-      {
+    public String getOID() {
         return oid;
-      }
+    }
 
 
-    public String getJCEName ()
-      {
+    public String getJCEName() {
         return jcename;
-      }
+    }
 
-    
-    public static boolean testAlgorithmURI (String sksname)
-      {
-        for (HashAlgorithms alg : HashAlgorithms.values ())
-          {
-            if (sksname.equals (alg.sksname))
-              {
+
+    public static boolean testAlgorithmURI(String sksname) {
+        for (HashAlgorithms alg : HashAlgorithms.values()) {
+            if (sksname.equals(alg.sksname)) {
                 return true;
-              }
-          }
+            }
+        }
         return false;
-      }
+    }
 
 
-    public byte[] digest (byte[] data) throws IOException
-      {
-        try
-          {
-            return MessageDigest.getInstance (getJCEName ()).digest (data);
-          }
-        catch (GeneralSecurityException gse)
-          {
-            throw new IOException (gse);
-          }
-      }
+    public byte[] digest(byte[] data) throws IOException {
+        try {
+            return MessageDigest.getInstance(getJCEName()).digest(data);
+        } catch (GeneralSecurityException gse) {
+            throw new IOException(gse);
+        }
+    }
 
 
-    public static HashAlgorithms getAlgorithmFromID (String algorithm_id) throws IOException
-      {
-        for (HashAlgorithms alg : values ())
-          {
-            if (algorithm_id.equals (alg.sksname))
-              {
+    public static HashAlgorithms getAlgorithmFromID(String algorithm_id) throws IOException {
+        for (HashAlgorithms alg : values()) {
+            if (algorithm_id.equals(alg.sksname)) {
                 return alg;
-              }
-          }
-        throw new IOException ("Unknown algorithm: " + algorithm_id);
-      }
+            }
+        }
+        throw new IOException("Unknown algorithm: " + algorithm_id);
+    }
 
 
-    public static HashAlgorithms getAlgorithmFromOID (String oid) throws IOException
-      {
-        for (HashAlgorithms alg : values ())
-          {
-            if (oid.equals (alg.oid))
-              {
+    public static HashAlgorithms getAlgorithmFromOID(String oid) throws IOException {
+        for (HashAlgorithms alg : values()) {
+            if (oid.equals(alg.oid)) {
                 return alg;
-              }
-          }
-        throw new IOException ("Unknown algorithm: " + oid);
-      }
-  }
+            }
+        }
+        throw new IOException("Unknown algorithm: " + oid);
+    }
+}

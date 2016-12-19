@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,44 +30,40 @@ import org.webpki.wasp.SignatureResponseDecoder;
 import org.webpki.wasp.SignatureProfileResponseDecoder;
 
 
-public class SresDec
-  {
+public class SresDec {
 
-    private static void show ()
-      {
-        System.out.println ("SresDec inputfile [-a]\n    -a  aia support\n");
-        System.exit (3);
-      }
+    private static void show() {
+        System.out.println("SresDec inputfile [-a]\n    -a  aia support\n");
+        System.exit(3);
+    }
 
-    static SignatureResponseDecoder test (String in_file, boolean aia_support) throws Exception
-      {
-        byte[] data = ArrayUtil.readFile (in_file);
-        XMLSchemaCache schema_cache = new XMLSchemaCache ();
-        schema_cache.addWrapper (SignatureResponseDecoder.class);
-        schema_cache.addWrapper (XDSProfileResponseDecoder.class);
+    static SignatureResponseDecoder test(String in_file, boolean aia_support) throws Exception {
+        byte[] data = ArrayUtil.readFile(in_file);
+        XMLSchemaCache schema_cache = new XMLSchemaCache();
+        schema_cache.addWrapper(SignatureResponseDecoder.class);
+        schema_cache.addWrapper(XDSProfileResponseDecoder.class);
 
-        SignatureResponseDecoder sres = (SignatureResponseDecoder) schema_cache.parse (data);
+        SignatureResponseDecoder sres = (SignatureResponseDecoder) schema_cache.parse(data);
 
-        SignatureProfileResponseDecoder prdec = sres.getSignatureProfileResponseDecoder ();
+        SignatureProfileResponseDecoder prdec = sres.getSignatureProfileResponseDecoder();
 
-        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
-        verifier.setTrustedRequired (false);
-        if (aia_support)
-          {
-            verifier.setAuthorityInfoAccessCAIssuersHandler (new AuthorityInfoAccessCAIssuersCache ());
-          }
+        KeyStoreVerifier verifier = new KeyStoreVerifier(DemoKeyStore.getCAKeyStore());
+        verifier.setTrustedRequired(false);
+        if (aia_support) {
+            verifier.setAuthorityInfoAccessCAIssuersHandler(new AuthorityInfoAccessCAIssuersCache());
+        }
 
-        prdec.verifySignature (verifier);
+        prdec.verifySignature(verifier);
 
-        System.out.println ("\nUSER SIGNATURE VERIFIED\n" + verifier.getSignerCertificate ().toString ());
+        System.out.println("\nUSER SIGNATURE VERIFIED\n" + verifier.getSignerCertificate().toString());
         return sres;
-      }
+    }
 
 
-    public static void main (String args[]) throws Exception
-      {
-        if (args.length < 1 || args.length > 2 || (args.length == 2 && !args[1].equals ("-a"))) show ();
-        test (args[0], args.length == 2);
-      }
+    public static void main(String args[]) throws Exception {
+        if (args.length < 1 || args.length > 2 || (args.length == 2 && !args[1].equals("-a")))
+            show();
+        test(args[0], args.length == 2);
+    }
 
-  }
+}

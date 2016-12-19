@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,286 +42,234 @@ import org.webpki.util.ISODateTime;
  * <p>
  * Returned by the parser methods.
  * Also provides built-in support for JCS (JSON Cleartext Signatures) decoding.</p>
- *
  */
-public class JSONObjectReader implements Serializable, Cloneable
-  {
+public class JSONObjectReader implements Serializable, Cloneable {
+
     private static final long serialVersionUID = 1L;
 
-    static final Pattern DECIMAL_PATTERN = Pattern.compile ("-?([1-9][0-9]*|0)[\\.][0-9]+");
-    static final Pattern INTEGER_PATTERN = Pattern.compile ("-?[1-9][0-9]*|0");
+    static final Pattern DECIMAL_PATTERN = Pattern.compile("-?([1-9][0-9]*|0)[\\.][0-9]+");
+    static final Pattern INTEGER_PATTERN = Pattern.compile("-?[1-9][0-9]*|0");
 
     JSONObject root;
 
-    JSONObjectReader (JSONObject root)
-      {
+    JSONObjectReader(JSONObject root) {
         this.root = root;
-      }
+    }
 
-    public void checkForUnread () throws IOException
-      {
-        if (getJSONArrayReader () == null)
-          {
-            JSONObject.checkObjectForUnread (root);
-          }
-        else
-          {
-            JSONObject.checkArrayForUnread (root.properties.get (null), "Outer");
-          }
-      }
+    public void checkForUnread() throws IOException {
+        if (getJSONArrayReader() == null) {
+            JSONObject.checkObjectForUnread(root);
+        } else {
+            JSONObject.checkArrayForUnread(root.properties.get(null), "Outer");
+        }
+    }
 
-    JSONValue getProperty (String name) throws IOException
-      {
-        JSONValue value = root.properties.get (name);
-        if (value == null)
-          {
-            throw new IOException ("Property \"" + name + "\" is missing");
-          }
+    JSONValue getProperty(String name) throws IOException {
+        JSONValue value = root.properties.get(name);
+        if (value == null) {
+            throw new IOException("Property \"" + name + "\" is missing");
+        }
         return value;
-      }
+    }
 
-    JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
-      {
-        JSONValue value = getProperty (name);
-        JSONTypes.compatibilityTest (expected_type, value);
+    JSONValue getProperty(String name, JSONTypes expected_type) throws IOException {
+        JSONValue value = getProperty(name);
+        JSONTypes.compatibilityTest(expected_type, value);
         value.readFlag = true;
         return value;
-      }
+    }
 
-    String getString (String name, JSONTypes expected) throws IOException
-      {
-        JSONValue value = getProperty (name, expected);
+    String getString(String name, JSONTypes expected) throws IOException {
+        JSONValue value = getProperty(name, expected);
         return (String) value.value;
-      }
+    }
 
-    public String getString (String name) throws IOException
-      {
-        return getString (name, JSONTypes.STRING);
-      }
+    public String getString(String name) throws IOException {
+        return getString(name, JSONTypes.STRING);
+    }
 
-    static long parseLong (String value) throws IOException
-      {
-        if (INTEGER_PATTERN.matcher (value).matches ())
-          {
-            double number = Double.valueOf (value);
-            if (Math.abs (number) > JSONObjectWriter.MAX_SAFE_INTEGER)
-              {
-                throw new IOException ("Integer values must not exceeed " + 
-                                       JSONObjectWriter.MAX_SAFE_INTEGER  +
-                                       ", found: " + value);
-              }
+    static long parseLong(String value) throws IOException {
+        if (INTEGER_PATTERN.matcher(value).matches()) {
+            double number = Double.valueOf(value);
+            if (Math.abs(number) > JSONObjectWriter.MAX_SAFE_INTEGER) {
+                throw new IOException("Integer values must not exceeed " +
+                        JSONObjectWriter.MAX_SAFE_INTEGER +
+                        ", found: " + value);
+            }
             return (long) number;
-          }
-        throw new IOException ("Value is not an integer: " + value);
-      }
+        }
+        throw new IOException("Value is not an integer: " + value);
+    }
 
-    static int parseInt (String value) throws IOException
-      {
-        long longValue = parseLong (value);
-        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE)
-          {
-            throw new IOException ("Java \"int\" out of range: " + value);
-          }
-        return (int)longValue;
-      }
+    static int parseInt(String value) throws IOException {
+        long longValue = parseLong(value);
+        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
+            throw new IOException("Java \"int\" out of range: " + value);
+        }
+        return (int) longValue;
+    }
 
-    public int getInt (String name) throws IOException
-      {
-        return parseInt (getString (name, JSONTypes.NUMBER));
-      }
+    public int getInt(String name) throws IOException {
+        return parseInt(getString(name, JSONTypes.NUMBER));
+    }
 
-    public long getInt53 (String name) throws IOException
-      {
-        return parseLong (getString (name, JSONTypes.NUMBER));
-      }
+    public long getInt53(String name) throws IOException {
+        return parseLong(getString(name, JSONTypes.NUMBER));
+    }
 
-    public double getDouble (String name) throws IOException
-      {
-        return Double.valueOf (getString (name, JSONTypes.NUMBER));
-      }
+    public double getDouble(String name) throws IOException {
+        return Double.valueOf(getString(name, JSONTypes.NUMBER));
+    }
 
-    public boolean getBoolean (String name) throws IOException
-      {
-        return new Boolean (getString (name, JSONTypes.BOOLEAN));
-      }
+    public boolean getBoolean(String name) throws IOException {
+        return new Boolean(getString(name, JSONTypes.BOOLEAN));
+    }
 
-    public GregorianCalendar getDateTime (String name) throws IOException
-      {
-        return ISODateTime.parseDateTime (getString (name));
-      }
+    public GregorianCalendar getDateTime(String name) throws IOException {
+        return ISODateTime.parseDateTime(getString(name));
+    }
 
-    public byte[] getBinary (String name) throws IOException
-      {
-        return Base64URL.decode (getString (name));
-      }
+    public byte[] getBinary(String name) throws IOException {
+        return Base64URL.decode(getString(name));
+    }
 
-    static BigInteger parseBigInteger (String value) throws IOException
-      {
-        if (INTEGER_PATTERN.matcher (value).matches ())
-          {
-            return new BigInteger (value);
-          }
-        throw new IOException ("Malformed \"BigInteger\": " + value);
-      }
+    static BigInteger parseBigInteger(String value) throws IOException {
+        if (INTEGER_PATTERN.matcher(value).matches()) {
+            return new BigInteger(value);
+        }
+        throw new IOException("Malformed \"BigInteger\": " + value);
+    }
 
-    static BigDecimal parseBigDecimal (String value, Integer decimals) throws IOException
-      {
-        if (INTEGER_PATTERN.matcher (value).matches () ||
-            DECIMAL_PATTERN.matcher (value).matches ())
-          {
-            BigDecimal parsed = new BigDecimal (value);
-            if (decimals != null && parsed.scale () != decimals)
-              {
-                throw new IOException ("Incorrect number of decimals in \"BigDecimal\": " + parsed.scale ());
-              }
+    static BigDecimal parseBigDecimal(String value, Integer decimals) throws IOException {
+        if (INTEGER_PATTERN.matcher(value).matches() ||
+                DECIMAL_PATTERN.matcher(value).matches()) {
+            BigDecimal parsed = new BigDecimal(value);
+            if (decimals != null && parsed.scale() != decimals) {
+                throw new IOException("Incorrect number of decimals in \"BigDecimal\": " + parsed.scale());
+            }
             return parsed;
-          }
-        throw new IOException ("Malformed \"BigDecimal\": " + value);
-      }
+        }
+        throw new IOException("Malformed \"BigDecimal\": " + value);
+    }
 
-    public BigInteger getBigInteger (String name) throws IOException
-      {
-        return parseBigInteger (getString (name));
-      }
+    public BigInteger getBigInteger(String name) throws IOException {
+        return parseBigInteger(getString(name));
+    }
 
-    public BigDecimal getBigDecimal (String name) throws IOException
-      {
-        return parseBigDecimal (getString (name), null);
-      }
+    public BigDecimal getBigDecimal(String name) throws IOException {
+        return parseBigDecimal(getString(name), null);
+    }
 
-    public BigDecimal getBigDecimal (String name, Integer decimals) throws IOException
-      {
-        return parseBigDecimal (getString (name), decimals);
-      }
+    public BigDecimal getBigDecimal(String name, Integer decimals) throws IOException {
+        return parseBigDecimal(getString(name), decimals);
+    }
 
     @SuppressWarnings("unchecked")
-    public JSONArrayReader getJSONArrayReader ()
-      {
-        return root.properties.containsKey (null) ? new JSONArrayReader ((Vector<JSONValue>) root.properties.get (null).value) : null;
-      }
+    public JSONArrayReader getJSONArrayReader() {
+        return root.properties.containsKey(null) ? new JSONArrayReader((Vector<JSONValue>) root.properties.get(null).value) : null;
+    }
 
-    public boolean getIfNULL (String name) throws IOException
-      {
-        if (getPropertyType (name) == JSONTypes.NULL)
-          {
-            scanAway (name);
+    public boolean getIfNULL(String name) throws IOException {
+        if (getPropertyType(name) == JSONTypes.NULL) {
+            scanAway(name);
             return true;
-          }
+        }
         return false;
-      }
+    }
 
-    public JSONObjectReader getObject (String name) throws IOException
-      {
-        JSONValue value = getProperty (name, JSONTypes.OBJECT);
-        return new JSONObjectReader ((JSONObject) value.value);
-      }
+    public JSONObjectReader getObject(String name) throws IOException {
+        JSONValue value = getProperty(name, JSONTypes.OBJECT);
+        return new JSONObjectReader((JSONObject) value.value);
+    }
 
     @SuppressWarnings("unchecked")
-    public JSONArrayReader getArray (String name) throws IOException
-      {
-        JSONValue value = getProperty (name, JSONTypes.ARRAY);
-        return new JSONArrayReader ((Vector<JSONValue>) value.value);
-      }
+    public JSONArrayReader getArray(String name) throws IOException {
+        JSONValue value = getProperty(name, JSONTypes.ARRAY);
+        return new JSONArrayReader((Vector<JSONValue>) value.value);
+    }
 
-    public String getStringConditional (String name) throws IOException
-      {
-        return this.getStringConditional (name, null);
-      }
+    public String getStringConditional(String name) throws IOException {
+        return this.getStringConditional(name, null);
+    }
 
-    public boolean getBooleanConditional (String name) throws IOException
-      {
-        return this.getBooleanConditional (name, false);
-      }
+    public boolean getBooleanConditional(String name) throws IOException {
+        return this.getBooleanConditional(name, false);
+    }
 
-    public String getStringConditional (String name, String default_value) throws IOException
-      {
-        return hasProperty (name) ? getString (name) : default_value;
-      }
+    public String getStringConditional(String name, String default_value) throws IOException {
+        return hasProperty(name) ? getString(name) : default_value;
+    }
 
-    public boolean getBooleanConditional (String name, boolean default_value) throws IOException
-      {
-        return hasProperty (name) ? getBoolean (name) : default_value;
-      }
+    public boolean getBooleanConditional(String name, boolean default_value) throws IOException {
+        return hasProperty(name) ? getBoolean(name) : default_value;
+    }
 
-    public byte[] getBinaryConditional (String name) throws IOException
-      {
-        return hasProperty (name) ? getBinary (name) : null;
-      }
+    public byte[] getBinaryConditional(String name) throws IOException {
+        return hasProperty(name) ? getBinary(name) : null;
+    }
 
-    public String[] getStringArrayConditional (String name) throws IOException
-      {
-        return hasProperty (name) ? getStringArray (name) : null;
-      }
+    public String[] getStringArrayConditional(String name) throws IOException {
+        return hasProperty(name) ? getStringArray(name) : null;
+    }
 
-    String [] getSimpleArray (String name, JSONTypes expectedType) throws IOException
-      {
-        Vector<String> array = new Vector<String> ();
+    String[] getSimpleArray(String name, JSONTypes expectedType) throws IOException {
+        Vector<String> array = new Vector<String>();
         @SuppressWarnings("unchecked")
-        Vector<JSONValue> arrayElements = ((Vector<JSONValue>) getProperty (name, JSONTypes.ARRAY).value);
-        for (JSONValue value : arrayElements)
-          {
-            JSONTypes.compatibilityTest (expectedType, value);
+        Vector<JSONValue> arrayElements = ((Vector<JSONValue>) getProperty(name, JSONTypes.ARRAY).value);
+        for (JSONValue value : arrayElements) {
+            JSONTypes.compatibilityTest(expectedType, value);
             value.readFlag = true;
-            array.add ((String)value.value);
-          }
-        return array.toArray (new String[0]);
-      }
+            array.add((String) value.value);
+        }
+        return array.toArray(new String[0]);
+    }
 
-    public String[] getStringArray (String name) throws IOException
-      {
-        return getSimpleArray (name, JSONTypes.STRING);
-      }
+    public String[] getStringArray(String name) throws IOException {
+        return getSimpleArray(name, JSONTypes.STRING);
+    }
 
-    public Vector<byte[]> getBinaryArray (String name) throws IOException
-      {
-        Vector<byte[]> blobs = new Vector<byte[]> ();
-        for (String blob : getStringArray (name))
-          {
-            blobs.add (Base64URL.decode (blob));
-          }
+    public Vector<byte[]> getBinaryArray(String name) throws IOException {
+        Vector<byte[]> blobs = new Vector<byte[]>();
+        for (String blob : getStringArray(name)) {
+            blobs.add(Base64URL.decode(blob));
+        }
         return blobs;
-      }
+    }
 
-    public String[] getProperties ()
-      {
-        return root.properties.keySet ().toArray (new String[0]);
-      }
+    public String[] getProperties() {
+        return root.properties.keySet().toArray(new String[0]);
+    }
 
-    public boolean hasProperty (String name)
-      {
-        return root.properties.get (name) != null;
-      }
+    public boolean hasProperty(String name) {
+        return root.properties.get(name) != null;
+    }
 
-    public JSONTypes getPropertyType (String name) throws IOException
-      {
-        return getProperty (name).type;
-      }
+    public JSONTypes getPropertyType(String name) throws IOException {
+        return getProperty(name).type;
+    }
 
     /**
      * Read and decode JCS signature object from the current JSON object.
+     *
      * @return An object which can be used to verify keys etc.
+     * @throws IOException In case there is something wrong with the signature
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
-     * @throws IOException In case there is something wrong with the signature 
      */
-    public JSONSignatureDecoder getSignature (AlgorithmPreferences algorithmPreferences) throws IOException
-      {
-        return new JSONSignatureDecoder (this, algorithmPreferences);
-      }
+    public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences) throws IOException {
+        return new JSONSignatureDecoder(this, algorithmPreferences);
+    }
 
-    public JSONSignatureDecoder getSignature () throws IOException
-      {
-        return new JSONSignatureDecoder (this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-      }
- 
-    public PublicKey getPublicKey (AlgorithmPreferences algorithmPreferences) throws IOException
-      {
+    public JSONSignatureDecoder getSignature() throws IOException {
+        return new JSONSignatureDecoder(this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+    }
+
+    public PublicKey getPublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
         return getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).getCorePublicKey(algorithmPreferences);
-      }
+    }
 
-    public PublicKey getPublicKey () throws IOException
-      {
-        return getPublicKey (AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-      }
+    public PublicKey getPublicKey() throws IOException {
+        return getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+    }
 
     void clearReadFlags() {
         for (JSONValue value : root.properties.values()) {
@@ -332,16 +280,16 @@ public class JSONObjectReader implements Serializable, Cloneable
     public PublicKey getCorePublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
         clearReadFlags();
         PublicKey publicKey = JSONSignatureDecoder.decodePublicKey(this,
-                                                                   algorithmPreferences, 
+                                                                   algorithmPreferences,
                                                                    JSONSignatureDecoder.TYPE_JSON,
                                                                    JSONSignatureDecoder.CURVE_JSON);
-        checkForUnread ();
+        checkForUnread();
         return publicKey;
     }
 
     public PublicKey getPublicKeyFromJwk() throws IOException {
         return JSONSignatureDecoder.decodePublicKey(this,
-                                                    AlgorithmPreferences.JOSE, 
+                                                    AlgorithmPreferences.JOSE,
                                                     JSONSignatureDecoder.JWK_KTY_JSON,
                                                     JSONSignatureDecoder.JWK_CRV_JSON);
     }
@@ -355,53 +303,45 @@ public class JSONObjectReader implements Serializable, Cloneable
         return new JSONDecryptionDecoder(this);
     }
 
-    public X509Certificate[] getCertificatePath () throws IOException
-      {
-        return JSONSignatureDecoder.getCertificatePath (this);
-      }
+    public X509Certificate[] getCertificatePath() throws IOException {
+        return JSONSignatureDecoder.getCertificatePath(this);
+    }
 
-    public JSONObjectReader scanAway (String name) throws IOException {
-        JSONValue value = getProperty (name);
+    public JSONObjectReader scanAway(String name) throws IOException {
+        JSONValue value = getProperty(name);
         value.readFlag = true;
         if (value.type == JSONTypes.OBJECT) {
-            JSONObject.setObjectAsRead((JSONObject)value.value);
+            JSONObject.setObjectAsRead((JSONObject) value.value);
         } else if (value.type == JSONTypes.ARRAY) {
             JSONObject.setArrayAsRead(value);
         }
         return this;
     }
 
-    public JSONObjectReader removeProperty (String name) throws IOException
-      {
-        getProperty (name);
-        root.properties.remove (name);
+    public JSONObjectReader removeProperty(String name) throws IOException {
+        getProperty(name);
+        root.properties.remove(name);
         return this;
-      }
+    }
 
-    public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
-      {
-        return new JSONObjectWriter (root).serializeJSONObject (output_format);
-      }
+    public byte[] serializeJSONObject(JSONOutputFormats output_format) throws IOException {
+        return new JSONObjectWriter(root).serializeJSONObject(output_format);
+    }
 
     /**
      * Deep copy of JSON object
      */
     @Override
-    public JSONObjectReader clone ()
-      {
-        try
-          {
-            return JSONParser.parse (serializeJSONObject (JSONOutputFormats.NORMALIZED));
-          }
-        catch (IOException e)
-          {
-            throw new RuntimeException (e);
-          }
-      }
- 
+    public JSONObjectReader clone() {
+        try {
+            return JSONParser.parse(serializeJSONObject(JSONOutputFormats.NORMALIZED));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
-    public String toString ()
-      {
-        return new JSONObjectWriter (root).toString ();
-      }
-  }
+    public String toString() {
+        return new JSONObjectWriter(root).toString();
+    }
+}

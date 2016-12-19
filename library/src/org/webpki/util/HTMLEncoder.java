@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ package org.webpki.util;
  * The HTMLEncoder class contains a utility method for converting
  * a string into a format suitable for placing inside a HTML tag
  * parameter, sometimes known as "html encoding".
- *
+ * <p>
  * <P>To convert a <CODE>String</CODE>, each character is examined
  * in turn:
  * <UL>
@@ -32,8 +32,7 @@ package org.webpki.util;
  * <LI>All other characters remain the same.
  * </UL>
  */
-public class HTMLEncoder
-  {
+public class HTMLEncoder {
 
     /**
      * Converts a string into a htmlencoded string.
@@ -41,18 +40,14 @@ public class HTMLEncoder
      * @param val the <CODE>String</CODE> to be converted.
      * @return the converted <CODE>String</CODE>.
      */
-    public static String encode (String val)
-      {
-        if (val != null)
-          {
-            StringBuffer    buf = new StringBuffer(val.length() + 8);
-            char            c;
+    public static String encode(String val) {
+        if (val != null) {
+            StringBuffer buf = new StringBuffer(val.length() + 8);
+            char c;
 
-            for (int i = 0; i < val.length(); i++)
-              {
+            for (int i = 0; i < val.length(); i++) {
                 c = val.charAt(i);
-                switch(c)
-                  {
+                switch (c) {
                     case '<':
                         buf.append("&lt;");
                         break;
@@ -71,35 +66,28 @@ public class HTMLEncoder
                     default:
                         buf.append(c);
                         break;
-                  }
-              }
+                }
+            }
             return buf.toString();
-          } 
-        else 
-          {
+        } else {
             return new String("");
-          }
-      } 
+        }
+    }
 
     @SuppressWarnings("fallthrough")
-    public static String encodeWithLineBreaks (byte[] val)
-      {
-        if (val != null)
-          {
-            StringBuffer    buf = new StringBuffer();
-            char            c;
+    public static String encodeWithLineBreaks(byte[] val) {
+        if (val != null) {
+            StringBuffer buf = new StringBuffer();
+            char c;
             boolean indent = true;
-            for (int i = 0; i < val.length; i++)
-              {
-                c = (char)((int) val[i] & 0xFF);
+            for (int i = 0; i < val.length; i++) {
+                c = (char) ((int) val[i] & 0xFF);
                 if (c < ' ' && c != '\n') continue;
-                if (c >= 127)  c = '.';
-                if (c == ' ' && indent) buf.append ("&nbsp;");
-                else
-                  {
+                if (c >= 127) c = '.';
+                if (c == ' ' && indent) buf.append("&nbsp;");
+                else {
                     indent = false;
-                    switch(c)
-                      {
+                    switch (c) {
                         case '<':
                             buf.append("&lt;");
                             break;
@@ -116,21 +104,19 @@ public class HTMLEncoder
                             buf.append("&#039;");
                             break;
                         case '\n':
-                            buf.append ("<br>");
+                            buf.append("<br>");
                             indent = true;
                         default:
                             buf.append(c);
                             break;
-                      }
-                  }
-              }
+                    }
+                }
+            }
             return buf.toString();
-          } 
-        else 
-          {
+        } else {
             return new String("");
-          }
-      }
+        }
+    }
 
-  }
+}
 

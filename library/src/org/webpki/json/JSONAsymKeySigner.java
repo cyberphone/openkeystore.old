@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,50 +29,44 @@ import org.webpki.crypto.SignatureAlgorithms;
 /**
  * Initiatiator object for asymmetric key signatures.
  */
-public class JSONAsymKeySigner extends JSONSigner
-  {
+public class JSONAsymKeySigner extends JSONSigner {
+
     private static final long serialVersionUID = 1L;
 
     AsymSignatureAlgorithms algorithm;
 
     AsymKeySignerInterface signer;
-    
-    PublicKey public_key;
-    
-    public JSONAsymKeySigner (AsymKeySignerInterface signer) throws IOException
-      {
-        this.signer = signer;
-        public_key = signer.getPublicKey ();
-        algorithm = KeyAlgorithms.getKeyAlgorithm (public_key).getRecommendedSignatureAlgorithm ();
-      }
 
-    public JSONAsymKeySigner setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
-      {
+    PublicKey public_key;
+
+    public JSONAsymKeySigner(AsymKeySignerInterface signer) throws IOException {
+        this.signer = signer;
+        public_key = signer.getPublicKey();
+        algorithm = KeyAlgorithms.getKeyAlgorithm(public_key).getRecommendedSignatureAlgorithm();
+    }
+
+    public JSONAsymKeySigner setSignatureAlgorithm(AsymSignatureAlgorithms algorithm) {
         this.algorithm = algorithm;
         return this;
-      }
+    }
 
-    public JSONAsymKeySigner setAlgorithmPreferences (AlgorithmPreferences algorithmPreferences)
-      {
+    public JSONAsymKeySigner setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
         this.algorithmPreferences = algorithmPreferences;
         return this;
-      }
+    }
 
     @Override
-    SignatureAlgorithms getAlgorithm ()
-      {
+    SignatureAlgorithms getAlgorithm() {
         return algorithm;
-      }
+    }
 
     @Override
-    byte[] signData (byte[] data) throws IOException
-      {
-        return signer.signData (data, algorithm);
-      }
+    byte[] signData(byte[] data) throws IOException {
+        return signer.signData(data, algorithm);
+    }
 
     @Override
-    void writeKeyData (JSONObjectWriter wr) throws IOException
-      {
-        wr.setPublicKey (public_key, algorithmPreferences);
-      }
-  }
+    void writeKeyData(JSONObjectWriter wr) throws IOException {
+        wr.setPublicKey(public_key, algorithmPreferences);
+    }
+}

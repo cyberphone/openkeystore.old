@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,8 @@ import java.security.PublicKey;
 /**
  * Initiatiator object for asymmetric key signature verifiers.
  */
-public class JSONAsymKeyVerifier extends JSONVerifier
-  {
+public class JSONAsymKeyVerifier extends JSONVerifier {
+
     private static final long serialVersionUID = 1L;
 
     PublicKey expectedPublicKey;
@@ -33,20 +33,18 @@ public class JSONAsymKeyVerifier extends JSONVerifier
      * Verifier for asymmetric keys.
      * Note that you can access the received public key from {@link JSONSignatureDecoder}
      * which is useful if there are multiple keys possible.
+     *
      * @param expectedPublicKey Expected public key
-      */
-    public JSONAsymKeyVerifier (PublicKey expectedPublicKey)
-      {
+     */
+    public JSONAsymKeyVerifier(PublicKey expectedPublicKey) {
         super(JSONSignatureTypes.ASYMMETRIC_KEY);
         this.expectedPublicKey = expectedPublicKey;
-      }
+    }
 
     @Override
-    void verify (JSONSignatureDecoder signatureDecoder) throws IOException
-      {
-        if (!expectedPublicKey.equals (signatureDecoder.publicKey))
-          {
-            throw new IOException ("Provided public key differs from the signature key");
-          }
-       }
-  }
+    void verify(JSONSignatureDecoder signatureDecoder) throws IOException {
+        if (!expectedPublicKey.equals(signatureDecoder.publicKey)) {
+            throw new IOException("Provided public key differs from the signature key");
+        }
+    }
+}

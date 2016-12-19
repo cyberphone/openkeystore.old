@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,81 +18,71 @@ package org.webpki.sks.twolayer.se;
 
 import java.security.cert.X509Certificate;
 
-public class SEDeviceInfo
-  {
+public class SEDeviceInfo {
+
     short apiLevel;
-    
-    public short getApiLevel ()
-      {
+
+    public short getApiLevel() {
         return apiLevel;
-      }
-    
+    }
+
     private byte deviceType;
 
-    public byte getDeviceType ()
-      {
+    public byte getDeviceType() {
         return deviceType;
-      }
+    }
 
     String updateUrl;
-    
-    public String getUpdateUrl ()
-      {
+
+    public String getUpdateUrl() {
         return updateUrl;
-      }
+    }
 
     String vendorName;
-    
-    public String getVendorName ()
-      {
+
+    public String getVendorName() {
         return vendorName;
-      }
-    
+    }
+
     String vendorDescription;
-    
-    public String getVendorDescription ()
-      {
+
+    public String getVendorDescription() {
         return vendorDescription;
-      }
-    
+    }
+
     X509Certificate[] certificatePath;
-    
-    public X509Certificate[] getCertificatePath ()
-      {
+
+    public X509Certificate[] getCertificatePath() {
         return certificatePath;
-      }
-    
+    }
+
     String[] supportedAlgorithms;
-    
-    public String[] getSupportedAlgorithms ()
-      {
+
+    public String[] getSupportedAlgorithms() {
         return supportedAlgorithms;
-      }
+    }
 
     int cryptoDataSize;
-    
-    public int getCryptoDataSize ()
-      {
+
+    public int getCryptoDataSize() {
         return cryptoDataSize;
-      }
-    
+    }
+
     int extensionDataSize;
-    
-    public int getExtensionDataSize ()
-      {
+
+    public int getExtensionDataSize() {
         return extensionDataSize;
-      }
-    
-  public SEDeviceInfo (short apiLevel,
-                       byte deviceType,
-                       String updateUrl,  // May be null
-                       String vendorName,
-                       String vendorDescription,
-                       X509Certificate[] certificatePath,
-                       String[] supportedAlgorithms,
-                       int cryptoDataSize,
-                       int extensionDataSize)
-      {
+    }
+
+    public SEDeviceInfo(short apiLevel,
+                        byte deviceType,
+                        String updateUrl,  // May be null
+                        String vendorName,
+                        String vendorDescription,
+                        X509Certificate[] certificatePath,
+                        String[] supportedAlgorithms,
+                        int cryptoDataSize,
+                        int extensionDataSize) {
         this.apiLevel = apiLevel;
         this.deviceType = deviceType;
         this.updateUrl = updateUrl;
@@ -102,5 +92,5 @@ public class SEDeviceInfo
         this.supportedAlgorithms = supportedAlgorithms;
         this.cryptoDataSize = cryptoDataSize;
         this.extensionDataSize = extensionDataSize;
-      }
-  }
+    }
+}

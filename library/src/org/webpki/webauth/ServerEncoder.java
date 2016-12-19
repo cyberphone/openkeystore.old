@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,41 +24,35 @@ import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
-abstract class ServerEncoder extends JSONEncoder
-  {
+abstract class ServerEncoder extends JSONEncoder {
     private static final long serialVersionUID = 1L;
 
-    abstract void writeServerRequest (JSONObjectWriter wr) throws IOException;
-    
-    final void bad (String message) throws IOException
-      {
-        throw new IOException (message);
-      }
-    
-    @Override
-    public final String getContext ()
-      {
-        return WebAuthConstants.WEBAUTH_NS;
-      }
+    abstract void writeServerRequest(JSONObjectWriter wr) throws IOException;
+
+    final void bad(String message) throws IOException {
+        throw new IOException(message);
+    }
 
     @Override
-    final protected void writeJSONData (JSONObjectWriter wr) throws IOException
-      {
-        writeServerRequest (wr);
+    public final String getContext() {
+        return WebAuthConstants.WEBAUTH_NS;
+    }
+
+    @Override
+    final protected void writeJSONData(JSONObjectWriter wr) throws IOException {
+        writeServerRequest(wr);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional signature
         ////////////////////////////////////////////////////////////////////////
-        if (signer != null)
-          {
-            wr.setSignature (new JSONX509Signer (signer));
-          }
-      }
+        if (signer != null) {
+            wr.setSignature(new JSONX509Signer(signer));
+        }
+    }
 
     private SignerInterface signer;
-    
-    public void setRequestSigner (SignerInterface signer) throws IOException
-      {
+
+    public void setRequestSigner(SignerInterface signer) throws IOException {
         this.signer = signer;
-      }
-  }
+    }
+}

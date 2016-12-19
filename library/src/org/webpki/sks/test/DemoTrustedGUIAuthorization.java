@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,46 +28,42 @@ import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SKSException;
 
-public class DemoTrustedGUIAuthorization extends DummyTrustedGUIAuthorization
-  {
+public class DemoTrustedGUIAuthorization extends DummyTrustedGUIAuthorization {
     @Override
-    public byte[] getTrustedAuthorization (PassphraseFormat format,
-                                           Grouping grouping,
-                                           AppUsage app_usage,
-                                           String friendly_name) throws SKSException
-      {
+    public byte[] getTrustedAuthorization(PassphraseFormat format,
+                                          Grouping grouping,
+                                          AppUsage app_usage,
+                                          String friendly_name) throws SKSException {
         byte[] authorization = null;
-        JPasswordField pwd = new JPasswordField (10);
-        pwd.addAncestorListener (new AncestorListener ()
-          {
+        JPasswordField pwd = new JPasswordField(10);
+        pwd.addAncestorListener(new AncestorListener() {
             @Override
-            public void ancestorAdded (AncestorEvent e)
-              {
-                JComponent component = e.getComponent ();
+            public void ancestorAdded(AncestorEvent e) {
+                JComponent component = e.getComponent();
                 component.requestFocusInWindow();
-              }
+            }
 
             @Override
-            public void ancestorMoved (AncestorEvent e) {}
+            public void ancestorMoved(AncestorEvent e) {
+            }
 
             @Override
-            public void ancestorRemoved (AncestorEvent e) {}
-          });
+            public void ancestorRemoved(AncestorEvent e) {
+            }
+        });
 
-        int action = JOptionPane.showConfirmDialog (null,
-                                                    pwd,
-                                                    "Enter PIN",
-                                                    JOptionPane.OK_CANCEL_OPTION);   
-        if (action == JOptionPane.OK_OPTION)
-          {
-            authorization = convertToUTF8 (format, new String (pwd.getPassword ()));
-          }
+        int action = JOptionPane.showConfirmDialog(null,
+                pwd,
+                "Enter PIN",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (action == JOptionPane.OK_OPTION) {
+            authorization = convertToUTF8(format, new String(pwd.getPassword()));
+        }
         return authorization;
-      }
+    }
 
     @Override
-    public String getImplementation ()
-      {
+    public String getImplementation() {
         return "Primitive (non-secure) GUI version";
-      }
-  }
+    }
+}

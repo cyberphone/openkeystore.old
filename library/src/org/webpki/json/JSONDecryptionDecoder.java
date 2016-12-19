@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,13 +47,13 @@ import org.webpki.json.encryption.KeyEncryptionAlgorithms;
  */
 public class JSONDecryptionDecoder {
 
-    public static final String ENCRYPTION_VERSION_ID      = "http://xmlns.webpki.org/jef/v1";
+    public static final String ENCRYPTION_VERSION_ID = "http://xmlns.webpki.org/jef/v1";
 
-    public static final String ENCRYPTED_KEY_JSON         = "encryptedKey";
-    public static final String EPHEMERAL_KEY_JSON         = "ephemeralKey";
-    public static final String IV_JSON                    = "iv";
-    public static final String TAG_JSON                   = "tag";
-    public static final String CIPHER_TEXT_JSON           = "cipherText";
+    public static final String ENCRYPTED_KEY_JSON    = "encryptedKey";
+    public static final String EPHEMERAL_KEY_JSON    = "ephemeralKey";
+    public static final String IV_JSON               = "iv";
+    public static final String TAG_JSON              = "tag";
+    public static final String CIPHER_TEXT_JSON      = "cipherText";
 
     private PublicKey publicKey;
 
@@ -64,7 +64,7 @@ public class JSONDecryptionDecoder {
     private byte[] iv;
 
     private byte[] tag;
-    
+
     private String keyId;
 
     private KeyEncryptionAlgorithms keyEncryptionAlgorithm;
@@ -72,12 +72,12 @@ public class JSONDecryptionDecoder {
     private byte[] encryptedKeyData;  // For RSA only
 
     private byte[] encryptedData;
-    
+
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
-    
+
     private JSONObjectReader checkVersion(JSONObjectReader rd) throws IOException {
-       rd.clearReadFlags();
-       String version = rd.getStringConditional(JSONSignatureDecoder.VERSION_JSON, ENCRYPTION_VERSION_ID);
+        rd.clearReadFlags();
+        String version = rd.getStringConditional(JSONSignatureDecoder.VERSION_JSON, ENCRYPTION_VERSION_ID);
         if (!version.equals(ENCRYPTION_VERSION_ID)) {
             throw new IOException("Unknown encryption version: " + version);
         }
@@ -117,8 +117,8 @@ public class JSONDecryptionDecoder {
         // Begin JEF normalization                                              //
         //                                                                      //
         // 1. Make a shallow copy of the signature object property list         //
-        LinkedHashMap<String,JSONValue> savedProperties =
-            new LinkedHashMap<String,JSONValue>(rd.root.properties);
+        LinkedHashMap<String, JSONValue> savedProperties =
+                new LinkedHashMap<String, JSONValue>(rd.root.properties);
         //                                                                      //
         // 2. Hide properties for the serializer..                              //
         rd.root.properties.remove(IV_JSON);                                     //
@@ -134,7 +134,7 @@ public class JSONDecryptionDecoder {
         // End JEF normalization                                                //
         //////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-            .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
+                .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(ENCRYPTED_KEY_JSON)) {
@@ -145,8 +145,8 @@ public class JSONDecryptionDecoder {
             if (keyEncryptionAlgorithm.isRsa()) {
                 encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
             } else {
-                ephemeralPublicKey = 
-                    (ECPublicKey) encryptedKey.getObject(EPHEMERAL_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
+                ephemeralPublicKey =
+                        (ECPublicKey) encryptedKey.getObject(EPHEMERAL_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
         } else {
             keyId = rd.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
@@ -170,7 +170,7 @@ public class JSONDecryptionDecoder {
     }
 
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
-    throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException {
         require(true);
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
@@ -178,14 +178,14 @@ public class JSONDecryptionDecoder {
                 notFound = false;
                 if (decryptionKey.getKeyEncryptionAlgorithm().equals(keyEncryptionAlgorithm)) {
                     return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
-                         EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
-                                                      encryptedKeyData,
-                                                      decryptionKey.getPrivateKey())
-                                             :
-                         EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
-                                                             dataEncryptionAlgorithm,
-                                                             ephemeralPublicKey,
-                                                             decryptionKey.getPrivateKey()));
+                            EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
+                                                         encryptedKeyData,
+                                                         decryptionKey.getPrivateKey())
+                            :
+                            EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
+                                                                dataEncryptionAlgorithm,
+                                                                ephemeralPublicKey,
+                                                                decryptionKey.getPrivateKey()));
                 }
             }
         }

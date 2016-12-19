@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,29 +24,28 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 /**
  * Initiatiator object for symmetric key signature verifiers.
  */
-public class JSONSymKeyVerifier extends JSONVerifier
-  {
+public class JSONSymKeyVerifier extends JSONVerifier {
+
     private static final long serialVersionUID = 1L;
 
     SymKeyVerifierInterface verifier;
-    
+
     /**
      * Verifier for symmetric keys.
      * Note that you can access the received KeyID from {@link JSONSignatureDecoder}.
+     *
      * @param verifier Verifies that the key and signature value match.
      */
-    public JSONSymKeyVerifier (SymKeyVerifierInterface verifier)
-      {
+    public JSONSymKeyVerifier(SymKeyVerifierInterface verifier) {
         super(JSONSignatureTypes.SYMMETRIC_KEY);
         this.verifier = verifier;
-      }
+    }
 
     @Override
-    void verify (JSONSignatureDecoder signatureDecoder) throws IOException
-      {
-        signatureDecoder.checkVerification (verifier.verifyData (signatureDecoder.normalizedData,
-                                                                 signatureDecoder.signatureValue,
-                                                                 (MACAlgorithms)signatureDecoder.algorithm,
-                                                                 signatureDecoder.keyId));
-      }
-  }
+    void verify(JSONSignatureDecoder signatureDecoder) throws IOException {
+        signatureDecoder.checkVerification(verifier.verifyData(signatureDecoder.normalizedData,
+                                                               signatureDecoder.signatureValue,
+                                                               (MACAlgorithms) signatureDecoder.algorithm,
+                                                               signatureDecoder.keyId));
+    }
+}

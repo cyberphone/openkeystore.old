@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,75 +19,65 @@ package org.webpki.sks;
 import java.security.cert.X509Certificate;
 
 
-public class KeyAttributes
-  {
+public class KeyAttributes {
+
     short symmetricKeyLength;
-    
+
     X509Certificate[] certificatePath;
-    
+
     byte appUsage;
-    
+
     String friendlyName;
 
     String[] endorsedAlgorithms;
 
     String[] extensionTypes;
-    
-    
-    public boolean isSymmetricKey ()
-      {
+
+
+    public boolean isSymmetricKey() {
         return symmetricKeyLength > 0;
-      }
-    
-    public short getSymmetricKeyLength ()
-      {
+    }
+
+    public short getSymmetricKeyLength() {
         return symmetricKeyLength;
-      }
-    
-    public X509Certificate[] getCertificatePath ()
-      {
+    }
+
+    public X509Certificate[] getCertificatePath() {
         return certificatePath;
-      }
+    }
 
-    public AppUsage getAppUsage () throws SKSException
-      {
-        for (AppUsage au : AppUsage.values ())
-          {
-            if (au.getSksValue () == appUsage)
-              {
+    public AppUsage getAppUsage() throws SKSException {
+        for (AppUsage au : AppUsage.values()) {
+            if (au.getSksValue() == appUsage) {
                 return au;
-              }
-          }
-        throw new SKSException ("Internal AppUsage error");
-      }
-    
-    public String getFriendlyName ()
-      {
+            }
+        }
+        throw new SKSException("Internal AppUsage error");
+    }
+
+    public String getFriendlyName() {
         return friendlyName;
-      }
+    }
 
-    public String[] getEndorsedAlgorithms ()
-      {
+    public String[] getEndorsedAlgorithms() {
         return extensionTypes;
-      }
+    }
 
-    public String[] getExtensionTypes ()
-      {
+    public String[] getExtensionTypes() {
         return extensionTypes;
-      }
-    
-    public KeyAttributes (short symmetricKeyLength,
-                          X509Certificate[] certificatePath,
-                          byte appUsage,
-                          String friendlyName,
-                          String[] endorsedAlgorithms,
-                          String[] extensionTypes)
-      {
+    }
+
+    public KeyAttributes(short symmetricKeyLength,
+                         X509Certificate[] certificatePath,
+                         byte appUsage,
+                         String friendlyName,
+                         String[] endorsedAlgorithms,
+                         String[] extensionTypes) {
         this.symmetricKeyLength = symmetricKeyLength;
         this.certificatePath = certificatePath;
         this.appUsage = appUsage;
         this.friendlyName = friendlyName;
         this.endorsedAlgorithms = endorsedAlgorithms;
         this.extensionTypes = extensionTypes;
-      }
-  }
+    }
+}

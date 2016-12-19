@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,49 +55,49 @@ public class DemoCode {
 
         // Fill it with some data
         writer.setString("myProperty", "Some data");
-        
+
         // Sign document
         writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
             @Override
-            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+            public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
                 try {
                     return new SignatureWrapper(algorithm, privateKey)
-                        .update(data)
-                        .sign();
+                            .update(data)
+                            .sign();
                 } catch (GeneralSecurityException e) {
                     throw new IOException(e);
                 }
             }
-   
+
             @Override
             public PublicKey getPublicKey() throws IOException {
                 return publicKey;
             }
         }));
-        
+
         // Serialize document
         String json = writer.toString();
 
         // Print document on the console
         System.out.println("Signed doc:\n" + json);
-        
+
         // Parse document
         JSONObjectReader reader = JSONParser.parse(json);
-        
+
         // Get and verify signature
         JSONSignatureDecoder signature = reader.getSignature();
         signature.verify(new JSONAsymKeyVerifier(publicKey));
-        
+
         // Print document payload on the console
         System.out.println("Returned data: " + reader.getString("myProperty"));
     }
 
-    public static void main (String[] argc) {
+    public static void main(String[] argc) {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-            kpg.initialize (new ECGenParameterSpec(KeyAlgorithms.NIST_P_256.getJCEName()), new SecureRandom());
+            kpg.initialize(new ECGenParameterSpec(KeyAlgorithms.NIST_P_256.getJCEName()), new SecureRandom());
             KeyPair keyPair = kpg.generateKeyPair();
-            new DemoCode ().signAndVerifyJCS(keyPair.getPublic(), keyPair.getPrivate());
+            new DemoCode().signAndVerifyJCS(keyPair.getPublic(), keyPair.getPrivate());
         } catch (Exception e) {
             e.printStackTrace();
         }

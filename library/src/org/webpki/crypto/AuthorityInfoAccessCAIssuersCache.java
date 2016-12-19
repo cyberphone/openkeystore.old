@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,87 +28,66 @@ import java.security.cert.X509Certificate;
 import org.webpki.util.URLDereferencer;
 
 
-public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAIssuersSpi, Serializable
-  {
+public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAIssuersSpi, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Hashtable<String,X509Certificate[]> cache = new Hashtable<String,X509Certificate[]> ();
+    private Hashtable<String, X509Certificate[]> cache = new Hashtable<String, X509Certificate[]>();
 
 
-    public X509Certificate[] getUpdatedPath (X509Certificate[] input_path) throws IOException
-      {
-        String[] aia_caissuers = CertificateUtil.getAIACAIssuers (input_path[input_path.length - 1]);
-        if (aia_caissuers != null)
-          {
-            for (String uri : aia_caissuers)
-              {
-                X509Certificate[] ca_path = cache.get (uri);
-                if (ca_path == null)
-                  {
-                    try
-                      {
-                        synchronized (this)
-                          {
+    public X509Certificate[] getUpdatedPath(X509Certificate[] input_path) throws IOException {
+        String[] aia_caissuers = CertificateUtil.getAIACAIssuers(input_path[input_path.length - 1]);
+        if (aia_caissuers != null) {
+            for (String uri : aia_caissuers) {
+                X509Certificate[] ca_path = cache.get(uri);
+                if (ca_path == null) {
+                    try {
+                        synchronized (this) {
                             X509Certificate[] temp_path = null;
-                            URLDereferencer dref = new URLDereferencer (uri);
-                            if (dref.getMimeType ().equals ("application/x-x509-ca-cert") || 
-                                dref.getMimeType ().equals ("application/pkix-cert"))
-                              {
-                                temp_path = new X509Certificate[] {CertificateUtil.getCertificateFromBlob (dref.getData ())};
-                              }
-                            else if (dref.getMimeType ().equals ("application/x-pkcs7-certificates") ||
-                                     dref.getMimeType ().equals ("application/pkcs7-mime"))
-                              {
-                                temp_path = CertificateUtil.getSortedPathFromPKCS7Bag (dref.getData ());
-                              }
-                            else
-                              {
-                                throw new IOException ("Unknown CA data object");
-                              }
-                            temp_path = getUpdatedPath (temp_path);
-                            input_path[input_path.length - 1].verify (temp_path[0].getPublicKey ());
-                            cache.put (uri, ca_path = temp_path);
-                          }
-                      }
-                    catch (IOException ioe)
-                      {
-                        System.out.println ("Silently failed on AIA url: " + uri + " " + ioe.getMessage ());
-                      }
-                    catch (GeneralSecurityException gse)
-                      {
-                        System.out.println ("Format error in AIA url: " + uri + " " + gse.getMessage ());
-                      }
-                  }
-                if (ca_path != null)
-                  {
+                            URLDereferencer dref = new URLDereferencer(uri);
+                            if (dref.getMimeType().equals("application/x-x509-ca-cert") ||
+                                    dref.getMimeType().equals("application/pkix-cert")) {
+                                temp_path = new X509Certificate[]{CertificateUtil.getCertificateFromBlob(dref.getData())};
+                            } else if (dref.getMimeType().equals("application/x-pkcs7-certificates") ||
+                                    dref.getMimeType().equals("application/pkcs7-mime")) {
+                                temp_path = CertificateUtil.getSortedPathFromPKCS7Bag(dref.getData());
+                            } else {
+                                throw new IOException("Unknown CA data object");
+                            }
+                            temp_path = getUpdatedPath(temp_path);
+                            input_path[input_path.length - 1].verify(temp_path[0].getPublicKey());
+                            cache.put(uri, ca_path = temp_path);
+                        }
+                    } catch (IOException ioe) {
+                        System.out.println("Silently failed on AIA url: " + uri + " " + ioe.getMessage());
+                    } catch (GeneralSecurityException gse) {
+                        System.out.println("Format error in AIA url: " + uri + " " + gse.getMessage());
+                    }
+                }
+                if (ca_path != null) {
                     X509Certificate[] cert_path = new X509Certificate[ca_path.length + input_path.length];
                     int q = 0;
-                    for (X509Certificate tcert : input_path)
-                      {
+                    for (X509Certificate tcert : input_path) {
                         cert_path[q++] = tcert;
-                      }
-                    for (X509Certificate tcert : ca_path)
-                      {
+                    }
+                    for (X509Certificate tcert : ca_path) {
                         cert_path[q++] = tcert;
-                      }
+                    }
                     return cert_path;
-                  }
-              }
-          }
+                }
+            }
+        }
         return input_path;
-      }
+    }
 
 
-    public void preInitialize (X509Certificate[] ca_path, String uri)
-      {
-        cache.put (uri, ca_path);
-      }
+    public void preInitialize(X509Certificate[] ca_path, String uri) {
+        cache.put(uri, ca_path);
+    }
 
 
-    public void preInitialize (X509Certificate ca_cert, String uri)
-      {
-        preInitialize (new X509Certificate[] {ca_cert}, uri);
-      }
+    public void preInitialize(X509Certificate ca_cert, String uri) {
+        preInitialize(new X509Certificate[]{ca_cert}, uri);
+    }
 
-  }
+}

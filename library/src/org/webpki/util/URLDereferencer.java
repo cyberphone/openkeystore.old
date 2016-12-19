@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,7 @@ import java.io.Serializable;
 import org.webpki.net.HTTPSWrapper;
 
 
-public class URLDereferencer implements MIMETypedObject, Serializable
-  {
+public class URLDereferencer implements MIMETypedObject, Serializable {
     private static final long serialVersionUID = 1L;
 
     private byte[] data;
@@ -31,29 +30,25 @@ public class URLDereferencer implements MIMETypedObject, Serializable
     private String ct;
 
 
-    public URLDereferencer (String url) throws IOException
-      {
-        HTTPSWrapper wrap = new HTTPSWrapper ();
-        wrap.setRequireSuccess (true);
-        wrap.makeGetRequest (url);
-        ct = wrap.getContentType ();
-        if (ct == null)
-          {
-            throw new IOException ("MIME type missing for url: " + url);
-          }
-        data = wrap.getData ();
-      }
+    public URLDereferencer(String url) throws IOException {
+        HTTPSWrapper wrap = new HTTPSWrapper();
+        wrap.setRequireSuccess(true);
+        wrap.makeGetRequest(url);
+        ct = wrap.getContentType();
+        if (ct == null) {
+            throw new IOException("MIME type missing for url: " + url);
+        }
+        data = wrap.getData();
+    }
 
 
-    public byte[] getData () throws IOException
-      {
+    public byte[] getData() throws IOException {
         return data;
-      }
+    }
 
 
-    public String getMimeType () throws IOException
-      {
+    public String getMimeType() throws IOException {
         return ct;
-      }
+    }
 
-  }
+}

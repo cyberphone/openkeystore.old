@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,7 @@
  */
 package org.webpki.asn1;
 
-public interface ASN1Constants
-  {
+public interface ASN1Constants {
     /* Identifier constants ****************************************************************/
     /* Tag classes */
     public static final int CLASS_MASK      = 0xC0; /* Bits 8 and 7 */
@@ -59,4 +58,4 @@ public interface ASN1Constants
     public static final int UNIVERSALSTRING = 0x1C; /* 28: Universal string */
     public static final int BMPSTRING       = 0x1E; /* 30: Basic Multilingual Plane/Unicode string */
     /* EO Identifier constants ******************************************************************/
-  }
+}

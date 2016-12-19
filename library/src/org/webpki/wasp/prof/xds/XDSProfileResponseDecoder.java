@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,8 +48,7 @@ import static org.webpki.wasp.WASPConstants.*;
 import static org.webpki.wasp.prof.xds.XDSProfileConstants.*;
 
 
-public class XDSProfileResponseDecoder extends XMLObjectWrapper implements SignatureProfileResponseDecoder
-  {
+public class XDSProfileResponseDecoder extends XMLObjectWrapper implements SignatureProfileResponseDecoder {
 
     // Attributes
     private String id;
@@ -78,185 +77,161 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
     private X509Certificate[] signer_certpath;
 
 
-    protected boolean hasQualifiedElements ()
-      {
+    protected boolean hasQualifiedElements() {
         return true;
-      }
+    }
 
 
-    public void init () throws IOException
-      {
-        addSchema (XML_SCHEMA_FILE);
-      }
+    public void init() throws IOException {
+        addSchema(XML_SCHEMA_FILE);
+    }
 
 
-    public String namespace ()
-      {
+    public String namespace() {
         return XML_SCHEMA_NAMESPACE;
-      }
+    }
 
 
-    public String element ()
-      {
+    public String element() {
         return RESPONSE_ELEM;
-      }
+    }
 
 
-    public String[] getUnreferencedAttachments ()
-      {
+    public String[] getUnreferencedAttachments() {
         return unreferenced_attachments;
-      }
+    }
 
-    
-    public byte[] getServerCertificateFingerprint ()
-      {
+
+    public byte[] getServerCertificateFingerprint() {
         return server_certificate_fingerprint;
-      }
+    }
 
-    
-    public String getRequestURL ()
-      {
+
+    public String getRequestURL() {
         return request_url;
-      }
+    }
 
-    
-    public String getSubmitUrl ()
-      {
+
+    public String getSubmitUrl() {
         return submit_url;
-      }
- 
-    
-    public GregorianCalendar getServerTime ()
-      {
-        return server_time;
-      }
+    }
 
-    
-    public GregorianCalendar getClientTime ()
-      {
+
+    public GregorianCalendar getServerTime() {
+        return server_time;
+    }
+
+
+    public GregorianCalendar getClientTime() {
         return client_time;
-      }
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // XML Reader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected void fromXML (DOMReaderHelper rd) throws IOException
-      {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+    protected void fromXML(DOMReaderHelper rd) throws IOException {
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper();
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        id = ah.getString (ID_ATTR);
+        id = ah.getString(ID_ATTR);
 
-        server_time = ah.getDateTime (SERVER_TIME_ATTR);
+        server_time = ah.getDateTime(SERVER_TIME_ATTR);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submit_url = ah.getString(SUBMIT_URL_ATTR);
 
-        request_url = ah.getString (REQUEST_URL_ATTR);
+        request_url = ah.getString(REQUEST_URL_ATTR);
 
-        client_time = ah.getDateTime (CLIENT_TIME_ATTR);
+        client_time = ah.getDateTime(CLIENT_TIME_ATTR);
 
-        server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
+        server_certificate_fingerprint = ah.getBinaryConditional(SERVER_CERT_FP_ATTR);
 
-        unreferenced_attachments = ah.getListConditional (UNREFERENCED_ATTACHMENTS_ATTR);
+        unreferenced_attachments = ah.getListConditional(UNREFERENCED_ATTACHMENTS_ATTR);
 
-        rd.getChild ();
+        rd.getChild();
 
         //////////////////////////////////////////////////////////////////////////
         // Get the child elements
         //////////////////////////////////////////////////////////////////////////
-        doc_refs = DocumentReferences.read (rd);
+        doc_refs = DocumentReferences.read(rd);
 
-        doc_signs = DocumentSignatures.read (rd);
+        doc_signs = DocumentSignatures.read(rd);
 
-        signature = (XMLSignatureWrapper) wrap (rd.getNext ());
-      }
+        signature = (XMLSignatureWrapper) wrap(rd.getNext());
+    }
 
-    protected void toXML (DOMWriterHelper helper) throws IOException
-      {
-        throw new IOException ("Should NEVER be called");
-      }
+    protected void toXML(DOMWriterHelper helper) throws IOException {
+        throw new IOException("Should NEVER be called");
+    }
 
-    public void verifySignature (VerifierInterface verifier) throws IOException
-      {
-        ds = new XMLVerifier (verifier);
-        ds.setSignedKeyInfo (SignedKeyInfoSpecifier.ALLOW_SIGNED_KEY_INFO);
-        ds.validateEnvelopedSignature (this, null, signature, id);
-        signer_certpath = verifier.getSignerCertificatePath ();
-      }
+    public void verifySignature(VerifierInterface verifier) throws IOException {
+        ds = new XMLVerifier(verifier);
+        ds.setSignedKeyInfo(SignedKeyInfoSpecifier.ALLOW_SIGNED_KEY_INFO);
+        ds.validateEnvelopedSignature(this, null, signature, id);
+        signer_certpath = verifier.getSignerCertificatePath();
+    }
 
 
-    private void bad (String what) throws IOException
-      {
-        throw new IOException (what);
-      }
+    private void bad(String what) throws IOException {
+        throw new IOException(what);
+    }
 
 
-    public boolean match (SignatureProfileEncoder spreenc,
-                          DocumentData doc_data,
-                          DocumentReferences doc_refs,
-                          Vector<CertificateFilter> cert_filters,
-                          String id,
-                          byte[] expected_fingerprint)
-    throws IOException
-      {
+    public boolean match(SignatureProfileEncoder spreenc,
+                         DocumentData doc_data,
+                         DocumentReferences doc_refs,
+                         Vector<CertificateFilter> cert_filters,
+                         String id,
+                         byte[] expected_fingerprint)
+            throws IOException {
         // Is this the same profile?
-        if (!(spreenc instanceof XDSProfileRequestEncoder))
-          {
+        if (!(spreenc instanceof XDSProfileRequestEncoder)) {
             return false;
-          }
+        }
 
         // Yes, it was!
         XDSProfileRequestEncoder enc = (XDSProfileRequestEncoder) spreenc;
 
         // Check that the ID attribute is OK
-        if (!this.id.equals (id))
-          {
-            bad ("Non-matching ID attribute");
-          }
+        if (!this.id.equals(id)) {
+            bad("Non-matching ID attribute");
+        }
 
         // Check that the document references are OK
-        this.doc_refs.check (doc_refs);
+        this.doc_refs.check(doc_refs);
 
         // Check that the document hashes are OK
-        if (!(new DocumentSignatures (enc.digest_algorithm, enc.document_canonicalization_algorithm, doc_data).equals (doc_signs)))
-          {
+        if (!(new DocumentSignatures(enc.digest_algorithm, enc.document_canonicalization_algorithm, doc_data).equals(doc_signs))) {
             return false;
-          }
+        }
 
-        if (enc.digest_algorithm != null && enc.digest_algorithm != ds.getDigestAlgorithm ())
-          {
-            bad ("Wrong digest algorithm.  Requested: " + enc.digest_algorithm.getAlgorithmId () +
-                 ".  Got: " + ds.getDigestAlgorithm ().getAlgorithmId ());
-          }
+        if (enc.digest_algorithm != null && enc.digest_algorithm != ds.getDigestAlgorithm()) {
+            bad("Wrong digest algorithm.  Requested: " + enc.digest_algorithm.getAlgorithmId() +
+                    ".  Got: " + ds.getDigestAlgorithm().getAlgorithmId());
+        }
 
-        if (enc.signature_algorithm != null && enc.signature_algorithm != ds.getSignatureAlgorithm ())
-          {
-            bad ("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getAlgorithmId (AlgorithmPreferences.SKS) +
-                 ".  Got: " + ds.getSignatureAlgorithm ().getAlgorithmId (AlgorithmPreferences.SKS));
-          }
+        if (enc.signature_algorithm != null && enc.signature_algorithm != ds.getSignatureAlgorithm()) {
+            bad("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS) +
+                    ".  Got: " + ds.getSignatureAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS));
+        }
 
         if (expected_fingerprint != null &&
-            (server_certificate_fingerprint == null || !ArrayUtil.compare (server_certificate_fingerprint, expected_fingerprint)))
-          {
-            bad ("Server certificate fingerprint");
-          }
+                (server_certificate_fingerprint == null || !ArrayUtil.compare(server_certificate_fingerprint, expected_fingerprint))) {
+            bad("Server certificate fingerprint");
+        }
 
-        if (cert_filters.size () > 0 && signer_certpath != null)
-          {
-            for (CertificateFilter cf : cert_filters)
-              {
-                if (cf.matches (signer_certpath))
-                  {
+        if (cert_filters.size() > 0 && signer_certpath != null) {
+            for (CertificateFilter cf : cert_filters) {
+                if (cf.matches(signer_certpath)) {
                     return true;
-                  }
-              }
-            bad ("Certificates does not match filter(s)");
-          }
+                }
+            }
+            bad("Certificates does not match filter(s)");
+        }
 
         // Success!
         return true;
-      }
+    }
 
-  }
+}

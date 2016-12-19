@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,12 @@ import java.io.IOException;
  */
 public enum DataEncryptionAlgorithms {
 
-    JOSE_A128CBC_HS256_ALG_ID   ("A128CBC-HS256", 32), 
-    JOSE_A256CBC_HS512_ALG_ID   ("A256CBC-HS512", 64);
+    JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32),
+    JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64);
 
     String JsonName;
     int keyLength;
-    
+
     DataEncryptionAlgorithms(String JsonName, int keyLength) {
         this.JsonName = JsonName;
         this.keyLength = keyLength;

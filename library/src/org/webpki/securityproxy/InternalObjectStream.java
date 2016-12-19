@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,41 +27,34 @@ import java.io.ObjectStreamClass;
 /**
  * Internal class for dealing with classloader serialization issues.
  */
-class InternalObjectStream extends ObjectInputStream
-  {
-    Object owner;
-    
-    @Override
-    public Class<?> resolveClass (ObjectStreamClass desc) throws IOException, ClassNotFoundException
-      {
-        try
-          {
-            return owner.getClass ().getClassLoader ().loadClass (desc.getName ());
-          }
-        catch (Exception e)
-          {
-          }
-        return super.resolveClass (desc);
-      }
+class InternalObjectStream extends ObjectInputStream {
 
-    InternalObjectStream (InputStream in, Object owner) throws IOException
-      {
-        super (in);
+    Object owner;
+
+    @Override
+    public Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        try {
+            return owner.getClass().getClassLoader().loadClass(desc.getName());
+        } catch (Exception e) {
+        }
+        return super.resolveClass(desc);
+    }
+
+    InternalObjectStream(InputStream in, Object owner) throws IOException {
+        super(in);
         this.owner = owner;
-      }
-    
-    static Object readObject (byte[] data, Object owner) throws IOException, ClassNotFoundException
-      {
-        InternalObjectStream ios = new InternalObjectStream (new ByteArrayInputStream (data), owner);
-        Object object = ios.readObject ();
-        ios.close ();
+    }
+
+    static Object readObject(byte[] data, Object owner) throws IOException, ClassNotFoundException {
+        InternalObjectStream ios = new InternalObjectStream(new ByteArrayInputStream(data), owner);
+        Object object = ios.readObject();
+        ios.close();
         return object;
-      }
-    
-    static byte[] writeObject (Object object) throws IOException
-      {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-        new ObjectOutputStream (baos).writeObject (object);
-        return baos.toByteArray ();
-      }
-  }
+    }
+
+    static byte[] writeObject(Object object) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new ObjectOutputStream(baos).writeObject(object);
+        return baos.toByteArray();
+    }
+}

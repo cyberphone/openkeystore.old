@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,37 +19,31 @@ package org.webpki.asn1;
 import java.io.IOException;
 import java.util.*;
 
-public abstract class ASN1Time extends Simple
-  {
+public abstract class ASN1Time extends Simple {
     Date value;
-    
-    ASN1Time(DerDecoder decoder) throws IOException
-      {
+
+    ASN1Time(DerDecoder decoder) throws IOException {
         super(decoder);
-      }
-    
-    ASN1Time(int tagNumber, Date value)
-      {
+    }
+
+    ASN1Time(int tagNumber, Date value) {
         super(tagNumber, false);
         this.value = value;
-      }
-    
-    public Date value()
-      {
+    }
+
+    public Date value() {
         return value;
-      }
-    
-    public Object objValue()
-      {
+    }
+
+    public Object objValue() {
         return value();
-      }
-    
+    }
+
     abstract String encodedForm();
-    
-    public void encode(Encoder encoder) throws IOException
-      {
+
+    public void encode(Encoder encoder) throws IOException {
         String encodedForm = encodedForm();
         encodeHeader(encoder, encodedForm.length(), true);
         encoder.write(encodedForm.getBytes());
-      }
-  }
+    }
+}

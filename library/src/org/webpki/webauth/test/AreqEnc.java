@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,80 +37,66 @@ import org.webpki.webauth.AuthenticationRequestDecoder;
 import org.webpki.webauth.AuthenticationRequestEncoder;
 import org.webpki.webauth.AuthenticationResponseDecoder;
 
-public class AreqEnc
-  {
+public class AreqEnc {
     static StringBuffer info_string;
-    
-    static int info_lengthp2;
-    
-    static void printHeader ()
-      {
-        for (int i = 0; i < info_lengthp2; i++)
-          {
-            info_string.append ('=');
-          }
-        info_string.append ('\n');
-      }
-    
-    static void printInfo (String info)
-      {
-        info_string = new StringBuffer ("\n\n");
-        info_lengthp2 = info.length () + 4;
-        printHeader ();
-        info_string.append ("= ").append (info).append (" =\n");
-        printHeader ();
-        System.out.println (info_string.toString ());
-      }
 
-    static void installOptionalBCProvider ()
-      {
+    static int info_lengthp2;
+
+    static void printHeader() {
+        for (int i = 0; i < info_lengthp2; i++) {
+            info_string.append('=');
+        }
+        info_string.append('\n');
+    }
+
+    static void printInfo(String info) {
+        info_string = new StringBuffer("\n\n");
+        info_lengthp2 = info.length() + 4;
+        printHeader();
+        info_string.append("= ").append(info).append(" =\n");
+        printHeader();
+        System.out.println(info_string.toString());
+    }
+
+    static void installOptionalBCProvider() {
         @SuppressWarnings("rawtypes")
         Class bc = null;
-        try
-          {
-            bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
-          }
-        catch (ClassNotFoundException e)
-          {
-            printInfo ("BouncyCastle provider not in path - Using the platform provider");
+        try {
+            bc = Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider");
+        } catch (ClassNotFoundException e) {
+            printInfo("BouncyCastle provider not in path - Using the platform provider");
             return;
-          }
-        try
-          {
-            Security.insertProviderAt ((Provider) bc.newInstance (), 1);
-            printInfo ("Installed BouncyCastle as first provider");
-          }
-        catch (Exception e)
-          {
-            printInfo ("Failed to install BouncyCastle!");
-          }
-      }
-    
-    static
-      {
-        installOptionalBCProvider ();
-      }
+        }
+        try {
+            Security.insertProviderAt((Provider) bc.newInstance(), 1);
+            printInfo("Installed BouncyCastle as first provider");
+        } catch (Exception e) {
+            printInfo("Failed to install BouncyCastle!");
+        }
+    }
 
-    private static void show ()
-      {
-        System.out.println ("AreqEnc outfile [options]\n" +
-                            "  -F authfile  full round (all 4 steps)\n" +
-                            "  -B       use rsasha1 as signature method\n" +
-                            "  -A       full cert path\n" +
-                            "  -I       sign request\n" +
-                            "  -R       request client-feature\n" +
-                            "  -T       set a fixed server time-stamp\n" +
-                            "  -t       set a fixed client time-stamp\n" +
-                            "  -i       set a fixed reference ID\n" +
-                            "  -f       set certificate filters\n" +
-                            "  -l       set languages = eng\n");
-        System.exit (3);
-      }
+    static {
+        installOptionalBCProvider();
+    }
+
+    private static void show() {
+        System.out.println("AreqEnc outfile [options]\n" +
+                "  -F authfile  full round (all 4 steps)\n" +
+                "  -B       use rsasha1 as signature method\n" +
+                "  -A       full cert path\n" +
+                "  -I       sign request\n" +
+                "  -R       request client-feature\n" +
+                "  -T       set a fixed server time-stamp\n" +
+                "  -t       set a fixed client time-stamp\n" +
+                "  -i       set a fixed reference ID\n" +
+                "  -f       set certificate filters\n" +
+                "  -l       set languages = eng\n");
+        System.exit(3);
+    }
 
 
-    public static void main (String args[]) throws Exception
-      {
-        if (args.length == 0) show ();
+    public static void main(String args[]) throws Exception {
+        if (args.length == 0) show();
         boolean lang = false;
         String authfile = null;
         boolean fixed_client_time = false;
@@ -121,103 +107,88 @@ public class AreqEnc
         boolean signrequest = false;
         boolean certflt = false;
         boolean iddata = false;
-        for (int i = 1; i < args.length; i++)
-          {
-            if (args[i].equals ("-I")) signrequest = true;
-            else if (args[i].equals ("-B")) rsasha1DS = true;
-            else if (args[i].equals ("-A")) certpath = true;
-            else if (args[i].equals ("-F"))
-              {
-                if (++i >= args.length || args[i].startsWith ("-"))
-                  {
-                    throw new IOException ("Bad -F option");
-                  }
+        for (int i = 1; i < args.length; i++) {
+            if (args[i].equals("-I")) signrequest = true;
+            else if (args[i].equals("-B")) rsasha1DS = true;
+            else if (args[i].equals("-A")) certpath = true;
+            else if (args[i].equals("-F")) {
+                if (++i >= args.length || args[i].startsWith("-")) {
+                    throw new IOException("Bad -F option");
+                }
                 authfile = args[i];
-              }
-            else if (args[i].equals ("-R")) request_client_feature = true;
-            else if (args[i].equals ("-T")) fixed_server_time = true;
-            else if (args[i].equals ("-t")) fixed_client_time = true;
-            else if (args[i].equals ("-i")) iddata = true;
-            else if (args[i].equals ("-f")) certflt = true;
-            else if (args[i].equals ("-l")) lang = true;
-            else show ();
-          }
- 
-         
-        AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home", null);
+            } else if (args[i].equals("-R")) request_client_feature = true;
+            else if (args[i].equals("-T")) fixed_server_time = true;
+            else if (args[i].equals("-t")) fixed_client_time = true;
+            else if (args[i].equals("-i")) iddata = true;
+            else if (args[i].equals("-f")) certflt = true;
+            else if (args[i].equals("-l")) lang = true;
+            else show();
+        }
 
-        if (certpath)
-          {
-            areqenc.setExtendedCertPath (true);
-          }
 
-        if (rsasha1DS)
-          {
-            areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA1);
-          }
-        else
-          {
-            areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA256);
-            areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.ECDSA_SHA256);
-          }
+        AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder("https://example.com/home", null);
 
-        if (certflt)
-          {
-            for (CertificateFilter cf : SreqEnc.createCertificateFilters ())
-              {
-                areqenc.addCertificateFilter (cf);
-              }
-          }
+        if (certpath) {
+            areqenc.setExtendedCertPath(true);
+        }
 
-        if (iddata)
-          {
-            areqenc.setID ("I0762586222");
-          }
+        if (rsasha1DS) {
+            areqenc.addSignatureAlgorithm(AsymSignatureAlgorithms.RSA_SHA1);
+        } else {
+            areqenc.addSignatureAlgorithm(AsymSignatureAlgorithms.RSA_SHA256);
+            areqenc.addSignatureAlgorithm(AsymSignatureAlgorithms.ECDSA_SHA256);
+        }
 
-        if (lang)
-          {
-            areqenc.setPreferredLanguages (new String[]{"eng"});
-          }
+        if (certflt) {
+            for (CertificateFilter cf : SreqEnc.createCertificateFilters()) {
+                areqenc.addCertificateFilter(cf);
+            }
+        }
 
-        if (fixed_server_time)
-          {
-            areqenc.setServerTime (new GregorianCalendar (2005, 3, 10, 9, 30, 0).getTime());
-          }
+        if (iddata) {
+            areqenc.setID("I0762586222");
+        }
 
-        if (request_client_feature)
-          {
-            areqenc.requestClientFeature ("http://xmlns.example.com/feature1");
-          }
+        if (lang) {
+            areqenc.setPreferredLanguages(new String[]{"eng"});
+        }
 
-        if (signrequest)
-          {
-            KeyStoreSigner req_signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
-            req_signer.setKey (null, DemoKeyStore.getSignerPassword ());
+        if (fixed_server_time) {
+            areqenc.setServerTime(new GregorianCalendar(2005, 3, 10, 9, 30, 0).getTime());
+        }
+
+        if (request_client_feature) {
+            areqenc.requestClientFeature("http://xmlns.example.com/feature1");
+        }
+
+        if (signrequest) {
+            KeyStoreSigner req_signer = new KeyStoreSigner(DemoKeyStore.getExampleDotComKeyStore(), null);
+            req_signer.setKey(null, DemoKeyStore.getSignerPassword());
 // TODO
-            req_signer.setExtendedCertPath (true);
-            areqenc.setRequestSigner (req_signer);
-          }
+            req_signer.setExtendedCertPath(true);
+            areqenc.setRequestSigner(req_signer);
+        }
 
-        byte[] data = areqenc.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile (args[0], data);
-        JSONDecoderCache sc = new JSONDecoderCache ();
-        sc.addToCache (AuthenticationRequestDecoder.class);
-        sc.parse (data);
+        byte[] data = areqenc.serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
+        ArrayUtil.writeFile(args[0], data);
+        JSONDecoderCache sc = new JSONDecoderCache();
+        sc.addToCache(AuthenticationRequestDecoder.class);
+        sc.parse(data);
 
         if (authfile == null) return;
 
         // Simulate receival and transmit of data at the client
 
-        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getMarionKeyStore (), null);
-        signer.setKey (null, DemoKeyStore.getSignerPassword ());
-        AresEnc.test (args[0], authfile, signer, fixed_client_time);
+        KeyStoreSigner signer = new KeyStoreSigner(DemoKeyStore.getMarionKeyStore(), null);
+        signer.setKey(null, DemoKeyStore.getSignerPassword());
+        AresEnc.test(args[0], authfile, signer, fixed_client_time);
 
         // Receive by requesting service
 
-        AuthenticationResponseDecoder aresdec = AresDec.test (authfile);
-        areqenc.checkRequestResponseIntegrity (aresdec, null);
+        AuthenticationResponseDecoder aresdec = AresDec.test(authfile);
+        areqenc.checkRequestResponseIntegrity(aresdec, null);
 
-        ArrayUtil.writeFile (authfile, aresdec.serializeJSONDecoder (JSONOutputFormats.PRETTY_PRINT));
+        ArrayUtil.writeFile(authfile, aresdec.serializeJSONDecoder(JSONOutputFormats.PRETTY_PRINT));
 
-      }
-  }
+    }
+}

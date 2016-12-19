@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,50 +18,41 @@ package org.webpki.asn1;
 
 import java.io.IOException;
 
-public final class ASN1Boolean extends Simple
-  {
+public final class ASN1Boolean extends Simple {
     boolean value;
-    
-    public ASN1Boolean(boolean value)
-      {
+
+    public ASN1Boolean(boolean value) {
         super(BOOLEAN, true);
         this.value = value;
-      }
-    
-    ASN1Boolean(DerDecoder decoder) throws IOException
-      {
+    }
+
+    ASN1Boolean(DerDecoder decoder) throws IOException {
         // Boolean encoding shall be primitive
         super(decoder, true);
 
-        if(decoder.length != 1)
-          {
+        if (decoder.length != 1) {
             throw new IOException("Boolean value must have length 1.");
-          }
+        }
         value = decoder.content()[0] != 0;
-      }
-    
-    public void encode(Encoder encoder) throws IOException
-      {
+    }
+
+    public void encode(Encoder encoder) throws IOException {
         encode(encoder, value ? Encoder.TRUE : Encoder.FALSE);
-      }
-    
-    public boolean deepCompare(BaseASN1Object o)
-      {
-        return sameType(o) && ((ASN1Boolean)o).value == value;
-      }
-    
-    public boolean value()
-      {
+    }
+
+    public boolean deepCompare(BaseASN1Object o) {
+        return sameType(o) && ((ASN1Boolean) o).value == value;
+    }
+
+    public boolean value() {
         return value;
-      }
-    
-    public Object objValue()
-      {
+    }
+
+    public Object objValue() {
         return new Boolean(value);
-      }
-    
-    void toString(StringBuffer s, String prefix)
-      {
-        s.append (getByteNumber ()).append(prefix).append("BOOLEAN ").append(value);
-      }
-  }
+    }
+
+    void toString(StringBuffer s, String prefix) {
+        s.append(getByteNumber()).append(prefix).append("BOOLEAN ").append(value);
+    }
+}

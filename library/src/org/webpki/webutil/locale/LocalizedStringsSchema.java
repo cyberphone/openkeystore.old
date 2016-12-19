@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,119 +24,97 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 
-public class LocalizedStringsSchema extends XMLObjectWrapper
-  {
-    public void init () throws IOException
-      {
-        addSchema ("localeschema.xsd");
-      }
+public class LocalizedStringsSchema extends XMLObjectWrapper {
+    public void init() throws IOException {
+        addSchema("localeschema.xsd");
+    }
 
 
-    protected boolean hasQualifiedElements ()
-      {
+    protected boolean hasQualifiedElements() {
         return true;
-      }
+    }
 
 
-    public String namespace ()
-      {
+    public String namespace() {
         return "http://locale.com";
-      }
-    
+    }
 
-    public String element ()
-      {
+
+    public String element() {
         return "LocalizedStrings";
-      }
- 
-    private Vector<String> lsname = new Vector<String> ();
-      
-    private Vector<String> lsvalue = new Vector<String> ();
-      
+    }
+
+    private Vector<String> lsname = new Vector<String>();
+
+    private Vector<String> lsvalue = new Vector<String>();
+
     private String language;
 
     private String application;
-   
-    
 
-    public String getLanguage ()
-      {
+
+    public String getLanguage() {
         return language;
-      }
+    }
 
 
-    public String getApplication ()
-      {
+    public String getApplication() {
         return application;
-      }
+    }
 
 
-    public String[] getLocalizedStrings (LocalizedStrings[] template) throws IOException
-      {
-        int l = lsvalue.size ();
-        if (template.length != l)
-          {
-            throw new IOException ("Wrong number of elements in XML file");
-          }
-        
+    public String[] getLocalizedStrings(LocalizedStrings[] template) throws IOException {
+        int l = lsvalue.size();
+        if (template.length != l) {
+            throw new IOException("Wrong number of elements in XML file");
+        }
+
         int i = -1, max = 0;
-        while (++i < template.length)
-          {
-            if (template[i].handle < 0 || template[i].handle > 9999)
-              {
-                throw new IOException ("Index out localized string > 9999");
-              }
-            if (template[i].handle > max)
-              {
+        while (++i < template.length) {
+            if (template[i].handle < 0 || template[i].handle > 9999) {
+                throw new IOException("Index out localized string > 9999");
+            }
+            if (template[i].handle > max) {
                 max = template[i].handle;
-              }
-          }
+            }
+        }
         String res[] = new String[max + 1];
-        for (i = 0; i < l; i++)
-          {
+        for (i = 0; i < l; i++) {
             int j = -1;
             boolean found = false;
-            while (++j < l)
-              {
-                if (lsname.elementAt (j) != null && template[i].lsname.equals (lsname.elementAt (j)))
-                  {
-                    if (res[template[i].handle] == null)
-                      {
-                        res[template[i].handle] = lsvalue.elementAt (j);
-                        lsname.setElementAt (null, j);
+            while (++j < l) {
+                if (lsname.elementAt(j) != null && template[i].lsname.equals(lsname.elementAt(j))) {
+                    if (res[template[i].handle] == null) {
+                        res[template[i].handle] = lsvalue.elementAt(j);
+                        lsname.setElementAt(null, j);
                         found = true;
                         break;
-                      }
-                    else
-                      {
-                        throw new IOException ("Duplicate handle: " + template[i].lsname);
-                      }
-                  }
-              }
-            if (!found) throw new IOException ("Missing in XML file: "  + template[i].lsname);
-          }
+                    } else {
+                        throw new IOException("Duplicate handle: " + template[i].lsname);
+                    }
+                }
+            }
+            if (!found) throw new IOException("Missing in XML file: " + template[i].lsname);
+        }
         return res;
-      }
+    }
 
 
-    protected void fromXML (DOMReaderHelper rd) throws IOException
-      {
-        language = rd.getAttributeHelper ().getString ("Language");
-        application = rd.getAttributeHelper ().getString ("Application");
+    protected void fromXML(DOMReaderHelper rd) throws IOException {
+        language = rd.getAttributeHelper().getString("Language");
+        application = rd.getAttributeHelper().getString("Application");
 
-        rd.getChild ();
+        rd.getChild();
 
-        while (rd.hasNext("LString"))
-          {
-            lsvalue.addElement (rd.getString ());
-            lsname.addElement (rd.getAttributeHelper ().getString ("Name"));
-          }
-      }
+        while (rd.hasNext("LString")) {
+            lsvalue.addElement(rd.getString());
+            lsname.addElement(rd.getAttributeHelper().getString("Name"));
+        }
+    }
 
-    
-    protected void toXML (DOMWriterHelper wr) throws IOException
-      {
-        throw new IOException ("Not implemented (as it is not needed...)");
-      }
 
-  }
+    protected void toXML(DOMWriterHelper wr) throws IOException {
+        throw new IOException("Not implemented (as it is not needed...)");
+    }
+
+}

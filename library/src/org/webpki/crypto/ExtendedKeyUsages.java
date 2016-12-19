@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-public enum ExtendedKeyUsages
-  {
+public enum ExtendedKeyUsages {
+
     SERVER_AUTH             ("1.3.6.1.5.5.7.3.1", "serverAuth"),
     CLIENT_AUTH             ("1.3.6.1.5.5.7.3.2", "clientAuth"),
     CODE_SIGNING            ("1.3.6.1.5.5.7.3.3", "codeSigning"),
@@ -30,46 +30,37 @@ public enum ExtendedKeyUsages
     private final String oid;
     private final String x509_name;
 
-    private ExtendedKeyUsages (String oid, String x509_name)
-      {
+    private ExtendedKeyUsages(String oid, String x509_name) {
         this.oid = oid;
         this.x509_name = x509_name;
-      }
+    }
 
 
-    public String getOID ()
-      {
+    public String getOID() {
         return oid;
-      }
-  
+    }
 
-    public static ExtendedKeyUsages getExtendedKeyUsage (String x509_name) throws IOException
-      {
-        for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
-          {
-            if (x509_name.equals (eku.x509_name))
-              {
+
+    public static ExtendedKeyUsages getExtendedKeyUsage(String x509_name) throws IOException {
+        for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
+            if (x509_name.equals(eku.x509_name)) {
                 return eku;
-              }
-          }
-        throw new IOException ("Unknown EKU: " + x509_name);
-      }
+            }
+        }
+        throw new IOException("Unknown EKU: " + x509_name);
+    }
 
-    public static String getOptionallyTranslatedEKU (String oid) throws IOException
-      {
-        for (ExtendedKeyUsages eku : ExtendedKeyUsages.values ())
-          {
-            if (oid.equals (eku.oid))
-              {
+    public static String getOptionallyTranslatedEKU(String oid) throws IOException {
+        for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
+            if (oid.equals(eku.oid)) {
                 return eku.x509_name;
-              }
-          }
+            }
+        }
         return oid;
-      }
+    }
 
 
-    public Object getX509Name ()
-      {
-         return x509_name;
-      }
-  }
+    public Object getX509Name() {
+        return x509_name;
+    }
+}

@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,26 +18,30 @@
 package org.webpki.xmldsig.c14n;
 
 /**
- *  
+ *
  *
  */
 public class Canonicalizer20010315ExclOmitComments
         extends Canonicalizer20010315Excl {
 
-   /**
-    * 
-    */
+    /**
+     *
+     */
     public Canonicalizer20010315ExclOmitComments() {
-      super(false);
-   }
- 
-   /** {inheritDoc} */
-   public final String engineGetURI() {
-      return Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
-   }
+        super(false);
+    }
 
-   /** {inheritDoc} */
-   public final boolean engineGetIncludeComments() {
-      return false;
-   }
+    /**
+     * {inheritDoc}
+     */
+    public final String engineGetURI() {
+        return Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS;
+    }
+
+    /**
+     * {inheritDoc}
+     */
+    public final boolean engineGetIncludeComments() {
+        return false;
+    }
 }

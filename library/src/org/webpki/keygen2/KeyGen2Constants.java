@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.webpki.keygen2;
 
 import org.webpki.sks.SecureKeyStore;
 
-public interface KeyGen2Constants
-  {
+public interface KeyGen2Constants {
+
     String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20151101";
 
     // JSON properties
@@ -195,4 +195,4 @@ public interface KeyGen2Constants
     String WIDTH_JSON                                = "width";
 
     String WRITABLE_JSON                             = SecureKeyStore.VAR_WRITABLE;
-  }
+}

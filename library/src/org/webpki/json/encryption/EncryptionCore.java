@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ import org.webpki.util.ArrayUtil;
 // Core encryption class
 
 public final class EncryptionCore {
-    
+
     private EncryptionCore() {} // Static and final class
 
     private static byte[] getTag(byte[] key,
@@ -55,10 +55,10 @@ public final class EncryptionCore {
         byte[] al = new byte[8];
         int value = authenticatedData.length * 8;
         for (int q = 24, i = 4; q >= 0; q -= 8, i++) {
-            al[i] = (byte)(value >>> q);
+            al[i] = (byte) (value >>> q);
         }
         Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init (new SecretKeySpec (key, 0, 16, "RAW"));
+        mac.init(new SecretKeySpec(key, 0, 16, "RAW"));
         mac.update(authenticatedData);
         mac.update(iv);
         mac.update(cipherText);
@@ -69,7 +69,7 @@ public final class EncryptionCore {
     }
 
     private static byte[] aesCore(int mode, byte[] key, byte[] iv, byte[] data, DataEncryptionAlgorithms dataEncryptionAlgorithm)
-    throws GeneralSecurityException {
+            throws GeneralSecurityException {
         if (!permittedDataEncryptionAlgorithm(dataEncryptionAlgorithm)) {
             throw new GeneralSecurityException("Unsupported AES algorithm: " + dataEncryptionAlgorithm);
         }
@@ -79,7 +79,7 @@ public final class EncryptionCore {
     }
 
     private static byte[] rsaCore(int mode, Key key, byte[] data, KeyEncryptionAlgorithms keyEncryptionAlgorithm)
-    throws GeneralSecurityException {
+            throws GeneralSecurityException {
         if (keyEncryptionAlgorithm != KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
@@ -92,13 +92,13 @@ public final class EncryptionCore {
         private byte[] iv;
         byte[] tag;
         byte[] cipherText;
-        
+
         private AuthEncResult(byte[] iv, byte[] tag, byte[] cipherText) {
             this.iv = iv;
             this.tag = tag;
             this.cipherText = cipherText;
         }
-        
+
         public byte[] getTag() {
             return tag;
         }
@@ -115,7 +115,7 @@ public final class EncryptionCore {
     public static class EcdhSenderResult {
         private byte[] sharedSecret;
         private ECPublicKey ephemeralKey;
-        
+
         private EcdhSenderResult(byte[] sharedSecret, ECPublicKey ephemeralKey) {
             this.sharedSecret = sharedSecret;
             this.ephemeralKey = ephemeralKey;
@@ -129,20 +129,20 @@ public final class EncryptionCore {
             return ephemeralKey;
         }
     }
-    
+
     public static AuthEncResult contentEncryption(DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                   byte[] key,
                                                   byte[] plainText,
                                                   byte[] authenticatedData) throws GeneralSecurityException {
         byte[] iv = new byte[16];
-        new SecureRandom().nextBytes (iv);
+        new SecureRandom().nextBytes(iv);
         byte[] cipherText = aesCore(Cipher.ENCRYPT_MODE, key, iv, plainText, dataEncryptionAlgorithm);
         return new AuthEncResult(iv, getTag(key, cipherText, iv, authenticatedData), cipherText);
     }
 
     public static byte[] generateDataEncryptionKey(DataEncryptionAlgorithms dataEncryptionAlgorithm) {
         byte[] dataEncryptionKey = new byte[dataEncryptionAlgorithm.getKeyLength()];
-        new SecureRandom().nextBytes (dataEncryptionKey);
+        new SecureRandom().nextBytes(dataEncryptionKey);
         return dataEncryptionKey;
     }
 
@@ -156,7 +156,7 @@ public final class EncryptionCore {
             throw new GeneralSecurityException("Authentication error on algorithm: " + dataEncryptionAlgorithm);
         }
         return aesCore(Cipher.DECRYPT_MODE, key, iv, cipherText, dataEncryptionAlgorithm);
-     }
+    }
 
     public static byte[] rsaEncryptKey(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                        byte[] rawKey,
@@ -172,7 +172,7 @@ public final class EncryptionCore {
 
     private static void addInt4(MessageDigest messageDigest, int value) {
         for (int i = 24; i >= 0; i -= 8) {
-            messageDigest.update((byte)(value >>> i));
+            messageDigest.update((byte) (value >>> i));
         }
     }
 
@@ -213,18 +213,18 @@ public final class EncryptionCore {
                                                       PublicKey staticKey) throws GeneralSecurityException, IOException {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJCEName());
-        generator.initialize (eccgen, new SecureRandom());
+        generator.initialize(eccgen, new SecureRandom());
         KeyPair keyPair = generator.generateKeyPair();
         return new EcdhSenderResult(receiverKeyAgreement(keyEncryptionAlgorithm,
                                                          dataEncryptionAlgorithm,
-                                                         (ECPublicKey)staticKey,
+                                                         (ECPublicKey) staticKey,
                                                          keyPair.getPrivate()),
-                                    (ECPublicKey) keyPair.getPublic());
+                                                         (ECPublicKey) keyPair.getPublic());
     }
 
     public static boolean permittedKeyEncryptionAlgorithm(KeyEncryptionAlgorithms algorithm) {
         return algorithm == KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID ||
-               algorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
+                algorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
     }
 
     public static boolean permittedDataEncryptionAlgorithm(DataEncryptionAlgorithms algorithm) {

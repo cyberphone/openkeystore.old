@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,5 @@ package org.webpki.crypto;
 /**
  * The crypto library supports SKS and JOSE algorithms.
  * Algorithms and EC curves like Brainpool which does not have a JOSE counterpart will throw exceptions in the "JOSE" mode.
- *
  */
 public enum AlgorithmPreferences {SKS, JOSE, JOSE_ACCEPT_PREFER}

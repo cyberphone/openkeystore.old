@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,57 +20,73 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * A simple Unsynced ByteArryOutputStream
- * @author raul
  *
+ * @author raul
  */
 public class UnsyncByteArrayOutputStream extends ByteArrayOutputStream {
-    int size=4*1024;
-    byte []buf=new byte[size];
+    int size = 4 * 1024;
+    byte[] buf = new byte[size];
     int pos;
-    /** {inheritDoc} */
+
+    /**
+     * {inheritDoc}
+     */
     public void write(byte[] arg0) {
-        int newPos=pos+arg0.length;
-        if (newPos>size) {
+        int newPos = pos + arg0.length;
+        if (newPos > size) {
             expandSize();
         }
-        System.arraycopy(arg0,0,buf,pos,arg0.length);
-        pos=newPos;
+        System.arraycopy(arg0, 0, buf, pos, arg0.length);
+        pos = newPos;
     }
-    /** {inheritDoc} */
+
+    /**
+     * {inheritDoc}
+     */
     public void write(byte[] arg0, int arg1, int arg2) {
-        int newPos=pos+arg2;
-        if (newPos>size) {
+        int newPos = pos + arg2;
+        if (newPos > size) {
             expandSize();
         }
-        System.arraycopy(arg0,arg1,buf,pos,arg2);
-        pos=newPos;
+        System.arraycopy(arg0, arg1, buf, pos, arg2);
+        pos = newPos;
     }
-    /** {inheritDoc} */
-    public void write(int arg0) {       
-        if (pos>=size) {
+
+    /**
+     * {inheritDoc}
+     */
+    public void write(int arg0) {
+        if (pos >= size) {
             expandSize();
         }
-        buf[pos++]=(byte)arg0;      
+        buf[pos++] = (byte) arg0;
     }
-    /** {inheritDoc} */
+
+    /**
+     * {inheritDoc}
+     */
     public byte[] toByteArray() {
-        byte result[]=new byte[pos];
-        System.arraycopy(buf,0,result,0,pos);
+        byte result[] = new byte[pos];
+        System.arraycopy(buf, 0, result, 0, pos);
         return result;
     }
-    
-    /** {inheritDoc} */
+
+    /**
+     * {inheritDoc}
+     */
     public void reset() {
-        pos=0;
+        pos = 0;
     }
-    
-    /** {inheritDoc} */
+
+    /**
+     * {inheritDoc}
+     */
     void expandSize() {
-        int newSize=size<<2;
-        byte newBuf[]=new byte[newSize];
-        System.arraycopy(buf,0,newBuf,0,pos);
-        buf=newBuf;
-        size=newSize;
-        
+        int newSize = size << 2;
+        byte newBuf[] = new byte[newSize];
+        System.arraycopy(buf, 0, newBuf, 0, pos);
+        buf = newBuf;
+        size = newSize;
+
     }
 }

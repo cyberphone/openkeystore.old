@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,120 +31,99 @@ import org.webpki.util.ISODateTime;
 /**
  * Reads array elements.
  */
-public class JSONArrayReader implements Serializable
-  {
+public class JSONArrayReader implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     Vector<JSONValue> array;
 
     int index;
 
-    JSONArrayReader (Vector<JSONValue> array)
-      {
+    JSONArrayReader(Vector<JSONValue> array) {
         this.array = array;
-      }
+    }
 
-    public boolean hasMore ()
-      {
-        return index < array.size ();
-      }
+    public boolean hasMore() {
+        return index < array.size();
+    }
 
-    void inRangeCheck () throws IOException
-      {
-        if (!hasMore ())
-          {
-            throw new IOException ("Trying to read past of array limit: " + index);
-          }
-      }
-    
-    Object get (JSONTypes expectedType) throws IOException
-      {
-        inRangeCheck ();
-        JSONValue value = array.elementAt (index++);
+    void inRangeCheck() throws IOException {
+        if (!hasMore()) {
+            throw new IOException("Trying to read past of array limit: " + index);
+        }
+    }
+
+    Object get(JSONTypes expectedType) throws IOException {
+        inRangeCheck();
+        JSONValue value = array.elementAt(index++);
         value.readFlag = true;
-        JSONTypes.compatibilityTest (expectedType, value);
+        JSONTypes.compatibilityTest(expectedType, value);
         return value.value;
-      }
+    }
 
-    public String getString () throws IOException
-      {
-        return (String) get (JSONTypes.STRING);
-      }
+    public String getString() throws IOException {
+        return (String) get(JSONTypes.STRING);
+    }
 
-    public int getInt () throws IOException
-      {
-        return JSONObjectReader.parseInt ((String) get (JSONTypes.NUMBER));
-      }
+    public int getInt() throws IOException {
+        return JSONObjectReader.parseInt((String) get(JSONTypes.NUMBER));
+    }
 
-    public long getInt53 () throws NumberFormatException, IOException
-      {
-        return JSONObjectReader.parseLong ((String) get (JSONTypes.NUMBER));
-      }
+    public long getInt53() throws NumberFormatException, IOException {
+        return JSONObjectReader.parseLong((String) get(JSONTypes.NUMBER));
+    }
 
-    public double getDouble () throws IOException
-      {
-        return Double.valueOf ((String) get (JSONTypes.NUMBER));
-      }
+    public double getDouble() throws IOException {
+        return Double.valueOf((String) get(JSONTypes.NUMBER));
+    }
 
-    public BigInteger getBigInteger () throws IOException
-      {
-        return JSONObjectReader.parseBigInteger (getString ());
-      }
+    public BigInteger getBigInteger() throws IOException {
+        return JSONObjectReader.parseBigInteger(getString());
+    }
 
-    public BigDecimal getBigDecimal () throws IOException
-      {
-        return JSONObjectReader.parseBigDecimal (getString (), null);
-      }
+    public BigDecimal getBigDecimal() throws IOException {
+        return JSONObjectReader.parseBigDecimal(getString(), null);
+    }
 
-    public BigDecimal getBigDecimal (Integer decimals) throws IOException
-      {
-        return JSONObjectReader.parseBigDecimal (getString (), decimals);
-      }
+    public BigDecimal getBigDecimal(Integer decimals) throws IOException {
+        return JSONObjectReader.parseBigDecimal(getString(), decimals);
+    }
 
-    public GregorianCalendar getDateTime () throws IOException
-      {
-        return ISODateTime.parseDateTime (getString ());
-      }
+    public GregorianCalendar getDateTime() throws IOException {
+        return ISODateTime.parseDateTime(getString());
+    }
 
-    public byte[] getBinary () throws IOException
-      {
-        return Base64URL.decode (getString ());
-      }
+    public byte[] getBinary() throws IOException {
+        return Base64URL.decode(getString());
+    }
 
-    public boolean getBoolean () throws IOException
-      {
-        return new Boolean ((String) get (JSONTypes.BOOLEAN));
-      }
+    public boolean getBoolean() throws IOException {
+        return new Boolean((String) get(JSONTypes.BOOLEAN));
+    }
 
-    public boolean getIfNULL () throws IOException
-      {
-        if (getElementType () == JSONTypes.NULL)
-          {
-            scanAway ();
+    public boolean getIfNULL() throws IOException {
+        if (getElementType() == JSONTypes.NULL) {
+            scanAway();
             return true;
-          }
+        }
         return false;
-      }
+    }
 
     @SuppressWarnings("unchecked")
-    public JSONArrayReader getArray () throws IOException
-      {
-        return new JSONArrayReader ((Vector<JSONValue>)get (JSONTypes.ARRAY));
-      }
+    public JSONArrayReader getArray() throws IOException {
+        return new JSONArrayReader((Vector<JSONValue>) get(JSONTypes.ARRAY));
+    }
 
-    public JSONTypes getElementType () throws IOException
-      {
-        inRangeCheck ();
-        return array.elementAt (index).type;
-      }
+    public JSONTypes getElementType() throws IOException {
+        inRangeCheck();
+        return array.elementAt(index).type;
+    }
 
-    public JSONObjectReader getObject () throws IOException
-      {
-        return new JSONObjectReader ((JSONObject) get (JSONTypes.OBJECT));
-      }
+    public JSONObjectReader getObject() throws IOException {
+        return new JSONObjectReader((JSONObject) get(JSONTypes.OBJECT));
+    }
 
-    public void scanAway () throws IOException
-      {
-        get (getElementType ());
-      }
-  }
+    public void scanAway() throws IOException {
+        get(getElementType());
+    }
+}

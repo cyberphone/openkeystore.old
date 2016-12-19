@@ -1,11 +1,11 @@
 /*
- *  Copyright 2006-2015 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,49 +24,42 @@ import org.webpki.xml.XMLCookie;
 
 /**
  * Implements the WASP/WebAuth "ClientPlatformFeature" XML object
- * 
  */
-public class ClientPlatformFeature
-  {
-    public ClientPlatformFeature (String feature_uri, XMLCookie xml_cookie)
-      {
+public class ClientPlatformFeature {
+    public ClientPlatformFeature(String feature_uri, XMLCookie xml_cookie) {
         this.feature_uri = feature_uri;
         this.xml_cookie = xml_cookie;
-      }
+    }
 
     String feature_uri;
-    
+
     private XMLCookie xml_cookie;
 
     public static final String CLIENT_PLATFORM_FEATURE_ELEM = "ClientPlatformFeature";
 
-    private static final String URI_ATTR                    = "URI";
+    private static final String URI_ATTR = "URI";
 
-    public String getFeatureURI ()
-      {
+    public String getFeatureURI() {
         return feature_uri;
-      }
+    }
 
-    public XMLCookie getXMLCookie () throws IOException
-      {
+    public XMLCookie getXMLCookie() throws IOException {
         return xml_cookie;
-      }
+    }
 
-    static ClientPlatformFeature read (DOMReaderHelper rd) throws IOException
-      {
-        rd.getNext (CLIENT_PLATFORM_FEATURE_ELEM);
-        String uri = rd.getAttributeHelper ().getString (URI_ATTR);
-        rd.getChild ();
-        XMLCookie xml_cookie = rd.getXMLCookie ();
-        rd.getParent ();
-        return new ClientPlatformFeature (uri, xml_cookie);
-      }
+    static ClientPlatformFeature read(DOMReaderHelper rd) throws IOException {
+        rd.getNext(CLIENT_PLATFORM_FEATURE_ELEM);
+        String uri = rd.getAttributeHelper().getString(URI_ATTR);
+        rd.getChild();
+        XMLCookie xml_cookie = rd.getXMLCookie();
+        rd.getParent();
+        return new ClientPlatformFeature(uri, xml_cookie);
+    }
 
-    public void write (DOMWriterHelper wr) throws IOException
-      {
-        wr.addChildElement (CLIENT_PLATFORM_FEATURE_ELEM);
-        wr.setStringAttribute (URI_ATTR, feature_uri);
-        wr.addXMLCookie (xml_cookie);
-        wr.getParent ();
-      }
-  }
+    public void write(DOMWriterHelper wr) throws IOException {
+        wr.addChildElement(CLIENT_PLATFORM_FEATURE_ELEM);
+        wr.setStringAttribute(URI_ATTR, feature_uri);
+        wr.addXMLCookie(xml_cookie);
+        wr.getParent();
+    }
+}

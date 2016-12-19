@@ -21,23 +21,23 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-   <xs:element name="ECKeyValue">
-      <xs:complexType>
-         <xs:sequence>
-            <xs:element name="NamedCurve">
-               <xs:complexType>
-                  <xs:attribute name="URI" use="required">
-                     <xs:simpleType>
-                        <xs:restriction base="xs:string">
-                           <xs:pattern value="urn:oid:[1-9][0-9]*(\.[1-9][0-9]*)*"/>
-                        </xs:restriction>
-                     </xs:simpleType>
-                  </xs:attribute>
-               </xs:complexType>
-            </xs:element>
-            <xs:element name="PublicKey" type="xs:base64Binary"/>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
-   
+    <xs:element name="ECKeyValue">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="NamedCurve">
+                    <xs:complexType>
+                        <xs:attribute name="URI" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="urn:oid:[1-9][0-9]*(\.[1-9][0-9]*)*"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="PublicKey" type="xs:base64Binary"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
 </xs:schema>
