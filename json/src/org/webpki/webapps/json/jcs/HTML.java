@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,403 +28,467 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.json.JSONSignatureDecoder;
 
-public class HTML
-  {
-    static final String SIGNUP_BGND_COLOR   = "#F4FFF1";
-    static final String SIGNUP_EDIT_COLOR   = "#FFFA91";
-    static final String SIGNUP_BAD_COLOR    = "#F78181";
-    static final String BOX_SHADDOW         = "box-shadow:5px 5px 5px #C0C0C0";
-    static final String KG2_DEVID_BASE      = "Field";
+public class HTML {
+    static final String SIGNUP_BGND_COLOR = "#F4FFF1";
+    static final String SIGNUP_EDIT_COLOR = "#FFFA91";
+    static final String SIGNUP_BAD_COLOR = "#F78181";
+    static final String BOX_SHADDOW = "box-shadow:5px 5px 5px #C0C0C0";
+    static final String KG2_DEVID_BASE = "Field";
     static final String HOME = "><a href=\"home\" title=\"Home\" style=\"position:absolute;top:15px;right:15px;z-index:5;visibility:visible\">Home</a";
 
     static final String STATIC_BOX = "word-break:break-all;width:800pt;background:#F8F8F8;";
     static final String COMMON_BOX = "border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0";
 
-    static final String TEXT_BOX   = "background:#FFFFD0;width:805pt;";
-    
-    static final String SAMPLE_DATA = "{\n" + 
-                                      "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n" +
-                                      "  &quot;otherProperties&quot;: [2000, true]\n" +
-                                      "}";
-    
-    static final String HTML_INIT = 
-        "<!DOCTYPE html>"+
-        "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"+
-        "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>" +
-        "<title>JSON Signature Demo</title>"+
-        "<style type=\"text/css\">html {overflow:auto} html, body {margin:0px;padding:0px;height:100%} "+
-        "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white} "+
-        "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica} "+
-        "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica} "+
-        "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "+
-        "input {font-weight:normal;font-size:8pt;font-family:verdana,arial} "+
-        "td {font-size:8pt;font-family:verdana,arial} "+
-        ".smalltext {font-size:6pt;font-family:verdana,arial} "+
-        "button {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px} "+
-        ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana} " +
-        "</style>";
-    
+    static final String TEXT_BOX = "background:#FFFFD0;width:805pt;";
 
-    static String encode (String val)
-      {
-        if (val != null)
-          {
-            StringBuffer buf = new StringBuffer (val.length () + 8);
+    static final String SAMPLE_DATA = "{\n"
+            + "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n"
+            + "  &quot;otherProperties&quot;: [2000, true]\n" + "}";
+
+    static final String HTML_INIT = "<!DOCTYPE html>"
+            + "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"
+            + "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>"
+            + "<title>JSON Signature Demo</title>"
+            + "<style type=\"text/css\">html {overflow:auto} html, body {margin:0px;padding:0px;height:100%} "
+            + "body {font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white} "
+            + "h2 {font-weight:bold;font-size:12pt;color:#000000;font-family:arial,verdana,helvetica} "
+            + "h3 {font-weight:bold;font-size:11pt;color:#000000;font-family:arial,verdana,helvetica} "
+            + "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "
+            + "input {font-weight:normal;font-size:8pt;font-family:verdana,arial} "
+            + "td {font-size:8pt;font-family:verdana,arial} "
+            + ".smalltext {font-size:6pt;font-family:verdana,arial} "
+            + "button {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px} "
+            + ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana} "
+            + "</style>";
+
+    static String encode(String val) {
+        if (val != null) {
+            StringBuffer buf = new StringBuffer(val.length() + 8);
             char c;
 
-            for (int i = 0; i < val.length (); i++)
-              {
-                c = val.charAt (i);
-                switch (c)
-                  {
-                    case '<':
-                      buf.append ("&lt;");
-                      break;
-                    case '>':
-                      buf.append ("&gt;");
-                      break;
-                    case '&':
-                      buf.append ("&amp;");
-                      break;
-                    case '\"':
-                      buf.append ("&#034;");
-                      break;
-                    case '\'':
-                      buf.append ("&#039;");
-                      break;
-                    default:
-                      buf.append (c);
-                      break;
-                  }
-              }
-            return buf.toString ();
-          }
-        else
-          {
-            return new String ("");
-          }
-      }
-    
-    static String newLines2HTML (String text_with_newlines)
-      {
-        StringBuffer result = new StringBuffer ();
-        for (char c : text_with_newlines.toCharArray ())
-          {
-            if (c == '\n')
-              {
-                result.append ("<br>");
-              }
-            else
-              {
-                result.append (c);
-              }
-          }
-        return result.toString ();
-      }
-    
-    static String getHTML (String javascript, String bodyscript, String box)
-      {
-        StringBuffer s = new StringBuffer (HTML_INIT);
-        if (javascript != null)
-          {
-            s.append ("<script type=\"text/javascript\">").append (javascript).append ("</script>");
-          }
-        s.append ("</head><body");
-        if (bodyscript != null)
-          {
-            s.append (' ').append (bodyscript);
-          }
-        s.append (
-            "><div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;" +
-            "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\"" +
-            " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
-         .append (JCSService.logotype)
-         .append ("</div><table cellapdding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
-            .append(box).append("</table></body></html>");
-        return s.toString ();
-      }
-    
-    static void output (HttpServletResponse response, String html) throws IOException, ServletException
-      {
-        response.setContentType ("text/html; charset=utf-8");
-        response.setHeader ("Pragma", "No-Cache");
-        response.setDateHeader ("EXPIRES", 0);
-        response.getOutputStream ().write (html.getBytes ("UTF-8"));
-      }
+            for (int i = 0; i < val.length(); i++) {
+                c = val.charAt(i);
+                switch (c) {
+                case '<':
+                    buf.append("&lt;");
+                    break;
+                case '>':
+                    buf.append("&gt;");
+                    break;
+                case '&':
+                    buf.append("&amp;");
+                    break;
+                case '\"':
+                    buf.append("&#034;");
+                    break;
+                case '\'':
+                    buf.append("&#039;");
+                    break;
+                default:
+                    buf.append(c);
+                    break;
+                }
+            }
+            return buf.toString();
+        } else {
+            return new String("");
+        }
+    }
 
-    static String getConditionalParameter (HttpServletRequest request, String name)
-      {
-        String value = request.getParameter (name);
-        if (value == null)
-          {
+    static String newLines2HTML(String text_with_newlines) {
+        StringBuffer result = new StringBuffer();
+        for (char c : text_with_newlines.toCharArray()) {
+            if (c == '\n') {
+                result.append("<br>");
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
+    static String getHTML(String javascript, String bodyscript, String box) {
+        StringBuffer s = new StringBuffer(HTML_INIT);
+        if (javascript != null) {
+            s.append("<script type=\"text/javascript\">").append(javascript)
+                    .append("</script>");
+        }
+        s.append("</head><body");
+        if (bodyscript != null) {
+            s.append(' ').append(bodyscript);
+        }
+        s.append(
+                "><div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;"
+                        + "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\""
+                        + " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
+                .append(JCSService.logotype)
+                .append("</div><table cellapdding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
+                .append(box).append("</table></body></html>");
+        return s.toString();
+    }
+
+    static void output(HttpServletResponse response, String html)
+            throws IOException, ServletException {
+        response.setContentType("text/html; charset=utf-8");
+        response.setHeader("Pragma", "No-Cache");
+        response.setDateHeader("EXPIRES", 0);
+        response.getOutputStream().write(html.getBytes("UTF-8"));
+    }
+
+    static String getConditionalParameter(HttpServletRequest request,
+            String name) {
+        String value = request.getParameter(name);
+        if (value == null) {
             return "";
-          }
+        }
         return value;
-      }
+    }
 
-    public static String fancyBox (String id, String content)
-      {
-        return "<div id=\"" + id + "\" style=\"" + STATIC_BOX + COMMON_BOX + "\">" + content + "</div>";
-      }
+    public static String fancyBox(String id, String content) {
+        return "<div id=\"" + id + "\" style=\"" + STATIC_BOX + COMMON_BOX
+                + "\">" + content + "</div>";
+    }
 
-    public static String fancyText (int rows, String content)
-      {
-        return "<textarea style=\"margin-top:3pt;" + TEXT_BOX + COMMON_BOX + "\" rows=\"" + rows + 
-               "\" maxlength=\"100000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + content +
-               "</textarea>";
-      }
-    
-    public static void homePage (HttpServletResponse response, String baseurl) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-                null,
-                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-                "<table style=\"max-width=\"300px\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS - JSON Cleartext Signature<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/verify\">Verify a JCS on the server</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/create\">Create a JCS on the server</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>" +
-                   "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jcs.html\">JCS Documentation</a></td></tr>" +
-                 "</table></td></tr>"));
-      }
+    public static String fancyText(int rows, String content) {
+        return "<textarea style=\"margin-top:3pt;" + TEXT_BOX + COMMON_BOX
+                + "\" rows=\"" + rows + "\" maxlength=\"100000\" name=\""
+                + RequestServlet.JCS_ARGUMENT + "\">" + content + "</textarea>";
+    }
 
-    public static void verifyPage (HttpServletResponse response, HttpServletRequest request, String signature) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-                HOME,
-                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-                "<table cellpadding=\"0\" cellspacing=\"0\"><form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">"  +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Testing JSON Signatures<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\">Paste a JSON signature in the text box or try with the default:</td></tr>" +
-                   "<tr><td align=\"left\">" + fancyText (20, encode (signature)) + "</td></tr>" +
-                   "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Verify JSON Signature!\" name=\"sumbit\"></td></tr>" +
-                 "</form></table></td></tr>"));
-      }
-    
-    public static void noWebCryptoPage (HttpServletResponse response) throws IOException, ServletException 
-      {
-        HTML.output (response, HTML.getHTML (null, null,
-                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">Your Browser Doesn't Support WebCrypto :-(</td></tr>"));
-      }
+    public static void homePage(HttpServletResponse response, String baseurl)
+            throws IOException, ServletException {
+        HTML.output(
+                response,
+                HTML.getHTML(
+                        null,
+                        null,
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
+                                + "<table style=\"max-width=\"300px\">"
+                                + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS - JSON Cleartext Signature<br>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\"><a href=\""
+                                + baseurl
+                                + "/verify\">Verify a JCS on the server</a></td></tr>"
+                                + "<tr><td>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\"><a href=\""
+                                + baseurl
+                                + "/create\">Create a JCS on the server</a></td></tr>"
+                                + "<tr><td>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\"><a href=\""
+                                + baseurl
+                                + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>"
+                                + "<tr><td>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jcs.html\">JCS Documentation</a></td></tr>"
+                                + "</table></td></tr>"));
+    }
 
-    private static String javaScript (String string)
-      {
-        StringBuffer s = new StringBuffer ();
-        for (char c : string.toCharArray ())
-          {
-            if (c == '\n')
-              {
-                s.append ("\\n");
-              }
-            else
-              {
-                s.append (c);
-              }
-          }
-        return s.toString ();
-      }
+    public static void verifyPage(HttpServletResponse response,
+            HttpServletRequest request, String signature) throws IOException,
+            ServletException {
+        HTML.output(
+                response,
+                HTML.getHTML(
+                        null,
+                        HOME,
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
+                                + "<table cellpadding=\"0\" cellspacing=\"0\"><form method=\"POST\" action=\""
+                                + request.getRequestURL().toString()
+                                + "\">"
+                                + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Testing JSON Signatures<br>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\">Paste a JSON signature in the text box or try with the default:</td></tr>"
+                                + "<tr><td align=\"left\">"
+                                + fancyText(20, encode(signature))
+                                + "</td></tr>"
+                                + "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Verify JSON Signature!\" name=\"sumbit\"></td></tr>"
+                                + "</form></table></td></tr>"));
+    }
 
-    public static void webCryptoPage (HttpServletResponse response) throws IOException, ServletException
-      {
-        StringBuffer html = new StringBuffer (
-            "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><style> " +
-             "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} " +
-             "</style></head>\n" +
-            "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\"" + HOME + ">\n" +
-            "<h3>WebCrypto / JCS Demo</h3>\n\n" +
-            "This demo only relies on ES6 and WebCrypto features and does not refer to any external libraries either." +
-            "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n" +
-            "<div id=\"pub.key\"></div>\n\n" +
-            "<script>\n\n  // This code is supposed to be compliant with the WebCrypto draft...\n\n" +
-        
-              "var pubKey;\n" +
-              "var privKey;\n" +
-              "var jsonObject;\n" +
-              "var publicKeyInJWKFormat; // The bridge between JCS and WebCrypto\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Utility methods                                                      //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "var BASE64URL_ENCODE = [" + 
-              "'A','B','C','D','E','F','G','H'," +
-              "'I','J','K','L','M','N','O','P'," +
-              "'Q','R','S','T','U','V','W','X'," +
-              "'Y','Z','a','b','c','d','e','f'," +
-              "'g','h','i','j','k','l','m','n'," +
-              "'o','p','q','r','s','t','u','v'," +
-              "'w','x','y','z','0','1','2','3'," +
-              "'4','5','6','7','8','9','-','_'];\n" +
-              "function convertToBase64URL(binarray) {\n" +
-              "    var encoded = new String ();\n" +
-              "    var i = 0;\n" +
-              "    var modulo3 = binarray.length % 3;\n" +
-              "    while (i < binarray.length - modulo3) {\n" +
-              "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n" +
-              "        encoded += BASE64URL_ENCODE[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n" +
-              "        encoded += BASE64URL_ENCODE[((binarray[i++] << 2) & 0x3C) | ((binarray[i] >>> 6) & 0x03)];\n" +
-              "        encoded += BASE64URL_ENCODE[binarray[i++] & 0x3F];\n" +
-              "    }\n" +
-              "    if (modulo3 == 1) {\n" +
-              "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n" +
-              "        encoded += BASE64URL_ENCODE[(binarray[i] << 4) & 0x30];\n" +
-              "    }\n" +
-              "    else if (modulo3 == 2) {\n" +
-              "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n" +
-              "        encoded += BASE64URL_ENCODE[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n" +
-              "        encoded += BASE64URL_ENCODE[(binarray[i] << 2) & 0x3C];\n" +
-              "    }\n" +
-              "    return encoded;\n" +
-              "}\n\n" +
-              "function convertToUTF8(string) {\n" +
-              " var buffer = [];\n" +
-              " for (var i = 0; i < string.length; i++) {\n" +
-              "   var c = string.charCodeAt(i);\n" +
-              "   if (c < 128) {\n" +
-              "     buffer.push(c);\n" +
-              "   } else if ((c > 127) && (c < 2048)) {\n" +
-              "     buffer.push((c >> 6) | 0xC0);\n" +
-              "     buffer.push((c & 0x3F) | 0x80);\n" +
-              "   } else {\n" +
-              "     buffer.push((c >> 12) | 0xE0);\n" +
-              "     buffer.push(((c >> 6) & 0x3F) | 0x80);\n" +
-              "     buffer.push((c & 0x3F) | 0x80);\n" +
-              "   }\n" +
-              " }\n" +
-              " return new Uint8Array(buffer);\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Nice-looking text-boxes                                              //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function fancyJSONBox(header, json) {\n" +
-              "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;" + 
-                        "max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + JSON.stringify(json) + '</div>';\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Error message helper                                                 //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-             "function bad(id, message) {\n" +
-              " document.getElementById (id).innerHTML = '<b style=\"color:red\">' + message + '</b>';\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Create key event handler                                             //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function createKey() {\n" +
-              "  if (window.crypto === undefined || window.crypto.subtle == undefined) {\n" +
-              "    document.location.href = 'nowebcrypto';\n" +
-              "    return;\n" +
-              "  }\n" +
-              "  console.log('Begin creating key...');\n" +
-              "  document.getElementById('pub.key').innerHTML = '<i>Working...</i>';\n" +
-              "  crypto.subtle.generateKey({name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n" +
-              "                            false, ['sign', 'verify']).then(function(key) {\n" +
-              "    pubKey = key.publicKey;\n" +
-              "    privKey = key.privateKey;\n\n" +
+    public static void noWebCryptoPage(HttpServletResponse response)
+            throws IOException, ServletException {
+        HTML.output(
+                response,
+                HTML.getHTML(
+                        null,
+                        null,
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">Your Browser Doesn't Support WebCrypto :-(</td></tr>"));
+    }
 
-              "    crypto.subtle.exportKey('jwk', pubKey).then(function(key) {\n" +
-              "      publicKeyInJWKFormat = key;\n" +
-              "      console.log('generateKey() RSASSA-PKCS1-v1_5: PASS');\n" +
-              "      document.getElementById('pub.key').innerHTML = fancyJSONBox('Generated public key in JWK format', publicKeyInJWKFormat) + " +
-                        "'<br>&nbsp;<br>Editable sample data in JSON Format:<br>" +
-                        "<textarea style=\"margin-top:3pt;margin-left:0pt;padding:10px;background:#FFFFD0;min-width:805pt;border-width:1px;border-style:solid;border-color:grey;box-shadow:3pt 3pt 3pt #D0D0D0\" " +
-                        "rows=\"5\" maxlength=\"1000\" id=\"json.text\">" + javaScript (SAMPLE_DATA) + "</textarea>" +
-                        "<p><input type=\"button\" value=\"Sign Sample Data\" onClick=\"signSampleData()\"/></p><p id=\"sign.res\"><p>';\n" +
-              "    });\n" +
-              "  }).then(undefined, function() {\n" + 
-              "    bad('pub.key', 'WebCrypto failed for unknown reasons');\n" +
-              "  });" +
-              "\n}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Sign event handler                                                   //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function signSampleData() {\n" +
-              "  try {\n" +
-              "    document.getElementById('sign.res').innerHTML = '';\n" +
-              "    jsonObject = JSON.parse(document.getElementById('json.text').value);\n" +
-              "    if (typeof jsonObject !== 'object' || Array.isArray(jsonObject)) {\n" +
-              "      bad('sign.res', 'Only JSON objects can be signed');\n" +
-              "      return;\n" +
-              "    }\n" +
-              "    if (jsonObject." + JSONSignatureDecoder.SIGNATURE_JSON + ") {\n" +
-              "      bad('sign.res', 'Object is already signed');\n" +
-              "      return;\n" +
-              "    }\n" +
-              "    var signatureObject = jsonObject." + JSONSignatureDecoder.SIGNATURE_JSON + " = {};\n" +
-              "    signatureObject." + JSONSignatureDecoder.ALGORITHM_JSON + " = '" + AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId (AlgorithmPreferences.JOSE) + "';\n" +
-              "    var publicKeyObject = signatureObject." + JSONSignatureDecoder.PUBLIC_KEY_JSON + " = {};\n" +
-              "    publicKeyObject." + JSONSignatureDecoder.TYPE_JSON + " = '" + JSONSignatureDecoder.RSA_PUBLIC_KEY + "';\n" +
-              "    publicKeyObject." + JSONSignatureDecoder.N_JSON + " = publicKeyInJWKFormat." + JSONSignatureDecoder.N_JSON + ";\n" +
-              "    publicKeyObject." + JSONSignatureDecoder.E_JSON + " = publicKeyInJWKFormat." + JSONSignatureDecoder.E_JSON + ";\n" +
-               "  } catch (err) {\n" +
-              "    bad('sign.res', 'JSON error: ' + err.toString());\n" +
-              "    return;\n" +
-              "  }\n" +
-              "  crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5'}, privKey,\n" +
-              "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n" +
-              "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n" +
-              "    signatureObject." + JSONSignatureDecoder.VALUE_JSON + " = convertToBase64URL(new Uint8Array(signature));\n" +
-              "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + " +
-              "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n" +
-              "  }).then(undefined, function() {\n" +
-              "    bad('sign.res', 'WebCrypto failed for unknown reasons');\n" +
-              "  });\n" +
-              "}\n\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "// Optional validation is in this demo/test happening on the server     //\n" +
-              "//////////////////////////////////////////////////////////////////////////\n" +
-              "function verifySignatureOnServer() {\n" +
-              "  document.location.href = 'request?" + RequestServlet.JCS_ARGUMENT + "=" + "' + " +
-                   "convertToBase64URL(convertToUTF8(JSON.stringify(jsonObject)));\n" +
-              "}\n");
-             
-        HTML.output (response, html.append ("</script></body></html>").toString ());
-      }
+    private static String javaScript(String string) {
+        StringBuffer s = new StringBuffer();
+        for (char c : string.toCharArray()) {
+            if (c == '\n') {
+                s.append("\\n");
+            } else {
+                s.append(c);
+            }
+        }
+        return s.toString();
+    }
 
-    public static void errorPage (HttpServletResponse response, String error) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-              HOME,
-                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-                "<table style=\"max-width=\"300px\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana;color:red\">Something went wrong...<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\">" + newLines2HTML (encode (error)) + "</td></tr>" +
-                 "</table></td></tr>"));
-      }
+    public static void webCryptoPage(HttpServletResponse response)
+            throws IOException, ServletException {
+        StringBuffer html = new StringBuffer(
+                "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><style> "
+                        + "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "
+                        + "</style></head>\n"
+                        + "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\""
+                        + HOME
+                        + ">\n"
+                        + "<h3>WebCrypto / JCS Demo</h3>\n\n"
+                        + "This demo only relies on ES6 and WebCrypto features and does not refer to any external libraries either."
+                        + "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n"
+                        + "<div id=\"pub.key\"></div>\n\n"
+                        + "<script>\n\n  // This code is supposed to be compliant with the WebCrypto draft...\n\n"
+                        +
 
-    public static void printResultPage (HttpServletResponse response, String message) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-                                            HOME,
-                                             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" + message + "</td></tr>"));
-      }
+                        "var pubKey;\n"
+                        + "var privKey;\n"
+                        + "var jsonObject;\n"
+                        + "var publicKeyInJWKFormat; // The bridge between JCS and WebCrypto\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Utility methods                                                      //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "var BASE64URL_ENCODE = ["
+                        + "'A','B','C','D','E','F','G','H',"
+                        + "'I','J','K','L','M','N','O','P',"
+                        + "'Q','R','S','T','U','V','W','X',"
+                        + "'Y','Z','a','b','c','d','e','f',"
+                        + "'g','h','i','j','k','l','m','n',"
+                        + "'o','p','q','r','s','t','u','v',"
+                        + "'w','x','y','z','0','1','2','3',"
+                        + "'4','5','6','7','8','9','-','_'];\n"
+                        + "function convertToBase64URL(binarray) {\n"
+                        + "    var encoded = new String ();\n"
+                        + "    var i = 0;\n"
+                        + "    var modulo3 = binarray.length % 3;\n"
+                        + "    while (i < binarray.length - modulo3) {\n"
+                        + "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n"
+                        + "        encoded += BASE64URL_ENCODE[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n"
+                        + "        encoded += BASE64URL_ENCODE[((binarray[i++] << 2) & 0x3C) | ((binarray[i] >>> 6) & 0x03)];\n"
+                        + "        encoded += BASE64URL_ENCODE[binarray[i++] & 0x3F];\n"
+                        + "    }\n"
+                        + "    if (modulo3 == 1) {\n"
+                        + "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n"
+                        + "        encoded += BASE64URL_ENCODE[(binarray[i] << 4) & 0x30];\n"
+                        + "    }\n"
+                        + "    else if (modulo3 == 2) {\n"
+                        + "        encoded += BASE64URL_ENCODE[(binarray[i] >>> 2) & 0x3F];\n"
+                        + "        encoded += BASE64URL_ENCODE[((binarray[i++] << 4) & 0x30) | ((binarray[i] >>> 4) & 0x0F)];\n"
+                        + "        encoded += BASE64URL_ENCODE[(binarray[i] << 2) & 0x3C];\n"
+                        + "    }\n"
+                        + "    return encoded;\n"
+                        + "}\n\n"
+                        + "function convertToUTF8(string) {\n"
+                        + " var buffer = [];\n"
+                        + " for (var i = 0; i < string.length; i++) {\n"
+                        + "   var c = string.charCodeAt(i);\n"
+                        + "   if (c < 128) {\n"
+                        + "     buffer.push(c);\n"
+                        + "   } else if ((c > 127) && (c < 2048)) {\n"
+                        + "     buffer.push((c >> 6) | 0xC0);\n"
+                        + "     buffer.push((c & 0x3F) | 0x80);\n"
+                        + "   } else {\n"
+                        + "     buffer.push((c >> 12) | 0xE0);\n"
+                        + "     buffer.push(((c >> 6) & 0x3F) | 0x80);\n"
+                        + "     buffer.push((c & 0x3F) | 0x80);\n"
+                        + "   }\n"
+                        + " }\n"
+                        + " return new Uint8Array(buffer);\n"
+                        + "}\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Nice-looking text-boxes                                              //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "function fancyJSONBox(header, json) {\n"
+                        + "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;"
+                        + "max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + JSON.stringify(json) + '</div>';\n"
+                        + "}\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Error message helper                                                 //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "function bad(id, message) {\n"
+                        + " document.getElementById (id).innerHTML = '<b style=\"color:red\">' + message + '</b>';\n"
+                        + "}\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Create key event handler                                             //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "function createKey() {\n"
+                        + "  if (window.crypto === undefined || window.crypto.subtle == undefined) {\n"
+                        + "    document.location.href = 'nowebcrypto';\n"
+                        + "    return;\n"
+                        + "  }\n"
+                        + "  console.log('Begin creating key...');\n"
+                        + "  document.getElementById('pub.key').innerHTML = '<i>Working...</i>';\n"
+                        + "  crypto.subtle.generateKey({name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}, modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01])},\n"
+                        + "                            false, ['sign', 'verify']).then(function(key) {\n"
+                        + "    pubKey = key.publicKey;\n"
+                        + "    privKey = key.privateKey;\n\n"
+                        +
 
-    public static void createPage (HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException
-      {
-        HTML.output (response, HTML.getHTML (null,
-            HOME,
-            "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
-            "<table cellpadding=\"0\" cellspacing=\"0\"><form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">"  +
-               "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JSON Signature Creation<br>&nbsp;</td></tr>" +
-               "<tr><td align=\"left\">Paste an unsigned JSON object in the text box or try with the default:</td></tr>" +
-               "<tr><td align=\"left\">" + fancyText (10,
-                         "{\n" + "" +
-                         "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n" +
-                         "  &quot;otherProperties&quot;: [2000, true]\n" +
-                         "}") +
-                     "</td></tr>" +
-               "<tr><td align=\"center\"><table>" +
-                 "<tr><td valign=\"middle\" rowspan=\"7\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.SYM + 
-                 "\">Symmetric key</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + GenerateSignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.JOSE_FLAG + "\" checked value=\"true\">JOSE Algorithms</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.ES6_FLAG + "\" value=\"true\">Normalize data according to ES6/V8</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"checkbox\" name=\"" + CreateServlet.JS_FLAG + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td><td>" +
-                 "</table></td></tr>" +
-               "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>" +
-             "</form></table></td></tr>"));
-      }
+                        "    crypto.subtle.exportKey('jwk', pubKey).then(function(key) {\n"
+                        + "      publicKeyInJWKFormat = key;\n"
+                        + "      console.log('generateKey() RSASSA-PKCS1-v1_5: PASS');\n"
+                        + "      document.getElementById('pub.key').innerHTML = fancyJSONBox('Generated public key in JWK format', publicKeyInJWKFormat) + "
+                        + "'<br>&nbsp;<br>Editable sample data in JSON Format:<br>"
+                        + "<textarea style=\"margin-top:3pt;margin-left:0pt;padding:10px;background:#FFFFD0;min-width:805pt;border-width:1px;border-style:solid;border-color:grey;box-shadow:3pt 3pt 3pt #D0D0D0\" "
+                        + "rows=\"5\" maxlength=\"1000\" id=\"json.text\">"
+                        + javaScript(SAMPLE_DATA)
+                        + "</textarea>"
+                        + "<p><input type=\"button\" value=\"Sign Sample Data\" onClick=\"signSampleData()\"/></p><p id=\"sign.res\"><p>';\n"
+                        + "    });\n"
+                        + "  }).then(undefined, function() {\n"
+                        + "    bad('pub.key', 'WebCrypto failed for unknown reasons');\n"
+                        + "  });"
+                        + "\n}\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Sign event handler                                                   //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "function signSampleData() {\n"
+                        + "  try {\n"
+                        + "    document.getElementById('sign.res').innerHTML = '';\n"
+                        + "    jsonObject = JSON.parse(document.getElementById('json.text').value);\n"
+                        + "    if (typeof jsonObject !== 'object' || Array.isArray(jsonObject)) {\n"
+                        + "      bad('sign.res', 'Only JSON objects can be signed');\n"
+                        + "      return;\n"
+                        + "    }\n"
+                        + "    if (jsonObject."
+                        + JSONSignatureDecoder.SIGNATURE_JSON
+                        + ") {\n"
+                        + "      bad('sign.res', 'Object is already signed');\n"
+                        + "      return;\n"
+                        + "    }\n"
+                        + "    var signatureObject = jsonObject."
+                        + JSONSignatureDecoder.SIGNATURE_JSON
+                        + " = {};\n"
+                        + "    signatureObject."
+                        + JSONSignatureDecoder.ALGORITHM_JSON
+                        + " = '"
+                        + AsymSignatureAlgorithms.RSA_SHA256
+                                .getAlgorithmId(AlgorithmPreferences.JOSE)
+                        + "';\n"
+                        + "    var publicKeyObject = signatureObject."
+                        + JSONSignatureDecoder.PUBLIC_KEY_JSON
+                        + " = {};\n"
+                        + "    publicKeyObject."
+                        + JSONSignatureDecoder.TYPE_JSON
+                        + " = '"
+                        + JSONSignatureDecoder.RSA_PUBLIC_KEY
+                        + "';\n"
+                        + "    publicKeyObject."
+                        + JSONSignatureDecoder.N_JSON
+                        + " = publicKeyInJWKFormat."
+                        + JSONSignatureDecoder.N_JSON
+                        + ";\n"
+                        + "    publicKeyObject."
+                        + JSONSignatureDecoder.E_JSON
+                        + " = publicKeyInJWKFormat."
+                        + JSONSignatureDecoder.E_JSON
+                        + ";\n"
+                        + "  } catch (err) {\n"
+                        + "    bad('sign.res', 'JSON error: ' + err.toString());\n"
+                        + "    return;\n"
+                        + "  }\n"
+                        + "  crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5'}, privKey,\n"
+                        + "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n"
+                        + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
+                        + "    signatureObject."
+                        + JSONSignatureDecoder.VALUE_JSON
+                        + " = convertToBase64URL(new Uint8Array(signature));\n"
+                        + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
+                        + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"
+                        + "  }).then(undefined, function() {\n"
+                        + "    bad('sign.res', 'WebCrypto failed for unknown reasons');\n"
+                        + "  });\n"
+                        + "}\n\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "// Optional validation is in this demo/test happening on the server     //\n"
+                        + "//////////////////////////////////////////////////////////////////////////\n"
+                        + "function verifySignatureOnServer() {\n"
+                        + "  document.location.href = 'request?"
+                        + RequestServlet.JCS_ARGUMENT
+                        + "="
+                        + "' + "
+                        + "convertToBase64URL(convertToUTF8(JSON.stringify(jsonObject)));\n"
+                        + "}\n");
 
-  }
+        HTML.output(response, html.append("</script></body></html>").toString());
+    }
+
+    public static void errorPage(HttpServletResponse response, String error)
+            throws IOException, ServletException {
+        HTML.output(
+                response,
+                HTML.getHTML(
+                        null,
+                        HOME,
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
+                                + "<table style=\"max-width=\"300px\">"
+                                + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana;color:red\">Something went wrong...<br>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\">"
+                                + newLines2HTML(encode(error)) + "</td></tr>"
+                                + "</table></td></tr>"));
+    }
+
+    public static void printResultPage(HttpServletResponse response,
+            String message) throws IOException, ServletException {
+        HTML.output(response, HTML.getHTML(null, HOME,
+                "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
+                        + message + "</td></tr>"));
+    }
+
+    public static void createPage(HttpServletResponse response,
+            HttpServletRequest request) throws IOException, ServletException {
+        HTML.output(
+                response,
+                HTML.getHTML(
+                        null,
+                        HOME,
+                        "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
+                                + "<table cellpadding=\"0\" cellspacing=\"0\"><form method=\"POST\" action=\""
+                                + request.getRequestURL().toString()
+                                + "\">"
+                                + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JSON Signature Creation<br>&nbsp;</td></tr>"
+                                + "<tr><td align=\"left\">Paste an unsigned JSON object in the text box or try with the default:</td></tr>"
+                                + "<tr><td align=\"left\">"
+                                + fancyText(
+                                        10,
+                                        "{\n"
+                                                + ""
+                                                + "  &quot;statement&quot;: &quot;Hello signed world!&quot;,\n"
+                                                + "  &quot;otherProperties&quot;: [2000, true]\n"
+                                                + "}")
+                                + "</td></tr>"
+                                + "<tr><td align=\"center\"><table>"
+                                + "<tr><td valign=\"middle\" rowspan=\"7\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
+                                + CreateServlet.KEY_TYPE
+                                + "\" value=\""
+                                + GenerateSignature.ACTION.SYM
+                                + "\">Symmetric key</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+                                + CreateServlet.KEY_TYPE
+                                + "\" value=\""
+                                + GenerateSignature.ACTION.EC
+                                + "\" checked=\"checked\">EC Key (P-256)</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+                                + CreateServlet.KEY_TYPE
+                                + "\" value=\""
+                                + GenerateSignature.ACTION.RSA
+                                + "\">RSA Key (2048)</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+                                + CreateServlet.KEY_TYPE
+                                + "\" value=\""
+                                + GenerateSignature.ACTION.X509
+                                + "\">X.509 Certificate/Private key</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
+                                + CreateServlet.JOSE_FLAG
+                                + "\" checked value=\"true\">JOSE Algorithms</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
+                                + CreateServlet.ES6_FLAG
+                                + "\" value=\"true\">Normalize data according to ES6/V8</td><td>"
+                                + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
+                                + CreateServlet.JS_FLAG
+                                + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td><td>"
+                                + "</table></td></tr>"
+                                + "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>"
+                                + "</form></table></td></tr>"));
+    }
+
+}

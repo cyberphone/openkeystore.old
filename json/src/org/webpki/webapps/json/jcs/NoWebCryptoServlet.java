@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,12 +24,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class NoWebCryptoServlet extends HttpServlet
-  {
+public class NoWebCryptoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    
-    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        HTML.noWebCryptoPage (response);
-      }
-  }
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        HTML.noWebCryptoPage(response);
+    }
+}

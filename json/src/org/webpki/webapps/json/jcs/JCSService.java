@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -30,55 +30,58 @@ import org.webpki.crypto.KeyStoreReader;
 import org.webpki.util.ArrayUtil;
 import org.webpki.webutil.InitPropertyReader;
 
-public class JCSService extends InitPropertyReader implements ServletContextListener
-  {
-    static Logger logger = Logger.getLogger (JCSService.class.getName ());
-    
+public class JCSService extends InitPropertyReader implements
+        ServletContextListener {
+    static Logger logger = Logger.getLogger(JCSService.class.getName());
+
     static String key_password;
-    
+
     static KeyStore clientkey_rsa;
 
     static KeyStore clientkey_ec;
-    
+
     static String logotype;
 
     InputStream getResource(String name) throws IOException {
-      InputStream is = this.getClass().getResourceAsStream(name);
-      if (is == null) {
-          throw new IOException("Resource fail for: " + name);
-      }
-      return is;
+        InputStream is = this.getClass().getResourceAsStream(name);
+        if (is == null) {
+            throw new IOException("Resource fail for: " + name);
+        }
+        return is;
     }
 
     @Override
-    public void contextDestroyed (ServletContextEvent event)
-      {
-      }
+    public void contextDestroyed(ServletContextEvent event) {
+    }
 
     @Override
-    public void contextInitialized (ServletContextEvent event)
-      {
-        initProperties (event);
-        try
-          {
-            ////////////////////////////////////////////////////////////////////////////////////////////
+    public void contextInitialized(ServletContextEvent event) {
+        initProperties(event);
+        try {
+            // //////////////////////////////////////////////////////////////////////////////////////////
             // Logotype
-            ////////////////////////////////////////////////////////////////////////////////////////////
+            // //////////////////////////////////////////////////////////////////////////////////////////
             logotype = new String(
-                ArrayUtil.getByteArrayFromInputStream(getResource("webpki-logo.svg")), "UTF-8");
+                    ArrayUtil
+                            .getByteArrayFromInputStream(getResource("webpki-logo.svg")),
+                    "UTF-8");
 
-            ////////////////////////////////////////////////////////////////////////////////////////////
+            // //////////////////////////////////////////////////////////////////////////////////////////
             // Keys
-            ////////////////////////////////////////////////////////////////////////////////////////////
-            CustomCryptoProvider.forcedLoad (getPropertyBoolean ("bouncycastle_first"));
-            key_password = getPropertyString ("key_password");
-            clientkey_rsa = KeyStoreReader.loadKeyStore (getResource (getPropertyString ("clientkey_rsa")), key_password);
-            clientkey_ec = KeyStoreReader.loadKeyStore (getResource (getPropertyString ("clientkey_ec")), key_password);
-            logger.info ("JCS Demo Successfully Initiated");
-          }
-        catch (Exception e)
-          {
-            logger.log (Level.SEVERE, "********\n" + e.getMessage () + "\n********", e);
-          }
-      }
-  }
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            CustomCryptoProvider
+                    .forcedLoad(getPropertyBoolean("bouncycastle_first"));
+            key_password = getPropertyString("key_password");
+            clientkey_rsa = KeyStoreReader.loadKeyStore(
+                    getResource(getPropertyString("clientkey_rsa")),
+                    key_password);
+            clientkey_ec = KeyStoreReader.loadKeyStore(
+                    getResource(getPropertyString("clientkey_ec")),
+                    key_password);
+            logger.info("JCS Demo Successfully Initiated");
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "********\n" + e.getMessage()
+                    + "\n********", e);
+        }
+    }
+}

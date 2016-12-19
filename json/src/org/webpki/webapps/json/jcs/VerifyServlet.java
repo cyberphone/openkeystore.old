@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2014 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,49 +29,45 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
-public class VerifyServlet extends HttpServlet
-  {
+public class VerifyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    
-    String signature;
-    
-    @Override
-    public
-    void init (ServletConfig config)
-      {
-        try
-          {
-            super.init (config);
-            try
-              {
-                signature = new String (ArrayUtil.getByteArrayFromInputStream (config.getServletContext ().getResourceAsStream ("/signature.json")), "UTF-8");
-              }
-            catch (IOException e)
-              {
-                throw new RuntimeException (e);
-              }
-          }
-        catch (ServletException e)
-          {
-            throw new RuntimeException (e);
-          }
-      }
-    
-    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        HTML.verifyPage (response, request, signature);
-      }
 
-    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        request.setCharacterEncoding ("UTF-8");
-        String json = CreateServlet.getTextArea (request);
-/*
-        response.sendRedirect (ServletUtil.getContextURL (request) + 
-                               "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                               Base64URL.encode (json.getBytes ("UTF-8")));
-*/
-        RequestDispatcher rd = request.getRequestDispatcher ("request?" + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode (json.getBytes ("UTF-8")));
-        rd.forward (request, response); 
-      }
-  }
+    String signature;
+
+    @Override
+    public void init(ServletConfig config) {
+        try {
+            super.init(config);
+            try {
+                signature = new String(
+                        ArrayUtil.getByteArrayFromInputStream(config
+                                .getServletContext().getResourceAsStream(
+                                        "/signature.json")), "UTF-8");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        HTML.verifyPage(response, request, signature);
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
+        String json = CreateServlet.getTextArea(request);
+        /*
+         * response.sendRedirect (ServletUtil.getContextURL (request) +
+         * "/request?" + RequestServlet.JCS_ARGUMENT + "=" + Base64URL.encode
+         * (json.getBytes ("UTF-8")));
+         */
+        RequestDispatcher rd = request.getRequestDispatcher("request?"
+                + RequestServlet.JCS_ARGUMENT + "="
+                + Base64URL.encode(json.getBytes("UTF-8")));
+        rd.forward(request, response);
+    }
+}
