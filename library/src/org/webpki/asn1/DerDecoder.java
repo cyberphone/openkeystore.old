@@ -218,16 +218,6 @@ public class DerDecoder implements ASN1Constants {
                 }
             }
         }
-/*
-        if(offset < source.length - 1)
-          {
-            next();
-          }
-        else
-          {
-            //debug("EOF");
-          }
-*/
 //AR 2006-09-22++
         offset++;
 //AR 2006-09-22--

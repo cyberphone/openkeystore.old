@@ -40,19 +40,20 @@ import org.webpki.util.ArrayUtil;
  * Simple signature test generator
  */
 public class GenerateSignature {
-    static enum ACTION {
-        SYM, EC, RSA, X509
-    };
+
+    static enum ACTION {SYM, EC, RSA, X509}
 
     static final String KEY_NAME = "mykey";
 
-    static final byte[] SYMMETRIC_KEY = { (byte) 0xF4, (byte) 0xC7,
-            (byte) 0x4F, (byte) 0x33, (byte) 0x98, (byte) 0xC4, (byte) 0x9C,
-            (byte) 0xF4, (byte) 0x6D, (byte) 0x93, (byte) 0xEC, (byte) 0x98,
-            (byte) 0x18, (byte) 0x83, (byte) 0x26, (byte) 0x61, (byte) 0xA4,
-            (byte) 0x0B, (byte) 0xAE, (byte) 0x4D, (byte) 0x20, (byte) 0x4D,
-            (byte) 0x75, (byte) 0x50, (byte) 0x36, (byte) 0x14, (byte) 0x10,
-            (byte) 0x20, (byte) 0x74, (byte) 0x34, (byte) 0x69, (byte) 0x09 };
+    static final byte[] SYMMETRIC_KEY = 
+          { (byte) 0xF4, (byte) 0xC7, (byte) 0x4F, (byte) 0x33,
+            (byte) 0x98, (byte) 0xC4, (byte) 0x9C, (byte) 0xF4,
+            (byte) 0x6D, (byte) 0x93, (byte) 0xEC, (byte) 0x98,
+            (byte) 0x18, (byte) 0x83, (byte) 0x26, (byte) 0x61,
+            (byte) 0xA4, (byte) 0x0B, (byte) 0xAE, (byte) 0x4D,
+            (byte) 0x20, (byte) 0x4D, (byte) 0x75, (byte) 0x50,
+            (byte) 0x36, (byte) 0x14, (byte) 0x10, (byte) 0x20,
+            (byte) 0x74, (byte) 0x34, (byte) 0x69, (byte) 0x09 };
 
     ACTION action;
 

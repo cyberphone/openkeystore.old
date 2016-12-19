@@ -36,10 +36,10 @@ import org.webpki.util.Base64URL;
 public class CreateServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    static final String KEY_TYPE = "keytype";
+    static final String KEY_TYPE  = "keytype";
     static final String JOSE_FLAG = "jose";
-    static final String ES6_FLAG = "es6";
-    static final String JS_FLAG = "js";
+    static final String ES6_FLAG  = "es6";
+    static final String JS_FLAG   = "js";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
