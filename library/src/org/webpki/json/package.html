@@ -82,7 +82,7 @@ writer.setInt(5);
 writer.setInt(-8).setBoolean(true);  // Chain commands
 JSONObjectWriter inner = writer.setObject();
 inner.setString("s", "hi").setDateTime("now", new Date(), true);  // Date UTC-only option
-System.out.println(writer.toString());
+System.out.println(new String(writer.serializeJSONArray(JSONOutputFormats.PRETTY_PRINT),"UTF-8"));
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
 [5,-8,true,
@@ -90,12 +90,6 @@ Expected result:<pre style="margin-left:40pt;color:green">
   "s": "hi",
   "now": "2014-12-26T16:40:28Z"
 }]
-</pre>
-Using normalized formatting:
-<pre style="margin-left:20pt">
-System.out.println(writer.toString());
-</pre><pre style="margin-left:40pt;color:green">
-[5,-8,true,{"s":"hi","now":"2014-12-26T16:40:28Z"}]
 </pre>
 <h4>4. Reading objects</h4>
 <pre style="margin-left:20pt">
