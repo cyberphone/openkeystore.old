@@ -21,6 +21,6 @@ import java.io.IOException;
 
 public interface SymKeyVerifierInterface {
 
-    public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException;
+    public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String keyId) throws IOException;
 
 }

@@ -102,7 +102,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
     X509Certificate[] certificates;
 
     // It is an asymmetric key signature 
-    PublicKey public_key;
+    PublicKey publicKey;
 
     // It is a symmetric key signature
 
@@ -116,7 +116,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         Element element;
         String id;
         CanonicalizationAlgorithms cn_alg;
-        HashAlgorithms digest_alg;
+        HashAlgorithms digestAlg;
         byte[] digest_val;
         boolean enveloped;
 
@@ -126,7 +126,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             this.element = o.element;
             this.id = o.id;
             this.cn_alg = o.cn_alg;
-            this.digest_alg = o.digest_alg;
+            this.digestAlg = o.digestAlg;
             this.digest_val = o.digest_val;
             this.enveloped = o.enveloped;
         }
@@ -159,7 +159,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     CanonicalizationAlgorithms canonicalization_algorithm;
 
-    String signature_algorithm;
+    String signatureAlgorithm;
 
     CanonicalizationAlgorithms transform_algorithm;
 
@@ -212,12 +212,12 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
 
     public static PublicKey readPublicKey(DOMReaderHelper rd) throws IOException {
-        PublicKey public_key = null;
+        PublicKey publicKey = null;
         try {
             if (rd.hasNext(RSA_KEY_VALUE_ELEM)) {
                 rd.getNext(RSA_KEY_VALUE_ELEM);
                 rd.getChild();
-                public_key = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(readCryptoBinary(rd, MODULUS_ELEM),
+                publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(readCryptoBinary(rd, MODULUS_ELEM),
                         readCryptoBinary(rd, EXPONENT_ELEM)));
             } else {
                 rd.getNext(EC_KEY_VALUE_ELEM);
@@ -227,7 +227,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                 if (!named_curve.startsWith(KeyAlgorithms.XML_DSIG_CURVE_PREFIX)) {
                     throw new IOException("Syntax error: " + named_curve);
                 }
-                public_key = KeyFactory.getInstance("EC").generatePublic(
+                publicKey = KeyFactory.getInstance("EC").generatePublic(
                     new X509EncodedKeySpec(
                         new ASN1Sequence(new BaseASN1Object[]
                             {
@@ -243,8 +243,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             throw new IOException(e);
         }
         rd.getParent();
-        KeyAlgorithms.getKeyAlgorithm(public_key); // Verify that it is one of the supported
-        return public_key;
+        KeyAlgorithms.getKeyAlgorithm(publicKey); // Verify that it is one of the supported
+        return publicKey;
     }
 
 
@@ -319,7 +319,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         rd.getParent();
         rd.getParent();
         rd.getNext(DIGEST_METHOD_ELEM);
-        ref.digest_alg = HashAlgorithms.getAlgorithmFromID(aHelper.getString(ALGORITHM_ATTR));
+        ref.digestAlg = HashAlgorithms.getAlgorithmFromID(aHelper.getString(ALGORITHM_ATTR));
         rd.getChild();
         if (rd.hasNext()) throw new IOException("No \"DigestMethod\" elements allowed");
         rd.getParent();
@@ -396,7 +396,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         } else if (rd.hasNext(KEY_VALUE_ELEM)) {
             rd.getNext(KEY_VALUE_ELEM);
             rd.getChild();
-            public_key = readPublicKey(rd);
+            publicKey = readPublicKey(rd);
             rd.getParent();
         } else {
             rd.getString(KEY_NAME_ELEM);  // We don't care about the name...
@@ -463,8 +463,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
     }
 
 
-    public static void writePublicKey(DOMWriterHelper wr, PublicKey public_key) throws IOException {
-        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm(public_key);
+    public static void writePublicKey(DOMWriterHelper wr, PublicKey publicKey) throws IOException {
+        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm(publicKey);
         if (key_alg.isRSAKey()) {
             String old = wr.pushPrefix(XML_DSIG_NS_PREFIX);
             if (old == null || !old.equals(XML_DSIG_NS_PREFIX)) {
@@ -472,14 +472,14 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             } else {
                 wr.addChildElement(RSA_KEY_VALUE_ELEM);
             }
-            writeCryptoBinary(wr, ((RSAPublicKey) public_key).getModulus(), MODULUS_ELEM);
-            writeCryptoBinary(wr, ((RSAPublicKey) public_key).getPublicExponent(), EXPONENT_ELEM);
+            writeCryptoBinary(wr, ((RSAPublicKey) publicKey).getModulus(), MODULUS_ELEM);
+            writeCryptoBinary(wr, ((RSAPublicKey) publicKey).getPublicExponent(), EXPONENT_ELEM);
         } else {
             wr.pushPrefix(XML_DSIG11_NS_PREFIX);
             wr.addChildElementNS(XML_DSIG11_NS, EC_KEY_VALUE_ELEM);
             wr.addEmptyElement(NAMED_CURVE_ELEM);
             wr.setStringAttribute(URI_ATTR, KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID());
-            wr.addBinary(PUBLIC_KEY_ELEM, ParseUtil.bitstring(ParseUtil.sequence(DerDecoder.decode(public_key.getEncoded()), 2).get(1)));
+            wr.addBinary(PUBLIC_KEY_ELEM, ParseUtil.bitstring(ParseUtil.sequence(DerDecoder.decode(publicKey.getEncoded()), 2).get(1)));
         }
         wr.getParent();
         wr.popPrefix();
@@ -531,16 +531,16 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         wr.setStringAttribute(ALGORITHM_ATTR, canonicalization_algorithm.getURI());
 
         wr.addEmptyElement(SIGNATURE_METHOD_ELEM);
-        wr.setStringAttribute(ALGORITHM_ATTR, signature_algorithm);
+        wr.setStringAttribute(ALGORITHM_ATTR, signatureAlgorithm);
         object_id = object_id == null ? ("O." + base_id) : object_id;
         SignedElement_Reference_node = envelope_id == null ?
                 createOneReference(wr, object_id, false)
                 :
                 createOneReference(wr, envelope_id, true);
 
-        String key_id = envelope_id == null ? "K." + base_id : envelope_id + ".KeyInfo";
+        String keyId = envelope_id == null ? "K." + base_id : envelope_id + ".KeyInfo";
         if (KeyInfo_Reference_create) {
-            KeyInfo_Reference_node = createOneReference(wr, key_id, false);
+            KeyInfo_Reference_node = createOneReference(wr, keyId, false);
         }
 
         wr.getParent();
@@ -549,14 +549,14 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
         KeyInfo_element = wr.addChildElementNS(XML_DSIG_NS, KEY_INFO_ELEM);
         if (KeyInfo_Reference_create) {
-            wr.setStringAttribute(ID_ATTR, key_id);
+            wr.setStringAttribute(ID_ATTR, keyId);
         }
 
         if (certificates != null) {
             writeX509Data(wr, this, certificates);
-        } else if (public_key != null) {
+        } else if (publicKey != null) {
             wr.addChildElement(KEY_VALUE_ELEM);
-            writePublicKey(wr, public_key);
+            writePublicKey(wr, publicKey);
             wr.getParent();
         } else {
             wr.addString(KEY_NAME_ELEM, symmetric_key_name);

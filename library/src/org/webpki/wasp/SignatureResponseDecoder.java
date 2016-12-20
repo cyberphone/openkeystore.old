@@ -76,7 +76,7 @@ public class SignatureResponseDecoder extends SignatureResponse {
             if (sign_prof_data.match(spe,
                     sreqenc.document_data,
                     sreqenc.document_references,
-                    sreqenc.certificate_filters,
+                    sreqenc.certificateFilters,
                     sreqenc.id,
                     expected_fingerprint)) {
                 return;

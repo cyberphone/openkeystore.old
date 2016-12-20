@@ -29,9 +29,9 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 abstract class CredentialDiscoveryResponse extends XMLObjectWrapper 
   {
-    String server_session_id;
+    String serverSessionId;
     
-    String client_session_id;
+    String clientSessionId;
     
     CredentialDiscoveryResponse () {}
 

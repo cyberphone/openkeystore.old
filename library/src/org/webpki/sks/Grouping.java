@@ -27,11 +27,11 @@ public enum Grouping {
 
     private final String name;       // As expressed in protocols
 
-    private final byte sks_value;    // As expressed in SKS
+    private final byte sksValue;    // As expressed in SKS
 
-    private Grouping(String name, byte sks_value) {
+    private Grouping(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -41,7 +41,7 @@ public enum Grouping {
 
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
 

@@ -34,11 +34,11 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
 
     class MatchingCredential
       {
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
 
-        String client_session_id;
+        String clientSessionId;
 
-        String server_session_id;
+        String serverSessionId;
         
         boolean locked;
       }
@@ -54,12 +54,12 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
             this.id = id;
           }
         
-        public void addMatchingCredential (X509Certificate[] certificate_path, String client_session_id, String server_session_id, boolean locked) throws IOException
+        public void addMatchingCredential (X509Certificate[] certificatePath, String clientSessionId, String serverSessionId, boolean locked) throws IOException
           {
             MatchingCredential mc = new MatchingCredential ();
-            mc.certificate_path = certificate_path;
-            mc.client_session_id = client_session_id;
-            mc.server_session_id = server_session_id;
+            mc.certificatePath = certificatePath;
+            mc.clientSessionId = clientSessionId;
+            mc.serverSessionId = serverSessionId;
             mc.locked = locked;
             matching_credentials.add (mc);
           }
@@ -77,8 +77,8 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
 
     public CredentialDiscoveryResponseEncoder (CredentialDiscoveryRequestDecoder cred_disc_dec)
       {
-        super.server_session_id = cred_disc_dec.server_session_id;
-        super.client_session_id = cred_disc_dec.client_session_id;
+        super.serverSessionId = cred_disc_dec.serverSessionId;
+        super.clientSessionId = cred_disc_dec.clientSessionId;
         this.ref = cred_disc_dec.lookup_specifiers;
       }
 
@@ -109,9 +109,9 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, client_session_id);
+        wr.setStringAttribute (ID_ATTR, clientSessionId);
 
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, serverSessionId);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup results
@@ -131,13 +131,13 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
             for (MatchingCredential mc : lo_res.matching_credentials)
               {
                 wr.addChildElement (MATCHING_CREDENTIAL_ELEM);
-                wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.client_session_id);
-                wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.server_session_id);
+                wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.clientSessionId);
+                wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.serverSessionId);
                 if (mc.locked)
                   {
                     wr.setBooleanAttribute (LOCKED_ATTR, mc.locked);
                   }
-                XMLSignatureWrapper.writeX509DataSubset (wr, mc.certificate_path);
+                XMLSignatureWrapper.writeX509DataSubset (wr, mc.certificatePath);
                 wr.getParent ();
               }
             wr.getParent ();

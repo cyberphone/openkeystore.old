@@ -84,8 +84,8 @@ public class DummyTrustedGUIAuthorization implements TrustedGUIAuthorization {
     @Override
     public byte[] getTrustedAuthorization(PassphraseFormat format,
                                           Grouping grouping,
-                                          AppUsage app_usage,
-                                          String friendly_name) throws SKSException {
+                                          AppUsage appUsage,
+                                          String friendlyName) throws SKSException {
         return convertToUTF8(format, GOOD_TRUSTED_GUI_PIN);
     }
 

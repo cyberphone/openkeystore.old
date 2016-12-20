@@ -20,7 +20,7 @@ import org.webpki.sks.PassphraseFormat;
 
 public class PINPol {
     String id;
-    boolean user_defined;
+    boolean userDefined;
     int pin_policy_handle;
     PassphraseFormat format;
 }

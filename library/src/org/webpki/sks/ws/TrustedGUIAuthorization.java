@@ -26,8 +26,8 @@ public interface TrustedGUIAuthorization {
 
     byte[] getTrustedAuthorization(PassphraseFormat format,
                                    Grouping grouping,
-                                   AppUsage app_usage,
-                                   String friendly_name) throws SKSException;
+                                   AppUsage appUsage,
+                                   String friendlyName) throws SKSException;
 
     String getImplementation();
 }

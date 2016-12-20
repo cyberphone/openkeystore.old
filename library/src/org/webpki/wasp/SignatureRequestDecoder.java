@@ -52,9 +52,9 @@ public class SignatureRequestDecoder extends SignatureRequest {
 
     private String id;
 
-    private String server_time;
+    private String serverTime;
 
-    private String submit_url;
+    private String submitUrl;
 
     private String cancel_url;                                                          // Optional
 
@@ -120,7 +120,7 @@ public class SignatureRequestDecoder extends SignatureRequest {
         boolean referenced;
         byte[] data;
         String content_id;
-        String mime_type;
+        String mimeType;
         String meta_data;
 
         BaseDocument(DocumentReferences.Reference ref) throws IOException {
@@ -133,7 +133,7 @@ public class SignatureRequestDecoder extends SignatureRequest {
                 }
             }
             content_id = ref.content_id;
-            mime_type = ref.mime_type;
+            mimeType = ref.mimeType;
             meta_data = ref.meta_data;
         }
 
@@ -147,7 +147,7 @@ public class SignatureRequestDecoder extends SignatureRequest {
         }
 
         public String getMimeType() {
-            return mime_type;
+            return mimeType;
         }
 
         public String getMetaData() {
@@ -291,12 +291,12 @@ public class SignatureRequestDecoder extends SignatureRequest {
 
 
     public String getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
@@ -358,9 +358,9 @@ public class SignatureRequestDecoder extends SignatureRequest {
 
         id = ah.getString(ID_ATTR);
 
-        server_time = ah.getString(SERVER_TIME_ATTR);  // No point in converting to local presentation
+        serverTime = ah.getString(SERVER_TIME_ATTR);  // No point in converting to local presentation
 
-        submit_url = ah.getString(SUBMIT_URL_ATTR);
+        submitUrl = ah.getString(SUBMIT_URL_ATTR);
 
         cancel_url = ah.getStringConditional(ABORT_URL_ATTR);
 

@@ -47,28 +47,28 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
     AES_CBC_PAD     ("http://xmlns.webpki.org/sks/algorithm#aes.cbc",
                      "AES/CBC/PKCS5Padding", 0,  true,  false, true,   false);
 
-    private final String sksname;          // As (typically) expressed in protocols
-    private final String jcename;          // As expressed for JCE
-    private final int key_length;          // 0 => 16, 24 and 32 are ok
-    private final boolean iv_mode;         // CBC
-    private final boolean internal_iv;     // XML Encryption
-    private final boolean sks_mandatory;   // If required
-    private final boolean needs_padding;   // If that is the case
+    private final String sksName;          // As expressed in SKS
+    private final String jceName;          // As expressed for JCE
+    private final int keyLength;           // 0 => 16, 24 and 32 are ok
+    private final boolean ivMode;          // CBC
+    private final boolean internalIv;      // XML Encryption
+    private final boolean sksMandatory;    // If required
+    private final boolean needsPadding;    // If that is the case
 
-    private SymEncryptionAlgorithms(String sksname, 
-                                    String jcename,
-                                    int key_length,
-                                    boolean iv_mode,
-                                    boolean internal_iv,
-                                    boolean sks_mandatory,
-                                    boolean needs_padding) {
-        this.sksname = sksname;
-        this.jcename = jcename;
-        this.key_length = key_length;
-        this.iv_mode = iv_mode;
-        this.internal_iv = internal_iv;
-        this.sks_mandatory = sks_mandatory;
-        this.needs_padding = needs_padding;
+    private SymEncryptionAlgorithms(String sksName, 
+                                    String jceName,
+                                    int keyLength,
+                                    boolean ivMode,
+                                    boolean internalIv,
+                                    boolean sksMandatory,
+                                    boolean needsPadding) {
+        this.sksName = sksName;
+        this.jceName = jceName;
+        this.keyLength = keyLength;
+        this.ivMode = ivMode;
+        this.internalIv = internalIv;
+        this.sksMandatory = sksMandatory;
+        this.needsPadding = needsPadding;
     }
 
 
@@ -80,13 +80,13 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
 
     @Override
     public boolean isMandatorySKSAlgorithm() {
-        return sks_mandatory;
+        return sksMandatory;
     }
 
 
     @Override
     public String getJCEName() {
-        return jcename;
+        return jceName;
     }
 
 
@@ -97,32 +97,32 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
 
 
     public int getKeyLength() {
-        return key_length;
+        return keyLength;
     }
 
 
     public boolean needsIV() {
-        return iv_mode;
+        return ivMode;
     }
 
 
     public boolean internalIV() {
-        return internal_iv;
+        return internalIv;
     }
 
 
     public boolean needsPadding() {
-        return needs_padding;
+        return needsPadding;
     }
 
 
-    public static SymEncryptionAlgorithms getAlgorithmFromID(String algorithm_id) throws IOException {
+    public static SymEncryptionAlgorithms getAlgorithmFromID(String algorithmId) throws IOException {
         for (SymEncryptionAlgorithms alg : values()) {
-            if (algorithm_id.equals(alg.sksname)) {
+            if (algorithmId.equals(alg.sksName)) {
                 return alg;
             }
         }
-        throw new IOException("Unknown algorithm: " + algorithm_id);
+        throw new IOException("Unknown algorithm: " + algorithmId);
     }
 
 
@@ -131,6 +131,6 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
         if (algorithmPreferences == AlgorithmPreferences.JOSE) {
             throw new IOException("There is no JOSE algorithm for: " + toString());
         }
-        return sksname;
+        return sksName;
     }
 }

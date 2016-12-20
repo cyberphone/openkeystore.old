@@ -31,8 +31,7 @@ public abstract class JSONEncoder implements Serializable {
     /**
      * INTERNAL USE ONLY.
      */
-    protected JSONEncoder() {
-    }
+    protected JSONEncoder() {}
 
     /**
      * INTERNAL USE ONLY.

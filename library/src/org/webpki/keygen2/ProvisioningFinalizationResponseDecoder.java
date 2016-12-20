@@ -26,9 +26,9 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator {
 
     private static final long serialVersionUID = 1L;
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     byte[] attestation;
 
@@ -37,9 +37,9 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
         attestation = rd.getBinary(ATTESTATION_JSON);
     }

@@ -33,6 +33,7 @@ package org.webpki.keygen2;
  */
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONArrayWriter;
@@ -45,60 +46,60 @@ public class InvocationResponseEncoder extends JSONEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String server_session_id;
+    String serverSessionId;
 
     byte[] nonce;  // For VMs
 
-    LinkedHashMap<String, InvocationRequestDecoder.CAPABILITY> queried_capabilities;
+    LinkedHashMap<String, InvocationRequestDecoder.CAPABILITY> queriedCapabilities;
 
-    LinkedHashMap<String, String[]> returned_values = new LinkedHashMap<String, String[]>();
+    LinkedHashMap<String, String[]> returnedValues = new LinkedHashMap<String, String[]>();
 
     class ImageAttributes {
-        String mime_type;
+        String mimeType;
         int width;
         int height;
     }
 
     LinkedHashMap<String, ImageAttributes> image_preferences = new LinkedHashMap<String, ImageAttributes>();
 
-    void addCapability(String type_uri, InvocationRequestDecoder.CAPABILITY capability) throws IOException {
-        InvocationRequestDecoder.CAPABILITY current = queried_capabilities.get(type_uri);
+    void addCapability(String typeUri, InvocationRequestDecoder.CAPABILITY capability) throws IOException {
+        InvocationRequestDecoder.CAPABILITY current = queriedCapabilities.get(typeUri);
         if (current == null || current != InvocationRequestDecoder.CAPABILITY.UNDEFINED) {
-            KeyGen2Validator.bad("State error for URI: " + type_uri);
+            KeyGen2Validator.bad("State error for URI: " + typeUri);
         }
-        queried_capabilities.put(type_uri, capability);
+        queriedCapabilities.put(typeUri, capability);
     }
 
-    public InvocationResponseEncoder addImagePreference(String type_uri,
-                                                        String mime_type,
+    public InvocationResponseEncoder addImagePreference(String typeUri,
+                                                        String mimeType,
                                                         int width,
                                                         int height) throws IOException {
-        addCapability(type_uri, InvocationRequestDecoder.CAPABILITY.IMAGE_ATTRIBUTES);
+        addCapability(typeUri, InvocationRequestDecoder.CAPABILITY.IMAGE_ATTRIBUTES);
         ImageAttributes im_pref = new ImageAttributes();
-        im_pref.mime_type = mime_type;
+        im_pref.mimeType = mimeType;
         im_pref.width = width;
         im_pref.height = height;
-        image_preferences.put(type_uri, im_pref);
+        image_preferences.put(typeUri, im_pref);
         return this;
     }
 
-    public InvocationResponseEncoder addSupportedFeature(String type_uri) throws IOException {
-        addCapability(type_uri, InvocationRequestDecoder.CAPABILITY.URI_FEATURE);
+    public InvocationResponseEncoder addSupportedFeature(String typeUri) throws IOException {
+        addCapability(typeUri, InvocationRequestDecoder.CAPABILITY.URI_FEATURE);
         return this;
     }
 
-    public InvocationResponseEncoder addClientValues(String type_uri, String[] values) throws IOException {
-        addCapability(type_uri, InvocationRequestDecoder.CAPABILITY.VALUES);
+    public InvocationResponseEncoder addClientValues(String typeUri, String[] values) throws IOException {
+        addCapability(typeUri, InvocationRequestDecoder.CAPABILITY.VALUES);
         if (values.length == 0) {
-            KeyGen2Validator.bad("Zero length array not allowed, URI: " + type_uri);
+            KeyGen2Validator.bad("Zero length array not allowed, URI: " + typeUri);
         }
-        returned_values.put(type_uri, values);
+        returnedValues.put(typeUri, values);
         return this;
     }
 
     public InvocationResponseEncoder(InvocationRequestDecoder decoder) {
-        this.server_session_id = decoder.server_session_id;
-        this.queried_capabilities = decoder.queried_capabilities;
+        this.serverSessionId = decoder.serverSessionId;
+        this.queriedCapabilities = decoder.queriedCapabilities;
     }
 
     public void setNonce(byte[] nonce) {
@@ -111,7 +112,7 @@ public class InvocationResponseEncoder extends JSONEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Session properties
         ////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
         ////////////////////////////////////////////////////////////////////////
         // VM mandatory option
@@ -123,22 +124,22 @@ public class InvocationResponseEncoder extends JSONEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Optional client capabilities
         ////////////////////////////////////////////////////////////////////////
-        if (!queried_capabilities.isEmpty()) {
+        if (!queriedCapabilities.isEmpty()) {
             JSONArrayWriter aw = wr.setArray(CLIENT_CAPABILITIES_JSON);
-            for (String uri : queried_capabilities.keySet()) {
+            for (String uri : queriedCapabilities.keySet()) {
                 JSONObjectWriter ow = aw.setObject().setString(TYPE_JSON, uri);
                 boolean supported = false;
-                switch (queried_capabilities.get(uri)) {
+                switch (queriedCapabilities.get(uri)) {
                     case IMAGE_ATTRIBUTES:
                         ImageAttributes im_pref = image_preferences.get(uri);
                         ow.setObject(IMAGE_ATTRIBUTES_JSON)
-                            .setString(MIME_TYPE_JSON, im_pref.mime_type)
+                            .setString(MIME_TYPE_JSON, im_pref.mimeType)
                             .setInt(WIDTH_JSON, im_pref.width)
                             .setInt(HEIGHT_JSON, im_pref.height);
                         break;
 
                     case VALUES:
-                        ow.setStringArray(VALUES_JSON, returned_values.get(uri));
+                        ow.setStringArray(VALUES_JSON, returnedValues.get(uri));
                         break;
 
                     case URI_FEATURE:

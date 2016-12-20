@@ -17,6 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 
 import org.webpki.json.JSONObjectReader;
@@ -29,16 +30,16 @@ public class InvocationResponseDecoder extends KeyGen2Validator {
 
     byte[] nonce;  // For VMs
 
-    LinkedHashMap<String, ServerState.CapabilityBase> received_capabilities = new LinkedHashMap<String, ServerState.CapabilityBase>();
+    LinkedHashMap<String, ServerState.CapabilityBase> receivedCapabilities = new LinkedHashMap<String, ServerState.CapabilityBase>();
 
-    String server_session_id;
+    String serverSessionId;
 
     @Override
     protected void readJSONData(JSONObjectReader rd) throws IOException {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
         nonce = rd.getBinaryConditional(NONCE_JSON);
 
@@ -59,7 +60,7 @@ public class InvocationResponseDecoder extends KeyGen2Validator {
                                                              or.getInt(HEIGHT_JSON));
             }
             capability.type = type;
-            if (received_capabilities.put(type, capability) != null) {
+            if (receivedCapabilities.put(type, capability) != null) {
                 KeyGen2Validator.bad("Duplicated capability URI: " + type);
             }
         }

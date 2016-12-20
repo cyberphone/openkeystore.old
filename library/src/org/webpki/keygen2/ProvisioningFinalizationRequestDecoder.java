@@ -17,12 +17,17 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.Vector;
+
 import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.crypto.CertificateFilter;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 
@@ -39,30 +44,30 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         public static final int UPDATE_KEY           = 2;
         public static final int CLONE_KEY_PROTECTION = 3;
 
-        String client_session_id;
+        String clientSessionId;
 
-        String server_session_id;
+        String serverSessionId;
 
         byte[] mac;
 
-        byte[] certificate_fingerprint;
+        byte[] certificateFingerprint;
 
         byte[] authorization;
 
-        int post_operation;
+        int postOperation;
 
-        PostOperation(String client_session_id,
-                      String server_session_id,
-                      byte[] certificate_fingerprint,
+        PostOperation(String clientSessionId,
+                      String serverSessionId,
+                      byte[] certificateFingerprint,
                       byte[] authorization,
                       byte[] mac,
-                      int post_operation) {
-            this.client_session_id = client_session_id;
-            this.server_session_id = server_session_id;
-            this.certificate_fingerprint = certificate_fingerprint;
+                      int postOperation) {
+            this.clientSessionId = clientSessionId;
+            this.serverSessionId = serverSessionId;
+            this.certificateFingerprint = certificateFingerprint;
             this.authorization = authorization;
             this.mac = mac;
-            this.post_operation = post_operation;
+            this.postOperation = postOperation;
         }
 
         public byte[] getMac() {
@@ -70,7 +75,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         }
 
         public byte[] getCertificateFingerprint() {
-            return certificate_fingerprint;
+            return certificateFingerprint;
         }
 
         public byte[] getAuthorization() {
@@ -78,15 +83,15 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         }
 
         public int getPostOperation() {
-            return post_operation;
+            return postOperation;
         }
 
         public String getClientSessionId() {
-            return client_session_id;
+            return clientSessionId;
         }
 
         public String getServerSessionId() {
-            return server_session_id;
+            return serverSessionId;
         }
 
     }
@@ -186,11 +191,11 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
             super(rd, cpk);
             JSONArrayReader props = rd.getArray(PROPERTIES_JSON);
             do {
-                JSONObjectReader prop_rd = props.getObject();
+                JSONObjectReader propertyReader = props.getObject();
                 Property property = new Property();
-                property.name = prop_rd.getString(NAME_JSON);
-                property.value = prop_rd.getString(VALUE_JSON);
-                property.writable = prop_rd.getBooleanConditional(WRITABLE_JSON);
+                property.name = propertyReader.getString(NAME_JSON);
+                property.value = propertyReader.getString(VALUE_JSON);
+                property.writable = propertyReader.getBooleanConditional(WRITABLE_JSON);
                 properties.add(property);
             } while (props.hasMore());
         }
@@ -209,11 +214,11 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         @Override
         public byte[] getExtensionData() throws IOException {
             byte[] total = new byte[0];
-            for (Property prop : properties) {
+            for (Property property : properties) {
                 total = ArrayUtil.add(total,
-                        ArrayUtil.add(getStringData(prop.name),
-                                ArrayUtil.add(new byte[]{prop.writable ? (byte) 1 : (byte) 0},
-                                        getStringData(prop.value))));
+                                      ArrayUtil.add(getStringData(property.name),
+                                                    ArrayUtil.add(new byte[]{property.writable ? (byte) 1 : (byte) 0},
+                                                                  getStringData(property.value))));
             }
             return total;
         }
@@ -224,11 +229,11 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
 
         byte[] data;
 
-        String mime_type;
+        String mimeType;
 
         Logotype(JSONObjectReader rd, IssuedCredential cpk) throws IOException {
             super(rd, cpk);
-            mime_type = rd.getString(MIME_TYPE_JSON);
+            mimeType = rd.getString(MIME_TYPE_JSON);
             data = rd.getBinary(EXTENSION_DATA_JSON);
         }
 
@@ -239,7 +244,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
 
         @Override
         public String getQualifier() {
-            return mime_type;
+            return mimeType;
         }
 
         @Override
@@ -251,25 +256,25 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
 
     public class IssuedCredential {
 
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
 
         String id;
 
-        byte[] encrypted_symmetric_key;
+        byte[] encryptedSymmetricKey;
 
-        byte[] symmetric_key_mac;
+        byte[] symmetricKeyMac;
 
-        byte[] encrypted_private_key;
+        byte[] encryptedPrivateKey;
 
-        byte[] private_key_mac;
+        byte[] privateKeyMac;
 
         byte[] mac;
 
-        boolean trust_anchor;
+        boolean trustAnchor;
 
         Vector<Extension> extensions = new Vector<Extension>();
 
-        PostOperation post_operation;
+        PostOperation postOperation;
 
         IssuedCredential() {
         }
@@ -277,36 +282,36 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
 
         IssuedCredential(JSONObjectReader rd) throws IOException {
             id = rd.getString(ID_JSON);
-            certificate_path = rd.getCertificatePath();
+            certificatePath = rd.getCertificatePath();
             mac = KeyGen2Validator.getMac(rd);
 
-            trust_anchor = rd.getBooleanConditional(TRUST_ANCHOR_JSON);
-            if (trust_anchor) {
-                if (certificate_path[certificate_path.length - 1].getBasicConstraints() < 0) {
+            trustAnchor = rd.getBooleanConditional(TRUST_ANCHOR_JSON);
+            if (trustAnchor) {
+                if (certificatePath[certificatePath.length - 1].getBasicConstraints() < 0) {
                     throw new IOException("The \"" + TRUST_ANCHOR_JSON + "\" option requires a CA certificate");
                 }
             }
 
             if (rd.hasProperty(IMPORT_SYMMETRIC_KEY_JSON)) {
                 JSONObjectReader import_key = rd.getObject(IMPORT_SYMMETRIC_KEY_JSON);
-                encrypted_symmetric_key = import_key.getBinary(ENCRYPTED_KEY_JSON);
-                symmetric_key_mac = KeyGen2Validator.getMac(import_key);
+                encryptedSymmetricKey = import_key.getBinary(ENCRYPTED_KEY_JSON);
+                symmetricKeyMac = KeyGen2Validator.getMac(import_key);
             } else if (rd.hasProperty(IMPORT_PRIVATE_KEY_JSON)) {
                 JSONObjectReader import_key = rd.getObject(IMPORT_PRIVATE_KEY_JSON);
-                encrypted_private_key = import_key.getBinary(ENCRYPTED_KEY_JSON);
-                private_key_mac = KeyGen2Validator.getMac(import_key);
+                encryptedPrivateKey = import_key.getBinary(ENCRYPTED_KEY_JSON);
+                privateKeyMac = KeyGen2Validator.getMac(import_key);
             }
 
             for (JSONObjectReader extension : getObjectArrayConditional(rd, EXTENSIONS_JSON)) {
                 new StandardExtension(extension, this);
             }
 
-            for (JSONObjectReader encrypted_extension : getObjectArrayConditional(rd, ENCRYPTED_EXTENSIONS_JSON)) {
-                new EncryptedExtension(encrypted_extension, this);
+            for (JSONObjectReader encryptedExtension : getObjectArrayConditional(rd, ENCRYPTED_EXTENSIONS_JSON)) {
+                new EncryptedExtension(encryptedExtension, this);
             }
 
-            for (JSONObjectReader property_bag : getObjectArrayConditional(rd, PROPERTY_BAGS_JSON)) {
-                new PropertyBag(property_bag, this);
+            for (JSONObjectReader propertyBag : getObjectArrayConditional(rd, PROPERTY_BAGS_JSON)) {
+                new PropertyBag(propertyBag, this);
             }
 
             for (JSONObjectReader logotype : getObjectArrayConditional(rd, LOGOTYPES_JSON)) {
@@ -314,35 +319,35 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
             }
 
             if (rd.hasProperty(CLONE_KEY_PROTECTION_JSON)) {
-                post_operation = readPostOperation(rd.getObject(CLONE_KEY_PROTECTION_JSON), PostOperation.CLONE_KEY_PROTECTION);
+                postOperation = readPostOperation(rd.getObject(CLONE_KEY_PROTECTION_JSON), PostOperation.CLONE_KEY_PROTECTION);
             } else if (rd.hasProperty(UPDATE_KEY_JSON)) {
-                post_operation = readPostOperation(rd.getObject(UPDATE_KEY_JSON), PostOperation.UPDATE_KEY);
+                postOperation = readPostOperation(rd.getObject(UPDATE_KEY_JSON), PostOperation.UPDATE_KEY);
             }
         }
 
 
         public X509Certificate[] getCertificatePath() {
-            return certificate_path;
+            return certificatePath;
         }
 
 
         public byte[] getOptionalSymmetricKey() {
-            return encrypted_symmetric_key;
+            return encryptedSymmetricKey;
         }
 
 
         public byte[] getSymmetricKeyMac() {
-            return symmetric_key_mac;
+            return symmetricKeyMac;
         }
 
 
         public byte[] getOptionalPrivateKey() {
-            return encrypted_private_key;
+            return encryptedPrivateKey;
         }
 
 
         public byte[] getPrivateKeyMac() {
-            return private_key_mac;
+            return privateKeyMac;
         }
 
 
@@ -360,78 +365,78 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         }
 
         public PostOperation getPostOperation() {
-            return post_operation;
+            return postOperation;
         }
 
         public boolean getTrustAnchorFlag() {
-            return trust_anchor;
+            return trustAnchor;
         }
 
     }
 
-    private PostOperation readPostOperation(JSONObjectReader rd, int post_op) throws IOException {
+    private PostOperation readPostOperation(JSONObjectReader rd, int postOp) throws IOException {
         return new PostOperation(KeyGen2Validator.getID(rd, CLIENT_SESSION_ID_JSON),
-                KeyGen2Validator.getID(rd, SERVER_SESSION_ID_JSON),
-                rd.getBinary(CertificateFilter.CF_FINGER_PRINT),
-                rd.getBinary(AUTHORIZATION_JSON),
-                KeyGen2Validator.getMac(rd),
-                post_op);
+                                 KeyGen2Validator.getID(rd, SERVER_SESSION_ID_JSON),
+                                 rd.getBinary(CertificateFilter.CF_FINGER_PRINT),
+                                 rd.getBinary(AUTHORIZATION_JSON),
+                                 KeyGen2Validator.getMac(rd),
+                                 postOp);
     }
 
-    private Vector<IssuedCredential> issued_keys = new Vector<IssuedCredential>();
+    private Vector<IssuedCredential> issuedKeys = new Vector<IssuedCredential>();
 
-    private Vector<PostOperation> post_unlock_keys = new Vector<PostOperation>();
+    private Vector<PostOperation> postUnlockKeys = new Vector<PostOperation>();
 
-    private Vector<PostOperation> post_delete_keys = new Vector<PostOperation>();
+    private Vector<PostOperation> postDeleteKeys = new Vector<PostOperation>();
 
-    private String client_session_id;
+    private String clientSessionId;
 
-    private String server_session_id;
+    private String serverSessionId;
 
-    private String submit_url;
+    private String submitUrl;
 
-    private byte[] close_session_mac;
+    private byte[] closeSessionMac;
 
-    private byte[] close_session_nonce;
+    private byte[] closeSessionNonce;
 
 
     public String getServerSessionId() {
-        return server_session_id;
+        return serverSessionId;
     }
 
 
     public String getClientSessionId() {
-        return client_session_id;
+        return clientSessionId;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public IssuedCredential[] getIssuedCredentials() {
-        return issued_keys.toArray(new IssuedCredential[0]);
+        return issuedKeys.toArray(new IssuedCredential[0]);
     }
 
 
     public PostOperation[] getPostUnlockKeys() {
-        return post_unlock_keys.toArray(new PostOperation[0]);
+        return postUnlockKeys.toArray(new PostOperation[0]);
     }
 
 
     public PostOperation[] getPostDeleteKeys() {
-        return post_delete_keys.toArray(new PostOperation[0]);
+        return postDeleteKeys.toArray(new PostOperation[0]);
     }
 
 
     public byte[] getCloseSessionMac() {
-        return close_session_mac;
+        return closeSessionMac;
     }
 
 
     public byte[] getCloseSessionNonce() {
-        return close_session_nonce;
+        return closeSessionNonce;
     }
 
 
@@ -440,35 +445,35 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        submit_url = getURL(rd, SUBMIT_URL_JSON);
+        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
-        close_session_nonce = rd.getBinary(NONCE_JSON);
+        closeSessionNonce = rd.getBinary(NONCE_JSON);
 
-        close_session_mac = KeyGen2Validator.getMac(rd);
+        closeSessionMac = KeyGen2Validator.getMac(rd);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader keys : getObjectArrayConditional(rd, ISSUED_CREDENTIALS_JSON)) {
-            issued_keys.add(new IssuedCredential(keys));
+            issuedKeys.add(new IssuedCredential(keys));
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional post provisioning unlocks
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader keys : getObjectArrayConditional(rd, UNLOCK_KEYS_JSON)) {
-            post_unlock_keys.add(readPostOperation(keys, PostOperation.UNLOCK_KEY));
+            postUnlockKeys.add(readPostOperation(keys, PostOperation.UNLOCK_KEY));
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional post provisioning deletes
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader keys : getObjectArrayConditional(rd, DELETE_KEYS_JSON)) {
-            post_delete_keys.add(readPostOperation(keys, PostOperation.DELETE_KEY));
+            postDeleteKeys.add(readPostOperation(keys, PostOperation.DELETE_KEY));
         }
     }
 

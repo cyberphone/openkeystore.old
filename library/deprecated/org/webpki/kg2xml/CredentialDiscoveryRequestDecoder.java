@@ -48,11 +48,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial_number;
+        BigInteger serialNumber;
         String email_reg_ex;
         String[] policy_rules;
-        GregorianCalendar issued_before;
-        GregorianCalendar issued_after;
+        GregorianCalendar issuedBefore;
+        GregorianCalendar issuedAfter;
 
         byte[] nonce;
         
@@ -60,7 +60,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         Element element;
         
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
 
         LookupSpecifier () { }
 
@@ -77,11 +77,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
                 rd.getNext ();
                 issuer_reg_ex = ah.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX);
                 subject_reg_ex = ah.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
-                serial_number = ah.getBigIntegerConditional (CertificateFilter.CF_SERIAL_NUMBER);
+                serialNumber = ah.getBigIntegerConditional (CertificateFilter.CF_SERIAL_NUMBER);
                 email_reg_ex = ah.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
                 policy_rules = ah.getListConditional (CertificateFilter.CF_POLICY_RULES);
-                issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
-                issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
+                issuedBefore = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
+                issuedAfter = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
               }
             signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
             rd.getParent ();
@@ -95,7 +95,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         public PublicKey getKeyManagementKey ()
           {
-            return key_management_key;
+            return keyManagementKey;
           }
         
         public String getSubjectRegEx ()
@@ -110,7 +110,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         public BigInteger getSerialNumber ()
           {
-            return serial_number;
+            return serialNumber;
           }
         
         public String getEmailRegEx ()
@@ -125,41 +125,41 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         public GregorianCalendar getIssuedBefore ()
           {
-            return issued_before;
+            return issuedBefore;
           }
 
         public GregorianCalendar getIssuedAfter ()
           {
-            return issued_after;
+            return issuedAfter;
           }
       }
 
     LinkedHashMap<String,LookupSpecifier> lookup_specifiers = new LinkedHashMap<String,LookupSpecifier> ();
     
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
-    private String submit_url;
+    private String submitUrl;
 
     private XMLSignatureWrapper signature;                  // Optional
 
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
 
     public String getSubmitUrl ()
       {
-        return submit_url;
+        return submitUrl;
       }
 
 
@@ -171,7 +171,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
     
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, serverSessionId);
       }
 
 
@@ -189,11 +189,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
+        clientSessionId = ah.getString (CLIENT_SESSION_ID_ATTR);
 
-        server_session_id = ah.getString (ID_ATTR);
+        serverSessionId = ah.getString (ID_ATTR);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submitUrl = ah.getString (SUBMIT_URL_ATTR);
         
         rd.getChild ();
 
@@ -213,7 +213,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
               {
                 throw new IOException ("Lookup signature must use SHA256");
               }
-            o.key_management_key = verifier.getPublicKey ();
+            o.keyManagementKey = verifier.getPublicKey ();
           }
         while (rd.hasNext (LOOKUP_SPECIFIER_ELEM));
 

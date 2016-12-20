@@ -41,25 +41,25 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
     
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
 
     public Date getServerTime ()
       {
-        return server_time;
+        return serverTime;
       }
 
     
     public Date getClientTime ()
       {
-        return client_time;
+        return clientTime;
       }
 
     
@@ -100,13 +100,13 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
-        client_session_id = ah.getString (ID_ATTR);
+        clientSessionId = ah.getString (ID_ATTR);
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
 
-        server_time = ah.getDateTime (SERVER_TIME_ATTR).getTime ();
+        serverTime = ah.getDateTime (SERVER_TIME_ATTR).getTime ();
 
-        client_time = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
+        clientTime = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
 
         attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
         

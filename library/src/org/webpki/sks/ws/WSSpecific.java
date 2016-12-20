@@ -49,5 +49,5 @@ public interface WSSpecific {
     /**
      * Setup WS device property
      */
-    void setDeviceID(String device_id);
+    void setDeviceID(String deviceId);
 }

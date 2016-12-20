@@ -119,12 +119,12 @@ public class SEReferenceImplementation {
             }
         }
 
-        public SignatureWrapper(String algorithm, PrivateKey private_key) throws GeneralSecurityException {
+        public SignatureWrapper(String algorithm, PrivateKey privateKey) throws GeneralSecurityException {
             instance = Signature.getInstance(algorithm);
-            instance.initSign(private_key);
-            rsaFlag = private_key instanceof RSAPrivateKey;
+            instance.initSign(privateKey);
+            rsaFlag = privateKey instanceof RSAPrivateKey;
             if (!rsaFlag) {
-                extendTo = getEcPointLength((ECKey) private_key);
+                extendTo = getEcPointLength((ECKey) privateKey);
             }
         }
 
@@ -1146,17 +1146,17 @@ public class SEReferenceImplementation {
         ///////////////////////////////////////////////////////////////////////////////////
         // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
         ///////////////////////////////////////////////////////////////////////////////////
-        boolean rsa_flag = false;
+        boolean rsaFlag = false;
         for (int j = 8; j < 11; j++) {
-            rsa_flag = true;
+            rsaFlag = true;
             for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++) {
                 if (pkcs8PrivateKey[j + i] != RSA_ENCRYPTION_OID[i]) {
-                    rsa_flag = false;
+                    rsaFlag = false;
                 }
             }
-            if (rsa_flag) break;
+            if (rsaFlag) break;
         }
-        return KeyFactory.getInstance(rsa_flag ? "RSA" : "EC").generatePrivate(key_spec);
+        return KeyFactory.getInstance(rsaFlag ? "RSA" : "EC").generatePrivate(key_spec);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -2102,8 +2102,8 @@ public class SEReferenceImplementation {
                                           byte biometricProtection,
                                           byte exportProtection,
                                           byte deleteProtection,
-                                          byte app_usage,
-                                          String friendly_name,
+                                          byte appUsage,
+                                          String friendlyName,
                                           String keyAlgorithm,
                                           byte[] keyParameters,
                                           String[] endorsedAlgorithms,
@@ -2159,8 +2159,8 @@ public class SEReferenceImplementation {
             verifier.addByte(biometricProtection);
             verifier.addByte(exportProtection);
             verifier.addByte(deleteProtection);
-            verifier.addByte(app_usage);
-            verifier.addString(friendly_name == null ? "" : friendly_name);
+            verifier.addByte(appUsage);
+            verifier.addString(friendlyName == null ? "" : friendlyName);
             verifier.addString(keyAlgorithm);
             verifier.addArray(keyParameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keyParameters);
             String prevAlg = "\0";

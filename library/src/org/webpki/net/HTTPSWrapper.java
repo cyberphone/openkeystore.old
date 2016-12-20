@@ -148,7 +148,7 @@ public class HTTPSWrapper {
     private static Proxy default_proxy;
     private static KeyStore default_trust_store;
     private KeyStore key_store;
-    private String key_alias;
+    private String keyAlias;
     private String key_store_password;
 
     private LinkedHashMap<String, Vector<String>> request_headers = new LinkedHashMap<String, Vector<String>>();
@@ -199,13 +199,13 @@ public class HTTPSWrapper {
                     KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                     kmf.init(key_store, key_store_password.toCharArray());
                     key_managers = kmf.getKeyManagers();
-                    if (key_alias != null) {
+                    if (keyAlias != null) {
                         final X509KeyManager orig_key_manager = (X509KeyManager) key_managers[0];
                         key_managers = new KeyManager[]{new X509KeyManager() {
 
                             @Override
                             public String chooseClientAlias(String[] key_type, Principal[] issuers, Socket socket) {
-                                return key_alias;
+                                return keyAlias;
                             }
 
                             @Override
@@ -366,10 +366,10 @@ public class HTTPSWrapper {
      * <p>
      * his method must be called before making either a GET or POST request.
      *
-     * @param key_alias name of selected key
+     * @param keyAlias name of selected key
      */
-    public void setKeyAlias(String key_alias) {
-        this.key_alias = key_alias;
+    public void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
     }
 
 

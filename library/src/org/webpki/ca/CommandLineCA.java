@@ -213,11 +213,11 @@ public class CommandLineCA {
 
     class CertificateSigner implements AsymKeySignerInterface {
         PrivateKey sign_key;
-        PublicKey public_key;
+        PublicKey publicKey;
 
-        CertificateSigner(PrivateKey sign_key, PublicKey public_key) {
+        CertificateSigner(PrivateKey sign_key, PublicKey publicKey) {
             this.sign_key = sign_key;
-            this.public_key = public_key;
+            this.publicKey = publicKey;
         }
 
 
@@ -234,7 +234,7 @@ public class CommandLineCA {
 
 
         public PublicKey getPublicKey() throws IOException {
-            return public_key;
+            return publicKey;
         }
 
     }

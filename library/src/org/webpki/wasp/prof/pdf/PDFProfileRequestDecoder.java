@@ -36,13 +36,13 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
     boolean signed_key_info;
 
-    boolean extended_cert_path;
+    boolean extendedCertPath;
 
     String canonicalization_algorithm;
 
     String digest_algorithm;
 
-    String signature_algorithm;
+    String signatureAlgorithm;
 
     String document_canonicalization_algorithm;
 
@@ -68,7 +68,7 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
 
     public boolean getExtendedCertPath() {
-        return extended_cert_path;
+        return extendedCertPath;
     }
 
 
@@ -83,13 +83,13 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
         //////////////////////////////////////////////////////////////////////////
         signed_key_info = ah.getBooleanConditional(SIGNED_KEY_INFO_ATTR);
 
-        extended_cert_path = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
+        extendedCertPath = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
 
         canonicalization_algorithm = ah.getStringConditional(CN_ALG_ATTR, CanonicalizationAlgorithms.C14N_EXCL.getURI());
 
         digest_algorithm = ah.getStringConditional(DIGEST_ALG_ATTR, HashAlgorithms.SHA1.getAlgorithmId());
 
-        signature_algorithm = ah.getStringConditional(SIGNATURE_ALG_ATTR, AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS));
+        signatureAlgorithm = ah.getStringConditional(SIGNATURE_ALG_ATTR, AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS));
 
         document_canonicalization_algorithm = ah.getStringConditional(DOC_CN_ALG_ATTR, DOC_SIGN_CN_ALG);
     }
@@ -106,7 +106,7 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
     public boolean hasSupportedParameters() {
         return CanonicalizationAlgorithms.testAlgorithmURI(canonicalization_algorithm) &&
                 HashAlgorithms.testAlgorithmURI(digest_algorithm) &&
-                AsymSignatureAlgorithms.testAlgorithmURI(signature_algorithm) &&
+                AsymSignatureAlgorithms.testAlgorithmURI(signatureAlgorithm) &&
                 document_canonicalization_algorithm.equals(DOC_SIGN_CN_ALG);
     }
 

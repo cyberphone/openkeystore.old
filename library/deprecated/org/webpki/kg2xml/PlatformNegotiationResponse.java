@@ -28,7 +28,7 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 abstract class PlatformNegotiationResponse extends XMLObjectWrapper
   {
-    String server_session_id;
+    String serverSessionId;
     
     byte[] nonce;  // For VMs
 

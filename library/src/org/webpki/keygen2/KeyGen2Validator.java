@@ -63,9 +63,9 @@ abstract class KeyGen2Validator extends JSONDecoder {
         return url;
     }
 
-    static private void validateURI(String uri_string) throws IOException {
+    static private void validateURI(String uriString) throws IOException {
         try {
-            URI uri = new URI(uri_string);
+            URI uri = new URI(uriString);
             if (!uri.isAbsolute()) {
                 bad("Bad URI: " + uri);
             }
@@ -100,21 +100,21 @@ abstract class KeyGen2Validator extends JSONDecoder {
         return mac;
     }
 
-    static byte[] getEncryptedKey(JSONObjectReader rd, String name_of_key) throws IOException {
-        byte[] encrypted_value = rd.getBinary(name_of_key);
-        if (encrypted_value.length < SecureKeyStore.AES_CBC_PKCS5_PADDING ||
-                encrypted_value.length > SecureKeyStore.MAX_LENGTH_PIN_PUK + SecureKeyStore.AES_CBC_PKCS5_PADDING) {
-            bad("Encrypted protection for \"" + name_of_key + "\" length error: " + encrypted_value.length);
+    static byte[] getEncryptedKey(JSONObjectReader rd, String nameOfKey) throws IOException {
+        byte[] encryptedValue = rd.getBinary(nameOfKey);
+        if (encryptedValue.length < SecureKeyStore.AES_CBC_PKCS5_PADDING ||
+            encryptedValue.length > SecureKeyStore.MAX_LENGTH_PIN_PUK + SecureKeyStore.AES_CBC_PKCS5_PADDING) {
+            bad("Encrypted protection for \"" + nameOfKey + "\" length error: " + encryptedValue.length);
         }
-        return encrypted_value;
+        return encryptedValue;
     }
 
-    static short getAuthorizationRetryLimit(JSONObjectReader rd, int lower_limit) throws IOException {
-        int retry_limit = rd.getInt(KeyGen2Constants.RETRY_LIMIT_JSON);
-        if (retry_limit < lower_limit || retry_limit > SecureKeyStore.MAX_RETRY_LIMIT) {
-            bad("\"" + KeyGen2Constants.RETRY_LIMIT_JSON + "\" limit range error: " + retry_limit);
+    static short getAuthorizationRetryLimit(JSONObjectReader rd, int lowerLimit) throws IOException {
+        int retryLimit = rd.getInt(KeyGen2Constants.RETRY_LIMIT_JSON);
+        if (retryLimit < lowerLimit || retryLimit > SecureKeyStore.MAX_RETRY_LIMIT) {
+            bad("\"" + KeyGen2Constants.RETRY_LIMIT_JSON + "\" limit range error: " + retryLimit);
         }
-        return (short) retry_limit;
+        return (short) retryLimit;
     }
 
     static String[] getNonEmptyList(JSONObjectReader rd, String name) throws IOException {

@@ -50,7 +50,7 @@ public class SignatureRequestEncoder extends SignatureRequest {
 
     Vector<SignatureProfileEncoder> signature_profiles = new Vector<SignatureProfileEncoder>();
 
-    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter>();
+    Vector<CertificateFilter> certificateFilters = new Vector<CertificateFilter>();
 
     DocumentReferences document_references = new DocumentReferences();
 
@@ -58,13 +58,13 @@ public class SignatureRequestEncoder extends SignatureRequest {
 
     String id;
 
-    String submit_url;
+    String submitUrl;
 
     String cancel_url;
 
     ClientPlatformFeature client_platform_request;
 
-    Date server_time;
+    Date serverTime;
 
     private String signature_gui_policy;
 
@@ -124,15 +124,15 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
     // Constructors
 
-    public SignatureRequestEncoder(String domain_id, String submit_url, String cancel_url) {
+    public SignatureRequestEncoder(String domain_id, String submitUrl, String cancel_url) {
         this.domain_id = domain_id;
-        this.submit_url = submit_url;
+        this.submitUrl = submitUrl;
         this.cancel_url = cancel_url;
     }
 
 
-    public SignatureRequestEncoder(String domain_id, String submit_url) {
-        this(domain_id, submit_url, null);
+    public SignatureRequestEncoder(String domain_id, String submitUrl) {
+        this(domain_id, submitUrl, null);
     }
 
 
@@ -143,7 +143,7 @@ public class SignatureRequestEncoder extends SignatureRequest {
 
 
     public CertificateFilter addCertificateFilter(CertificateFilter cf) {
-        certificate_filters.add(cf);
+        certificateFilters.add(cf);
         return cf;
     }
 
@@ -153,8 +153,8 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
 
 
-    public void setServerTime(Date server_time) {
-        this.server_time = server_time;
+    public void setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
     }
 
 
@@ -189,10 +189,10 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
 
 
-    private RootDocument createDocument(byte[] data, String mime_type) {
+    private RootDocument createDocument(byte[] data, String mimeType) {
         int i = TEXT_TYPES.length;
         while (i-- > 0) {
-            if (mime_type.equals(TEXT_TYPES[i])) {
+            if (mimeType.equals(TEXT_TYPES[i])) {
                 return new TextDocument(data, getNextContentID(), MARKUP_TYPES[i]);
             }
         }
@@ -200,23 +200,23 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
 
 
-    private String addDocument(byte[] data, TargetContainer target, String mime_type, String meta_data) throws IOException {
-        return addDocument(createDocument(data, mime_type), target, mime_type, meta_data);
+    private String addDocument(byte[] data, TargetContainer target, String mimeType, String meta_data) throws IOException {
+        return addDocument(createDocument(data, mimeType), target, mimeType, meta_data);
     }
 
 
-    private String addDocument(String data, TargetContainer target, String mime_type, String meta_data) throws IOException {
-        return addDocument(data.getBytes("UTF-8"), target, mime_type, meta_data);
+    private String addDocument(String data, TargetContainer target, String mimeType, String meta_data) throws IOException {
+        return addDocument(data.getBytes("UTF-8"), target, mimeType, meta_data);
     }
 
 
-    public String addDocument(TargetContainer target, byte[] data, String mime_type, String meta_data) throws IOException {
-        return addDocument(data, target, mime_type, meta_data);
+    public String addDocument(TargetContainer target, byte[] data, String mimeType, String meta_data) throws IOException {
+        return addDocument(data, target, mimeType, meta_data);
     }
 
 
-    public String addDocument(TargetContainer target, String data, String mime_type, String meta_data) throws IOException {
-        return addDocument(data, target, mime_type, meta_data);
+    public String addDocument(TargetContainer target, String data, String mimeType, String meta_data) throws IOException {
+        return addDocument(data, target, mimeType, meta_data);
     }
 
 
@@ -245,7 +245,7 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
 
 
-    public String addDocument(RootDocument the_doc, TargetContainer target, String mime_type, String meta_data) throws IOException {
+    public String addDocument(RootDocument the_doc, TargetContainer target, String mimeType, String meta_data) throws IOException {
         document_data.addDocument(the_doc);
         String content_id = the_doc.getContentID();
         switch (target) {
@@ -253,25 +253,25 @@ public class SignatureRequestEncoder extends SignatureRequest {
                 if (document_references.main_document != null) {
                     throw new IOException("MainDocument already defined!");
                 }
-                document_references.main_document = document_references.addReference(content_id, mime_type, meta_data);
+                document_references.main_document = document_references.addReference(content_id, mimeType, meta_data);
                 break;
 
             case DETAIL_DOCUMENT:
                 if (document_references.detail_document != null) {
                     throw new IOException("DetailDocument already defined!");
                 }
-                document_references.detail_document = document_references.addReference(content_id, mime_type, meta_data);
+                document_references.detail_document = document_references.addReference(content_id, mimeType, meta_data);
                 break;
 
             case PROCESSING_DOCUMENT:
                 if (document_references.processing_document != null) {
                     throw new IOException("ProcessingDocument already defined!");
                 }
-                document_references.processing_document = document_references.addReference(content_id, mime_type, meta_data);
+                document_references.processing_document = document_references.addReference(content_id, mimeType, meta_data);
                 break;
 
             case EMBEDDED_OBJECT:
-                document_references.addEmbeddedObjectReference(content_id, mime_type, meta_data);
+                document_references.addEmbeddedObjectReference(content_id, mimeType, meta_data);
                 break;
 
             default:
@@ -281,28 +281,28 @@ public class SignatureRequestEncoder extends SignatureRequest {
     }
 
 
-    public String addAttachment(RootDocument the_doc, String mime_type, String meta_data,
+    public String addAttachment(RootDocument the_doc, String mimeType, String meta_data,
                                 boolean provider_originated, String description, String file, boolean must_access)
             throws IOException {
         document_data.addDocument(the_doc);
         String content_id = the_doc.getContentID();
-        document_references.addAttachmentReference(content_id, mime_type, meta_data, provider_originated, description, file, must_access);
+        document_references.addAttachmentReference(content_id, mimeType, meta_data, provider_originated, description, file, must_access);
         return content_id;
     }
 
 
-    public String addAttachment(String data, String mime_type, String meta_data,
+    public String addAttachment(String data, String mimeType, String meta_data,
                                 boolean provider_originated, String description, String file, boolean must_access)
             throws IOException {
-        return addAttachment(data.getBytes("UTF-8"), mime_type, meta_data,
+        return addAttachment(data.getBytes("UTF-8"), mimeType, meta_data,
                 provider_originated, description, file, must_access);
     }
 
 
-    public String addAttachment(byte[] data, String mime_type, String meta_data,
+    public String addAttachment(byte[] data, String mimeType, String meta_data,
                                 boolean provider_originated, String description, String file, boolean must_access)
             throws IOException {
-        return addAttachment(createDocument(data, mime_type), mime_type, meta_data,
+        return addAttachment(createDocument(data, mimeType), mimeType, meta_data,
                 provider_originated, description, file, must_access);
     }
 
@@ -324,12 +324,12 @@ public class SignatureRequestEncoder extends SignatureRequest {
         }
         wr.setStringAttribute(ID_ATTR, id);
 
-        if (server_time == null) {
-            server_time = new Date();
+        if (serverTime == null) {
+            serverTime = new Date();
         }
-        wr.setDateTimeAttribute(SERVER_TIME_ATTR, server_time);
+        wr.setDateTimeAttribute(SERVER_TIME_ATTR, serverTime);
 
-        wr.setStringAttribute(SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute(SUBMIT_URL_ATTR, submitUrl);
 
         if (cancel_url != null) {
             wr.setStringAttribute(ABORT_URL_ATTR, cancel_url);
@@ -366,7 +366,7 @@ public class SignatureRequestEncoder extends SignatureRequest {
         //////////////////////////////////////////////////////////////////////////
         // Certificate filters (optional)
         //////////////////////////////////////////////////////////////////////////
-        for (CertificateFilter cf : certificate_filters) {
+        for (CertificateFilter cf : certificateFilters) {
             writeCertificateFilter(wr, cf);
         }
 

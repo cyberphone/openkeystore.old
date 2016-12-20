@@ -37,59 +37,60 @@ import org.webpki.util.ISODateTime;
 import static org.webpki.webauth.WebAuthConstants.*;
 
 public class AuthenticationRequestEncoder extends ServerEncoder {
+
     private static final long serialVersionUID = 1L;
 
     String id;
 
-    String submit_url;
+    String submitUrl;
 
-    String abort_url;                                                          // Optional
+    String abortUrl;                                                          // Optional
 
-    String[] language_list;                                                    // Optional
+    String[] languageList;                                                    // Optional
 
-    String[] key_container_list;                                               // Optional
+    String[] keyContainerList;                                                // Optional
 
-    boolean full_path;                                                         // Optional
+    boolean fullPath;                                                         // Optional
 
-    boolean extended_cert_path_set;                                            // Optional
-    boolean extended_cert_path;
+    boolean extendedCertPathSet;                                              // Optional
+    boolean extendedCertPath;
 
     int expires;
 
-    LinkedHashSet<AsymSignatureAlgorithms> signature_algorithms = new LinkedHashSet<AsymSignatureAlgorithms>();
+    LinkedHashSet<AsymSignatureAlgorithms> signatureAlgorithms = new LinkedHashSet<AsymSignatureAlgorithms>();
 
-    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter>();
+    Vector<CertificateFilter> certificateFilters = new Vector<CertificateFilter>();
 
-    Vector<String> requested_client_features = new Vector<String>();
+    Vector<String> requestedClientFeatures = new Vector<String>();
 
-    Date server_time;
+    Date serverTime;
 
-    public AuthenticationRequestEncoder(String submit_url, String optional_abort_url) {
-        this.submit_url = submit_url;
-        this.abort_url = optional_abort_url;
+    public AuthenticationRequestEncoder(String submitUrl, String optionalAbortUrl) {
+        this.submitUrl = submitUrl;
+        this.abortUrl = optionalAbortUrl;
     }
 
 
     public AuthenticationRequestEncoder addSignatureAlgorithm(AsymSignatureAlgorithms algorithm) {
-        signature_algorithms.add(algorithm);
+        signatureAlgorithms.add(algorithm);
         return this;
     }
 
 
-    public AuthenticationRequestEncoder addCertificateFilter(CertificateFilter certificate_filter) {
-        certificate_filters.add(certificate_filter);
+    public AuthenticationRequestEncoder addCertificateFilter(CertificateFilter certificateFilter) {
+        certificateFilters.add(certificateFilter);
         return this;
     }
 
 
-    public AuthenticationRequestEncoder setExtendedCertPath(boolean extended_cert_path) {
-        this.extended_cert_path = extended_cert_path;
-        extended_cert_path_set = true;
+    public AuthenticationRequestEncoder setExtendedCertPath(boolean extendedCertPath) {
+        this.extendedCertPath = extendedCertPath;
+        extendedCertPathSet = true;
         return this;
     }
 
-    public AuthenticationRequestEncoder setTargetKeyContainerList(KeyContainerTypes[] optional_list_of_granted_types) throws IOException {
-        this.key_container_list = KeyContainerTypes.parseOptionalKeyContainerList(optional_list_of_granted_types);
+    public AuthenticationRequestEncoder setTargetKeyContainerList(KeyContainerTypes[] optionalListOfGrantedTypes) throws IOException {
+        this.keyContainerList = KeyContainerTypes.parseOptionalKeyContainerList(optionalListOfGrantedTypes);
         return this;
     }
 
@@ -99,50 +100,50 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
     }
 
 
-    public AuthenticationRequestEncoder setServerTime(Date server_time) {
-        this.server_time = server_time;
+    public AuthenticationRequestEncoder setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
         return this;
     }
 
 
-    public AuthenticationRequestEncoder setPreferredLanguages(String[] language_list) {
-        this.language_list = language_list;
+    public AuthenticationRequestEncoder setPreferredLanguages(String[] languageList) {
+        this.languageList = languageList;
         return this;
     }
 
 
-    public AuthenticationRequestEncoder requestClientFeature(String feature_uri) {
-        requested_client_features.add(feature_uri);
+    public AuthenticationRequestEncoder requestClientFeature(String featureUri) {
+        requestedClientFeatures.add(featureUri);
         return this;
     }
 
-    public void checkRequestResponseIntegrity(AuthenticationResponseDecoder authenication_response,
-                                              byte[] expected_server_certificate_fingerprint) throws IOException {
-        if (expected_server_certificate_fingerprint != null &&
-                (authenication_response.server_certificate_fingerprint == null ||
-                        !ArrayUtil.compare(authenication_response.server_certificate_fingerprint,
-                                expected_server_certificate_fingerprint))) {
+    public void checkRequestResponseIntegrity(AuthenticationResponseDecoder authenicationResponse,
+                                              byte[] expectedServerCertificateFingerprint) throws IOException {
+        if (expectedServerCertificateFingerprint != null &&
+                (authenicationResponse.serverCertificateFingerprint == null ||
+                        !ArrayUtil.compare(authenicationResponse.serverCertificateFingerprint,
+                                expectedServerCertificateFingerprint))) {
             bad("Server certificate fingerprint");
         }
-        if (!id.equals(authenication_response.id)) {
+        if (!id.equals(authenicationResponse.id)) {
             bad("ID attributes");
         }
-        if (!ISODateTime.formatDateTime(server_time, true).equals(ISODateTime.formatDateTime(authenication_response.server_time.getTime(), true))) {
+        if (!ISODateTime.formatDateTime(serverTime, true).equals(ISODateTime.formatDateTime(authenicationResponse.serverTime.getTime(), true))) {
             bad("ServerTime attribute");
         }
-        boolean sig_alg_found = false;
-        for (AsymSignatureAlgorithms sig_alg : signature_algorithms) {
-            if (sig_alg == authenication_response.signature_algorithm) {
-                sig_alg_found = true;
+        boolean sigAlgFound = false;
+        for (AsymSignatureAlgorithms sigAlg : signatureAlgorithms) {
+            if (sigAlg == authenicationResponse.signatureAlgorithm) {
+                sigAlgFound = true;
                 break;
             }
         }
-        if (!sig_alg_found) {
-            bad("Wrong signature algorithm: " + authenication_response.signature_algorithm);
+        if (!sigAlgFound) {
+            bad("Wrong signature algorithm: " + authenicationResponse.signatureAlgorithm);
         }
-        if (extended_cert_path && certificate_filters.size() > 0 && authenication_response.certificate_path != null) {
-            for (CertificateFilter cf : certificate_filters) {
-                if (cf.matches(authenication_response.certificate_path)) {
+        if (extendedCertPath && certificateFilters.size() > 0 && authenicationResponse.certificatePath != null) {
+            for (CertificateFilter cf : certificateFilters) {
+                if (cf.matches(authenicationResponse.certificatePath)) {
                     return;
                 }
             }
@@ -161,54 +162,54 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
         }
         wr.setString(ID_JSON, id);
 
-        if (server_time == null) {
-            server_time = new Date();
+        if (serverTime == null) {
+            serverTime = new Date();
         }
-        wr.setDateTime(SERVER_TIME_JSON, server_time, true);  // Server UTC
+        wr.setDateTime(SERVER_TIME_JSON, serverTime, true);  // Server UTC
 
-        wr.setString(SUBMIT_URL_JSON, submit_url);
+        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
-        if (abort_url != null) {
-            wr.setString(ABORT_URL_JSON, abort_url);
-        }
-
-        if (language_list != null) {
-            wr.setStringArray(PREFERRED_LANGUAGES_JSON, language_list);
+        if (abortUrl != null) {
+            wr.setString(ABORT_URL_JSON, abortUrl);
         }
 
-        if (key_container_list != null) {
-            wr.setStringArray(KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, key_container_list);
+        if (languageList != null) {
+            wr.setStringArray(PREFERRED_LANGUAGES_JSON, languageList);
+        }
+
+        if (keyContainerList != null) {
+            wr.setStringArray(KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, keyContainerList);
         }
 
         if (expires > 0) {
             wr.setInt(EXPIRES_JSON, expires);
         }
 
-        if (extended_cert_path_set) {
-            wr.setBoolean(EXTENDED_CERT_PATH_JSON, extended_cert_path);
+        if (extendedCertPathSet) {
+            wr.setBoolean(EXTENDED_CERT_PATH_JSON, extendedCertPath);
         }
 
-        if (signature_algorithms.isEmpty()) {
+        if (signatureAlgorithms.isEmpty()) {
             bad("Missing \"" + SIGNATURE_ALGORITHMS_JSON + "\"");
         }
         JSONArrayWriter signature_algorithm_array = wr.setArray(SIGNATURE_ALGORITHMS_JSON);
-        for (AsymSignatureAlgorithms algorithm : signature_algorithms) {
+        for (AsymSignatureAlgorithms algorithm : signatureAlgorithms) {
             signature_algorithm_array.setString(algorithm.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER));
         }
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"
         //////////////////////////////////////////////////////////////////////////
-        if (!requested_client_features.isEmpty()) {
-            wr.setStringArray(REQUESTED_CLIENT_FEATURES_JSON, requested_client_features.toArray(new String[0]));
+        if (!requestedClientFeatures.isEmpty()) {
+            wr.setStringArray(REQUESTED_CLIENT_FEATURES_JSON, requestedClientFeatures.toArray(new String[0]));
         }
 
         //////////////////////////////////////////////////////////////////////////
         // Certificate filters (optional)
         //////////////////////////////////////////////////////////////////////////
-        if (!certificate_filters.isEmpty()) {
+        if (!certificateFilters.isEmpty()) {
             JSONArrayWriter cf_arr = wr.setArray(CERTIFICATE_FILTERS_JSON);
-            for (CertificateFilter cf : certificate_filters) {
+            for (CertificateFilter cf : certificateFilters) {
                 CertificateFilterWriter.write(cf_arr.setObject(), cf);
             }
         }

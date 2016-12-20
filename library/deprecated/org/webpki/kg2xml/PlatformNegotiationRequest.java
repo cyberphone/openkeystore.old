@@ -28,11 +28,11 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 abstract class PlatformNegotiationRequest extends XMLObjectWrapper 
   {
-    String server_session_id;
+    String serverSessionId;
 
-    String submit_url;
+    String submitUrl;
     
-    String abort_url; // Optional
+    String abortUrl; // Optional
 
     PlatformNegotiationRequest () {}
 

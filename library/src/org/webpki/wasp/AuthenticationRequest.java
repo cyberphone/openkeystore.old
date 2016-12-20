@@ -37,9 +37,9 @@ import static org.webpki.wasp.WASPConstants.*;
 abstract class AuthenticationRequest extends XMLObjectWrapper {
     String id;
 
-    String submit_url;
+    String submitUrl;
 
-    String abort_url;                                                          // Optional
+    String abortUrl;                                                          // Optional
 
     String[] languages;                                                         // Optional
 
@@ -47,7 +47,7 @@ abstract class AuthenticationRequest extends XMLObjectWrapper {
 
     Vector<AuthenticationProfile> authentication_profiles = new Vector<AuthenticationProfile>();
 
-    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter>();
+    Vector<CertificateFilter> certificateFilters = new Vector<CertificateFilter>();
 
     Vector<String> requested_client_platform_features = new Vector<String>();
 

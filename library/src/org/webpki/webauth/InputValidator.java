@@ -31,6 +31,7 @@ import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 
 abstract class InputValidator extends JSONDecoder {
+
     private static final long serialVersionUID = 1L;
 
     static String getID(JSONObjectReader rd, String name) throws IOException {
@@ -45,9 +46,9 @@ abstract class InputValidator extends JSONDecoder {
         return url;
     }
 
-    static private void validateURI(String uri_string) throws IOException {
+    static private void validateURI(String uriString) throws IOException {
         try {
-            URI uri = new URI(uri_string);
+            URI uri = new URI(uriString);
             if (!uri.isAbsolute()) {
                 bad("Bad URI: " + uri);
             }
@@ -106,8 +107,7 @@ abstract class InputValidator extends JSONDecoder {
         JSONArrayReader arr = rd.getArray(name);
         do {
             result.add(arr.getObject());
-        }
-        while (arr.hasMore());
+        } while (arr.hasMore());
         return result;
     }
 

@@ -32,33 +32,33 @@ public class KeySpecifier implements Serializable {
 
     KeyAlgorithms keyAlgorithm;
 
-    public KeySpecifier(KeyAlgorithms key_algorithm) {
-        this.keyAlgorithm = key_algorithm;
+    public KeySpecifier(KeyAlgorithms keyAlgorithm) {
+        this.keyAlgorithm = keyAlgorithm;
     }
 
 
-    KeySpecifier(KeyAlgorithms key_algorithm, byte[] optional_parameter) throws IOException {
-        this(key_algorithm);
-        if (optional_parameter != null) {
-            if (!key_algorithm.hasParameters()) {
-                throw new IOException("Algorithm '" + key_algorithm.toString() + "' does not use \"" + KeyGen2Constants.KEY_PARAMETERS_JSON + "\"");
+    KeySpecifier(KeyAlgorithms keyAlgorithm, byte[] optionalParameter) throws IOException {
+        this(keyAlgorithm);
+        if (optionalParameter != null) {
+            if (!keyAlgorithm.hasParameters()) {
+                throw new IOException("Algorithm '" + keyAlgorithm.toString() + "' does not use \"" + KeyGen2Constants.KEY_PARAMETERS_JSON + "\"");
             }
-            if (key_algorithm.isRSAKey()) {
-                keyParameters = optional_parameter;
+            if (keyAlgorithm.isRSAKey()) {
+                keyParameters = optionalParameter;
             } else {
-                throw new IOException("Algorithm '" + key_algorithm.toString() + "' not implemented");
+                throw new IOException("Algorithm '" + keyAlgorithm.toString() + "' not implemented");
             }
         }
     }
 
 
-    public KeySpecifier(KeyAlgorithms key_algorithm, long parameter) throws IOException {
-        this(key_algorithm, BigInteger.valueOf(parameter).toByteArray());
+    public KeySpecifier(KeyAlgorithms keyAlgorithm, long parameter) throws IOException {
+        this(keyAlgorithm, BigInteger.valueOf(parameter).toByteArray());
     }
 
 
-    public KeySpecifier(String uri, byte[] optional_parameters) throws IOException {
-        this(KeyAlgorithms.getKeyAlgorithmFromID(uri, AlgorithmPreferences.SKS), optional_parameters);
+    public KeySpecifier(String uri, byte[] optionalParameters) throws IOException {
+        this(KeyAlgorithms.getKeyAlgorithmFromID(uri, AlgorithmPreferences.SKS), optionalParameters);
     }
 
 

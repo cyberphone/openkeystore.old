@@ -101,34 +101,34 @@ public class ServerState implements Serializable
       {
         private static final long serialVersionUID = 1L;
         
-        String client_session_id;
+        String clientSessionId;
         
-        String server_session_id;
+        String serverSessionId;
         
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
       
         byte[] certificate_data;
         
-        PostOperation post_operation;
+        PostOperation postOperation;
         
-        PostProvisioningTargetKey (String client_session_id,
-                                   String server_session_id,
+        PostProvisioningTargetKey (String clientSessionId,
+                                   String serverSessionId,
                                    byte[] certificate_data,
-                                   PublicKey key_management_key,
-                                   PostOperation post_operation)
+                                   PublicKey keyManagementKey,
+                                   PostOperation postOperation)
           {
-            this.client_session_id = client_session_id;
-            this.server_session_id = server_session_id;
+            this.clientSessionId = clientSessionId;
+            this.serverSessionId = serverSessionId;
             this.certificate_data = certificate_data;
-            this.key_management_key = key_management_key;
-            this.post_operation = post_operation;
+            this.keyManagementKey = keyManagementKey;
+            this.postOperation = postOperation;
           }
   
         public boolean equals (Object o)
           {
             return o instanceof PostProvisioningTargetKey && 
-                   client_session_id.equals(((PostProvisioningTargetKey)o).client_session_id) &&
-                   server_session_id.equals (((PostProvisioningTargetKey)o).server_session_id) &&
+                   clientSessionId.equals(((PostProvisioningTargetKey)o).clientSessionId) &&
+                   serverSessionId.equals (((PostProvisioningTargetKey)o).serverSessionId) &&
                    ArrayUtil.compare (certificate_data, ((PostProvisioningTargetKey)o).certificate_data);
           }
       }
@@ -155,11 +155,11 @@ public class ServerState implements Serializable
         
         public abstract byte[] getExtensionData () throws IOException;
         
-        abstract void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException;
+        abstract void writeExtension (DOMWriterHelper wr, byte[] macData) throws IOException;
         
-        void writeCore (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        void writeCore (DOMWriterHelper wr, byte[] macData) throws IOException
           {
-            wr.setBinaryAttribute (MAC_ATTR, mac_data);
+            wr.setBinaryAttribute (MAC_ATTR, macData);
             wr.setStringAttribute (TYPE_ATTR, type);
           }
         
@@ -191,10 +191,10 @@ public class ServerState implements Serializable
             return data;
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        void writeExtension (DOMWriterHelper wr, byte[] macData) throws IOException
           {
             wr.addBinary (EXTENSION_ELEM, data);
-            writeCore (wr, mac_data);
+            writeCore (wr, macData);
           }
       }
 
@@ -202,12 +202,12 @@ public class ServerState implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
-        byte[] encrypted_data;
+        byte[] encryptedData;
 
-        EncryptedExtension (String type, byte[] encrypted_data)
+        EncryptedExtension (String type, byte[] encryptedData)
           {
             super (type);
-            this.encrypted_data = encrypted_data;
+            this.encryptedData = encryptedData;
           }
 
         public byte getSubType ()
@@ -217,13 +217,13 @@ public class ServerState implements Serializable
 
         public byte[] getExtensionData () throws IOException
           {
-            return encrypted_data;
+            return encryptedData;
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        void writeExtension (DOMWriterHelper wr, byte[] macData) throws IOException
           {
-            wr.addBinary (ENCRYPTED_EXTENSION_ELEM, encrypted_data);
-            writeCore (wr, mac_data);
+            wr.addBinary (ENCRYPTED_EXTENSION_ELEM, encryptedData);
+            writeCore (wr, macData);
           }
       }
 
@@ -254,10 +254,10 @@ public class ServerState implements Serializable
             return logotype.getMimeType ();
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        void writeExtension (DOMWriterHelper wr, byte[] macData) throws IOException
           {
             wr.addBinary (LOGOTYPE_ELEM, logotype.getData ());
-            writeCore (wr, mac_data);
+            writeCore (wr, macData);
             wr.setStringAttribute (MIME_TYPE_ATTR, logotype.getMimeType ());
           }
       }
@@ -336,14 +336,14 @@ public class ServerState implements Serializable
             return properties.values ().toArray (new Property[0]);
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        void writeExtension (DOMWriterHelper wr, byte[] macData) throws IOException
           {
             if (properties.isEmpty ())
               {
                 throw new IOException ("Empty " + PROPERTY_BAG_ELEM + ": " + type);
               }
             wr.addChildElement (PROPERTY_BAG_ELEM);
-            writeCore (wr, mac_data);
+            writeCore (wr, macData);
             for (Property property : properties.values ())
               {
                 wr.addChildElement (PROPERTY_ELEM);
@@ -366,7 +366,7 @@ public class ServerState implements Serializable
 
         String id;
         
-        byte[] encrypted_value;
+        byte[] encryptedValue;
 
         public String getID ()
           {
@@ -375,14 +375,14 @@ public class ServerState implements Serializable
 
         PassphraseFormat format;
 
-        int retry_limit;
+        int retryLimit;
 
-        PUKPolicy (byte[] encrypted_value, PassphraseFormat format, int retry_limit) throws IOException
+        PUKPolicy (byte[] encryptedValue, PassphraseFormat format, int retryLimit) throws IOException
           {
-            this.encrypted_value = encrypted_value;
+            this.encryptedValue = encryptedValue;
             this.id = puk_prefix + ++next_puk_id_suffix;
             this.format = format;
-            this.retry_limit = retry_limit;
+            this.retryLimit = retryLimit;
           }
 
         void writePolicy (DOMWriterHelper wr) throws IOException
@@ -390,15 +390,15 @@ public class ServerState implements Serializable
             wr.addChildElement (PUK_POLICY_SPECIFIER_ELEM);
 
             wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
+            wr.setIntAttribute (RETRY_LIMIT_ATTR, retryLimit);
             wr.setStringAttribute (FORMAT_ATTR, format.getProtocolName ());
-            wr.setBinaryAttribute (ENCRYPTED_PUK_ATTR, encrypted_value);
+            wr.setBinaryAttribute (ENCRYPTED_PUK_ATTR, encryptedValue);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
-            puk_policy_mac.addArray (encrypted_value);
+            puk_policy_mac.addArray (encryptedValue);
             puk_policy_mac.addByte (format.getSksValue ());
-            puk_policy_mac.addShort (retry_limit);
+            puk_policy_mac.addShort (retryLimit);
             wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
           }
       }
@@ -417,51 +417,51 @@ public class ServerState implements Serializable
         // Actual data
 
 
-        PUKPolicy puk_policy; // Optional
+        PUKPolicy pukPolicy; // Optional
         
         public PUKPolicy getPUKPolicy ()
           {
-            return puk_policy;
+            return pukPolicy;
           }
 
 
-        boolean user_modifiable = true;
+        boolean userModifiable = true;
         
         boolean user_modifiable_set;
         
         public boolean getUserModifiable ()
           {
-            return user_modifiable;
+            return userModifiable;
           }
 
         public PINPolicy setUserModifiable (boolean flag)
           {
-            user_modifiable = flag;
+            userModifiable = flag;
             user_modifiable_set = true;
             return this;
           }
         
-        boolean user_defined = true;
+        boolean userDefined = true;
         
         public boolean getUserDefinedFlag ()
           {
-            return user_defined;
+            return userDefined;
           }
 
 
         PassphraseFormat format;
 
-        int min_length;
+        int minLength;
 
-        int max_length;
+        int maxLength;
 
-        int retry_limit;
+        int retryLimit;
 
         Grouping grouping; // Optional
 
-        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
+        Set<PatternRestriction> patternRestrictions = EnumSet.noneOf (PatternRestriction.class);
 
-        InputMethod input_method; // Optional
+        InputMethod inputMethod; // Optional
 
 
         String id;
@@ -481,50 +481,50 @@ public class ServerState implements Serializable
           {
             wr.addChildElement (PIN_POLICY_SPECIFIER_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
-            wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
+            wr.setIntAttribute (MAX_LENGTH_ATTR, maxLength);
+            wr.setIntAttribute (MIN_LENGTH_ATTR, minLength);
+            wr.setIntAttribute (RETRY_LIMIT_ATTR, retryLimit);
             if (user_modifiable_set)
               {
-                wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, user_modifiable);
+                wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, userModifiable);
               }
             if (grouping != null)
               {
                 wr.setStringAttribute (GROUPING_ATTR, grouping.getProtocolName ());
               }
             wr.setStringAttribute (FORMAT_ATTR, format.getProtocolName ());
-            if (!pattern_restrictions.isEmpty ())
+            if (!patternRestrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
-                for (PatternRestriction pr : pattern_restrictions)
+                for (PatternRestriction pr : patternRestrictions)
                   {
                     prs.add (pr.getProtocolName ());
                   }
                 wr.setListAttribute (PATTERN_RESTRICTIONS_ATTR, prs.toArray (new String[0]));
               }
-            if (input_method != null)
+            if (inputMethod != null)
               {
-                wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getProtocolName ());
+                wr.setStringAttribute (INPUT_METHOD_ATTR, inputMethod.getProtocolName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();
             pin_policy_mac.addString (id);
-            pin_policy_mac.addString (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
-            pin_policy_mac.addBool (user_defined);
-            pin_policy_mac.addBool (user_modifiable);
+            pin_policy_mac.addString (pukPolicy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : pukPolicy.id);
+            pin_policy_mac.addBool (userDefined);
+            pin_policy_mac.addBool (userModifiable);
             pin_policy_mac.addByte (format.getSksValue ());
-            pin_policy_mac.addShort (retry_limit);
+            pin_policy_mac.addShort (retryLimit);
             pin_policy_mac.addByte (grouping == null ? Grouping.NONE.getSksValue () : grouping.getSksValue ());
-            pin_policy_mac.addByte (PatternRestriction.getSksValue (pattern_restrictions));
-            pin_policy_mac.addShort (min_length);
-            pin_policy_mac.addShort (max_length);
-            pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSksValue () : input_method.getSksValue ());
+            pin_policy_mac.addByte (PatternRestriction.getSksValue (patternRestrictions));
+            pin_policy_mac.addShort (minLength);
+            pin_policy_mac.addShort (maxLength);
+            pin_policy_mac.addByte (inputMethod == null ? InputMethod.ANY.getSksValue () : inputMethod.getSksValue ());
             wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
           }
 
-        public PINPolicy setInputMethod (InputMethod input_method)
+        public PINPolicy setInputMethod (InputMethod inputMethod)
           {
-            this.input_method = input_method;
+            this.inputMethod = inputMethod;
             return this;
           }
 
@@ -536,7 +536,7 @@ public class ServerState implements Serializable
 
         public PINPolicy addPatternRestriction (PatternRestriction pattern)
           {
-            this.pattern_restrictions.add (pattern);
+            this.patternRestrictions.add (pattern);
             return this;
           }
       }
@@ -616,34 +616,34 @@ public class ServerState implements Serializable
           }
 
 
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
         
-        public Key setCertificatePath (X509Certificate[] certificate_path)
+        public Key setCertificatePath (X509Certificate[] certificatePath)
           {
-            this.certificate_path = certificate_path;
+            this.certificatePath = certificatePath;
             return this;
           }
         
         public X509Certificate[] getCertificatePath ()
           {
-            return certificate_path;
+            return certificatePath;
           }
 
 
         byte[] encrypted_symmetric_key;
         
-        public Key setSymmetricKey (byte[] symmetric_key) throws IOException
+        public Key setSymmetricKey (byte[] symmetricKey) throws IOException
           {
-            this.encrypted_symmetric_key = encrypt (symmetric_key);
+            this.encrypted_symmetric_key = encrypt (symmetricKey);
             return this;
           }
         
 
-        String[] endorsed_algorithms;
+        String[] endorsedAlgorithms;
 
-        public Key setEndorsedAlgorithms (String[] endorsed_algorithms) throws IOException
+        public Key setEndorsedAlgorithms (String[] endorsedAlgorithms) throws IOException
           {
-            this.endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+            this.endorsedAlgorithms = BasicCapabilities.getSortedAlgorithms (endorsedAlgorithms);
             return this;
           }
 
@@ -656,9 +656,9 @@ public class ServerState implements Serializable
 
         byte[] encrypted_private_key;
         
-        public Key setPrivateKey (byte[] private_key) throws IOException
+        public Key setPrivateKey (byte[] privateKey) throws IOException
           {
-            this.encrypted_private_key = encrypt (private_key);
+            this.encrypted_private_key = encrypt (privateKey);
             return this;
           }
 
@@ -668,25 +668,25 @@ public class ServerState implements Serializable
           }
 
         
-        String friendly_name;
+        String friendlyName;
 
-        public Key setFriendlyName (String friendly_name)
+        public Key setFriendlyName (String friendlyName)
           {
-            this.friendly_name = friendly_name;
+            this.friendlyName = friendlyName;
             return this;
           }
 
         public String getFriendlyName ()
           {
-            return friendly_name;
+            return friendlyName;
           }
 
         
-        PublicKey public_key;   // Filled in by KeyCreationRequestDecoder
+        PublicKey publicKey;   // Filled in by KeyCreationRequestDecoder
 
         public PublicKey getPublicKey ()
           {
-            return public_key;
+            return publicKey;
           }
 
 
@@ -698,46 +698,46 @@ public class ServerState implements Serializable
           }
 
 
-        ExportProtection export_protection;
+        ExportProtection exportProtection;
         
-        public Key setExportProtection (ExportProtection export_protection)
+        public Key setExportProtection (ExportProtection exportProtection)
           {
-            this.export_protection = export_protection;
+            this.exportProtection = exportProtection;
             return this;
           }
 
         public ExportProtection getExportPolicy ()
           {
-            return export_protection;
+            return exportProtection;
           }
         
         
-        byte[] server_seed;
+        byte[] serverSeed;
         
-        public Key setServerSeed (byte[] server_seed) throws IOException
+        public Key setServerSeed (byte[] serverSeed) throws IOException
           {
-            if (server_seed != null && server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED)
+            if (serverSeed != null && serverSeed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED)
               {
                 bad ("Server seed > " + SecureKeyStore.MAX_LENGTH_SERVER_SEED + " bytes");
               }
-            this.server_seed = server_seed;
+            this.serverSeed = serverSeed;
             return this;
           }
         
 
-        boolean enable_pin_caching;
+        boolean enablePinCaching;
         boolean enable_pin_caching_set;
         
         public Key setEnablePINCaching (boolean flag)
           {
-            enable_pin_caching = flag;
+            enablePinCaching = flag;
             enable_pin_caching_set = true;
             return this;
           }
         
         public boolean getEnablePINCachingFlag ()
           {
-            return enable_pin_caching;
+            return enablePinCaching;
           }
 
 
@@ -757,33 +757,33 @@ public class ServerState implements Serializable
           }
 
         
-        BiometricProtection biometric_protection;
+        BiometricProtection biometricProtection;
         
-        public Key setBiometricProtection (BiometricProtection biometric_protection) throws IOException
+        public Key setBiometricProtection (BiometricProtection biometricProtection) throws IOException
           {
             // TODO there must be some PIN-related tests here...
-            this.biometric_protection = biometric_protection;
+            this.biometricProtection = biometricProtection;
             return this;
           }
 
         public BiometricProtection getBiometricProtection ()
           {
-            return biometric_protection;
+            return biometricProtection;
           }
 
 
-        DeleteProtection delete_protection;
+        DeleteProtection deleteProtection;
         
-        public Key setDeleteProtection (DeleteProtection delete_protection) throws IOException
+        public Key setDeleteProtection (DeleteProtection deleteProtection) throws IOException
           {
             // TODO there must be some PIN-related tests here...
-            this.delete_protection = delete_protection;
+            this.deleteProtection = deleteProtection;
             return this;
           }
 
         public DeleteProtection getDeletePolicy ()
           {
-            return delete_protection;
+            return deleteProtection;
           }
 
 
@@ -795,36 +795,36 @@ public class ServerState implements Serializable
           }
         
 
-        AppUsage app_usage;
+        AppUsage appUsage;
 
         public AppUsage getAppUsage ()
           {
-            return app_usage;
+            return appUsage;
           }
 
-        KeySpecifier key_specifier;
+        KeySpecifier keySpecifier;
 
-        PINPolicy pin_policy;
+        PINPolicy pinPolicy;
         
         public PINPolicy getPINPolicy ()
           {
-            return pin_policy;
+            return pinPolicy;
           }
 
         
-        byte[] preset_pin;
+        byte[] presetPin;
         
         public byte[] getEncryptedPIN ()
           {
-            return preset_pin;
+            return presetPin;
           }
         
 
-        boolean device_pin_protection;
+        boolean devicePinProtection;
 
         public boolean getDevicePINProtection ()
           {
-            return device_pin_protection;
+            return devicePinProtection;
           }
         
         
@@ -834,7 +834,7 @@ public class ServerState implements Serializable
               {
                 bad ("Clone or Update already set for this key");
               }
-            if (pin_policy != null || device_pin_protection)
+            if (pinPolicy != null || devicePinProtection)
               {
                 bad ("Clone/Update keys cannot be PIN protected");
               }
@@ -842,55 +842,55 @@ public class ServerState implements Serializable
           }
         
      
-        public Key setClonedKeyProtection (String old_client_session_id, 
-                                                     String old_server_session_id,
-                                                     X509Certificate old_key,
-                                                     PublicKey key_management_key) throws IOException
+        public Key setClonedKeyProtection (String oldClientSessionId, 
+                                                     String oldServerSessionId,
+                                                     X509Certificate oldKey,
+                                                     PublicKey keyManagementKey) throws IOException
           {
-            PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
-                                                             old_server_session_id,
-                                                             old_key,
+            PostProvisioningTargetKey op = addPostOperation (oldClientSessionId,
+                                                             oldServerSessionId,
+                                                             oldKey,
                                                              PostOperation.CLONE_KEY_PROTECTION,
-                                                             key_management_key);
+                                                             keyManagementKey);
             setPostOp (op);
             return this;
           }
 
-        public Key setUpdatedKey (String old_client_session_id, 
-                                            String old_server_session_id,
-                                            X509Certificate old_key,
-                                            PublicKey key_management_key) throws IOException
+        public Key setUpdatedKey (String oldClientSessionId, 
+                                            String oldServerSessionId,
+                                            X509Certificate oldKey,
+                                            PublicKey keyManagementKey) throws IOException
           { 
-            PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
-                                                             old_server_session_id,
-                                                             old_key,
+            PostProvisioningTargetKey op = addPostOperation (oldClientSessionId,
+                                                             oldServerSessionId,
+                                                             oldKey,
                                                              PostOperation.UPDATE_KEY,
-                                                             key_management_key);
+                                                             keyManagementKey);
             setPostOp (op);
             return this;
           }
 
-        Key (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
+        Key (AppUsage appUsage, KeySpecifier keySpecifier, PINPolicy pinPolicy, byte[] presetPin, boolean devicePinProtection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
-            this.app_usage = app_usage;
-            this.key_specifier = key_specifier;
-            this.pin_policy = pin_policy;
-            this.preset_pin = preset_pin;
-            this.device_pin_protection = device_pin_protection;
-            if (pin_policy != null)
+            this.appUsage = appUsage;
+            this.keySpecifier = keySpecifier;
+            this.pinPolicy = pinPolicy;
+            this.presetPin = presetPin;
+            this.devicePinProtection = devicePinProtection;
+            if (pinPolicy != null)
               {
-                if (pin_policy.not_first)
+                if (pinPolicy.not_first)
                   {
-                    if (pin_policy.grouping == Grouping.SHARED && ((pin_policy.preset_test == null && preset_pin != null) || (pin_policy.preset_test != null && preset_pin == null)))
+                    if (pinPolicy.grouping == Grouping.SHARED && ((pinPolicy.preset_test == null && presetPin != null) || (pinPolicy.preset_test != null && presetPin == null)))
                       {
-                        bad ("\"shared\" PIN keys must either have no \"preset_pin\" " + "value or all be preset");
+                        bad ("\"shared\" PIN keys must either have no \"presetPin\" " + "value or all be preset");
                       }
                   }
                 else
                   {
-                    pin_policy.not_first = true;
-                    pin_policy.preset_test = preset_pin;
+                    pinPolicy.not_first = true;
+                    pinPolicy.preset_test = presetPin;
                   }
               }
           }
@@ -901,11 +901,11 @@ public class ServerState implements Serializable
             MacGenerator key_pair_mac = new MacGenerator ();
             key_pair_mac.addString (id);
             key_pair_mac.addString (key_attestation_algorithm);
-            key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
-            key_pair_mac.addString (pin_policy == null ? 
+            key_pair_mac.addArray (serverSeed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : serverSeed);
+            key_pair_mac.addString (pinPolicy == null ? 
                                       SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
                                                        :
-                                      pin_policy.id);
+                                      pinPolicy.id);
             if (getEncryptedPIN () == null)
               {
                 key_pair_mac.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
@@ -914,19 +914,19 @@ public class ServerState implements Serializable
               {
                 key_pair_mac.addArray (getEncryptedPIN ());
               }
-            key_pair_mac.addBool (device_pin_protection);
-            key_pair_mac.addBool (enable_pin_caching);
-            key_pair_mac.addByte (biometric_protection == null ?
-                       BiometricProtection.NONE.getSksValue () : biometric_protection.getSksValue ());
-            key_pair_mac.addByte (export_protection == null ?
-                ExportProtection.NON_EXPORTABLE.getSksValue () : export_protection.getSksValue ());
-            key_pair_mac.addByte (delete_protection == null ?
-                       DeleteProtection.NONE.getSksValue () : delete_protection.getSksValue ());
-            key_pair_mac.addByte (app_usage.getSksValue ());
-            key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_pair_mac.addString (key_specifier.getKeyAlgorithm ().getURI ());
-            key_pair_mac.addArray (key_specifier.getParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_specifier.getParameters ());
-            if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
+            key_pair_mac.addBool (devicePinProtection);
+            key_pair_mac.addBool (enablePinCaching);
+            key_pair_mac.addByte (biometricProtection == null ?
+                       BiometricProtection.NONE.getSksValue () : biometricProtection.getSksValue ());
+            key_pair_mac.addByte (exportProtection == null ?
+                ExportProtection.NON_EXPORTABLE.getSksValue () : exportProtection.getSksValue ());
+            key_pair_mac.addByte (deleteProtection == null ?
+                       DeleteProtection.NONE.getSksValue () : deleteProtection.getSksValue ());
+            key_pair_mac.addByte (appUsage.getSksValue ());
+            key_pair_mac.addString (friendlyName == null ? "" : friendlyName);
+            key_pair_mac.addString (keySpecifier.getKeyAlgorithm ().getURI ());
+            key_pair_mac.addArray (keySpecifier.getParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keySpecifier.getParameters ());
+            if (endorsedAlgorithms != null) for (String algorithm : endorsedAlgorithms)
               {
                 key_pair_mac.addString (algorithm);
               }
@@ -935,61 +935,61 @@ public class ServerState implements Serializable
 
             wr.setStringAttribute (ID_ATTR, id);
 
-            if (server_seed != null)
+            if (serverSeed != null)
               {
-                wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
+                wr.setBinaryAttribute (SERVER_SEED_ATTR, serverSeed);
               }
 
-            if (device_pin_protection)
+            if (devicePinProtection)
               {
                 wr.setBooleanAttribute (DEVICE_PIN_PROTECTION_ATTR, true);
               }
 
-            if (preset_pin != null)
+            if (presetPin != null)
               {
-                wr.setBinaryAttribute (ENCRYPTED_PRESET_PIN_ATTR, preset_pin);
+                wr.setBinaryAttribute (ENCRYPTED_PRESET_PIN_ATTR, presetPin);
               }
 
             if (enable_pin_caching_set)
               {
-                if (enable_pin_caching && (pin_policy == null || pin_policy.input_method != InputMethod.TRUSTED_GUI))
+                if (enablePinCaching && (pinPolicy == null || pinPolicy.inputMethod != InputMethod.TRUSTED_GUI))
                   {
                     bad ("\"" + ENABLE_PIN_CACHING_ATTR +"\" must be combined with " + InputMethod.TRUSTED_GUI.toString ());
                   }
-                wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enable_pin_caching);
+                wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enablePinCaching);
               }
 
-            if (biometric_protection != null)
+            if (biometricProtection != null)
               {
-                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getProtocolName ());
+                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometricProtection.getProtocolName ());
               }
 
-            if (export_protection != null)
+            if (exportProtection != null)
               {
-                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getProtocolName ());
+                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, exportProtection.getProtocolName ());
               }
 
-            if (delete_protection != null)
+            if (deleteProtection != null)
               {
-                wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getProtocolName ());
+                wr.setStringAttribute (DELETE_PROTECTION_ATTR, deleteProtection.getProtocolName ());
               }
 
-            if (friendly_name != null)
+            if (friendlyName != null)
               {
-                wr.setStringAttribute (FRIENDLY_NAME_ATTR, friendly_name);
+                wr.setStringAttribute (FRIENDLY_NAME_ATTR, friendlyName);
               }
 
-            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getProtocolName ());
+            wr.setStringAttribute (APP_USAGE_ATTR, appUsage.getProtocolName ());
 
-            wr.setStringAttribute (KEY_ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
-            if (key_specifier.getParameters () != null)
+            wr.setStringAttribute (KEY_ALGORITHM_ATTR, keySpecifier.getKeyAlgorithm ().getURI ());
+            if (keySpecifier.getParameters () != null)
               {
-                wr.setBinaryAttribute (KEY_PARAMETERS_ATTR, key_specifier.getParameters ());
+                wr.setBinaryAttribute (KEY_PARAMETERS_ATTR, keySpecifier.getParameters ());
               }
 
-            if (endorsed_algorithms != null)
+            if (endorsedAlgorithms != null)
               {
-                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
+                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsedAlgorithms);
               }
 
             wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
@@ -1010,7 +1010,7 @@ public class ServerState implements Serializable
         return current_phase;
       }
 
-    ServerCryptoInterface server_crypto_interface;
+    ServerCryptoInterface serverCryptoInterface;
 
     BasicCapabilities basic_capabilities = new BasicCapabilities (false);
     
@@ -1040,15 +1040,15 @@ public class ServerState implements Serializable
 
     Vector<ImagePreference> image_preferences; 
 
-    String server_session_id;
+    String serverSessionId;
 
-    String client_session_id;
+    String clientSessionId;
     
     String issuer_uri;
 
-    int session_life_time;
+    int sessionLifeTime;
 
-    short session_key_limit;
+    short sessionKeyLimit;
     
     String provisioning_session_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
     
@@ -1058,7 +1058,7 @@ public class ServerState implements Serializable
     
     ECPublicKey client_ephemeral_key;
     
-    PublicKey key_management_key;
+    PublicKey keyManagementKey;
     
     byte[] saved_close_nonce;
     
@@ -1066,28 +1066,28 @@ public class ServerState implements Serializable
     
     X509Certificate device_certificate;
     
-    PostProvisioningTargetKey addPostOperation (String old_client_session_id,
-                                                String old_server_session_id,
-                                                X509Certificate old_key,
+    PostProvisioningTargetKey addPostOperation (String oldClientSessionId,
+                                                String oldServerSessionId,
+                                                X509Certificate oldKey,
                                                 PostOperation operation,
-                                                PublicKey key_management_key) throws IOException
+                                                PublicKey keyManagementKey) throws IOException
       {
         try
           {
-            PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
-                                                                                   old_server_session_id,
-                                                                                   old_key.getEncoded (),
-                                                                                   key_management_key,
+            PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (oldClientSessionId,
+                                                                                   oldServerSessionId,
+                                                                                   oldKey.getEncoded (),
+                                                                                   keyManagementKey,
                                                                                    operation);
             for (PostProvisioningTargetKey post_op : post_operations)
               {
                 if (post_op.equals (new_post_op))
                   {
-                    if (post_op.post_operation == PostOperation.DELETE_KEY || new_post_op.post_operation == PostOperation.DELETE_KEY)
+                    if (post_op.postOperation == PostOperation.DELETE_KEY || new_post_op.postOperation == PostOperation.DELETE_KEY)
                       {
                         bad ("DeleteKey cannot be combined with other management operations");
                       }
-                    if (post_op.post_operation == PostOperation.UPDATE_KEY || new_post_op.post_operation == PostOperation.UPDATE_KEY)
+                    if (post_op.postOperation == PostOperation.UPDATE_KEY || new_post_op.postOperation == PostOperation.UPDATE_KEY)
                       {
                         bad ("UpdateKey can only be performed once per key");
                       }
@@ -1102,9 +1102,9 @@ public class ServerState implements Serializable
           }
       }
     
-    void checkSession (String client_session_id, String server_session_id) throws IOException
+    void checkSession (String clientSessionId, String serverSessionId) throws IOException
       {
-        if (!this.client_session_id.equals (client_session_id) || !this.server_session_id.equals (server_session_id))
+        if (!this.clientSessionId.equals (clientSessionId) || !this.serverSessionId.equals (serverSessionId))
           {
             bad ("Session ID mismatch");
           }
@@ -1118,17 +1118,17 @@ public class ServerState implements Serializable
 
     byte[] mac (byte[] data, byte[] method) throws IOException
       {
-        return server_crypto_interface.mac (data, ArrayUtil.add (method, getMacSequenceCounterAndUpdate ()));
+        return serverCryptoInterface.mac (data, ArrayUtil.add (method, getMacSequenceCounterAndUpdate ()));
       }
     
-    byte[] attest (byte[] data, byte[] mac_counter) throws IOException, GeneralSecurityException
+    byte[] attest (byte[] data, byte[] macCounter) throws IOException, GeneralSecurityException
       {
-        return server_crypto_interface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, mac_counter)); 
+        return serverCryptoInterface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, macCounter)); 
       }
     
     byte[] encrypt (byte[] data) throws IOException
       {
-        return server_crypto_interface.encrypt (data);
+        return serverCryptoInterface.encrypt (data);
       }
     
     void checkFinalResult (byte[] close_session_attestation) throws IOException, GeneralSecurityException
@@ -1171,9 +1171,9 @@ public class ServerState implements Serializable
 
  
     // Constructor
-    public ServerState (ServerCryptoInterface server_crypto_interface)
+    public ServerState (ServerCryptoInterface serverCryptoInterface)
       {
-        this.server_crypto_interface = server_crypto_interface;
+        this.serverCryptoInterface = serverCryptoInterface;
       }
 
     
@@ -1207,32 +1207,32 @@ public class ServerState implements Serializable
         try
           {
             checkState (false, ProtocolPhase.PROVISIONING_INITIALIZATION);
-            client_session_id = prov_init_response.client_session_id;
+            clientSessionId = prov_init_response.clientSessionId;
             device_certificate = prov_init_response.device_certificate_path == null ? null : prov_init_response.device_certificate_path[0];
             client_ephemeral_key = prov_init_response.client_ephemeral_key;
             client_attribute_values = prov_init_response.client_attribute_values;
 
             MacGenerator kdf = new MacGenerator ();
-            kdf.addString (client_session_id);
-            kdf.addString (server_session_id);
+            kdf.addString (clientSessionId);
+            kdf.addString (serverSessionId);
             kdf.addString (issuer_uri);
             kdf.addArray (getDeviceID ());
 
             MacGenerator attestation_arguments = new MacGenerator ();
-            attestation_arguments.addString (client_session_id);
-            attestation_arguments.addString (server_session_id);
+            attestation_arguments.addString (clientSessionId);
+            attestation_arguments.addString (serverSessionId);
             attestation_arguments.addString (issuer_uri);
             attestation_arguments.addArray (getDeviceID ());
             attestation_arguments.addString (provisioning_session_algorithm);
             attestation_arguments.addBool (device_certificate == null);
             attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
             attestation_arguments.addArray (client_ephemeral_key.getEncoded ());
-            attestation_arguments.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
-            attestation_arguments.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
-            attestation_arguments.addInt (session_life_time);
-            attestation_arguments.addShort (session_key_limit);
+            attestation_arguments.addArray (keyManagementKey == null ? new byte[0] : keyManagementKey.getEncoded ());
+            attestation_arguments.addInt ((int) (prov_init_response.clientTime.getTime () / 1000));
+            attestation_arguments.addInt (sessionLifeTime);
+            attestation_arguments.addShort (sessionKeyLimit);
 
-            server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
+            serverCryptoInterface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                  kdf.getResult (),
                                                                  attestation_arguments.getResult (),
                                                                  device_certificate == null ? null : device_certificate,
@@ -1246,11 +1246,11 @@ public class ServerState implements Serializable
             new XMLSymKeyVerifier (new SymKeyVerifierInterface()
               {
                 @Override
-                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException
+                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String keyId) throws IOException
                   {
-                    return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
+                    return ArrayUtil.compare (serverCryptoInterface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
                   }
-              }).validateEnvelopedSignature (prov_init_response, null, prov_init_response.signature, client_session_id);
+              }).validateEnvelopedSignature (prov_init_response, null, prov_init_response.signature, clientSessionId);
           }
         catch (GeneralSecurityException e)
           {
@@ -1268,7 +1268,7 @@ public class ServerState implements Serializable
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
       {
         checkState (false, ProtocolPhase.CREDENTIAL_DISCOVERY);
-        checkSession (credential_discovery_response.client_session_id, credential_discovery_response.server_session_id);
+        checkSession (credential_discovery_response.clientSessionId, credential_discovery_response.serverSessionId);
         current_phase = ProtocolPhase.KEY_CREATION;
       }
 
@@ -1276,28 +1276,28 @@ public class ServerState implements Serializable
     public void update (KeyCreationResponseDecoder key_create_response) throws IOException
       {
         checkState (false, ProtocolPhase.KEY_CREATION);
-        checkSession (key_create_response.client_session_id, key_create_response.server_session_id);
-        if (key_create_response.generated_keys.size () != requested_keys.size ())
+        checkSession (key_create_response.clientSessionId, key_create_response.serverSessionId);
+        if (key_create_response.generatedKeys.size () != requested_keys.size ())
           {
             ServerState.bad ("Different number of requested and received keys");
           }
         try
           {
-            for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
+            for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generatedKeys.values ())
               {
                 ServerState.Key kp = requested_keys.get (gpk.id);
                 if (kp == null)
                   {
                     ServerState.bad ("Missing key id:" + gpk.id);
                   }
-                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+                if (kp.keySpecifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.publicKey = gpk.publicKey, kp.keySpecifier.parameters != null))
                   {
                     ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
                   }
                 MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
                 attestation.addString (gpk.id);
-                attestation.addArray (gpk.public_key.getEncoded ());
+                attestation.addArray (gpk.publicKey.getEncoded ());
                  if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
                                          kp.attestation = gpk.attestation))
                   {
@@ -1316,7 +1316,7 @@ public class ServerState implements Serializable
     public void update (ProvisioningFinalizationResponseDecoder prov_final_response) throws IOException
       {
         checkState (false, ProtocolPhase.PROVISIONING_FINALIZATION);
-        checkSession (prov_final_response.client_session_id, prov_final_response.server_session_id);
+        checkSession (prov_final_response.clientSessionId, prov_final_response.serverSessionId);
         try
           {
             checkFinalResult (prov_final_response.attestation);
@@ -1329,9 +1329,9 @@ public class ServerState implements Serializable
       }
 
     
-    public String getDeviceID (boolean long_version)
+    public String getDeviceID (boolean longVersion)
       {
-        return DeviceID.getDeviceID (device_certificate, long_version);
+        return DeviceID.getDeviceID (device_certificate, longVersion);
       }
 
 
@@ -1373,97 +1373,97 @@ public class ServerState implements Serializable
       }
 
     
-    public void addPostDeleteKey (String old_client_session_id,
-                                  String old_server_session_id,
-                                  X509Certificate old_key,
-                                  PublicKey key_management_key) throws IOException
+    public void addPostDeleteKey (String oldClientSessionId,
+                                  String oldServerSessionId,
+                                  X509Certificate oldKey,
+                                  PublicKey keyManagementKey) throws IOException
       {
-        addPostOperation (old_client_session_id, 
-                          old_server_session_id,
-                          old_key, 
+        addPostOperation (oldClientSessionId, 
+                          oldServerSessionId,
+                          oldKey, 
                           PostOperation.DELETE_KEY,
-                          key_management_key);
+                          keyManagementKey);
       }
 
   
-    public void addPostUnlockKey (String old_client_session_id,
-                                  String old_server_session_id,
-                                  X509Certificate old_key,
-                                  PublicKey key_management_key) throws IOException
+    public void addPostUnlockKey (String oldClientSessionId,
+                                  String oldServerSessionId,
+                                  X509Certificate oldKey,
+                                  PublicKey keyManagementKey) throws IOException
       {
-        addPostOperation (old_client_session_id, 
-        old_server_session_id,
-        old_key, 
+        addPostOperation (oldClientSessionId, 
+        oldServerSessionId,
+        oldKey, 
         PostOperation.UNLOCK_KEY,
-        key_management_key);
+        keyManagementKey);
       }
 
     
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
     
-    public PINPolicy createPINPolicy (PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException
+    public PINPolicy createPINPolicy (PassphraseFormat format, int minLength, int maxLength, int retryLimit, PUKPolicy pukPolicy) throws IOException
       {
-        PINPolicy pin_policy = new PINPolicy ();
-        pin_policy.format = format;
-        pin_policy.min_length = min_length;
-        pin_policy.max_length = max_length;
-        pin_policy.retry_limit = retry_limit;
-        pin_policy.puk_policy = puk_policy;
+        PINPolicy pinPolicy = new PINPolicy ();
+        pinPolicy.format = format;
+        pinPolicy.minLength = minLength;
+        pinPolicy.maxLength = maxLength;
+        pinPolicy.retryLimit = retryLimit;
+        pinPolicy.pukPolicy = pukPolicy;
         if (format == null)
           {
             bad ("PassphraseFormat must not be null");
           }
-        if (min_length > max_length)
+        if (minLength > maxLength)
           {
-            bad ("min_length > max_length");
+            bad ("minLength > maxLength");
           }
-        return pin_policy;
+        return pinPolicy;
       }
 
 
-    public PUKPolicy createPUKPolicy (byte[] puk, PassphraseFormat format, int retry_limit) throws IOException
+    public PUKPolicy createPUKPolicy (byte[] puk, PassphraseFormat format, int retryLimit) throws IOException
       {
-        return new PUKPolicy (encrypt (puk), format, retry_limit);
+        return new PUKPolicy (encrypt (puk), format, retryLimit);
       }
 
 
-    private Key addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
+    private Key addKeyProperties (AppUsage appUsage, KeySpecifier keySpecifier, PINPolicy pinPolicy, byte[] presetPin, boolean devicePinProtection) throws IOException
       {
-        Key key = new Key (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
+        Key key = new Key (appUsage, keySpecifier, pinPolicy, presetPin, devicePinProtection);
         requested_keys.put (key.getID (), key);
         return key;
       }
 
 
-    public Key createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] pin) throws IOException
+    public Key createKeyWithPresetPIN (AppUsage appUsage, KeySpecifier keySpecifier, PINPolicy pinPolicy, byte[] pin) throws IOException
       {
-        if (pin_policy == null)
+        if (pinPolicy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        pin_policy.user_defined = false;
-        return addKeyProperties (app_usage, key_specifier, pin_policy, encrypt (pin), false);
+        pinPolicy.userDefined = false;
+        return addKeyProperties (appUsage, keySpecifier, pinPolicy, encrypt (pin), false);
       }
 
 
-    public Key createKey (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy) throws IOException
+    public Key createKey (AppUsage appUsage, KeySpecifier keySpecifier, PINPolicy pinPolicy) throws IOException
       {
-        return addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
+        return addKeyProperties (appUsage, keySpecifier, pinPolicy, null, false);
       }
 
 
-    public Key createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
+    public Key createDevicePINProtectedKey (AppUsage appUsage, KeySpecifier keySpecifier) throws IOException
       {
-        return addKeyProperties (app_usage, key_specifier, null, null, true);
+        return addKeyProperties (appUsage, keySpecifier, null, null, true);
       }
 
 
@@ -1482,6 +1482,6 @@ public class ServerState implements Serializable
 
     public ECPublicKey generateEphemeralKey () throws IOException
       {
-        return server_crypto_interface.generateEphemeralKey (ephemeral_key_algorithm);
+        return serverCryptoInterface.generateEphemeralKey (ephemeral_key_algorithm);
       }
   }

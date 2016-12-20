@@ -20,8 +20,8 @@ package org.webpki.util;
 import java.io.IOException;
 
 public class DebugFormatter {
-    private DebugFormatter() {
-    }
+
+    private DebugFormatter() {}
 
     private StringBuffer res = new StringBuffer(1000);
 
@@ -52,16 +52,16 @@ public class DebugFormatter {
         twohex(i % 256);
     }
 
-    private String toHexDebugData(byte indata[], int bytes_per_line) {
+    private String toHexDebugData(byte indata[], int bytesPerLine) {
         int index = 0;
         int i = 0;
         if (indata.length == 0) {
             return "No data";
         }
-        boolean only_data = false;
-        if (bytes_per_line < 0) {
-            bytes_per_line = -bytes_per_line;
-            only_data = true;
+        boolean onlyData = false;
+        if (bytesPerLine < 0) {
+            bytesPerLine = -bytesPerLine;
+            onlyData = true;
         }
         while (index < indata.length) {
             if (index > 0) {
@@ -70,18 +70,18 @@ public class DebugFormatter {
             addrhex(index);
             put(':');
             int q = indata.length - index;
-            if (q > bytes_per_line) {
-                q = bytes_per_line;
+            if (q > bytesPerLine) {
+                q = bytesPerLine;
             }
             for (i = 0; i < q; i++) {
                 put(' ');
                 twohex(indata[index + i]);
             }
-            if (only_data) {
+            if (onlyData) {
                 index += q;
                 continue;
             }
-            while (i++ <= bytes_per_line) {
+            while (i++ <= bytesPerLine) {
                 put(' ');
                 put(' ');
                 put(' ');
@@ -96,7 +96,7 @@ public class DebugFormatter {
                 }
             }
             put('\'');
-            while (i++ < bytes_per_line) {
+            while (i++ < bytesPerLine) {
                 put(' ');
             }
         }
@@ -111,8 +111,8 @@ public class DebugFormatter {
         return res.toString();
     }
 
-    public static String getHexDebugData(byte indata[], int bytes_per_line) {
-        return new DebugFormatter().toHexDebugData(indata, bytes_per_line);
+    public static String getHexDebugData(byte indata[], int bytesPerLine) {
+        return new DebugFormatter().toHexDebugData(indata, bytesPerLine);
     }
 
     public static String getHexDebugData(byte indata[]) {

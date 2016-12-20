@@ -27,16 +27,14 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.util.URLDereferencer;
 
-
 public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAIssuersSpi, Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Hashtable<String, X509Certificate[]> cache = new Hashtable<String, X509Certificate[]>();
 
-
-    public X509Certificate[] getUpdatedPath(X509Certificate[] input_path) throws IOException {
-        String[] aia_caissuers = CertificateUtil.getAIACAIssuers(input_path[input_path.length - 1]);
+    public X509Certificate[] getUpdatedPath(X509Certificate[] inputPath) throws IOException {
+        String[] aia_caissuers = CertificateUtil.getAIACAIssuers(inputPath[inputPath.length - 1]);
         if (aia_caissuers != null) {
             for (String uri : aia_caissuers) {
                 X509Certificate[] ca_path = cache.get(uri);
@@ -55,7 +53,7 @@ public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAI
                                 throw new IOException("Unknown CA data object");
                             }
                             temp_path = getUpdatedPath(temp_path);
-                            input_path[input_path.length - 1].verify(temp_path[0].getPublicKey());
+                            inputPath[inputPath.length - 1].verify(temp_path[0].getPublicKey());
                             cache.put(uri, ca_path = temp_path);
                         }
                     } catch (IOException ioe) {
@@ -65,9 +63,9 @@ public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAI
                     }
                 }
                 if (ca_path != null) {
-                    X509Certificate[] cert_path = new X509Certificate[ca_path.length + input_path.length];
+                    X509Certificate[] cert_path = new X509Certificate[ca_path.length + inputPath.length];
                     int q = 0;
-                    for (X509Certificate tcert : input_path) {
+                    for (X509Certificate tcert : inputPath) {
                         cert_path[q++] = tcert;
                     }
                     for (X509Certificate tcert : ca_path) {
@@ -77,17 +75,17 @@ public class AuthorityInfoAccessCAIssuersCache implements AuthorityInfoAccessCAI
                 }
             }
         }
-        return input_path;
+        return inputPath;
     }
 
 
-    public void preInitialize(X509Certificate[] ca_path, String uri) {
-        cache.put(uri, ca_path);
+    public void preInitialize(X509Certificate[] caCertificatePath, String uri) {
+        cache.put(uri, caCertificatePath);
     }
 
 
-    public void preInitialize(X509Certificate ca_cert, String uri) {
-        preInitialize(new X509Certificate[]{ca_cert}, uri);
+    public void preInitialize(X509Certificate caCertificate, String uri) {
+        preInitialize(new X509Certificate[]{caCertificate}, uri);
     }
 
 }

@@ -53,31 +53,31 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryRequest
   {
-    ServerCryptoInterface server_crypto_interface;
+    ServerCryptoInterface serverCryptoInterface;
 
     public class LookupDescriptor extends XMLObjectWrapper implements XMLEnvelopedInput, AsymKeySignerInterface
       {
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
 
         String id;
         
-        boolean search_filter;
+        boolean searchFilter;
 
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial_number;
+        BigInteger serialNumber;
         String email_reg_ex;
         String[] policy_rules;
-        Date issued_before;
-        Date issued_after;
+        Date issuedBefore;
+        Date issuedAfter;
         
         Document root;
         
 
-        LookupDescriptor (PublicKey key_management_key)
+        LookupDescriptor (PublicKey keyManagementKey)
           {
-            this.key_management_key = key_management_key;
-            this.id = lookup_prefix + ++next_lookup_id_suffix;
+            this.keyManagementKey = keyManagementKey;
+            this.id = lookupPrefix + ++nextLookupIdSuffix;
           }
         
         private void nullCheck (Object object) throws IOException
@@ -91,7 +91,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         public LookupDescriptor setSubjectRegEx (String subject_reg_ex) throws IOException
           {
             nullCheck (subject_reg_ex);
-            search_filter = true;
+            searchFilter = true;
             this.subject_reg_ex = subject_reg_ex;
             return this;
           }
@@ -105,7 +105,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
           {
             nullCheck (issuer_reg_ex);
-            search_filter = true;
+            searchFilter = true;
             this.issuer_reg_ex = issuer_reg_ex;
             return this;
           }
@@ -116,18 +116,18 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             return setIssuerRegEx (new CertificateFilter ().setIssuer (issuer).getIssuerRegEx ());
           }
   
-        public LookupDescriptor setSerialNumber (BigInteger serial_number) throws IOException
+        public LookupDescriptor setSerialNumber (BigInteger serialNumber) throws IOException
           {
-            nullCheck (serial_number);
-            search_filter = true;
-            this.serial_number = serial_number;
+            nullCheck (serialNumber);
+            searchFilter = true;
+            this.serialNumber = serialNumber;
             return this;
           }
   
         public LookupDescriptor setEmailRegEx (String email_reg_ex) throws IOException
           {
             nullCheck (email_reg_ex);
-            search_filter = true;
+            searchFilter = true;
             this.email_reg_ex = email_reg_ex;
             return this;
           }
@@ -141,24 +141,24 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         public LookupDescriptor setPolicyRules (String[] policy_rules) throws IOException
           {
             nullCheck (policy_rules);
-            search_filter = true;
+            searchFilter = true;
             this.policy_rules = new CertificateFilter ().setPolicyRules (policy_rules).getPolicyRules ();
             return this;
           }
   
-        public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
+        public LookupDescriptor setIssuedBefore (Date issuedBefore) throws IOException
           {
-            nullCheck (issued_before);
-            search_filter = true;
-            this.issued_before = issued_before;
+            nullCheck (issuedBefore);
+            searchFilter = true;
+            this.issuedBefore = issuedBefore;
             return this;
           }
   
-        public LookupDescriptor setIssuedAfter (Date issued_after) throws IOException
+        public LookupDescriptor setIssuedAfter (Date issuedAfter) throws IOException
           {
-            nullCheck (issued_after);
-            search_filter = true;
-            this.issued_after = issued_after;
+            nullCheck (issuedAfter);
+            searchFilter = true;
+            this.issuedAfter = issuedAfter;
             return this;
           }
 
@@ -200,7 +200,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             wr.setBinaryAttribute (NONCE_ATTR, nonce);
             
             wr.setStringAttribute (ID_ATTR, id);
-            if (search_filter)
+            if (searchFilter)
               {
                 wr.addChildElement (SEARCH_FILTER_ELEM);
                 if (subject_reg_ex != null)
@@ -211,9 +211,9 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
                   {
                     wr.setStringAttribute (CertificateFilter.CF_ISSUER_REG_EX, issuer_reg_ex);
                   }
-                if (serial_number != null)
+                if (serialNumber != null)
                   {
-                    wr.setBigIntegerAttribute (CertificateFilter.CF_SERIAL_NUMBER, serial_number);
+                    wr.setBigIntegerAttribute (CertificateFilter.CF_SERIAL_NUMBER, serialNumber);
                   }
                 if (email_reg_ex != null)
                   {
@@ -223,13 +223,13 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
                   {
                     wr.setListAttribute (CertificateFilter.CF_POLICY_RULES, policy_rules);
                   }
-                if (issued_before != null)
+                if (issuedBefore != null)
                   {
-                    wr.setDateTimeAttribute (ISSUED_BEFORE_ATTR, issued_before);
+                    wr.setDateTimeAttribute (ISSUED_BEFORE_ATTR, issuedBefore);
                   }
-                if (issued_after != null)
+                if (issuedAfter != null)
                   {
-                    wr.setDateTimeAttribute (ISSUED_AFTER_ATTR, issued_after);
+                    wr.setDateTimeAttribute (ISSUED_AFTER_ATTR, issuedAfter);
                   }
                 wr.getParent ();
               }
@@ -268,13 +268,13 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         @Override
         public PublicKey getPublicKey () throws IOException
           {
-            return key_management_key;
+            return keyManagementKey;
           }
 
         @Override
         public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
           {
-            return server_crypto_interface.generateKeyManagementAuthorization (key_management_key, data);
+            return serverCryptoInterface.generateKeyManagementAuthorization (keyManagementKey, data);
           }
       }
 
@@ -283,23 +283,23 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
     
     Vector<LookupDescriptor> lookup_descriptors = new Vector<LookupDescriptor> ();
 
-    String lookup_prefix = "Lookup.";
+    String lookupPrefix = "Lookup.";
     
     byte[] nonce;
     
-    int next_lookup_id_suffix = 0;
+    int nextLookupIdSuffix = 0;
     
     boolean ecc_keys;
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder (ServerState server_state, String submit_url) throws IOException
+    public CredentialDiscoveryRequestEncoder (ServerState serverState, String submitUrl) throws IOException
       {
-        server_state.checkState (true, ProtocolPhase.CREDENTIAL_DISCOVERY);
-        client_session_id = server_state.client_session_id;
-        server_session_id = server_state.server_session_id;
-        server_crypto_interface = server_state.server_crypto_interface;
-        super.submit_url = submit_url;
+        serverState.checkState (true, ProtocolPhase.CREDENTIAL_DISCOVERY);
+        clientSessionId = serverState.clientSessionId;
+        serverSessionId = serverState.serverSessionId;
+        serverCryptoInterface = serverState.serverCryptoInterface;
+        super.submitUrl = submitUrl;
       }
 
 
@@ -314,15 +314,15 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
+        ds.createEnvelopedSignature (doc, serverSessionId);
       }
 
     
-    public LookupDescriptor addLookupDescriptor (PublicKey key_management_key)
+    public LookupDescriptor addLookupDescriptor (PublicKey keyManagementKey)
       {
-        LookupDescriptor lo_des = new LookupDescriptor (key_management_key);
+        LookupDescriptor lo_des = new LookupDescriptor (keyManagementKey);
         lookup_descriptors.add (lo_des);
-        if (key_management_key instanceof ECPublicKey)
+        if (keyManagementKey instanceof ECPublicKey)
           {
             ecc_keys = true;
           }
@@ -337,11 +337,11 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setStringAttribute (ID_ATTR, serverSessionId);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, clientSessionId);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute (SUBMIT_URL_ATTR, submitUrl);
         
         XMLSignatureWrapper.addXMLSignatureNS (wr);
         
@@ -358,13 +358,13 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             throw new IOException ("There must be at least one descriptor defined");
           }
         MacGenerator concat = new MacGenerator ();
-        concat.addString (client_session_id);
-        concat.addString (server_session_id);
+        concat.addString (clientSessionId);
+        concat.addString (serverSessionId);
         nonce = HashAlgorithms.SHA256.digest (concat.getResult ());
         for (LookupDescriptor im_des : lookup_descriptors)
           {
             XMLAsymKeySigner ds = new XMLAsymKeySigner (im_des);
-            ds.setSignatureAlgorithm (im_des.key_management_key instanceof ECPublicKey ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
+            ds.setSignatureAlgorithm (im_des.keyManagementKey instanceof ECPublicKey ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
             ds.removeXMLSignatureNS ();
             ds.createEnvelopedSignature (im_des);
             im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);

@@ -29,11 +29,11 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 abstract class CredentialDiscoveryRequest extends XMLObjectWrapper 
   {
-    String submit_url;
+    String submitUrl;
     
-    String server_session_id;
+    String serverSessionId;
     
-    String client_session_id;
+    String clientSessionId;
     
     CredentialDiscoveryRequest () {}
 

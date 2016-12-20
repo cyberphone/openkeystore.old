@@ -68,7 +68,7 @@ public class DocumentReferences {
     public class Reference {
         // Always applicable attributes
         String content_id;
-        String mime_type;
+        String mimeType;
         String meta_data;  // Optional
 
         // Attachment additions. Not 100% OO, but what the heck!
@@ -109,7 +109,7 @@ public class DocumentReferences {
     private void writeReference(String element, Reference ref, DOMWriterHelper wr) throws IOException {
         wr.addChildElement(element);
         wr.setStringAttribute(CONTENT_ID_ATTR, ref.content_id);
-        wr.setStringAttribute(MIME_TYPE_ATTR, ref.mime_type);
+        wr.setStringAttribute(MIME_TYPE_ATTR, ref.mimeType);
         if (ref.meta_data != null) {
             wr.setStringAttribute(META_DATA_ATTR, ref.meta_data);
         }
@@ -157,16 +157,16 @@ public class DocumentReferences {
     }
 
 
-    Reference addReference(String content_id, String mime_type, String meta_data) {
-        return addReference(content_id, mime_type, meta_data, false, null, null, false);
+    Reference addReference(String content_id, String mimeType, String meta_data) {
+        return addReference(content_id, mimeType, meta_data, false, null, null, false);
     }
 
 
-    private Reference addReference(String content_id, String mime_type, String meta_data,
+    private Reference addReference(String content_id, String mimeType, String meta_data,
                                    boolean provider_originated, String description, String file, boolean must_access) {
         Reference ref = new Reference();
         ref.content_id = content_id;
-        ref.mime_type = mime_type;
+        ref.mimeType = mimeType;
         ref.meta_data = meta_data;
         ref.provider_originated = provider_originated;
         ref.description = description;
@@ -177,16 +177,16 @@ public class DocumentReferences {
     }
 
 
-    Reference addAttachmentReference(String content_id, String mime_type, String meta_data,
+    Reference addAttachmentReference(String content_id, String mimeType, String meta_data,
                                      boolean provider_originated, String description, String file, boolean must_access) {
-        Reference ref = addReference(content_id, mime_type, meta_data, provider_originated, description, file, must_access);
+        Reference ref = addReference(content_id, mimeType, meta_data, provider_originated, description, file, must_access);
         attachments.add(ref);
         return ref;
     }
 
 
-    Reference addEmbeddedObjectReference(String content_id, String mime_type, String meta_data) {
-        Reference ref = addReference(content_id, mime_type, meta_data);
+    Reference addEmbeddedObjectReference(String content_id, String mimeType, String meta_data) {
+        Reference ref = addReference(content_id, mimeType, meta_data);
         embedded_objects.add(ref);
         return ref;
     }
@@ -206,16 +206,16 @@ public class DocumentReferences {
         rd.getNext();
         DOMAttributeReaderHelper ah = rd.getAttributeHelper();
         String content_id = ah.getString(CONTENT_ID_ATTR);
-        String mime_type = ah.getString(MIME_TYPE_ATTR);
+        String mimeType = ah.getString(MIME_TYPE_ATTR);
         String meta_data = ah.getStringConditional(META_DATA_ATTR);
         if (attachment) {
             boolean provider_originated = ah.getBooleanConditional(PROVIDER_ORIGINATED_ATTR);
             String description = ah.getString(DESCRIPTION_ATTR);
             String file = ah.getString(FILE_ATTR);
             boolean must_access = ah.getBooleanConditional(MUSTACCESS_ATTR);
-            return addReference(content_id, mime_type, meta_data, provider_originated, description, file, must_access);
+            return addReference(content_id, mimeType, meta_data, provider_originated, description, file, must_access);
         }
-        return addReference(content_id, mime_type, meta_data, false, null, null, false);
+        return addReference(content_id, mimeType, meta_data, false, null, null, false);
     }
 
 
@@ -267,7 +267,7 @@ public class DocumentReferences {
         }
         return arg2 != null &&
                 compare(arg1.content_id, arg2.content_id) &&
-                compare(arg1.mime_type, arg2.mime_type) &&
+                compare(arg1.mimeType, arg2.mimeType) &&
                 compare(arg1.meta_data, arg2.meta_data) &&
                 arg1.provider_originated == arg2.provider_originated &&
                 compare(arg1.description, arg2.description) &&

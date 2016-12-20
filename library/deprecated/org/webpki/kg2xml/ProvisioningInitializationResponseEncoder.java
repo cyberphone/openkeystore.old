@@ -47,18 +47,18 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
      // Constructors
 
     public ProvisioningInitializationResponseEncoder (ECPublicKey client_ephemeral_key,
-                                                      String server_session_id,
-                                                      String client_session_id,
-                                                      Date server_time,
-                                                      Date client_time,
+                                                      String serverSessionId,
+                                                      String clientSessionId,
+                                                      Date serverTime,
+                                                      Date clientTime,
                                                       byte[] attestation,
                                                       X509Certificate[] device_certificate_path)  throws IOException
       {
         super.client_ephemeral_key = client_ephemeral_key;
-        super.server_session_id = server_session_id;
-        super.client_session_id = client_session_id;
-        super.server_time = server_time;
-        super.client_time = client_time;
+        super.serverSessionId = serverSessionId;
+        super.clientSessionId = clientSessionId;
+        super.serverTime = serverTime;
+        super.clientTime = clientTime;
         super.attestation = attestation;
         super.device_certificate_path = device_certificate_path;
       }
@@ -96,7 +96,7 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         ds.SetKeyName ("derived-session-key");
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, client_session_id);
+        ds.createEnvelopedSignature (doc, clientSessionId);
       }
 
 
@@ -110,13 +110,13 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, client_session_id);
+        wr.setStringAttribute (ID_ATTR, clientSessionId);
 
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, serverSessionId);
 
-        wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
+        wr.setDateTimeAttribute (SERVER_TIME_ATTR, serverTime);
 
-        wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
+        wr.setDateTimeAttribute (CLIENT_TIME_ATTR, clientTime);
         
         wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, attestation);
         

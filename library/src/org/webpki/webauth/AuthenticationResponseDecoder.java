@@ -17,13 +17,16 @@
 package org.webpki.webauth;
 
 import java.io.IOException;
+
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+
 import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.VerifierInterface;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
@@ -32,34 +35,35 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 
 public class AuthenticationResponseDecoder extends InputValidator {
+
     private static final long serialVersionUID = 1L;
 
-    GregorianCalendar server_time;
+    GregorianCalendar serverTime;
 
-    private GregorianCalendar client_time;
+    private GregorianCalendar clientTime;
 
     private JSONSignatureDecoder signature;
 
-    byte[] server_certificate_fingerprint;
+    byte[] serverCertificateFingerprint;
 
-    String request_url;
+    String requestUrl;
 
     String id;
 
-    X509Certificate[] certificate_path;
+    X509Certificate[] certificatePath;
 
-    AsymSignatureAlgorithms signature_algorithm;
+    AsymSignatureAlgorithms signatureAlgorithm;
 
-    LinkedHashMap<String, LinkedHashSet<String>> client_platform_features = new LinkedHashMap<String, LinkedHashSet<String>>();
+    LinkedHashMap<String, LinkedHashSet<String>> clientPlatformFeatures = new LinkedHashMap<String, LinkedHashSet<String>>();
 
 
     public String getRequestURL() {
-        return request_url;
+        return requestUrl;
     }
 
 
     public GregorianCalendar getClientTime() {
-        return client_time;
+        return clientTime;
     }
 
 
@@ -69,7 +73,7 @@ public class AuthenticationResponseDecoder extends InputValidator {
 
 
     public LinkedHashMap<String, LinkedHashSet<String>> getClientPlatformFeatures() {
-        return client_platform_features;
+        return clientPlatformFeatures;
     }
 
 
@@ -88,24 +92,24 @@ public class AuthenticationResponseDecoder extends InputValidator {
         //////////////////////////////////////////////////////////////////////////
         id = rd.getString(ID_JSON);
 
-        server_time = rd.getDateTime(SERVER_TIME_JSON);
+        serverTime = rd.getDateTime(SERVER_TIME_JSON);
 
-        client_time = rd.getDateTime(CLIENT_TIME_JSON);
+        clientTime = rd.getDateTime(CLIENT_TIME_JSON);
 
-        request_url = rd.getString(REQUEST_URL_JSON);
+        requestUrl = rd.getString(REQUEST_URL_JSON);
 
-        server_certificate_fingerprint = rd.getBinaryConditional(SERVER_CERT_FP_JSON);
+        serverCertificateFingerprint = rd.getBinaryConditional(SERVER_CERT_FP_JSON);
 
         //////////////////////////////////////////////////////////////////////////
         // Get the optional client platform features
         //////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader feature : InputValidator.getObjectArrayConditional(rd, CLIENT_FEATURES_JSON)) {
             String type = InputValidator.getURI(feature, TYPE_JSON);
-            LinkedHashSet<String> set = client_platform_features.get(type);
+            LinkedHashSet<String> set = clientPlatformFeatures.get(type);
             if (set != null) {
                 bad("Duplicated \"" + TYPE_JSON + "\" : " + type);
             }
-            client_platform_features.put(type, set = new LinkedHashSet<String>());
+            clientPlatformFeatures.put(type, set = new LinkedHashSet<String>());
             for (String value : InputValidator.getNonEmptyList(feature, VALUES_JSON)) {
                 set.add(value);
             }
@@ -115,8 +119,8 @@ public class AuthenticationResponseDecoder extends InputValidator {
         // Finally, get the signature!
         //////////////////////////////////////////////////////////////////////////
         signature = rd.getSignature();
-        certificate_path = signature.getCertificatePath();
-        signature_algorithm = (AsymSignatureAlgorithms) signature.getAlgorithm();
+        certificatePath = signature.getCertificatePath();
+        signatureAlgorithm = (AsymSignatureAlgorithms) signature.getAlgorithm();
     }
 
     @Override

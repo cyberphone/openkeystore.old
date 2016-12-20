@@ -37,12 +37,12 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     AsymKeySignerInterface signer;
 
-    PublicKey public_key;
+    PublicKey publicKey;
 
     public JSONAsymKeySigner(AsymKeySignerInterface signer) throws IOException {
         this.signer = signer;
-        public_key = signer.getPublicKey();
-        algorithm = KeyAlgorithms.getKeyAlgorithm(public_key).getRecommendedSignatureAlgorithm();
+        publicKey = signer.getPublicKey();
+        algorithm = KeyAlgorithms.getKeyAlgorithm(publicKey).getRecommendedSignatureAlgorithm();
     }
 
     public JSONAsymKeySigner setSignatureAlgorithm(AsymSignatureAlgorithms algorithm) {
@@ -67,6 +67,6 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
-        wr.setPublicKey(public_key, algorithmPreferences);
+        wr.setPublicKey(publicKey, algorithmPreferences);
     }
 }

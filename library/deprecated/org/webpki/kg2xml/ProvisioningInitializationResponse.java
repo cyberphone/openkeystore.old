@@ -38,13 +38,13 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
   {
     ProvisioningInitializationResponse () {}
 
-    String server_session_id;
+    String serverSessionId;
     
-    String client_session_id;
+    String clientSessionId;
 
-    Date server_time;
+    Date serverTime;
     
-    Date client_time;
+    Date clientTime;
     
     ECPublicKey client_ephemeral_key;
     

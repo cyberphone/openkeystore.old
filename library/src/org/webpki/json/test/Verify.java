@@ -67,9 +67,9 @@ public class Verify {
                                 try {
                                     KeyStore ks = ((AsymSignatureAlgorithms) signature.getAlgorithm()).isRSA() ?
                                             DemoKeyStore.getMybankDotComKeyStore() : DemoKeyStore.getECDSAStore();
-                                    PublicKey public_key = ks.getCertificate("mykey").getPublicKey();
-                                    signature.verify(new JSONAsymKeyVerifier(public_key));
-                                    debugOutput("Asymmetric key signature validated for: " + public_key.toString());
+                                    PublicKey publicKey = ks.getCertificate("mykey").getPublicKey();
+                                    signature.verify(new JSONAsymKeyVerifier(publicKey));
+                                    debugOutput("Asymmetric key signature validated for: " + publicKey.toString());
                                 } catch (GeneralSecurityException e) {
                                     throw new IOException(e);
                                 }

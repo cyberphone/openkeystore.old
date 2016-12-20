@@ -33,38 +33,38 @@ import java.security.GeneralSecurityException;
  */
 public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
 
-    private PrivateKey private_key;
+    private PrivateKey privateKey;
 
-    private KeyStore signer_cert_keystore;
+    private KeyStore signerCertKeystore;
 
-    private AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler;
+    private AuthorityInfoAccessCAIssuersSpi aiaCaissuerHandler;
 
-    private String key_alias;
+    private String keyAlias;
 
-    private boolean extended_certpath;
+    private boolean extendedCertpath;
 
-    private boolean ecdsa_der_encoded;
+    private boolean ecdsaDerEncoded;
 
 
-    private KeyStoreSigner testKey(String key_alias) throws IOException, GeneralSecurityException {
-        if (!signer_cert_keystore.isKeyEntry(key_alias)) {
-            throw new IOException("Specified certficate does not have a private key: " + key_alias);
+    private KeyStoreSigner testKey(String keyAlias) throws IOException, GeneralSecurityException {
+        if (!signerCertKeystore.isKeyEntry(keyAlias)) {
+            throw new IOException("Specified certficate does not have a private key: " + keyAlias);
         }
         return this;
     }
 
 
-    private X509Certificate[] getCertPath(String key_alias, boolean path_expansion) throws IOException, GeneralSecurityException {
-        testKey(key_alias);
-        Certificate[] cp = signer_cert_keystore.getCertificateChain(key_alias);
-        X509Certificate[] certificate_path = new X509Certificate[cp.length];
+    private X509Certificate[] getCertPath(String keyAlias, boolean pathExpansion) throws IOException, GeneralSecurityException {
+        testKey(keyAlias);
+        Certificate[] cp = signerCertKeystore.getCertificateChain(keyAlias);
+        X509Certificate[] certificatePath = new X509Certificate[cp.length];
         for (int q = 0; q < cp.length; q++) {
-            certificate_path[q] = (X509Certificate) cp[q];
+            certificatePath[q] = (X509Certificate) cp[q];
         }
-        if (path_expansion && aia_caissuer_handler != null) {
-            return aia_caissuer_handler.getUpdatedPath(certificate_path);
+        if (pathExpansion && aiaCaissuerHandler != null) {
+            return aiaCaissuerHandler.getUpdatedPath(certificatePath);
         }
-        return certificate_path;
+        return certificatePath;
     }
 
 
@@ -78,10 +78,10 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
         }
         CertificateSelection cs = new CertificateSelection(this);
         try {
-            Enumeration<String> aliases = signer_cert_keystore.aliases();
+            Enumeration<String> aliases = signerCertKeystore.aliases();
             while (aliases.hasMoreElements()) {
                 String new_key = aliases.nextElement();
-                if (signer_cert_keystore.isKeyEntry(new_key)) {
+                if (signerCertKeystore.isKeyEntry(new_key)) {
                     X509Certificate[] curr_path = getCertPath(new_key, path_expansion);
                     if (cfs.length == 0) {
                         cs.addEntry(new_key, curr_path[0]);
@@ -105,22 +105,22 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
     @Override
     public X509Certificate[] getCertificatePath() throws IOException {
         try {
-            X509Certificate[] path = getCertPath(key_alias, true);
-            return extended_certpath ? path : new X509Certificate[]{path[0]};
+            X509Certificate[] path = getCertPath(keyAlias, true);
+            return extendedCertpath ? path : new X509Certificate[]{path[0]};
         } catch (GeneralSecurityException e) {
             throw new IOException(e.getMessage());
         }
     }
 
 
-    public KeyStoreSigner setECDSASignatureEncoding(boolean der_encoded) {
-        ecdsa_der_encoded = der_encoded;
+    public KeyStoreSigner setECDSASignatureEncoding(boolean derEncoded) {
+        ecdsaDerEncoded = derEncoded;
         return this;
     }
 
 
-    public KeyStoreSigner setAuthorityInfoAccessCAIssuersHandler(AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler) {
-        this.aia_caissuer_handler = aia_caissuer_handler;
+    public KeyStoreSigner setAuthorityInfoAccessCAIssuersHandler(AuthorityInfoAccessCAIssuersSpi aiaCaissuerHandler) {
+        this.aiaCaissuerHandler = aiaCaissuerHandler;
         return this;
     }
 
@@ -128,44 +128,44 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
     @Override
     public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
         try {
-            return new SignatureWrapper(algorithm,
-                    private_key).setECDSASignatureEncoding(ecdsa_der_encoded)
-                    .update(data)
-                    .sign();
+            return new SignatureWrapper(algorithm, privateKey)
+                .setECDSASignatureEncoding(ecdsaDerEncoded)
+                .update(data)
+                .sign();
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
         }
     }
 
 
-    public KeyStoreSigner(KeyStore signer_cert_keystore, KeyContainerTypes container_type) {
-        this.signer_cert_keystore = signer_cert_keystore;
+    public KeyStoreSigner(KeyStore signerCertKeystore, KeyContainerTypes containerType) {
+        this.signerCertKeystore = signerCertKeystore;
     }
 
 
-    public KeyStoreSigner setKey(String in_key_alias, String password) throws IOException {
-        key_alias = in_key_alias;
+    public KeyStoreSigner setKey(String inKeyAlias, String password) throws IOException {
+        keyAlias = inKeyAlias;
         try {
-            if (key_alias == null) {
+            if (keyAlias == null) {
                 // Search for signer certificate/key:
-                Enumeration<String> aliases = signer_cert_keystore.aliases();
+                Enumeration<String> aliases = signerCertKeystore.aliases();
 
                 while (aliases.hasMoreElements()) {
                     String new_key = aliases.nextElement();
-                    if (signer_cert_keystore.isKeyEntry(new_key)) {
-                        if (key_alias != null) {
+                    if (signerCertKeystore.isKeyEntry(new_key)) {
+                        if (keyAlias != null) {
                             throw new IOException("Missing certificate alias and multiple matches");
                         }
-                        key_alias = new_key;
+                        keyAlias = new_key;
                     }
                 }
-                if (key_alias == null) {
+                if (keyAlias == null) {
                     throw new IOException("No matching certificate");
                 }
             } else {
-                testKey(key_alias);
+                testKey(keyAlias);
             }
-            private_key = (PrivateKey) signer_cert_keystore.getKey(key_alias,
+            privateKey = (PrivateKey) signerCertKeystore.getKey(keyAlias,
                     password == null ? null : password.toCharArray());
             return this;
         } catch (GeneralSecurityException e) {
@@ -175,7 +175,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
 
 
     public KeyStoreSigner setExtendedCertPath(boolean flag) {
-        extended_certpath = flag;
+        extendedCertpath = flag;
         return this;
     }
 }

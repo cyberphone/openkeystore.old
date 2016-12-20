@@ -40,138 +40,138 @@ public class SignatureWrapper {
 
     static final int LEADING_ZERO  = 0x00;
 
-    boolean ecdsa_der_encoded;
+    boolean ecdsaDerEncoded;
 
-    private static int getExtendTo(ECParameterSpec ec_parameters) throws IOException {
-        return (KeyAlgorithms.getECKeyAlgorithm(ec_parameters).getPublicKeySizeInBits() + 7) / 8;
+    private static int getExtendTo(ECParameterSpec ecParameters) throws IOException {
+        return (KeyAlgorithms.getECKeyAlgorithm(ecParameters).getPublicKeySizeInBits() + 7) / 8;
     }
 
-    public static byte[] decodeDEREncodedECDSASignature(byte[] der_coded_signature,
-                                                        ECParameterSpec ec_parameters) throws IOException {
-        int extend_to = getExtendTo(ec_parameters);
+    public static byte[] decodeDEREncodedECDSASignature(byte[] derCodedSignature,
+                                                        ECParameterSpec ecParameters) throws IOException {
+        int extendTo = getExtendTo(ecParameters);
         int index = 2;
         int length;
-        byte[] concatendated_signature = new byte[extend_to << 1];
-        if (der_coded_signature[0] != ASN1_SEQUENCE) {
+        byte[] concatenatedSignature = new byte[extendTo << 1];
+        if (derCodedSignature[0] != ASN1_SEQUENCE) {
             throw new IOException("Not SEQUENCE");
         }
-        length = der_coded_signature[1];
+        length = derCodedSignature[1];
         if (length < 4) {
             if (length != -127) {
                 throw new IOException("ASN.1 Length error");
             }
-            length = der_coded_signature[index++] & 0xFF;
+            length = derCodedSignature[index++] & 0xFF;
         }
-        if (index != der_coded_signature.length - length) {
+        if (index != derCodedSignature.length - length) {
             throw new IOException("ASN.1 Length error");
         }
-        for (int offset = 0; offset <= extend_to; offset += extend_to) {
-            if (der_coded_signature[index++] != ASN1_INTEGER) {
+        for (int offset = 0; offset <= extendTo; offset += extendTo) {
+            if (derCodedSignature[index++] != ASN1_INTEGER) {
                 throw new IOException("Not INTEGER");
             }
-            int l = der_coded_signature[index++];
-            while (l > extend_to) {
-                if (der_coded_signature[index++] != LEADING_ZERO) {
+            int l = derCodedSignature[index++];
+            while (l > extendTo) {
+                if (derCodedSignature[index++] != LEADING_ZERO) {
                     throw new IOException("Bad INTEGER");
                 }
                 l--;
             }
-            System.arraycopy(der_coded_signature, index, concatendated_signature, offset + extend_to - l, l);
+            System.arraycopy(derCodedSignature, index, concatenatedSignature, offset + extendTo - l, l);
             index += l;
         }
-        if (index != der_coded_signature.length) {
+        if (index != derCodedSignature.length) {
             throw new IOException("ASN.1 Length error");
         }
-        return concatendated_signature;
+        return concatenatedSignature;
     }
 
-    public static byte[] encodeDEREncodedECDSASignature(byte[] concatendated_signature,
-                                                        ECParameterSpec ec_parameters) throws IOException {
-        int extend_to = getExtendTo(ec_parameters);
-        if (extend_to != concatendated_signature.length / 2) {
+    public static byte[] encodeDEREncodedECDSASignature(byte[] concatenatedSignature,
+                                                        ECParameterSpec ecParameters) throws IOException {
+        int extendTo = getExtendTo(ecParameters);
+        if (extendTo != concatenatedSignature.length / 2) {
             throw new IOException("Signature length error");
         }
 
-        int i = extend_to;
-        while (i > 0 && concatendated_signature[extend_to - i] == LEADING_ZERO) {
+        int i = extendTo;
+        while (i > 0 && concatenatedSignature[extendTo - i] == LEADING_ZERO) {
             i--;
         }
         int j = i;
-        if (concatendated_signature[extend_to - i] < 0) {
+        if (concatenatedSignature[extendTo - i] < 0) {
             j++;
         }
 
-        int k = extend_to;
-        while (k > 0 && concatendated_signature[2 * extend_to - k] == LEADING_ZERO) {
+        int k = extendTo;
+        while (k > 0 && concatenatedSignature[2 * extendTo - k] == LEADING_ZERO) {
             k--;
         }
         int l = k;
-        if (concatendated_signature[2 * extend_to - k] < 0) {
+        if (concatenatedSignature[2 * extendTo - k] < 0) {
             l++;
         }
 
         int len = 2 + j + 2 + l;
         int offset = 1;
-        byte der_coded_signature[];
+        byte derCodedSignature[];
         if (len < 128) {
-            der_coded_signature = new byte[len + 2];
+            derCodedSignature = new byte[len + 2];
         } else {
-            der_coded_signature = new byte[len + 3];
-            der_coded_signature[1] = (byte) 0x81;
+            derCodedSignature = new byte[len + 3];
+            derCodedSignature[1] = (byte) 0x81;
             offset = 2;
         }
-        der_coded_signature[0] = ASN1_SEQUENCE;
-        der_coded_signature[offset++] = (byte) len;
-        der_coded_signature[offset++] = ASN1_INTEGER;
-        der_coded_signature[offset++] = (byte) j;
-        System.arraycopy(concatendated_signature, extend_to - i, der_coded_signature, offset + j - i, i);
+        derCodedSignature[0] = ASN1_SEQUENCE;
+        derCodedSignature[offset++] = (byte) len;
+        derCodedSignature[offset++] = ASN1_INTEGER;
+        derCodedSignature[offset++] = (byte) j;
+        System.arraycopy(concatenatedSignature, extendTo - i, derCodedSignature, offset + j - i, i);
         offset += j;
-        der_coded_signature[offset++] = ASN1_INTEGER;
-        der_coded_signature[offset++] = (byte) l;
-        System.arraycopy(concatendated_signature, 2 * extend_to - k, der_coded_signature, offset + l - k, k);
-        return der_coded_signature;
+        derCodedSignature[offset++] = ASN1_INTEGER;
+        derCodedSignature[offset++] = (byte) l;
+        System.arraycopy(concatenatedSignature, 2 * extendTo - k, derCodedSignature, offset + l - k, k);
+        return derCodedSignature;
     }
 
     Signature instance;
-    boolean rsa_flag;
-    ECParameterSpec ec_parameters;
+    boolean rsaFlag;
+    ECParameterSpec ecParameters;
 
     private SignatureWrapper(AsymSignatureAlgorithms algorithm, String provider, Key key) throws GeneralSecurityException, IOException {
         instance = provider == null ? Signature.getInstance(algorithm.getJCEName())
                                                     : 
                                       Signature.getInstance(algorithm.getJCEName(), provider);
-        rsa_flag = key instanceof RSAKey;
-        if (!rsa_flag) {
-            ec_parameters = ((ECKey) key).getParams();
+        rsaFlag = key instanceof RSAKey;
+        if (!rsaFlag) {
+            ecParameters = ((ECKey) key).getParams();
         }
     }
 
     public SignatureWrapper(AsymSignatureAlgorithms algorithm, 
-                            PublicKey public_key,
+                            PublicKey publicKey,
                             String provider) throws GeneralSecurityException, IOException {
-        this(algorithm, provider, public_key);
-        instance.initVerify(public_key);
+        this(algorithm, provider, publicKey);
+        instance.initVerify(publicKey);
     }
 
     public SignatureWrapper(AsymSignatureAlgorithms algorithm,
-                            PublicKey public_key) throws GeneralSecurityException, IOException {
-        this(algorithm, public_key, null);
+                            PublicKey publicKey) throws GeneralSecurityException, IOException {
+        this(algorithm, publicKey, null);
     }
 
     public SignatureWrapper(AsymSignatureAlgorithms algorithm,
-                            PrivateKey private_key,
+                            PrivateKey privateKey,
                             String provider) throws GeneralSecurityException, IOException {
-        this(algorithm, provider, private_key);
-        instance.initSign(private_key);
+        this(algorithm, provider, privateKey);
+        instance.initSign(privateKey);
     }
 
     public SignatureWrapper(AsymSignatureAlgorithms algorithm,
-                            PrivateKey private_key) throws GeneralSecurityException, IOException {
-        this(algorithm, private_key, null);
+                            PrivateKey privateKey) throws GeneralSecurityException, IOException {
+        this(algorithm, privateKey, null);
     }
 
-    public SignatureWrapper setECDSASignatureEncoding(boolean der_encoded) {
-        ecdsa_der_encoded = der_encoded;
+    public SignatureWrapper setECDSASignatureEncoding(boolean derEncoded) {
+        ecdsaDerEncoded = derEncoded;
         return this;
     }
 
@@ -190,12 +190,12 @@ public class SignatureWrapper {
     }
 
     public boolean verify(byte[] signature) throws GeneralSecurityException, IOException {
-        return instance.verify(ecdsa_der_encoded || rsa_flag ?
-                signature : SignatureWrapper.encodeDEREncodedECDSASignature(signature, ec_parameters));
+        return instance.verify(ecdsaDerEncoded || rsaFlag ?
+                signature : SignatureWrapper.encodeDEREncodedECDSASignature(signature, ecParameters));
     }
 
     public byte[] sign() throws GeneralSecurityException, IOException {
-        return ecdsa_der_encoded || rsa_flag ?
-                instance.sign() : SignatureWrapper.decodeDEREncodedECDSASignature(instance.sign(), ec_parameters);
+        return ecdsaDerEncoded || rsaFlag ?
+                instance.sign() : SignatureWrapper.decodeDEREncodedECDSASignature(instance.sign(), ecParameters);
     }
 }

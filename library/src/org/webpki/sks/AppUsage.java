@@ -25,13 +25,13 @@ public enum AppUsage {
     ENCRYPTION     ("encryption",     SecureKeyStore.APP_USAGE_ENCRYPTION),
     UNIVERSAL      ("universal",      SecureKeyStore.APP_USAGE_UNIVERSAL);
 
-    private final String name;         // As expressed in protocols
+    private final String name;        // As expressed in protocols
 
-    private final byte sks_value;      // As expressed in SKS
+    private final byte sksValue;      // As expressed in SKS
 
-    private AppUsage(String name, byte sks_value) {
+    private AppUsage(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -41,7 +41,7 @@ public enum AppUsage {
 
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
 

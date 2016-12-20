@@ -184,9 +184,9 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput {
             o.value = "Some text";
             o.forcedDOMRewrite();
             if (args[0].equals("-rsa")) {
-                PrivateKey private_key = (PrivateKey) DemoKeyStore.getMarionKeyStore().getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
-                PublicKey public_key = DemoKeyStore.getMarionKeyStore().getCertificate("mykey").getPublicKey();
-                XMLAsymKeySigner xmls = new XMLAsymKeySigner(new rsaKey(private_key, public_key));
+                PrivateKey privateKey = (PrivateKey) DemoKeyStore.getMarionKeyStore().getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
+                PublicKey publicKey = DemoKeyStore.getMarionKeyStore().getCertificate("mykey").getPublicKey();
+                XMLAsymKeySigner xmls = new XMLAsymKeySigner(new rsaKey(privateKey, publicKey));
                 xmls.createEnvelopedSignature(o);
             } else if (args[0].equals("-x509")) {
                 KeyStoreSigner signer = new KeyStoreSigner(DemoKeyStore.getMarionKeyStore(), null);
@@ -225,7 +225,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput {
                 verifier.validateEnvelopedSignature(o);
             } else {
                 XMLSymKeyVerifier verifier = new XMLSymKeyVerifier(new SymKeyVerifierInterface() {
-                    public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException {
+                    public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String keyId) throws IOException {
                         if (algorithm != MACAlgorithms.HMAC_SHA256) {
                             throw new IOException("Bad sym ALG");
                         }

@@ -23,6 +23,6 @@ import java.security.cert.X509Certificate;
 
 public interface AuthorityInfoAccessCAIssuersSpi {
 
-    X509Certificate[] getUpdatedPath(X509Certificate[] input_path) throws IOException;
+    X509Certificate[] getUpdatedPath(X509Certificate[] inputPath) throws IOException;
 
 }

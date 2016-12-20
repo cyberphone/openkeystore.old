@@ -145,11 +145,11 @@ public class ProvSess {
                     }
                 } else {
                     PublicKey device_public_key = device_certificate.getPublicKey();
-                    AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                    AsymSignatureAlgorithms signatureAlgorithm = device_public_key instanceof RSAPublicKey ?
                             AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
 
                     // Verify that the session key signature was signed by the device key
-                    SignatureWrapper verifier = new SignatureWrapper(signature_algorithm, device_public_key);
+                    SignatureWrapper verifier = new SignatureWrapper(signatureAlgorithm, device_public_key);
                     verifier.update(attestation_arguments);
                     if (!verifier.verify(session_attestation)) {
                         throw new IOException("Verify provisioning signature failed");
@@ -189,11 +189,11 @@ public class ProvSess {
             return rnd;
         }
 
-        public byte[] generateKeyManagementAuthorization(PublicKey key_management_key, byte[] data) throws IOException {
+        public byte[] generateKeyManagementAuthorization(PublicKey keyManagementKey, byte[] data) throws IOException {
             try {
-                SignatureWrapper km_sign = new SignatureWrapper(key_management_key instanceof RSAPublicKey ?
+                SignatureWrapper km_sign = new SignatureWrapper(keyManagementKey instanceof RSAPublicKey ?
                         AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256,
-                        key_management_keys.get(key_management_key));
+                        key_management_keys.get(keyManagementKey));
                 km_sign.update(data);
                 return km_sign.sign();
             } catch (GeneralSecurityException e) {
@@ -218,15 +218,15 @@ public class ProvSess {
 
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
 
-    Date client_time;
+    Date clientTime;
 
     int provisioning_handle;
 
-    int session_life_time = 10000;
+    int sessionLifeTime = 10000;
 
-    String server_session_id;
+    String serverSessionId;
 
-    String client_session_id;
+    String clientSessionId;
 
     ECPublicKey server_ephemeral_key;
 
@@ -250,11 +250,11 @@ public class ProvSess {
 
     boolean user_modifiable_pins = false;
 
-    boolean device_pin_protected = false;
+    boolean devicePinProtected = false;
 
     boolean fail_mac;
 
-    InputMethod input_method = InputMethod.ANY;
+    InputMethod inputMethod = InputMethod.ANY;
 
     byte[] custom_key_parameters = null;
 
@@ -340,50 +340,50 @@ public class ProvSess {
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    ProvSess(Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled, String serv_sess) throws GeneralSecurityException, IOException {
+    ProvSess(Device device, short sessionKeyLimit, Integer kmk_id, boolean privacy_enabled, String serv_sess) throws GeneralSecurityException, IOException {
         this.device = device;
         this.kmk_id = kmk_id;
         this.privacy_enabled = privacy_enabled;
-        PublicKey key_management_key = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys()[kmk_id];
+        PublicKey keyManagementKey = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys()[kmk_id];
         sks = device.sks;
-        server_session_id = serv_sess == null ? "S-" + Long.toHexString(new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
+        serverSessionId = serv_sess == null ? "S-" + Long.toHexString(new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
         String sess_key_alg = override_session_key_algorithm == null ? session_key_algorithm : override_session_key_algorithm;
-        client_time = new Date();
+        clientTime = new Date();
         ProvisioningSession sess =
                 device.sks.createProvisioningSession(sess_key_alg,
                         privacy_enabled,
-                        server_session_id,
+                        serverSessionId,
                         server_ephemeral_key = server_sess_key.generateEphemeralKey
                                 (
                                         override_server_ephemeral_key_algorithm == null ? KeyAlgorithms.NIST_P_256 : override_server_ephemeral_key_algorithm
                                 ),
                         ISSUER_URI,
-                        key_management_key,
-                        (int) (client_time.getTime() / 1000),
-                        session_life_time,
-                        session_key_limit);
-        client_session_id = sess.getClientSessionId();
+                        keyManagementKey,
+                        (int) (clientTime.getTime() / 1000),
+                        sessionLifeTime,
+                        sessionKeyLimit);
+        clientSessionId = sess.getClientSessionId();
         provisioning_handle = sess.getProvisioningHandle();
 
         MacGenerator kdf = new MacGenerator();
-        kdf.addString(client_session_id);
-        kdf.addString(server_session_id);
+        kdf.addString(clientSessionId);
+        kdf.addString(serverSessionId);
         kdf.addString(ISSUER_URI);
         kdf.addArray(getDeviceID());
 
         MacGenerator attestation_arguments = new MacGenerator();
-        attestation_arguments.addString(client_session_id);
-        attestation_arguments.addString(server_session_id);
+        attestation_arguments.addString(clientSessionId);
+        attestation_arguments.addString(serverSessionId);
         attestation_arguments.addString(ISSUER_URI);
         attestation_arguments.addArray(getDeviceID());
         attestation_arguments.addString(sess_key_alg);
         attestation_arguments.addBool(privacy_enabled);
         attestation_arguments.addArray(server_ephemeral_key.getEncoded());
         attestation_arguments.addArray(sess.getClientEphemeralKey().getEncoded());
-        attestation_arguments.addArray(key_management_key == null ? new byte[0] : key_management_key.getEncoded());
-        attestation_arguments.addInt((int) (client_time.getTime() / 1000));
-        attestation_arguments.addInt(session_life_time);
-        attestation_arguments.addShort(session_key_limit);
+        attestation_arguments.addArray(keyManagementKey == null ? new byte[0] : keyManagementKey.getEncoded());
+        attestation_arguments.addInt((int) (clientTime.getTime() / 1000));
+        attestation_arguments.addInt(sessionLifeTime);
+        attestation_arguments.addShort(sessionKeyLimit);
 
         server_sess_key.generateAndVerifySessionKey(sess.getClientEphemeralKey(),
                 kdf.getResult(),
@@ -396,8 +396,8 @@ public class ProvSess {
         this.kmk_id = kmk_id;
     }
 
-    public ProvSess(Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException {
-        this(device, session_key_limit, kmk_id, false, null);
+    public ProvSess(Device device, short sessionKeyLimit, Integer kmk_id) throws GeneralSecurityException, IOException {
+        this(device, sessionKeyLimit, kmk_id, false, null);
     }
 
     public ProvSess(Device device, String serv_sess_id) throws GeneralSecurityException, IOException {
@@ -408,8 +408,8 @@ public class ProvSess {
         this(device, (short) 50, null);
     }
 
-    public ProvSess(Device device, short session_key_limit) throws GeneralSecurityException, IOException {
-        this(device, session_key_limit, null);
+    public ProvSess(Device device, short sessionKeyLimit) throws GeneralSecurityException, IOException {
+        this(device, sessionKeyLimit, null);
     }
 
     public ProvSess(Device device, Integer kmk_id) throws GeneralSecurityException, IOException {
@@ -419,8 +419,8 @@ public class ProvSess {
     public void closeSession() throws IOException, GeneralSecurityException {
         byte[] nonce = server_sess_key.generateNonce();
         MacGenerator close = new MacGenerator();
-        close.addString(client_session_id);
-        close.addString(server_session_id);
+        close.addString(clientSessionId);
+        close.addString(serverSessionId);
         close.addString(ISSUER_URI);
         close.addArray(nonce);
         byte[] result = sks.closeProvisioningSession(provisioning_handle,
@@ -457,16 +457,16 @@ public class ProvSess {
         user_modifiable_pins = true;
     }
 
-    public void setInputMethod(InputMethod input_method) {
-        this.input_method = input_method;
+    public void setInputMethod(InputMethod inputMethod) {
+        this.inputMethod = inputMethod;
     }
 
     public void setKeyAlgorithm(String key_algorithm) {
         custom_key_algorithm = key_algorithm;
     }
 
-    public void setKeyParameters(byte[] key_parameters) {
-        custom_key_parameters = key_parameters;
+    public void setKeyParameters(byte[] keyParameters) {
+        custom_key_parameters = keyParameters;
     }
 
     public byte[] getPassphraseBytes(PassphraseFormat format, String passphrase) throws IOException {
@@ -476,98 +476,98 @@ public class ProvSess {
         return passphrase.getBytes("UTF-8");
     }
 
-    public PUKPol createPUKPolicy(String id, PassphraseFormat format, int retry_limit, String puk_value) throws IOException, GeneralSecurityException {
-        PUKPol puk_policy = new PUKPol();
-        byte[] encrypted_value = server_sess_key.encrypt(getPassphraseBytes(format, puk_value));
+    public PUKPol createPUKPolicy(String id, PassphraseFormat format, int retryLimit, String puk_value) throws IOException, GeneralSecurityException {
+        PUKPol pukPolicy = new PUKPol();
+        byte[] encryptedValue = server_sess_key.encrypt(getPassphraseBytes(format, puk_value));
         MacGenerator puk_policy_mac = new MacGenerator();
         puk_policy_mac.addString(id);
-        puk_policy_mac.addArray(encrypted_value);
+        puk_policy_mac.addArray(encryptedValue);
         puk_policy_mac.addByte(format.getSksValue());
-        puk_policy_mac.addShort(retry_limit);
-        puk_policy.id = id;
-        puk_policy.puk_policy_handle = sks.createPukPolicy(provisioning_handle,
+        puk_policy_mac.addShort(retryLimit);
+        pukPolicy.id = id;
+        pukPolicy.puk_policy_handle = sks.createPukPolicy(provisioning_handle,
                 id,
-                encrypted_value,
+                encryptedValue,
                 format.getSksValue(),
-                (short) retry_limit,
+                (short) retryLimit,
                 mac4call(puk_policy_mac.getResult(), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
-        return puk_policy;
+        return pukPolicy;
     }
 
-    public PINPol createPINPolicy(String id, PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPol puk_policy) throws IOException, GeneralSecurityException {
-        return createPINPolicy(id, format, EnumSet.noneOf(PatternRestriction.class), Grouping.NONE, min_length, max_length, retry_limit, puk_policy);
+    public PINPol createPINPolicy(String id, PassphraseFormat format, int minLength, int maxLength, int retryLimit, PUKPol pukPolicy) throws IOException, GeneralSecurityException {
+        return createPINPolicy(id, format, EnumSet.noneOf(PatternRestriction.class), Grouping.NONE, minLength, maxLength, retryLimit, pukPolicy);
     }
 
     public PINPol createPINPolicy(String id,
                                   PassphraseFormat format,
-                                  Set<PatternRestriction> pattern_restrictions,
+                                  Set<PatternRestriction> patternRestrictions,
                                   Grouping grouping,
-                                  int min_length,
-                                  int max_length,
-                                  int retry_limit,
-                                  PUKPol puk_policy) throws IOException, GeneralSecurityException {
-        PINPol pin_policy = new PINPol();
-        boolean user_defined = user_defined_pins;
-        boolean user_modifiable = user_modifiable_pins;
-        int puk_policy_handle = puk_policy == null ? 0 : puk_policy.puk_policy_handle;
+                                  int minLength,
+                                  int maxLength,
+                                  int retryLimit,
+                                  PUKPol pukPolicy) throws IOException, GeneralSecurityException {
+        PINPol pinPolicy = new PINPol();
+        boolean userDefined = user_defined_pins;
+        boolean userModifiable = user_modifiable_pins;
+        int puk_policy_handle = pukPolicy == null ? 0 : pukPolicy.puk_policy_handle;
         MacGenerator pin_policy_mac = new MacGenerator();
         pin_policy_mac.addString(id);
-        pin_policy_mac.addString(puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
-        pin_policy_mac.addBool(user_defined);
-        pin_policy_mac.addBool(user_modifiable);
+        pin_policy_mac.addString(pukPolicy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : pukPolicy.id);
+        pin_policy_mac.addBool(userDefined);
+        pin_policy_mac.addBool(userModifiable);
         pin_policy_mac.addByte(format.getSksValue());
-        pin_policy_mac.addShort(retry_limit);
+        pin_policy_mac.addShort(retryLimit);
         pin_policy_mac.addByte(grouping.getSksValue());
-        pin_policy_mac.addByte(PatternRestriction.getSksValue(pattern_restrictions));
-        pin_policy_mac.addShort(min_length);
-        pin_policy_mac.addShort(max_length);
-        pin_policy_mac.addByte(input_method.getSksValue());
-        pin_policy.id = id;
-        pin_policy.user_defined = user_defined;
-        pin_policy.format = format;
-        pin_policy.pin_policy_handle = sks.createPinPolicy(provisioning_handle,
+        pin_policy_mac.addByte(PatternRestriction.getSksValue(patternRestrictions));
+        pin_policy_mac.addShort(minLength);
+        pin_policy_mac.addShort(maxLength);
+        pin_policy_mac.addByte(inputMethod.getSksValue());
+        pinPolicy.id = id;
+        pinPolicy.userDefined = userDefined;
+        pinPolicy.format = format;
+        pinPolicy.pin_policy_handle = sks.createPinPolicy(provisioning_handle,
                 id,
                 puk_policy_handle,
-                user_defined,
-                user_modifiable,
+                userDefined,
+                userModifiable,
                 format.getSksValue(),
-                (short) retry_limit,
+                (short) retryLimit,
                 grouping.getSksValue(),
-                PatternRestriction.getSksValue(pattern_restrictions),
-                (byte) min_length,
-                (byte) max_length,
-                input_method.getSksValue(),
+                PatternRestriction.getSksValue(patternRestrictions),
+                (byte) minLength,
+                (byte) maxLength,
+                inputMethod.getSksValue(),
                 mac4call(pin_policy_mac.getResult(), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
-        return pin_policy;
+        return pinPolicy;
     }
 
     public GenKey createKey(String id,
                             KeyAlgorithms key_algorithm,
                             String pin_value,
-                            PINPol pin_policy,
-                            AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException {
-        return createKey(id, key_algorithm, pin_value, pin_policy, key_usage, null);
+                            PINPol pinPolicy,
+                            AppUsage keyUsage) throws SKSException, IOException, GeneralSecurityException {
+        return createKey(id, key_algorithm, pin_value, pinPolicy, keyUsage, null);
     }
 
     public GenKey createKey(String id,
                             KeyAlgorithms key_algorithm,
                             String pin_value,
-                            PINPol pin_policy,
-                            AppUsage app_usage,
+                            PINPol pinPolicy,
+                            AppUsage appUsage,
                             String[] endorsed_algorithm) throws SKSException, IOException, GeneralSecurityException {
-        byte[] server_seed = new byte[32];
-        new SecureRandom().nextBytes(server_seed);
+        byte[] serverSeed = new byte[32];
+        new SecureRandom().nextBytes(serverSeed);
         return createKey(id,
                 SecureKeyStore.ALGORITHM_KEY_ATTEST_1,
-                server_seed,
-                pin_policy,
+                serverSeed,
+                pinPolicy,
                 pin_value,
-                BiometricProtection.NONE /* biometric_protection */,
+                BiometricProtection.NONE /* biometricProtection */,
                 ExportProtection.NON_EXPORTABLE /* export_policy */,
                 DeleteProtection.NONE /* delete_policy */,
-                false /* enable_pin_caching */,
-                app_usage,
-                "" /* friendly_name */,
+                false /* enablePinCaching */,
+                appUsage,
+                "" /* friendlyName */,
                 new KeySpecifier(key_algorithm),
                 endorsed_algorithm);
     }
@@ -575,73 +575,73 @@ public class ProvSess {
 
     public GenKey createKey(String id,
                             String key_entry_algorithm,
-                            byte[] server_seed,
-                            PINPol pin_policy,
+                            byte[] serverSeed,
+                            PINPol pinPolicy,
                             String pin_value,
-                            BiometricProtection biometric_protection,
-                            ExportProtection export_protection,
-                            DeleteProtection delete_protection,
-                            boolean enable_pin_caching,
-                            AppUsage app_usage,
-                            String friendly_name,
-                            KeySpecifier key_specifier,
-                            String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException {
+                            BiometricProtection biometricProtection,
+                            ExportProtection exportProtection,
+                            DeleteProtection deleteProtection,
+                            boolean enablePinCaching,
+                            AppUsage appUsage,
+                            String friendlyName,
+                            KeySpecifier keySpecifier,
+                            String[] endorsedAlgorithms) throws SKSException, IOException, GeneralSecurityException {
         key_entry_algorithm = override_key_entry_algorithm == null ? key_entry_algorithm : override_key_entry_algorithm;
-        String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS) : custom_key_algorithm;
-        byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters() : custom_key_parameters;
-        String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
-        byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSksValue();
+        String key_algorithm = custom_key_algorithm == null ? keySpecifier.getKeyAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS) : custom_key_algorithm;
+        byte[] keyParameters = custom_key_parameters == null ? keySpecifier.getParameters() : custom_key_parameters;
+        String[] sorted_algorithms = endorsedAlgorithms == null ? new String[0] : endorsedAlgorithms;
+        byte actual_export_policy = override_export_protection ? overriden_export_protection : exportProtection.getSksValue();
         MacGenerator key_entry_mac = new MacGenerator();
         key_entry_mac.addString(id);
         key_entry_mac.addString(key_entry_algorithm);
-        key_entry_mac.addArray(server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
+        key_entry_mac.addArray(serverSeed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : serverSeed);
         byte[] encrypted_pin_value = null;
-        if (pin_policy == null) {
+        if (pinPolicy == null) {
             if (pin_value != null) {
                 encrypted_pin_value = pin_value.getBytes("UTF-8");
             }
         } else {
-            encrypted_pin_value = getPassphraseBytes(pin_policy.format, pin_value);
-            if (!pin_policy.user_defined) {
+            encrypted_pin_value = getPassphraseBytes(pinPolicy.format, pin_value);
+            if (!pinPolicy.userDefined) {
                 encrypted_pin_value = server_sess_key.encrypt(encrypted_pin_value);
             }
         }
-        key_entry_mac.addString(pin_policy == null ?
+        key_entry_mac.addString(pinPolicy == null ?
                 SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE
                 :
-                pin_policy.id);
-        if (pin_policy == null || pin_policy.user_defined) {
+                pinPolicy.id);
+        if (pinPolicy == null || pinPolicy.userDefined) {
             key_entry_mac.addString(SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
         } else {
             key_entry_mac.addArray(encrypted_pin_value);
         }
-        key_entry_mac.addBool(device_pin_protected);
-        key_entry_mac.addBool(enable_pin_caching);
-        key_entry_mac.addByte(biometric_protection.getSksValue());
+        key_entry_mac.addBool(devicePinProtected);
+        key_entry_mac.addBool(enablePinCaching);
+        key_entry_mac.addByte(biometricProtection.getSksValue());
         key_entry_mac.addByte(actual_export_policy);
-        key_entry_mac.addByte(delete_protection.getSksValue());
-        key_entry_mac.addByte(app_usage.getSksValue());
-        key_entry_mac.addString(friendly_name == null ? "" : friendly_name);
+        key_entry_mac.addByte(deleteProtection.getSksValue());
+        key_entry_mac.addByte(appUsage.getSksValue());
+        key_entry_mac.addString(friendlyName == null ? "" : friendlyName);
         key_entry_mac.addString(key_algorithm);
-        key_entry_mac.addArray(key_parameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_parameters);
+        key_entry_mac.addArray(keyParameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : keyParameters);
         for (String algorithm : sorted_algorithms) {
             key_entry_mac.addString(algorithm);
         }
         KeyData key_entry = sks.createKeyEntry(provisioning_handle,
                 id,
                 key_entry_algorithm,
-                server_seed,
-                device_pin_protected,
-                pin_policy == null ? 0 : pin_policy.pin_policy_handle,
+                serverSeed,
+                devicePinProtected,
+                pinPolicy == null ? 0 : pinPolicy.pin_policy_handle,
                 encrypted_pin_value,
-                enable_pin_caching,
-                biometric_protection.getSksValue(),
+                enablePinCaching,
+                biometricProtection.getSksValue(),
                 actual_export_policy,
-                delete_protection.getSksValue(),
-                app_usage.getSksValue(),
-                friendly_name,
+                deleteProtection.getSksValue(),
+                appUsage.getSksValue(),
+                friendlyName,
                 key_algorithm,
-                key_parameters,
+                keyParameters,
                 sorted_algorithms,
                 mac4call(key_entry_mac.getResult(), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator();
@@ -652,45 +652,45 @@ public class ProvSess {
         }
         GenKey key = new GenKey();
         key.id = id;
-        key.key_handle = key_entry.getKeyHandle();
-        String return_alg = KeyAlgorithms.getKeyAlgorithm(key.public_key = key_entry.getPublicKey(), key_parameters != null).getAlgorithmId(AlgorithmPreferences.SKS);
+        key.keyHandle = key_entry.getKeyHandle();
+        String return_alg = KeyAlgorithms.getKeyAlgorithm(key.publicKey = key_entry.getPublicKey(), keyParameters != null).getAlgorithmId(AlgorithmPreferences.SKS);
         BigInteger exponent = RSAKeyGenParameterSpec.F4;
-        if (key_parameters != null) {
-            exponent = new BigInteger(key_parameters);
+        if (keyParameters != null) {
+            exponent = new BigInteger(keyParameters);
         }
         if (!return_alg.equals(key_algorithm)) {
             bad("Bad return algorithm: " + return_alg);
         }
-        if (key.public_key instanceof RSAPublicKey && !((RSAPublicKey) key.public_key).getPublicExponent().equals(exponent)) {
+        if (key.publicKey instanceof RSAPublicKey && !((RSAPublicKey) key.publicKey).getPublicExponent().equals(exponent)) {
             bad("Wrong exponent RSA returned");
         }
         key.prov_sess = this;
         return key;
     }
 
-    void setCertificate(int key_handle, String id, PublicKey public_key, X509Certificate[] certificate_path) throws IOException, GeneralSecurityException {
+    void setCertificate(int keyHandle, String id, PublicKey publicKey, X509Certificate[] certificatePath) throws IOException, GeneralSecurityException {
         MacGenerator set_certificate = new MacGenerator();
-        set_certificate.addArray(public_key.getEncoded());
+        set_certificate.addArray(publicKey.getEncoded());
         set_certificate.addString(id);
-        certificate_path = CertificateUtil.getSortedPath(certificate_path);
-        for (X509Certificate certificate : certificate_path) {
+        certificatePath = CertificateUtil.getSortedPath(certificatePath);
+        for (X509Certificate certificate : certificatePath) {
             set_certificate.addArray(certificate.getEncoded());
         }
-        sks.setCertificatePath(key_handle,
-                certificate_path,
+        sks.setCertificatePath(keyHandle,
+                certificatePath,
                 mac4call(set_certificate.getResult(), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH));
     }
 
     public void postDeleteKey(GenKey key) throws IOException, GeneralSecurityException {
         MacGenerator upd_mac = new MacGenerator();
         byte[] authorization = key.getPostProvMac(upd_mac, this);
-        sks.postDeleteKey(provisioning_handle, key.key_handle, authorization, mac4call(upd_mac.getResult(), SecureKeyStore.METHOD_POST_DELETE_KEY));
+        sks.postDeleteKey(provisioning_handle, key.keyHandle, authorization, mac4call(upd_mac.getResult(), SecureKeyStore.METHOD_POST_DELETE_KEY));
     }
 
     public void postUnlockKey(GenKey key) throws IOException, GeneralSecurityException {
         MacGenerator upd_mac = new MacGenerator();
         byte[] authorization = key.getPostProvMac(upd_mac, this);
-        sks.postUnlockKey(provisioning_handle, key.key_handle, authorization, mac4call(upd_mac.getResult(), SecureKeyStore.METHOD_POST_UNLOCK_KEY));
+        sks.postUnlockKey(provisioning_handle, key.keyHandle, authorization, mac4call(upd_mac.getResult(), SecureKeyStore.METHOD_POST_UNLOCK_KEY));
     }
 
     public boolean exists() throws SKSException {

@@ -80,19 +80,19 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
     
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public Date getServerTime ()
       {
-        return server_time;
+        return serverTime;
       }
 
 
     public String getSubmitUrl ()
       {
-        return submit_url;
+        return submitUrl;
       }
 
     
@@ -110,21 +110,21 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
     public int getSessionLifeTime ()
       {
-        return session_life_time;
+        return sessionLifeTime;
       }
 
     
     public short getSessionKeyLimit ()
       {
-        return session_key_limit;
+        return sessionKeyLimit;
       }
 
 
-    PublicKey key_management_key;
+    PublicKey keyManagementKey;
 
     public PublicKey getKeyManagementKey ()
       {
-        return key_management_key;
+        return keyManagementKey;
       }
 
     
@@ -142,7 +142,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
     
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, serverSessionId);
       }
 
 
@@ -176,17 +176,17 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (ID_ATTR);
+        serverSessionId = ah.getString (ID_ATTR);
 
-        server_time = ah.getDateTime (SERVER_TIME_ATTR).getTime ();
+        serverTime = ah.getDateTime (SERVER_TIME_ATTR).getTime ();
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submitUrl = ah.getString (SUBMIT_URL_ATTR);
         
         session_key_algorithm = ah.getString (SESSION_KEY_ALGORITHM_ATTR);
         
-        session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
+        sessionKeyLimit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         
-        session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
+        sessionLifeTime = ah.getInt (SESSION_LIFE_TIME_ATTR);
         
         String[] attrs = ah.getListConditional (REQUESTED_CLIENT_ATTRIBUTES_ATTR);
         if (attrs != null)
@@ -215,7 +215,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
           {
             rd.getNext (KEY_MANAGEMENT_KEY_ELEM);
             rd.getChild ();
-            scanForUpdateKeys (rd, kmk_root = new KeyManagementKeyUpdateHolder (key_management_key = XMLSignatureWrapper.readPublicKey (rd)));
+            scanForUpdateKeys (rd, kmk_root = new KeyManagementKeyUpdateHolder (keyManagementKey = XMLSignatureWrapper.readPublicKey (rd)));
             rd.getParent ();
           }
 

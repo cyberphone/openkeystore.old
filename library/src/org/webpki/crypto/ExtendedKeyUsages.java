@@ -28,11 +28,11 @@ public enum ExtendedKeyUsages {
     OCSP_SIGNING            ("1.3.6.1.5.5.7.3.9", "OCSPSigning");
 
     private final String oid;
-    private final String x509_name;
+    private final String x509Name;
 
-    private ExtendedKeyUsages(String oid, String x509_name) {
+    private ExtendedKeyUsages(String oid, String x509Name) {
         this.oid = oid;
-        this.x509_name = x509_name;
+        this.x509Name = x509Name;
     }
 
 
@@ -41,19 +41,19 @@ public enum ExtendedKeyUsages {
     }
 
 
-    public static ExtendedKeyUsages getExtendedKeyUsage(String x509_name) throws IOException {
+    public static ExtendedKeyUsages getExtendedKeyUsage(String x509Name) throws IOException {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
-            if (x509_name.equals(eku.x509_name)) {
+            if (x509Name.equals(eku.x509Name)) {
                 return eku;
             }
         }
-        throw new IOException("Unknown EKU: " + x509_name);
+        throw new IOException("Unknown EKU: " + x509Name);
     }
 
     public static String getOptionallyTranslatedEKU(String oid) throws IOException {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
             if (oid.equals(eku.oid)) {
-                return eku.x509_name;
+                return eku.x509Name;
             }
         }
         return oid;
@@ -61,6 +61,6 @@ public enum ExtendedKeyUsages {
 
 
     public Object getX509Name() {
-        return x509_name;
+        return x509Name;
     }
 }

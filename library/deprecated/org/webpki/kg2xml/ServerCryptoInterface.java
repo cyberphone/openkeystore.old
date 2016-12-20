@@ -43,7 +43,7 @@ public interface ServerCryptoInterface extends Serializable
 
     public byte[] generateNonce () throws IOException;
 
-    public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException;
+    public byte[] generateKeyManagementAuthorization (PublicKey keyManagementKey, byte[] data) throws IOException;
     
     public PublicKey[] enumerateKeyManagementKeys () throws IOException;
   }

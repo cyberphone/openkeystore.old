@@ -92,12 +92,12 @@ public class GenerateSignature {
 
         @Override
         public boolean verifyData(byte[] data, byte[] digest,
-                MACAlgorithms algorithm, String key_id) throws IOException {
-            if (KEY_NAME.equals(key_id)) {
+                MACAlgorithms algorithm, String keyId) throws IOException {
+            if (KEY_NAME.equals(keyId)) {
                 return ArrayUtil.compare(digest,
                         getMacAlgorithm().digest(SYMMETRIC_KEY, data));
             }
-            throw new IOException("Unknown key id: " + key_id);
+            throw new IOException("Unknown key id: " + keyId);
         }
     }
 

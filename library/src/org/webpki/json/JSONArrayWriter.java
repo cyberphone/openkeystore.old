@@ -87,8 +87,8 @@ public class JSONArrayWriter implements Serializable {
         return add(JSONTypes.NULL, "null");
     }
 
-    public JSONArrayWriter setDateTime(Date date_time, boolean forceUtc) throws IOException {
-        return setString(ISODateTime.formatDateTime(date_time, forceUtc));
+    public JSONArrayWriter setDateTime(Date dateTime, boolean forceUtc) throws IOException {
+        return setString(ISODateTime.formatDateTime(dateTime, forceUtc));
     }
 
     public JSONArrayWriter setBinary(byte[] value) throws IOException {

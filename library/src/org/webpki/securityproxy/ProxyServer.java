@@ -124,7 +124,7 @@ public class ProxyServer {
             // Normal HTTP response, output headers as well 
             //////////////////////////////////////////////////
             response.setContentLength(http_data.data.length);
-            response.setContentType(http_data.mime_type);
+            response.setContentType(http_data.mimeType);
             for (String name : http_data.headers.keySet()) {
                 response.setHeader(name, http_data.headers.get(name));
             }
@@ -584,9 +584,9 @@ public class ProxyServer {
         /////////////////////////////////////////////////
         try {
             InternalClientObject client_object = (InternalClientObject) InternalObjectStream.readObject(data, this);
-            long server_time = new Date().getTime();
-            if (client_object.time_stamp > server_time + TIME_MARGIN ||
-                    client_object.time_stamp < server_time - TIME_MARGIN) {
+            long serverTime = new Date().getTime();
+            if (client_object.time_stamp > serverTime + TIME_MARGIN ||
+                    client_object.time_stamp < serverTime - TIME_MARGIN) {
                 returnProxyFailure(response, "Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
                 return;
             }

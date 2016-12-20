@@ -38,35 +38,35 @@ public class InvocationRequestEncoder extends ServerEncoder {
 
     Action action = Action.MANAGE;
 
-    String server_session_id;
+    String serverSessionId;
 
-    String submit_url;
+    String submitUrl;
 
-    String abort_url; // Optional
+    String abortUrl; // Optional
 
-    private ServerState server_state;
+    private ServerState serverState;
 
     // Constructors
 
-    public InvocationRequestEncoder(ServerState server_state,
-                                    String submit_url,
-                                    String server_session_id) throws IOException {
-        server_state.checkState(true, ProtocolPhase.INVOCATION);
-        this.server_state = server_state;
-        this.submit_url = submit_url;
-        if (server_session_id == null) {
-            server_session_id = Long.toHexString(new Date().getTime());
-            server_session_id += Base64URL.generateURLFriendlyRandom(SecureKeyStore.MAX_LENGTH_ID_TYPE - server_session_id.length());
+    public InvocationRequestEncoder(ServerState serverState,
+                                    String submitUrl,
+                                    String serverSessionId) throws IOException {
+        serverState.checkState(true, ProtocolPhase.INVOCATION);
+        this.serverState = serverState;
+        this.submitUrl = submitUrl;
+        if (serverSessionId == null) {
+            serverSessionId = Long.toHexString(new Date().getTime());
+            serverSessionId += Base64URL.generateURLFriendlyRandom(SecureKeyStore.MAX_LENGTH_ID_TYPE - serverSessionId.length());
         }
-        this.server_session_id = server_state.server_session_id = server_session_id;
+        this.serverSessionId = serverState.serverSessionId = serverSessionId;
     }
 
     public void setAction(Action action) {
         this.action = action;
     }
 
-    public void setAbortUrl(String abort_url) {
-        this.abort_url = abort_url;
+    public void setAbortUrl(String abortUrl) {
+        this.abortUrl = abortUrl;
     }
 
 
@@ -75,26 +75,26 @@ public class InvocationRequestEncoder extends ServerEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(SUBMIT_URL_JSON, submit_url);
+        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         wr.setString(ACTION_JSON, action.getJSONName());
 
-        setOptionalString(wr, ABORT_URL_JSON, abort_url);
+        setOptionalString(wr, ABORT_URL_JSON, abortUrl);
 
-        if (server_state.privacy_enabled_set) {
-            wr.setBoolean(PRIVACY_ENABLED_JSON, server_state.privacy_enabled);
+        if (serverState.privacyEnabledSet) {
+            wr.setBoolean(PRIVACY_ENABLED_JSON, serverState.privacyEnabled);
         }
 
-        setOptionalStringArray(wr, PREFERREDD_LANGUAGES_JSON, server_state.language_list);
+        setOptionalStringArray(wr, PREFERREDD_LANGUAGES_JSON, serverState.languageList);
 
-        setOptionalStringArray(wr, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, server_state.key_container_list);
+        setOptionalStringArray(wr, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, serverState.keyContainerList);
 
         setOptionalStringArray(wr,
                                CLIENT_CAPABILITY_QUERY_JSON,
-                               server_state.queried_capabilities.isEmpty() ?
-                                   null : server_state.queried_capabilities.keySet().toArray(new String[0]));
+                               serverState.queriedCapabilities.isEmpty() ?
+                                   null : serverState.queriedCapabilities.keySet().toArray(new String[0]));
     }
 
     @Override

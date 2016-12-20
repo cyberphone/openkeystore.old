@@ -32,7 +32,7 @@ public class HTTPResponseWrapper implements Serializable {
 
     byte[] data;
 
-    String mime_type;
+    String mimeType;
 
     String string_data;
 
@@ -65,11 +65,11 @@ public class HTTPResponseWrapper implements Serializable {
      * Normal HTTP return
      *
      * @param data      The HTTP body
-     * @param mime_type The MIME type
+     * @param mimeType The MIME type
      */
-    public HTTPResponseWrapper(byte[] data, String mime_type) {
+    public HTTPResponseWrapper(byte[] data, String mimeType) {
         this.data = data;
-        this.mime_type = mime_type;
+        this.mimeType = mimeType;
     }
 
     /**

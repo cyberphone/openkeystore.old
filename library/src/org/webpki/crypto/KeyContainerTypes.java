@@ -52,15 +52,16 @@ public enum KeyContainerTypes {
     }
 
     static class KeyContainerListParser {
-        LinkedHashSet<String> key_container_types = new LinkedHashSet<String>();
 
-        KeyContainerListParser(String[] list_of_granted_types) throws IOException {
-            if (list_of_granted_types != null) {
-                if (list_of_granted_types.length == 0) {
+        LinkedHashSet<String> keyContainerTypes = new LinkedHashSet<String>();
+
+        KeyContainerListParser(String[] listOfGrantedTypes) throws IOException {
+            if (listOfGrantedTypes != null) {
+                if (listOfGrantedTypes.length == 0) {
                     throw new IOException("Empty list not allowed");
                 }
-                for (String type : list_of_granted_types) {
-                    if (!key_container_types.add(getKeyContainerType(type).getName())) {
+                for (String type : listOfGrantedTypes) {
+                    if (!keyContainerTypes.add(getKeyContainerType(type).getName())) {
                         throw new IOException("Duplicate key container type: " + type);
                     }
                 }
@@ -68,30 +69,30 @@ public enum KeyContainerTypes {
         }
 
         String[] normalized() {
-            if (key_container_types.isEmpty()) {
+            if (keyContainerTypes.isEmpty()) {
                 return null;
             }
-            return key_container_types.toArray(new String[0]);
+            return keyContainerTypes.toArray(new String[0]);
         }
     }
 
-    public static String[] parseOptionalKeyContainerList(String[] list_of_granted_types) throws IOException {
-        return new KeyContainerListParser(list_of_granted_types).normalized();
+    public static String[] parseOptionalKeyContainerList(String[] listOfGrantedTypes) throws IOException {
+        return new KeyContainerListParser(listOfGrantedTypes).normalized();
     }
 
-    public static String[] parseOptionalKeyContainerList(KeyContainerTypes[] list_of_granted_types) throws IOException {
-        if (list_of_granted_types == null) {
+    public static String[] parseOptionalKeyContainerList(KeyContainerTypes[] listOfGrantedTypes) throws IOException {
+        if (listOfGrantedTypes == null) {
             return null;
         }
         Vector<String> list = new Vector<String>();
-        for (KeyContainerTypes type : list_of_granted_types) {
+        for (KeyContainerTypes type : listOfGrantedTypes) {
             list.add(type.getName());
         }
         return parseOptionalKeyContainerList(list.toArray(new String[0]));
     }
 
-    public static LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerSet(String[] list_of_granted_types) throws IOException {
-        String[] list = parseOptionalKeyContainerList(list_of_granted_types);
+    public static LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerSet(String[] listOfGrantedTypes) throws IOException {
+        String[] list = parseOptionalKeyContainerList(listOfGrantedTypes);
         if (list == null) {
             return null;
         }

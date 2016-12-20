@@ -154,7 +154,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         int keyHandle;
 
-        byte app_usage;
+        byte appUsage;
 
         PublicKey publicKey;     // In this implementation overwritten by "setCertificatePath"
 
@@ -166,7 +166,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         LinkedHashSet<String> endorsedAlgorithms;
 
-        String friendly_name;
+        String friendlyName;
 
         boolean devicePinProtection;
 
@@ -208,11 +208,11 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                     if (keyEntry.pinPolicy == pinPolicy) {
                         switch (pinPolicy.grouping) {
                             case PIN_GROUPING_UNIQUE:
-                                if (app_usage != keyEntry.app_usage) {
+                                if (appUsage != keyEntry.appUsage) {
                                     continue;
                                 }
                             case PIN_GROUPING_SIGN_PLUS_STD:
-                                if ((app_usage == APP_USAGE_SIGNATURE) ^ (keyEntry.app_usage == APP_USAGE_SIGNATURE)) {
+                                if ((appUsage == APP_USAGE_SIGNATURE) ^ (keyEntry.appUsage == APP_USAGE_SIGNATURE)) {
                                     continue;
                                 }
                         }
@@ -652,7 +652,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     void verifyPINPolicyCompliance(boolean forcedSetter, 
                                    byte[] pinValue,
                                    PINPolicy pinPolicy,
-                                   byte app_usage,
+                                   byte appUsage,
                                    TEEError sksError) throws SKSException {
         ///////////////////////////////////////////////////////////////////////////////////
         // Check PIN length
@@ -752,13 +752,13 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                         continue;
 
                     case PIN_GROUPING_UNIQUE:
-                        if (equal ^ (app_usage == keyEntry.app_usage)) {
+                        if (equal ^ (appUsage == keyEntry.appUsage)) {
                             sksError.abort("Grouping = \"unique\" PIN error");
                         }
                         continue;
 
                     case PIN_GROUPING_SIGN_PLUS_STD:
-                        if (((app_usage == APP_USAGE_SIGNATURE) ^ (keyEntry.app_usage == APP_USAGE_SIGNATURE)) ^ !equal) {
+                        if (((appUsage == APP_USAGE_SIGNATURE) ^ (keyEntry.appUsage == APP_USAGE_SIGNATURE)) ^ !equal) {
                             sksError.abort("Grouping = \"signature+standard\" PIN error");
                         }
                 }
@@ -770,7 +770,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         if (!keyEntry.pinPolicy.userModifiable) {
             abort("PIN for key #" + keyEntry.keyHandle + " is not user modifiable", SKSException.ERROR_NOT_ALLOWED);
         }
-        verifyPINPolicyCompliance(true, newPin, keyEntry.pinPolicy, keyEntry.app_usage, this);
+        verifyPINPolicyCompliance(true, newPin, keyEntry.pinPolicy, keyEntry.appUsage, this);
     }
 
     void deleteEmptySession(Provisioning provisioning) {
@@ -842,7 +842,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
             provisioning.abort("Updated/cloned keys must not define PIN protection");
         }
         if (update) {
-            if (targetKeyEntry.app_usage != newKey.app_usage) {
+            if (targetKeyEntry.appUsage != newKey.appUsage) {
                 provisioning.abort("Updated keys must have the same \"" + VAR_APP_USAGE + "\" as the target key");
             }
         } else {
@@ -1492,8 +1492,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         return new KeyAttributes(keyEntry.symmetricKeyLength,
                                  keyEntry.certificatePath,
-                                 keyEntry.app_usage,
-                                 keyEntry.friendly_name,
+                                 keyEntry.appUsage,
+                                 keyEntry.friendlyName,
                                  keyEntry.endorsedAlgorithms.toArray(new String[0]),
                                  keyEntry.extensions.keySet().toArray(new String[0]));
     }
@@ -2165,8 +2165,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                byte biometricProtection,
                                                byte exportProtection,
                                                byte deleteProtection,
-                                               byte app_usage,
-                                               String friendly_name,
+                                               byte appUsage,
+                                               String friendlyName,
                                                String keyAlgorithm,
                                                byte[] keyParameters,
                                                String[] endorsedAlgorithms,
@@ -2187,7 +2187,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         }
         provisioning.rangeTest(exportProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "ExportProtection");
         provisioning.rangeTest(deleteProtection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "DeleteProtection");
-        provisioning.rangeTest(app_usage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
+        provisioning.rangeTest(appUsage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
         provisioning.rangeTest(biometricProtection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2253,8 +2253,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                 biometricProtection,
                                                                 exportProtection,
                                                                 deleteProtection,
-                                                                app_usage,
-                                                                friendly_name,
+                                                                appUsage,
+                                                                friendlyName,
                                                                 keyAlgorithm,
                                                                 keyParameters,
                                                                 endorsedAlgorithms,
@@ -2275,7 +2275,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
-            verifyPINPolicyCompliance(false, pinValue, pinPolicy, app_usage, provisioning);
+            verifyPINPolicyCompliance(false, pinValue, pinPolicy, appUsage, provisioning);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2285,11 +2285,11 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         provisioning.names.put(id, true); // Referenced (for "closeProvisioningSession")
         provisioning.provisioningState = seKeyData.provisioningState;
         keyEntry.pinPolicy = pinPolicy;
-        keyEntry.friendly_name = friendly_name;
+        keyEntry.friendlyName = friendlyName;
         keyEntry.pinValue = pinValue;
         keyEntry.publicKey = seKeyData.publicKey;
         keyEntry.sealedKey = seKeyData.sealedKey;
-        keyEntry.app_usage = app_usage;
+        keyEntry.appUsage = appUsage;
         keyEntry.devicePinProtection = devicePinProtection;
         keyEntry.enablePinCaching = enablePinCaching;
         keyEntry.biometricProtection = biometricProtection;

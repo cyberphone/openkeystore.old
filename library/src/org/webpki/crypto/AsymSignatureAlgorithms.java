@@ -47,27 +47,27 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     ECDSA_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",  "ES512",   
                   "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, true,  false);
 
-    private final String sksname;   // As (typically) expressed in protocols
-    private final String josename;  // Alternative JOSE name
+    private final String sksName;   // As expressed in SKS
+    private final String joseName;  // Alternative JOSE name
     private final String oid;       // As expressed in OIDs
-    private final String jcename;   // As expressed for JCE
-    private final HashAlgorithms digest_alg;
-    private boolean sks_mandatory;  // If required in SKS
+    private final String jceName;   // As expressed for JCE
+    private final HashAlgorithms digestAlg;
+    private boolean sksMandatory;   // If required in SKS
     private boolean rsa;            // RSA algorithm
 
-    private AsymSignatureAlgorithms(String sksname,
-                                    String josename,
+    private AsymSignatureAlgorithms(String sksName,
+                                    String joseName,
                                     String oid,
-                                    String jcename,
-                                    HashAlgorithms digest_alg,
-                                    boolean sks_mandatory,
+                                    String jceName,
+                                    HashAlgorithms digestAlg,
+                                    boolean sksMandatory,
                                     boolean rsa) {
-        this.sksname = sksname;
-        this.josename = josename;
+        this.sksName = sksName;
+        this.joseName = joseName;
         this.oid = oid;
-        this.jcename = jcename;
-        this.digest_alg = digest_alg;
-        this.sks_mandatory = sks_mandatory;
+        this.jceName = jceName;
+        this.digestAlg = digestAlg;
+        this.sksMandatory = sksMandatory;
         this.rsa = rsa;
     }
 
@@ -80,13 +80,13 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
 
     @Override
     public boolean isMandatorySKSAlgorithm() {
-        return sks_mandatory;
+        return sksMandatory;
     }
 
 
     @Override
     public String getJCEName() {
-        return jcename;
+        return jceName;
     }
 
 
@@ -97,7 +97,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
 
 
     public HashAlgorithms getDigestAlgorithm() {
-        return digest_alg;
+        return digestAlg;
     }
 
 
@@ -106,9 +106,9 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static boolean testAlgorithmURI(String sksname) {
+    public static boolean testAlgorithmURI(String sksName) {
         for (AsymSignatureAlgorithms alg : values()) {
-            if (sksname.equals(alg.sksname)) {
+            if (sksName.equals(alg.sksName)) {
                 return true;
             }
         }
@@ -116,33 +116,34 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static AsymSignatureAlgorithms getAlgorithmFromID(String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException {
+    public static AsymSignatureAlgorithms getAlgorithmFromID(String algorithmId,
+                                                             AlgorithmPreferences algorithmPreferences) throws IOException {
         for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values()) {
-            if (algorithm_id.equals(alg.sksname)) {
+            if (algorithmId.equals(alg.sksName)) {
                 if (algorithmPreferences == AlgorithmPreferences.JOSE) {
-                    throw new IOException("JOSE algorithm expected: " + algorithm_id);
+                    throw new IOException("JOSE algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
-            if (algorithm_id.equals(alg.josename)) {
+            if (algorithmId.equals(alg.joseName)) {
                 if (algorithmPreferences == AlgorithmPreferences.SKS) {
-                    throw new IOException("SKS algorithm expected: " + algorithm_id);
+                    throw new IOException("SKS algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
         }
-        throw new IOException("Unknown signature algorithm: " + algorithm_id);
+        throw new IOException("Unknown signature algorithm: " + algorithmId);
     }
 
 
     @Override
     public String getAlgorithmId(AlgorithmPreferences algorithmPreferences) throws IOException {
-        if (josename == null) {
+        if (joseName == null) {
             if (algorithmPreferences == AlgorithmPreferences.JOSE) {
                 throw new IOException("There is no JOSE algorithm for: " + toString());
             }
-            return sksname;
+            return sksName;
         }
-        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
     }
 }

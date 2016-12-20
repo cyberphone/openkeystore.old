@@ -85,9 +85,9 @@ public class ReadSignature {
                             .getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
                     switch (signature.getSignatureType()) {
                     case ASYMMETRIC_KEY:
-                        PublicKey public_key = signature.getPublicKey();
+                        PublicKey publicKey = signature.getPublicKey();
                         KeyAlgorithms key_alg = KeyAlgorithms
-                                .getKeyAlgorithm(public_key);
+                                .getKeyAlgorithm(publicKey);
                         StringBuffer asym_text = new StringBuffer(
                                 "Asymmetric key signature validated for:\n")
                                 .append(key_alg.isECKey() ? "EC" : "RSA")
@@ -97,7 +97,7 @@ public class ReadSignature {
                         if (key_alg.isECKey()) {
                             asym_text.append(", Curve=").append(
                                     key_alg.getJCEName());
-                            ECPoint ec_point = ((ECPublicKey) public_key)
+                            ECPoint ec_point = ((ECPublicKey) publicKey)
                                     .getW();
                             asym_text
                                     .append("\nX: ")
@@ -110,11 +110,11 @@ public class ReadSignature {
                             asym_text
                                     .append("\nModulus: ")
                                     .append(cryptoBinary(
-                                            ((RSAPublicKey) public_key)
+                                            ((RSAPublicKey) publicKey)
                                                     .getModulus(), key_alg))
                                     .append("\nExponent: ")
                                     .append(cryptoBinary(
-                                            ((RSAPublicKey) public_key)
+                                            ((RSAPublicKey) publicKey)
                                                     .getPublicExponent(),
                                             key_alg));
                         }

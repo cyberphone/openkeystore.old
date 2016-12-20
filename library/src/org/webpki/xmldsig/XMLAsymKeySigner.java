@@ -29,7 +29,7 @@ public class XMLAsymKeySigner extends XMLSignerCore {
     AsymKeySignerInterface signer_impl;
 
     PublicKey populateKeys(XMLSignatureWrapper r) throws IOException {
-        return r.public_key = signer_impl.getPublicKey();
+        return r.publicKey = signer_impl.getPublicKey();
     }
 
     byte[] getSignatureBlob(byte[] data, AsymSignatureAlgorithms sig_alg) throws IOException {

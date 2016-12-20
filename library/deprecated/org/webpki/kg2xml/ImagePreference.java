@@ -23,7 +23,7 @@ public class ImagePreference implements Serializable
     private static final long serialVersionUID = 1L;
 
     String type;
-    String mime_type;
+    String mimeType;
     int width;
     int height;
 
@@ -34,7 +34,7 @@ public class ImagePreference implements Serializable
 
     public String getMimeType ()
       {
-        return mime_type;
+        return mimeType;
       }
 
     public int getWidth ()

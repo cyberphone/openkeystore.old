@@ -34,19 +34,19 @@ import static org.webpki.wasp.WASPConstants.*;
 
 
 public class AuthenticationRequestEncoder extends AuthenticationRequest {
-    Date server_time;
+    Date serverTime;
 
     private String prefix;  // Default: no prefix
 
 
-    public AuthenticationRequestEncoder(String submit_url, String abort_url) {
-        this.submit_url = submit_url;
-        this.abort_url = abort_url;
+    public AuthenticationRequestEncoder(String submitUrl, String abortUrl) {
+        this.submitUrl = submitUrl;
+        this.abortUrl = abortUrl;
     }
 
 
-    public AuthenticationRequestEncoder(String submit_url) {
-        this(submit_url, null);
+    public AuthenticationRequestEncoder(String submitUrl) {
+        this(submitUrl, null);
     }
 
 
@@ -58,7 +58,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
 
 
     public AuthenticationRequestEncoder addCertificateFilter(CertificateFilter cf) {
-        certificate_filters.add(cf);
+        certificateFilters.add(cf);
         return this;
     }
 
@@ -68,8 +68,8 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
     }
 
 
-    public void setServerTime(Date server_time) {
-        this.server_time = server_time;
+    public void setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
     }
 
 
@@ -83,8 +83,8 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
     }
 
 
-    public AuthenticationRequestEncoder requestClientPlatformFeature(String feature_uri) {
-        requested_client_platform_features.add(feature_uri);
+    public AuthenticationRequestEncoder requestClientPlatformFeature(String featureUri) {
+        requested_client_platform_features.add(featureUri);
         return this;
     }
 
@@ -100,15 +100,15 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
         }
         wr.setStringAttribute(ID_ATTR, id);
 
-        if (server_time == null) {
-            server_time = new Date();
+        if (serverTime == null) {
+            serverTime = new Date();
         }
-        wr.setDateTimeAttribute(SERVER_TIME_ATTR, server_time);
+        wr.setDateTimeAttribute(SERVER_TIME_ATTR, serverTime);
 
-        wr.setStringAttribute(SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute(SUBMIT_URL_ATTR, submitUrl);
 
-        if (abort_url != null) {
-            wr.setStringAttribute(ABORT_URL_ATTR, abort_url);
+        if (abortUrl != null) {
+            wr.setStringAttribute(ABORT_URL_ATTR, abortUrl);
         }
 
         if (languages != null) {
@@ -137,7 +137,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
             if (ap.signed_key_info) {
                 wr.setBooleanAttribute(SIGNED_KEY_INFO_ATTR, true);
             }
-            if (ap.extended_cert_path) {
+            if (ap.extendedCertPath) {
                 wr.setBooleanAttribute(EXTENDED_CERT_PATH_ATTR, true);
             }
             if (ap.canonicalization_algorithm != null) {
@@ -146,15 +146,15 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
             if (ap.digest_algorithm != null) {
                 wr.setStringAttribute(DIGEST_ALG_ATTR, ap.digest_algorithm.getAlgorithmId());
             }
-            if (ap.signature_algorithm != null) {
-                wr.setStringAttribute(SIGNATURE_ALG_ATTR, ap.signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS));
+            if (ap.signatureAlgorithm != null) {
+                wr.setStringAttribute(SIGNATURE_ALG_ATTR, ap.signatureAlgorithm.getAlgorithmId(AlgorithmPreferences.SKS));
             }
         }
 
         //////////////////////////////////////////////////////////////////////////
         // Certificate filters (optional)
         //////////////////////////////////////////////////////////////////////////
-        for (CertificateFilter cf : certificate_filters) {
+        for (CertificateFilter cf : certificateFilters) {
             SignatureRequestEncoder.writeCertificateFilter(wr, cf);
         }
     }
@@ -180,11 +180,11 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest {
         if (!id.equals(areresp.id)) {
             bad("ID attributes");
         }
-        if (!ISODateTime.formatDateTime(server_time, true).equals(ISODateTime.formatDateTime(areresp.server_time.getTime(), true))) {
+        if (!ISODateTime.formatDateTime(serverTime, true).equals(ISODateTime.formatDateTime(areresp.serverTime.getTime(), true))) {
             bad("ServerTime attribute");
         }
-        if (certificate_filters.size() > 0 && areresp.signer_certpath != null) {
-            for (CertificateFilter cf : certificate_filters) {
+        if (certificateFilters.size() > 0 && areresp.signer_certpath != null) {
+            for (CertificateFilter cf : certificateFilters) {
                 if (cf.matches(areresp.signer_certpath)) {
                     return;
                 }

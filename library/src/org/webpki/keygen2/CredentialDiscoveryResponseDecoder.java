@@ -17,7 +17,9 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.cert.X509Certificate;
+
 import java.util.Vector;
 
 import org.webpki.json.JSONArrayReader;
@@ -33,24 +35,24 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator {
 
         MatchingCredential() {}
 
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
 
-        String client_session_id;
+        String clientSessionId;
 
-        String server_session_id;
+        String serverSessionId;
 
         boolean locked;
 
         public String getClientSessionId() {
-            return client_session_id;
+            return clientSessionId;
         }
 
         public String getServerSessionId() {
-            return server_session_id;
+            return serverSessionId;
         }
 
         public X509Certificate[] getCertificatePath() {
-            return certificate_path;
+            return certificatePath;
         }
 
         public boolean isLocked() {
@@ -64,19 +66,19 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator {
 
         LookupResult() {}
 
-        Vector<MatchingCredential> matching_credentials = new Vector<MatchingCredential>();
+        Vector<MatchingCredential> matchingCredentials = new Vector<MatchingCredential>();
 
         LookupResult(JSONObjectReader rd) throws IOException {
             id = KeyGen2Validator.getID(rd, ID_JSON);
             JSONArrayReader matches = rd.getArray(MATCHING_CREDENTIALS_JSON);
             while (matches.hasMore()) {
-                JSONObjectReader match_object = matches.getObject();
-                MatchingCredential matching_credential = new MatchingCredential();
-                matching_credential.client_session_id = KeyGen2Validator.getID(match_object, CLIENT_SESSION_ID_JSON);
-                matching_credential.server_session_id = KeyGen2Validator.getID(match_object, SERVER_SESSION_ID_JSON);
-                matching_credential.certificate_path = match_object.getCertificatePath();
-                matching_credential.locked = match_object.getBooleanConditional(LOCKED_JSON);
-                matching_credentials.add(matching_credential);
+                JSONObjectReader matchObject = matches.getObject();
+                MatchingCredential matchingCredential = new MatchingCredential();
+                matchingCredential.clientSessionId = KeyGen2Validator.getID(matchObject, CLIENT_SESSION_ID_JSON);
+                matchingCredential.serverSessionId = KeyGen2Validator.getID(matchObject, SERVER_SESSION_ID_JSON);
+                matchingCredential.certificatePath = matchObject.getCertificatePath();
+                matchingCredential.locked = matchObject.getBooleanConditional(LOCKED_JSON);
+                matchingCredentials.add(matchingCredential);
             }
         }
 
@@ -86,18 +88,18 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator {
         }
 
         public MatchingCredential[] getMatchingCredentials() {
-            return matching_credentials.toArray(new MatchingCredential[0]);
+            return matchingCredentials.toArray(new MatchingCredential[0]);
         }
     }
 
-    private Vector<LookupResult> lookup_results = new Vector<LookupResult>();
+    private Vector<LookupResult> lookupResults = new Vector<LookupResult>();
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     public LookupResult[] getLookupResults() {
-        return lookup_results.toArray(new LookupResult[0]);
+        return lookupResults.toArray(new LookupResult[0]);
     }
 
 
@@ -106,17 +108,17 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the lookup_results [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         JSONArrayReader lookups = rd.getArray(LOOKUP_RESULTS_JSON);
         do {
-            LookupResult lookup_result = new LookupResult(lookups.getObject());
-            lookup_results.add(lookup_result);
+            LookupResult lookupResult = new LookupResult(lookups.getObject());
+            lookupResults.add(lookupResult);
         }
         while (lookups.hasMore());
     }

@@ -31,7 +31,7 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class KeyCreationResponseDecoder extends KeyCreationResponse
   {
-    LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
+    LinkedHashMap<String,GeneratedPublicKey> generatedKeys = new LinkedHashMap<String,GeneratedPublicKey> ();
 
     class GeneratedPublicKey
       {
@@ -39,7 +39,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
 
         String id;
 
-        PublicKey public_key;
+        PublicKey publicKey;
 
         byte[] attestation;
       }
@@ -55,9 +55,9 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        client_session_id = ah.getString (ID_ATTR);
+        clientSessionId = ah.getString (ID_ATTR);
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
 
         rd.getChild ();
 
@@ -71,9 +71,9 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
             gk.id = ah.getString (ID_ATTR);
             gk.attestation = ah.getBinary (KEY_ATTESTATION_ATTR);
             rd.getChild ();
-            gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
+            gk.publicKey = XMLSignatureWrapper.readPublicKey (rd);
             rd.getParent ();
-            if (generated_keys.put (gk.id, gk) != null)
+            if (generatedKeys.put (gk.id, gk) != null)
               {
                 ServerState.bad ("Duplicate key id:" + gk.id);
               }

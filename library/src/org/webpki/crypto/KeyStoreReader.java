@@ -43,16 +43,16 @@ public class KeyStoreReader {
             KeyStore ks = KeyStore.getInstance(type);
             ks.load(new ByteArrayInputStream(buffer), password.toCharArray());
             return ks;
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
-    public static KeyStore loadKeyStore(String keystore_file_name, String password) throws IOException {
-        return loadKeyStore(ArrayUtil.readFile(keystore_file_name), password);
+    public static KeyStore loadKeyStore(String keystoreFileName, String password) throws IOException {
+        return loadKeyStore(ArrayUtil.readFile(keystoreFileName), password);
     }
 
-    public static KeyStore loadKeyStore(InputStream input_stream, String password) throws IOException {
-        return loadKeyStore(ArrayUtil.getByteArrayFromInputStream(input_stream), password);
+    public static KeyStore loadKeyStore(InputStream inputStream, String password) throws IOException {
+        return loadKeyStore(ArrayUtil.getByteArrayFromInputStream(inputStream), password);
     }
 }

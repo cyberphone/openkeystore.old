@@ -17,16 +17,21 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateUtil;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.keygen2.ServerState.Key;
 import org.webpki.keygen2.ServerState.PostOperation;
 import org.webpki.keygen2.ServerState.PostProvisioningTargetKey;
@@ -38,23 +43,23 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String submit_url;
+    String submitUrl;
 
-    ServerState server_state;
+    ServerState serverState;
 
     // Constructors
 
-    public ProvisioningFinalizationRequestEncoder(ServerState server_state, String submit_url) throws IOException {
-        this.server_state = server_state;
-        this.submit_url = submit_url;
-        server_state.checkState(true, server_state.current_phase == ProtocolPhase.KEY_CREATION ?
-                ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
-        server_state.current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
+    public ProvisioningFinalizationRequestEncoder(ServerState serverState, String submitUrl) throws IOException {
+        this.serverState = serverState;
+        this.submitUrl = submitUrl;
+        serverState.checkState(true, serverState.currentPhase == ProtocolPhase.KEY_CREATION ?
+                          ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
+        serverState.currentPhase = ProtocolPhase.PROVISIONING_FINALIZATION;
     }
 
 
     byte[] mac(byte[] data, byte[] method) throws IOException, GeneralSecurityException {
-        return server_state.mac(data, method);
+        return serverState.mac(data, method);
     }
 
 
@@ -64,34 +69,35 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
 
 
     void writePostOp(JSONObjectWriter wr,
-                     PostProvisioningTargetKey target_key,
-                     MacGenerator post_op_mac) throws IOException, GeneralSecurityException {
-        wr.setBinary(CertificateFilter.CF_FINGER_PRINT, HashAlgorithms.SHA256.digest(target_key.certificate_data));
-        wr.setString(SERVER_SESSION_ID_JSON, target_key.server_session_id);
-        wr.setString(CLIENT_SESSION_ID_JSON, target_key.client_session_id);
-        byte[] key_id = server_state.server_crypto_interface.mac(target_key.certificate_data, server_state.getDeviceID());
-        byte[] authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization(target_key.key_management_key,
+                     PostProvisioningTargetKey targetKey,
+                     MacGenerator postOpMac) throws IOException, GeneralSecurityException {
+        wr.setBinary(CertificateFilter.CF_FINGER_PRINT, HashAlgorithms.SHA256.digest(targetKey.certificateData));
+        wr.setString(SERVER_SESSION_ID_JSON, targetKey.serverSessionId);
+        wr.setString(CLIENT_SESSION_ID_JSON, targetKey.clientSessionId);
+        byte[] keyId = serverState.serverCryptoInterface.mac(targetKey.certificateData, serverState.getDeviceID());
+        byte[] authorization = serverState.serverCryptoInterface.generateKeyManagementAuthorization(targetKey.keyManagementKey,
                 ArrayUtil.add(SecureKeyStore.KMK_TARGET_KEY_REFERENCE,
-                              key_id));
+                              keyId));
         wr.setBinary(AUTHORIZATION_JSON, authorization);
-        post_op_mac.addArray(authorization);
-        mac(wr, post_op_mac.getResult(), target_key.post_operation.getMethod());
+        postOpMac.addArray(authorization);
+        mac(wr, postOpMac.getResult(), targetKey.postOperation.getMethod());
     }
 
-    void writeExtensions(JSONObjectWriter wr, Key key, byte[] ee_cert, byte sub_type) throws IOException, GeneralSecurityException {
+    void writeExtensions(JSONObjectWriter wr, Key key, byte[] eeCertificate, byte subType) 
+    throws IOException, GeneralSecurityException {
         JSONArrayWriter arr = null;
         for (ServerState.ExtensionInterface ei : key.extensions.values()) {
-            if (ei.getSubType() == sub_type) {
+            if (ei.getSubType() == subType) {
                 if (arr == null) {
                     arr = wr.setArray(ei.getJSONArrayString());
                 }
-                MacGenerator add_ext = new MacGenerator();
-                add_ext.addArray(ee_cert);
-                add_ext.addString(ei.type);
-                add_ext.addByte(ei.getSubType());
-                add_ext.addString(ei.getQualifier());
-                add_ext.addBlob(ei.getExtensionData());
-                ei.writeExtension(arr.setObject(), mac(add_ext.getResult(), SecureKeyStore.METHOD_ADD_EXTENSION));
+                MacGenerator addExt = new MacGenerator();
+                addExt.addArray(eeCertificate);
+                addExt.addString(ei.type);
+                addExt.addByte(ei.getSubType());
+                addExt.addString(ei.getQualifier());
+                addExt.addBlob(ei.getExtensionData());
+                ei.writeExtension(arr.setObject(), mac(addExt.getResult(), SecureKeyStore.METHOD_ADD_EXTENSION));
             }
         }
     }
@@ -102,78 +108,78 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
         ////////////////////////////////////////////////////////////////////////
         wr.setString(ID_JSON, key.id);
 
-        MacGenerator set_certificate = new MacGenerator();
-        set_certificate.addArray(key.publicKey.getEncoded());
-        set_certificate.addString(key.id);
-        X509Certificate[] certificate_path = key.certificate_path;
-        if (key.trust_anchor_set && !CertificateUtil.isTrustAnchor(certificate_path[certificate_path.length - 1])) {
+        MacGenerator setCertificate = new MacGenerator();
+        setCertificate.addArray(key.publicKey.getEncoded());
+        setCertificate.addString(key.id);
+        X509Certificate[] certificatePath = key.certificatePath;
+        if (key.trustAnchorSet && !CertificateUtil.isTrustAnchor(certificatePath[certificatePath.length - 1])) {
             throw new IOException("Invalid \"" + TRUST_ANCHOR_JSON + "\"");
         }
-        for (X509Certificate certificate : certificate_path) {
-            set_certificate.addArray(certificate.getEncoded());
+        for (X509Certificate certificate : certificatePath) {
+            setCertificate.addArray(certificate.getEncoded());
         }
-        wr.setCertificatePath(certificate_path);
-        mac(wr, set_certificate.getResult(), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
-        byte[] ee_cert = certificate_path[0].getEncoded();
+        wr.setCertificatePath(certificatePath);
+        mac(wr, setCertificate.getResult(), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
+        byte[] eeCertificate = certificatePath[0].getEncoded();
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: A certificate path may also contain a TA
         ////////////////////////////////////////////////////////////////////////
-        if (key.trust_anchor_set) {
-            wr.setBoolean(TRUST_ANCHOR_JSON, key.trust_anchor);
+        if (key.trustAnchorSet) {
+            wr.setBoolean(TRUST_ANCHOR_JSON, key.trustAnchor);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: "piggybacked" symmetric key
         ////////////////////////////////////////////////////////////////////////
-        if (key.encrypted_symmetric_key != null) {
-            MacGenerator set_symkey = new MacGenerator();
-            set_symkey.addArray(ee_cert);
-            set_symkey.addArray(key.encrypted_symmetric_key);
-            mac(wr.setObject(IMPORT_SYMMETRIC_KEY_JSON).setBinary(ENCRYPTED_KEY_JSON, key.encrypted_symmetric_key),
-                    set_symkey.getResult(), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
+        if (key.encryptedSymmetricKey != null) {
+            MacGenerator setSymkey = new MacGenerator();
+            setSymkey.addArray(eeCertificate);
+            setSymkey.addArray(key.encryptedSymmetricKey);
+            mac(wr.setObject(IMPORT_SYMMETRIC_KEY_JSON).setBinary(ENCRYPTED_KEY_JSON, key.encryptedSymmetricKey),
+                    setSymkey.getResult(), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: private key
         ////////////////////////////////////////////////////////////////////////
-        if (key.encrypted_private_key != null) {
-            MacGenerator set_privkey = new MacGenerator();
-            set_privkey.addArray(ee_cert);
-            set_privkey.addArray(key.encrypted_private_key);
-            mac(wr.setObject(IMPORT_PRIVATE_KEY_JSON).setBinary(ENCRYPTED_KEY_JSON, key.encrypted_private_key),
-                    set_privkey.getResult(), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
+        if (key.encryptedPrivateKey != null) {
+            MacGenerator setPrivkey = new MacGenerator();
+            setPrivkey.addArray(eeCertificate);
+            setPrivkey.addArray(key.encryptedPrivateKey);
+            mac(wr.setObject(IMPORT_PRIVATE_KEY_JSON).setBinary(ENCRYPTED_KEY_JSON, key.encryptedPrivateKey),
+                    setPrivkey.getResult(), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: property bags, extensions, and logotypes.
         // Note: Order must be followed!
         ////////////////////////////////////////////////////////////////////////
-        writeExtensions(wr, key, ee_cert, SecureKeyStore.SUB_TYPE_EXTENSION);
-        writeExtensions(wr, key, ee_cert, SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION);
-        writeExtensions(wr, key, ee_cert, SecureKeyStore.SUB_TYPE_PROPERTY_BAG);
-        writeExtensions(wr, key, ee_cert, SecureKeyStore.SUB_TYPE_LOGOTYPE);
+        writeExtensions(wr, key, eeCertificate, SecureKeyStore.SUB_TYPE_EXTENSION);
+        writeExtensions(wr, key, eeCertificate, SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION);
+        writeExtensions(wr, key, eeCertificate, SecureKeyStore.SUB_TYPE_PROPERTY_BAG);
+        writeExtensions(wr, key, eeCertificate, SecureKeyStore.SUB_TYPE_LOGOTYPE);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: post operation associated with the provisioned key
         ////////////////////////////////////////////////////////////////////////
-        if (key.clone_or_update_operation != null) {
-            MacGenerator set_post_mac = new MacGenerator();
-            set_post_mac.addArray(ee_cert);
-            writePostOp(wr.setObject(key.clone_or_update_operation.post_operation.getJSONProp()),
-                    key.clone_or_update_operation,
-                    set_post_mac);
+        if (key.cloneOrUpdateOperation != null) {
+            MacGenerator setPostMac = new MacGenerator();
+            setPostMac.addArray(eeCertificate);
+            writePostOp(wr.setObject(key.cloneOrUpdateOperation.postOperation.getJSONProp()),
+                        key.cloneOrUpdateOperation,
+                        setPostMac);
         }
     }
 
     void optionalPostOps(JSONObjectWriter wr, PostOperation operation) throws IOException, GeneralSecurityException {
-        JSONArrayWriter op_wr = null;
-        for (ServerState.PostProvisioningTargetKey pptk : server_state.post_operations) {
-            if (pptk.post_operation == operation) {
-                if (op_wr == null) {
-                    op_wr = wr.setArray(operation.getJSONProp());
+        JSONArrayWriter opWriter = null;
+        for (ServerState.PostProvisioningTargetKey pptk : serverState.postOperations) {
+            if (pptk.postOperation == operation) {
+                if (opWriter == null) {
+                    opWriter = wr.setArray(operation.getJSONProp());
                 }
-                writePostOp(op_wr.setObject(), pptk, new MacGenerator());
+                writePostOp(opWriter.setObject(), pptk, new MacGenerator());
             }
         }
     }
@@ -184,19 +190,19 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
             //////////////////////////////////////////////////////////////////////////
             // Session properties
             //////////////////////////////////////////////////////////////////////////
-            wr.setString(SERVER_SESSION_ID_JSON, server_state.server_session_id);
+            wr.setString(SERVER_SESSION_ID_JSON, serverState.serverSessionId);
 
-            wr.setString(CLIENT_SESSION_ID_JSON, server_state.client_session_id);
+            wr.setString(CLIENT_SESSION_ID_JSON, serverState.clientSessionId);
 
-            wr.setString(SUBMIT_URL_JSON, submit_url);
+            wr.setString(SUBMIT_URL_JSON, submitUrl);
 
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
-            if (!server_state.requested_keys.isEmpty()) {
-                JSONArrayWriter key_arr = wr.setArray(ISSUED_CREDENTIALS_JSON);
-                for (ServerState.Key key : server_state.getKeys()) {
-                    issueCredential(key_arr.setObject(), key);
+            if (!serverState.requestedKeys.isEmpty()) {
+                JSONArrayWriter keyArray = wr.setArray(ISSUED_CREDENTIALS_JSON);
+                for (ServerState.Key key : serverState.getKeys()) {
+                    issueCredential(keyArray.setObject(), key);
                 }
             }
 
@@ -214,11 +220,11 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
             MacGenerator close = new MacGenerator();
-            close.addString(server_state.client_session_id);
-            close.addString(server_state.server_session_id);
-            close.addString(server_state.issuer_uri);
-            close.addArray(server_state.saved_close_nonce = server_state.server_crypto_interface.generateNonce());
-            wr.setBinary(NONCE_JSON, server_state.saved_close_nonce);
+            close.addString(serverState.clientSessionId);
+            close.addString(serverState.serverSessionId);
+            close.addString(serverState.issuerUri);
+            close.addArray(serverState.savedCloseNonce = serverState.serverCryptoInterface.generateNonce());
+            wr.setBinary(NONCE_JSON, serverState.savedCloseNonce);
             wr.setBinary(MAC_JSON, mac(close.getResult(), SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         } catch (GeneralSecurityException e) {
             throw new IOException(e);

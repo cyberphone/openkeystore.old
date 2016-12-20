@@ -46,31 +46,31 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         public static final int UPDATE_KEY            = 2;
         public static final int CLONE_KEY_PROTECTION  = 3;
         
-        String client_session_id;
+        String clientSessionId;
         
-        String server_session_id;
+        String serverSessionId;
         
         byte[] mac;
         
-        byte[] certificate_fingerprint;
+        byte[] certificateFingerprint;
         
         byte[] authorization;
         
-        int post_operation;
+        int postOperation;
         
-        PostOperation (String client_session_id,
-                       String server_session_id,
-                       byte[] certificate_fingerprint,
+        PostOperation (String clientSessionId,
+                       String serverSessionId,
+                       byte[] certificateFingerprint,
                        byte[] authorization,
                        byte[] mac,
-                       int post_operation)
+                       int postOperation)
           {
-            this.client_session_id = client_session_id;
-            this.server_session_id = server_session_id;
-            this.certificate_fingerprint = certificate_fingerprint;
+            this.clientSessionId = clientSessionId;
+            this.serverSessionId = serverSessionId;
+            this.certificateFingerprint = certificateFingerprint;
             this.authorization = authorization;
             this.mac = mac;
-            this.post_operation = post_operation;
+            this.postOperation = postOperation;
           }
         
         public byte[] getMac ()
@@ -80,7 +80,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public byte[] getCertificateFingerprint ()
           {
-            return certificate_fingerprint;
+            return certificateFingerprint;
           }
         
         public byte[] getAuthorization ()
@@ -90,17 +90,17 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public int getPostOperation ()
           {
-            return post_operation;
+            return postOperation;
           }
         
         public String getClientSessionId ()
           {
-            return client_session_id;
+            return clientSessionId;
           }
         
         public String getServerSessionId ()
           {
-            return server_session_id;
+            return serverSessionId;
           }
   
       }
@@ -249,12 +249,12 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       {
         byte[] data;
         
-        String mime_type;
+        String mimeType;
   
-        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, IssuedCredential cpk) throws IOException
+        Logotype (byte[] data, String mimeType, DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
-            this.mime_type = mime_type;
+            this.mimeType = mimeType;
             this.data = data;
           }
   
@@ -267,7 +267,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         @Override
         public String getQualifier ()
           {
-            return mime_type;
+            return mimeType;
           }
 
         @Override
@@ -280,7 +280,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     public class IssuedCredential
       {
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
 
         String id;
 
@@ -298,7 +298,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
         Vector<Extension> extensions = new Vector<Extension> ();
         
-        PostOperation post_operation;
+        PostOperation postOperation;
 
         IssuedCredential () { }
 
@@ -312,11 +312,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             trust_anchor = ah.getBooleanConditional (TRUST_ANCHOR_ATTR);
             rd.getChild ();
 
-            certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);            
+            certificatePath = XMLSignatureWrapper.readSortedX509DataSubset (rd);            
 
             if (trust_anchor)
               {
-                if (certificate_path[certificate_path.length - 1].getBasicConstraints () < 0)
+                if (certificatePath[certificatePath.length - 1].getBasicConstraints () < 0)
                   {
                     throw new IOException ("The \"TrustAnchor\" option requires a CA certificate");
                   }
@@ -345,7 +345,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                 if (rd.hasNext (PROPERTY_BAG_ELEM))
                   {
                     rd.getNext (PROPERTY_BAG_ELEM);
-                    PropertyBag property_bag = new PropertyBag (rd, this);
+                    PropertyBag propertyBag = new PropertyBag (rd, this);
                     rd.getChild ();
                     while (rd.hasNext (PROPERTY_ELEM))
                       {
@@ -354,7 +354,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                         property.name = ah.getString (NAME_ATTR);
                         property.value = ah.getString (VALUE_ATTR);
                         property.writable = ah.getBooleanConditional (WRITABLE_ATTR);
-                        property_bag.properties.add (property);
+                        propertyBag.properties.add (property);
                       }
                     rd.getParent ();
                   }
@@ -372,11 +372,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                   }
                 else if (rd.hasNext (CLONE_KEY_PROTECTION_ELEM))
                   {
-                    post_operation = readPostOperation (rd, PostOperation.CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
+                    postOperation = readPostOperation (rd, PostOperation.CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
                   }
                 else
                   {
-                    post_operation = readPostOperation (rd, PostOperation.UPDATE_KEY, UPDATE_KEY_ELEM);
+                    postOperation = readPostOperation (rd, PostOperation.UPDATE_KEY, UPDATE_KEY_ELEM);
                   }
               }
             rd.getParent ();
@@ -385,7 +385,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
         public X509Certificate[] getCertificatePath ()
           {
-            return certificate_path;
+            return certificatePath;
           }
 
 
@@ -431,7 +431,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public PostOperation getPostOperation ()
           {
-            return post_operation;
+            return postOperation;
           }
 
         public boolean getTrustAnchorFlag ()
@@ -459,11 +459,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       
     private Vector<PostOperation> post_delete_keys = new Vector<PostOperation> ();
     
-    private String client_session_id;
+    private String clientSessionId;
 
-    private String server_session_id;
+    private String serverSessionId;
 
-    private String submit_url;
+    private String submitUrl;
 
     private XMLSignatureWrapper signature;                  // Optional
 
@@ -474,19 +474,19 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
 
     public String getSubmitUrl ()
       {
-        return submit_url;
+        return submitUrl;
       }
 
 
@@ -522,7 +522,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, serverSessionId);
       }
 
 
@@ -540,11 +540,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
+        clientSessionId = ah.getString (CLIENT_SESSION_ID_ATTR);
 
-        server_session_id = ah.getString (ID_ATTR);
+        serverSessionId = ah.getString (ID_ATTR);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submitUrl = ah.getString (SUBMIT_URL_ATTR);
         
         close_session_mac = ah.getBinary (MAC_ATTR);
         

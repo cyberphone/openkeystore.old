@@ -34,27 +34,27 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
       {
         MatchingCredential () {}
         
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
         
-        String client_session_id;
+        String clientSessionId;
         
-        String server_session_id;
+        String serverSessionId;
         
         boolean locked;
         
         public String getClientSessionId ()
           {
-            return client_session_id;
+            return clientSessionId;
           }
         
         public String getServerSessionId ()
           {
-            return server_session_id;
+            return serverSessionId;
           }
         
         public X509Certificate[] getCertificatePath ()
           {
-            return certificate_path;
+            return certificatePath;
           }
         
         public boolean isLocked ()
@@ -81,10 +81,10 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
               {
                 rd.getNext (MATCHING_CREDENTIAL_ELEM);
                 MatchingCredential mc = new MatchingCredential ();
-                mc.client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
-                mc.server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+                mc.clientSessionId = ah.getString (CLIENT_SESSION_ID_ATTR);
+                mc.serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
                 rd.getChild ();
-                mc.certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
+                mc.certificatePath = XMLSignatureWrapper.readSortedX509DataSubset (rd);
                 rd.getParent ();
                 mc.locked = ah.getBooleanConditional (LOCKED_ATTR);
                 matching_credentials.add (mc);
@@ -106,19 +106,19 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
 
     private Vector<LookupResult> lookup_results = new Vector<LookupResult> ();
     
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
 
@@ -136,9 +136,9 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
 
-        client_session_id = ah.getString (ID_ATTR);
+        clientSessionId = ah.getString (ID_ATTR);
 
         rd.getChild ();
 

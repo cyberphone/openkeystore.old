@@ -17,8 +17,11 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.PublicKey;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.Date;
 import java.util.Vector;
 
@@ -26,10 +29,13 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.keygen2.ServerState.ProtocolPhase;
+
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.Grouping;
 
@@ -39,66 +45,66 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    ServerCryptoInterface server_crypto_interface;
+    ServerCryptoInterface serverCryptoInterface;
 
-    String submit_url;
+    String submitUrl;
 
-    String server_session_id;
+    String serverSessionId;
 
-    String client_session_id;
+    String clientSessionId;
 
     public class LookupDescriptor extends CertificateFilter implements AsymKeySignerInterface {
 
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
 
         String id;
 
-        boolean search_filter;
+        boolean searchFilter;
 
-        Date issued_before;
-        Date issued_after;
+        Date issuedBefore;
+        Date issuedAfter;
         Grouping grouping;
-        AppUsage app_usage;
+        AppUsage appUsage;
 
-        LookupDescriptor(PublicKey key_management_key) {
-            this.key_management_key = key_management_key;
-            this.id = lookup_prefix + ++next_lookup_id_suffix;
+        LookupDescriptor(PublicKey keyManagementKey) {
+            this.keyManagementKey = keyManagementKey;
+            this.id = lookupPrefix + ++nextLookupIdSuffix;
         }
 
         @Override
         protected void nullCheck(Object object) throws IOException {
-            search_filter = true;
+            searchFilter = true;
             if (object == null) {
                 bad("Null search parameter not allowed");
             }
         }
 
 
-        public LookupDescriptor setIssuedBefore(Date issued_before) throws IOException {
-            nullCheck(issued_before);
-            search_filter = true;
-            this.issued_before = issued_before;
+        public LookupDescriptor setIssuedBefore(Date issuedBefore) throws IOException {
+            nullCheck(issuedBefore);
+            searchFilter = true;
+            this.issuedBefore = issuedBefore;
             return this;
         }
 
-        public LookupDescriptor setIssuedAfter(Date issued_after) throws IOException {
-            nullCheck(issued_after);
-            search_filter = true;
-            this.issued_after = issued_after;
+        public LookupDescriptor setIssuedAfter(Date issuedAfter) throws IOException {
+            nullCheck(issuedAfter);
+            searchFilter = true;
+            this.issuedAfter = issuedAfter;
             return this;
         }
 
         public LookupDescriptor setGrouping(Grouping grouping) throws IOException {
             nullCheck(grouping);
-            search_filter = true;
+            searchFilter = true;
             this.grouping = grouping;
             return this;
         }
 
-        public LookupDescriptor setAppUsage(AppUsage app_usage) throws IOException {
-            nullCheck(app_usage);
-            search_filter = true;
-            this.app_usage = app_usage;
+        public LookupDescriptor setAppUsage(AppUsage appUsage) throws IOException {
+            nullCheck(appUsage);
+            searchFilter = true;
+            this.appUsage = appUsage;
             return this;
         }
 
@@ -107,65 +113,65 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
 
             wr.setBinary(NONCE_JSON, nonce);
 
-            if (search_filter) {
-                JSONObjectWriter search_writer = wr.setObject(SEARCH_FILTER_JSON);
-                setOptionalBinary(search_writer, CertificateFilter.CF_FINGER_PRINT, getFingerPrint());
-                setOptionalString(search_writer, CertificateFilter.CF_ISSUER_REG_EX, getIssuerRegEx());
-                setOptionalBigInteger(search_writer, CertificateFilter.CF_SERIAL_NUMBER, getSerialNumber());
-                setOptionalString(search_writer, CertificateFilter.CF_SUBJECT_REG_EX, getSubjectRegEx());
-                setOptionalString(search_writer, CertificateFilter.CF_EMAIL_REG_EX, getEmailRegEx());
-                setOptionalStringArray(search_writer, CertificateFilter.CF_POLICY_RULES, getPolicyRules());
-                setOptionalStringArray(search_writer, CertificateFilter.CF_KEY_USAGE_RULES, getKeyUsageRules());
-                setOptionalStringArray(search_writer, CertificateFilter.CF_EXT_KEY_USAGE_RULES, getExtendedKeyUsageRules());
-                setOptionalDateTime(search_writer, ISSUED_BEFORE_JSON, issued_before);
-                setOptionalDateTime(search_writer, ISSUED_AFTER_JSON, issued_after);
+            if (searchFilter) {
+                JSONObjectWriter searchWriter = wr.setObject(SEARCH_FILTER_JSON);
+                setOptionalBinary(searchWriter, CertificateFilter.CF_FINGER_PRINT, getFingerPrint());
+                setOptionalString(searchWriter, CertificateFilter.CF_ISSUER_REG_EX, getIssuerRegEx());
+                setOptionalBigInteger(searchWriter, CertificateFilter.CF_SERIAL_NUMBER, getSerialNumber());
+                setOptionalString(searchWriter, CertificateFilter.CF_SUBJECT_REG_EX, getSubjectRegEx());
+                setOptionalString(searchWriter, CertificateFilter.CF_EMAIL_REG_EX, getEmailRegEx());
+                setOptionalStringArray(searchWriter, CertificateFilter.CF_POLICY_RULES, getPolicyRules());
+                setOptionalStringArray(searchWriter, CertificateFilter.CF_KEY_USAGE_RULES, getKeyUsageRules());
+                setOptionalStringArray(searchWriter, CertificateFilter.CF_EXT_KEY_USAGE_RULES, getExtendedKeyUsageRules());
+                setOptionalDateTime(searchWriter, ISSUED_BEFORE_JSON, issuedBefore);
+                setOptionalDateTime(searchWriter, ISSUED_AFTER_JSON, issuedAfter);
                 if (grouping != null) {
-                    search_writer.setString(GROUPING_JSON, grouping.getProtocolName());
+                    searchWriter.setString(GROUPING_JSON, grouping.getProtocolName());
                 }
-                if (app_usage != null) {
-                    search_writer.setString(APP_USAGE_JSON, app_usage.getProtocolName());
+                if (appUsage != null) {
+                    searchWriter.setString(APP_USAGE_JSON, appUsage.getProtocolName());
                 }
             }
             JSONAsymKeySigner signer = new JSONAsymKeySigner(this);
-            signer.setSignatureAlgorithm(key_management_key instanceof RSAPublicKey ?
+            signer.setSignatureAlgorithm(keyManagementKey instanceof RSAPublicKey ?
                     AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256);
             wr.setSignature(signer);
         }
 
         @Override
         public PublicKey getPublicKey() throws IOException {
-            return key_management_key;
+            return keyManagementKey;
         }
 
         @Override
         public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
-            return server_crypto_interface.generateKeyManagementAuthorization(key_management_key, data);
+            return serverCryptoInterface.generateKeyManagementAuthorization(keyManagementKey, data);
         }
     }
 
 
-    Vector<LookupDescriptor> lookup_descriptors = new Vector<LookupDescriptor>();
+    Vector<LookupDescriptor> lookupDescriptors = new Vector<LookupDescriptor>();
 
-    String lookup_prefix = "Lookup.";
+    String lookupPrefix = "Lookup.";
 
     byte[] nonce;
 
-    int next_lookup_id_suffix = 0;
+    int nextLookupIdSuffix = 0;
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder(ServerState server_state, String submit_url) throws IOException {
-        server_state.checkState(true, ProtocolPhase.CREDENTIAL_DISCOVERY);
-        client_session_id = server_state.client_session_id;
-        server_session_id = server_state.server_session_id;
-        server_crypto_interface = server_state.server_crypto_interface;
-        this.submit_url = submit_url;
+    public CredentialDiscoveryRequestEncoder(ServerState serverState, String submitUrl) throws IOException {
+        serverState.checkState(true, ProtocolPhase.CREDENTIAL_DISCOVERY);
+        clientSessionId = serverState.clientSessionId;
+        serverSessionId = serverState.serverSessionId;
+        serverCryptoInterface = serverState.serverCryptoInterface;
+        this.submitUrl = submitUrl;
     }
 
 
-    public LookupDescriptor addLookupDescriptor(PublicKey key_management_key) {
-        LookupDescriptor lo_des = new LookupDescriptor(key_management_key);
-        lookup_descriptors.add(lo_des);
+    public LookupDescriptor addLookupDescriptor(PublicKey keyManagementKey) {
+        LookupDescriptor lo_des = new LookupDescriptor(keyManagementKey);
+        lookupDescriptors.add(lo_des);
         return lo_des;
     }
 
@@ -175,25 +181,25 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(CLIENT_SESSION_ID_JSON, client_session_id);
+        wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
 
-        wr.setString(SUBMIT_URL_JSON, submit_url);
+        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup descriptors
         ////////////////////////////////////////////////////////////////////////
-        if (lookup_descriptors.isEmpty()) {
+        if (lookupDescriptors.isEmpty()) {
             bad("There must be at least one descriptor defined");
         }
         MacGenerator concat = new MacGenerator();
-        concat.addString(client_session_id);
-        concat.addString(server_session_id);
+        concat.addString(clientSessionId);
+        concat.addString(serverSessionId);
         nonce = HashAlgorithms.SHA256.digest(concat.getResult());
         JSONArrayWriter array = wr.setArray(LOOKUP_SPECIFIERS_JSON);
-        for (LookupDescriptor im_des : lookup_descriptors) {
-            im_des.write(array.setObject());
+        for (LookupDescriptor imDes : lookupDescriptors) {
+            imDes.write(array.setObject());
         }
     }
 

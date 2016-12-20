@@ -93,9 +93,9 @@ abstract class ServerEncoder extends JSONEncoder {
         }
     }
 
-    void setOptionalDateTime(JSONObjectWriter wr, String name, Date date_time) throws IOException {
-        if (date_time != null) {
-            wr.setDateTime(name, date_time, true);  // Server UTC
+    void setOptionalDateTime(JSONObjectWriter wr, String name, Date dateTime) throws IOException {
+        if (dateTime != null) {
+            wr.setDateTime(name, dateTime, true);  // Server UTC
         }
     }
 }

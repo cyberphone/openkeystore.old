@@ -42,7 +42,7 @@ abstract class XMLVerifierCore {
 
     private HashAlgorithms digest_algorithm;  // Only tested for main Reference not for keyinfo types
 
-    private AsymSignatureAlgorithms signature_algorithm;
+    private AsymSignatureAlgorithms signatureAlgorithm;
 
     private boolean debug;
 
@@ -57,7 +57,7 @@ abstract class XMLVerifierCore {
         if (debug) {
             logger.info(ref.id + "=\n" + new String(ref_cn));
         }
-        if (!ArrayUtil.compare(ref.digest_alg.digest(ref_cn), ref.digest_val)) {
+        if (!ArrayUtil.compare(ref.digestAlg.digest(ref_cn), ref.digest_val)) {
             throw new IOException("Incorrect message digest id=" + ref.id);
         }
     }
@@ -68,7 +68,7 @@ abstract class XMLVerifierCore {
 
     private void checkMainReference(XMLSignatureWrapper signature) throws IOException, GeneralSecurityException {
         // Check the mandatory Object/Outer container reference
-        digest_algorithm = signature.reference_object_1.digest_alg;
+        digest_algorithm = signature.reference_object_1.digestAlg;
         checkReference(signature.reference_object_1);
     }
 
@@ -88,7 +88,7 @@ abstract class XMLVerifierCore {
     }
 
 
-    void core_verify(XMLSignatureWrapper signature, PublicKey public_key) throws IOException, GeneralSecurityException {
+    void core_verify(XMLSignatureWrapper signature, PublicKey publicKey) throws IOException, GeneralSecurityException {
         byte[] sign_cn = XPathCanonicalizer.serializeSubset(signature.signedinfo_object.element, signature.signedinfo_object.cn_alg);
         if (debug) {
             logger.info(XMLSignatureWrapper.SIGNED_INFO_ELEM + "=\n" + new String(sign_cn));
@@ -102,8 +102,8 @@ abstract class XMLVerifierCore {
                     signature.symmetric_key_name);
         } else {
             // Check signature
-            signature_algorithm = signature.signedinfo_object.asym_signature_alg;
-            success = new SignatureWrapper(signature.signedinfo_object.asym_signature_alg, public_key)
+            signatureAlgorithm = signature.signedinfo_object.asym_signature_alg;
+            success = new SignatureWrapper(signature.signedinfo_object.asym_signature_alg, publicKey)
                     .update(sign_cn)
                     .verify(signature.signedinfo_object.signature_val);
         }
@@ -142,7 +142,7 @@ abstract class XMLVerifierCore {
 
 
     public AsymSignatureAlgorithms getSignatureAlgorithm() {
-        return signature_algorithm;
+        return signatureAlgorithm;
     }
 
 

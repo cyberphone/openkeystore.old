@@ -31,16 +31,16 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HS384", "HmacSHA384", true),
     HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HS512", "HmacSHA512", true);
 
-    private final String sksname;   // As (typically) expressed in protocols
-    private final String josename;  // JOSE alternative
-    private final String jcename;   // As expressed for JCE
-    private boolean sks_mandatory;  // If required in SKS
+    private final String sksName;   // As expressed in SKS
+    private final String joseName;  // JOSE alternative
+    private final String jceName;   // As expressed for JCE
+    private boolean sksMandatory;   // If required in SKS
 
-    private MACAlgorithms(String sksname, String josename, String jcename, boolean sks_mandatory) {
-        this.sksname = sksname;
-        this.josename = josename;
-        this.jcename = jcename;
-        this.sks_mandatory = sks_mandatory;
+    private MACAlgorithms(String sksName, String joseName, String jceName, boolean sksMandatory) {
+        this.sksName = sksName;
+        this.joseName = joseName;
+        this.jceName = jceName;
+        this.sksMandatory = sksMandatory;
     }
 
 
@@ -52,13 +52,13 @@ public enum MACAlgorithms implements SignatureAlgorithms {
 
     @Override
     public boolean isMandatorySKSAlgorithm() {
-        return sks_mandatory;
+        return sksMandatory;
     }
 
 
     @Override
     public String getJCEName() {
-        return jcename;
+        return jceName;
     }
 
 
@@ -79,9 +79,9 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static boolean testAlgorithmURI(String sksname) {
+    public static boolean testAlgorithmURI(String sksName) {
         for (MACAlgorithms alg : MACAlgorithms.values()) {
-            if (sksname.equals(alg.sksname)) {
+            if (sksName.equals(alg.sksName)) {
                 return true;
             }
         }
@@ -89,33 +89,34 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static MACAlgorithms getAlgorithmFromID(String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException {
+    public static MACAlgorithms getAlgorithmFromID(String algorithmId,
+                                                   AlgorithmPreferences algorithmPreferences) throws IOException {
         for (MACAlgorithms alg : values()) {
-            if (algorithm_id.equals(alg.sksname)) {
+            if (algorithmId.equals(alg.sksName)) {
                 if (algorithmPreferences == AlgorithmPreferences.JOSE) {
-                    throw new IOException("JOSE algorithm expected: " + algorithm_id);
+                    throw new IOException("JOSE algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
-            if (algorithm_id.equals(alg.josename)) {
+            if (algorithmId.equals(alg.joseName)) {
                 if (algorithmPreferences == AlgorithmPreferences.SKS) {
-                    throw new IOException("SKS algorithm expected: " + algorithm_id);
+                    throw new IOException("SKS algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
         }
-        throw new IOException("Unknown MAC algorithm: " + algorithm_id);
+        throw new IOException("Unknown MAC algorithm: " + algorithmId);
     }
 
 
     @Override
     public String getAlgorithmId(AlgorithmPreferences algorithmPreferences) throws IOException {
-        if (josename == null) {
+        if (joseName == null) {
             if (algorithmPreferences == AlgorithmPreferences.JOSE) {
                 throw new IOException("There is no JOSE algorithm for: " + toString());
             }
-            return sksname;
+            return sksName;
         }
-        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
     }
 }

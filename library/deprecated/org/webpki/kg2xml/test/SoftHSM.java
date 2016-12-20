@@ -137,11 +137,11 @@ public class SoftHSM implements ServerCryptoInterface
               {
                 // E2ES mode
                 PublicKey device_public_key = device_certificate.getPublicKey ();
-                AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                AsymSignatureAlgorithms signatureAlgorithm = device_public_key instanceof RSAPublicKey ?
                     AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
       
                 // Verify that attestation was signed by the device key
-                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
+                Signature verifier = Signature.getInstance (signatureAlgorithm.getJCEName ());
                 verifier.initVerify (device_public_key);
                 verifier.update (attestation_arguments);
                 if (!verifier.verify (session_attestation))

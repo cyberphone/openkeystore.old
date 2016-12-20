@@ -29,7 +29,7 @@ public class XMLSymKeyVerifier extends XMLVerifierCore {
 
     void verify(XMLSignatureWrapper signature) throws IOException, GeneralSecurityException {
         // Right kind of XML Dsig?
-        if (signature.public_key != null || signature.certificates != null) {
+        if (signature.publicKey != null || signature.certificates != null) {
             throw new IOException("Missing symmetric key!");
         }
 

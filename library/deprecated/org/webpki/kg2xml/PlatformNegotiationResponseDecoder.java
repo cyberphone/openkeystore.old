@@ -38,7 +38,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
@@ -54,7 +54,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
         
         nonce = ah.getBinaryConditional (NONCE_ATTR);
 
@@ -70,7 +70,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
             ImagePreference im_pref = new ImagePreference ();
             rd.getNext (IMAGE_PREFERENCE_ELEM);
             im_pref.type = ah.getString (TYPE_ATTR);
-            im_pref.mime_type = ah.getString (MIME_TYPE_ATTR);
+            im_pref.mimeType = ah.getString (MIME_TYPE_ATTR);
             im_pref.width = ah.getInt (WIDTH_ATTR);
             im_pref.height = ah.getInt (HEIGHT_ATTR);
             image_preferences.add (im_pref);

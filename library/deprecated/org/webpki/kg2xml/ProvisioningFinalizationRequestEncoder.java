@@ -48,21 +48,21 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinalizationRequest
   {
-    String submit_url;
+    String submitUrl;
 
     private String prefix;  // Default: no prefix
 
-    ServerState server_state;
+    ServerState serverState;
     
    
     // Constructors
 
-    public ProvisioningFinalizationRequestEncoder (ServerState server_state, String submit_url) throws IOException
+    public ProvisioningFinalizationRequestEncoder (ServerState serverState, String submitUrl) throws IOException
       {
-        this.server_state = server_state;
-        this.submit_url = submit_url;
-        server_state.checkState (true, server_state.current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
-        server_state.current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
+        this.serverState = serverState;
+        this.submitUrl = submitUrl;
+        serverState.checkState (true, serverState.current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
+        serverState.current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
 
 
@@ -77,13 +77,13 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_state.server_session_id);
+        ds.createEnvelopedSignature (doc, serverState.serverSessionId);
       }
     
     
     private byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
-        return server_state.mac (data, method);
+        return serverState.mac (data, method);
       }
     
     
@@ -94,21 +94,21 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
     
     
     private void writePostOp (DOMWriterHelper wr,
-                              PostProvisioningTargetKey target_key,
+                              PostProvisioningTargetKey targetKey,
                               MacGenerator post_op_mac) throws IOException, GeneralSecurityException
       {
-        wr.addChildElement (target_key.post_operation.getXMLElem ());
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
-        wr.setBinaryAttribute (CertificateFilter.CF_FINGER_PRINT, HashAlgorithms.SHA256.digest (target_key.certificate_data));
-        byte[] device_id = server_state.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_state.device_certificate.getEncoded ();
-        byte[] key_id = server_state.server_crypto_interface.mac (target_key.certificate_data, device_id);
-        byte[] authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key,
+        wr.addChildElement (targetKey.postOperation.getXMLElem ());
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, targetKey.clientSessionId);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, targetKey.serverSessionId);
+        wr.setBinaryAttribute (CertificateFilter.CF_FINGER_PRINT, HashAlgorithms.SHA256.digest (targetKey.certificate_data));
+        byte[] deviceId = serverState.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : serverState.device_certificate.getEncoded ();
+        byte[] keyId = serverState.serverCryptoInterface.mac (targetKey.certificate_data, deviceId);
+        byte[] authorization = serverState.serverCryptoInterface.generateKeyManagementAuthorization (targetKey.keyManagementKey,
                                                                                                         ArrayUtil.add (SecureKeyStore.KMK_TARGET_KEY_REFERENCE,
-                                                                                                                       key_id));
+                                                                                                                       keyId));
         wr.setBinaryAttribute (AUTHORIZATION_ATTR, authorization);
         post_op_mac.addArray (authorization);
-        mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());
+        mac (wr, post_op_mac.getResult (), targetKey.postOperation.getMethod ());
         wr.getParent ();
       }
 
@@ -122,21 +122,21 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             //////////////////////////////////////////////////////////////////////////
             // Set top-level attributes
             //////////////////////////////////////////////////////////////////////////
-            wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_state.client_session_id);
+            wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, serverState.clientSessionId);
     
-            wr.setStringAttribute (ID_ATTR, server_state.server_session_id);
+            wr.setStringAttribute (ID_ATTR, serverState.serverSessionId);
     
-            wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+            wr.setStringAttribute (SUBMIT_URL_ATTR, submitUrl);
     
             byte[] nonce;
-            wr.setBinaryAttribute (CHALLENGE_ATTR, nonce = server_state.server_crypto_interface.generateNonce ());
+            wr.setBinaryAttribute (CHALLENGE_ATTR, nonce = serverState.serverCryptoInterface.generateNonce ());
     
             XMLSignatureWrapper.addXMLSignatureNS (wr);
     
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
-            for (ServerState.Key key : server_state.getKeys ())
+            for (ServerState.Key key : serverState.getKeys ())
               {
                 wr.addChildElement (ISSUED_CREDENTIAL_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
@@ -149,20 +149,20 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                 // Always: the X509 Certificate(s)
                 ////////////////////////////////////////////////////////////////////////
                 MacGenerator set_certificate = new MacGenerator ();
-                set_certificate.addArray (key.public_key.getEncoded ());
+                set_certificate.addArray (key.publicKey.getEncoded ());
                 set_certificate.addString (key.id);
-                X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
-                if (key.trust_anchor_set && !CertificateUtil.isTrustAnchor (certificate_path[certificate_path.length - 1]))
+                X509Certificate[] certificatePath = CertificateUtil.getSortedPath (key.certificatePath);
+                if (key.trust_anchor_set && !CertificateUtil.isTrustAnchor (certificatePath[certificatePath.length - 1]))
                   {
                     throw new IOException ("Invalid \"" + TRUST_ANCHOR_ATTR + "\"");
                   }
-                for (X509Certificate certificate : certificate_path)
+                for (X509Certificate certificate : certificatePath)
                   {
                     set_certificate.addArray (certificate.getEncoded ());
                   }
                 mac (wr, set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
-                XMLSignatureWrapper.writeX509DataSubset (wr, certificate_path);
-                byte[] ee_cert = certificate_path[0].getEncoded ();
+                XMLSignatureWrapper.writeX509DataSubset (wr, certificatePath);
+                byte[] ee_cert = certificatePath[0].getEncoded ();
                 
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: "piggybacked" symmetric key
@@ -222,9 +222,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning unlock operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerState.PostProvisioningTargetKey pptk : server_state.post_operations)
+            for (ServerState.PostProvisioningTargetKey pptk : serverState.post_operations)
               {
-                if (pptk.post_operation == ServerState.PostOperation.UNLOCK_KEY)
+                if (pptk.postOperation == ServerState.PostOperation.UNLOCK_KEY)
                   {
                     writePostOp (wr, pptk, new MacGenerator ());
                   }
@@ -233,9 +233,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning delete operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerState.PostProvisioningTargetKey pptk : server_state.post_operations)
+            for (ServerState.PostProvisioningTargetKey pptk : serverState.post_operations)
               {
-                if (pptk.post_operation == ServerState.PostOperation.DELETE_KEY)
+                if (pptk.postOperation == ServerState.PostOperation.DELETE_KEY)
                   {
                     writePostOp (wr, pptk, new MacGenerator ());
                   }
@@ -245,10 +245,10 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
             MacGenerator close = new MacGenerator ();
-            close.addString (server_state.client_session_id);
-            close.addString (server_state.server_session_id);
-            close.addString (server_state.issuer_uri);
-            close.addArray (server_state.saved_close_nonce = nonce);
+            close.addString (serverState.clientSessionId);
+            close.addString (serverState.serverSessionId);
+            close.addString (serverState.issuer_uri);
+            close.addArray (serverState.saved_close_nonce = nonce);
             top.setAttribute (MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
                                                                             SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION)));

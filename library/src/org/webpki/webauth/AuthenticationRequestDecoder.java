@@ -32,29 +32,30 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 
 public class AuthenticationRequestDecoder extends ClientDecoder {
+
     private static final long serialVersionUID = 1L;
 
-    String server_time;
+    String serverTime;
 
     String id;
 
     LinkedHashSet<AsymSignatureAlgorithms> algorithms = new LinkedHashSet<AsymSignatureAlgorithms>();
 
-    LinkedHashSet<String> client_features = new LinkedHashSet<String>();
+    LinkedHashSet<String> clientFeatures = new LinkedHashSet<String>();
 
-    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter>();
+    Vector<CertificateFilter> certificateFilters = new Vector<CertificateFilter>();
 
-    String submit_url;
+    String submitUrl;
 
-    String abort_url;
+    String abortUrl;
 
     String[] languages;
 
-    LinkedHashSet<KeyContainerTypes> key_container_list;
+    LinkedHashSet<KeyContainerTypes> keyContainerList;
 
     int expires;
 
-    boolean extended_cert_path;
+    boolean extendedCertPath;
 
     public AsymSignatureAlgorithms[] getSignatureAlgorithms() {
         return algorithms.toArray(new AsymSignatureAlgorithms[0]);
@@ -62,12 +63,12 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
 
 
     public CertificateFilter[] getCertificateFilters() {
-        return certificate_filters.toArray(new CertificateFilter[0]);
+        return certificateFilters.toArray(new CertificateFilter[0]);
     }
 
 
     public LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerList() {
-        return key_container_list;
+        return keyContainerList;
     }
 
 
@@ -77,22 +78,22 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
 
 
     public String getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public String getOptionalAbortURL() {
-        return abort_url;
+        return abortUrl;
     }
 
 
     public String[] getRequestedClientFeatures() {
-        return client_features.toArray(new String[0]);
+        return clientFeatures.toArray(new String[0]);
     }
 
 
@@ -106,7 +107,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
     }
 
     public boolean wantsExtendedCertPath() {
-        return extended_cert_path;
+        return extendedCertPath;
     }
 
 
@@ -121,17 +122,17 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         id = InputValidator.getID(rd, ID_JSON);
 
-        server_time = rd.getString(SERVER_TIME_JSON);
+        serverTime = rd.getString(SERVER_TIME_JSON);
 
-        submit_url = rd.getString(SUBMIT_URL_JSON);
+        submitUrl = rd.getString(SUBMIT_URL_JSON);
 
-        abort_url = rd.getStringConditional(ABORT_URL_JSON);
+        abortUrl = rd.getStringConditional(ABORT_URL_JSON);
 
         languages = InputValidator.getListConditional(rd, PREFERRED_LANGUAGES_JSON);
 
-        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet(InputValidator.getListConditional(rd, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
+        keyContainerList = KeyContainerTypes.getOptionalKeyContainerSet(InputValidator.getListConditional(rd, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
 
-        extended_cert_path = rd.getBooleanConditional(EXTENDED_CERT_PATH_JSON);
+        extendedCertPath = rd.getBooleanConditional(EXTENDED_CERT_PATH_JSON);
 
         expires = rd.hasProperty(EXPIRES_JSON) ? rd.getInt(EXPIRES_JSON) : -1;  // Default: no timeout and associated GUI
 
@@ -140,7 +141,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         String[] features = InputValidator.getURIListConditional(rd, CLIENT_FEATURES_JSON);
         if (features != null) for (String feature : features) {
-            if (!client_features.add(feature)) {
+            if (!clientFeatures.add(feature)) {
                 bad("Duplicate \"" + CLIENT_FEATURES_JSON + "\"  :" + feature);
             }
         }
@@ -162,7 +163,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
         // Get the optional certificate filters [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader cf : InputValidator.getObjectArrayConditional(rd, CERTIFICATE_FILTERS_JSON)) {
-            certificate_filters.add(CertificateFilterReader.read(cf));
+            certificateFilters.add(CertificateFilterReader.read(cf));
         }
     }
 

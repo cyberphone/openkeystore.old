@@ -83,12 +83,12 @@ public class ASN1 {
     }
 
     static SKSPrivateKey parsePrivateKey() throws GeneralSecurityException {
-        SKSPrivateKey private_key = new SKSPrivateKey();
+        SKSPrivateKey privateKey = new SKSPrivateKey();
         getObject(ASN1_SEQUENCE);           // Outer SEQUENCE
         getObject(ASN1_INTEGER);              // PKCS #8 version
         if (length != 1 || buffer[index++] != 0x00)
             throw new GeneralSecurityException("Unknown PKCS #8 version");
-        if (private_key.rsa = parseAlgorithmID()) {
+        if (privateKey.rsa = parseAlgorithmID()) {
             getPrivateKeyPayload(0);
             for (int q = 0; q < 8; q++) {
                 scanObject(ASN1_INTEGER);
@@ -107,7 +107,7 @@ public class ASN1 {
             }
         }
         if (index != max_buflen) throw new GeneralSecurityException("Private key length error");
-        return private_key;
+        return privateKey;
     }
 
     static void getPrivateKeyPayload(int version) throws GeneralSecurityException {
@@ -139,17 +139,17 @@ public class ASN1 {
     static byte[] returnPublicKey() throws GeneralSecurityException {
         int i = index;
         parsePublicKey();
-        byte[] public_key = new byte[length = index - i];
-        System.arraycopy(buffer, index - length, public_key, 0, length);
-        return public_key;
+        byte[] publicKey = new byte[length = index - i];
+        System.arraycopy(buffer, index - length, publicKey, 0, length);
+        return publicKey;
     }
 
     static SKSPublicKey parsePublicKey() throws GeneralSecurityException {
-        SKSPublicKey public_key = new SKSPublicKey();
+        SKSPublicKey publicKey = new SKSPublicKey();
         getObject(ASN1_SEQUENCE);
         int i = index;
         int l = length;
-        if (public_key.rsa = parseAlgorithmID()) {
+        if (publicKey.rsa = parseAlgorithmID()) {
             getBitString();
             getObject(ASN1_SEQUENCE);
             getObject(ASN1_INTEGER);
@@ -163,7 +163,7 @@ public class ASN1 {
         }
         index += length;
         if (i != index - l) throw new GeneralSecurityException("Public key length error");
-        return public_key;
+        return publicKey;
     }
 
     private static boolean parseAlgorithmID() throws GeneralSecurityException {

@@ -17,11 +17,15 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
+
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
 import java.security.GeneralSecurityException;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 
@@ -37,38 +41,38 @@ public class CertificateInfo {
                                             "MAY", "JUN", "JUL", "AUG",
                                             "SEP", "OCT", "NOV", "DEC"};
 
-    private String issuer_dn;
+    private String issuerDn;
 
-    private String serial_number;
+    private String serialNumber;
 
-    private String subject_dn;
+    private String subjectDn;
 
-    private Date not_valid_before;
+    private Date notValidBefore;
 
-    private Date not_valid_after;
+    private Date notValidAfter;
 
     private X509Certificate certificate;
 
     private boolean trusted;
 
-    private boolean trust_mode_set;
+    private boolean trustModeSet;
 
 
     public CertificateInfo(X509Certificate certificate, boolean trusted) throws IOException {
         this.certificate = certificate;
         this.trusted = trusted;
-        trust_mode_set = true;
-        issuer_dn = CertificateUtil.convertRFC2253ToLegacy(certificate.getIssuerX500Principal().getName());
-        serial_number = certificate.getSerialNumber().toString();
-        subject_dn = CertificateUtil.convertRFC2253ToLegacy(certificate.getSubjectX500Principal().getName());
-        not_valid_before = certificate.getNotBefore();
-        not_valid_after = certificate.getNotAfter();
+        trustModeSet = true;
+        issuerDn = CertificateUtil.convertRFC2253ToLegacy(certificate.getIssuerX500Principal().getName());
+        serialNumber = certificate.getSerialNumber().toString();
+        subjectDn = CertificateUtil.convertRFC2253ToLegacy(certificate.getSubjectX500Principal().getName());
+        notValidBefore = certificate.getNotBefore();
+        notValidAfter = certificate.getNotAfter();
     }
 
 
     public CertificateInfo(X509Certificate certificate) throws IOException {
         this(certificate, true);
-        trust_mode_set = false;
+        trustModeSet = false;
     }
 
 
@@ -92,7 +96,7 @@ public class CertificateInfo {
 
     private String getFormattedSubject() {
         StringBuffer sb = new StringBuffer();
-        if (subject_dn != null) {
+        if (subjectDn != null) {
             Conditional(sb, "Name", getSubjectCommonName());
             Conditional(sb, "SerialNumber", getSubjectSerialNumber());
             Conditional(sb, "Organization", getSubjectOrganization());
@@ -152,7 +156,7 @@ public class CertificateInfo {
      * Returns the subject's common name (CN).
      */
     public String getSubjectCommonName() {
-        return parseDN(subject_dn, "CN=");
+        return parseDN(subjectDn, "CN=");
     }
 
 
@@ -160,7 +164,7 @@ public class CertificateInfo {
      * Returns the subject's organization (O).
      */
     public String getSubjectOrganization() {
-        return parseDN(subject_dn, "O=");
+        return parseDN(subjectDn, "O=");
     }
 
 
@@ -168,7 +172,7 @@ public class CertificateInfo {
      * Returns the subject's organizational unit (OU).
      */
     public String getSubjectOrganizationUnit() {
-        return parseDN(subject_dn, "OU=");
+        return parseDN(subjectDn, "OU=");
     }
 
 
@@ -176,7 +180,7 @@ public class CertificateInfo {
      * Returns the subject's e-mail address (E).
      */
     public String getSubjectEmail() {
-        return parseDN(subject_dn, "E=");
+        return parseDN(subjectDn, "E=");
     }
 
 
@@ -184,7 +188,7 @@ public class CertificateInfo {
      * Returns the subject's country address (C).
      */
     public String getSubjectCountry() {
-        return parseDN(subject_dn, "C=");
+        return parseDN(subjectDn, "C=");
     }
 
 
@@ -192,7 +196,7 @@ public class CertificateInfo {
      * Returns the subject's serial number (OID 2.5.4.5).
      */
     public String getSubjectSerialNumber() {
-        return parseDN(subject_dn, "SerialNumber=");
+        return parseDN(subjectDn, "SerialNumber=");
     }
 
 
@@ -212,7 +216,7 @@ public class CertificateInfo {
      * Returns the subject of this certificate
      */
     public String getSubject() {
-        return getItem(subject_dn);
+        return getItem(subjectDn);
     }
 
 
@@ -220,7 +224,7 @@ public class CertificateInfo {
      * Returns the issuer of this certificate
      */
     public String getIssuer() {
-        return getItem(issuer_dn);
+        return getItem(issuerDn);
     }
 
 
@@ -228,7 +232,7 @@ public class CertificateInfo {
      * Returns the serial number of this certificate
      */
     public String getSerialNumber() {
-        return getItem(serial_number);
+        return getItem(serialNumber);
     }
 
 
@@ -236,7 +240,7 @@ public class CertificateInfo {
      * Returns the start date of this certificate's validity period.
      */
     public Date getNotBeforeDate() {
-        return not_valid_before;
+        return notValidBefore;
     }
 
 
@@ -244,7 +248,7 @@ public class CertificateInfo {
      * Returns the end date of this certificate's validity period.
      */
     public Date getNotAfterDate() {
-        return not_valid_after;
+        return notValidAfter;
     }
 
 
@@ -253,7 +257,7 @@ public class CertificateInfo {
      */
     public boolean isValid() {
         Date d = new Date();
-        return d.after(not_valid_before) && d.before(not_valid_after);
+        return d.after(notValidBefore) && d.before(notValidAfter);
     }
 
 
@@ -317,7 +321,7 @@ public class CertificateInfo {
 
 
     public boolean isTrusted() throws IOException {
-        if (trust_mode_set) {
+        if (trustModeSet) {
             return trusted;
         }
         throw new IOException("Illegal call.  Trust is unknown");
@@ -338,14 +342,14 @@ public class CertificateInfo {
     public String toString(boolean Verbose) {
         byte hash[] = getCertificateHash();
         return "  Subject DN: " + getSubject() + "\n" +
-                "  Issuer DN: " + getIssuer() + "\n" +
-                "  Serial number: " + getSerialNumber() + "\n" +
-                (Verbose ? getFormattedSubject() : "") +
-                "  Validity: " +
-                toDate(not_valid_before) + " To " +
-                toDate(not_valid_after) + (isValid() ? "" : " ***EXPIRED***") +
-                (trusted ? "" : " ***UNKNOWN CA***") +
-                "\n  SHA1 hash: " + (hash == null ? "BAD" : DebugFormatter.getHexString(hash));
+               "  Issuer DN: " + getIssuer() + "\n" +
+               "  Serial number: " + getSerialNumber() + "\n" +
+               (Verbose ? getFormattedSubject() : "") +
+               "  Validity: " +
+               toDate(notValidBefore) + " To " +
+               toDate(notValidAfter) + (isValid() ? "" : " ***EXPIRED***") +
+               (trusted ? "" : " ***UNKNOWN CA***") +
+               "\n  SHA1 hash: " + (hash == null ? "BAD" : DebugFormatter.getHexString(hash));
     }
 
 

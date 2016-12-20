@@ -75,11 +75,11 @@ public class Sign {
         }
 
         @Override
-        public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException {
-            if (key_id.equals(SYMMETRIC_KEY_NAME)) {
+        public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String keyId) throws IOException {
+            if (keyId.equals(SYMMETRIC_KEY_NAME)) {
                 return ArrayUtil.compare(digest, getMacAlgorithm().digest(SYMMETRIC_KEY, data));
             }
-            throw new IOException("Unknown key id: " + key_id);
+            throw new IOException("Unknown key id: " + keyId);
         }
     }
 
@@ -145,9 +145,9 @@ public class Sign {
     public static void createAsymmetricKeySignature(JSONObjectWriter wr, boolean rsa) throws IOException {
         try {
             KeyStore ks = rsa ? DemoKeyStore.getMybankDotComKeyStore() : DemoKeyStore.getECDSAStore();
-            PrivateKey private_key = (PrivateKey) ks.getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
-            PublicKey public_key = ks.getCertificate("mykey").getPublicKey();
-            wr.setSignature(new JSONAsymKeySigner(new AsymSigner(private_key, public_key)));
+            PrivateKey privateKey = (PrivateKey) ks.getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
+            PublicKey publicKey = ks.getCertificate("mykey").getPublicKey();
+            wr.setSignature(new JSONAsymKeySigner(new AsymSigner(privateKey, publicKey)));
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
         }

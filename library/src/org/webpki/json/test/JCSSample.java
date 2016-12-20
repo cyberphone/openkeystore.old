@@ -70,9 +70,9 @@ public class JCSSample {
     static void createAsymmetricKeySignature(JSONObjectWriter wr, String file_name, AlgorithmPreferences jose_alg_pref) throws IOException {
         try {
             KeyStore ks = DemoKeyStore.getECDSAStore();
-            PrivateKey private_key = (PrivateKey) ks.getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
-            PublicKey public_key = ks.getCertificate("mykey").getPublicKey();
-            JSONAsymKeySigner signer = new JSONAsymKeySigner(new AsymSigner(private_key, public_key)).setAlgorithmPreferences(jose_alg_pref);
+            PrivateKey privateKey = (PrivateKey) ks.getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray());
+            PublicKey publicKey = ks.getCertificate("mykey").getPublicKey();
+            JSONAsymKeySigner signer = new JSONAsymKeySigner(new AsymSigner(privateKey, publicKey)).setAlgorithmPreferences(jose_alg_pref);
             wr.setSignature(signer);
             ArrayUtil.writeFile(file_name, signer.getNormalizedData());
         } catch (GeneralSecurityException e) {

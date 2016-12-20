@@ -17,7 +17,9 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
+
 import java.security.PublicKey;
 
 import org.webpki.json.JSONObjectReader;
@@ -28,11 +30,11 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator {
 
     private static final long serialVersionUID = 1L;
 
-    LinkedHashMap<String, GeneratedPublicKey> generated_keys = new LinkedHashMap<String, GeneratedPublicKey>();
+    LinkedHashMap<String, GeneratedPublicKey> generatedKeys = new LinkedHashMap<String, GeneratedPublicKey>();
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     class GeneratedPublicKey {
 
@@ -50,19 +52,19 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
         //////////////////////////////////////////////////////////////////////////
         // Get the generated keys [1..n]
         //////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader key_rd : getObjectArray(rd, GENERATED_KEYS_JSON)) {
+        for (JSONObjectReader keyReader : getObjectArray(rd, GENERATED_KEYS_JSON)) {
             GeneratedPublicKey gk = new GeneratedPublicKey();
-            gk.id = key_rd.getString(ID_JSON);
-            gk.attestation = key_rd.getBinary(ATTESTATION_JSON);
-            gk.publicKey = key_rd.getPublicKey();
-            if (generated_keys.put(gk.id, gk) != null) {
+            gk.id = keyReader.getString(ID_JSON);
+            gk.attestation = keyReader.getBinary(ATTESTATION_JSON);
+            gk.publicKey = keyReader.getPublicKey();
+            if (generatedKeys.put(gk.id, gk) != null) {
                 ServerState.bad("Duplicate key id:" + gk.id);
             }
         }

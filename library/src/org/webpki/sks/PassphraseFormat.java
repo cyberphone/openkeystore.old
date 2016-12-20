@@ -27,11 +27,11 @@ public enum PassphraseFormat {
 
     private final String name;       // As expressed in protocols
 
-    private final byte sks_value;    // As expressed in SKS
+    private final byte sksValue;    // As expressed in SKS
 
-    private PassphraseFormat(String name, byte sks_value) {
+    private PassphraseFormat(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -40,7 +40,7 @@ public enum PassphraseFormat {
     }
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
     public static PassphraseFormat getPassphraseFormatFromString(String name) throws IOException {

@@ -40,9 +40,9 @@ import static org.webpki.wasp.prof.xds.XDSProfileConstants.*;
 
 public class XDSProfileResponseEncoder extends XMLObjectWrapper implements SignatureProfileResponseEncoder {
 
-    private String request_url;
+    private String requestUrl;
 
-    private Date client_time;
+    private Date clientTime;
 
     private String id;
 
@@ -105,9 +105,9 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
 
         wr.setStringAttribute(SUBMIT_URL_ATTR, s_req_dec.getSubmitUrl());
 
-        wr.setStringAttribute(REQUEST_URL_ATTR, request_url);
+        wr.setStringAttribute(REQUEST_URL_ATTR, requestUrl);
 
-        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, client_time);
+        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, clientTime);
 
         if (server_certificate_fingerprint != null) {
             wr.setBinaryAttribute(SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
@@ -133,13 +133,13 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
     public void createSignedData(SignerInterface signer,
                                  SignatureResponseEncoder s_resp_enc,
                                  SignatureRequestDecoder s_req_dec,
-                                 String request_url,
-                                 Date client_time,
+                                 String requestUrl,
+                                 Date clientTime,
                                  byte[] server_certificate_fingerprint) throws IOException {
         this.s_resp_enc = s_resp_enc;
         this.s_req_dec = s_req_dec;
-        this.request_url = request_url;
-        this.client_time = client_time;
+        this.requestUrl = requestUrl;
+        this.clientTime = clientTime;
         this.id = s_req_dec.getID();
         this.server_certificate_fingerprint = server_certificate_fingerprint;
         this.doc_sign = new DocumentSignatures(to_decoder.getDigestAlgorithm(),

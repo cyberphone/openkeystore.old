@@ -33,9 +33,9 @@ import static org.webpki.wasp.WASPConstants.*;
 abstract class AuthenticationResponse extends XMLObjectWrapper {
     String id;
 
-    String submit_url;
+    String submitUrl;
 
-    String request_url;
+    String requestUrl;
 
     byte[] server_certificate_fingerprint;                     // Optional
 

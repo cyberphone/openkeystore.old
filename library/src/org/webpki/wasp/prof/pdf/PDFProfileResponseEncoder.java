@@ -42,11 +42,11 @@ import static org.webpki.wasp.prof.pdf.PDFProfileConstants.*;
 
 public class PDFProfileResponseEncoder extends XMLObjectWrapper implements SignatureProfileResponseEncoder {
 
-    private String request_url;
+    private String requestUrl;
 
-    private Date client_time;
+    private Date clientTime;
 
-    private String server_time;
+    private String serverTime;
 
     private String id;
 
@@ -107,11 +107,11 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
         wr.setStringAttribute(ID_ATTR, id);
 
         wr.setStringAttribute(SUBMIT_URL_ATTR, s_req_dec.getSubmitUrl());
-        wr.setStringAttribute(REQUEST_URL_ATTR, request_url);
+        wr.setStringAttribute(REQUEST_URL_ATTR, requestUrl);
 
-        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, client_time);
+        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, clientTime);
 
-        wr.setStringAttribute(SERVER_TIME_ATTR, server_time);
+        wr.setStringAttribute(SERVER_TIME_ATTR, serverTime);
 
         if (server_certificate_fingerprint != null) {
             wr.setBinaryAttribute(SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
@@ -132,14 +132,14 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
     public void createSignedData(SignerInterface signer,
                                  SignatureResponseEncoder s_resp_enc,
                                  SignatureRequestDecoder s_req_dec,
-                                 String request_url,
-                                 Date client_time,
+                                 String requestUrl,
+                                 Date clientTime,
                                  byte[] server_certificate_fingerprint) throws IOException {
         this.s_resp_enc = s_resp_enc;
         this.s_req_dec = s_req_dec;
-        this.request_url = request_url;
-        this.client_time = client_time;
-        server_time = s_req_dec.getServerTime();
+        this.requestUrl = requestUrl;
+        this.clientTime = clientTime;
+        serverTime = s_req_dec.getServerTime();
         id = s_req_dec.getID();
         this.server_certificate_fingerprint = server_certificate_fingerprint;
         doc_sign = new DocumentSignatures(HashAlgorithms.getAlgorithmFromID(to_decoder.digest_algorithm),

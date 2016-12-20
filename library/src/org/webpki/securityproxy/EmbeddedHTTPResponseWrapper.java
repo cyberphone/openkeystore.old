@@ -48,9 +48,9 @@ public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements 
      * Normal HTTP return
      *
      * @param data      The HTTP body
-     * @param mime_type The MIME type
+     * @param mimeType The MIME type
      */
-    public EmbeddedHTTPResponseWrapper(byte[] data, String mime_type) {
-        super(data, mime_type);
+    public EmbeddedHTTPResponseWrapper(byte[] data, String mimeType) {
+        super(data, mimeType);
     }
 }

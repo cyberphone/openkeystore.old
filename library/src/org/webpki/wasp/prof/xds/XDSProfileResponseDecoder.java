@@ -53,13 +53,13 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
     // Attributes
     private String id;
 
-    private String submit_url;
+    private String submitUrl;
 
-    private String request_url;
+    private String requestUrl;
 
-    private GregorianCalendar client_time;
+    private GregorianCalendar clientTime;
 
-    private GregorianCalendar server_time;
+    private GregorianCalendar serverTime;
 
     private byte[] server_certificate_fingerprint;              // Optional
 
@@ -108,22 +108,22 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
 
 
     public String getRequestURL() {
-        return request_url;
+        return requestUrl;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public GregorianCalendar getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public GregorianCalendar getClientTime() {
-        return client_time;
+        return clientTime;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,13 +137,13 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
         //////////////////////////////////////////////////////////////////////////
         id = ah.getString(ID_ATTR);
 
-        server_time = ah.getDateTime(SERVER_TIME_ATTR);
+        serverTime = ah.getDateTime(SERVER_TIME_ATTR);
 
-        submit_url = ah.getString(SUBMIT_URL_ATTR);
+        submitUrl = ah.getString(SUBMIT_URL_ATTR);
 
-        request_url = ah.getString(REQUEST_URL_ATTR);
+        requestUrl = ah.getString(REQUEST_URL_ATTR);
 
-        client_time = ah.getDateTime(CLIENT_TIME_ATTR);
+        clientTime = ah.getDateTime(CLIENT_TIME_ATTR);
 
         server_certificate_fingerprint = ah.getBinaryConditional(SERVER_CERT_FP_ATTR);
 
@@ -211,8 +211,8 @@ public class XDSProfileResponseDecoder extends XMLObjectWrapper implements Signa
                     ".  Got: " + ds.getDigestAlgorithm().getAlgorithmId());
         }
 
-        if (enc.signature_algorithm != null && enc.signature_algorithm != ds.getSignatureAlgorithm()) {
-            bad("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS) +
+        if (enc.signatureAlgorithm != null && enc.signatureAlgorithm != ds.getSignatureAlgorithm()) {
+            bad("Wrong signature algorithm.  Requested: " + enc.signatureAlgorithm.getAlgorithmId(AlgorithmPreferences.SKS) +
                     ".  Got: " + ds.getSignatureAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS));
         }
 

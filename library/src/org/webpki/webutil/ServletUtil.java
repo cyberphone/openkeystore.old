@@ -99,11 +99,11 @@ public class ServletUtil {
     public static KeyStore getKeyStore(ServletContext context, String certsfile, String password)
             throws IOException, GeneralSecurityException {
         FileInputStream file = new FileInputStream(context.getRealPath(File.separator +
-                "WEB-INF" +
-                File.separator +
-                "classes" +
-                File.separator +
-                certsfile));
+                                                                       "WEB-INF" +
+                                                                       File.separator +
+                                                                       "classes" +
+                                                                       File.separator +
+                                                                       certsfile));
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(file, password.toCharArray());
         return ks;

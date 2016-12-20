@@ -145,10 +145,10 @@ public class InfoCardReader
       }
 
 /*
-    public InfoCardReader setCardImage (byte[] image_data, String mime_type)
+    public InfoCardReader setCardImage (byte[] image_data, String mimeType)
       {
         this.image_data = image_data;
-        this.image_mime = mime_type;
+        this.image_mime = mimeType;
         return this;
       }
 */

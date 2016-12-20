@@ -33,7 +33,7 @@ import static org.webpki.wasp.WASPConstants.*;
 
 
 public class AuthenticationRequestDecoder extends AuthenticationRequest {
-    private String server_time;
+    private String serverTime;
 
     private XMLSignatureWrapper signature;                                              // Optional
 
@@ -44,7 +44,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
 
         ap.signed_key_info = ah.getBooleanConditional(SIGNED_KEY_INFO_ATTR);
 
-        ap.extended_cert_path = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
+        ap.extendedCertPath = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
 
         String value;
 
@@ -66,7 +66,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
 
         if ((value = ah.getStringConditional(SIGNATURE_ALG_ATTR)) != null) {
             if (AsymSignatureAlgorithms.testAlgorithmURI(value)) {
-                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromID(value, AlgorithmPreferences.SKS);
+                ap.signatureAlgorithm = AsymSignatureAlgorithms.getAlgorithmFromID(value, AlgorithmPreferences.SKS);
             } else {
                 return;
             }
@@ -82,7 +82,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
 
 
     public CertificateFilter[] getCertificateFilters() {
-        return certificate_filters.toArray(new CertificateFilter[0]);
+        return certificateFilters.toArray(new CertificateFilter[0]);
     }
 
 
@@ -92,17 +92,17 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
 
 
     public String getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public String getAbortURL() {
-        return abort_url;
+        return abortUrl;
     }
 
 
@@ -143,11 +143,11 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
 
         id = ah.getString(ID_ATTR);
 
-        server_time = ah.getString(SERVER_TIME_ATTR);
+        serverTime = ah.getString(SERVER_TIME_ATTR);
 
-        submit_url = ah.getString(SUBMIT_URL_ATTR);
+        submitUrl = ah.getString(SUBMIT_URL_ATTR);
 
-        abort_url = ah.getStringConditional(ABORT_URL_ATTR);
+        abortUrl = ah.getStringConditional(ABORT_URL_ATTR);
 
         languages = ah.getListConditional(LANGUAGES_ATTR);
 
@@ -178,7 +178,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest {
         // Get the certificate filters [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         while (rd.hasNext(CERTIFICATE_FILTER_ELEM)) {
-            certificate_filters.add(SignatureRequestDecoder.readCertificateFilter(rd));
+            certificateFilters.add(SignatureRequestDecoder.readCertificateFilter(rd));
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////

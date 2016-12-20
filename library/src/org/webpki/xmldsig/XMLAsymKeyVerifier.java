@@ -24,21 +24,21 @@ import java.security.GeneralSecurityException;
 
 public class XMLAsymKeyVerifier extends XMLVerifierCore {
 
-    private PublicKey public_key;
+    private PublicKey publicKey;
 
     public PublicKey getPublicKey() {
-        return public_key;
+        return publicKey;
     }
 
 
     void verify(XMLSignatureWrapper signature) throws IOException, GeneralSecurityException {
         // Right kind of XML Dsig?
-        if ((public_key = signature.public_key) == null) {
+        if ((publicKey = signature.publicKey) == null) {
             throw new IOException("Missing public key!");
         }
 
         // Check signature
-        core_verify(signature, public_key);
+        core_verify(signature, publicKey);
     }
 
 }

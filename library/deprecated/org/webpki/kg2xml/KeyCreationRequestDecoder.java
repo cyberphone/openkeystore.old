@@ -50,20 +50,20 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       {
         byte[] mac;
         
-        Object user_data;
+        Object userData;
 
         PassphraseFormat format;
 
-        short retry_limit;
+        short retryLimit;
         
         String id;
         
-        byte[] encrypted_value;
+        byte[] encryptedValue;
  
         PUKPolicy (DOMReaderHelper rd) throws IOException
           {
-            encrypted_value = rd.getAttributeHelper ().getBinary (ENCRYPTED_PUK_ATTR);
-            retry_limit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
+            encryptedValue = rd.getAttributeHelper ().getBinary (ENCRYPTED_PUK_ATTR);
+            retryLimit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
             id = rd.getAttributeHelper ().getString (ID_ATTR);
             format = PassphraseFormat.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
             mac = rd.getAttributeHelper ().getBinary (MAC_ATTR);
@@ -72,7 +72,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public short getRetryLimit ()
           {
-            return retry_limit;
+            return retryLimit;
           }
 
 
@@ -83,19 +83,19 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public byte[] getEncryptedValue ()
           {
-            return encrypted_value;
+            return encryptedValue;
           }
 
 
-        public void setUserData (Object user_data)
+        public void setUserData (Object userData)
           {
-            this.user_data = user_data;
+            this.userData = userData;
           }
 
 
         public Object getUserData ()
           {
-            return user_data;
+            return userData;
           }
 
         
@@ -118,23 +118,23 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         
         String id;
         
-        PUKPolicy puk_policy;
+        PUKPolicy pukPolicy;
         
-        Object user_data;
+        Object userData;
 
         PassphraseFormat format;
 
-        short retry_limit;
+        short retryLimit;
 
-        short min_length;
+        short minLength;
 
-        short max_length;
+        short maxLength;
 
         Grouping grouping;
 
-        InputMethod input_method;
+        InputMethod inputMethod;
 
-        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
+        Set<PatternRestriction> patternRestrictions = EnumSet.noneOf (PatternRestriction.class);
 
         PINPolicy (DOMReaderHelper rd) throws IOException
           {
@@ -144,31 +144,31 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             
             id = ah.getString (ID_ATTR);
 
-            min_length = (short)ah.getInt (MIN_LENGTH_ATTR);
+            minLength = (short)ah.getInt (MIN_LENGTH_ATTR);
 
-            max_length = (short)ah.getInt (MAX_LENGTH_ATTR);
+            maxLength = (short)ah.getInt (MAX_LENGTH_ATTR);
 
-            if (min_length > max_length)
+            if (minLength > maxLength)
               {
                 bad ("PIN length: min > max");
               }
 
-            retry_limit = (short)ah.getInt (RETRY_LIMIT_ATTR);
+            retryLimit = (short)ah.getInt (RETRY_LIMIT_ATTR);
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
             grouping = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getProtocolName ()));
 
-            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getProtocolName ()));
+            inputMethod = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getProtocolName ()));
             
-            user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, true);
+            userModifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, true);
 
             String pr[] = ah.getListConditional (PATTERN_RESTRICTIONS_ATTR);
             if (pr != null)
               {
                 for (String pattern : pr)
                   {
-                    pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
+                    patternRestrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
                   }
               }
           }
@@ -176,25 +176,25 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public Set<PatternRestriction> getPatternRestrictions ()
           {
-            return pattern_restrictions;
+            return patternRestrictions;
           }
 
 
         public short getMinLength ()
           {
-            return min_length;
+            return minLength;
           }
 
 
         public short getMaxLength ()
           {
-            return max_length;
+            return maxLength;
           }
 
 
         public short getRetryLimit ()
           {
-            return retry_limit;
+            return retryLimit;
           }
 
 
@@ -210,25 +210,25 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        boolean user_defined = true;
+        boolean userDefined = true;
         
         public boolean getUserDefinedFlag ()
           {
-            return user_defined;
+            return userDefined;
           }
 
 
-        boolean user_modifiable;
+        boolean userModifiable;
         
         public boolean getUserModifiableFlag ()
           {
-            return user_modifiable;
+            return userModifiable;
           }
 
 
         public InputMethod getInputMethod ()
           {
-            return input_method;
+            return inputMethod;
           }
 
 
@@ -244,21 +244,21 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        public void setUserData (Object user_data)
+        public void setUserData (Object userData)
           {
-            this.user_data = user_data;
+            this.userData = userData;
           }
 
 
         public Object getUserData ()
           {
-            return user_data;
+            return userData;
           }
 
         
         public PUKPolicy getPUKPolicy ()
           {
-            return puk_policy;
+            return pukPolicy;
           }
       }
 
@@ -273,24 +273,24 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         boolean start_of_pin_group;
 
-        PINPolicy pin_policy;
+        PINPolicy pinPolicy;
         
-        byte[] preset_pin;
+        byte[] presetPin;
 
-        byte[] user_set_pin;
+        byte[] userSetPin;
 
-        boolean device_pin_protected;
+        boolean devicePinProtected;
         
-        AppUsage app_usage;
+        AppUsage appUsage;
 
-        KeySpecifier key_specifier;
+        KeySpecifier keySpecifier;
         
         KeyObject (DOMReaderHelper rd, 
-                   PINPolicy pin_policy,
+                   PINPolicy pinPolicy,
                    boolean start_of_pin_group) throws IOException
           {
             rd.getNext (KEY_ENTRY_SPECIFIER_ELEM);
-            this.pin_policy = pin_policy;
+            this.pinPolicy = pinPolicy;
             this.start_of_pin_group = start_of_pin_group;
  
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
@@ -301,54 +301,54 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             mac = ah.getBinary (MAC_ATTR);
 
-            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR);
+            friendlyName = ah.getStringConditional (FRIENDLY_NAME_ATTR);
             
-            device_pin_protected = ah.getBooleanConditional (DEVICE_PIN_PROTECTION_ATTR, false);
+            devicePinProtected = ah.getBooleanConditional (DEVICE_PIN_PROTECTION_ATTR, false);
             
-            preset_pin = ah.getBinaryConditional (ENCRYPTED_PRESET_PIN_ATTR);
-            if (preset_pin != null)
+            presetPin = ah.getBinaryConditional (ENCRYPTED_PRESET_PIN_ATTR);
+            if (presetPin != null)
               {
-                pin_policy.user_defined = false;
+                pinPolicy.userDefined = false;
               }
 
-            app_usage = AppUsage.getAppUsageFromString (ah.getString (APP_USAGE_ATTR));
+            appUsage = AppUsage.getAppUsageFromString (ah.getString (APP_USAGE_ATTR));
 
-            enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
+            enablePinCaching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
             
-            endorsed_algorithms = ah.getListConditional (ENDORSED_ALGORITHMS_ATTR);
-            if (endorsed_algorithms == null)
+            endorsedAlgorithms = ah.getListConditional (ENDORSED_ALGORITHMS_ATTR);
+            if (endorsedAlgorithms == null)
               {
-                endorsed_algorithms = new String[0];
+                endorsedAlgorithms = new String[0];
               }
             else
               {
-                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+                endorsedAlgorithms = BasicCapabilities.getSortedAlgorithms (endorsedAlgorithms);
               }
 
-            server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
+            serverSeed = ah.getBinaryConditional (SERVER_SEED_ATTR);
 
-            biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
+            biometricProtection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
                                                                                          BiometricProtection.NONE.getProtocolName ()));
 
-            delete_protection = DeleteProtection.getDeletePolicyFromString (ah.getStringConditional (DELETE_PROTECTION_ATTR, 
+            deleteProtection = DeleteProtection.getDeletePolicyFromString (ah.getStringConditional (DELETE_PROTECTION_ATTR, 
                                                                             DeleteProtection.NONE.getProtocolName ()));
-            export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
+            exportProtection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
                                                                             ExportProtection.NON_EXPORTABLE.getProtocolName ()));
 
-            key_specifier = new KeySpecifier (ah.getString (KEY_ALGORITHM_ATTR),
+            keySpecifier = new KeySpecifier (ah.getString (KEY_ALGORITHM_ATTR),
                                               ah.getBinaryConditional (KEY_PARAMETERS_ATTR));
           }
 
 
         public PINPolicy getPINPolicy ()
           {
-            return pin_policy;
+            return pinPolicy;
           }
 
 
         public byte[] getPresetPIN ()
           {
-            return preset_pin;
+            return presetPin;
           }
 
 
@@ -366,19 +366,19 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public boolean isDevicePINProtected ()
           {
-            return device_pin_protected;
+            return devicePinProtected;
           }
 
 
         public KeySpecifier getKeySpecifier ()
           {
-            return key_specifier;
+            return keySpecifier;
           }
 
 
         public AppUsage getAppUsage ()
           {
-            return app_usage;
+            return appUsage;
           }
 
 
@@ -394,64 +394,64 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
         
 
-        byte[] server_seed;
+        byte[] serverSeed;
         
         public byte[] getServerSeed ()
           {
-            return server_seed;
+            return serverSeed;
           }
         
-        BiometricProtection biometric_protection;
+        BiometricProtection biometricProtection;
 
         public BiometricProtection getBiometricProtection ()
           {
-            return biometric_protection;
+            return biometricProtection;
           }
 
         
-        ExportProtection export_protection;
+        ExportProtection exportProtection;
         
         public ExportProtection getExportProtection ()
           {
-            return export_protection;
+            return exportProtection;
           }
 
         
-        DeleteProtection delete_protection;
+        DeleteProtection deleteProtection;
         
         public DeleteProtection getDeleteProtection ()
           {
-            return delete_protection;
+            return deleteProtection;
           }
 
         
-        boolean enable_pin_caching;
+        boolean enablePinCaching;
         
         public boolean getEnablePINCachingFlag ()
           {
-            return enable_pin_caching;
+            return enablePinCaching;
           }
 
       
-        String friendly_name;
+        String friendlyName;
         
         public String getFriendlyName ()
           {
-            return friendly_name;
+            return friendlyName;
           }
         
         
-        String[] endorsed_algorithms;
+        String[] endorsedAlgorithms;
 
         public String[] getEndorsedAlgorithms ()
           {
-            return endorsed_algorithms;
+            return endorsedAlgorithms;
           }
 
         
         public byte[] getSKSPINValue ()
           {
-            return user_set_pin == null ? getPresetPIN () : user_set_pin;
+            return userSetPin == null ? getPresetPIN () : userSetPin;
           }
       }
 
@@ -467,23 +467,23 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     public class UserPINDescriptor
       {
-        PINPolicy pin_policy;
-        AppUsage app_usage;
+        PINPolicy pinPolicy;
+        AppUsage appUsage;
         
-        private UserPINDescriptor (PINPolicy pin_policy, AppUsage app_usage)
+        private UserPINDescriptor (PINPolicy pinPolicy, AppUsage appUsage)
           {
-            this.pin_policy = pin_policy;
-            this.app_usage = app_usage;
+            this.pinPolicy = pinPolicy;
+            this.appUsage = appUsage;
           }
 
         public PINPolicy getPINPolicy ()
           {
-            return pin_policy;
+            return pinPolicy;
           }
 
         public AppUsage getAppUsage ()
           {
-            return app_usage;
+            return appUsage;
           }
         
         public UserPINError setPIN (String pin_string_value, boolean set_value_on_success)
@@ -493,7 +493,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             byte[] pin = null;
             try
               {
-                if (pin_string_value.length () > 0 && pin_policy.format == PassphraseFormat.BINARY)
+                if (pin_string_value.length () > 0 && pinPolicy.format == PassphraseFormat.BINARY)
                   {
                     pin = DebugFormatter.getByteArrayFromHex (pin_string_value);
                   }
@@ -511,7 +511,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN length
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy.min_length > pin.length || pin_policy.max_length < pin.length)
+            if (pinPolicy.minLength > pin.length || pinPolicy.maxLength < pin.length)
               {
                 error.length_error = true;
                 return error;
@@ -544,8 +544,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                     nonalphanum = true;
                   }
               }
-            if ((pin_policy.format == PassphraseFormat.NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
-                (pin_policy.format == PassphraseFormat.ALPHANUMERIC && (loweralpha || nonalphanum)))
+            if ((pinPolicy.format == PassphraseFormat.NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+                (pinPolicy.format == PassphraseFormat.ALPHANUMERIC && (loweralpha || nonalphanum)))
               {
                 error.syntax_error = true;
                 return error;
@@ -554,16 +554,16 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN patterns
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy.pattern_restrictions.contains (PatternRestriction.MISSING_GROUP))
+            if (pinPolicy.patternRestrictions.contains (PatternRestriction.MISSING_GROUP))
               {
                 if (!upperalpha || !number ||
-                    (pin_policy.format == PassphraseFormat.STRING && (!loweralpha || !nonalphanum)))
+                    (pinPolicy.format == PassphraseFormat.STRING && (!loweralpha || !nonalphanum)))
                   {
                     error.pattern_error = PatternRestriction.MISSING_GROUP;
                     return error;
                   }
               }
-            if (pin_policy.pattern_restrictions.contains (PatternRestriction.SEQUENCE))
+            if (pinPolicy.patternRestrictions.contains (PatternRestriction.SEQUENCE))
               {
                 byte c = pin[0];
                 byte f = (byte)(pin[1] - c);
@@ -583,7 +583,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                     return error;
                   }
               }
-            if (pin_policy.pattern_restrictions.contains (PatternRestriction.REPEATED))
+            if (pinPolicy.patternRestrictions.contains (PatternRestriction.REPEATED))
               {
                 for (int i = 0; i < pin.length; i++)
                   {
@@ -598,10 +598,10 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                       }
                   }
               }
-            if (pin_policy.pattern_restrictions.contains (PatternRestriction.TWO_IN_A_ROW) ||
-                pin_policy.pattern_restrictions.contains (PatternRestriction.THREE_IN_A_ROW))
+            if (pinPolicy.patternRestrictions.contains (PatternRestriction.TWO_IN_A_ROW) ||
+                pinPolicy.patternRestrictions.contains (PatternRestriction.THREE_IN_A_ROW))
               {
-                int max = pin_policy.pattern_restrictions.contains (PatternRestriction.THREE_IN_A_ROW) ? 3 : 2;
+                int max = pinPolicy.patternRestrictions.contains (PatternRestriction.THREE_IN_A_ROW) ? 3 : 2;
                 byte c = pin [0];
                 int same_count = 1;
                 for (int i = 1; i < pin.length; i++)
@@ -628,12 +628,12 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             Vector<KeyObject> keys_needing_pin = new Vector<KeyObject> ();
             for (KeyObject key : request_objects)
               {
-                if (key.pin_policy == pin_policy)
+                if (key.pinPolicy == pinPolicy)
                   {
-                    switch (pin_policy.grouping)
+                    switch (pinPolicy.grouping)
                       {
                         case NONE:
-                          if (key.user_set_pin == null)
+                          if (key.userSetPin == null)
                             {
                               keys_needing_pin.add (key);
                               break;
@@ -645,28 +645,28 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                           continue;
                   
                         case UNIQUE:
-                          if (app_usage == key.app_usage)
+                          if (appUsage == key.appUsage)
                             {
                               keys_needing_pin.add (key);
                             }
                           else
                             {
-                              if (key.user_set_pin != null && ArrayUtil.compare (pin, key.user_set_pin))
+                              if (key.userSetPin != null && ArrayUtil.compare (pin, key.userSetPin))
                                 {
                                   error.unique_error = true;
-                                  error.unique_error_app_usage = key.app_usage;
+                                  error.unique_error_app_usage = key.appUsage;
                                   return error;
                                 }
                             }
                           continue;
 
                         case SIGNATURE_PLUS_STANDARD:
-                          if ((app_usage == AppUsage.SIGNATURE) ^ (key.app_usage == AppUsage.SIGNATURE))
+                          if ((appUsage == AppUsage.SIGNATURE) ^ (key.appUsage == AppUsage.SIGNATURE))
                             {
-                              if (key.user_set_pin != null && ArrayUtil.compare (pin, key.user_set_pin))
+                              if (key.userSetPin != null && ArrayUtil.compare (pin, key.userSetPin))
                                 {
                                   error.unique_error = true;
-                                  error.unique_error_app_usage = key.app_usage;
+                                  error.unique_error_app_usage = key.appUsage;
                                   return error;
                                 }
                             }
@@ -687,7 +687,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
               {
                 for (KeyObject key : keys_needing_pin)
                   {
-                    key.user_set_pin = pin;
+                    key.userSetPin = pin;
                   }
               }
             return null;
@@ -708,8 +708,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           {
             if (key.getPINPolicy () != null && key.getPINPolicy ().getUserDefinedFlag ())
               {
-                UserPINDescriptor pin_desc = new UserPINDescriptor (key.pin_policy, key.app_usage);
-                if (key.pin_policy.grouping == Grouping.NONE)
+                UserPINDescriptor pin_desc = new UserPINDescriptor (key.pinPolicy, key.appUsage);
+                if (key.pinPolicy.grouping == Grouping.NONE)
                   {
                     user_pin_policies.add (pin_desc);
                   }
@@ -717,16 +717,16 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                   {
                     for (UserPINDescriptor upd2 : user_pin_policies)
                       {
-                        if (upd2.pin_policy == key.pin_policy)
+                        if (upd2.pinPolicy == key.pinPolicy)
                           {
-                            if (key.pin_policy.grouping == Grouping.SHARED)
+                            if (key.pinPolicy.grouping == Grouping.SHARED)
                               {
                                 pin_desc = null;
                                 break;
                               }
-                            if (key.pin_policy.grouping == Grouping.UNIQUE)
+                            if (key.pinPolicy.grouping == Grouping.UNIQUE)
                               {
-                                if (upd2.app_usage == key.app_usage)
+                                if (upd2.appUsage == key.appUsage)
                                   {
                                     pin_desc = null;
                                     break;
@@ -734,7 +734,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                               }
                             else
                               {
-                                if ((upd2.app_usage == AppUsage.SIGNATURE) ^ (key.app_usage != AppUsage.SIGNATURE))
+                                if ((upd2.appUsage == AppUsage.SIGNATURE) ^ (key.appUsage != AppUsage.SIGNATURE))
                                   {
                                     pin_desc = null;
                                     break;
@@ -760,10 +760,10 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
 
     private KeyObject readKeyProperties (DOMReaderHelper rd,
-                                         PINPolicy pin_policy,
+                                         PINPolicy pinPolicy,
                                          boolean start_of_pin_group) throws IOException
       {
-        KeyObject rk = new KeyObject (rd, pin_policy, start_of_pin_group);
+        KeyObject rk = new KeyObject (rd, pinPolicy, start_of_pin_group);
         request_objects.add (rk);
         return rk;
       }
@@ -775,12 +775,12 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       }
 
 
-    private void readPINPolicy (DOMReaderHelper rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
+    private void readPINPolicy (DOMReaderHelper rd, boolean puk_start, PUKPolicy pukPolicy) throws IOException
       {
         boolean start = true;
         rd.getNext (PIN_POLICY_SPECIFIER_ELEM);
         PINPolicy upp = new PINPolicy (rd);
-        upp.puk_policy = puk_policy;
+        upp.pukPolicy = pukPolicy;
         rd.getChild ();
         do
           {
@@ -796,31 +796,31 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     private Vector<KeyObject> request_objects = new Vector<KeyObject> ();
       
-    private String submit_url;
+    private String submitUrl;
 
     private boolean deferred_certification;
 
     private XMLSignatureWrapper signature;  // Optional
 
-    private String server_session_id;
+    private String serverSessionId;
 
-    private String client_session_id;
+    private String clientSessionId;
 
     public String getClientSessionId ()
       {
-        return client_session_id;
+        return clientSessionId;
       }
 
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public String getSubmitUrl ()
       {
-        return submit_url;
+        return submitUrl;
       }
 
 
@@ -835,7 +835,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, serverSessionId);
       }
 
 
@@ -859,11 +859,11 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (ID_ATTR);
+        serverSessionId = ah.getString (ID_ATTR);
 
-        client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
+        clientSessionId = ah.getString (CLIENT_SESSION_ID_ATTR);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submitUrl = ah.getString (SUBMIT_URL_ATTR);
 
         deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
 

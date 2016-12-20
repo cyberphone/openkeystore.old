@@ -72,15 +72,15 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return value;
     }
 
-    JSONValue getProperty(String name, JSONTypes expected_type) throws IOException {
+    JSONValue getProperty(String name, JSONTypes expectedType) throws IOException {
         JSONValue value = getProperty(name);
-        JSONTypes.compatibilityTest(expected_type, value);
+        JSONTypes.compatibilityTest(expectedType, value);
         value.readFlag = true;
         return value;
     }
 
-    String getString(String name, JSONTypes expected) throws IOException {
-        JSONValue value = getProperty(name, expected);
+    String getString(String name, JSONTypes expectedType) throws IOException {
+        JSONValue value = getProperty(name, expectedType);
         return (String) value.value;
     }
 
@@ -324,8 +324,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return this;
     }
 
-    public byte[] serializeJSONObject(JSONOutputFormats output_format) throws IOException {
-        return new JSONObjectWriter(root).serializeJSONObject(output_format);
+    public byte[] serializeJSONObject(JSONOutputFormats outputFormat) throws IOException {
+        return new JSONObjectWriter(root).serializeJSONObject(outputFormat);
     }
 
     /**

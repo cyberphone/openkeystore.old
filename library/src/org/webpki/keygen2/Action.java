@@ -24,47 +24,47 @@ public enum Action {
     UNLOCK ("unlock", true,  false, true),
     RESUME ("resume", false, false, false);
 
-    private final String json_name;              // As expressed in JSON
+    private final String jsonName;             // As expressed in JSON
 
-    private final boolean prov_init_required;    // ProvisioningInitialization required else illegal
+    private final boolean provInitRequired;    // ProvisioningInitialization required else illegal
 
-    private final boolean lookup_allowed;        // CredentialDiscovery permitted
+    private final boolean lookupAllowed;       // CredentialDiscovery permitted
 
-    private final boolean key_init_allowed;      // KeyInitialization permitted
+    private final boolean keyInitAllowed;      // KeyInitialization permitted
 
-    private Action(String json_name, boolean lookup_allowed, boolean key_init_allowed, boolean prov_init_required) {
-        this.json_name = json_name;
-        this.lookup_allowed = lookup_allowed;
-        this.key_init_allowed = key_init_allowed;
-        this.prov_init_required = prov_init_required;
+    private Action(String jsonName, boolean lookupAllowed, boolean keyInitAllowed, boolean provInitRequired) {
+        this.jsonName = jsonName;
+        this.lookupAllowed = lookupAllowed;
+        this.keyInitAllowed = keyInitAllowed;
+        this.provInitRequired = provInitRequired;
     }
 
 
     public String getJSONName() {
-        return json_name;
+        return jsonName;
     }
 
 
     public boolean mayLookupCredentials() {
-        return lookup_allowed;
+        return lookupAllowed;
     }
 
 
     public boolean mayInitializeKeys() {
-        return key_init_allowed;
+        return keyInitAllowed;
     }
 
     public boolean mustOrMustNotCreateSession() {
-        return prov_init_required;
+        return provInitRequired;
     }
 
 
-    public static Action getActionFromString(String json_name) throws IOException {
+    public static Action getActionFromString(String jsonName) throws IOException {
         for (Action action : Action.values()) {
-            if (json_name.equals(action.json_name)) {
+            if (jsonName.equals(action.jsonName)) {
                 return action;
             }
         }
-        throw new IOException("Unknown action: " + json_name);
+        throw new IOException("Unknown action: " + jsonName);
     }
 }

@@ -41,7 +41,7 @@ import org.webpki.asn1.ASN1Null;
 
 
 public class PKCS7Signer {
-    private AsymSignatureAlgorithms signature_algorithm = AsymSignatureAlgorithms.RSA_SHA1;
+    private AsymSignatureAlgorithms signatureAlgorithm = AsymSignatureAlgorithms.RSA_SHA1;
 
     private SignerInterface signer_implem;
 
@@ -50,8 +50,8 @@ public class PKCS7Signer {
     static final String PKCS7_DATA = "1.2.840.113549.1.7.1";
 
 
-    public void setSignatureAlgorithm(AsymSignatureAlgorithms signature_algorithm) {
-        this.signature_algorithm = signature_algorithm;
+    public void setSignatureAlgorithm(AsymSignatureAlgorithms signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
     }
 
 
@@ -69,10 +69,10 @@ public class PKCS7Signer {
             BaseASN1Object sign_info = signer_cert.get(new int[]{0, i + 2});
             BaseASN1Object cert_ref = signer_cert.get(new int[]{0, i});
 
-            String digest_oid = signature_algorithm.getDigestAlgorithm().getOID();
+            String digest_oid = signatureAlgorithm.getDigestAlgorithm().getOID();
             String encryption_oid = AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getOID();
 
-            byte[] signed_data = signer_implem.signData(message, signature_algorithm);
+            byte[] signed_data = signer_implem.signData(message, signatureAlgorithm);
 
             BaseASN1Object r =
                     ASN1Util.oidValue(PKCS7_SIGNED_DATA,

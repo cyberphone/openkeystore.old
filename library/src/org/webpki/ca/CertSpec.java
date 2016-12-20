@@ -17,21 +17,23 @@
 package org.webpki.ca;
 
 import java.io.IOException;
+
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
+
 import java.net.InetAddress;
 
 import org.webpki.asn1.ASN1OctetString;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1IA5String;
+
 import org.webpki.asn1.cert.RelativeDistinguishedName;
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
 
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ExtendedKeyUsages;
-import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
 
 

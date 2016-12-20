@@ -62,8 +62,8 @@ public class SignatureResponseEncoder extends SignatureResponse {
     public void createSignedResponse(SignerInterface signer,
                                      SignatureRequestDecoder sign_req_decoder,
                                      SignatureProfileResponseEncoder sign_prof_resp_encoder,
-                                     String request_url,
-                                     Date client_time,
+                                     String requestUrl,
+                                     Date clientTime,
                                      X509Certificate server_certificate) throws IOException {
         check(called_xml, "createSignedResponse MUST be called before XML generation!");
         called_sign = true;
@@ -80,8 +80,8 @@ public class SignatureResponseEncoder extends SignatureResponse {
         sign_prof_resp_encoder.createSignedData(signer,
                 this,
                 sign_req_decoder,
-                request_url,
-                client_time,
+                requestUrl,
+                clientTime,
                 fingerprint);
     }
 

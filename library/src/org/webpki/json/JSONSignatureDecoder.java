@@ -242,10 +242,10 @@ public class JSONSignatureDecoder implements Serializable {
     static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
         X509Certificate lastCertificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate>();
-        for (byte[] certificate_blob : rd.getBinaryArray(CERTIFICATE_PATH_JSON)) {
+        for (byte[] certificateBlob : rd.getBinaryArray(CERTIFICATE_PATH_JSON)) {
             try {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificate_blob));
+                X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBlob));
                 certificates.add(pathCheck(lastCertificate, lastCertificate = certificate));
             } catch (GeneralSecurityException e) {
                 throw new IOException(e);
@@ -263,8 +263,8 @@ public class JSONSignatureDecoder implements Serializable {
             String subject = rd.getString(SUBJECT_JSON);
             X509Certificate signatureCertificate = certificatePath[0];
             if (!signatureCertificate.getIssuerX500Principal().getName().equals(issuer) ||
-                    !signatureCertificate.getSerialNumber().equals(serialNumber) ||
-                    !signatureCertificate.getSubjectX500Principal().getName().equals(subject)) {
+                !signatureCertificate.getSerialNumber().equals(serialNumber) ||
+                !signatureCertificate.getSubjectX500Principal().getName().equals(subject)) {
                 throw new IOException("\"" + SIGNER_CERTIFICATE_JSON + "\" doesn't match actual certificate");
             }
         }
@@ -296,8 +296,8 @@ public class JSONSignatureDecoder implements Serializable {
         }
         try {
             checkVerification(new SignatureWrapper((AsymSignatureAlgorithms) algorithm, publicKey)
-                    .update(normalizedData)
-                    .verify(signatureValue));
+                .update(normalizedData)
+                .verify(signatureValue));
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
         }

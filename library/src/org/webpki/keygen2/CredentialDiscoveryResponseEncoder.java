@@ -17,8 +17,10 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.Vector;
+
 import java.security.cert.X509Certificate;
 
 import org.webpki.json.JSONArrayWriter;
@@ -33,11 +35,11 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder {
 
     class MatchingCredential {
 
-        X509Certificate[] certificate_path;
+        X509Certificate[] certificatePath;
 
-        String client_session_id;
+        String clientSessionId;
 
-        String server_session_id;
+        String serverSessionId;
 
         boolean locked;
     }
@@ -46,48 +48,51 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder {
 
         String id;
 
-        Vector<MatchingCredential> matching_credentials = new Vector<MatchingCredential>();
+        Vector<MatchingCredential> matchingCredentials = new Vector<MatchingCredential>();
 
         LookupResult(String id) {
             this.id = id;
         }
 
-        public void addMatchingCredential(X509Certificate[] certificate_path, String client_session_id, String server_session_id, boolean locked) throws IOException {
-            MatchingCredential mc = new MatchingCredential();
-            mc.certificate_path = certificate_path;
-            mc.client_session_id = client_session_id;
-            mc.server_session_id = server_session_id;
-            mc.locked = locked;
-            matching_credentials.add(mc);
+        public void addMatchingCredential(X509Certificate[] certificatePath, 
+                                          String clientSessionId,
+                                          String serverSessionId,
+                                          boolean locked) throws IOException {
+            MatchingCredential matchingCredential = new MatchingCredential();
+            matchingCredential.certificatePath = certificatePath;
+            matchingCredential.clientSessionId = clientSessionId;
+            matchingCredential.serverSessionId = serverSessionId;
+            matchingCredential.locked = locked;
+            matchingCredentials.add(matchingCredential);
         }
     }
 
 
-    Vector<LookupResult> lookup_results = new Vector<LookupResult>();
+    Vector<LookupResult> lookupResults = new Vector<LookupResult>();
 
     LinkedHashMap<String, CredentialDiscoveryRequestDecoder.LookupSpecifier> ref;
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
 
     // Constructors
 
-    public CredentialDiscoveryResponseEncoder(CredentialDiscoveryRequestDecoder cred_disc_dec) {
-        server_session_id = cred_disc_dec.server_session_id;
-        client_session_id = cred_disc_dec.client_session_id;
-        this.ref = cred_disc_dec.lookup_specifiers;
+    public CredentialDiscoveryResponseEncoder(CredentialDiscoveryRequestDecoder credentialDiscoveryRequestDecoder) {
+        serverSessionId = credentialDiscoveryRequestDecoder.serverSessionId;
+        clientSessionId = credentialDiscoveryRequestDecoder.clientSessionId;
+        this.ref = credentialDiscoveryRequestDecoder.lookupSpecifiers;
     }
 
 
     public LookupResult addLookupResult(String id) throws IOException {
-        LookupResult lo_res = new LookupResult(id);
+        LookupResult lookupResult = new LookupResult(id);
         if (!ref.containsKey(id)) {
             throw new IOException("Non-matching \"ID\": " + id);
         }
-        lookup_results.add(lo_res);
-        return lo_res;
+        lookupResults.add(lookupResult);
+        return lookupResult;
     }
 
 
@@ -96,31 +101,31 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(CLIENT_SESSION_ID_JSON, client_session_id);
+        wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup results
         ////////////////////////////////////////////////////////////////////////
-        if (lookup_results.isEmpty()) {
+        if (lookupResults.isEmpty()) {
             throw new IOException("There must be at least one result defined");
         }
-        if (lookup_results.size() != ref.size()) {
+        if (lookupResults.size() != ref.size()) {
             throw new IOException("Missing outputed results");
         }
         JSONArrayWriter lookups = wr.setArray(LOOKUP_RESULTS_JSON);
-        for (LookupResult lo_res : lookup_results) {
-            JSONObjectWriter lookup_writer = lookups.setObject();
-            lookup_writer.setString(ID_JSON, lo_res.id);
-            JSONArrayWriter matcher_array = lookup_writer.setArray(MATCHING_CREDENTIALS_JSON);
-            for (MatchingCredential mc : lo_res.matching_credentials) {
-                JSONObjectWriter match_object = matcher_array.setObject();
-                match_object.setString(SERVER_SESSION_ID_JSON, mc.server_session_id);
-                match_object.setString(CLIENT_SESSION_ID_JSON, mc.client_session_id);
-                match_object.setCertificatePath(mc.certificate_path);
-                if (mc.locked) {
-                    match_object.setBoolean(LOCKED_JSON, mc.locked);
+        for (LookupResult lookupResult : lookupResults) {
+            JSONObjectWriter lookupWriter = lookups.setObject();
+            lookupWriter.setString(ID_JSON, lookupResult.id);
+            JSONArrayWriter matcherArray = lookupWriter.setArray(MATCHING_CREDENTIALS_JSON);
+            for (MatchingCredential matchingCredential : lookupResult.matchingCredentials) {
+                JSONObjectWriter matchObject = matcherArray.setObject();
+                matchObject.setString(SERVER_SESSION_ID_JSON, matchingCredential.serverSessionId);
+                matchObject.setString(CLIENT_SESSION_ID_JSON, matchingCredential.clientSessionId);
+                matchObject.setCertificatePath(matchingCredential.certificatePath);
+                if (matchingCredential.locked) {
+                    matchObject.setBoolean(LOCKED_JSON, matchingCredential.locked);
                 }
             }
         }

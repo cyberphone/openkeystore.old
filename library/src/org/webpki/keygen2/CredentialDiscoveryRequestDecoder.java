@@ -17,18 +17,24 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.Grouping;
+
 import org.webpki.util.ArrayUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -41,12 +47,12 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
 
         String id;
 
-        GregorianCalendar issued_before;
-        GregorianCalendar issued_after;
+        GregorianCalendar issuedBefore;
+        GregorianCalendar issuedAfter;
         Grouping grouping;
-        AppUsage app_usage;
+        AppUsage appUsage;
 
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
 
         LookupSpecifier(JSONObjectReader rd) throws IOException {
             id = KeyGen2Validator.getID(rd, ID_JSON);
@@ -66,17 +72,17 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
                 setPolicyRules(search.getStringArrayConditional(CertificateFilter.CF_POLICY_RULES));
                 setKeyUsageRules(search.getStringArrayConditional(CertificateFilter.CF_KEY_USAGE_RULES));
                 setExtendedKeyUsageRules(search.getStringArrayConditional(CertificateFilter.CF_EXT_KEY_USAGE_RULES));
-                issued_before = KeyGen2Validator.getDateTimeConditional(search, ISSUED_BEFORE_JSON);
-                issued_after = KeyGen2Validator.getDateTimeConditional(search, ISSUED_AFTER_JSON);
+                issuedBefore = KeyGen2Validator.getDateTimeConditional(search, ISSUED_BEFORE_JSON);
+                issuedAfter = KeyGen2Validator.getDateTimeConditional(search, ISSUED_AFTER_JSON);
                 if (search.hasProperty(GROUPING_JSON)) {
                     grouping = Grouping.getGroupingFromString(search.getString(GROUPING_JSON));
                 }
                 if (search.hasProperty(APP_USAGE_JSON)) {
-                    app_usage = AppUsage.getAppUsageFromString(search.getString(APP_USAGE_JSON));
+                    appUsage = AppUsage.getAppUsageFromString(search.getString(APP_USAGE_JSON));
                 }
             }
             JSONSignatureDecoder signature = rd.getSignature();
-            key_management_key = signature.getPublicKey();
+            keyManagementKey = signature.getPublicKey();
             if (((AsymSignatureAlgorithms) signature.getAlgorithm()).getDigestAlgorithm() != HashAlgorithms.SHA256) {
                 throw new IOException("Lookup signature must use SHA256");
             }
@@ -88,15 +94,15 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
         }
 
         public PublicKey getKeyManagementKey() {
-            return key_management_key;
+            return keyManagementKey;
         }
 
         public GregorianCalendar getIssuedBefore() {
-            return issued_before;
+            return issuedBefore;
         }
 
         public GregorianCalendar getIssuedAfter() {
-            return issued_after;
+            return issuedAfter;
         }
 
         public Grouping getGrouping() {
@@ -104,48 +110,48 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
         }
 
         public AppUsage getAppUsage() {
-            return app_usage;
+            return appUsage;
         }
 
         @Override
-        public boolean matches(X509Certificate[] certificate_path) throws IOException {
-            if (issued_before != null && issued_before.getTimeInMillis() < (certificate_path[0].getNotBefore().getTime())) {
+        public boolean matches(X509Certificate[] certificatePath) throws IOException {
+            if (issuedBefore != null && issuedBefore.getTimeInMillis() < (certificatePath[0].getNotBefore().getTime())) {
                 return false;
             }
-            if (issued_after != null && issued_after.getTimeInMillis() > (certificate_path[0].getNotBefore().getTime())) {
+            if (issuedAfter != null && issuedAfter.getTimeInMillis() > (certificatePath[0].getNotBefore().getTime())) {
                 return false;
             }
-            return super.matches(certificate_path);
+            return super.matches(certificatePath);
         }
     }
 
-    LinkedHashMap<String, LookupSpecifier> lookup_specifiers = new LinkedHashMap<String, LookupSpecifier>();
+    LinkedHashMap<String, LookupSpecifier> lookupSpecifiers = new LinkedHashMap<String, LookupSpecifier>();
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
-    String submit_url;
+    String submitUrl;
 
     byte[] nonce_reference;
 
     public String getServerSessionId() {
-        return server_session_id;
+        return serverSessionId;
     }
 
 
     public String getClientSessionId() {
-        return client_session_id;
+        return clientSessionId;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public LookupSpecifier[] getLookupSpecifiers() {
-        return lookup_specifiers.values().toArray(new LookupSpecifier[0]);
+        return lookupSpecifiers.values().toArray(new LookupSpecifier[0]);
     }
 
 
@@ -154,18 +160,18 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        submit_url = getURL(rd, SUBMIT_URL_JSON);
+        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Calculate proper nonce
         /////////////////////////////////////////////////////////////////////////////////////////
         MacGenerator mac = new MacGenerator();
-        mac.addString(client_session_id);
-        mac.addString(server_session_id);
+        mac.addString(clientSessionId);
+        mac.addString(serverSessionId);
         nonce_reference = HashAlgorithms.SHA256.digest(mac.getResult());
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +179,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader spec : getObjectArray(rd, LOOKUP_SPECIFIERS_JSON)) {
             LookupSpecifier ls = new LookupSpecifier(spec);
-            if (lookup_specifiers.put(ls.id, ls) != null) {
+            if (lookupSpecifiers.put(ls.id, ls) != null) {
                 throw new IOException("Duplicate id: " + ls.id);
             }
         }

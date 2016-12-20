@@ -29,21 +29,21 @@ import org.webpki.crypto.KeyAlgorithms;
 
 public interface ServerCryptoInterface extends Serializable {
 
-    ECPublicKey generateEphemeralKey(KeyAlgorithms ec_key_algorithm) throws IOException;
+    ECPublicKey generateEphemeralKey(KeyAlgorithms ecKeyAlgorithm) throws IOException;
 
-    void generateAndVerifySessionKey(ECPublicKey client_ephemeral_key,
-                                     byte[] kdf_data,
-                                     byte[] attestation_arguments,
-                                     X509Certificate device_certificate,
-                                     byte[] session_attestation) throws IOException;
+    void generateAndVerifySessionKey(ECPublicKey clientEphemeralKey,
+                                     byte[] kdfData,
+                                     byte[] attestationArguments,
+                                     X509Certificate deviceCertificate,
+                                     byte[] sessionAttestation) throws IOException;
 
-    public byte[] mac(byte[] data, byte[] key_modifier) throws IOException;
+    public byte[] mac(byte[] data, byte[] keyModifier) throws IOException;
 
     public byte[] encrypt(byte[] data) throws IOException;
 
     public byte[] generateNonce() throws IOException;
 
-    public byte[] generateKeyManagementAuthorization(PublicKey key_management_key, byte[] data) throws IOException;
+    public byte[] generateKeyManagementAuthorization(PublicKey keyManagementKey, byte[] data) throws IOException;
 
     public PublicKey[] enumerateKeyManagementKeys() throws IOException;
 

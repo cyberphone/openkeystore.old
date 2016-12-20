@@ -540,12 +540,12 @@ public class ProxyClient {
     /**
      * For HTTPS client certificate authentication.
      *
-     * @param key_alias Key alias
+     * @param keyAlias Key alias
      * @throws IOException If something unexpected happens...
      */
-    public void setKeyAlias(String key_alias) throws IOException {
+    public void setKeyAlias(String keyAlias) throws IOException {
         checkOrder();
-        proxy_service_key_alias = key_alias;
+        proxy_service_key_alias = keyAlias;
     }
 
     /**

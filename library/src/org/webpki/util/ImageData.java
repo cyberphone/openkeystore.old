@@ -24,17 +24,16 @@ public class ImageData implements MIMETypedObject, Serializable {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
-    private ImageData() {
-    }
+    private ImageData() {}
 
     byte[] data;
 
-    String mime_type;
+    String mimeType;
 
 
-    public ImageData(byte[] data, String mime_type) {
+    public ImageData(byte[] data, String mimeType) {
         this.data = data;
-        this.mime_type = mime_type;
+        this.mimeType = mimeType;
     }
 
     public byte[] getData() throws IOException {
@@ -43,6 +42,6 @@ public class ImageData implements MIMETypedObject, Serializable {
 
 
     public String getMimeType() throws IOException {
-        return mime_type;
+        return mimeType;
     }
 }

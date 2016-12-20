@@ -94,14 +94,14 @@ public class DeviceID {
             if (hash.length != 20 && hash.length != 10) {
                 throw new IllegalArgumentException("Hash length: " + hash.length);
             }
-            int total_bits = hash.length == 20 ? 180 : 100;
+            int totalBits = hash.length == 20 ? 180 : 100;
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(hash);
             hash = half(half(hash));
             baos.write(hash.length == 5 ? half(hash) : hash);
             byte[] data = baos.toByteArray();
             StringBuffer buffer = new StringBuffer();
-            for (int bit_position = 0; bit_position < total_bits; bit_position += 5) {
+            for (int bit_position = 0; bit_position < totalBits; bit_position += 5) {
                 int bit_position_in_byte = bit_position % 8;
                 int index = bit_position / 8;
                 byte value = (byte) (bit_position_in_byte > 3
@@ -117,11 +117,11 @@ public class DeviceID {
         }
     }
 
-    public static String getDeviceID(byte[] identity_blob_or_null, boolean long_version) {
-        if (identity_blob_or_null != null) {
+    public static String getDeviceID(byte[] identityBlobOrNull, boolean longVersion) {
+        if (identityBlobOrNull != null) {
             try {
-                byte[] hash = HashAlgorithms.SHA1.digest(identity_blob_or_null);
-                return getDeviceIDFromHash(long_version ? hash : half(hash));
+                byte[] hash = HashAlgorithms.SHA1.digest(identityBlobOrNull);
+                return getDeviceIDFromHash(longVersion ? hash : half(hash));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -129,46 +129,46 @@ public class DeviceID {
         return "N/A";
     }
 
-    public static String getDeviceID(X509Certificate device_certificate_or_null, boolean long_version) {
+    public static String getDeviceID(X509Certificate deviceCertificateOrNull, boolean longVersion) {
         try {
-            return getDeviceID(device_certificate_or_null == null ? null : device_certificate_or_null.getEncoded(), long_version);
+            return getDeviceID(deviceCertificateOrNull == null ? null : deviceCertificateOrNull.getEncoded(), longVersion);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void validateDeviceID(String device_id) throws IOException {
+    public static void validateDeviceID(String deviceId) throws IOException {
         int bytes = 20;
         int characters = 32;
-        if (device_id.length() == 20) {
+        if (deviceId.length() == 20) {
             bytes = 10;
             characters = 16;
-        } else if (device_id.length() != 36) {
+        } else if (deviceId.length() != 36) {
             throw new IOException("DeviceID must be 20 or 36 characters");
         }
         byte[] hash = new byte[bytes];
         int q = 0;
-        int bit_position = 0;
+        int bitPosition = 0;
         for (int i = 0; i < characters; i++) {
-            char c = device_id.charAt(i);
+            char c = deviceId.charAt(i);
             if (c > 255 || (c = REVERSE_BASE32[c]) < 0) {
                 throw new IOException("Illigal DeviceID character: " + c);
             }
-            if (bit_position < 4) {
-                if (bit_position == 0) {
+            if (bitPosition < 4) {
+                if (bitPosition == 0) {
                     hash[q] = 0;
                 }
-                hash[q] |= (byte) (c << (3 - bit_position));
-                if (bit_position == 3) {
+                hash[q] |= (byte) (c << (3 - bitPosition));
+                if (bitPosition == 3) {
                     q++;
                 }
             } else {
-                hash[q] |= (byte) (c >> ((bit_position + 5) % 8));
-                hash[++q] = (byte) (c << (11 - bit_position));
+                hash[q] |= (byte) (c >> ((bitPosition + 5) % 8));
+                hash[++q] = (byte) (c << (11 - bitPosition));
             }
-            bit_position = (bit_position + 5) % 8;
+            bitPosition = (bitPosition + 5) % 8;
         }
-        if (!device_id.equals(getDeviceIDFromHash(hash))) {
+        if (!deviceId.equals(getDeviceIDFromHash(hash))) {
             throw new IOException("DeviceID checksum error");
         }
     }

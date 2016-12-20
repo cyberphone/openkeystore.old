@@ -50,7 +50,7 @@ abstract class XMLSignerCore {
 
     private HashAlgorithms digest_algorithm = HashAlgorithms.SHA256;
 
-    private AsymSignatureAlgorithms signature_algorithm;
+    private AsymSignatureAlgorithms signatureAlgorithm;
 
     private boolean debug;
 
@@ -64,9 +64,9 @@ abstract class XMLSignerCore {
     }
 
 
-    public void setSignatureAlgorithm(AsymSignatureAlgorithms signature_algorithm) {
-        if (signature_algorithm != null) {
-            this.signature_algorithm = signature_algorithm;
+    public void setSignatureAlgorithm(AsymSignatureAlgorithms signatureAlgorithm) {
+        if (signatureAlgorithm != null) {
+            this.signatureAlgorithm = signatureAlgorithm;
         }
     }
 
@@ -109,14 +109,14 @@ abstract class XMLSignerCore {
         dsig_wrapper = new XMLSignatureWrapper();
         dsig_wrapper.KeyInfo_Reference_create = write_keyinfo_ref_flag;
         if (this instanceof XMLSymKeySigner) {
-            dsig_wrapper.signature_algorithm = ((XMLSymKeySigner) this).sym_signer.getMacAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS);
+            dsig_wrapper.signatureAlgorithm = ((XMLSymKeySigner) this).sym_signer.getMacAlgorithm().getAlgorithmId(AlgorithmPreferences.SKS);
             dsig_wrapper.symmetric_key_name = ((XMLSymKeySigner) this).key_name;
         } else {
-            PublicKey public_key = populateKeys(dsig_wrapper);
-            if (signature_algorithm == null) {
-                signature_algorithm = KeyAlgorithms.getKeyAlgorithm(public_key).getRecommendedSignatureAlgorithm();
+            PublicKey publicKey = populateKeys(dsig_wrapper);
+            if (signatureAlgorithm == null) {
+                signatureAlgorithm = KeyAlgorithms.getKeyAlgorithm(publicKey).getRecommendedSignatureAlgorithm();
             }
-            dsig_wrapper.signature_algorithm = signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS);
+            dsig_wrapper.signatureAlgorithm = signatureAlgorithm.getAlgorithmId(AlgorithmPreferences.SKS);
         }
 
         // Setup all declared algorithms
@@ -140,7 +140,7 @@ abstract class XMLSignerCore {
         }
         // Sign the Reference (SignedInfo)
         byte[] data = XPathCanonicalizer.serializeSubset(dsig_wrapper.SignedInfo_element, dsig_wrapper.canonicalization_algorithm);
-        updateBase64Field(dsig_wrapper.SignatureValue_node, getSignatureBlob(data, signature_algorithm));
+        updateBase64Field(dsig_wrapper.SignatureValue_node, getSignatureBlob(data, signatureAlgorithm));
 
         if (remove_xml_ns) {
             dsig_wrapper.root.removeAttributeNS("http://www.w3.org/2000/xmlns/", XMLSignatureWrapper.XML_DSIG_NS_PREFIX);

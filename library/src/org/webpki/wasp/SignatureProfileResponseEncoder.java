@@ -27,7 +27,7 @@ public interface SignatureProfileResponseEncoder {
     void createSignedData(SignerInterface signer,
                           SignatureResponseEncoder s_resp_enc,
                           SignatureRequestDecoder s_req_dec,
-                          String request_url,
-                          Date client_time,
+                          String requestUrl,
+                          Date clientTime,
                           byte[] server_certificate_fingerprint) throws IOException;
 }

@@ -766,12 +766,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             }
         }
 
-        public SignatureWrapper(String algorithm, PrivateKey private_key) throws GeneralSecurityException {
+        public SignatureWrapper(String algorithm, PrivateKey privateKey) throws GeneralSecurityException {
             instance = Signature.getInstance(algorithm);
-            instance.initSign(private_key);
-            rsaFlag = private_key instanceof RSAPrivateKey;
+            instance.initSign(privateKey);
+            rsaFlag = privateKey instanceof RSAPrivateKey;
             if (!rsaFlag) {
-                extendTo = getEcPointLength((ECKey) private_key);
+                extendTo = getEcPointLength((ECKey) privateKey);
             }
         }
 
@@ -2167,7 +2167,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Find the protection data objects that are not stored in the key entry
         ///////////////////////////////////////////////////////////////////////////////////
-        byte protection_status = KeyProtectionInfo.PROTSTAT_NO_PIN;
+        byte protectionStatus = KeyProtectionInfo.PROTSTAT_NO_PIN;
         byte pukFormat = 0;
         short pukRetryLimit = 0;
         short pukErrorCount = 0;
@@ -2181,20 +2181,20 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         short maxLength = 0;
         byte inputMethod = 0;
         if (keyEntry.devicePinProtection) {
-            protection_status = KeyProtectionInfo.PROTSTAT_DEVICE_PIN;
+            protectionStatus = KeyProtectionInfo.PROTSTAT_DEVICE_PIN;
         } else if (keyEntry.pinPolicy != null) {
-            protection_status = KeyProtectionInfo.PROTSTAT_PIN_PROTECTED;
+            protectionStatus = KeyProtectionInfo.PROTSTAT_PIN_PROTECTED;
             if (keyEntry.errorCount >= keyEntry.pinPolicy.retryLimit) {
-                protection_status |= KeyProtectionInfo.PROTSTAT_PIN_BLOCKED;
+                protectionStatus |= KeyProtectionInfo.PROTSTAT_PIN_BLOCKED;
             }
             if (keyEntry.pinPolicy.pukPolicy != null) {
                 pukFormat = keyEntry.pinPolicy.pukPolicy.format;
                 pukRetryLimit = keyEntry.pinPolicy.pukPolicy.retryLimit;
                 pukErrorCount = keyEntry.pinPolicy.pukPolicy.errorCount;
-                protection_status |= KeyProtectionInfo.PROTSTAT_PUK_PROTECTED;
+                protectionStatus |= KeyProtectionInfo.PROTSTAT_PUK_PROTECTED;
                 if (keyEntry.pinPolicy.pukPolicy.errorCount >= keyEntry.pinPolicy.pukPolicy.retryLimit &&
                         keyEntry.pinPolicy.pukPolicy.retryLimit > 0) {
-                    protection_status |= KeyProtectionInfo.PROTSTAT_PUK_BLOCKED;
+                    protectionStatus |= KeyProtectionInfo.PROTSTAT_PUK_BLOCKED;
                 }
             }
             userDefined = keyEntry.pinPolicy.userDefined;
@@ -2207,7 +2207,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             maxLength = keyEntry.pinPolicy.maxLength;
             inputMethod = keyEntry.pinPolicy.inputMethod;
         }
-        return new KeyProtectionInfo(protection_status,
+        return new KeyProtectionInfo(protectionStatus,
                                      pukFormat,
                                      pukRetryLimit,
                                      pukErrorCount,

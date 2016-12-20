@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.GeneralSecurityException;
 
-
 public enum HashAlgorithms {
 
     SHA1   ("http://www.w3.org/2000/09/xmldsig#sha1",        "1.3.14.3.2.26",          "SHA-1"),
@@ -29,19 +28,19 @@ public enum HashAlgorithms {
     SHA384 ("http://www.w3.org/2001/04/xmldsig-more#sha384", "2.16.840.1.101.3.4.2.2", "SHA-384"),
     SHA512 ("http://www.w3.org/2001/04/xmlenc#sha512",       "2.16.840.1.101.3.4.2.3", "SHA-512");
 
-    private final String sksname;   // As (typically) expressed in protocols
+    private final String sksName;   // As expressed in SKS
     private final String oid;       // As expressed in ASN.1 messages
-    private final String jcename;   // As expressed for JCE
+    private final String jceName;   // As expressed for JCE
 
-    private HashAlgorithms(String sksname, String oid, String jcename) {
-        this.sksname = sksname;
+    private HashAlgorithms(String sksName, String oid, String jceName) {
+        this.sksName = sksName;
         this.oid = oid;
-        this.jcename = jcename;
+        this.jceName = jceName;
     }
 
 
     public String getAlgorithmId() {
-        return sksname;
+        return sksName;
     }
 
 
@@ -51,13 +50,13 @@ public enum HashAlgorithms {
 
 
     public String getJCEName() {
-        return jcename;
+        return jceName;
     }
 
 
-    public static boolean testAlgorithmURI(String sksname) {
+    public static boolean testAlgorithmURI(String sksName) {
         for (HashAlgorithms alg : HashAlgorithms.values()) {
-            if (sksname.equals(alg.sksname)) {
+            if (sksName.equals(alg.sksName)) {
                 return true;
             }
         }
@@ -74,13 +73,13 @@ public enum HashAlgorithms {
     }
 
 
-    public static HashAlgorithms getAlgorithmFromID(String algorithm_id) throws IOException {
+    public static HashAlgorithms getAlgorithmFromID(String algorithmId) throws IOException {
         for (HashAlgorithms alg : values()) {
-            if (algorithm_id.equals(alg.sksname)) {
+            if (algorithmId.equals(alg.sksName)) {
                 return alg;
             }
         }
-        throw new IOException("Unknown algorithm: " + algorithm_id);
+        throw new IOException("Unknown algorithm: " + algorithmId);
     }
 
 

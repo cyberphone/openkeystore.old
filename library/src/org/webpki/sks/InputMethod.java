@@ -26,11 +26,11 @@ public enum InputMethod {
 
     private final String name;       // As expressed in protocols
 
-    private final byte sks_value;    // As expressed in SKS
+    private final byte sksValue;    // As expressed in SKS
 
-    private InputMethod(String name, byte sks_value) {
+    private InputMethod(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -40,7 +40,7 @@ public enum InputMethod {
 
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
 

@@ -40,13 +40,13 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class KeyCreationRequestEncoder extends KeyCreationRequest
   {
-    String submit_url;
+    String submitUrl;
 
     boolean deferred_certification;
 
     String prefix;  // Default: no prefix
 
-    ServerState server_state;
+    ServerState serverState;
     
     private boolean need_signature_ns;
     
@@ -59,12 +59,12 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     // Constructors
 
-    public KeyCreationRequestEncoder (ServerState server_state, String submit_url) throws IOException
+    public KeyCreationRequestEncoder (ServerState serverState, String submitUrl) throws IOException
       {
-        this.server_state = server_state;
-        this.submit_url = submit_url;
-        server_state.checkState (true, server_state.current_phase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
-        server_state.current_phase = ProtocolPhase.KEY_CREATION;
+        this.serverState = serverState;
+        this.submitUrl = submitUrl;
+        serverState.checkState (true, serverState.current_phase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
+        serverState.current_phase = ProtocolPhase.KEY_CREATION;
       }
 
 
@@ -98,13 +98,13 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ds.removeXMLSignatureNS ();
         need_signature_ns = true;
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_state.server_session_id);
+        ds.createEnvelopedSignature (doc, serverState.serverSessionId);
       }
     
     
     private ServerState.PUKPolicy getPUKPolicy (ServerState.Key kp)
       {
-        return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
+        return kp.pinPolicy == null ? null : kp.pinPolicy.pukPolicy;
       }
 
 
@@ -120,11 +120,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_state.server_session_id);
+        wr.setStringAttribute (ID_ATTR, serverState.serverSessionId);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_state.client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, serverState.clientSessionId);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute (SUBMIT_URL_ATTR, submitUrl);
 
         wr.setStringAttribute (KEY_ENTRY_ALGORITHM_ATTR, key_entry_algorithm);
 
@@ -136,23 +136,23 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (server_state.requested_keys.isEmpty ())
+        if (serverState.requested_keys.isEmpty ())
           {
             bad ("Empty request not allowd!");
           }
-        server_state.key_attestation_algorithm = key_entry_algorithm;
+        serverState.key_attestation_algorithm = key_entry_algorithm;
         ServerState.Key last_req_key = null;
         try
           {
-            for (ServerState.Key req_key : server_state.requested_keys.values ())
+            for (ServerState.Key req_key : serverState.requested_keys.values ())
               {
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
                   {
                     wr.getParent ();
                   }
-                if (last_req_key != null && last_req_key.pin_policy != null &&
-                    last_req_key.pin_policy != req_key.pin_policy)
+                if (last_req_key != null && last_req_key.pinPolicy != null &&
+                    last_req_key.pinPolicy != req_key.pinPolicy)
                   {
                     wr.getParent ();
                   }
@@ -171,19 +171,19 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
                         written_puk.add (getPUKPolicy (req_key).id);
                       }
                   }
-                if (req_key.pin_policy != null)
+                if (req_key.pinPolicy != null)
                   {
-                    if (written_pin.contains (req_key.pin_policy.id))
+                    if (written_pin.contains (req_key.pinPolicy.id))
                       {
-                        if (last_req_key.pin_policy != req_key.pin_policy)
+                        if (last_req_key.pinPolicy != req_key.pinPolicy)
                           {
                             bad ("PIN grouping error");
                           }
                       }
                     else
                       {
-                        req_key.pin_policy.writePolicy (wr);
-                        written_pin.add (req_key.pin_policy.id);
+                        req_key.pinPolicy.writePolicy (wr);
+                        written_pin.add (req_key.pinPolicy.id);
                       }
                   }
                 req_key.writeRequest (wr);
@@ -194,7 +194,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
           {
             throw new IOException (e);
           }
-        if (last_req_key != null && last_req_key.pin_policy != null)
+        if (last_req_key != null && last_req_key.pinPolicy != null)
           {
             wr.getParent ();
           }

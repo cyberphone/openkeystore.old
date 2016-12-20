@@ -17,13 +17,18 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.Date;
+
 import java.security.GeneralSecurityException;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
+
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSymKeySigner;
@@ -34,46 +39,46 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String server_session_id;
+    String serverSessionId;
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_time_verbatim;
+    String serverTimeVerbatim;
 
-    Date client_time;
+    Date clientTime;
 
-    ECPublicKey client_ephemeral_key;
+    ECPublicKey clientEphemeralKey;
 
     byte[] attestation;
 
-    X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
+    X509Certificate[] deviceCertificatePath;  // Is null for the privacy_enabled mode
 
-    byte[] server_certificate_fingerprint;  // Optional
+    byte[] serverCertificateFingerprint;  // Optional
 
-    JSONSymKeySigner session_signature;
+    JSONSymKeySigner sessionSignature;
 
 
     // Constructors
 
     public ProvisioningInitializationResponseEncoder(ProvisioningInitializationRequestDecoder prov_init_req,
-                                                     ECPublicKey client_ephemeral_key,
-                                                     String client_session_id,
-                                                     Date client_time,
+                                                     ECPublicKey clientEphemeralKey,
+                                                     String clientSessionId,
+                                                     Date clientTime,
                                                      byte[] attestation,
-                                                     X509Certificate[] device_certificate_path) throws IOException {
-        this.server_session_id = prov_init_req.server_session_id;
-        this.server_time_verbatim = prov_init_req.server_time_verbatim;
-        this.client_ephemeral_key = client_ephemeral_key;
-        this.client_session_id = client_session_id;
-        this.client_time = client_time;
+                                                     X509Certificate[] deviceCertificatePath) throws IOException {
+        this.serverSessionId = prov_init_req.serverSessionId;
+        this.serverTimeVerbatim = prov_init_req.serverTimeVerbatim;
+        this.clientEphemeralKey = clientEphemeralKey;
+        this.clientSessionId = clientSessionId;
+        this.clientTime = clientTime;
         this.attestation = attestation;
-        this.device_certificate_path = device_certificate_path;
+        this.deviceCertificatePath = deviceCertificatePath;
     }
 
 
-    public void setServerCertificate(X509Certificate server_certificate) throws IOException {
+    public void setServerCertificate(X509Certificate serverCertificate) throws IOException {
         try {
-            server_certificate_fingerprint = HashAlgorithms.SHA256.digest(server_certificate.getEncoded());
+            serverCertificateFingerprint = HashAlgorithms.SHA256.digest(serverCertificate.getEncoded());
         } catch (GeneralSecurityException gse) {
             throw new IOException(gse);
         }
@@ -81,7 +86,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
 
 
     public void setResponseSigner(SymKeySignerInterface signer) throws IOException {
-        session_signature = new JSONSymKeySigner(signer);
+        sessionSignature = new JSONSymKeySigner(signer);
     }
 
 
@@ -90,24 +95,24 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(CLIENT_SESSION_ID_JSON, client_session_id);
+        wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
 
-        wr.setString(SERVER_TIME_JSON, server_time_verbatim);
+        wr.setString(SERVER_TIME_JSON, serverTimeVerbatim);
 
-        wr.setDateTime(CLIENT_TIME_JSON, client_time, false); // Client keeps local time
+        wr.setDateTime(CLIENT_TIME_JSON, clientTime, false); // Client keeps local time
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON).setPublicKey(client_ephemeral_key);
+        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON).setPublicKey(clientEphemeralKey);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional device certificate path
         ////////////////////////////////////////////////////////////////////////
-        if (device_certificate_path != null) {
-            wr.setObject(DEVICE_ID_JSON).setCertificatePath(device_certificate_path);
+        if (deviceCertificatePath != null) {
+            wr.setObject(DEVICE_ID_JSON).setCertificatePath(deviceCertificatePath);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -118,14 +123,14 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Optional server certificate fingerprint
         ////////////////////////////////////////////////////////////////////////
-        if (server_certificate_fingerprint != null) {
-            wr.setBinary(SERVER_CERT_FP_JSON, server_certificate_fingerprint);
+        if (serverCertificateFingerprint != null) {
+            wr.setBinary(SERVER_CERT_FP_JSON, serverCertificateFingerprint);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // Mandatory session signature
         ////////////////////////////////////////////////////////////////////////
-        wr.setSignature(session_signature);
+        wr.setSignature(sessionSignature);
     }
 
     @Override

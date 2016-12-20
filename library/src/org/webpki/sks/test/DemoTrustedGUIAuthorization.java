@@ -32,8 +32,8 @@ public class DemoTrustedGUIAuthorization extends DummyTrustedGUIAuthorization {
     @Override
     public byte[] getTrustedAuthorization(PassphraseFormat format,
                                           Grouping grouping,
-                                          AppUsage app_usage,
-                                          String friendly_name) throws SKSException {
+                                          AppUsage appUsage,
+                                          String friendlyName) throws SKSException {
         byte[] authorization = null;
         JPasswordField pwd = new JPasswordField(10);
         pwd.addAncestorListener(new AncestorListener() {

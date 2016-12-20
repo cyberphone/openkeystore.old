@@ -25,13 +25,13 @@ public enum BiometricProtection {
     COMBINED    ("combined",    SecureKeyStore.BIOMETRIC_PROTECTION_COMBINED),
     EXCLUSIVE   ("exclusive",   SecureKeyStore.BIOMETRIC_PROTECTION_EXCLUSIVE);
 
-    private final String name;       // As expressed in protocols
+    private final String name;      // As expressed in protocols
 
-    private final byte sks_value;    // As expressed in SKS
+    private final byte sksValue;    // As expressed in SKS
 
-    private BiometricProtection(String name, byte sks_value) {
+    private BiometricProtection(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -41,7 +41,7 @@ public enum BiometricProtection {
 
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
 

@@ -17,6 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -29,8 +30,10 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
+
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -41,30 +44,30 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
     abstract class PresetValueReference {
 
-        byte[] encrypted_value;
+        byte[] encryptedValue;
 
-        PresetValueReference(JSONObjectReader rd, String name_of_key) throws IOException {
-            encrypted_value = getEncryptedKey(rd, name_of_key);
+        PresetValueReference(JSONObjectReader rd, String nameOfKey) throws IOException {
+            encryptedValue = getEncryptedKey(rd, nameOfKey);
         }
 
         public byte[] getEncryptedValue() {
-            return encrypted_value;
+            return encryptedValue;
         }
     }
 
 
     public class PresetPIN extends PresetValueReference {
 
-        boolean user_modifiable;
+        boolean userModifiable;
 
-        PresetPIN(JSONObjectReader rd, String name_of_key) throws IOException {
-            super(rd, name_of_key);
-            user_modifiable = rd.getBooleanConditional(USER_MODIFIABLE_JSON);
+        PresetPIN(JSONObjectReader rd, String nameOfKey) throws IOException {
+            super(rd, nameOfKey);
+            userModifiable = rd.getBooleanConditional(USER_MODIFIABLE_JSON);
         }
 
 
         public boolean isUserModifiable() {
-            return user_modifiable;
+            return userModifiable;
         }
     }
 
@@ -73,17 +76,17 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
         byte[] mac;
 
-        Object user_data;
+        Object userData;
 
         PassphraseFormat format;
 
-        short retry_limit;
+        short retryLimit;
 
         String id;
 
         PUKPolicy(JSONObjectReader rd) throws IOException {
             super(rd, ENCRYPTED_PUK_JSON);
-            retry_limit = getAuthorizationRetryLimit(rd, 0);
+            retryLimit = getAuthorizationRetryLimit(rd, 0);
             id = KeyGen2Validator.getID(rd, ID_JSON);
             format = getPassphraseFormat(rd);
             mac = KeyGen2Validator.getMac(rd);
@@ -91,7 +94,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
 
         public short getRetryLimit() {
-            return retry_limit;
+            return retryLimit;
         }
 
 
@@ -100,13 +103,13 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         }
 
 
-        public void setUserData(Object user_data) {
-            this.user_data = user_data;
+        public void setUserData(Object userData) {
+            this.userData = userData;
         }
 
 
         public Object getUserData() {
-            return user_data;
+            return userData;
         }
 
 
@@ -127,50 +130,50 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
         String id;
 
-        PUKPolicy puk_policy;
+        PUKPolicy pukPolicy;
 
-        Object user_data;
+        Object userData;
 
         PassphraseFormat format;
 
-        short retry_limit;
+        short retryLimit;
 
-        short min_length;
+        short minLength;
 
-        short max_length;
+        short maxLength;
 
         Grouping grouping;
 
-        InputMethod input_method;
+        InputMethod inputMethod;
 
-        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf(PatternRestriction.class);
+        Set<PatternRestriction> patternRestrictions = EnumSet.noneOf(PatternRestriction.class);
 
         PINPolicy(JSONObjectReader rd) throws IOException {
             id = KeyGen2Validator.getID(rd, ID_JSON);
 
-            min_length = getPINLength(rd, MIN_LENGTH_JSON);
+            minLength = getPINLength(rd, MIN_LENGTH_JSON);
 
-            max_length = getPINLength(rd, MAX_LENGTH_JSON);
+            maxLength = getPINLength(rd, MAX_LENGTH_JSON);
 
-            if (min_length > max_length) {
+            if (minLength > maxLength) {
                 bad("PIN length: min > max");
             }
 
-            retry_limit = getAuthorizationRetryLimit(rd, 1);
+            retryLimit = getAuthorizationRetryLimit(rd, 1);
 
             format = getPassphraseFormat(rd);
 
-            user_modifiable = rd.getBooleanConditional(USER_MODIFIABLE_JSON, true);
+            userModifiable = rd.getBooleanConditional(USER_MODIFIABLE_JSON, true);
 
             grouping = Grouping.getGroupingFromString(rd.getStringConditional(GROUPING_JSON, Grouping.NONE.getProtocolName()));
 
-            input_method = InputMethod.getInputMethodFromString(rd.getStringConditional(INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName()));
+            inputMethod = InputMethod.getInputMethodFromString(rd.getStringConditional(INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName()));
 
             for (String pattern : rd.hasProperty(PATTERN_RESTRICTIONS_JSON) ?
                     KeyGen2Validator.getNonEmptyList(rd, PATTERN_RESTRICTIONS_JSON)
                     :
                     new String[0]) {
-                pattern_restrictions.add(PatternRestriction.getPatternRestrictionFromString(pattern));
+                patternRestrictions.add(PatternRestriction.getPatternRestrictionFromString(pattern));
             }
 
             mac = KeyGen2Validator.getMac(rd);
@@ -178,22 +181,22 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
 
         public Set<PatternRestriction> getPatternRestrictions() {
-            return pattern_restrictions;
+            return patternRestrictions;
         }
 
 
         public short getMinLength() {
-            return min_length;
+            return minLength;
         }
 
 
         public short getMaxLength() {
-            return max_length;
+            return maxLength;
         }
 
 
         public short getRetryLimit() {
-            return retry_limit;
+            return retryLimit;
         }
 
 
@@ -207,22 +210,22 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         }
 
 
-        boolean user_defined;
+        boolean userDefined;
 
         public boolean getUserDefinedFlag() {
-            return user_defined;
+            return userDefined;
         }
 
 
-        boolean user_modifiable;
+        boolean userModifiable;
 
         public boolean getUserModifiableFlag() {
-            return user_modifiable;
+            return userModifiable;
         }
 
 
         public InputMethod getInputMethod() {
-            return input_method;
+            return inputMethod;
         }
 
 
@@ -236,18 +239,18 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         }
 
 
-        public void setUserData(Object user_data) {
-            this.user_data = user_data;
+        public void setUserData(Object userData) {
+            this.userData = userData;
         }
 
 
         public Object getUserData() {
-            return user_data;
+            return userData;
         }
 
 
         public PUKPolicy getPUKPolicy() {
-            return puk_policy;
+            return pukPolicy;
         }
     }
 
@@ -258,96 +261,96 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
         byte[] mac;
 
-        boolean start_of_puk_group;
+        boolean startOfPukGroup;
 
-        boolean start_of_pin_group;
+        boolean startOfPinGroup;
 
-        PINPolicy pin_policy;
+        PINPolicy pinPolicy;
 
-        PresetPIN preset_pin;
+        PresetPIN presetPin;
 
-        byte[] user_set_pin;
+        byte[] userSetPin;
 
-        boolean device_pin_protected;
+        boolean devicePinProtected;
 
-        AppUsage app_usage;
+        AppUsage appUsage;
 
-        KeySpecifier key_specifier;
+        KeySpecifier keySpecifier;
 
         KeyObject(JSONObjectReader rd,
-                  PINPolicy pin_policy,
-                  boolean start_of_pin_group,
-                  PresetPIN preset_pin,
-                  boolean device_pin_protected) throws IOException {
-            this.pin_policy = pin_policy;
-            this.start_of_pin_group = start_of_pin_group;
-            this.preset_pin = preset_pin;
-            this.device_pin_protected = device_pin_protected;
+                  PINPolicy pinPolicy,
+                  boolean startOfPinGroup,
+                  PresetPIN presetPin,
+                  boolean devicePinProtected) throws IOException {
+            this.pinPolicy = pinPolicy;
+            this.startOfPinGroup = startOfPinGroup;
+            this.presetPin = presetPin;
+            this.devicePinProtected = devicePinProtected;
 
             id = KeyGen2Validator.getID(rd, ID_JSON);
 
-            key_specifier = new KeySpecifier(getURI(rd, KEY_ALGORITHM_JSON),
+            keySpecifier = new KeySpecifier(getURI(rd, KEY_ALGORITHM_JSON),
                     rd.getBinaryConditional(KEY_PARAMETERS_JSON));
 
             if (rd.hasProperty(ENDORSED_ALGORITHMS_JSON)) {
-                endorsed_algorithms = getURIList(rd, ENDORSED_ALGORITHMS_JSON);
+                endorsedAlgorithms = getURIList(rd, ENDORSED_ALGORITHMS_JSON);
             } else {
-                endorsed_algorithms = new String[0];
+                endorsedAlgorithms = new String[0];
             }
 
-            server_seed = rd.getBinaryConditional(SERVER_SEED_JSON);
+            serverSeed = rd.getBinaryConditional(SERVER_SEED_JSON);
 
-            app_usage = AppUsage.getAppUsageFromString(rd.getString(APP_USAGE_JSON));
+            appUsage = AppUsage.getAppUsageFromString(rd.getString(APP_USAGE_JSON));
 
-            enable_pin_caching = rd.getBooleanConditional(ENABLE_PIN_CACHING_JSON);
+            enablePinCaching = rd.getBooleanConditional(ENABLE_PIN_CACHING_JSON);
 
-            biometric_protection = BiometricProtection.getBiometricProtectionFromString(rd.getStringConditional(BIOMETRIC_PROTECTION_JSON,
+            biometricProtection = BiometricProtection.getBiometricProtectionFromString(rd.getStringConditional(BIOMETRIC_PROTECTION_JSON,
                     BiometricProtection.NONE.getProtocolName()));
 
-            delete_protection = DeleteProtection.getDeletePolicyFromString(rd.getStringConditional(DELETE_PROTECTION_JSON,
+            deleteProtection = DeleteProtection.getDeletePolicyFromString(rd.getStringConditional(DELETE_PROTECTION_JSON,
                     DeleteProtection.NONE.getProtocolName()));
 
-            export_protection = ExportProtection.getExportPolicyFromString(rd.getStringConditional(EXPORT_PROTECTION_JSON,
+            exportProtection = ExportProtection.getExportPolicyFromString(rd.getStringConditional(EXPORT_PROTECTION_JSON,
                     ExportProtection.NON_EXPORTABLE.getProtocolName()));
 
-            friendly_name = rd.getStringConditional(FRIENDLY_NAME_JSON);
+            friendlyName = rd.getStringConditional(FRIENDLY_NAME_JSON);
 
             mac = KeyGen2Validator.getMac(rd);
         }
 
 
         public PINPolicy getPINPolicy() {
-            return pin_policy;
+            return pinPolicy;
         }
 
 
         public byte[] getPresetPIN() {
-            return preset_pin == null ? null : preset_pin.encrypted_value;
+            return presetPin == null ? null : presetPin.encryptedValue;
         }
 
 
         public boolean isStartOfPINPolicy() {
-            return start_of_pin_group;
+            return startOfPinGroup;
         }
 
 
         public boolean isStartOfPUKPolicy() {
-            return start_of_puk_group;
+            return startOfPukGroup;
         }
 
 
         public boolean isDevicePINProtected() {
-            return device_pin_protected;
+            return devicePinProtected;
         }
 
 
         public KeySpecifier getKeySpecifier() {
-            return key_specifier;
+            return keySpecifier;
         }
 
 
         public AppUsage getAppUsage() {
-            return app_usage;
+            return appUsage;
         }
 
 
@@ -361,105 +364,105 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         }
 
 
-        byte[] server_seed;
+        byte[] serverSeed;
 
         public byte[] getServerSeed() {
-            return server_seed;
+            return serverSeed;
         }
 
-        BiometricProtection biometric_protection;
+        BiometricProtection biometricProtection;
 
         public BiometricProtection getBiometricProtection() {
-            return biometric_protection;
+            return biometricProtection;
         }
 
 
-        ExportProtection export_protection;
+        ExportProtection exportProtection;
 
         public ExportProtection getExportProtection() {
-            return export_protection;
+            return exportProtection;
         }
 
 
-        DeleteProtection delete_protection;
+        DeleteProtection deleteProtection;
 
         public DeleteProtection getDeleteProtection() {
-            return delete_protection;
+            return deleteProtection;
         }
 
 
-        boolean enable_pin_caching;
+        boolean enablePinCaching;
 
         public boolean getEnablePINCachingFlag() {
-            return enable_pin_caching;
+            return enablePinCaching;
         }
 
 
-        String friendly_name;
+        String friendlyName;
 
         public String getFriendlyName() {
-            return friendly_name;
+            return friendlyName;
         }
 
 
-        String[] endorsed_algorithms;
+        String[] endorsedAlgorithms;
 
         public String[] getEndorsedAlgorithms() {
-            return endorsed_algorithms;
+            return endorsedAlgorithms;
         }
 
 
         public byte[] getSKSPINValue() {
-            return user_set_pin == null ? getPresetPIN() : user_set_pin;
+            return userSetPin == null ? getPresetPIN() : userSetPin;
         }
     }
 
     public class UserPINError {
-        public boolean length_error;
-        public boolean syntax_error;
-        public boolean unique_error;
-        public AppUsage unique_error_app_usage;
-        public PatternRestriction pattern_error;
+        public boolean lengthError;
+        public boolean syntaxError;
+        public boolean uniqueError;
+        public AppUsage uniqueErrorAppUsage;
+        public PatternRestriction patternError;
     }
 
 
     public class UserPINDescriptor {
-        PINPolicy pin_policy;
-        AppUsage app_usage;
+        PINPolicy pinPolicy;
+        AppUsage appUsage;
 
-        private UserPINDescriptor(PINPolicy pin_policy, AppUsage app_usage) {
-            this.pin_policy = pin_policy;
-            this.app_usage = app_usage;
+        private UserPINDescriptor(PINPolicy pinPolicy, AppUsage appUsage) {
+            this.pinPolicy = pinPolicy;
+            this.appUsage = appUsage;
         }
 
         public PINPolicy getPINPolicy() {
-            return pin_policy;
+            return pinPolicy;
         }
 
         public AppUsage getAppUsage() {
-            return app_usage;
+            return appUsage;
         }
 
-        public UserPINError setPIN(String pin_string_value, boolean set_value_on_success) {
+        public UserPINError setPIN(String pinStringValue, boolean setValueOnSuccess) {
             UserPINError error = new UserPINError();
 
             byte[] pin = null;
             try {
-                if (pin_string_value.length() > 0 && pin_policy.format == PassphraseFormat.BINARY) {
-                    pin = DebugFormatter.getByteArrayFromHex(pin_string_value);
+                if (pinStringValue.length() > 0 && pinPolicy.format == PassphraseFormat.BINARY) {
+                    pin = DebugFormatter.getByteArrayFromHex(pinStringValue);
                 } else {
-                    pin = pin_string_value.getBytes("UTF-8");
+                    pin = pinStringValue.getBytes("UTF-8");
                 }
             } catch (IOException e) {
-                error.syntax_error = true;
+                error.syntaxError = true;
                 return error;
             }
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN length
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy.min_length > pin.length || pin_policy.max_length < pin.length) {
-                error.length_error = true;
+            if (pinPolicy.minLength > pin.length || pinPolicy.maxLength < pin.length) {
+                error.lengthError = true;
                 return error;
             }
 
@@ -482,23 +485,23 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
                     nonalphanum = true;
                 }
             }
-            if ((pin_policy.format == PassphraseFormat.NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
-                    (pin_policy.format == PassphraseFormat.ALPHANUMERIC && (loweralpha || nonalphanum))) {
-                error.syntax_error = true;
+            if ((pinPolicy.format == PassphraseFormat.NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+                (pinPolicy.format == PassphraseFormat.ALPHANUMERIC && (loweralpha || nonalphanum))) {
+                error.syntaxError = true;
                 return error;
             }
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN patterns
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy.pattern_restrictions.contains(PatternRestriction.MISSING_GROUP)) {
+            if (pinPolicy.patternRestrictions.contains(PatternRestriction.MISSING_GROUP)) {
                 if (!upperalpha || !number ||
-                        (pin_policy.format == PassphraseFormat.STRING && (!loweralpha || !nonalphanum))) {
-                    error.pattern_error = PatternRestriction.MISSING_GROUP;
+                    (pinPolicy.format == PassphraseFormat.STRING && (!loweralpha || !nonalphanum))) {
+                    error.patternError = PatternRestriction.MISSING_GROUP;
                     return error;
                 }
             }
-            if (pin_policy.pattern_restrictions.contains(PatternRestriction.SEQUENCE)) {
+            if (pinPolicy.patternRestrictions.contains(PatternRestriction.SEQUENCE)) {
                 byte c = pin[0];
                 byte f = (byte) (pin[1] - c);
                 boolean seq = (f == 1) || (f == -1);
@@ -510,34 +513,34 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
                     c = pin[i];
                 }
                 if (seq) {
-                    error.pattern_error = PatternRestriction.SEQUENCE;
+                    error.patternError = PatternRestriction.SEQUENCE;
                     return error;
                 }
             }
-            if (pin_policy.pattern_restrictions.contains(PatternRestriction.REPEATED)) {
+            if (pinPolicy.patternRestrictions.contains(PatternRestriction.REPEATED)) {
                 for (int i = 0; i < pin.length; i++) {
                     byte b = pin[i];
                     for (int j = 0; j < pin.length; j++) {
                         if (j != i && b == pin[j]) {
-                            error.pattern_error = PatternRestriction.REPEATED;
+                            error.patternError = PatternRestriction.REPEATED;
                             return error;
                         }
                     }
                 }
             }
-            if (pin_policy.pattern_restrictions.contains(PatternRestriction.TWO_IN_A_ROW) ||
-                    pin_policy.pattern_restrictions.contains(PatternRestriction.THREE_IN_A_ROW)) {
-                int max = pin_policy.pattern_restrictions.contains(PatternRestriction.THREE_IN_A_ROW) ? 3 : 2;
+            if (pinPolicy.patternRestrictions.contains(PatternRestriction.TWO_IN_A_ROW) ||
+                    pinPolicy.patternRestrictions.contains(PatternRestriction.THREE_IN_A_ROW)) {
+                int max = pinPolicy.patternRestrictions.contains(PatternRestriction.THREE_IN_A_ROW) ? 3 : 2;
                 byte c = pin[0];
-                int same_count = 1;
+                int sameCount = 1;
                 for (int i = 1; i < pin.length; i++) {
                     if (c == pin[i]) {
-                        if (++same_count == max) {
-                            error.pattern_error = max == 2 ? PatternRestriction.TWO_IN_A_ROW : PatternRestriction.THREE_IN_A_ROW;
+                        if (++sameCount == max) {
+                            error.patternError = max == 2 ? PatternRestriction.TWO_IN_A_ROW : PatternRestriction.THREE_IN_A_ROW;
                             return error;
                         }
                     } else {
-                        same_count = 1;
+                        sameCount = 1;
                         c = pin[i];
                     }
                 }
@@ -546,42 +549,42 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that PIN grouping rules are followed
             ///////////////////////////////////////////////////////////////////////////////////
-            Vector<KeyObject> keys_needing_pin = new Vector<KeyObject>();
-            for (KeyObject key : request_objects) {
-                if (key.pin_policy == pin_policy) {
-                    switch (pin_policy.grouping) {
+            Vector<KeyObject> keysNeedingPin = new Vector<KeyObject>();
+            for (KeyObject key : requestObjects) {
+                if (key.pinPolicy == pinPolicy) {
+                    switch (pinPolicy.grouping) {
                         case NONE:
-                            if (key.user_set_pin == null) {
-                                keys_needing_pin.add(key);
+                            if (key.userSetPin == null) {
+                                keysNeedingPin.add(key);
                                 break;
                             }
                             continue;
 
                         case SHARED:
-                            keys_needing_pin.add(key);
+                            keysNeedingPin.add(key);
                             continue;
 
                         case UNIQUE:
-                            if (app_usage == key.app_usage) {
-                                keys_needing_pin.add(key);
+                            if (appUsage == key.appUsage) {
+                                keysNeedingPin.add(key);
                             } else {
-                                if (key.user_set_pin != null && ArrayUtil.compare(pin, key.user_set_pin)) {
-                                    error.unique_error = true;
-                                    error.unique_error_app_usage = key.app_usage;
+                                if (key.userSetPin != null && ArrayUtil.compare(pin, key.userSetPin)) {
+                                    error.uniqueError = true;
+                                    error.uniqueErrorAppUsage = key.appUsage;
                                     return error;
                                 }
                             }
                             continue;
 
                         case SIGNATURE_PLUS_STANDARD:
-                            if ((app_usage == AppUsage.SIGNATURE) ^ (key.app_usage == AppUsage.SIGNATURE)) {
-                                if (key.user_set_pin != null && ArrayUtil.compare(pin, key.user_set_pin)) {
-                                    error.unique_error = true;
-                                    error.unique_error_app_usage = key.app_usage;
+                            if ((appUsage == AppUsage.SIGNATURE) ^ (key.appUsage == AppUsage.SIGNATURE)) {
+                                if (key.userSetPin != null && ArrayUtil.compare(pin, key.userSetPin)) {
+                                    error.uniqueError = true;
+                                    error.uniqueErrorAppUsage = key.appUsage;
                                     return error;
                                 }
                             } else {
-                                keys_needing_pin.add(key);
+                                keysNeedingPin.add(key);
                             }
                             continue;
                     }
@@ -592,9 +595,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
             ///////////////////////////////////////////////////////////////////////////////////
             // We did it!  Assign the PIN to the associated keys or just return null=success
             ///////////////////////////////////////////////////////////////////////////////////
-            if (set_value_on_success) {
-                for (KeyObject key : keys_needing_pin) {
-                    key.user_set_pin = pin;
+            if (setValueOnSuccess) {
+                for (KeyObject key : keysNeedingPin) {
+                    key.userSetPin = pin;
                 }
             }
             return null;
@@ -603,68 +606,68 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
 
     public Vector<KeyObject> getKeyObjects() throws IOException {
-        return request_objects;
+        return requestObjects;
     }
 
 
     public Vector<UserPINDescriptor> getUserPINDescriptors() {
-        Vector<UserPINDescriptor> user_pin_policies = new Vector<UserPINDescriptor>();
-        for (KeyObject key : request_objects) {
+        Vector<UserPINDescriptor> userPinPolicies = new Vector<UserPINDescriptor>();
+        for (KeyObject key : requestObjects) {
             if (key.getPINPolicy() != null && key.getPINPolicy().getUserDefinedFlag()) {
-                UserPINDescriptor pin_desc = new UserPINDescriptor(key.pin_policy, key.app_usage);
-                if (key.pin_policy.grouping == Grouping.NONE) {
-                    user_pin_policies.add(pin_desc);
+                UserPINDescriptor pinDescriptor = new UserPINDescriptor(key.pinPolicy, key.appUsage);
+                if (key.pinPolicy.grouping == Grouping.NONE) {
+                    userPinPolicies.add(pinDescriptor);
                 } else {
-                    for (UserPINDescriptor upd2 : user_pin_policies) {
-                        if (upd2.pin_policy == key.pin_policy) {
-                            if (key.pin_policy.grouping == Grouping.SHARED) {
-                                pin_desc = null;
+                    for (UserPINDescriptor upd2 : userPinPolicies) {
+                        if (upd2.pinPolicy == key.pinPolicy) {
+                            if (key.pinPolicy.grouping == Grouping.SHARED) {
+                                pinDescriptor = null;
                                 break;
                             }
-                            if (key.pin_policy.grouping == Grouping.UNIQUE) {
-                                if (upd2.app_usage == key.app_usage) {
-                                    pin_desc = null;
+                            if (key.pinPolicy.grouping == Grouping.UNIQUE) {
+                                if (upd2.appUsage == key.appUsage) {
+                                    pinDescriptor = null;
                                     break;
                                 }
                             } else {
-                                if ((upd2.app_usage == AppUsage.SIGNATURE) ^ (key.app_usage != AppUsage.SIGNATURE)) {
-                                    pin_desc = null;
+                                if ((upd2.appUsage == AppUsage.SIGNATURE) ^ (key.appUsage != AppUsage.SIGNATURE)) {
+                                    pinDescriptor = null;
                                     break;
                                 }
                             }
                         }
                     }
-                    if (pin_desc != null) {
-                        user_pin_policies.add(pin_desc);
+                    if (pinDescriptor != null) {
+                        userPinPolicies.add(pinDescriptor);
                     }
                 }
             }
         }
-        return user_pin_policies;
+        return userPinPolicies;
     }
 
 
     private KeyObject readKeyProperties(JSONObjectReader rd,
-                                        PINPolicy pin_policy,
-                                        boolean start_of_pin_group) throws IOException {
+                                        PINPolicy pinPolicy,
+                                        boolean startOfPinGroup) throws IOException {
         KeyObject rk;
         PresetPIN preset = null;
-        boolean save_user_defined = pin_policy.user_defined;
+        boolean save_user_defined = pinPolicy.userDefined;
         if (rd.hasProperty(ENCRYPTED_PIN_JSON)) {
             preset = new PresetPIN(rd, ENCRYPTED_PIN_JSON);
         } else {
-            pin_policy.user_defined = true;
+            pinPolicy.userDefined = true;
         }
-        if (!start_of_pin_group && save_user_defined ^ pin_policy.user_defined) {
+        if (!startOfPinGroup && save_user_defined ^ pinPolicy.userDefined) {
             bad("Mixed use of user-defined and preset PINs within a PIN group is not allowed");
         }
-        request_objects.add(rk = new KeyObject(rd, pin_policy, start_of_pin_group, preset, false));
+        requestObjects.add(rk = new KeyObject(rd, pinPolicy, startOfPinGroup, preset, false));
         return rk;
     }
 
 
-    private void readKeyProperties(JSONObjectReader rd, boolean device_pin_protected) throws IOException {
-        request_objects.add(new KeyObject(rd, null, false, null, device_pin_protected));
+    private void readKeyProperties(JSONObjectReader rd, boolean devicePinProtected) throws IOException {
+        requestObjects.add(new KeyObject(rd, null, false, null, devicePinProtected));
     }
 
 
@@ -673,40 +676,40 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
     }
 
 
-    private Vector<KeyObject> request_objects = new Vector<KeyObject>();
+    private Vector<KeyObject> requestObjects = new Vector<KeyObject>();
 
-    private String submit_url;
+    private String submitUrl;
 
-    private boolean deferred_issuance;
+    private boolean deferredIssuance;
 
-    private String server_session_id;
+    private String serverSessionId;
 
-    private String client_session_id;
+    private String clientSessionId;
 
     public String getClientSessionId() {
-        return client_session_id;
+        return clientSessionId;
     }
 
 
     public String getServerSessionId() {
-        return server_session_id;
+        return serverSessionId;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
-    String key_entry_algorithm;
+    String keyEntryAlgorithm;
 
     public String getKeyEntryAlgorithm() {
-        return key_entry_algorithm;
+        return keyEntryAlgorithm;
     }
 
 
     public boolean getDeferredIssuanceFlag() {
-        return deferred_issuance;
+        return deferredIssuance;
     }
 
     @Override
@@ -715,15 +718,15 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         // Session properties
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        key_entry_algorithm = getURI(rd, KEY_ENTRY_ALGORITHM_JSON);
+        keyEntryAlgorithm = getURI(rd, KEY_ENTRY_ALGORITHM_JSON);
 
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID(rd, CLIENT_SESSION_ID_JSON);
+        clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        submit_url = getURL(rd, SUBMIT_URL_JSON);
+        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
-        deferred_issuance = rd.getBooleanConditional(DEFERRED_ISSUANCE_JSON);
+        deferredIssuance = rd.getBooleanConditional(DEFERRED_ISSUANCE_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the key requests and protection elements [1..n]
@@ -739,16 +742,16 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         }
     }
 
-    void readPINProtectedKeys(JSONObjectReader rd, PUKPolicy puk_policy) throws IOException {
-        boolean startofpuk = puk_policy != null;
+    void readPINProtectedKeys(JSONObjectReader rd, PUKPolicy pukPolicy) throws IOException {
+        boolean startOfpuk = pukPolicy != null;
         for (JSONObjectReader pin : getObjectArray(rd, PIN_POLICY_SPECIFIERS_JSON)) {
-            PINPolicy pin_policy = new PINPolicy(pin);
-            pin_policy.puk_policy = puk_policy;
+            PINPolicy pinPolicy = new PINPolicy(pin);
+            pinPolicy.pukPolicy = pukPolicy;
             boolean start = true;
             for (JSONObjectReader key : getObjectArray(pin, KEY_ENTRY_SPECIFIERS_JSON)) {
-                readKeyProperties(key, pin_policy, start).start_of_puk_group = startofpuk;
+                readKeyProperties(key, pinPolicy, start).startOfPukGroup = startOfpuk;
                 start = false;
-                startofpuk = false;
+                startOfpuk = false;
             }
         }
     }

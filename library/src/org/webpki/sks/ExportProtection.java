@@ -25,13 +25,13 @@ public enum ExportProtection {
     PUK            ("puk",            SecureKeyStore.EXPORT_DELETE_PROTECTION_PUK),
     NON_EXPORTABLE ("non-exportable", SecureKeyStore.EXPORT_DELETE_PROTECTION_NOT_ALLOWED);
 
-    private final String name;         // As expressed in protocols
+    private final String name;        // As expressed in protocols
 
-    private final byte sks_value;      // As expressed in SKS
+    private final byte sksValue;      // As expressed in SKS
 
-    private ExportProtection(String name, byte sks_value) {
+    private ExportProtection(String name, byte sksValue) {
         this.name = name;
-        this.sks_value = sks_value;
+        this.sksValue = sksValue;
     }
 
 
@@ -41,7 +41,7 @@ public enum ExportProtection {
 
 
     public byte getSksValue() {
-        return sks_value;
+        return sksValue;
     }
 
 

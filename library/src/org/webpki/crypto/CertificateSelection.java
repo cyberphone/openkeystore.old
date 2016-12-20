@@ -33,8 +33,8 @@ public class CertificateSelection {
     }
 
 
-    public void addEntry(String key_alias, X509Certificate certificate) {
-        selection.put(key_alias, certificate);
+    public void addEntry(String keyAlias, X509Certificate certificate) {
+        selection.put(keyAlias, certificate);
     }
 
 
@@ -43,8 +43,8 @@ public class CertificateSelection {
     }
 
 
-    public X509Certificate getCertificate(String key_alias) {
-        return selection.get(key_alias);
+    public X509Certificate getCertificate(String keyAlias) {
+        return selection.get(keyAlias);
     }
 
 

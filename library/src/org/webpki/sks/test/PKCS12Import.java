@@ -60,55 +60,55 @@ public class PKCS12Import {
             System.exit(-3);
         }
         String pin_value = null;
-        AppUsage app_usage = AppUsage.UNIVERSAL;
+        AppUsage appUsage = AppUsage.UNIVERSAL;
         PassphraseFormat format = null;
-        InputMethod input_method = null;
+        InputMethod inputMethod = null;
         Grouping grouping = null;
         String[] endorsed_algs = new String[0];
         boolean pin_caching = false;
         if (argc.length > 2) {
             pin_value = argc[2];
             format = PassphraseFormat.valueOf(argc[3]);
-            input_method = InputMethod.valueOf(argc[4]);
+            inputMethod = InputMethod.valueOf(argc[4]);
             grouping = Grouping.valueOf(argc[5]);
-            app_usage = AppUsage.valueOf(argc[6]);
+            appUsage = AppUsage.valueOf(argc[6]);
             pin_caching = new Boolean(argc[7]);
         }
         CustomCryptoProvider.forcedLoad(true);
         KeyStore ks = KeyStoreReader.loadKeyStore(argc[0], argc[1]);
         Vector<X509Certificate> cert_path = new Vector<X509Certificate>();
-        PrivateKey private_key = null;
+        PrivateKey privateKey = null;
         Enumeration<String> aliases = ks.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
             if (ks.isKeyEntry(alias)) {
-                private_key = (PrivateKey) ks.getKey(alias, argc[1].toCharArray());
+                privateKey = (PrivateKey) ks.getKey(alias, argc[1].toCharArray());
                 for (Certificate cert : ks.getCertificateChain(alias)) {
                     cert_path.add((X509Certificate) cert);
                 }
                 break;
             }
         }
-        boolean rsa_flag = cert_path.firstElement().getPublicKey() instanceof RSAPublicKey;
-        if (private_key == null) {
+        boolean rsaFlag = cert_path.firstElement().getPublicKey() instanceof RSAPublicKey;
+        if (privateKey == null) {
             throw new IOException("No private key!");
         }
-        if (app_usage == AppUsage.ENCRYPTION) {
-            endorsed_algs = rsa_flag ?
+        if (appUsage == AppUsage.ENCRYPTION) {
+            endorsed_algs = rsaFlag ?
                     new String[]{AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getAlgorithmId(AlgorithmPreferences.SKS),
                             AsymEncryptionAlgorithms.RSA_OAEP_SHA1_MGF1P.getAlgorithmId(AlgorithmPreferences.SKS),
                             AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getAlgorithmId(AlgorithmPreferences.SKS)}
                     :
                     new String[]{SecureKeyStore.ALGORITHM_ECDH_RAW};
-        } else if (app_usage == AppUsage.SIGNATURE) {
-            endorsed_algs = rsa_flag ?
+        } else if (appUsage == AppUsage.SIGNATURE) {
+            endorsed_algs = rsaFlag ?
                     new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS), AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS)}
                     :
                     new String[]{AsymSignatureAlgorithms.ECDSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS)};
         }
         SecureKeyStore sks = (SecureKeyStore) Class.forName(System.getProperty("sks.client")).newInstance();
         EnumeratedKey ek = new EnumeratedKey();
-        GenKey old_key = null;
+        GenKey oldKey = null;
         while ((ek = sks.enumerateKeys(ek.getKeyHandle())) != null) {
             if (sks.getKeyAttributes(ek.getKeyHandle()).getCertificatePath()[0].equals(cert_path.get(0))) {
                 System.out.println("Duplicate entry - Replace key #" + ek.getKeyHandle());
@@ -117,9 +117,9 @@ public class PKCS12Import {
                     if (eps.getProvisioningHandle() == ek.getProvisioningHandle()) {
                         PublicKey kmk = eps.getKeyManagementKey();
                         if (kmk != null && new ProvSess.SoftHSM().enumerateKeyManagementKeys()[0].equals(kmk)) {
-                            old_key = new GenKey();
-                            old_key.key_handle = ek.getKeyHandle();
-                            old_key.cert_path = cert_path.toArray(new X509Certificate[0]);
+                            oldKey = new GenKey();
+                            oldKey.keyHandle = ek.getKeyHandle();
+                            oldKey.cert_path = cert_path.toArray(new X509Certificate[0]);
                             if (sks instanceof WSSpecific) {
                                 ((WSSpecific) sks).logEvent("Updating");
                             }
@@ -132,42 +132,42 @@ public class PKCS12Import {
         }
         Device device = new Device(sks);
         ProvSess sess = new ProvSess(device, 0);
-        if (old_key != null) {
-            sess.postDeleteKey(old_key);
+        if (oldKey != null) {
+            sess.postDeleteKey(oldKey);
         }
-        PINPol pin_policy = null;
+        PINPol pinPolicy = null;
         String prot = "NO PIN";
         if (argc.length > 2) {
             pin_value = argc[2];
-            sess.setInputMethod(input_method);
-            prot = "PIN [Format=" + format + ", InputMode=" + input_method + ", Grouping=" + grouping +
-                    ", AppUsage=" + app_usage + ", PINCaching=" + pin_caching + "]";
-            pin_policy = sess.createPINPolicy("PIN",
+            sess.setInputMethod(inputMethod);
+            prot = "PIN [Format=" + format + ", InputMode=" + inputMethod + ", Grouping=" + grouping +
+                    ", AppUsage=" + appUsage + ", PINCaching=" + pin_caching + "]";
+            pinPolicy = sess.createPINPolicy("PIN",
                     format,
                     EnumSet.noneOf(PatternRestriction.class),
                     grouping,
-                    1 /* min_length */,
-                    50 /* max_length */,
-                    (short) 3 /* retry_limit*/,
-                    null /* puk_policy */);
+                    1 /* minLength */,
+                    50 /* maxLength */,
+                    (short) 3 /* retryLimit*/,
+                    null /* pukPolicy */);
         }
         GenKey key = sess.createKey("Key",
                 SecureKeyStore.ALGORITHM_KEY_ATTEST_1,
-                null /* server_seed */,
-                pin_policy,
+                null /* serverSeed */,
+                pinPolicy,
                 pin_value,
-                BiometricProtection.NONE /* biometric_protection */,
+                BiometricProtection.NONE /* biometricProtection */,
                 ExportProtection.NON_EXPORTABLE /* export_policy */,
                 DeleteProtection.NONE /* delete_policy */,
-                pin_caching /* enable_pin_caching */,
-                app_usage,
-                "" /* friendly_name */,
+                pin_caching /* enablePinCaching */,
+                appUsage,
+                "" /* friendlyName */,
                 new KeySpecifier(KeyAlgorithms.NIST_P_256),
                 endorsed_algs);
         key.setCertificatePath(cert_path.toArray(new X509Certificate[0]));
-        key.setPrivateKey(private_key);
+        key.setPrivateKey(privateKey);
         sess.closeSession();
-        System.out.println("Imported Subject: " + cert_path.firstElement().getSubjectX500Principal().getName() + "\nID=#" + key.key_handle +
-                ", " + (rsa_flag ? "RSA" : "EC") + " Key with " + prot);
+        System.out.println("Imported Subject: " + cert_path.firstElement().getSubjectX500Principal().getName() + "\nID=#" + key.keyHandle +
+                ", " + (rsaFlag ? "RSA" : "EC") + " Key with " + prot);
     }
 }

@@ -54,15 +54,15 @@ public class Key2 {
 
     @SuppressWarnings("serial")
     public static class Reader extends JSONDecoder {
-        PublicKey public_key;
+        PublicKey publicKey;
 
         PublicKey getPublicKey() throws IOException {
-            return public_key;
+            return publicKey;
         }
 
         @Override
         protected void readJSONData(JSONObjectReader rd) throws IOException {
-            public_key = rd.getPublicKey();
+            publicKey = rd.getPublicKey();
         }
 
         @Override
@@ -73,15 +73,15 @@ public class Key2 {
 
     @SuppressWarnings("serial")
     static class Writer extends JSONEncoder {
-        PublicKey public_key;
+        PublicKey publicKey;
 
-        Writer(PublicKey public_key) {
-            this.public_key = public_key;
+        Writer(PublicKey publicKey) {
+            this.publicKey = publicKey;
         }
 
         @Override
         protected void writeJSONData(JSONObjectWriter wr) throws IOException {
-            wr.setPublicKey(public_key);
+            wr.setPublicKey(publicKey);
         }
 
         @Override
@@ -103,11 +103,11 @@ public class Key2 {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(rsa ? "RSA" : "EC");
         kpg.initialize(alg_par_spec, new SecureRandom());
         KeyPair key_pair = kpg.generateKeyPair();
-        PublicKey public_key = key_pair.getPublic();
-        byte[] data = new Writer(public_key).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
+        PublicKey publicKey = key_pair.getPublic();
+        byte[] data = new Writer(publicKey).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse(data);
-        if (!ArrayUtil.compare(reader.getPublicKey().getEncoded(), public_key.getEncoded())) {
-            throw new IOException("Unmatching keys:" + public_key.toString());
+        if (!ArrayUtil.compare(reader.getPublicKey().getEncoded(), publicKey.getEncoded())) {
+            throw new IOException("Unmatching keys:" + publicKey.toString());
         }
         if (list) {
             System.out.println(new String(data, "UTF-8"));
@@ -126,13 +126,13 @@ public class Key2 {
                     KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
                     kpg.initialize(alg_par_spec, new SecureRandom());
                     KeyPair key_pair = kpg.generateKeyPair();
-                    byte[] public_key = key_pair.getPublic().getEncoded();
+                    byte[] publicKey = key_pair.getPublic().getEncoded();
                     int i = -1;
                     System.out.print(ka.getAlgorithmId(AlgorithmPreferences.SKS) + "\nnew byte[]\n{");
-                    for (byte b : public_key) {
+                    for (byte b : publicKey) {
                         if (++i != 0) {
                             System.out.print(",");
-                            if (i % 8 == 0 && i != public_key.length) {
+                            if (i % 8 == 0 && i != publicKey.length) {
                                 System.out.println();
                             }
                             System.out.print(" ");

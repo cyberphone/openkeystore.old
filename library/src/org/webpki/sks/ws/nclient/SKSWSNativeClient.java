@@ -40,13 +40,13 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
     @Override
     native public ProvisioningSession createProvisioningSession(String algorithm,
                                                                 boolean privacy_enabled,
-                                                                String server_session_id,
+                                                                String serverSessionId,
                                                                 ECPublicKey server_ephemeral_key,
                                                                 String issuer_uri,
-                                                                PublicKey key_management_key,
-                                                                int client_time,
-                                                                int session_life_time,
-                                                                short session_key_limit) throws SKSException;
+                                                                PublicKey keyManagementKey,
+                                                                int clientTime,
+                                                                int sessionLifeTime,
+                                                                short sessionKeyLimit) throws SKSException;
 
     @Override
     native public byte[] closeProvisioningSession(int provisioning_handle,
@@ -65,19 +65,19 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
     native public KeyData createKeyEntry(int provisioning_handle,
                                          String id,
                                          String algorithm,
-                                         byte[] server_seed,
-                                         boolean device_pin_protection,
+                                         byte[] serverSeed,
+                                         boolean devicePinProtection,
                                          int pin_policy_handle,
                                          byte[] pin_value,
-                                         boolean enable_pin_caching,
-                                         byte biometric_protection,
-                                         byte export_protection,
-                                         byte delete_protection,
-                                         byte app_usage,
-                                         String friendly_name,
+                                         boolean enablePinCaching,
+                                         byte biometricProtection,
+                                         byte exportProtection,
+                                         byte deleteProtection,
+                                         byte appUsage,
+                                         String friendlyName,
                                          String key_algorithm,
-                                         byte[] key_parameters,
-                                         String[] endorsed_algorithms,
+                                         byte[] keyParameters,
+                                         String[] endorsedAlgorithms,
                                          byte[] mac) throws SKSException;
 
     @Override
@@ -88,12 +88,12 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
     native public void abortProvisioningSession(int provisioning_handle) throws SKSException;
 
     @Override
-    native public void setCertificatePath(int key_handle,
-                                          X509Certificate[] certificate_path,
+    native public void setCertificatePath(int keyHandle,
+                                          X509Certificate[] certificatePath,
                                           byte[] mac) throws SKSException;
 
     @Override
-    native public void addExtension(int key_handle,
+    native public void addExtension(int keyHandle,
                                     String type,
                                     byte sub_type,
                                     String qualifier,
@@ -101,28 +101,28 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
                                     byte[] mac) throws SKSException;
 
     @Override
-    native public void importSymmetricKey(int key_handle,
-                                          byte[] symmetric_key,
+    native public void importSymmetricKey(int keyHandle,
+                                          byte[] symmetricKey,
                                           byte[] mac) throws SKSException;
 
     @Override
-    native public void importPrivateKey(int key_handle,
-                                        byte[] private_key,
+    native public void importPrivateKey(int keyHandle,
+                                        byte[] privateKey,
                                         byte[] mac) throws SKSException;
 
     @Override
     native public int createPinPolicy(int provisioning_handle,
                                       String id,
                                       int puk_policy_handle,
-                                      boolean user_defined,
-                                      boolean user_modifiable,
+                                      boolean userDefined,
+                                      boolean userModifiable,
                                       byte format,
-                                      short retry_limit,
+                                      short retryLimit,
                                       byte grouping,
-                                      byte pattern_restrictions,
-                                      short min_length,
-                                      short max_length,
-                                      byte input_method,
+                                      byte patternRestrictions,
+                                      short minLength,
+                                      short maxLength,
+                                      byte inputMethod,
                                       byte[] mac) throws SKSException;
 
     @Override
@@ -130,7 +130,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
                                       String id,
                                       byte[] puk_value,
                                       byte format,
-                                      short retry_limit,
+                                      short retryLimit,
                                       byte[] mac) throws SKSException;
 
     @Override
@@ -146,39 +146,39 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void postUpdateKey(int key_handle,
+    native public void postUpdateKey(int keyHandle,
                                      int target_key_handle,
                                      byte[] authorization,
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void postCloneKeyProtection(int key_handle,
+    native public void postCloneKeyProtection(int keyHandle,
                                               int target_key_handle,
                                               byte[] authorization,
                                               byte[] mac) throws SKSException;
 
     @Override
-    native public KeyAttributes getKeyAttributes(int key_handle) throws SKSException;
+    native public KeyAttributes getKeyAttributes(int keyHandle) throws SKSException;
 
     @Override
-    native public EnumeratedKey enumerateKeys(int key_handle) throws SKSException;
+    native public EnumeratedKey enumerateKeys(int keyHandle) throws SKSException;
 
     @Override
-    native public byte[] signHashedData(int key_handle,
+    native public byte[] signHashedData(int keyHandle,
                                         String algorithm,
                                         byte[] parameters,
                                         byte[] authorization,
                                         byte[] data) throws SKSException;
 
     @Override
-    native public byte[] performHmac(int key_handle,
+    native public byte[] performHmac(int keyHandle,
                                      String algorithm,
                                      byte[] parameters,
                                      byte[] authorization,
                                      byte[] data) throws SKSException;
 
     @Override
-    native public byte[] symmetricKeyEncrypt(int key_handle,
+    native public byte[] symmetricKeyEncrypt(int keyHandle,
                                              String algorithm,
                                              boolean mode,
                                              byte[] parameters,
@@ -186,55 +186,55 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
                                              byte[] data) throws SKSException;
 
     @Override
-    native public byte[] asymmetricKeyDecrypt(int key_handle,
+    native public byte[] asymmetricKeyDecrypt(int keyHandle,
                                               String algorithm,
                                               byte[] parameters,
                                               byte[] authorization,
                                               byte[] data) throws SKSException;
 
     @Override
-    native public byte[] keyAgreement(int key_handle,
+    native public byte[] keyAgreement(int keyHandle,
                                       String algorithm,
                                       byte[] parameters,
                                       byte[] authorization,
-                                      ECPublicKey public_key) throws SKSException;
+                                      ECPublicKey publicKey) throws SKSException;
 
     @Override
-    native public void deleteKey(int key_handle,
+    native public void deleteKey(int keyHandle,
                                  byte[] authorization) throws SKSException;
 
     @Override
     native public DeviceInfo getDeviceInfo() throws SKSException;
 
     @Override
-    native public Extension getExtension(int key_handle,
+    native public Extension getExtension(int keyHandle,
                                          String type) throws SKSException;
 
     @Override
-    native public KeyProtectionInfo getKeyProtectionInfo(int key_handle) throws SKSException;
+    native public KeyProtectionInfo getKeyProtectionInfo(int keyHandle) throws SKSException;
 
     @Override
-    native public void setProperty(int key_handle,
+    native public void setProperty(int keyHandle,
                                    String type,
                                    String name,
                                    String value) throws SKSException;
 
     @Override
-    native public void unlockKey(int key_handle,
+    native public void unlockKey(int keyHandle,
                                  byte[] authorization) throws SKSException;
 
     @Override
-    native public void changePin(int key_handle,
+    native public void changePin(int keyHandle,
                                  byte[] authorization,
                                  byte[] new_pin) throws SKSException;
 
     @Override
-    native public void setPin(int key_handle,
+    native public void setPin(int keyHandle,
                               byte[] authorization,
                               byte[] new_pin) throws SKSException;
 
     @Override
-    native public byte[] exportKey(int key_handle,
+    native public byte[] exportKey(int keyHandle,
                                    byte[] authorization) throws SKSException;
 
     @Override
@@ -255,7 +255,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
     }
 
     @Override
-    public void setDeviceID(String device_id) {
+    public void setDeviceID(String deviceId) {
         // TODO Auto-generated method stub
 
     }

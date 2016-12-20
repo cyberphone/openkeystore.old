@@ -31,13 +31,13 @@ public class CustomCryptoProvider {
 
     private CustomCryptoProvider() {} // No instantiation
 
-    private static boolean loadBouncyCastle(boolean insert_first, boolean require) {
+    private static boolean loadBouncyCastle(boolean insertFirst, boolean require) {
         boolean loaded = false;
         try {
             Provider bc = (Provider) Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider").newInstance();
             if (Security.getProvider(bc.getName()) == null) {
                 try {
-                    if (insert_first) {
+                    if (insertFirst) {
                         Security.insertProviderAt(bc, 1);
                         logger.info("BouncyCastle successfully inserted at position #1");
                     } else {
@@ -62,11 +62,11 @@ public class CustomCryptoProvider {
         return loaded;
     }
 
-    public static boolean conditionalLoad(boolean insert_first) {
-        return loadBouncyCastle(insert_first, false);
+    public static boolean conditionalLoad(boolean insertFirst) {
+        return loadBouncyCastle(insertFirst, false);
     }
 
-    public static void forcedLoad(boolean insert_first) {
-        loadBouncyCastle(insert_first, true);
+    public static void forcedLoad(boolean insertFirst) {
+        loadBouncyCastle(insertFirst, true);
     }
 }

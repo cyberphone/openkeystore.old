@@ -37,13 +37,13 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
     private boolean signed_key_info;
 
-    private boolean extended_cert_path;
+    private boolean extendedCertPath;
 
     private String canonicalization_algorithm;
 
     private String digest_algorithm;
 
-    private String signature_algorithm;
+    private String signatureAlgorithm;
 
     private String document_canonicalization_algorithm;
 
@@ -74,7 +74,7 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
 
     public boolean getExtendedCertPath() {
-        return extended_cert_path;
+        return extendedCertPath;
     }
 
 
@@ -89,7 +89,7 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
 
     public AsymSignatureAlgorithms getSignatureAlgorithm() throws IOException {
-        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromID(signature_algorithm,
+        return signatureAlgorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromID(signatureAlgorithm,
                 AlgorithmPreferences.SKS);
     }
 
@@ -109,13 +109,13 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
         //////////////////////////////////////////////////////////////////////////
         signed_key_info = ah.getBooleanConditional(SIGNED_KEY_INFO_ATTR);
 
-        extended_cert_path = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
+        extendedCertPath = ah.getBooleanConditional(EXTENDED_CERT_PATH_ATTR);
 
         canonicalization_algorithm = ah.getStringConditional(CN_ALG_ATTR);
 
         digest_algorithm = ah.getStringConditional(DIGEST_ALG_ATTR);
 
-        signature_algorithm = ah.getStringConditional(SIGNATURE_ALG_ATTR);
+        signatureAlgorithm = ah.getStringConditional(SIGNATURE_ALG_ATTR);
 
         document_canonicalization_algorithm = ah.getStringConditional(DOC_CN_ALG_ATTR, DOC_SIGN_CN_ALG);
     }
@@ -132,7 +132,7 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
     public boolean hasSupportedParameters() {
         return (canonicalization_algorithm == null || CanonicalizationAlgorithms.testAlgorithmURI(canonicalization_algorithm)) &&
                 (digest_algorithm == null || HashAlgorithms.testAlgorithmURI(digest_algorithm)) &&
-                (signature_algorithm == null || AsymSignatureAlgorithms.testAlgorithmURI(signature_algorithm)) &&
+                (signatureAlgorithm == null || AsymSignatureAlgorithms.testAlgorithmURI(signatureAlgorithm)) &&
                 document_canonicalization_algorithm.equals(DOC_SIGN_CN_ALG);
     }
 

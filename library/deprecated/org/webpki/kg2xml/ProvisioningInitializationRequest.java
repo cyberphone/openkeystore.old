@@ -36,13 +36,13 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
   {
     ProvisioningInitializationRequest () {}
 
-    String server_session_id;
+    String serverSessionId;
     
     byte[] nonce;
 
-    Date server_time;
+    Date serverTime;
 
-    String submit_url;
+    String submitUrl;
     
     ECPublicKey server_ephemeral_key;
     
@@ -54,9 +54,9 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     
     Vector<String> client_attributes = new Vector<String> ();
     
-    int session_life_time;
+    int sessionLifeTime;
 
-    short session_key_limit;
+    short sessionKeyLimit;
 
     /**
      * Internal Use Only

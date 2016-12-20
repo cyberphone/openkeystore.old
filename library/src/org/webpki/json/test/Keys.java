@@ -57,15 +57,15 @@ public class Keys {
 
     @SuppressWarnings("serial")
     public static class Reader extends JSONDecoder {
-        PublicKey public_key;
+        PublicKey publicKey;
 
         PublicKey getPublicKey() throws IOException {
-            return public_key;
+            return publicKey;
         }
 
         @Override
         protected void readJSONData(JSONObjectReader rd) throws IOException {
-            public_key = rd.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            publicKey = rd.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override
@@ -76,17 +76,17 @@ public class Keys {
 
     @SuppressWarnings("serial")
     static class Writer extends JSONEncoder {
-        PublicKey public_key;
+        PublicKey publicKey;
         AlgorithmPreferences jose_curve;
 
-        Writer(PublicKey public_key, AlgorithmPreferences jose_curve) {
-            this.public_key = public_key;
+        Writer(PublicKey publicKey, AlgorithmPreferences jose_curve) {
+            this.publicKey = publicKey;
             this.jose_curve = jose_curve;
         }
 
         @Override
         protected void writeJSONData(JSONObjectWriter wr) throws IOException {
-            wr.setPublicKey(public_key, jose_curve);
+            wr.setPublicKey(publicKey, jose_curve);
         }
 
         @Override
@@ -108,11 +108,11 @@ public class Keys {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(rsa ? "RSA" : "EC");
         kpg.initialize(alg_par_spec, new SecureRandom());
         KeyPair key_pair = kpg.generateKeyPair();
-        PublicKey public_key = key_pair.getPublic();
-        byte[] data = new Writer(public_key, jose_curve).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
+        PublicKey publicKey = key_pair.getPublic();
+        byte[] data = new Writer(publicKey, jose_curve).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse(data);
         boolean ec_flag = false;
-        byte[] gen_pk = public_key.getEncoded();
+        byte[] gen_pk = publicKey.getEncoded();
         for (int j = 4; j < 11; j++) {
             ec_flag = true;
             for (int i = 0; i < EC_OID.length; i++) {
@@ -126,7 +126,7 @@ public class Keys {
             throw new IOException("Failed to find EC");
         }
         if (!ArrayUtil.compare(reader.getPublicKey().getEncoded(), gen_pk)) {
-            throw new IOException("Unmatching keys:" + public_key.toString());
+            throw new IOException("Unmatching keys:" + publicKey.toString());
         }
         if (list) {
             System.out.println("\n" + new String(data, "UTF-8") + Base64URL.encode(reader.getPublicKey().getEncoded()));

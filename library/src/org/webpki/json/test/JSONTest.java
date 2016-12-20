@@ -3016,16 +3016,16 @@ public class JSONTest {
     void serializeKey(String spki, String jcs) throws Exception {
         byte[] spki_bin = Base64URL.decode(spki);
         JSONObjectReader or = JSONParser.parse(jcs);
-        PublicKey public_key = or.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey publicKey = or.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         PublicKey public_key2 = or.getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        assertTrue("Public key", ArrayUtil.compare(public_key.getEncoded(), spki_bin));
+        assertTrue("Public key", ArrayUtil.compare(publicKey.getEncoded(), spki_bin));
         assertTrue("Public key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter();
         assertTrue("Public key jcs",
                 ArrayUtil.compare(ow.setPublicKey(getPublicKeyFromSPKI(spki_bin), (jcs.indexOf("\"P-") > 0) ?
                                 AlgorithmPreferences.JOSE : AlgorithmPreferences.SKS).serializeJSONObject(JSONOutputFormats.NORMALIZED),
                         or.serializeJSONObject(JSONOutputFormats.NORMALIZED)));
-        ow = new JSONObjectWriter().setCorePublicKey(public_key, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        ow = new JSONObjectWriter().setCorePublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         public_key2 = JSONParser.parse(ow.toString()).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue("Public core key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         ow.setInt("bug", 3);
@@ -3039,11 +3039,11 @@ public class JSONTest {
         public_key2 = JSONParser.parse(ow.setPublicKey(public_key2).setInt("OK", 5).toString()).getPublicKey();
         assertTrue("Public key2+", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectReader pub_key_object = or.getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        boolean rsa_flag = pub_key_object.getString(JSONSignatureDecoder.TYPE_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
-        String key_parm = rsa_flag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
+        boolean rsaFlag = pub_key_object.getString(JSONSignatureDecoder.TYPE_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
+        String key_parm = rsaFlag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary(key_parm);
         boolean must_fail = true;
-        if (rsa_flag) {
+        if (rsaFlag) {
             parm_bytes = ArrayUtil.add(new byte[]{0}, parm_bytes);
         } else if (parm_bytes[0] == 0) {
             byte[] pb_new = new byte[parm_bytes.length - 1];
@@ -3063,7 +3063,7 @@ public class JSONTest {
             assertFalse("Should have failed", must_fail);
         } catch (Exception e) {
             assertTrue("Shouldn't have failed", must_fail);
-            checkException(e, rsa_flag ?
+            checkException(e, rsaFlag ?
                     "Public RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes"
                     :
                     "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not normalized");

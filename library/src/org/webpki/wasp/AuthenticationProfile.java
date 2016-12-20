@@ -27,13 +27,13 @@ import org.webpki.xmldsig.CanonicalizationAlgorithms;
 public class AuthenticationProfile {
     boolean signed_key_info;
 
-    boolean extended_cert_path;
+    boolean extendedCertPath;
 
     CanonicalizationAlgorithms canonicalization_algorithm;
 
     HashAlgorithms digest_algorithm;
 
-    AsymSignatureAlgorithms signature_algorithm;
+    AsymSignatureAlgorithms signatureAlgorithm;
 
     AuthenticationProfile() {
     }
@@ -43,7 +43,7 @@ public class AuthenticationProfile {
     }
 
     public boolean getExtendedCertPath() {
-        return extended_cert_path;
+        return extendedCertPath;
     }
 
     public CanonicalizationAlgorithms getCanonicalizationAlgorithm() {
@@ -55,7 +55,7 @@ public class AuthenticationProfile {
     }
 
     public AsymSignatureAlgorithms getSignatureAlgorithm() {
-        return signature_algorithm;
+        return signatureAlgorithm;
     }
 
     public void setSignedKeyInfo(boolean flag) {
@@ -63,7 +63,7 @@ public class AuthenticationProfile {
     }
 
     public void setExtendedCertPath(boolean flag) {
-        this.extended_cert_path = flag;
+        this.extendedCertPath = flag;
     }
 
     public void setCanonicalizationAlgorithm(CanonicalizationAlgorithms canonicalization_algorithm) {
@@ -76,8 +76,8 @@ public class AuthenticationProfile {
         this.digest_algorithm = digest_algorithm;
     }
 
-    public void setSignatureAlgorithm(AsymSignatureAlgorithms signature_algorithm) throws IOException {
-        signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS);
-        this.signature_algorithm = signature_algorithm;
+    public void setSignatureAlgorithm(AsymSignatureAlgorithms signatureAlgorithm) throws IOException {
+        signatureAlgorithm.getAlgorithmId(AlgorithmPreferences.SKS);
+        this.signatureAlgorithm = signatureAlgorithm;
     }
 }

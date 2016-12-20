@@ -37,13 +37,13 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
 
     boolean signed_key_info;
 
-    boolean extended_cert_path;
+    boolean extendedCertPath;
 
     CanonicalizationAlgorithms canonicalization_algorithm;
 
     HashAlgorithms digest_algorithm;
 
-    AsymSignatureAlgorithms signature_algorithm;
+    AsymSignatureAlgorithms signatureAlgorithm;
 
     String document_canonicalization_algorithm;
 
@@ -72,7 +72,7 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
     }
 
     public void setExtendedCertPath(boolean flag) {
-        extended_cert_path = flag;
+        extendedCertPath = flag;
     }
 
     public void setCanonicalizationAlgorithm(CanonicalizationAlgorithms canonicalization_algorithm) {
@@ -83,8 +83,8 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
         this.digest_algorithm = digest_algorithm;
     }
 
-    public void setSignatureAlgorithm(AsymSignatureAlgorithms signature_algorithm) {
-        this.signature_algorithm = signature_algorithm;
+    public void setSignatureAlgorithm(AsymSignatureAlgorithms signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
     }
 
     public void setDocumentCanonicalizationAlgorithm(String document_canonicalization_algorithm) {
@@ -105,7 +105,7 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
             wr.setBooleanAttribute(SIGNED_KEY_INFO_ATTR, true);
         }
 
-        if (extended_cert_path) {
+        if (extendedCertPath) {
             wr.setBooleanAttribute(EXTENDED_CERT_PATH_ATTR, true);
         }
 
@@ -117,8 +117,8 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
             wr.setStringAttribute(DIGEST_ALG_ATTR, digest_algorithm.getAlgorithmId());
         }
 
-        if (signature_algorithm != null) {
-            wr.setStringAttribute(SIGNATURE_ALG_ATTR, signature_algorithm.getAlgorithmId(AlgorithmPreferences.SKS));
+        if (signatureAlgorithm != null) {
+            wr.setStringAttribute(SIGNATURE_ALG_ATTR, signatureAlgorithm.getAlgorithmId(AlgorithmPreferences.SKS));
         }
 
         if (document_canonicalization_algorithm != null) {

@@ -29,9 +29,9 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 abstract class KeyCreationResponse extends XMLObjectWrapper
   {
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     KeyCreationResponse () {}
 

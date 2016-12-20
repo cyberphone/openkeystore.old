@@ -59,13 +59,13 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
 
 
     public PlatformNegotiationResponseEncoder addImagePreference (String type_url,
-                                                                  String mime_type,
+                                                                  String mimeType,
                                                                   int width,
                                                                   int height)
       {
         ImagePreference im_pref = new ImagePreference ();
         im_pref.type = type_url;
-        im_pref.mime_type = mime_type;
+        im_pref.mimeType = mimeType;
         im_pref.width = width;
         im_pref.height = height;
         image_preferences.add (im_pref);
@@ -81,7 +81,7 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
 
     public PlatformNegotiationResponseEncoder (PlatformNegotiationRequestDecoder decoder)
       {
-        this.server_session_id = decoder.server_session_id;
+        this.serverSessionId = decoder.serverSessionId;
       }
     
     public void setNonce (byte[] nonce)
@@ -93,7 +93,7 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
       {
         wr.initializeRootObject (prefix);
 
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, serverSessionId);
         
         ////////////////////////////////////////////////////////////////////////
         // VM mandatory option
@@ -115,7 +115,7 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
           {
             wr.addChildElement (IMAGE_PREFERENCE_ELEM);
             wr.setStringAttribute (TYPE_ATTR, im_pref.type);
-            wr.setStringAttribute (MIME_TYPE_ATTR, im_pref.mime_type);
+            wr.setStringAttribute (MIME_TYPE_ATTR, im_pref.mimeType);
             wr.setIntAttribute (WIDTH_ATTR, im_pref.width);
             wr.setIntAttribute (HEIGHT_ATTR, im_pref.height);
             wr.getParent ();

@@ -28,25 +28,25 @@ import java.security.cert.X509Certificate;
  */
 public class KeyStoreVerifier implements VerifierInterface {
 
-    private X509Store ca_certificates;
+    private X509Store caCertificates;
 
-    private boolean abort_on_non_trusted = true;
+    private boolean abortOnNonTrusted = true;
 
     private boolean trusted;
 
-    private AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler;
+    private AuthorityInfoAccessCAIssuersSpi aiaCaissuerHandler;
 
-    private X509Certificate[] certificate_path;
+    private X509Certificate[] certificatePath;
 
     /**
      * Verifier based on a specific keystore.
      *
-     * @param caCertsKS Use this keystore for verification
+     * @param caCertsKeyStore Use this keystore for verification
      * @throws IOException for various errors
      */
-    public KeyStoreVerifier(KeyStore caCertsKS) throws IOException {
+    public KeyStoreVerifier(KeyStore caCertsKeyStore) throws IOException {
         try {
-            ca_certificates = new X509Store(caCertsKS);
+            caCertificates = new X509Store(caCertsKeyStore);
         } catch (GeneralSecurityException e) {
             throw new IOException(e.getMessage());
         }
@@ -61,23 +61,23 @@ public class KeyStoreVerifier implements VerifierInterface {
         try {
             KeyStore ks = KeyStore.getInstance("JKS");
             ks.load(null);
-            ca_certificates = new X509Store(ks);
+            caCertificates = new X509Store(ks);
         } catch (GeneralSecurityException e) {
             throw new IOException(e.getMessage());
         }
-        abort_on_non_trusted = false;
+        abortOnNonTrusted = false;
     }
 
 
-    public boolean verifyCertificatePath(X509Certificate[] in_certificate_path) throws IOException {
+    public boolean verifyCertificatePath(X509Certificate[] inCertificatePath) throws IOException {
         try {
-            certificate_path = in_certificate_path;
-            if (aia_caissuer_handler != null) {
-                certificate_path = aia_caissuer_handler.getUpdatedPath(certificate_path);
+            certificatePath = inCertificatePath;
+            if (aiaCaissuerHandler != null) {
+                certificatePath = aiaCaissuerHandler.getUpdatedPath(certificatePath);
             }
-            trusted = ca_certificates.verifyCertificates(certificate_path);
-            if (abort_on_non_trusted && !trusted) {
-                throw new IOException("Unknown CA: " + certificate_path[certificate_path.length - 1].getIssuerX500Principal().getName());
+            trusted = caCertificates.verifyCertificates(certificatePath);
+            if (abortOnNonTrusted && !trusted) {
+                throw new IOException("Unknown CA: " + certificatePath[certificatePath.length - 1].getIssuerX500Principal().getName());
             }
         } catch (GeneralSecurityException e) {
             throw new IOException(e.getMessage());
@@ -85,22 +85,22 @@ public class KeyStoreVerifier implements VerifierInterface {
         return trusted;
     }
 
-    public void setAuthorityInfoAccessCAIssuersHandler(AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler) {
-        this.aia_caissuer_handler = aia_caissuer_handler;
+    public void setAuthorityInfoAccessCAIssuersHandler(AuthorityInfoAccessCAIssuersSpi aiaCaissuerHandler) {
+        this.aiaCaissuerHandler = aiaCaissuerHandler;
     }
 
 
     public void setTrustedRequired(boolean flag) throws IOException {
-        abort_on_non_trusted = flag;
+        abortOnNonTrusted = flag;
     }
 
 
     public X509Certificate[] getSignerCertificatePath() throws IOException {
-        return certificate_path;
+        return certificatePath;
     }
 
 
     public X509Certificate getSignerCertificate() throws IOException {
-        return certificate_path[0];
+        return certificatePath[0];
     }
 }

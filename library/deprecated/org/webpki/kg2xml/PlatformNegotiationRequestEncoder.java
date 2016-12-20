@@ -41,28 +41,28 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
 
     boolean needs_dsig_ns;
 
-    private ServerState server_state;
+    private ServerState serverState;
 
     // Constructors
 
-    public PlatformNegotiationRequestEncoder (ServerState server_state,
-                                              String submit_url,
-                                              String server_session_id) throws IOException
+    public PlatformNegotiationRequestEncoder (ServerState serverState,
+                                              String submitUrl,
+                                              String serverSessionId) throws IOException
       {
-        server_state.checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
-        this.server_state = server_state;
-        this.submit_url = submit_url;
-        if (server_session_id == null)
+        serverState.checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
+        this.serverState = serverState;
+        this.submitUrl = submitUrl;
+        if (serverSessionId == null)
           {
-            server_session_id = Long.toHexString (new Date().getTime());
-            server_session_id += Base64URL.generateURLFriendlyRandom (SecureKeyStore.MAX_LENGTH_ID_TYPE - server_session_id.length ());
+            serverSessionId = Long.toHexString (new Date().getTime());
+            serverSessionId += Base64URL.generateURLFriendlyRandom (SecureKeyStore.MAX_LENGTH_ID_TYPE - serverSessionId.length ());
           }
-        this.server_session_id = server_state.server_session_id = server_session_id;
+        this.serverSessionId = serverState.serverSessionId = serverSessionId;
       }
     
     public BasicCapabilities getBasicCapabilities ()
       {
-        return server_state.basic_capabilities;
+        return serverState.basic_capabilities;
       }
    
     public void setAction (Action action)
@@ -70,9 +70,9 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         this.action = action;
       }
 
-    public void setAbortURL (String abort_url)
+    public void setAbortURL (String abortUrl)
       {
-        this.abort_url = abort_url;
+        this.abortUrl = abortUrl;
       }
 
 
@@ -88,7 +88,7 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
+        ds.createEnvelopedSignature (doc, serverSessionId);
       }
 
 
@@ -101,23 +101,23 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         //////////////////////////////////////////////////////////////////////////
         wr.setStringAttribute (ACTION_ATTR, action.getXMLName ());
 
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setStringAttribute (ID_ATTR, serverSessionId);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute (SUBMIT_URL_ATTR, submitUrl);
         
-        if (abort_url != null)
+        if (abortUrl != null)
           {
-            wr.setStringAttribute (ABORT_URL_ATTR, abort_url);
+            wr.setStringAttribute (ABORT_URL_ATTR, abortUrl);
           }
         
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        BasicCapabilities.write (wr, server_state.basic_capabilities, true);
+        BasicCapabilities.write (wr, serverState.basic_capabilities, true);
 
-        if (server_state.privacy_enabled_set)
+        if (serverState.privacy_enabled_set)
           {
-            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, server_state.privacy_enabled);
+            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, serverState.privacy_enabled);
           }
         
         if (needs_dsig_ns) XMLSignatureWrapper.addXMLSignatureNS (wr);

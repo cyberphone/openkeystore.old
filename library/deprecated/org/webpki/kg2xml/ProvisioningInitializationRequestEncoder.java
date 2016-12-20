@@ -46,7 +46,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
   {
     String prefix;  // Default: no prefix
     
-    ServerState server_state;
+    ServerState serverState;
     
     KeyManagementKeyUpdateHolder kmk_root;
     
@@ -54,42 +54,42 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
     public class KeyManagementKeyUpdateHolder
       {
-        PublicKey key_management_key;
+        PublicKey keyManagementKey;
         
         byte[] authorization;
         
         Vector<KeyManagementKeyUpdateHolder> children = new Vector<KeyManagementKeyUpdateHolder> ();
         
-        KeyManagementKeyUpdateHolder (PublicKey key_management_key)
+        KeyManagementKeyUpdateHolder (PublicKey keyManagementKey)
           {
-            if (key_management_key instanceof RSAPublicKey)
+            if (keyManagementKey instanceof RSAPublicKey)
               {
                 output_dsig_ns = true;
               }
-            this.key_management_key = key_management_key;
+            this.keyManagementKey = keyManagementKey;
           }
 
-        public KeyManagementKeyUpdateHolder update (PublicKey key_management_key) throws IOException
+        public KeyManagementKeyUpdateHolder update (PublicKey keyManagementKey) throws IOException
           {
-            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
-            kmk.authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
+            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (keyManagementKey);
+            kmk.authorization = serverState.serverCryptoInterface.generateKeyManagementAuthorization (keyManagementKey,
                                                                                                          ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
-                                                                                                         this.key_management_key.getEncoded ()));
+                                                                                                         this.keyManagementKey.getEncoded ()));
             children.add (kmk);
             return kmk;
           }
 
-        public KeyManagementKeyUpdateHolder update (PublicKey key_management_key, byte[] external_authorization) throws IOException
+        public KeyManagementKeyUpdateHolder update (PublicKey keyManagementKey, byte[] external_authorization) throws IOException
           {
-            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
+            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (keyManagementKey);
             kmk.authorization = external_authorization;
             try
               {
-                Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
+                Signature kmk_verify = Signature.getInstance (keyManagementKey instanceof RSAPublicKey ? 
                                                                                          "SHA256WithRSA" : "SHA256WithECDSA");
-                kmk_verify.initVerify (key_management_key);
+                kmk_verify.initVerify (keyManagementKey);
                 kmk_verify.update (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION);
-                kmk_verify.update (this.key_management_key.getEncoded ());
+                kmk_verify.update (this.keyManagementKey.getEncoded ());
                 if (!kmk_verify.verify (external_authorization))
                   {
                     throw new IOException ("Authorization signature did not validate");
@@ -106,49 +106,49 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
     // Constructors
 
-    public ProvisioningInitializationRequestEncoder (ServerState server_state,
-                                                     String submit_url,
-                                                     int session_life_time,
-                                                     short session_key_limit)  throws IOException
+    public ProvisioningInitializationRequestEncoder (ServerState serverState,
+                                                     String submitUrl,
+                                                     int sessionLifeTime,
+                                                     short sessionKeyLimit)  throws IOException
       {
-        server_state.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
-        this.server_state = server_state;
-        super.submit_url = server_state.issuer_uri = submit_url;
-        super.session_life_time = server_state.session_life_time = session_life_time;
-        super.session_key_limit = server_state.session_key_limit = session_key_limit;
-        super.nonce = server_state.vm_nonce;
-        server_session_id = server_state.server_session_id;
-        server_ephemeral_key = server_state.server_ephemeral_key = server_state.generateEphemeralKey ();
-        for (String client_attribute : server_state.basic_capabilities.client_attributes)
+        serverState.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
+        this.serverState = serverState;
+        super.submitUrl = serverState.issuer_uri = submitUrl;
+        super.sessionLifeTime = serverState.sessionLifeTime = sessionLifeTime;
+        super.sessionKeyLimit = serverState.sessionKeyLimit = sessionKeyLimit;
+        super.nonce = serverState.vm_nonce;
+        serverSessionId = serverState.serverSessionId;
+        server_ephemeral_key = serverState.server_ephemeral_key = serverState.generateEphemeralKey ();
+        for (String client_attribute : serverState.basic_capabilities.client_attributes)
           {
             client_attributes.add (client_attribute);
           }
       }
 
 
-    public KeyManagementKeyUpdateHolder setKeyManagementKey (PublicKey key_management_key)
+    public KeyManagementKeyUpdateHolder setKeyManagementKey (PublicKey keyManagementKey)
       {
-        return kmk_root = new KeyManagementKeyUpdateHolder (server_state.key_management_key = key_management_key);
+        return kmk_root = new KeyManagementKeyUpdateHolder (serverState.keyManagementKey = keyManagementKey);
       }
 
 
-    public void setVirtualMachine (byte[] vm_data, String type, String friendly_name)
+    public void setVirtualMachine (byte[] vm_data, String type, String friendlyName)
       {
         virtual_machine_data = vm_data;
         virtual_machine_type = type;
-        virtual_machine_friendly_name = friendly_name;
+        virtual_machine_friendly_name = friendlyName;
       }
 
 
     public void setSessionKeyAlgorithm (String session_key_algorithm)
       {
-        server_state.provisioning_session_algorithm = session_key_algorithm;
+        serverState.provisioning_session_algorithm = session_key_algorithm;
       }
 
     
-    public void setServerTime (Date server_time)
+    public void setServerTime (Date serverTime)
       {
-        super.server_time = server_time;
+        super.serverTime = serverTime;
       }
     
     
@@ -164,7 +164,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
+        ds.createEnvelopedSignature (doc, serverSessionId);
       }
 
 
@@ -174,7 +174,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
           {
             wr.addChildElement (UPDATABLE_KEY_MANAGEMENT_KEY_ELEM);
             wr.setBinaryAttribute (AUTHORIZATION_ATTR, child.authorization);
-            XMLSignatureWrapper.writePublicKey (wr, child.key_management_key);
+            XMLSignatureWrapper.writePublicKey (wr, child.keyManagementKey);
             scanForUpdatedKeys (wr, child);
             wr.getParent ();
           }
@@ -195,27 +195,27 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setStringAttribute (ID_ATTR, serverSessionId);
         
         if (nonce != null)
           {
             wr.setBinaryAttribute (NONCE_ATTR, nonce);
           }
 
-        if (server_time == null)
+        if (serverTime == null)
           {
-            server_time = new Date ();
+            serverTime = new Date ();
           }
 
-        wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
+        wr.setDateTimeAttribute (SERVER_TIME_ATTR, serverTime);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute (SUBMIT_URL_ATTR, submitUrl);
         
-        wr.setIntAttribute (SESSION_LIFE_TIME_ATTR, session_life_time);
+        wr.setIntAttribute (SESSION_LIFE_TIME_ATTR, sessionLifeTime);
 
-        wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
+        wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, sessionKeyLimit);
 
-        wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, server_state.provisioning_session_algorithm);
+        wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, serverState.provisioning_session_algorithm);
         
         if (!client_attributes.isEmpty ())
           {
@@ -235,7 +235,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         if (kmk_root != null)
           {
             wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
-            XMLSignatureWrapper.writePublicKey (wr, kmk_root.key_management_key);
+            XMLSignatureWrapper.writePublicKey (wr, kmk_root.keyManagementKey);
             scanForUpdatedKeys (wr, kmk_root);
             wr.getParent();
           }

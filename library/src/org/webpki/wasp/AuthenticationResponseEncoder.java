@@ -37,9 +37,9 @@ import static org.webpki.wasp.WASPConstants.*;
 
 
 public class AuthenticationResponseEncoder extends AuthenticationResponse {
-    private String server_time;
+    private String serverTime;
 
-    private Date client_time;
+    private Date clientTime;
 
     private boolean add_new_line = true;
 
@@ -58,14 +58,14 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse {
 
     public void createSignedResponse(SignerInterface signer,
                                      AuthenticationRequestDecoder auth_req_decoder,
-                                     String request_url,
-                                     Date client_time,
+                                     String requestUrl,
+                                     Date clientTime,
                                      X509Certificate server_certificate) throws IOException {
         this.id = auth_req_decoder.getID();
-        this.server_time = auth_req_decoder.getServerTime();
-        this.request_url = request_url;
-        this.submit_url = auth_req_decoder.getSubmitUrl();
-        this.client_time = client_time;
+        this.serverTime = auth_req_decoder.getServerTime();
+        this.requestUrl = requestUrl;
+        this.submitUrl = auth_req_decoder.getSubmitUrl();
+        this.clientTime = clientTime;
         if (server_certificate != null) {
             try {
                 this.server_certificate_fingerprint = HashAlgorithms.SHA256.digest(server_certificate.getEncoded());
@@ -101,13 +101,13 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse {
 
         wr.setStringAttribute(ID_ATTR, id);
 
-        wr.setStringAttribute(SERVER_TIME_ATTR, server_time);
+        wr.setStringAttribute(SERVER_TIME_ATTR, serverTime);
 
-        wr.setStringAttribute(SUBMIT_URL_ATTR, submit_url);
+        wr.setStringAttribute(SUBMIT_URL_ATTR, submitUrl);
 
-        wr.setStringAttribute(REQUEST_URL_ATTR, request_url);
+        wr.setStringAttribute(REQUEST_URL_ATTR, requestUrl);
 
-        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, client_time);
+        wr.setDateTimeAttribute(CLIENT_TIME_ATTR, clientTime);
 
         if (server_certificate_fingerprint != null) {
             wr.setBinaryAttribute(SERVER_CERT_FP_ATTR, server_certificate_fingerprint);

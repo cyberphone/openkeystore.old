@@ -58,7 +58,7 @@ import org.webpki.crypto.CertificateUtil;
 /*
 Certificate            ::=   SIGNED { SEQUENCE {
    version                 [0]   Version DEFAULT v1,
-   serial_number                 CertificateSerialNumber,
+   serialNumber                 CertificateSerialNumber,
    signature                     AlgorithmIdentifier,
    issuer                        Name,
    validity                      Validity,
@@ -153,7 +153,7 @@ public class CA {
 
     public X509Certificate createCert(CertSpec cert_spec,
                                       DistinguishedName issuer_name,
-                                      BigInteger serial_number,
+                                      BigInteger serialNumber,
                                       Date start_date, Date end_date,
                                       AsymSignatureAlgorithms certalg,
                                       AsymKeySignerInterface signer,
@@ -167,7 +167,7 @@ public class CA {
         BaseASN1Object validity = new ASN1Sequence(new BaseASN1Object[]{getASN1Time(start_date),
                 getASN1Time(end_date)});
 
-        BaseASN1Object signature_algorithm =
+        BaseASN1Object signatureAlgorithm =
                 new ASN1Sequence(new BaseASN1Object[]{new ASN1ObjectID(certalg.getOID()),
                         new ASN1Null()});
 
@@ -195,12 +195,12 @@ public class CA {
             for (KeyUsageBits kubit : cert_spec.key_usage_set) {
                 i |= 1 << kubit.ordinal();
             }
-            byte[] key_usage = new byte[i > 255 ? 2 : 1];
-            key_usage[0] = reverse_bits[i & 255];
+            byte[] keyUsage = new byte[i > 255 ? 2 : 1];
+            keyUsage[0] = reverse_bits[i & 255];
             if (i > 255) {
-                key_usage[1] = reverse_bits[i >> 8];
+                keyUsage[1] = reverse_bits[i >> 8];
             }
-            extensions.add(CertificateExtensions.KEY_USAGE, true, new ASN1BitString(key_usage));
+            extensions.add(CertificateExtensions.KEY_USAGE, true, new ASN1BitString(keyUsage));
         }
 
         //////////////////////////////////////////////////////
@@ -309,8 +309,8 @@ public class CA {
         //////////////////////////////////////////////////////
         BaseASN1Object[] inner = new BaseASN1Object[extensions.isEmpty() ? 7 : 8];
         inner[0] = version;
-        inner[1] = new ASN1Integer(serial_number);
-        inner[2] = signature_algorithm;
+        inner[1] = new ASN1Integer(serialNumber);
+        inner[2] = signatureAlgorithm;
         inner[3] = issuer_name.toASN1();
         inner[4] = validity;
         inner[5] = subject_name.toASN1();
@@ -323,7 +323,7 @@ public class CA {
 
         BaseASN1Object signature = new ASN1BitString(signer.signData(tbsCertificate.encode(), certalg));
 
-        byte[] certificate = new ASN1Sequence(new BaseASN1Object[]{tbsCertificate, signature_algorithm, signature}).encode();
+        byte[] certificate = new ASN1Sequence(new BaseASN1Object[]{tbsCertificate, signatureAlgorithm, signature}).encode();
 
         return CertificateUtil.getCertificateFromBlob(certificate);
     }

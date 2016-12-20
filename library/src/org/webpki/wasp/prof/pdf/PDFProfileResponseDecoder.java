@@ -48,13 +48,13 @@ import static org.webpki.wasp.prof.pdf.PDFProfileConstants.*;
 public class PDFProfileResponseDecoder extends XMLObjectWrapper implements SignatureProfileResponseDecoder {
 
     // Attributes
-    private String submit_url;
+    private String submitUrl;
 
-    private String request_url;
+    private String requestUrl;
 
-    private GregorianCalendar client_time;                      // Optional
+    private GregorianCalendar clientTime;                      // Optional
 
-    private GregorianCalendar server_time;                      // Optional
+    private GregorianCalendar serverTime;                      // Optional
 
     private String id;
 
@@ -109,12 +109,12 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
 
 
     public String getRequestURL() {
-        return request_url;
+        return requestUrl;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
@@ -124,12 +124,12 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
 
 
     public GregorianCalendar getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public GregorianCalendar getClientTime() {
-        return client_time;
+        return clientTime;
     }
 
 
@@ -142,10 +142,10 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        submit_url = ah.getString(SUBMIT_URL_ATTR);
-        request_url = ah.getString(REQUEST_URL_ATTR);
-        client_time = ah.getDateTimeConditional(CLIENT_TIME_ATTR);
-        server_time = ah.getDateTimeConditional(SERVER_TIME_ATTR);
+        submitUrl = ah.getString(SUBMIT_URL_ATTR);
+        requestUrl = ah.getString(REQUEST_URL_ATTR);
+        clientTime = ah.getDateTimeConditional(CLIENT_TIME_ATTR);
+        serverTime = ah.getDateTimeConditional(SERVER_TIME_ATTR);
         id = ah.getString(ID_ATTR);
         server_certificate_fingerprint = ah.getBinaryConditional(SERVER_CERT_FP_ATTR);
 
@@ -223,9 +223,9 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
                                    ".  Got: " + ds.getDigestAlgorithm ().getURI ());
           }
 
-        if (enc.signature_algorithm != ds.getSignatureAlgorithm ())
+        if (enc.signatureAlgorithm != ds.getSignatureAlgorithm ())
           {
-            bad ("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getURI () +
+            bad ("Wrong signature algorithm.  Requested: " + enc.signatureAlgorithm.getURI () +
                                    ".  Got: " + ds.getSignatureAlgorithm ().getURI ());
           }
 */

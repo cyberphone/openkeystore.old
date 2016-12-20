@@ -33,7 +33,7 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class KeyCreationResponseEncoder extends KeyCreationResponse
   {
-    private Vector<GeneratedPublicKey> generated_keys = new Vector<GeneratedPublicKey> ();
+    private Vector<GeneratedPublicKey> generatedKeys = new Vector<GeneratedPublicKey> ();
 
     private String prefix;  // Default: no prefix
 
@@ -44,24 +44,24 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
       {
         String id;
 
-        PublicKey public_key;
+        PublicKey publicKey;
 
         byte[] key_attestation;
 
         GeneratedPublicKey (String id)
           {
             this.id = id;
-            generated_keys.add (this);
+            generatedKeys.add (this);
           }
 
       }
 
 
-    public void addPublicKey (PublicKey public_key, byte[] key_attestation, String id) throws IOException
+    public void addPublicKey (PublicKey publicKey, byte[] key_attestation, String id) throws IOException
       {
         GeneratedPublicKey gk = new GeneratedPublicKey (id);
-        gk.public_key = public_key;
-        if (public_key instanceof ECPublicKey)
+        gk.publicKey = publicKey;
+        if (publicKey instanceof ECPublicKey)
           {
             need_ds11_namespace = true;
           }
@@ -83,8 +83,8 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
 
     public KeyCreationResponseEncoder (KeyCreationRequestDecoder key_init_req) throws IOException
       {
-        client_session_id = key_init_req.getClientSessionId ();
-        server_session_id = key_init_req.getServerSessionId ();
+        clientSessionId = key_init_req.getClientSessionId ();
+        serverSessionId = key_init_req.getServerSessionId ();
       }
 
 
@@ -99,16 +99,16 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
             XMLSignatureWrapper.addXMLSignature11NS (wr);
           }
 
-        wr.setStringAttribute (ID_ATTR, client_session_id);
+        wr.setStringAttribute (ID_ATTR, clientSessionId);
 
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, serverSessionId);
       
-        for (GeneratedPublicKey gk : generated_keys)
+        for (GeneratedPublicKey gk : generatedKeys)
           {
             wr.addChildElement (GENERATED_KEY_ELEM);
             wr.setStringAttribute (ID_ATTR, gk.id);
             wr.setBinaryAttribute (KEY_ATTESTATION_ATTR, gk.key_attestation);
-            XMLSignatureWrapper.writePublicKey (wr, gk.public_key);
+            XMLSignatureWrapper.writePublicKey (wr, gk.publicKey);
             wr.getParent ();
           }
       }

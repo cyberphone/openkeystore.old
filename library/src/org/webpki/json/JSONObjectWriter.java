@@ -791,8 +791,8 @@ public class JSONObjectWriter implements Serializable {
         return buffer.toString().getBytes("UTF-8");
     }
 
-    public String serializeToString(JSONOutputFormats format) throws IOException {
-        return new String(serializeJSONObject(format), "UTF-8");
+    public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
+        return new String(serializeJSONObject(outputFormat), "UTF-8");
     }
 
     @Override

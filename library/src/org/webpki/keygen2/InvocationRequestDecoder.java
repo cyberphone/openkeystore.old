@@ -17,11 +17,13 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.webpki.crypto.KeyContainerTypes;
+
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -32,7 +34,7 @@ public class InvocationRequestDecoder extends ClientDecoder {
 
     enum CAPABILITY {UNDEFINED, URI_FEATURE, VALUES, IMAGE_ATTRIBUTES}
 
-    LinkedHashMap<String, CAPABILITY> queried_capabilities = new LinkedHashMap<String, CAPABILITY>();
+    LinkedHashMap<String, CAPABILITY> queriedCapabilities = new LinkedHashMap<String, CAPABILITY>();
 
     Action action;
 
@@ -41,36 +43,36 @@ public class InvocationRequestDecoder extends ClientDecoder {
     }
 
 
-    boolean privacy_enabled;
+    boolean privacyEnabled;
 
     public boolean getPrivacyEnabledFlag() {
-        return privacy_enabled;
+        return privacyEnabled;
     }
 
 
     public Set<String> getQueriedCapabilities() {
-        return queried_capabilities.keySet();
+        return queriedCapabilities.keySet();
     }
 
 
-    String server_session_id;
+    String serverSessionId;
 
     public String getServerSessionId() {
-        return server_session_id;
+        return serverSessionId;
     }
 
 
-    String submit_url;
+    String submitUrl;
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
-    String abort_url; // Optional
+    String abortUrl; // Optional
 
     public String getOptionalAbortUrl() {
-        return abort_url;
+        return abortUrl;
     }
 
 
@@ -81,10 +83,10 @@ public class InvocationRequestDecoder extends ClientDecoder {
     }
 
 
-    LinkedHashSet<KeyContainerTypes> key_container_list;  // Optional
+    LinkedHashSet<KeyContainerTypes> keyContainerList;  // Optional
 
     public LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerList() {
-        return key_container_list;
+        return keyContainerList;
     }
 
 
@@ -97,22 +99,22 @@ public class InvocationRequestDecoder extends ClientDecoder {
 
         languages = rd.getStringArrayConditional(PREFERREDD_LANGUAGES_JSON);
 
-        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet(rd.getStringArrayConditional(KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
+        keyContainerList = KeyContainerTypes.getOptionalKeyContainerSet(rd.getStringArrayConditional(KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
 
-        privacy_enabled = rd.getBooleanConditional(PRIVACY_ENABLED_JSON);
+        privacyEnabled = rd.getBooleanConditional(PRIVACY_ENABLED_JSON);
 
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        submit_url = getURL(rd, SUBMIT_URL_JSON);
+        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
         if (rd.hasProperty(ABORT_URL_JSON)) {
-            abort_url = getURL(rd, ABORT_URL_JSON);
+            abortUrl = getURL(rd, ABORT_URL_JSON);
         }
 
-        String[] capability_uris = KeyGen2Validator.getURIListConditional(rd, CLIENT_CAPABILITY_QUERY_JSON);
-        if (capability_uris != null) {
-            for (String uri : capability_uris) {
-                if (queried_capabilities.put(uri, CAPABILITY.UNDEFINED) != null) {
+        String[] capabilityUris = KeyGen2Validator.getURIListConditional(rd, CLIENT_CAPABILITY_QUERY_JSON);
+        if (capabilityUris != null) {
+            for (String uri : capabilityUris) {
+                if (queriedCapabilities.put(uri, CAPABILITY.UNDEFINED) != null) {
                     KeyGen2Validator.bad("Duplicate capability URI: " + uri);
                 }
             }

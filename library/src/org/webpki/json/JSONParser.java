@@ -71,8 +71,8 @@ public class JSONParser {
         return new JSONParser().internalParse(jsonString);
     }
 
-    public static JSONObjectReader parse(byte[] json_utf8) throws IOException {
-        return parse(new String(json_utf8, "UTF-8"));
+    public static JSONObjectReader parse(byte[] jsonUtf8) throws IOException {
+        return parse(new String(jsonUtf8, "UTF-8"));
     }
 
     String scanProperty() throws IOException {

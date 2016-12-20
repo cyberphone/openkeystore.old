@@ -17,7 +17,9 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.Vector;
+
 import java.security.PublicKey;
 
 import org.webpki.json.JSONArrayWriter;
@@ -30,37 +32,37 @@ public class KeyCreationResponseEncoder extends JSONEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
-    Vector<GeneratedPublicKey> generated_keys = new Vector<GeneratedPublicKey>();
+    Vector<GeneratedPublicKey> generatedKeys = new Vector<GeneratedPublicKey>();
 
     private class GeneratedPublicKey {
         String id;
 
-        PublicKey public_key;
+        PublicKey publicKey;
 
         byte[] attestation;
 
         GeneratedPublicKey(String id) {
             this.id = id;
-            generated_keys.add(this);
+            generatedKeys.add(this);
         }
 
     }
 
 
-    public void addPublicKey(PublicKey public_key, byte[] attestation, String id) throws IOException {
+    public void addPublicKey(PublicKey publicKey, byte[] attestation, String id) throws IOException {
         GeneratedPublicKey gk = new GeneratedPublicKey(id);
-        gk.public_key = public_key;
+        gk.publicKey = publicKey;
         gk.attestation = attestation;
     }
 
 
-    public KeyCreationResponseEncoder(KeyCreationRequestDecoder key_init_req) throws IOException {
-        client_session_id = key_init_req.getClientSessionId();
-        server_session_id = key_init_req.getServerSessionId();
+    public KeyCreationResponseEncoder(KeyCreationRequestDecoder keyCreationRequestDecoder) throws IOException {
+        clientSessionId = keyCreationRequestDecoder.getClientSessionId();
+        serverSessionId = keyCreationRequestDecoder.getServerSessionId();
     }
 
 
@@ -69,18 +71,18 @@ public class KeyCreationResponseEncoder extends JSONEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(CLIENT_SESSION_ID_JSON, client_session_id);
+        wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
 
         //////////////////////////////////////////////////////////////////////////
         // The generated keys
         //////////////////////////////////////////////////////////////////////////
         JSONArrayWriter keys = wr.setArray(GENERATED_KEYS_JSON);
-        for (GeneratedPublicKey gk : generated_keys) {
+        for (GeneratedPublicKey gk : generatedKeys) {
             keys.setObject()
                 .setString(ID_JSON, gk.id)
-                .setPublicKey(gk.public_key)
+                .setPublicKey(gk.publicKey)
                 .setBinary(ATTESTATION_JSON, gk.attestation);
         }
     }

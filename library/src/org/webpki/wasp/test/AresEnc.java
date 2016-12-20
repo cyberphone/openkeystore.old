@@ -110,7 +110,7 @@ public class AresEnc {
 
     public static void main(String args[]) throws Exception {
         if (args.length < 3) show();
-        String key_alias = null;
+        String keyAlias = null;
         String storepassword = null;
         String signpassword = null;
         boolean localfixed = false;
@@ -124,7 +124,7 @@ public class AresEnc {
             } else if (arg.equals("-t")) localfixed = true;
             else if (i + 1 < args.length && argtest(args, i + 1) != null) {
                 String value = args[i + 1];
-                if (arg.equals("-a")) key_alias = value;
+                if (arg.equals("-a")) keyAlias = value;
                 else if (arg.equals("-k")) key_file = value;
                 else if (arg.equals("-w")) storepassword = value;
                 else if (arg.equals("-u")) signpassword = value;
@@ -144,7 +144,7 @@ public class AresEnc {
         String out_file = argtest(args, 1);
 
         KeyStoreSigner signer = new KeyStoreSigner(ks, null);
-        signer.setKey(key_alias, signpassword);
+        signer.setKey(keyAlias, signpassword);
 
         test(in_file, out_file, signer, localfixed, false);
 

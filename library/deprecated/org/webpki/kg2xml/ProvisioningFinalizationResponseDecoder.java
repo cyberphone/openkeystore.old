@@ -26,9 +26,9 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinalizationResponse
   {
       
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
     
     byte[] attestation;
 
@@ -47,9 +47,9 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        client_session_id = ah.getString (ID_ATTR);
+        clientSessionId = ah.getString (ID_ATTR);
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        serverSessionId = ah.getString (SERVER_SESSION_ID_ATTR);
         
         attestation = ah.getBinary (CLOSE_ATTESTATION_ATTR);
 

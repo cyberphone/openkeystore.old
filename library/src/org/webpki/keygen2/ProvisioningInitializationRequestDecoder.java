@@ -17,14 +17,18 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.Date;
 import java.util.Vector;
+
 import java.security.PublicKey;
+
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
+
 import org.webpki.util.ISODateTime;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -58,97 +62,97 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
         }
     }
 
-    private KeyManagementKeyUpdateHolder kmk_root = new KeyManagementKeyUpdateHolder(null);
+    private KeyManagementKeyUpdateHolder kmkRoot = new KeyManagementKeyUpdateHolder(null);
 
     public KeyManagementKeyUpdateHolder getKeyManagementKeyUpdateHolderRoot() {
-        return kmk_root;
+        return kmkRoot;
     }
 
-    String session_key_algorithm;
+    String sessionKeyAlgorithm;
 
     public String getServerSessionId() {
-        return server_session_id;
+        return serverSessionId;
     }
 
 
     public Date getServerTime() {
-        return server_time;
+        return serverTime;
     }
 
 
     public String getSubmitUrl() {
-        return submit_url;
+        return submitUrl;
     }
 
 
     public ECPublicKey getServerEphemeralKey() {
-        return server_ephemeral_key;
+        return serverEphemeralKey;
     }
 
 
     public String getSessionKeyAlgorithm() {
-        return session_key_algorithm;
+        return sessionKeyAlgorithm;
     }
 
 
     public int getSessionLifeTime() {
-        return session_life_time;
+        return sessionLifeTime;
     }
 
 
     public short getSessionKeyLimit() {
-        return session_key_limit;
+        return sessionKeyLimit;
     }
 
 
-    PublicKey key_management_key;
+    PublicKey keyManagementKey;
 
     public PublicKey getKeyManagementKey() {
-        return key_management_key;
+        return keyManagementKey;
     }
 
 
     public String getVirtualEnvironmentFriendlyName() {
-        return virtual_environment_friendly_name;
+        return virtualEnvironmentFriendlyName;
     }
 
 
     private void scanForUpdateKeys(JSONObjectReader rd, KeyManagementKeyUpdateHolder kmk) throws IOException {
         if (rd.hasProperty(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)) {
-            JSONArrayReader upd_arr = rd.getArray(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
+            JSONArrayReader updArr = rd.getArray(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
             do {
-                JSONObjectReader kmk_upd = upd_arr.getObject();
-                byte[] authorization = kmk_upd.getBinary(AUTHORIZATION_JSON);
-                KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder(kmk_upd.getPublicKey());
+                JSONObjectReader kmkUpd = updArr.getObject();
+                byte[] authorization = kmkUpd.getBinary(AUTHORIZATION_JSON);
+                KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder(kmkUpd.getPublicKey());
                 child.authorization = authorization;
                 kmk.children.add(child);
-                scanForUpdateKeys(kmk_upd, child);
+                scanForUpdateKeys(kmkUpd, child);
             }
-            while (upd_arr.hasMore());
+            while (updArr.hasMore());
         }
     }
 
-    String server_session_id;
+    String serverSessionId;
 
     byte[] nonce;
 
-    Date server_time;
+    Date serverTime;
 
-    String server_time_verbatim;
+    String serverTimeVerbatim;
 
-    String submit_url;
+    String submitUrl;
 
-    ECPublicKey server_ephemeral_key;
+    ECPublicKey serverEphemeralKey;
 
-    byte[] virtual_environment_data;
+    byte[] virtualEnvironmentData;
 
-    String virtual_environment_type;
+    String virtualEnvironmentType;
 
-    String virtual_environment_friendly_name;  // Optional, defined => Virtual environment defined
+    String virtualEnvironmentFriendlyName;  // Optional, defined => Virtual environment defined
 
-    int session_life_time;
+    int sessionLifeTime;
 
-    short session_key_limit;
+    short sessionKeyLimit;
 
 
     @Override
@@ -156,32 +160,32 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Core session properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        session_key_algorithm = rd.getString(SESSION_KEY_ALGORITHM_JSON);
+        sessionKeyAlgorithm = rd.getString(SESSION_KEY_ALGORITHM_JSON);
 
-        server_session_id = getID(rd, SERVER_SESSION_ID_JSON);
+        serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
-        server_time_verbatim = rd.getString(SERVER_TIME_JSON);
+        serverTimeVerbatim = rd.getString(SERVER_TIME_JSON);
 
-        server_time = ISODateTime.parseDateTime(server_time_verbatim).getTime();
+        serverTime = ISODateTime.parseDateTime(serverTimeVerbatim).getTime();
 
-        submit_url = getURL(rd, SUBMIT_URL_JSON);
+        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
-        session_key_limit = (short) rd.getInt(SESSION_KEY_LIMIT_JSON);
+        sessionKeyLimit = (short) rd.getInt(SESSION_KEY_LIMIT_JSON);
 
-        session_life_time = rd.getInt(SESSION_LIFE_TIME_JSON);
+        sessionLifeTime = rd.getInt(SESSION_LIFE_TIME_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the server key
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_ephemeral_key = (ECPublicKey) rd.getObject(SERVER_EPHEMERAL_KEY_JSON).getPublicKey();
+        serverEphemeralKey = (ECPublicKey) rd.getObject(SERVER_EPHEMERAL_KEY_JSON).getPublicKey();
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional key management key
         /////////////////////////////////////////////////////////////////////////////////////////
         if (rd.hasProperty(KEY_MANAGEMENT_KEY_JSON)) {
             JSONObjectReader kmkrd = rd.getObject(KEY_MANAGEMENT_KEY_JSON);
-            key_management_key = kmkrd.getPublicKey();
-            scanForUpdateKeys(kmkrd, kmk_root = new KeyManagementKeyUpdateHolder(key_management_key));
+            keyManagementKey = kmkrd.getPublicKey();
+            scanForUpdateKeys(kmkrd, kmkRoot = new KeyManagementKeyUpdateHolder(keyManagementKey));
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -194,9 +198,9 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
                 throw new IOException("Virtual Environment requests must be signed");
             }
             JSONObjectReader vmrd = rd.getObject(VIRTUAL_ENVIRONMENT_JSON);
-            virtual_environment_data = vmrd.getBinary(CONFIGURATION_JSON);
-            virtual_environment_type = vmrd.getString(TYPE_JSON);
-            virtual_environment_friendly_name = vmrd.getString(FRIENDLY_NAME_JSON);
+            virtualEnvironmentData = vmrd.getBinary(CONFIGURATION_JSON);
+            virtualEnvironmentType = vmrd.getString(TYPE_JSON);
+            virtualEnvironmentFriendlyName = vmrd.getString(FRIENDLY_NAME_JSON);
         }
     }
 

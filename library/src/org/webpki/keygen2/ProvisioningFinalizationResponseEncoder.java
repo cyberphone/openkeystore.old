@@ -27,17 +27,18 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String client_session_id;
+    String clientSessionId;
 
-    String server_session_id;
+    String serverSessionId;
 
     byte[] attestation;
 
     // Constructors
 
-    public ProvisioningFinalizationResponseEncoder(ProvisioningFinalizationRequestDecoder fin_prov_request, byte[] attestation) {
-        client_session_id = fin_prov_request.getClientSessionId();
-        server_session_id = fin_prov_request.getServerSessionId();
+    public ProvisioningFinalizationResponseEncoder(ProvisioningFinalizationRequestDecoder provisioningFinalizationRequestDecoder, 
+                                                   byte[] attestation) {
+        clientSessionId = provisioningFinalizationRequestDecoder.getClientSessionId();
+        serverSessionId = provisioningFinalizationRequestDecoder.getServerSessionId();
         this.attestation = attestation;
     }
 
@@ -46,9 +47,9 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder {
         //////////////////////////////////////////////////////////////////////////
         // Session properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString(SERVER_SESSION_ID_JSON, server_session_id);
+        wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(CLIENT_SESSION_ID_JSON, client_session_id);
+        wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
 
         wr.setBinary(ATTESTATION_JSON, attestation);
     }

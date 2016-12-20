@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
  * Useful functions for ISO time.
  */
 public class ISODateTime {
-    private ISODateTime() {
-    }  // No instantiation please
+
+    private ISODateTime() {}  // No instantiation please
 
     static final Pattern DATE_PATTERN =
             Pattern.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)");
@@ -83,27 +83,27 @@ public class ISODateTime {
             }
             milliSeconds = dateTime.substring(19, i);
             int tzHour = Integer.parseInt(dateTime.substring(++i, i + 2)),
-                    tzMinute = Integer.parseInt(dateTime.substring(i + 3, i + 5));
+                                          tzMinute = Integer.parseInt(dateTime.substring(i + 3, i + 5));
             gc.setTimeZone(new SimpleTimeZone(((60 * tzHour) + tzMinute) * factor, ""));
         }
         if (milliSeconds.length() > 0) {
             // Milliseconds.
             gc.set(GregorianCalendar.MILLISECOND,
-                    Integer.parseInt((milliSeconds.substring(1) + "00").substring(0, 3)));
+                   Integer.parseInt((milliSeconds.substring(1) + "00").substring(0, 3)));
         }
         return gc;
     }
 
-    public static String formatDateTime(Date t, boolean force_utc) {
+    public static String formatDateTime(Date date, boolean forceUtc) {
         GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(t);
+        gc.setTime(date);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        if (force_utc) {
+        if (forceUtc) {
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
-        StringBuffer s = new StringBuffer(sdf.format(t));
+        StringBuffer s = new StringBuffer(sdf.format(date));
 
-        int tzo = force_utc ? 0 : (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
+        int tzo = forceUtc ? 0 : (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
 
         if (tzo > 0) {
             int tzh = tzo / 60, tzm = tzo % 60;

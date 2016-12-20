@@ -42,15 +42,15 @@ public class KeyStore2PEMConverter {
         if (argv.length < 4) {
             fail();
         }
-        boolean private_key = false;
-        boolean public_key = false;
+        boolean privateKey = false;
+        boolean publicKey = false;
         boolean certificate = false;
         boolean trust = false;
         for (int i = 3; i < argv.length; i++) {
             if (argv[i].equals("public")) {
-                public_key = true;
+                publicKey = true;
             } else if (argv[i].equals("private")) {
-                private_key = true;
+                privateKey = true;
             } else if (argv[i].equals("certificate")) {
                 certificate = true;
             } else if (argv[i].equals("trust")) {
@@ -66,13 +66,13 @@ public class KeyStore2PEMConverter {
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
             if (ks.isKeyEntry(alias)) {
-                if (private_key) {
+                if (privateKey) {
                     writeObject(fis, "PRIVATE KEY", ks.getKey(alias, argv[1].toCharArray()).getEncoded());
                 }
                 if (certificate) for (Certificate cert : ks.getCertificateChain(alias)) {
                     writeCert(fis, cert);
                 }
-                if (public_key) {
+                if (publicKey) {
                     writeObject(fis, "PUBLIC KEY", ks.getCertificateChain(alias)[0].getPublicKey().getEncoded());
                 }
             } else if (ks.isCertificateEntry(alias)) {

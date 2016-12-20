@@ -105,7 +105,7 @@ public class SresEnc {
 
     public static void main(String args[]) throws Exception {
         if (args.length < 3) show();
-        String key_alias = null;
+        String keyAlias = null;
         String storepassword = null;
         String signpassword = null;
         boolean localfixed = false;
@@ -120,7 +120,7 @@ public class SresEnc {
             } else if (arg.equals("-t")) localfixed = true;
             else if (i + 1 < args.length && argtest(args, i + 1) != null) {
                 String value = args[i + 1];
-                if (arg.equals("-k")) key_alias = value;
+                if (arg.equals("-k")) keyAlias = value;
                 else if (arg.equals("-p")) profileindex = Integer.parseInt(value);
                 else if (arg.equals("-k")) key_file = value;
                 else if (arg.equals("-w")) storepassword = value;
@@ -141,7 +141,7 @@ public class SresEnc {
         String out_file = argtest(args, 1);
 
         KeyStoreSigner signer = new KeyStoreSigner(ks, null);
-        signer.setKey(key_alias, signpassword);
+        signer.setKey(keyAlias, signpassword);
 
         test(in_file, out_file, signer, localfixed, profileindex, false);
 

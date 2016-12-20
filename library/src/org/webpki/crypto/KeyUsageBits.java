@@ -30,24 +30,24 @@ public enum KeyUsageBits {
     ENCIPHER_ONLY     ("encipherOnly"),
     DECIPHER_ONLY     ("decipherOnly");
 
-    String x509_name;  // Used in WebPKI protocols
+    String x509Name;  // Used in WebPKI protocols
 
-    KeyUsageBits(String x509_name) {
-        this.x509_name = x509_name;
+    KeyUsageBits(String x509Name) {
+        this.x509Name = x509Name;
     }
 
 
     public String getX509Name() {
-        return x509_name;
+        return x509Name;
     }
 
 
-    public static KeyUsageBits getKeyUsageBit(String x509_name) throws IOException {
+    public static KeyUsageBits getKeyUsageBit(String x509Name) throws IOException {
         for (KeyUsageBits kubit : values()) {
-            if (kubit.x509_name.equals(x509_name)) {
+            if (kubit.x509Name.equals(x509Name)) {
                 return kubit;
             }
         }
-        throw new IOException("Bad KeyUsage bit: " + x509_name);
+        throw new IOException("Bad KeyUsage bit: " + x509Name);
     }
 }

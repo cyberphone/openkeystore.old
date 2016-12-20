@@ -41,19 +41,19 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
 
     public String getServerSessionId ()
       {
-        return server_session_id;
+        return serverSessionId;
       }
 
 
     public String getSubmitUrl ()
       {
-        return submit_url;
+        return submitUrl;
       }
 
 
     public String getAbortURL ()
       {
-        return abort_url;
+        return abortUrl;
       }
 
     Action action;
@@ -66,7 +66,7 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, serverSessionId);
       }
 
 
@@ -91,11 +91,11 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (ID_ATTR);
+        serverSessionId = ah.getString (ID_ATTR);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submitUrl = ah.getString (SUBMIT_URL_ATTR);
 
-        abort_url = ah.getStringConditional (ABORT_URL_ATTR);
+        abortUrl = ah.getStringConditional (ABORT_URL_ATTR);
         
         action = Action.getActionFromString (ah.getString (ACTION_ATTR));
 

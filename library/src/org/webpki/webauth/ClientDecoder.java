@@ -25,6 +25,7 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
 
 abstract class ClientDecoder extends InputValidator {
+
     private static final long serialVersionUID = 1L;
 
     private JSONSignatureDecoder signature;  // Optional

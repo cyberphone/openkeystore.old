@@ -297,45 +297,45 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
                     (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
                     (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
 
-    private final String sksname;                     // As (typically) expressed in protocols
-    private final String josename;                   // As expressed in JOSE.  Only applicable EC curves
-    private final String jcename;                    // As expressed for JCE
-    private final int length_in_bits;                // You guessed it :-)
-    private final AsymSignatureAlgorithms pref_alg;  // A sort of a "guide"
-    private final boolean has_parameters;            // Parameter value required?
-    private final boolean sks_mandatory;             // If required in SKS
-    private final String ec_domain_oid;              // EC domain as expressed in ASN.1 messages, null for RSA
-    private final ECParameterSpec ec_parm_spec;      // EC for creating a BC/JDK compatible method
+    private final String sksName;                    // As expressed in SKS
+    private final String joseName;                   // As expressed in JOSE.  Only applicable EC curves
+    private final String jceName;                    // As expressed for JCE
+    private final int lengthInBits;                  // You guessed it :-)
+    private final AsymSignatureAlgorithms prefAlg;   // A sort of a "guide"
+    private final boolean hasParameters;             // Parameter value required?
+    private final boolean sksMandatory;              // If required in SKS
+    private final String ecDomainOid;                // EC domain as expressed in ASN.1 messages, null for RSA
+    private final ECParameterSpec ecParmSpec;        // EC for creating a BC/JDK compatible method
 
     public static final String XML_DSIG_CURVE_PREFIX = "urn:oid:";
 
-    private KeyAlgorithms(String sksname,
-                          String josename,
-                          String jcename,
-                          int length_in_bits,
-                          AsymSignatureAlgorithms pref_alg,
-                          boolean has_parameters,
-                          boolean sks_mandatory,
-                          String ec_domain_oid,
-                          byte[] sample_public_key) {
-        this.sksname = sksname;
-        this.josename = josename;
-        this.jcename = jcename;
-        this.length_in_bits = length_in_bits;
-        this.pref_alg = pref_alg;
-        this.has_parameters = has_parameters;
-        this.sks_mandatory = sks_mandatory;
-        this.ec_domain_oid = ec_domain_oid;
-        ECParameterSpec temp_ec_parm_spec = null;
-        if (sample_public_key != null) {
+    private KeyAlgorithms(String sksName,
+                          String joseName,
+                          String jceName,
+                          int lengthInBits,
+                          AsymSignatureAlgorithms prefAlg,
+                          boolean hasParameters,
+                          boolean sksMandatory,
+                          String ecDomainOid,
+                          byte[] samplePublicKey) {
+        this.sksName = sksName;
+        this.joseName = joseName;
+        this.jceName = jceName;
+        this.lengthInBits = lengthInBits;
+        this.prefAlg = prefAlg;
+        this.hasParameters = hasParameters;
+        this.sksMandatory = sksMandatory;
+        this.ecDomainOid = ecDomainOid;
+        ECParameterSpec tempEcParmSpec = null;
+        if (samplePublicKey != null) {
             try {
-                temp_ec_parm_spec = ((ECPublicKey) KeyFactory.getInstance("EC").generatePublic(
-                        new X509EncodedKeySpec(sample_public_key))).getParams();
+                tempEcParmSpec = ((ECPublicKey) KeyFactory.getInstance("EC").generatePublic(
+                        new X509EncodedKeySpec(samplePublicKey))).getParams();
             } catch (Exception e) {
                 new RuntimeException(e);
             }
         }
-        this.ec_parm_spec = temp_ec_parm_spec;
+        this.ecParmSpec = tempEcParmSpec;
     }
 
 
@@ -347,13 +347,13 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
 
     @Override
     public boolean isMandatorySKSAlgorithm() {
-        return sks_mandatory;
+        return sksMandatory;
     }
 
 
     @Override
     public String getJCEName() {
-        return jcename;
+        return jceName;
     }
 
 
@@ -364,99 +364,100 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
 
 
     public String getECDomainOID() {
-        return ec_domain_oid;
+        return ecDomainOid;
     }
 
 
     public boolean isECKey() {
-        return ec_domain_oid != null;
+        return ecDomainOid != null;
     }
 
 
     public boolean isRSAKey() {
-        return ec_domain_oid == null;
+        return ecDomainOid == null;
     }
 
 
     public int getPublicKeySizeInBits() {
-        return length_in_bits;
+        return lengthInBits;
     }
 
 
     public AsymSignatureAlgorithms getRecommendedSignatureAlgorithm() {
-        return pref_alg;
+        return prefAlg;
     }
 
 
     public boolean hasParameters() {
-        return has_parameters;
+        return hasParameters;
     }
 
 
     public ECParameterSpec getECParameterSpec() {
-        return ec_parm_spec;
+        return ecParmSpec;
     }
 
 
-    public static KeyAlgorithms getECKeyAlgorithm(ECParameterSpec ec_parameters) throws IOException {
-        EllipticCurve ec_curve = ec_parameters.getCurve();
+    public static KeyAlgorithms getECKeyAlgorithm(ECParameterSpec ecParameters) throws IOException {
+        EllipticCurve ecCurve = ecParameters.getCurve();
         for (KeyAlgorithms alg : values()) {
-            if (alg.isECKey() && alg.ec_parm_spec.getCurve().equals(ec_curve)) {
+            if (alg.isECKey() && alg.ecParmSpec.getCurve().equals(ecCurve)) {
                 return alg;
             }
         }
-        throw new IOException("Unknown EC curve: " + ec_curve.toString());
+        throw new IOException("Unknown EC curve: " + ecCurve.toString());
     }
 
 
-    public static KeyAlgorithms getKeyAlgorithm(PublicKey public_key, Boolean key_parameters) throws IOException {
-        if (public_key instanceof ECPublicKey) {
-            return getECKeyAlgorithm(((ECPublicKey) public_key).getParams());
+    public static KeyAlgorithms getKeyAlgorithm(PublicKey publicKey, Boolean keyParameters) throws IOException {
+        if (publicKey instanceof ECPublicKey) {
+            return getECKeyAlgorithm(((ECPublicKey) publicKey).getParams());
         }
-        byte[] modblob = ((RSAPublicKey) public_key).getModulus().toByteArray();
-        int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
+        byte[] modblob = ((RSAPublicKey) publicKey).getModulus().toByteArray();
+        int lengthInBits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
         for (KeyAlgorithms alg : values()) {
-            if (alg.ec_domain_oid == null && length_in_bits == alg.length_in_bits &&
-                    (key_parameters == null || alg.has_parameters == key_parameters)) {
+            if (alg.ecDomainOid == null && lengthInBits == alg.lengthInBits &&
+                    (keyParameters == null || alg.hasParameters == keyParameters)) {
                 return alg;
             }
         }
-        throw new IOException("Unsupported RSA key size: " + length_in_bits);
+        throw new IOException("Unsupported RSA key size: " + lengthInBits);
     }
 
 
-    public static KeyAlgorithms getKeyAlgorithm(PublicKey public_key) throws IOException {
-        return getKeyAlgorithm(public_key, null);
+    public static KeyAlgorithms getKeyAlgorithm(PublicKey publicKey) throws IOException {
+        return getKeyAlgorithm(publicKey, null);
     }
 
 
-    public static KeyAlgorithms getKeyAlgorithmFromID(String algorithm_id, AlgorithmPreferences algorithmPreferences) throws IOException {
+    public static KeyAlgorithms getKeyAlgorithmFromID(String algorithmId, 
+                                                      AlgorithmPreferences algorithmPreferences) throws IOException {
         for (KeyAlgorithms alg : values()) {
-            if (algorithm_id.equals(alg.sksname)) {
+            if (algorithmId.equals(alg.sksName)) {
                 if (algorithmPreferences == AlgorithmPreferences.JOSE) {
-                    throw new IOException("JOSE algorithm expected: " + algorithm_id);
+                    throw new IOException("JOSE algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
-            if (algorithm_id.equals(alg.josename)) {
+            if (algorithmId.equals(alg.joseName)) {
                 if (algorithmPreferences == AlgorithmPreferences.SKS) {
-                    throw new IOException("SKS algorithm expected: " + algorithm_id);
+                    throw new IOException("SKS algorithm expected: " + algorithmId);
                 }
                 return alg;
             }
         }
-        throw new IOException("Unknown algorithm: " + algorithm_id);
+        throw new IOException("Unknown algorithm: " + algorithmId);
     }
 
 
     @Override
     public String getAlgorithmId(AlgorithmPreferences algorithmPreferences) throws IOException {
-        if (josename == null) {
+        if (joseName == null) {
             if (algorithmPreferences == AlgorithmPreferences.JOSE) {
                 throw new IOException("There is no JOSE algorithm for: " + toString());
             }
-            return sksname;
+            return sksName;
         }
-        return algorithmPreferences == AlgorithmPreferences.SKS ? sksname : josename;
+        return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
     }
 }
