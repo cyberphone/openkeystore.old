@@ -285,79 +285,73 @@ public class JSONObjectWriter implements Serializable {
         setBinary(name, cryptoBinary);
     }
 
-    /**
-     * Set signature property in JSON object.
-     * This is the JCS signature creation method.
-     *
-     * @param signer The interface to the signing key and type
-     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException In case there a problem with keys etc.
-     * <br>&nbsp;<br><b>Sample Code:</b>
-     *                     <pre>
-     *                     import java.io.IOException;
-     *
-     *                     import java.security.PrivateKey;
-     *                     import java.security.PublicKey;
-     *                     import java.security.SecureRandom;
-     *
-     *                     import org.webpki.crypto.AsymKeySignerInterface;
-     *                     import org.webpki.crypto.AsymSignatureAlgorithms;
-     *                     import org.webpki.crypto.SignatureWrapper;
-     *
-     *                     import org.webpki.json.JSONAsymKeySigner;
-     *                     import org.webpki.json.JSONAsymKeyVerifier;
-     *                     import org.webpki.json.JSONObjectReader;
-     *                     import org.webpki.json.JSONObjectWriter;
-     *                     import org.webpki.json.JSONOutputFormats;
-     *                     import org.webpki.json.JSONParser;
-     *                     import org.webpki.json.JSONSignatureDecoder;
-     *
-     *                     .
-     *                     .
-     *                     .
-     *
-     *                     public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
-     *
-     *                     // Create an empty JSON document
-     *                     JSONObjectWriter writer = new JSONObjectWriter();
-     *
-     *                     // Fill it with some data
-     *                     writer.setString("myProperty", "Some data");
-     *
-     *                     // Sign document
-     *                     writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
-     *                     {@literal @}Override
-     *                     public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
-     *                     try {
-     *                     return new SignatureWrapper(algorithm, privateKey).update(data).sign();
-     *                     } catch (GeneralSecurityException e) {
-     *                     throw new IOException(e);
-     *                     }
-     *                     }
-     *                     {@literal @}Override
-     *                     public PublicKey getPublicKey() throws IOException {
-     *                     return publicKey;
-     *                     }
-     *                     }));
-     *
-     *                     // Serialize document
-     *                     String json = writer.toString();
-     *
-     *                     // Print document on the console
-     *                     System.out.println("Signed doc: " + json);
-     *
-     *                     // Parse document
-     *                     JSONObjectReader reader = JSONParser.parse(json);
-     *
-     *                     // Get and verify signature
-     *                     JSONSignatureDecoder signature = reader.getSignature();
-     *                     signature.verify(new JSONAsymKeyVerifier(publicKey));
-     *
-     *                     // Print document payload on the console
-     *                     System.out.println("Returned data: " + reader.getString("myProperty"));
-     *                     }
-     *                     </pre>
-     */
+/**
+ * Set signature property in JSON object.
+ * This is the JCS signature creation method.
+ * @param signer The interface to the signing key and type
+ * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+ * @throws IOException In case there a problem with keys etc.
+ * <br>&nbsp;<br><b>Sample Code:</b>
+     <pre>
+    import java.io.IOException;
+    import java.security.PrivateKey;
+    import java.security.PublicKey;
+    import java.security.SecureRandom;
+    import org.webpki.crypto.AsymKeySignerInterface;
+    import org.webpki.crypto.AsymSignatureAlgorithms;
+    import org.webpki.crypto.SignatureWrapper;
+    import org.webpki.json.JSONAsymKeySigner;
+    import org.webpki.json.JSONAsymKeyVerifier;
+    import org.webpki.json.JSONObjectReader;
+    import org.webpki.json.JSONObjectWriter;
+    import org.webpki.json.JSONOutputFormats;
+    import org.webpki.json.JSONParser;
+    import org.webpki.json.JSONSignatureDecoder;
+           .
+           .
+           .
+    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+    
+      // Create an empty JSON document
+      JSONObjectWriter writer = new JSONObjectWriter();
+    
+      // Fill it with some data
+      writer.setString("myProperty", "Some data");
+    
+      // Sign document
+      writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
+        {@literal @}Override
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+          try {
+            return new SignatureWrapper(algorithm, privateKey).update(data).sign();
+          } catch (GeneralSecurityException e) {
+            throw new IOException(e);
+          }
+        }
+        {@literal @}Override
+        public PublicKey getPublicKey() throws IOException {
+          return publicKey;
+        }
+      }));
+    
+      // Serialize document
+      String json = writer.toString();
+    
+      // Print document on the console
+      System.out.println("Signed doc: " + json);
+    
+      // Parse document
+      JSONObjectReader reader = JSONParser.parse(json);
+    
+      // Get and verify signature
+      JSONSignatureDecoder signature = reader.getSignature();
+      signature.verify(new JSONAsymKeyVerifier(publicKey));
+    
+      // Print document payload on the console
+      System.out.println("Returned data: " + reader.getString("myProperty"));
+    }
+</pre>
+*/
     public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
         JSONObjectWriter signatureWriter = setObject(JSONSignatureDecoder.SIGNATURE_JSON);
         signatureWriter.setString(JSONSignatureDecoder.ALGORITHM_JSON,
