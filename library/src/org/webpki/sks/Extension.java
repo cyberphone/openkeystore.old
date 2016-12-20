@@ -23,10 +23,10 @@ import java.util.LinkedHashMap;
 public class Extension {
     String qualifier;
     byte[] extensionData;
-    byte sub_type;
+    byte subType;
 
-    public Extension(byte sub_type, String qualifier, byte[] extensionData) {
-        this.sub_type = sub_type;
+    public Extension(byte subType, String qualifier, byte[] extensionData) {
+        this.subType = subType;
         this.qualifier = qualifier;
         this.extensionData = extensionData;
     }
@@ -36,12 +36,12 @@ public class Extension {
     }
 
     public byte getSubType() {
-        return sub_type;
+        return subType;
     }
 
-    public byte[] getExtensionData(byte sub_type) throws SKSException {
-        if (this.sub_type != sub_type) {
-            throw new SKSException("Non-matching sub-type: " + this.sub_type);
+    public byte[] getExtensionData(byte subType) throws SKSException {
+        if (this.subType != subType) {
+            throw new SKSException("Non-matching sub-type: " + this.subType);
         }
         return extensionData;
     }
@@ -57,7 +57,7 @@ public class Extension {
 
     public Property[] getProperties() throws SKSException {
         LinkedHashMap<String, Property> properties = new LinkedHashMap<String, Property>();
-        if (sub_type != SecureKeyStore.SUB_TYPE_PROPERTY_BAG)
+        if (subType != SecureKeyStore.SUB_TYPE_PROPERTY_BAG)
             throw new SKSException("Not a \"PropertyBag\"");
         int i = 0;
         try {

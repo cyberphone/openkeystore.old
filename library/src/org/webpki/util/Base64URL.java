@@ -171,22 +171,22 @@ public class Base64URL {
      * [Encoding] Converts a binary byte array to a base64url encoded String.
      * For every 3 binary bytes, you'll get 4 base64 bytes.
      *
-     * @param binary_blob uncoded data
+     * @param binaryBlob uncoded data
      * @return encoded data as a String
      */
-    public static String encode(byte[] binary_blob) {
+    public static String encode(byte[] binaryBlob) {
         try {
-            return new String(encodeInternal(binary_blob), "UTF-8");
+            return new String(encodeInternal(binaryBlob), "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String generateURLFriendlyRandom(int length_in_characters) {
-        byte[] random = new byte[length_in_characters];
+    public static String generateURLFriendlyRandom(int lengthInCharacters) {
+        byte[] random = new byte[lengthInCharacters];
         new SecureRandom().nextBytes(random);
         StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < length_in_characters; i++) {
+        for (int i = 0; i < lengthInCharacters; i++) {
             buffer.append(BASE64URL[random[i] & 0x3F]);
         }
         return buffer.toString();

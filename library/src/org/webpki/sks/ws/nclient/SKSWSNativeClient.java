@@ -95,7 +95,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific {
     @Override
     native public void addExtension(int keyHandle,
                                     String type,
-                                    byte sub_type,
+                                    byte subType,
                                     String qualifier,
                                     byte[] extension_data,
                                     byte[] mac) throws SKSException;

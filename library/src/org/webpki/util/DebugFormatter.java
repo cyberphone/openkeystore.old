@@ -52,7 +52,7 @@ public class DebugFormatter {
         twohex(i % 256);
     }
 
-    private String toHexDebugData(byte indata[], int bytesPerLine) {
+    private String toHexDebugData(byte[] indata, int bytesPerLine) {
         int index = 0;
         int i = 0;
         if (indata.length == 0) {
@@ -103,7 +103,7 @@ public class DebugFormatter {
         return res.toString();
     }
 
-    private String toHexString(byte indata[]) {
+    private String toHexString(byte[] indata) {
         int i = 0;
         while (i < indata.length) {
             twohex(indata[i++]);
@@ -111,16 +111,16 @@ public class DebugFormatter {
         return res.toString();
     }
 
-    public static String getHexDebugData(byte indata[], int bytesPerLine) {
-        return new DebugFormatter().toHexDebugData(indata, bytesPerLine);
+    public static String getHexDebugData(byte[] binaryBlob, int bytesPerLine) {
+        return new DebugFormatter().toHexDebugData(binaryBlob, bytesPerLine);
     }
 
-    public static String getHexDebugData(byte indata[]) {
-        return getHexDebugData(indata, 16);
+    public static String getHexDebugData(byte[] binaryBlob) {
+        return getHexDebugData(binaryBlob, 16);
     }
 
-    public static String getHexString(byte arr[]) {
-        return new DebugFormatter().toHexString(arr);
+    public static String getHexString(byte[] binaryBlob) {
+        return new DebugFormatter().toHexString(binaryBlob);
     }
 
     public static int toHex(char c) throws IOException {
@@ -156,7 +156,7 @@ public class DebugFormatter {
     /*                                                                  */
     /*##################################################################*/
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String[] args) throws IOException {
         if (args.length == 3 && args[0].equals("tobin")) {
             ArrayUtil.writeFile(args[2], DebugFormatter.getByteArrayFromHex(new String(ArrayUtil.readFile(args[1]), "UTF-8")));
             System.exit(0);

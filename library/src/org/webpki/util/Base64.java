@@ -566,12 +566,12 @@ public class Base64 {
      * [Decoding] Converts a base64 encoded byte array to a binary byte array.
      * For every 4 base64 bytes you'll get 3 binary bytes.
      *
-     * @param base64_ascii8_blob encoded data
+     * @param base64Ascii8Blob encoded data
      * @return decoded data as a byte array
      * @throws IOException if the input data isn't valid base64 data
      */
-    public byte[] getBinaryFromBase64Binary(byte[] base64_ascii8_blob) throws IOException {
-        return decode(base64_ascii8_blob);
+    public byte[] getBinaryFromBase64Binary(byte[] base64Ascii8Blob) throws IOException {
+        return decode(base64Ascii8Blob);
     }
 
     /**
@@ -592,12 +592,12 @@ public class Base64 {
      * [Decoding] Converts a base64 encoded byte array to a String representation of the binary data.
      * For every 4 base64 bytes you'll get 3 binary bytes.
      *
-     * @param base64_ascii8_blob encoded data
+     * @param base64Ascii8Blob encoded data
      * @return decoded data as a String
      * @throws IOException if the input data isn't valid base64 data.
      */
-    public String getStringFromBase64Binary(byte[] base64_ascii8_blob) throws IOException {
-        return byteArrayToString(decode(base64_ascii8_blob));
+    public String getStringFromBase64Binary(byte[] base64Ascii8Blob) throws IOException {
+        return byteArrayToString(decode(base64Ascii8Blob));
     }
 
     /**
@@ -619,13 +619,13 @@ public class Base64 {
      * For every 4 base64 bytes you'll get 3 binary bytes. Note, however, that these bytes are UTF-8 bytes
      * and is not equal to the length of the Unicode String.
      *
-     * @param base64_ascii8_blob encoded data
+     * @param base64Ascii8Blob encoded data
      * @return decoded data as a Unicode String
      * @throws IOException if the input data isn't valid base64 data
      *                     or if there is a problem converting UTF-8 to Unicode
      */
-    public String getUnicodeFromBase64Binary(byte[] base64_ascii8_blob) throws IOException {
-        return byteArrayToUnicode(decode(base64_ascii8_blob));
+    public String getUnicodeFromBase64Binary(byte[] base64Ascii8Blob) throws IOException {
+        return byteArrayToUnicode(decode(base64Ascii8Blob));
     }
 
     /**
@@ -703,11 +703,11 @@ public class Base64 {
      * [Encoding] Converts a binary byte array to a base64 encoded byte array.
      * For every 3 binary bytes, you'll get 4 base64 bytes.
      *
-     * @param binary_blob uncoded data
+     * @param binaryBlob uncoded data
      * @return encoded data as a byte array
      */
-    public byte[] getBase64BinaryFromBinary(byte[] binary_blob) {
-        return encode(binary_blob);
+    public byte[] getBase64BinaryFromBinary(byte[] binaryBlob) {
+        return encode(binaryBlob);
     }
 
     /**
@@ -742,11 +742,11 @@ public class Base64 {
      * [Encoding] Converts a binary byte array to a base64 encoded String.
      * For every 3 binary bytes, you'll get 4 base64 bytes.
      *
-     * @param binary_blob uncoded data
+     * @param binaryBlob uncoded data
      * @return encoded data as a String
      */
-    public String getBase64StringFromBinary(byte[] binary_blob) {
-        return byteArrayToString(encode(binary_blob));
+    public String getBase64StringFromBinary(byte[] binaryBlob) {
+        return byteArrayToString(encode(binaryBlob));
     }
 
     /**

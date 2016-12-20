@@ -303,7 +303,7 @@ public class SKSTest {
         }
     }
 
-    Extension extensionTest(byte sub_type, String qualifier, byte[] extension_data, String error) throws Exception {
+    Extension extensionTest(byte subType, String qualifier, byte[] extension_data, String error) throws Exception {
         ProvSess sess = new ProvSess(device);
         GenKey key = sess.createKey("Key.1",
                 KeyAlgorithms.NIST_P_256,
@@ -313,14 +313,14 @@ public class SKSTest {
         String type = "http://example.com/define";
         try {
             if (qualifier == null) qualifier = "";
-            key.addExtension(type, sub_type, qualifier, extension_data);
+            key.addExtension(type, subType, qualifier, extension_data);
             assertTrue("Should pass", error == null);
             sess.closeSession();
             Extension ext = device.sks.getExtension(key.keyHandle, type);
             assertTrue("Ext data", ArrayUtil.compare(ext.getExtensionData(), extension_data));
             assertTrue("Qualifier", qualifier.equals(ext.getQualifier()));
-            assertTrue("Sub type", ext.getSubType() == sub_type);
-            if (sub_type == SecureKeyStore.SUB_TYPE_PROPERTY_BAG) {
+            assertTrue("Sub type", ext.getSubType() == subType);
+            if (subType == SecureKeyStore.SUB_TYPE_PROPERTY_BAG) {
                 int i = 0;
                 int writables = 0;
                 while (i < extension_data.length) {
@@ -2895,11 +2895,11 @@ public class SKSTest {
                 null,
                 AppUsage.AUTHENTICATION).setCertificate(cn());
         String type = "http://example.com/define";
-        byte sub_type = SecureKeyStore.SUB_TYPE_EXTENSION;
+        byte subType = SecureKeyStore.SUB_TYPE_EXTENSION;
         byte[] extension_data = {1, 4, 6, 8};
-        key.addExtension(type, sub_type, "", extension_data);
+        key.addExtension(type, subType, "", extension_data);
         try {
-            key.addExtension(type, sub_type, "", extension_data);
+            key.addExtension(type, subType, "", extension_data);
             fail("Duplicate");
         } catch (SKSException e) {
             checkException(e, "Duplicate \"" + SecureKeyStore.VAR_TYPE + "\" : " + type);
@@ -2911,8 +2911,8 @@ public class SKSTest {
                 null,
                 AppUsage.AUTHENTICATION).setCertificate(cn());
         type = "http://example.com/define";
-        sub_type = SecureKeyStore.SUB_TYPE_EXTENSION;
-        key.addExtension(type, sub_type, "", extension_data);
+        subType = SecureKeyStore.SUB_TYPE_EXTENSION;
+        key.addExtension(type, subType, "", extension_data);
         sess.closeSession();
         try {
             device.sks.getExtension(key.keyHandle, type + "@");

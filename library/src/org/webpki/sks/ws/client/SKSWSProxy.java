@@ -325,7 +325,7 @@ public interface SKSWSProxy
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte sub_type,
+                              byte subType,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -497,7 +497,7 @@ public interface SKSWSProxy
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                              Holder<Byte> sub_type,
+                              Holder<Byte> subType,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                               Holder<String> qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)

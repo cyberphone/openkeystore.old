@@ -150,16 +150,16 @@ public class GenKey {
         prov_sess.sks.importPrivateKey(keyHandle, encrypted_private_key, prov_sess.mac4call(privk_mac.getResult(), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY));
     }
 
-    public void addExtension(String type, byte sub_type, String qualifier, byte[] extension_data) throws IOException, GeneralSecurityException {
+    public void addExtension(String type, byte subType, String qualifier, byte[] extension_data) throws IOException, GeneralSecurityException {
         MacGenerator ext_mac = getEECertMacBuilder();
-        if (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION) {
+        if (subType == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION) {
             extension_data = prov_sess.server_sess_key.encrypt(extension_data);
         }
         ext_mac.addString(type);
-        ext_mac.addByte(sub_type);
+        ext_mac.addByte(subType);
         ext_mac.addString(qualifier);
         ext_mac.addBlob(extension_data);
-        prov_sess.sks.addExtension(keyHandle, type, sub_type, qualifier, extension_data, prov_sess.mac4call(ext_mac.getResult(), SecureKeyStore.METHOD_ADD_EXTENSION));
+        prov_sess.sks.addExtension(keyHandle, type, subType, qualifier, extension_data, prov_sess.mac4call(ext_mac.getResult(), SecureKeyStore.METHOD_ADD_EXTENSION));
     }
 
     public byte[] getPostProvMac(MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException {

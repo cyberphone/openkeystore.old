@@ -480,7 +480,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific {
     @Override
     public void addExtension(int keyHandle,
                              String type,
-                             byte sub_type,
+                             byte subType,
                              String qualifier,
                              byte[] extension_data,
                              byte[] mac) throws SKSException {
@@ -488,7 +488,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific {
             getSKSWS().addExtension(deviceId,
                     keyHandle,
                     type,
-                    sub_type,
+                    subType,
                     qualifier,
                     extension_data,
                     mac);
@@ -701,16 +701,16 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific {
     public Extension getExtension(int keyHandle,
                                   String type) throws SKSException {
         try {
-            Holder<Byte> sub_type = new Holder<Byte>();
+            Holder<Byte> subType = new Holder<Byte>();
             Holder<String> qualifier = new Holder<String>();
             Holder<byte[]> extension_data = new Holder<byte[]>();
             getSKSWS().getExtension(deviceId,
                     keyHandle,
                     type,
-                    sub_type,
+                    subType,
                     qualifier,
                     extension_data);
-            return new Extension(sub_type.value,
+            return new Extension(subType.value,
                     qualifier.value,
                     extension_data.value);
         } catch (SKSException_Exception e) {

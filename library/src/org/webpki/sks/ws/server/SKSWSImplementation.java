@@ -832,7 +832,7 @@ public class SKSWSImplementation
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte sub_type,
+                              byte subType,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -846,7 +846,7 @@ public class SKSWSImplementation
           {
             getDevice (deviceId).addExtension (keyHandle,
                                                 type,
-                                                sub_type,
+                                                subType,
                                                 qualifier,
                                                 extension_data,
                                                 mac);
@@ -1233,7 +1233,7 @@ public class SKSWSImplementation
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                              Holder<Byte> sub_type,
+                              Holder<Byte> subType,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                               Holder<String> qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -1244,7 +1244,7 @@ public class SKSWSImplementation
         try
           {
             Extension ext = getDevice (deviceId).getExtension (keyHandle, type);
-            sub_type.value       = ext.getSubType ();
+            subType.value       = ext.getSubType ();
             qualifier.value      = ext.getQualifier ();
             extension_data.value = ext.getExtensionData ();
           }
