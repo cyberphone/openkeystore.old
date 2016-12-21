@@ -78,7 +78,7 @@ public class JavaScriptSignature {
 
         // Serialize the signed object in JavaScript format
         String javaScript = "var reading = \n" +
-                new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8") +
+                new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8") +
                 ";\n";
 
         // Print object on the console

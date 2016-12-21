@@ -2387,47 +2387,47 @@ public class JSONTest {
     void booleanValues(boolean value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setBoolean(value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBoolean() == value);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBoolean() == value);
         or = new JSONObjectWriter();
         or.setBoolean("name", value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBoolean("name") == value);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBoolean("name") == value);
     }
 
     void dateTime(Date value) throws IOException {
         value = new Date((value.getTime() / 1000) * 1000);
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setDateTime(value, false);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime().getTime().equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime().getTime().equals(value));
         or = new JSONObjectWriter();
         or.setDateTime("name", value, false);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime().equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime().equals(value));
     }
 
     void bigIntegerValues(BigInteger value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setBigInteger(value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigInteger().equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigInteger().equals(value));
         or = new JSONObjectWriter();
         or.setBigInteger("name", value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals(value));
     }
 
     void bigDecimalValues(BigDecimal value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setBigDecimal(value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigDecimal().equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigDecimal().equals(value));
         or = new JSONObjectWriter();
         or.setBigDecimal("name", value);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals(value));
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals(value));
     }
 
     void longVariables(long value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setInt53(value);
-        assertTrue("long", JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getInt53() == value);
+        assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getInt53() == value);
         or = new JSONObjectWriter();
         or.setInt53("name", value);
-        assertTrue("long", JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getInt53("name") == value);
+        assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getInt53("name") == value);
     }
 
     void badArgument(String string) {
@@ -2450,9 +2450,9 @@ public class JSONTest {
         assertTrue(simpleObjectType(string + "  ").getPropertyType("name") == JSONTypes.NUMBER);
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setDouble(ref);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDouble() == ref);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDouble() == ref);
         or = new JSONObjectWriter().setDouble("name", ref);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getDouble("name") == ref);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDouble("name") == ref);
     }
 
     void integerValue(String string, boolean mustFail) throws Exception {
@@ -2473,9 +2473,9 @@ public class JSONTest {
         assertTrue(simpleObjectType(string + "  ").getPropertyType("name") == JSONTypes.NUMBER);
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setInt(ref);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getInt() == ref);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getInt() == ref);
         or = new JSONObjectWriter().setInt("name", ref);
-        assertTrue(JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getInt("name") == ref);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getInt("name") == ref);
     }
 
     void es6NumberTest() throws Exception {
@@ -2485,7 +2485,7 @@ public class JSONTest {
             String expected = ES6_NUMBERS[i++];
             String result = new String(new JSONObjectWriter()
                     .setDouble("v", Double.valueOf(original))
-                    .serializeJSONObject(JSONOutputFormats.NORMALIZED), "UTF-8");
+                    .serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
             assertTrue("es6num", result.equals("{\"v\":" + expected + "}"));
         }
     }
@@ -2558,30 +2558,30 @@ public class JSONTest {
 
     @Test
     public void JavaScriptMode() throws Exception {
-        String json = new String(JSONParser.parse(ESCAPING).serializeJSONObject(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+        String json = new String(JSONParser.parse(ESCAPING).serializeToBytes(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
         json = toJavaScript(json.substring(0, json.length() - 1), false);
-        String jsn = new String(JSONParser.parse(ESCAPING).serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        String jsn = new String(JSONParser.parse(ESCAPING).serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS Native", jsn.equals(json));
-        json = new String(JSONParser.parse(ESCAPING).serializeJSONObject(JSONOutputFormats.NORMALIZED), "UTF-8");
+        json = new String(JSONParser.parse(ESCAPING).serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
         json = "'" + toJavaScript(json, true) + "'";
         JSONObjectWriter writer = new JSONObjectWriter().setString("a%", "five");
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals("{\n  \"a%\": \"five\"\n}"));
         writer = new JSONObjectWriter().setString("a5", "five");
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals("{\n  a5: \"five\"\n}"));
         writer = new JSONObjectWriter().setString("a", "five");
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals("{\n  a: \"five\"\n}"));
         writer = new JSONObjectWriter().setString("5", "five");
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals("{\n  \"5\": \"five\"\n}"));
         writer = new JSONObjectWriter().setString("trouble", "</script>&");
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
         assertTrue("JS", json.equals("{\n  trouble: \"\\u003c/script\\u003e\\u0026\"\n}"));
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
         assertTrue("JS", json.equals("{\n  \"trouble\": \"</script>&\"\n}\n"));
-        json = new String(writer.serializeJSONObject(JSONOutputFormats.NORMALIZED), "UTF-8");
+        json = new String(writer.serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
         assertTrue("JS", json.equals("{\"trouble\":\"</script>&\"}"));
     }
 
@@ -2756,7 +2756,7 @@ public class JSONTest {
     private void simpleArrays() throws Exception {
         JSONObjectWriter ow = new JSONObjectWriter();
         ow.setArray("arr").setString("f").setBoolean(false);
-        JSONObjectReader or = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.NORMALIZED));
+        JSONObjectReader or = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.NORMALIZED));
         try {
             or.getStringArray("arr");
             fail("Didn't bomb");
@@ -2765,7 +2765,7 @@ public class JSONTest {
         }
         ow = new JSONObjectWriter();
         ow.setArray("arr").setString("f").setString("hgh");
-        or = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.NORMALIZED));
+        or = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.NORMALIZED));
         assertTrue(or.getStringArray("arr").length == 2);
     }
 
@@ -2776,14 +2776,14 @@ public class JSONTest {
                 for (int j = 0; j < i; j++) {
                     iarr[j] = (byte) Math.floor(Math.random() * 256);
                 }
-                byte[] arr = JSONParser.parse(new JSONObjectWriter().setBinary("blob", iarr).serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+                byte[] arr = JSONParser.parse(new JSONObjectWriter().setBinary("blob", iarr).serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
                 assertTrue("Length", arr.length == iarr.length);
                 for (int q = 0; q < arr.length; q++) {
                     assertTrue("Content", arr[q] == iarr[q]);
                 }
                 JSONObjectWriter ow = new JSONObjectWriter();
                 ow.setArray("arr").setBinary(iarr);
-                arr = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getArray("arr").getBinary();
+                arr = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("arr").getBinary();
                 assertTrue("Length", arr.length == iarr.length);
                 for (int q = 0; q < arr.length; q++) {
                     assertTrue("Content", arr[q] == iarr[q]);
@@ -2792,21 +2792,21 @@ public class JSONTest {
         }
         boolean should_fail = true;
         try {
-            JSONParser.parse(new JSONObjectWriter().setString("blob", "a").serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+            JSONParser.parse(new JSONObjectWriter().setString("blob", "a").serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
             should_fail = false;
         } catch (IOException e) {
         }
         assertTrue("a", should_fail);
         should_fail = true;
         try {
-            JSONParser.parse(new JSONObjectWriter().setString("blob", "+xdFdYg").serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+            JSONParser.parse(new JSONObjectWriter().setString("blob", "+xdFdYg").serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
             should_fail = false;
         } catch (IOException e) {
         }
         assertTrue("+xdFdYg", should_fail);
         should_fail = true;
         try {
-            JSONParser.parse(new JSONObjectWriter().setString("blob", "/xdFdYg").serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+            JSONParser.parse(new JSONObjectWriter().setString("blob", "/xdFdYg").serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
             should_fail = false;
         } catch (IOException e) {
         }
@@ -2816,7 +2816,7 @@ public class JSONTest {
             try {
                 String string = "A" + org.webpki.util.Base64URL.BASE64URL[i];
                 should_fail = i % 16 > 0;
-                JSONParser.parse(new JSONObjectWriter().setString("blob", string).serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+                JSONParser.parse(new JSONObjectWriter().setString("blob", string).serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
             } catch (IOException e) {
                 should_fail = !should_fail;
             }
@@ -2824,7 +2824,7 @@ public class JSONTest {
             try {
                 String string = "AA" + org.webpki.util.Base64URL.BASE64URL[i];
                 should_fail = i % 4 > 0;
-                JSONParser.parse(new JSONObjectWriter().setString("blob", string).serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
+                JSONParser.parse(new JSONObjectWriter().setString("blob", string).serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBinary("blob");
             } catch (IOException e) {
                 should_fail = !should_fail;
             }
@@ -2837,7 +2837,7 @@ public class JSONTest {
         JSONArrayWriter aw = new JSONArrayWriter();
         aw.setString("hi,there");
         aw.setObject().setBoolean("Boolish", true).setInt("intish", -567);
-        JSONObjectReader or = JSONParser.parse(aw.serializeJSONArray(JSONOutputFormats.PRETTY_PRINT));
+        JSONObjectReader or = JSONParser.parse(aw.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
         JSONArrayReader ar = or.getJSONArrayReader();
         assertTrue(ar.getString().equals("hi,there"));
         or = ar.getObject();
@@ -2848,7 +2848,7 @@ public class JSONTest {
         try {
             aw = new JSONArrayWriter();
             aw.setString("hi,there");
-            or = JSONParser.parse(aw.serializeJSONArray(JSONOutputFormats.PRETTY_PRINT));
+            or = JSONParser.parse(aw.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
             new JSONObjectWriter(or);
             fail("Should have failed");
         } catch (Exception e) {
@@ -2858,7 +2858,7 @@ public class JSONTest {
             aw = new JSONArrayWriter();
             aw.setString("hi,there");
             aw.setObject().setBoolean("boller", false);
-            String json = new String(aw.serializeJSONArray(JSONOutputFormats.NORMALIZED), "UTF-8");
+            String json = new String(aw.serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
             assertTrue("Compare" + json, json.equals("[\"hi,there\",{\"boller\":false}]"));
             or = JSONParser.parse(json);
             assertTrue("Compare", or.getJSONArrayReader().getString().equals("hi,there"));
@@ -2872,7 +2872,7 @@ public class JSONTest {
             JSONArrayWriter aw1 = aw.setArray();
             aw1.setString("hi,there");
             aw1.setObject().setBoolean("boller1", false);
-            String json = new String(aw.serializeJSONArray(JSONOutputFormats.NORMALIZED), "UTF-8");
+            String json = new String(aw.serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
             assertTrue("Compare" + json, json.equals("[[\"hi,there\",{\"boller1\":false}]]"));
             or = JSONParser.parse(json);
             assertTrue("Compare", or.getJSONArrayReader().getArray().getString().equals("hi,there"));
@@ -2886,7 +2886,7 @@ public class JSONTest {
             JSONArrayWriter aw1 = aw.setArray();
             aw1.setObject().setBoolean("boller2", false);
             aw1.setString("hi,there");
-            String json = new String(aw.serializeJSONArray(JSONOutputFormats.NORMALIZED), "UTF-8");
+            String json = new String(aw.serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
             assertTrue("Compare" + json, json.equals("[[{\"boller2\":false},\"hi,there\"]]"));
             or = JSONParser.parse(json);
             or.getJSONArrayReader().getArray().getObject().getBoolean("boller2");
@@ -2902,7 +2902,7 @@ public class JSONTest {
         JSONObjectWriter ow = new JSONObjectWriter();
         ow.setInt("intv", 3);
         ow.setInt("intb", 3);
-        JSONObjectReader or = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT));
+        JSONObjectReader or = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
         try {
             or.getInt("intb");
             or.checkForUnread();
@@ -2912,11 +2912,11 @@ public class JSONTest {
         }
         ow = new JSONObjectWriter();
         ow.setInt("intv", 3);
-        JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT)).scanAway("intv").checkForUnread();
+        JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).scanAway("intv").checkForUnread();
         ow = new JSONObjectWriter();
         ow.setInt("intb", 3);
         ow.setInt("intv", 3);
-        or = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT));
+        or = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
         try {
             or.scanAway("intb");
             or.checkForUnread();
@@ -2927,7 +2927,7 @@ public class JSONTest {
         ow = new JSONObjectWriter();
         ow.setObject("o").setString("yes", "welll...");
         ow.setInt("intv", 3);
-        or = JSONParser.parse(ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT));
+        or = JSONParser.parse(ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
         or.getInt("intv");
         or.scanAway("o");
         or.checkForUnread();
@@ -3023,9 +3023,9 @@ public class JSONTest {
         JSONObjectWriter ow = new JSONObjectWriter();
         assertTrue("Public key jcs",
                 ArrayUtil.compare(ow.setPublicKey(getPublicKeyFromSPKI(spki_bin), (jcs.indexOf("\"P-") > 0) ?
-                                AlgorithmPreferences.JOSE : AlgorithmPreferences.SKS).serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                        or.serializeJSONObject(JSONOutputFormats.NORMALIZED)));
-        ow = new JSONObjectWriter().setCorePublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                                AlgorithmPreferences.JOSE : AlgorithmPreferences.SKS).serializeToBytes(JSONOutputFormats.NORMALIZED),
+                        or.serializeToBytes(JSONOutputFormats.NORMALIZED)));
+        ow = JSONObjectWriter.createCorePublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         public_key2 = JSONParser.parse(ow.toString()).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue("Public core key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         ow.setInt("bug", 3);
@@ -3058,7 +3058,7 @@ public class JSONTest {
         updated_pub_key_object.setupForRewrite(key_parm);
         updated_pub_key_object.setBinary(key_parm, parm_bytes);
         try {
-            JSONParser.parse(or.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT))
+            JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT))
                     .getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             assertFalse("Should have failed", must_fail);
         } catch (Exception e) {
@@ -3093,18 +3093,18 @@ public class JSONTest {
         JSONArrayWriter aw = ow2.setArray("Arr");
         aw.setInt(2);
         aw.setString("Blah");
-        byte[] json = ow.serializeJSONObject(JSONOutputFormats.NORMALIZED);
+        byte[] json = ow.serializeToBytes(JSONOutputFormats.NORMALIZED);
         ow = new JSONObjectWriter();
         ow.setString("Yes", "No");
         ow2 = new JSONObjectWriter();
         aw = ow2.setArray("Arr");
         aw.setInt(2);
         aw.setString("Blah");
-        assertTrue("Writer added", ArrayUtil.compare(json, ow.setObject("Yay", ow2).serializeJSONObject(JSONOutputFormats.NORMALIZED)));
+        assertTrue("Writer added", ArrayUtil.compare(json, ow.setObject("Yay", ow2).serializeToBytes(JSONOutputFormats.NORMALIZED)));
         JSONObjectReader or = JSONParser.parse(json).getObject("Yay");
         ow = new JSONObjectWriter();
         ow.setString("Yes", "No");
-        assertTrue("Reader added", ArrayUtil.compare(json, ow.setObject("Yay", or).serializeJSONObject(JSONOutputFormats.NORMALIZED)));
+        assertTrue("Reader added", ArrayUtil.compare(json, ow.setObject("Yay", or).serializeToBytes(JSONOutputFormats.NORMALIZED)));
     }
 
     @Test
@@ -3134,7 +3134,7 @@ public class JSONTest {
                                 .setInt(7))
                         .setInt("four", 4))
                 .setInt("five", 5)
-                .serializeJSONObject(JSONOutputFormats.NORMALIZED), "UTF-8");
+                .serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
         assertTrue("Single\n" + expected + "\n" + result, expected.equals(result));
     }
 
@@ -3217,14 +3217,14 @@ public class JSONTest {
         if (test == BAD_SIGNATURE.DataAtEnd) {
             ow.setString("End-is-near..", "Indeed!");
         }
-        byte[] normalized = ow.serializeJSONObject(test == BAD_SIGNATURE.IncorrectNormalization ?
+        byte[] normalized = ow.serializeToBytes(test == BAD_SIGNATURE.IncorrectNormalization ?
                 JSONOutputFormats.PRETTY_PRINT : JSONOutputFormats.NORMALIZED);
         try {
             byte[] value = signer.signData(normalized, signAlg);
             if (test != BAD_SIGNATURE.NoSignature) {
                 signature.setBinary(JSONSignatureDecoder.VALUE_JSON, value);
             }
-            byte[] json = ow.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT);
+            byte[] json = ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
             //        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
             JSONSignatureDecoder dec = JSONParser.parse(json).getSignature();
             assertTrue("KID1", dec.getKeyId() == null ^ (test == BAD_SIGNATURE.KeyId || test == BAD_SIGNATURE.KeyId2));
@@ -3275,16 +3275,16 @@ public class JSONTest {
     void cloneObject(String json) throws Exception {
         JSONObjectReader o1 = JSONParser.parse(json);
         JSONObjectReader o2 = o1.clone();
-        assertTrue("clone1=" + json, ArrayUtil.compare(o1.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                o2.serializeJSONObject(JSONOutputFormats.NORMALIZED)));
-        assertTrue("clone2=" + json, ArrayUtil.compare(o1.serializeJSONObject(JSONOutputFormats.NORMALIZED),
+        assertTrue("clone1=" + json, ArrayUtil.compare(o1.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                o2.serializeToBytes(JSONOutputFormats.NORMALIZED)));
+        assertTrue("clone2=" + json, ArrayUtil.compare(o1.serializeToBytes(JSONOutputFormats.NORMALIZED),
                 json.getBytes("UTF-8")));
     }
 
     void removeProperty(String original, String property, String result) throws Exception {
         JSONObjectReader o = JSONParser.parse(original);
         (property.equals("outer") ? o : o.getObject("outer")).removeProperty(property);
-        assertTrue("remove", ArrayUtil.compare(o.serializeJSONObject(JSONOutputFormats.NORMALIZED),
+        assertTrue("remove", ArrayUtil.compare(o.serializeToBytes(JSONOutputFormats.NORMALIZED),
                 result.getBytes("UTF-8")));
     }
 
@@ -3305,15 +3305,15 @@ public class JSONTest {
     public void ClearTextNumbers() throws Exception {
         assertTrue(ArrayUtil.compare(new JSONObjectWriter()
                         .setNumberAsText("value", "0.0000000000001")
-                        .serializeJSONObject(JSONOutputFormats.NORMALIZED),
+                        .serializeToBytes(JSONOutputFormats.NORMALIZED),
                 "{\"value\":0.0000000000001}".getBytes("UTF-8")));
         assertTrue(ArrayUtil.compare(new JSONArrayWriter()
                         .setNumberAsText("0.0000000000001")
-                        .serializeJSONArray(JSONOutputFormats.NORMALIZED),
+                        .serializeToBytes(JSONOutputFormats.NORMALIZED),
                 "[0.0000000000001]".getBytes("UTF-8")));
         assertTrue(JSONParser.parse(new JSONObjectWriter()
                 .setNumberAsText("value", "0")
-                .serializeJSONObject(JSONOutputFormats.NORMALIZED)).getInt("value") == 0);
+                .serializeToBytes(JSONOutputFormats.NORMALIZED)).getInt("value") == 0);
         try {
             new JSONObjectWriter().setNumberAsText("value", "0.0000000000001-");
             fail("bad number");
@@ -3403,11 +3403,10 @@ public class JSONTest {
 
         byte[] dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
         JSONObjectReader json = JSONParser.parse(aliceKey);
-        String encrec = new JSONObjectWriter()
-                .setEncryptionObject(json.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                        null,
-                        dataEncryptionKey).toString();
+        String encrec = JSONObjectWriter.createEncryptionObject(json.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                                                                DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                                null,
+                                                                dataEncryptionKey).toString();
         assertTrue("Symmetric",
                 JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject()
                         .getDecryptedData(dataEncryptionKey)).toString().equals(json.toString()));
@@ -3439,21 +3438,19 @@ public class JSONTest {
         decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(), malletKeys.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
 
         JSONObjectReader unEncJson = JSONParser.parse("{\"hi\":\"\\u20ac\\u00e5\\u00f6k\"}");
-        String encJson = new JSONObjectWriter()
-                .setEncryptionObject(unEncJson.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                        bob.getPublic(),
-                        KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
+        String encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                                                                 DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                                 bob.getPublic(),
+                                                                 KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
                         .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()
                                 .getDecryptedData(decryptionKeys)).toString()));
 
-        encJson = new JSONObjectWriter()
-                .setEncryptionObject(unEncJson.serializeJSONObject(JSONOutputFormats.NORMALIZED),
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                        malletKeys.getPublic(),
-                        KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
+        encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                                                          DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                          malletKeys.getPublic(),
+                                                          KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
                         .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()

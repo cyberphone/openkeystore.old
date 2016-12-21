@@ -70,6 +70,6 @@ public abstract class JSONEncoder implements Serializable {
             wr.setString(JSONDecoderCache.QUALIFIER_JSON, getQualifier());
         }
         writeJSONData(wr);
-        return wr.serializeJSONObject(outputFormat);
+        return wr.serializeToBytes(outputFormat);
     }
 }

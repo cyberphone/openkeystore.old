@@ -98,7 +98,7 @@ public class JCSSample {
                     argc[0],
                     Boolean.valueOf(argc[1]) ?
                             AlgorithmPreferences.JOSE_ACCEPT_PREFER : AlgorithmPreferences.SKS);
-            String res = new String(wr.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
+            String res = new String(wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
             res = unormalized_json.substring(0, unormalized_json.indexOf(']')) + res.substring(res.indexOf(']'));
             System.out.println(res);
         } catch (Exception e) {

@@ -324,8 +324,12 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return this;
     }
 
-    public byte[] serializeJSONObject(JSONOutputFormats outputFormat) throws IOException {
-        return new JSONObjectWriter(root).serializeJSONObject(outputFormat);
+    public byte[] serializeToBytes(JSONOutputFormats outputFormat) throws IOException {
+        return new JSONObjectWriter(root).serializeToBytes(outputFormat);
+    }
+
+    public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
+        return new JSONObjectWriter(root).serializeToString(outputFormat);
     }
 
     /**
@@ -334,7 +338,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
     @Override
     public JSONObjectReader clone() {
         try {
-            return JSONParser.parse(serializeJSONObject(JSONOutputFormats.NORMALIZED));
+            return JSONParser.parse(serializeToBytes(JSONOutputFormats.NORMALIZED));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

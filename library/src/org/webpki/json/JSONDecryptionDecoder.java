@@ -126,10 +126,10 @@ public class JSONDecryptionDecoder {
         rd.root.properties.remove(CIPHER_TEXT_JSON);                            //
         //                                                                      //
         // 3. Serialize ("JSON.stringify()")                                    //
-        authenticatedData = rd.serializeJSONObject(JSONOutputFormats.NORMALIZED);
+        authenticatedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);  //
         //                                                                      //
         // 4. Restore encryption property list                                  //
-        rd.root.properties = savedProperties;
+        rd.root.properties = savedProperties;                                   //
         //                                                                      //
         // End JEF normalization                                                //
         //////////////////////////////////////////////////////////////////////////

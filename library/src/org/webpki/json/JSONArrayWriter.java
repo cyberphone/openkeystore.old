@@ -117,9 +117,22 @@ public class JSONArrayWriter implements Serializable {
         return this;
     }
 
-    public byte[] serializeJSONArray(JSONOutputFormats outputFormat) throws IOException {
+    public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
         JSONObject dummy = new JSONObject();
         dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
-        return new JSONObjectWriter(dummy).serializeJSONObject(outputFormat);
+        return new JSONObjectWriter(dummy).serializeToString(outputFormat);
+    }
+
+    public byte[] serializeToBytes(JSONOutputFormats outputFormat) throws IOException {
+        return serializeToString(outputFormat).getBytes("UTF-8");
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return serializeToString(JSONOutputFormats.PRETTY_PRINT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

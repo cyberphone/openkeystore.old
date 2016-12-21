@@ -1120,7 +1120,7 @@ public class JSONBaseHTML  {
                   .append("\">")
                   .append(or.getString(JSONDecoderCache.QUALIFIER_JSON))
                   .append("</th></tr><tr><td><code>")
-                  .append(new String(or.serializeJSONObject(JSONOutputFormats.PRETTY_HTML), "UTF-8"))
+                  .append(or.serializeToString(JSONOutputFormats.PRETTY_HTML))
                   .append("</code></td></tr>");
             if (protocol_step.optional_table_comment_HTML != null) {
                 buffer.append("<tr><td style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")

@@ -51,7 +51,7 @@ public class AddSignature {
         } else {
             Sign.createAsymmetricKeySignature(wr, action == ACTION.RSA);
         }
-        return wr.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT);
+        return wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
     }
 
     static void show() {
