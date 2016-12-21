@@ -62,7 +62,7 @@ public class JavaScriptSignatureServlet extends HttpServlet {
                                 "verify",
                                 new String(
                                         new JSONObjectWriter(parsed_json)
-                                                .serializeJSONObject(JSONOutputFormats.PRETTY_JS_NATIVE),
+                                                .serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE),
                                         "UTF-8")) + "</pre></td></tr>"
                         + "</table>");
     }

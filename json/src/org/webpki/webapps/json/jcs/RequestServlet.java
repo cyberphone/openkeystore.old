@@ -57,18 +57,18 @@ public class RequestServlet extends HttpServlet {
         HTML.printResultPage(
                 response,
                 "<table>"
-                        + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Successful Verification!<br>&nbsp;</td></tr>"
-                        + "<tr><td align=\"left\">"
-                        + HTML.newLines2HTML(doc.getResult())
-                        + "</td></tr>"
-                        + "<tr><td align=\"left\">Received Message:</td></tr>"
-                        + "<tr><td align=\"left\">"
-                        + HTML.fancyBox(
-                                "verify",
-                                new String(
-                                        new JSONObjectWriter(parsed_json)
-                                                .serializeJSONObject(JSONOutputFormats.PRETTY_HTML),
-                                        "UTF-8")) + "</td></tr>" + "</table>");
+        + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Successful Verification!<br>&nbsp;</td></tr>"
+        + "<tr><td align=\"left\">"
+        + HTML.newLines2HTML(doc.getResult())
+        + "</td></tr>"
+        + "<tr><td align=\"left\">Received Message:</td></tr>"
+        + "<tr><td align=\"left\">"
+        + HTML.fancyBox(
+                "verify",
+                new String(
+                        new JSONObjectWriter(parsed_json)
+                                .serializeToBytes(JSONOutputFormats.PRETTY_HTML),
+                        "UTF-8")) + "</td></tr>" + "</table>");
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)

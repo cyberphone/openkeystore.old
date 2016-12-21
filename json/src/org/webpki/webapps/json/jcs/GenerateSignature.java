@@ -115,6 +115,6 @@ public class GenerateSignature {
                             : JCSService.clientkey_ec))
                     .setAlgorithmPreferences(jose));
         }
-        return wr.serializeJSONObject(JSONOutputFormats.PRETTY_PRINT);
+        return wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
     }
 }
