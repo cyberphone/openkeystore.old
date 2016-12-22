@@ -54,7 +54,7 @@ import org.webpki.util.ISODateTime;
  * Creates JSON objects and performs serialization according to ES6.
  * <p>
  * Also provides built-in support for 
- <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS (JSON Cleartext Signatures)</a>
+ <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS (JSON Cleartext Signature)</a>
  and
 <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
  encodings.</p>
@@ -129,8 +129,12 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>"string"</code> property
-     * @param name Of property
+     * Set a <code>"string"</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "statement": "Life is good!"
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -151,7 +155,7 @@ public class JSONObjectWriter implements Serializable {
     /**
      * Bypass the normal number formatters.
      * Primarily for testing.
-     * @param name Of property
+     * @param name Property
      * @param value Text applied verbatim without quotes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -161,8 +165,8 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Formats a number according to ES6.
-     * This code is emulating 7.1.12.1 of the EcmaScript V6 specification.
+     * Formats a number according to ES6.<p>
+     * This code is emulating 7.1.12.1 of the EcmaScript V6 specification.</p>
      * @param value Value to be formatted
      * @return String representation
      * @throws IOException
@@ -198,8 +202,12 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set an <code>int</code> property
-     * @param name Of property
+     * Set an <code>int</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "headCount": 300
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -209,10 +217,15 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>long</code> property.
-     * Note that <code>long</code> are limited to 53 bits of precision.
-     * If you need higher precision use <code>BigInteger</code>.
-     * @param name Of property
+     * Set a <code>long</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "quiteNegative": -800719925474099
+     * </pre></p>
+     * Note that <code>long</code> data is limited to 53 bits of precision
+     * (exceeding this limit throws an exception).
+     * If you need higher precision use {@link JSONObjectWriter#setBigInteger(String, BigInteger)}.
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -222,8 +235,12 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>double</code> property.
-     * @param name Of property
+     * Set a <code>double</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "Planck's Constant": 6.62607004e-34
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -233,9 +250,13 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>BigInteger</code> property.
-     * Note: this is an <i>emulated</i> type since there is no <code>BigInteger</code> type in JSON
-     * @param name Of property
+     * Set a <code>BigInteger</code> property.<p>
+     * Note: this is an <i>mapped</i> type since there is no <code>BigInteger</code> type in JSON.</p><p>
+     * Sample:
+     * <pre>
+     *    "aPrettyHugeNumber": "94673335822222222222222222222222222222222222222222222"
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -249,33 +270,43 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>BigDecimal</code> property.
-     * Note: this is an <i>emulated</i> type since there is no <code>BigDecimal</code> type in JSON
-     * @param name Of property
+     * Set a <code>BigDecimal</code> property.<p>
+     * Note: this is an <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p><p>
+     * Sample:
+     * <pre>
+     *    "amount": "568790.25"
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
+     * @see #setBigDecimal(String, BigDecimal, Integer)
      */
     public JSONObjectWriter setBigDecimal(String name, BigDecimal value) throws IOException {
         return setString(name, bigDecimalToString(value, null));
     }
 
     /**
-     * Set a <code>BigDecimal</code> property.
-     * Note: this is an <i>emulated</i> type since there is no <code>BigDecimal</code> type in JSON.
-     * @param name Of property
+     * Set a <code>BigDecimal</code> property.<p>
+     * Note: this is an <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p>
+     * @param name Property
      * @param value Value
      * @param decimals Number of fractional digits
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
+     * @see #setBigDecimal(String, BigDecimal)
      */
     public JSONObjectWriter setBigDecimal(String name, BigDecimal value, Integer decimals) throws IOException {
         return setString(name, bigDecimalToString(value, decimals));
     }
 
     /**
-     * Set a <code>boolean</code> property.
-     * @param name Of property
+     * Set a <code>boolean</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "theEarthIsFlat": false
+     * </pre></p>
+     * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -285,44 +316,59 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>null</code> property.
-     * @param name Of property
+     * Set a <code>null</code> property.<p>
+     * Sample:
+     * <pre>
+     *    "myKnowledgeOfTheLispProgrammingLanguage": null
+     * </pre></p>
+     * @param name Property
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
+     * @see JSONObjectReader#getIfNULL(String)
      */
     public JSONObjectWriter setNULL(String name) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.NULL, "null"));
     }
 
     /**
-     * Set a <code>dateTime</code> property.
-     * Note: this is an <i>emulated</i> type since there is no <code>dateTime</code> type in JSON.
-     * @param name Of property
-     * @param dateTime Value
+     * Set an ISO formatted <code>dateTime</code> property.<p>
+     * Note: this is an <i>mapped</i> type since there is no <code>dateTime</code> type in JSON.</p><p>
+     * Sample:
+     * <pre>
+     *    "received": "2016-11-12T09:22:36Z"
+     * </pre></p>
+     * @param name Property
+     * @param dateTime Date/time value
      * @param forceUtc <code>true</code> for UTC, <code>false</code> for local time
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
+     * @see org.webpki.util.ISODateTime#formatDateTime(Date, boolean)
      */
     public JSONObjectWriter setDateTime(String name, Date dateTime, boolean forceUtc) throws IOException {
         return setString(name, ISODateTime.formatDateTime(dateTime, forceUtc));
     }
 
     /**
-     * Set a <code>byte[]</code> property.
-     * This method utilizes Base64Url encoding.
-     * @param name Of property
+     * Set a <code>byte[]</code> property.<p>
+     * This method utilizes Base64Url encoding.</p><p>
+     * Sample:
+     * <pre>
+     *    "nonce": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk"
+     * </pre></p>
+     * @param name Property
      * @param value Array of bytes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @see Base64URL#encode(byte[])
      */
     public JSONObjectWriter setBinary(String name, byte[] value) throws IOException {
         return setString(name, Base64URL.encode(value));
     }
 
     /**
-     * Set a JSON object.
+     * Set a JSON object.<p>
      * This method assigns a property name to an already existing object reader
-     * which is useful for wrapping JSON objects. 
-     * @param name Of object
+     * which is useful for wrapping JSON objects.</p>
+     * @param name Property
      * @param objectReader Object reader
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      */
@@ -332,10 +378,10 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a JSON object.
+     * Set a JSON object.<p>
      * This method assigns a property name to an already created object writer
-     * which is useful for chaining complex JSON objects. 
-     * @param name Of object
+     * which is useful for nested JSON objects.</p>
+     * @param name Property
      * @param objectWriter Object writer
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      */
@@ -345,9 +391,9 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set (create) a JSON object.
-     * This method creates an empty JSON object and links it to the current object through a property. 
-     * @param name Of object
+     * Set (create) a JSON object.<p>
+     * This method creates an empty JSON object and links it to the current object through a property.</p> 
+     * @param name Property
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      */
     public JSONObjectWriter setObject(String name) throws IOException {
@@ -357,9 +403,9 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set (create) a JSON array.
-     * This method creates an empty JSON array and links it to the current object through a property. 
-     * @param name Of array
+     * Set (create) a JSON array.<p>
+     * This method creates an empty JSON array and links it to the current object through a property.</p> 
+     * @param name Property
      * @return New instance of {@link org.webpki.json.JSONArrayWriter}
      */
     public JSONArrayWriter setArray(String name) throws IOException {
@@ -369,10 +415,10 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a JSON array.
+     * Set a JSON array.<p>
      * This method assigns a property name to an already created array writer
-     * which is useful for chaining complex JSON objects. 
-     * @param name Of array
+     * which is useful for nested JSON objects.</p>
+     * @param name Property
      * @param arrayWriter Array writer
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      */
@@ -390,11 +436,16 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set an array of <code>byte[]</code> property.
-     * This method puts each byte array (after Base64Url encoding) into a single JSON array.
-     * @param name Of property
+     * Set an array of <code>byte[]</code> property.<p>
+     * This method puts each byte array (after Base64Url encoding) into a single JSON array.</p><p>
+     * Sample:
+     * <pre>
+     *    "blobs": ["lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk","LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"]
+     * </pre></p>
+     * @param name Property
      * @param values Vector holding arrays of bytes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @see Base64URL#encode(byte[])
      */
     public JSONObjectWriter setBinaryArray(String name, Vector<byte[]> values) throws IOException {
         Vector<String> array = new Vector<String>();
@@ -405,9 +456,13 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set a <code>String[]</code> property.
-     * This method puts each <code>String</code> into a single JSON array.
-     * @param name Of property
+     * Set a <code>String[]</code> property.<p>
+     * This method puts each <code>String</code> into a single JSON array.</p><p>
+     * Sample:
+     * <pre>
+     *    "usPresidents": ["Clinton","Bush","Obama","Trump"]
+     * </pre></p>
+     * @param name Property
      * @param values Array of <code>String</code>
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      */
@@ -442,8 +497,8 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * <code>"signature"</code>object.
-     * This method performs all the processing needed for creating a JCS signature.
+     * <code>"signature"</code>object.<p>
+     * This method performs all the processing needed for adding a JCS signature to the current object.</p>
      * @param signer The interface to the signing key and type
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException In case there a problem with keys etc.
@@ -496,7 +551,22 @@ import org.webpki.json.JSONSignatureDecoder;
     
         // Print document on the console
         System.out.println("Signed doc: " + json);
-    
+
+<div id="verify" style="display:inline-block;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0">{
+  "<span style="color:#C00000">myProperty</span>": "<span style="color:#0000C0">Some data</span>",
+  "<span style="color:#C00000">signature</span>": {
+    "<span style="color:#C00000">algorithm</span>": "<span style="color:#0000C0">ES256</span>",
+    "<span style="color:#C00000">publicKey</span>": {
+      "<span style="color:#C00000">type</span>": "<span style="color:#0000C0">EC</span>",
+      "<span style="color:#C00000">curve</span>": "<span style="color:#0000C0">P-256</span>",
+      "<span style="color:#C00000">x</span>": "<span style="color:#0000C0">vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs</span>",
+      "<span style="color:#C00000">y</span>": "<span style="color:#0000C0">fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM</span>"
+    },
+    "<span style="color:#C00000">value</span>": "<span style="color:#0000C0">gNfr9Es0cnc263tmOYMsctBhbdQUSn9K-Uk42kUMKn4gBUKu9SP4iqNCQd2h8QSePPGsKdkLILVJDBlAbkQ1eA</span>"
+  }
+}
+</div>    
+
         // Parse document
         JSONObjectReader reader = JSONParser.parse(json);
     
@@ -532,7 +602,7 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Create a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * formatted public key object.
+     * formatted public key object.<p>
      * Typical use:
      *<pre>
     setObject("myPublicKey", JSONObjectWriter.setCorePublicKey(myPublicKey, AlgorithmPreferences.JOSE);
@@ -544,7 +614,7 @@ import org.webpki.json.JSONSignatureDecoder;
       <i>depends on the actual public key type and value</i>   
          .
     }
-</pre>
+</pre></p>
      * @param publicKey Public key value
      * @param algorithmPreferences JOSE or SKS algorithm notation
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
@@ -570,7 +640,7 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * public key property.
+     * public key property.<p>
      * Resulting JSON:
      * <pre>
     "publicKey": {
@@ -578,7 +648,7 @@ import org.webpki.json.JSONSignatureDecoder;
       <i>depends on the actual public key type and value</i>   
          .
     }
-</pre>
+</pre></p>
      * @param publicKey Public key value
      * @param algorithmPreferences JOSE or SKS algorithm notation
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
@@ -590,8 +660,9 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * public key property.
-     * This is equivalent to <code>setPublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER)</code>.
+     * public key property.<p>
+     * This method is equivalent to {@link #setPublicKey(PublicKey, AlgorithmPreferences)}
+     * using {@link AlgorithmPreferences#JOSE_ACCEPT_PREFER} as second argument.</p>
      * @param publicKey Public key value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
@@ -603,10 +674,12 @@ import org.webpki.json.JSONSignatureDecoder;
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
      * certificate path property.
+     * <p>Each path element (certificate) is base64url encoded and the path must be
+     * <i>sorted</i> where certificate[i] is signed by certificate[i + 1].</p><p>
      * Resulting JSON:
      * <pre>
-    "certificatePath": ["base64url"{,...}]
-</pre>
+    "certificatePath": ["MIIETTCCAjWgAwIBAgIGAUoqo74...gfdd" {,...}]
+</pre></p>
      * @param certificatePath Sorted certificate path array
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException

@@ -28,11 +28,15 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.Vector;
 
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
+
+import org.webpki.json.encryption.DataEncryptionAlgorithms;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -41,7 +45,13 @@ import org.webpki.util.ISODateTime;
  * JSON object reader.
  * <p>
  * Returned by the parser methods.
- * Also provides built-in support for JCS (JSON Cleartext Signatures) decoding.</p>
+ * Also provides built-in support for JCS (JSON Cleartext Signatures) decoding and
+<a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
+ encodings.</p>
+ <p>In addition,
+ there are static methods for converting
+ keys in <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>
+ format to their Java counterparts.
  */
 public class JSONObjectReader implements Serializable, Cloneable {
 
@@ -56,6 +66,15 @@ public class JSONObjectReader implements Serializable, Cloneable {
         this.root = root;
     }
 
+    /**
+     * Check for unread data.
+     * Throws an exception if any property or array element in the current object or
+     * child objects have not been read.
+     * @throws IOException
+     * @see JSONObjectReader#scanAway(String)
+     * @see JSONObjectReader#getPropertyType(String)
+     * @see JSONObjectReader#getProperties()
+     */
     public void checkForUnread() throws IOException {
         if (getJSONArrayReader() == null) {
             JSONObject.checkObjectForUnread(root);
@@ -79,11 +98,24 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return value;
     }
 
+    void clearReadFlags() {
+        for (JSONValue value : root.properties.values()) {
+            value.readFlag = false;
+        }
+    }
+
     String getString(String name, JSONTypes expectedType) throws IOException {
         JSONValue value = getProperty(name, expectedType);
         return (String) value.value;
     }
 
+    /**
+     * Read a JSON string property.
+     * @param name Property
+     * @return Java <code>String</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setString(String, String)
+     */
     public String getString(String name) throws IOException {
         return getString(name, JSONTypes.STRING);
     }
@@ -109,28 +141,86 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return (int) longValue;
     }
 
+    /**
+     * Read a JSON integer property.
+     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.
+     * @param name Property
+     * @return Java <code>int</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setInt(String, int)
+     */
     public int getInt(String name) throws IOException {
         return parseInt(getString(name, JSONTypes.NUMBER));
     }
 
+    /**
+     * Read a JSON long integer property.
+     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.
+     * Note: Only 53 bits of precision is available
+     * @param name Property
+     * @return Java <code>long</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setInt53(String, long)
+     */
     public long getInt53(String name) throws IOException {
         return parseLong(getString(name, JSONTypes.NUMBER));
     }
 
+    /**
+     * Read a JSON double property.
+     * @param name Property
+     * @return Java <code>double</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setDouble(String, double)
+     */
     public double getDouble(String name) throws IOException {
         return Double.valueOf(getString(name, JSONTypes.NUMBER));
     }
 
+    /**
+     * Read JSON boolean property.
+     * @param name Property
+     * @return Java <code>boolean</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setBoolean(String, boolean)
+     */
     public boolean getBoolean(String name) throws IOException {
         return new Boolean(getString(name, JSONTypes.BOOLEAN));
     }
 
+    /**
+     * Read a JSON dateTime property in ISO format.
+     * Note: Since JSON does not support a native dateTime type, this method builds on <i>mapping</i>.
+     * @param name Property
+     * @return Java <code>GregorianCalendar</code>
+     * @throws IOException
+     * @see org.webpki.util.ISODateTime#parseDateTime(String)
+     * @see JSONObjectWriter#setDateTime(String, Date, boolean)
+     */
     public GregorianCalendar getDateTime(String name) throws IOException {
         return ISODateTime.parseDateTime(getString(name));
     }
 
+    /**
+     * Read a base64url encoded JSON property.
+     * @param name Property
+     * @return Java <code>byte[]</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setBinary(String, byte[])
+     */
     public byte[] getBinary(String name) throws IOException {
         return Base64URL.decode(getString(name));
+    }
+
+    /**
+     * Conditionally read a base64url encoded JSON property.
+     * @param name Property
+     * @return Java <code>byte[]</code> or <code>null</code> if property is not present
+     * @throws IOException
+     * @see JSONObjectWriter#setBinary(String, byte[])
+     */
+    public byte[] getBinaryConditional(String name) throws IOException {
+        return hasProperty(name) ? getBinary(name) : null;
     }
 
     static BigInteger parseBigInteger(String value) throws IOException {
@@ -152,23 +242,63 @@ public class JSONObjectReader implements Serializable, Cloneable {
         throw new IOException("Malformed \"BigDecimal\": " + value);
     }
 
+    /**
+     * Read a BigInteger property.<br>
+     * Note: Since JSON does not support a native BigInteger type, this method builds on <i>mapping</i>.
+     * @param name Property
+     * @return Java <code>BigInteger</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setBigInteger(String, BigInteger)
+     */
     public BigInteger getBigInteger(String name) throws IOException {
         return parseBigInteger(getString(name));
     }
 
+    /**
+     * Read a BigDecimal property.<br>
+     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.
+     * Note: This method is equivalent to <code>getBigDecimal(name, null)</code>.
+     * @param name Property
+     * @return Java <code>BigInteger</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setBigDecimal(String, BigDecimal)
+     */
     public BigDecimal getBigDecimal(String name) throws IOException {
         return parseBigDecimal(getString(name), null);
     }
 
+    /**
+     * Read a BigDecimal property.<br>
+     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.
+     * @param name Property
+     * @param decimals Required number of fractional digits or <code>null</code> if unspecified
+     * @return Java <code>BigDecimal</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setBigDecimal(String, BigDecimal, Integer)
+     */
     public BigDecimal getBigDecimal(String name, Integer decimals) throws IOException {
         return parseBigDecimal(getString(name), decimals);
     }
 
+    /**
+     * Get root array reader.<br>
+     * If the outermost part of the JSON structure is an array, this method <b>must</b> be
+     * called <i>immediately after parsing</i> in order to process the structure.
+     * @return Array reader
+     */
     @SuppressWarnings("unchecked")
     public JSONArrayReader getJSONArrayReader() {
         return root.properties.containsKey(null) ? new JSONArrayReader((Vector<JSONValue>) root.properties.get(null).value) : null;
     }
 
+    /**
+     * Conditionally read a JSON <code>null</code> property.<br>
+     * Note: Only if the property contains a <code>null</code> the property is marked as "read". 
+     * @param name Property
+     * @return <code>true</code> if <code>null</code> was found, else <code>false</code>
+     * @throws IOException
+     * @see JSONObjectReader#checkForUnread()
+     */
     public boolean getIfNULL(String name) throws IOException {
         if (getPropertyType(name) == JSONTypes.NULL) {
             scanAway(name);
@@ -177,37 +307,78 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return false;
     }
 
+    /**
+     * Read a JSON object property.
+     * @param name Property
+     * @return Object reader
+     * @throws IOException
+     */
     public JSONObjectReader getObject(String name) throws IOException {
         JSONValue value = getProperty(name, JSONTypes.OBJECT);
         return new JSONObjectReader((JSONObject) value.value);
     }
 
+    /**
+     * Read a JSON array property.
+     * @param name Property
+     * @return Array reader
+     * @throws IOException
+     */
     @SuppressWarnings("unchecked")
     public JSONArrayReader getArray(String name) throws IOException {
         JSONValue value = getProperty(name, JSONTypes.ARRAY);
         return new JSONArrayReader((Vector<JSONValue>) value.value);
     }
 
+    /**
+     * Conditionally read a JSON string property.<br>
+     * Note: This method is equivalent to <code>getStringConditional(name, null)</code>.
+     * @param name Property
+     * @return The <code>String</code> if available else <code>null</code>
+     * @throws IOException
+     */
     public String getStringConditional(String name) throws IOException {
         return this.getStringConditional(name, null);
     }
 
+    /**
+     * Conditionally read a JSON string property.<br>
+     * @param name Property
+     * @param defaultValue Default value including possibly <code>null</code>
+     * @return The <code>String</code> if available else <code>defaultValue</code>
+     * @throws IOException
+     */
+    public String getStringConditional(String name, String defaultValue) throws IOException {
+        return hasProperty(name) ? getString(name) : defaultValue;
+    }
+
+    /**
+     * Conditionally read a JSON boolean property.<br>
+     * @param name Property
+     * @return The boolean if available else <code>false</code>
+     * @throws IOException
+     */
     public boolean getBooleanConditional(String name) throws IOException {
         return this.getBooleanConditional(name, false);
     }
 
-    public String getStringConditional(String name, String default_value) throws IOException {
-        return hasProperty(name) ? getString(name) : default_value;
+    /**
+     * Conditionally read a JSON boolean property.<br>
+     * @param name Property
+     * @param defaultValue Default value
+     * @return The boolean if available else <code>defaultValue</code>
+     * @throws IOException
+     */
+    public boolean getBooleanConditional(String name, boolean defaultValue) throws IOException {
+        return hasProperty(name) ? getBoolean(name) : defaultValue;
     }
 
-    public boolean getBooleanConditional(String name, boolean default_value) throws IOException {
-        return hasProperty(name) ? getBoolean(name) : default_value;
-    }
-
-    public byte[] getBinaryConditional(String name) throws IOException {
-        return hasProperty(name) ? getBinary(name) : null;
-    }
-
+    /**
+     * Conditionally read an array of JSON strings.
+     * @param name Property
+     * @return Array of <code>String</code> or <code>null</code> if property is not present
+     * @throws IOException
+     */
     public String[] getStringArrayConditional(String name) throws IOException {
         return hasProperty(name) ? getStringArray(name) : null;
     }
@@ -224,10 +395,22 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return array.toArray(new String[0]);
     }
 
+    /**
+     * Read an array of JSON strings.
+     * @param name Property
+     * @return Array of <code>String</code>
+     * @throws IOException
+     */
     public String[] getStringArray(String name) throws IOException {
         return getSimpleArray(name, JSONTypes.STRING);
     }
 
+    /**
+     * Read an array of base64url encoded JSON strings.
+     * @param name Property
+     * @return Vector holding arrays of bytes
+     * @throws IOException
+     */
     public Vector<byte[]> getBinaryArray(String name) throws IOException {
         Vector<byte[]> blobs = new Vector<byte[]>();
         for (String blob : getStringArray(name)) {
@@ -236,47 +419,102 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return blobs;
     }
 
+    /**
+     * Get JSON properties.<br>
+     * @return All properties of the current object
+     */
     public String[] getProperties() {
         return root.properties.keySet().toArray(new String[0]);
     }
 
+    /**
+     * Test if a property is present.
+     * @param name Property
+     * @return <code>true</code> if object is present, else <code>false</code>
+     * @see JSONObjectReader#getPropertyType(String)
+     */
     public boolean hasProperty(String name) {
         return root.properties.get(name) != null;
     }
 
+    /**
+     * Get the native JSON type of a property.
+     * @param name Property
+     * @return JSON type
+     * @throws IOException
+     * @see org.webpki.json.JSONTypes
+     * @see JSONObjectReader#hasProperty(String)
+     */
     public JSONTypes getPropertyType(String name) throws IOException {
         return getProperty(name).type;
     }
 
     /**
-     * Read and decode JCS signature object from the current JSON object.
-     *
+     * Read and decode a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * <code>"signature"</code> object.
+     * 
+     * @param algorithmPreferences JOSE or SKS notation expected
      * @return An object which can be used to verify keys etc.
-     * @throws IOException In case there is something wrong with the signature
+     * @throws IOException
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      */
     public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences) throws IOException {
         return new JSONSignatureDecoder(this, algorithmPreferences);
     }
 
+    /**
+     * Read and decode a
+     * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * <code>"signature"</code> object.
+     * This method is equivalent to <code>getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER)</code>.
+     *
+     * @return An object which can be used to verify keys etc.
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
+     */
     public JSONSignatureDecoder getSignature() throws IOException {
         return new JSONSignatureDecoder(this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
     }
 
+    /**
+     * Read and decode a public key in
+     * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * format.
+     * 
+     * @param algorithmPreferences JOSE or SKS notation expected
+     * @return Java <code>PublicKey</code>
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#setPublicKey(PublicKey)
+     */
     public PublicKey getPublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
         return getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).getCorePublicKey(algorithmPreferences);
     }
 
+    /**
+     * Read and decode a public key in
+     * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * format.
+     * This method is equivalent to <code>getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER)</code>.
+     * 
+     * @return Java <code>PublicKey</code>
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#setPublicKey(PublicKey)
+     */
     public PublicKey getPublicKey() throws IOException {
         return getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
     }
 
-    void clearReadFlags() {
-        for (JSONValue value : root.properties.values()) {
-            value.readFlag = false;
-        }
-    }
-
+    /**
+     * Read and decode a public key in
+     * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * format.
+     * Note: this method assumes that the current object only holds the actual public key structure (no property).
+     * 
+     * @param algorithmPreferences JOSE or SKS notation expected
+     * @return Java <code>PublicKey</code>
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#createCorePublicKey(PublicKey,AlgorithmPreferences)
+     */
     public PublicKey getCorePublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
         clearReadFlags();
         PublicKey publicKey = JSONSignatureDecoder.decodePublicKey(this,
@@ -287,6 +525,13 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return publicKey;
     }
 
+    /**
+     * Read a public key in a <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>.<p>
+     * Note: this method assumes that the current object only holds a JWK public key structure.</p>
+     * 
+     * @return Java <code>PublicKey</code>
+     * @throws IOException
+     */
     public PublicKey getPublicKeyFromJwk() throws IOException {
         return JSONSignatureDecoder.decodePublicKey(this,
                                                     AlgorithmPreferences.JOSE,
@@ -294,19 +539,59 @@ public class JSONObjectReader implements Serializable, Cloneable {
                                                     JSONSignatureDecoder.JWK_CRV_JSON);
     }
 
+    /**
+     * Read a public and private key in a <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>.<p>
+     * Note: this method assumes that the current object only holds a JWK key structure.</p>
+     * 
+     * @return Java <code>KeyPair</code>
+     * @throws IOException
+     */
     public KeyPair getKeyPairFromJwk() throws IOException {
         PublicKey publicKey = getPublicKeyFromJwk();
         return new KeyPair(publicKey, JSONSignatureDecoder.decodeJwkPrivateKey(this, publicKey));
     }
 
+    /**
+     * Read an object in
+     * <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF</a>
+     * format.<p>
+     * Note: this method assumes that the current object only holds a JEF structure.</p>
+     * @return An object which can be used to retrieve the original (unencrypted) data 
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,PublicKey,KeyEncryptionAlgorithms)
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,String,byte[])
+     */
     public JSONDecryptionDecoder getEncryptionObject() throws IOException {
         return new JSONDecryptionDecoder(this);
     }
 
+    /**
+     * Read a certificate path in 
+     * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * format.
+     * <p>The array elements (base64url encoded certificates),
+     * <b>must</b> be supplied in <i>strict issuance order</i>
+     * where certificate[i] is signed by certificate[i + 1].</p>
+     * @return Certificate path
+     * @throws IOException
+     * @see org.webpki.json.JSONObjectWriter#setCertificatePath(X509Certificate[])
+     */
     public X509Certificate[] getCertificatePath() throws IOException {
         return JSONSignatureDecoder.getCertificatePath(this);
     }
 
+    /**
+     * Scan a property.
+     * This method scans a property regardless of its type and it useful for dealing with
+     * data where the type is unknown.
+     * It also marks the property as "read" including possible child objects and arrays. 
+     * @param name Property
+     * @return Current instance of {@link org.webpki.json.JSONObjectReader}
+     * @throws IOException
+     * @see JSONObjectReader#checkForUnread()
+     * @see JSONObjectReader#getPropertyType(String)
+     * @see JSONObjectReader#getProperties()
+     */
     public JSONObjectReader scanAway(String name) throws IOException {
         JSONValue value = getProperty(name);
         value.readFlag = true;
@@ -318,22 +603,40 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return this;
     }
 
+    /**
+     * Remove a property.
+     * @param name Property
+     * @return Current instance of {@link org.webpki.json.JSONObjectReader}
+     * @throws IOException
+     */
     public JSONObjectReader removeProperty(String name) throws IOException {
         getProperty(name);
         root.properties.remove(name);
         return this;
     }
 
+    /**
+     * Serialize object reader to a Java <code>byte[]</code>.
+     * @param outputFormat Any JSONOutputFormats
+     * @return JSON string data
+     * @throws IOException
+     */
     public byte[] serializeToBytes(JSONOutputFormats outputFormat) throws IOException {
         return new JSONObjectWriter(root).serializeToBytes(outputFormat);
     }
 
-    public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
+    /**
+     * Serialize object reader to a Java <code>String</code>.
+     * @param outputFormat Any JSONOutputFormats
+     * @return JSON string data
+     * @throws IOException
+     */
+     public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
         return new JSONObjectWriter(root).serializeToString(outputFormat);
     }
 
     /**
-     * Deep copy of JSON object
+     * Deep copy of JSON object reader.
      */
     @Override
     public JSONObjectReader clone() {
@@ -344,6 +647,9 @@ public class JSONObjectReader implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Pretty print JSON of object reader.
+     */
     @Override
     public String toString() {
         return new JSONObjectWriter(root).toString();

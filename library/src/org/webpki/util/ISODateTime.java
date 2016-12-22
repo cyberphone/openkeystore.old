@@ -39,9 +39,10 @@ public class ISODateTime {
 
 
     /**
-     * Always: YYYY-MM-DDThh:mm:ss
-     * Optionally: a '.' followed by 1-3 digits giving millisecond
-     * Finally: 'Z' for UTC or an UTC time-zone difference expressed as +hh:mm or -hh:mm
+     * Parse an ISO formatted dateTime string.<p>
+     * <i>Always:</i> <code>yyyy-mm-ddThh:mm:ss</code><br>
+     * <i>Optionally:</i> a '.' followed by 1-3 digits giving millisecond<br>
+     * <i>Finally:</i> 'Z' for UTC or an UTC time-zone difference expressed as <code>+hh:mm</code> or <code>-hh:mm</code></p>
      *
      * @param dateTime String to be parsed
      * @return GregorianCalendar
@@ -88,20 +89,28 @@ public class ISODateTime {
         }
         if (milliSeconds.length() > 0) {
             // Milliseconds.
-            gc.set(GregorianCalendar.MILLISECOND,
-                   Integer.parseInt((milliSeconds.substring(1) + "00").substring(0, 3)));
+            gc.set(GregorianCalendar.MILLISECOND, Integer.parseInt(milliSeconds.substring(1)));
         }
         return gc;
     }
 
-    public static String formatDateTime(Date date, boolean forceUtc) {
+    /**
+     * Create an ISO formatted dateTime string.<p>
+     * <i>Always:</i> <code>yyyy-mm-ddThh:mm:ss</code><br>
+     * <i>UTC:</i> Append 'Z'<br>
+     * <i>Local time:</i> Append time-zone difference expressed as <code>+hh:mm</code> or <code>-hh:mm</code></p>
+     * @param dateTime The date/time object
+     * @param forceUtc <i>Representation:</i> <code>true</code> for UTC, <code>false</code> for local time
+     * @return String
+     */
+    public static String formatDateTime(Date dateTime, boolean forceUtc) {
         GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(date);
+        gc.setTime(dateTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         if (forceUtc) {
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
-        StringBuffer s = new StringBuffer(sdf.format(date));
+        StringBuffer s = new StringBuffer(sdf.format(dateTime));
 
         int tzo = forceUtc ? 0 : (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
 
