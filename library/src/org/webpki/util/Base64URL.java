@@ -64,7 +64,7 @@ public class Base64URL {
      * For every 4 base64 characters you'll get 3 binary bytes.</p>
      *
      * @param base64url Encoded data
-     * @return decoded Data as a byte array
+     * @return dDcoded data as a byte array
      * @throws IOException If input data isn't valid base64url data
      */
     public static byte[] decode(String base64url) throws IOException {
