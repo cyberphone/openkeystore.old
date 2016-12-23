@@ -26,50 +26,49 @@ import java.security.SecureRandom;
  */
 public class Base64URL {
 
-    ///////////////////////////////
-    ////       ATTRIBUTES      ////
-///////////////////////////////
-
     public final static char[] BASE64URL = {
-            //   0   1   2   3   4   5   6   7
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', // 0
-            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', // 1
-            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', // 2
-            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', // 3
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', // 4
-            'o', 'p', 'q', 'r', 's', 't', 'u', 'v', // 5
-            'w', 'x', 'y', 'z', '0', '1', '2', '3', // 6
-            '4', '5', '6', '7', '8', '9', '-', '_'  // 7
+    //   0   1   2   3   4   5   6   7
+        'A','B','C','D','E','F','G','H', // 0
+        'I','J','K','L','M','N','O','P', // 1
+        'Q','R','S','T','U','V','W','X', // 2
+        'Y','Z','a','b','c','d','e','f', // 3
+        'g','h','i','j','k','l','m','n', // 4
+        'o','p','q','r','s','t','u','v', // 5
+        'w','x','y','z','0','1','2','3', // 6
+        '4','5','6','7','8','9','-','_'  // 7
     };
-
+    
     public final static byte[] DECODE_TABLE = {
-            -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, 62, -1, -1,
-            52, 53, 54, 55, 56, 57, 58, 59,
-            60, 61, -1, -1, -1, -1, -1, -1,
-            -1, 0, 1, 2, 3, 4, 5, 6,
-            7, 8, 9, 10, 11, 12, 13, 14,
-            15, 16, 17, 18, 19, 20, 21, 22,
-            23, 24, 25, -1, -1, -1, -1, 63,
-            -1, 26, 27, 28, 29, 30, 31, 32,
-            33, 34, 35, 36, 37, 38, 39, 40,
-            41, 42, 43, 44, 45, 46, 47, 48,
-            49, 50, 51
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, 62, -1, -1,
+        52, 53, 54, 55, 56, 57, 58, 59,
+        60, 61, -1, -1, -1, -1, -1, -1,
+        -1,  0,  1,  2,  3,  4,  5,  6, 
+         7,  8,  9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22,
+        23, 24, 25, -1, -1, -1, -1, 63,
+        -1, 26, 27, 28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48,
+        49, 50, 51
     };
 
+    private Base64URL() {}  // No instantiation please
 
-    private Base64URL() {
-    }
-
-    ////////////////////
-    ////   DECODE   //// Throws IOException if argument isn't base64URL
-    ////////////////////
-
-    private static byte[] decodeInternal(byte[] encoded) throws IOException {
+    /**
+     * Converts a base64url encoded String to a byte array.<p>
+     * For every 4 base64 characters you'll get 3 binary bytes.</p>
+     *
+     * @param base64url Encoded data
+     * @return decoded Data as a byte array
+     * @throws IOException If input data isn't valid base64url data
+     */
+    public static byte[] decode(String base64url) throws IOException {
+        byte[] encoded = base64url.getBytes("UTF-8");
         byte[] semidecoded = new byte[encoded.length];
         for (int i = 0; i < encoded.length; i++) {
             byte c = encoded[i];
@@ -110,34 +109,23 @@ public class Base64URL {
                 throw new IOException("Wrong termination character");
             }
         }
-        //return results
         return decoded;
     }
 
     /**
-     * [Decoding] Converts a base64url encoded String to a binary byte array.
-     * For every 4 base64 bytes you'll get 3 binary bytes.
+     * Converts a byte array to a base64url encoded String.<p>
+     * For every 3 binary bytes, you'll get 4 base64 characters.</p>
      *
-     * @param base64url encoded data
-     * @return decoded data as a byte array
-     * @throws IOException if the input data isn't valid base64 data
-     *                     or if the input String contains characters
-     *                     other than ASCII8.
+     * @param byteArray Binary data
+     * @return Encoded data as a String
+     * @throws IOException
      */
-    public static byte[] decode(String base64url) throws IOException {
-        return decodeInternal(base64url.getBytes("UTF-8"));
-    }
-
-    ////////////////////
-    ////   ENCODE   //// Does not throw exceptions
-    ////////////////////
-
-    private static byte[] encodeInternal(byte[] uncoded) {
+    public static String encode(byte[] byteArray) throws IOException {
         //determine length of output
         int i;
-        int modulo3 = uncoded.length % 3;
+        int modulo3 = byteArray.length % 3;
         //(1)
-        i = (uncoded.length / 3) * 4;
+        i = (byteArray.length / 3) * 4;
         //(2)
         if (modulo3 != 0) {
             i += modulo3 + 1;
@@ -147,46 +135,34 @@ public class Base64URL {
         i = 0;
         int j = 0;
         //encode by threes
-        while (j < uncoded.length - modulo3) {
-            encoded[i++] = (byte) (BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte) (BASE64URL[((uncoded[j++] << 2) & 0x3C) | ((uncoded[j] >>> 6) & 0x03)]);
-            encoded[i++] = (byte) (BASE64URL[uncoded[j++] & 0x3F]);
+        while (j < byteArray.length - modulo3) {
+            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 2) & 0x3C) | ((byteArray[j] >>> 6) & 0x03)]);
+            encoded[i++] = (byte) (BASE64URL[byteArray[j++] & 0x3F]);
         }
         //encode  "odd" bytes
         if (modulo3 == 1) {
-            encoded[i++] = (byte) (BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[(uncoded[j] << 4) & 0x30]);
+            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte) (BASE64URL[(byteArray[j] << 4) & 0x30]);
         } else if (modulo3 == 2) {
-            encoded[i++] = (byte) (BASE64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte) (BASE64URL[(uncoded[j] << 2) & 0x3C]);
+            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)]);
+            encoded[i++] = (byte) (BASE64URL[(byteArray[j] << 2) & 0x3C]);
         }
-        //return results
-        return encoded;
+        return new String(encoded, "UTF-8");
     }
-
 
     /**
-     * [Encoding] Converts a binary byte array to a base64url encoded String.
-     * For every 3 binary bytes, you'll get 4 base64 bytes.
-     *
-     * @param binaryBlob uncoded data
-     * @return encoded data as a String
+     * Generates a base64url encoded nonce.
+     * @param length Number of characters
+     * @return Encoded nonce
      */
-    public static String encode(byte[] binaryBlob) {
-        try {
-            return new String(encodeInternal(binaryBlob), "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String generateURLFriendlyRandom(int lengthInCharacters) {
-        byte[] random = new byte[lengthInCharacters];
+    public static String generateURLFriendlyRandom(int length) {
+        byte[] random = new byte[length];
         new SecureRandom().nextBytes(random);
         StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < lengthInCharacters; i++) {
+        for (int i = 0; i < length; i++) {
             buffer.append(BASE64URL[random[i] & 0x3F]);
         }
         return buffer.toString();
