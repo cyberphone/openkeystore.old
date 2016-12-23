@@ -29,7 +29,12 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Creates JSON arrays.
+ * Writes JSON arrays.<p>
+ * Data types are dealt with as in {@link JSONObjectWriter}.</p>
+ * @see JSONObjectWriter#setArray(String)
+ * @see #setArray()
+ * @see #setArray(JSONArrayWriter)
+ * @see #JSONArrayWriter()
  */
 public class JSONArrayWriter implements Serializable {
 
@@ -37,6 +42,14 @@ public class JSONArrayWriter implements Serializable {
 
     Vector<JSONValue> array;
 
+    /**
+     * For creating a JSON array.<p>
+     * Note that this constructor can be used for creating a JSON structure where the
+     * outermost part in an array as well as for array sub-objects.</p>
+     * @see JSONObjectReader#getJSONArrayReader()
+     * @see JSONObjectWriter#setArray(String, JSONArrayWriter)
+     * @see #setArray(JSONArrayWriter)
+     */
     public JSONArrayWriter() {
         array = new Vector<JSONValue>();
     }
@@ -95,12 +108,24 @@ public class JSONArrayWriter implements Serializable {
         return setString(Base64URL.encode(value));
     }
 
+    /**
+     * Create nested array.<p>
+     * This method creates a new array writer at the current position.</p>
+     * @return Array writer
+     * @throws IOException
+     */
     public JSONArrayWriter setArray() throws IOException {
         JSONArrayWriter writer = new JSONArrayWriter();
         add(JSONTypes.ARRAY, writer.array);
         return writer;
     }
 
+    /**
+     * Create nested array.<p>
+     * This method inserts an existing array writer at the current position.</p>
+     * @return Array writer
+     * @throws IOException
+     */
     public JSONArrayWriter setArray(JSONArrayWriter writer) throws IOException {
         add(JSONTypes.ARRAY, writer.array);
         return this;

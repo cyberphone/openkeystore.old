@@ -53,11 +53,11 @@ import org.webpki.util.ISODateTime;
 /**
  * Creates JSON objects and performs serialization according to ES6.
  * <p>
- * Also provides built-in support for 
+ * Also provides built-in support for encoding
  <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS (JSON Cleartext Signature)</a>
  and
 <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
- encodings.</p>
+ constructs.</p>
  */
 public class JSONObjectWriter implements Serializable {
 
@@ -65,6 +65,9 @@ public class JSONObjectWriter implements Serializable {
 
     static final int STANDARD_INDENT = 2;
 
+    /**
+     * Integers outside of this range are not natively supported by JSON
+     */
     public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
 
     static final Pattern JS_ID_PATTERN = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
@@ -222,13 +225,14 @@ public class JSONObjectWriter implements Serializable {
      * <pre>
      *    "quiteNegative": -800719925474099
      * </pre></p>
-     * Note that <code>long</code> data is limited to 53 bits of precision
-     * (exceeding this limit throws an exception).
+     * Note that <code>long</code> data is limited to 53 bits of precision ({@value #MAX_SAFE_INTEGER}),
+     * exceeding this limit throws an exception.
      * If you need higher precision use {@link JSONObjectWriter#setBigInteger(String, BigInteger)}.
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException
+     * @see #MAX_SAFE_INTEGER
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6Long2NumberConversion(value)));
@@ -251,7 +255,7 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set a <code>BigInteger</code> property.<p>
-     * Note: this is an <i>mapped</i> type since there is no <code>BigInteger</code> type in JSON.</p><p>
+     * Note: this is a <i>mapped</i> type since there is no <code>BigInteger</code> type in JSON.</p><p>
      * Sample:
      * <pre>
      *    "aPrettyHugeNumber": "94673335822222222222222222222222222222222222222222222"
@@ -271,7 +275,7 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set a <code>BigDecimal</code> property.<p>
-     * Note: this is an <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p><p>
+     * Note: this is a <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p><p>
      * Sample:
      * <pre>
      *    "amount": "568790.25"
@@ -288,7 +292,7 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set a <code>BigDecimal</code> property.<p>
-     * Note: this is an <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p>
+     * Note: this is a <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p>
      * @param name Property
      * @param value Value
      * @param decimals Number of fractional digits
@@ -332,7 +336,7 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set an ISO formatted <code>dateTime</code> property.<p>
-     * Note: this is an <i>mapped</i> type since there is no <code>dateTime</code> type in JSON.</p><p>
+     * Note: this is a <i>mapped</i> type since there is no <code>dateTime</code> type in JSON.</p><p>
      * Sample:
      * <pre>
      *    "received": "2016-11-12T09:22:36Z"

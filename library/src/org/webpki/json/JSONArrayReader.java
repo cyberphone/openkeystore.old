@@ -29,7 +29,11 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
- * Reads array elements.
+ * Reads JSON array elements.<p>
+ * Data types are dealt with as in {@link JSONObjectReader}.</p>
+ * @see JSONObjectReader#getArray(String)
+ * @see JSONObjectReader#getJSONArrayReader()
+ * @see #getArray()
  */
 public class JSONArrayReader implements Serializable {
 

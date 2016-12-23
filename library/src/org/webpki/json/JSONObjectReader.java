@@ -45,13 +45,19 @@ import org.webpki.util.ISODateTime;
  * JSON object reader.
  * <p>
  * Returned by the parser methods.
- * Also provides built-in support for JCS (JSON Cleartext Signatures) decoding and
+ * Also provides built-in support for decoding
+ <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS (JSON Cleartext Signature)</a>
+ and
 <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
- encodings.</p>
+ constructs.</p>
  <p>In addition,
  there are static methods for converting
  keys in <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>
  format to their Java counterparts.
+ @see JSONParser
+ @see #getObject(String)
+ @see JSONArrayReader#getObject()
+ @see JSONObjectWriter#JSONObjectWriter(JSONObjectReader)
  */
 public class JSONObjectReader implements Serializable, Cloneable {
 
@@ -142,8 +148,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a JSON integer property.
-     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.
+     * Read a JSON integer property.<p>
+     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.</p>
      * @param name Property
      * @return Java <code>int</code>
      * @throws IOException
@@ -154,13 +160,16 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a JSON long integer property.
-     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.
-     * Note: Only 53 bits of precision is available
+     * Read a JSON long integer property.<p>
+     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.</p><p>
+     * Note: Only 53 bits of precision is available,
+     * values outside this range throw exceptions.</p>
      * @param name Property
      * @return Java <code>long</code>
      * @throws IOException
      * @see JSONObjectWriter#setInt53(String, long)
+     * @see JSONObjectWriter#MAX_SAFE_INTEGER
+     * @see #getBigInteger(String)
      */
     public long getInt53(String name) throws IOException {
         return parseLong(getString(name, JSONTypes.NUMBER));
@@ -189,8 +198,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a JSON dateTime property in ISO format.
-     * Note: Since JSON does not support a native dateTime type, this method builds on <i>mapping</i>.
+     * Read a JSON dateTime property in ISO format.<p>
+     * Note: Since JSON does not support a native dateTime type, this method builds on <i>mapping</i>.</p>
      * @param name Property
      * @return Java <code>GregorianCalendar</code>
      * @throws IOException
@@ -243,8 +252,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a BigInteger property.<br>
-     * Note: Since JSON does not support a native BigInteger type, this method builds on <i>mapping</i>.
+     * Read a BigInteger property.<p>
+     * Note: Since JSON does not support a native BigInteger type, this method builds on <i>mapping</i>.</p>
      * @param name Property
      * @return Java <code>BigInteger</code>
      * @throws IOException
@@ -255,8 +264,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a BigDecimal property.<br>
-     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.
+     * Read a BigDecimal property.<p>
+     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.</p>
      * Note: This method is equivalent to <code>getBigDecimal(name, null)</code>.
      * @param name Property
      * @return Java <code>BigInteger</code>
@@ -268,8 +277,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Read a BigDecimal property.<br>
-     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.
+     * Read a BigDecimal property.<p>
+     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.</p>
      * @param name Property
      * @param decimals Required number of fractional digits or <code>null</code> if unspecified
      * @return Java <code>BigDecimal</code>
@@ -281,10 +290,11 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Get root array reader.<br>
+     * Get root array reader.<p>
      * If the outermost part of the JSON structure is an array, this method <b>must</b> be
-     * called <i>immediately after parsing</i> in order to process the structure.
-     * @return Array reader
+     * called <i>immediately after parsing</i> in order to process the structure.</p>
+     * @return Array reader if array else <code>null</code>
+     * @see JSONArrayWriter#JSONArrayWriter()
      */
     @SuppressWarnings("unchecked")
     public JSONArrayReader getJSONArrayReader() {
@@ -292,8 +302,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
-     * Conditionally read a JSON <code>null</code> property.<br>
-     * Note: Only if the property contains a <code>null</code> the property is marked as "read". 
+     * Conditionally read a JSON <code>null</code> property.<p>
+     * Note: Only if the property contains a <code>null</code> the property is marked as "read".</p>
      * @param name Property
      * @return <code>true</code> if <code>null</code> was found, else <code>false</code>
      * @throws IOException
