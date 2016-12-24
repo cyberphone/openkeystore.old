@@ -280,7 +280,7 @@
         <exclude name="org/**/sks/twolayer/**"/>
       </packageset>
       <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
-      <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
+      <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2016 WebPKI.org.</i>]]></bottom>
     </javadoc>
