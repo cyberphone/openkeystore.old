@@ -260,6 +260,7 @@
 
   	<!-- Make documentation -->
     <javadoc destdir="${doc_dir}"
+    	     overview="${temp_dir}/overview.html"
              author="true"
              version="true"
              Package="false"
