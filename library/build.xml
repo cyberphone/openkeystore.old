@@ -271,7 +271,11 @@
       <packageset dir="${temp_dir}">
         <include name="org/**"/>
         <exclude name="org/**/test/**"/>
-        <exclude name="org/**/wasp/**"/>
+        <exclude name="org/**/v8dtoa/**"/>
+        <exclude name="org/**/c14n/**"/>
+        <exclude name="org/**/webutil/locale/**"/>
+        <exclude name="org/**/webutil/certview/**"/>
+        <exclude name="org/**/webutil/xmlview/**"/>
         <exclude name="org/**/sks/ws/**"/>
         <exclude name="org/**/sks/twolayer/**"/>
       </packageset>
