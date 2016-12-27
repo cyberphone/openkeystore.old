@@ -60,6 +60,8 @@ import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 
+import org.webpki.crypto.test.DeterministicSignatureWrapper;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -3259,6 +3261,7 @@ public class JSONTest {
         for (BAD_SIGNATURE test : BAD_SIGNATURE.values()) {
             badSignature(test);
         }
+        DeterministicSignatureWrapper.rfc4754();
     }
 
     @Test
