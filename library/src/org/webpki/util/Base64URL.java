@@ -38,7 +38,7 @@ public class Base64URL {
         '4','5','6','7','8','9','-','_'  // 7
     };
     
-    public final static byte[] DECODE_TABLE = {
+    final static byte[] DECODE_TABLE = {
         -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1,
@@ -131,26 +131,26 @@ public class Base64URL {
             i += modulo3 + 1;
         }
         //(3)
-        byte[] encoded = new byte[i];
+        char[] encoded = new char[i];
         i = 0;
         int j = 0;
         //encode by threes
         while (j < byteArray.length - modulo3) {
-            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 2) & 0x3C) | ((byteArray[j] >>> 6) & 0x03)]);
-            encoded[i++] = (byte) (BASE64URL[byteArray[j++] & 0x3F]);
+            encoded[i++] = BASE64URL[(byteArray[j] >>> 2) & 0x3F];
+            encoded[i++] = BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)];
+            encoded[i++] = BASE64URL[((byteArray[j++] << 2) & 0x3C) | ((byteArray[j] >>> 6) & 0x03)];
+            encoded[i++] = BASE64URL[byteArray[j++] & 0x3F];
         }
         //encode  "odd" bytes
         if (modulo3 == 1) {
-            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[(byteArray[j] << 4) & 0x30]);
+            encoded[i++] = BASE64URL[(byteArray[j] >>> 2) & 0x3F];
+            encoded[i]   = BASE64URL[(byteArray[j] << 4) & 0x30];
         } else if (modulo3 == 2) {
-            encoded[i++] = (byte) (BASE64URL[(byteArray[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte) (BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)]);
-            encoded[i++] = (byte) (BASE64URL[(byteArray[j] << 2) & 0x3C]);
+            encoded[i++] = BASE64URL[(byteArray[j] >>> 2) & 0x3F];
+            encoded[i++] = BASE64URL[((byteArray[j++] << 4) & 0x30) | ((byteArray[j] >>> 4) & 0x0F)];
+            encoded[i]   = BASE64URL[(byteArray[j] << 2) & 0x3C];
         }
-        return new String(encoded, "UTF-8");
+        return new String(encoded);
     }
 
     /**
