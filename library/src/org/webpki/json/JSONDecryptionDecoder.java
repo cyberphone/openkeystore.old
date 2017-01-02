@@ -116,7 +116,7 @@ public class JSONDecryptionDecoder {
         //////////////////////////////////////////////////////////////////////////
         // Begin JEF normalization                                              //
         //                                                                      //
-        // 1. Make a shallow copy of the signature object property list         //
+        // 1. Make a shallow copy of the encryption object property list        //
         LinkedHashMap<String, JSONValue> savedProperties =
                 new LinkedHashMap<String, JSONValue>(rd.root.properties);
         //                                                                      //
@@ -128,7 +128,7 @@ public class JSONDecryptionDecoder {
         // 3. Serialize ("JSON.stringify()")                                    //
         authenticatedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);  //
         //                                                                      //
-        // 4. Restore encryption property list                                  //
+        // 4. Restore encryption object property list                           //
         rd.root.properties = savedProperties;                                   //
         //                                                                      //
         // End JEF normalization                                                //
