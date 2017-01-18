@@ -42,7 +42,7 @@ import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -59,9 +59,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -75,12 +73,10 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -2394,15 +2390,31 @@ public class JSONTest {
         or.setBoolean("name", value);
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBoolean("name") == value);
     }
+    
+    void dateTimeTextual(String dateTime, String dateTimeUtc) throws IOException {
+        GregorianCalendar gc = JSONParser.parse("{\"name\":\"" + dateTime + "\"}").getDateTime("name");
+        assertTrue("Local", new JSONObjectWriter().setDateTime("name", gc, false).toString().contains("\"" + dateTime + "\""));
+        assertTrue("UTC", new JSONObjectWriter().setDateTime("name", gc, true).toString().contains("\"" + dateTimeUtc + "\""));
+    }
 
-    void dateTime(Date value) throws IOException {
-        value = new Date((value.getTime() / 1000) * 1000);
+    void dateTimeTest() throws IOException {
+        GregorianCalendar dateTime = new GregorianCalendar();
+        dateTime.setTimeInMillis((dateTime.getTimeInMillis() / 1000) * 1000);
         JSONObjectWriter or = new JSONObjectWriter();
-        or.setArray("name").setDateTime(value, false);
-        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime().getTime().equals(value));
+        or.setArray("name").setDateTime(dateTime, false);
+        GregorianCalendar readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime();
+        assertTrue("array", readDateTime.getTimeInMillis() == dateTime.getTimeInMillis());
         or = new JSONObjectWriter();
-        or.setDateTime("name", value, false);
-        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime().equals(value));
+        or.setDateTime("name", dateTime, false);
+        readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name");
+        assertTrue("object", readDateTime.getTimeInMillis() == dateTime.getTimeInMillis());
+        dateTimeTextual("2009-12-24T05:45:23-08:00", "2009-12-24T13:45:23Z");
+        dateTimeTextual("2009-12-24T05:45:23+08:00", "2009-12-23T21:45:23Z");
+        dateTimeTextual("2009-12-24T05:45:23+01:00", "2009-12-24T04:45:23Z");
+        dateTimeTextual("2009-06-24T05:45:23+01:00", "2009-06-24T04:45:23Z");
+        dateTimeTextual("2009-12-24T05:45:23-08:30", "2009-12-24T14:15:23Z");
+        dateTimeTextual("2009-12-24T05:45:23+08:09", "2009-12-23T21:36:23Z");
+        dateTimeTextual("2009-12-24T05:45:23-08:09", "2009-12-24T13:54:23Z");
     }
 
     void bigIntegerValues(BigInteger value) throws IOException {
@@ -2709,7 +2721,7 @@ public class JSONTest {
         bigDecimalValues(new BigDecimal("3232323243243234234243234234243243243243243234243"));
         bigDecimalValues(new BigDecimal("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues(new BigInteger("3232323243243234234243234234243243243243243234243"));
-        dateTime(new Date());
+        dateTimeTest();
         booleanValues(true);
         booleanValues(false);
         blobValues();

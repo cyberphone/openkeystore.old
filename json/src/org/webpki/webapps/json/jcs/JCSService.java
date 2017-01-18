@@ -18,7 +18,9 @@ package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.security.KeyStore;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +29,9 @@ import javax.servlet.ServletContextListener;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.webutil.InitPropertyReader;
 
 public class JCSService extends InitPropertyReader implements

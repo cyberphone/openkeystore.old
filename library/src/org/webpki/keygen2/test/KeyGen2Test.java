@@ -42,7 +42,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -576,7 +575,7 @@ public class KeyGen2Test {
             scanForKeyManagementKeyUpdates(prov_sess_req.getKeyManagementKeyUpdateHolderRoot());
             assertTrue("Submit URL", prov_sess_req.getSubmitUrl().equals(ISSUER_URL));
             assertFalse("VM", virtual_environment ^ ACME_INDUSTRIES.equals(prov_sess_req.getVirtualEnvironmentFriendlyName()));
-            Date clientTime = new Date();
+            GregorianCalendar clientTime = new GregorianCalendar();
             ProvisioningSession sess =
                     sks.createProvisioningSession(prov_sess_req.getSessionKeyAlgorithm(),
                             invocation_request.getPrivacyEnabledFlag(),
@@ -584,7 +583,7 @@ public class KeyGen2Test {
                             prov_sess_req.getServerEphemeralKey(),
                             prov_sess_req.getSubmitUrl(), /* IssuerURI */
                             prov_sess_req.getKeyManagementKey(),
-                            (int) (clientTime.getTime() / 1000),
+                            (int) (clientTime.getTimeInMillis() / 1000),
                             prov_sess_req.getSessionLifeTime(),
                             prov_sess_req.getSessionKeyLimit());
             provisioning_handle = sess.getProvisioningHandle();
@@ -978,10 +977,11 @@ public class KeyGen2Test {
 
             cdre.addLookupDescriptor(serverCryptoInterface.enumerateKeyManagementKeys()[2])
                     .setEmail("jane.doe@example.com");
-
+            GregorianCalendar begin = new GregorianCalendar();
+            begin.setTimeInMillis(new GregorianCalendar().getTimeInMillis() - 100000);
             cdre.addLookupDescriptor(serverCryptoInterface.enumerateKeyManagementKeys()[1])
-                    .setIssuedBefore(new Date(new Date().getTime() - 100000))
-                    .setIssuedAfter(new Date())
+                    .setIssuedBefore(begin)
+                    .setIssuedAfter(new GregorianCalendar())
                     .setGrouping(Grouping.SHARED)
                     .setAppUsage(AppUsage.UNIVERSAL)
                     .setFingerPrint(HashAlgorithms.SHA256.digest(TEST_STRING))
@@ -1171,7 +1171,7 @@ public class KeyGen2Test {
                     Vector<X509Certificate> cert_path = new Vector<X509Certificate>();
                     cert_path.add(new CA().createCert(cert_spec,
                             DistinguishedName.subjectDN((X509Certificate) DemoKeyStore.getSubCAKeyStore().getCertificate("mykey")),
-                            new BigInteger(String.valueOf(new Date().getTime())),
+                            new BigInteger(String.valueOf(new GregorianCalendar().getTimeInMillis())),
                             start.getTime(),
                             end.getTime(),
                             AsymSignatureAlgorithms.RSA_SHA256,

@@ -23,8 +23,6 @@ import java.math.BigDecimal;
 
 import java.util.Vector;
 import java.util.GregorianCalendar;
-import java.util.Calendar;
-import java.util.Date;
 
 import java.text.SimpleDateFormat;
 
@@ -443,21 +441,19 @@ public class DOMWriterHelper {
      * <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
      * encoding of <i>value</i>.
      * <p>The time value will be rounded to the nearest second (the precision
-     * of the Java {@link Date Date} class is milliseconds).
+     * of the Java {@link GregorianCalendar GregorianCalendar} class is milliseconds).
      *
      * @param name  The name of the new element.
      * @param value The value of the new element.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
-    public void addDateTime(String name, Date value) {
+    public void addDateTime(String name, GregorianCalendar value) {
         addString(name, ISODateTime.formatDateTime(value, false));
     }
 
 
-    public static String formatDate(Date t) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(t);
-        return new SimpleDateFormat("yyyy-MM-dd").format(t);
+    public static String formatDate(GregorianCalendar t) {
+        return new SimpleDateFormat("yyyy-MM-dd").format(t.getTime());
     }
 
     /**
@@ -470,7 +466,7 @@ public class DOMWriterHelper {
      * @param value The value of the new element.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
-    public void addDate(String name, Date value) {
+    public void addDate(String name, GregorianCalendar value) {
         addString(name, formatDate(value));
     }
 
@@ -613,13 +609,13 @@ public class DOMWriterHelper {
      * <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
      * encoding of <i>value</i>.
      * <p>The time value will be rounded to the nearest second (the precision
-     * of the Java {@link Date Date} class is milliseconds).
+     * of the Java {@link GregorianCalendar GregorianCalendar} class is milliseconds).
      *
      * @param name  The name of the attribute.
      * @param value The value of the attribute.
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
-    public void setDateTimeAttribute(String name, Date value) {
+    public void setDateTimeAttribute(String name, GregorianCalendar value) {
         setStringAttribute(name, ISODateTime.formatDateTime(value, false));
     }
 

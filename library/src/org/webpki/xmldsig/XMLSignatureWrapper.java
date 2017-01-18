@@ -18,30 +18,39 @@ package org.webpki.xmldsig;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigInteger;
 import java.util.Vector;
-import java.util.Date;
+
+import java.util.GregorianCalendar;
+
 import java.security.SecureRandom;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.w3c.dom.Text;
 import org.w3c.dom.Element;
+
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1Sequence;
 import org.webpki.asn1.ASN1ObjectID;
 import org.webpki.asn1.ASN1BitString;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
+
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -522,7 +531,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
 
     protected void toXML(DOMWriterHelper wr) throws IOException {
-        String base_id = Long.toHexString(new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+        String base_id = Long.toHexString(new GregorianCalendar().getTimeInMillis()) + Long.toHexString(new SecureRandom().nextLong());
 
         root = wr.initializeRootObject(XML_DSIG_NS_PREFIX);
         SignedInfo_element = wr.addChildElementNS(XML_DSIG_NS, SIGNED_INFO_ELEM);

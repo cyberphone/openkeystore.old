@@ -23,7 +23,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 /**
- * Parses a JSON object given as a string into a DOM-like tree.
+ * Parses JSON string/byte array data.
  */
 public class JSONParser {
 
@@ -67,12 +67,24 @@ public class JSONParser {
         return new JSONObjectReader(root);
     }
 
+    /**
+     * Parse JSON string data.
+     * @param jsonString The data to be parsed in UTF-8
+     * @return JSONObjectReader
+     * @throws IOException
+     */
     public static JSONObjectReader parse(String jsonString) throws IOException {
         return new JSONParser().internalParse(jsonString);
     }
 
-    public static JSONObjectReader parse(byte[] jsonUtf8) throws IOException {
-        return parse(new String(jsonUtf8, "UTF-8"));
+    /**
+     * Parse JSON byte array data.
+     * @param jsonBytes The data to be parsed in UTF-8
+     * @return JSONObjectReader
+     * @throws IOException
+     */
+    public static JSONObjectReader parse(byte[] jsonBytes) throws IOException {
+        return parse(new String(jsonBytes, "UTF-8"));
     }
 
     String scanProperty() throws IOException {

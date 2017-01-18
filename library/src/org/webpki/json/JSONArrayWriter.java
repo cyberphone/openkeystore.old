@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.util.Base64URL;
@@ -100,7 +100,7 @@ public class JSONArrayWriter implements Serializable {
         return add(JSONTypes.NULL, "null");
     }
 
-    public JSONArrayWriter setDateTime(Date dateTime, boolean forceUtc) throws IOException {
+    public JSONArrayWriter setDateTime(GregorianCalendar dateTime, boolean forceUtc) throws IOException {
         return setString(ISODateTime.formatDateTime(dateTime, forceUtc));
     }
 

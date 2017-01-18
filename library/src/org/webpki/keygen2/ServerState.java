@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
@@ -1275,7 +1276,7 @@ public class ServerState implements Serializable {
             attestationArguments.addArray(serverEphemeralKey.getEncoded());
             attestationArguments.addArray(clientEphemeralKey.getEncoded());
             attestationArguments.addArray(keyManagementKey == null ? new byte[0] : keyManagementKey.getEncoded());
-            attestationArguments.addInt((int) (provisioningInitializationResponse.clientTime.getTime() / 1000));
+            attestationArguments.addInt((int) (provisioningInitializationResponse.clientTime.getTimeInMillis() / 1000));
             attestationArguments.addInt(sessionLifeTime);
             attestationArguments.addShort(sessionKeyLimit);
 

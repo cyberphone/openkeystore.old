@@ -25,7 +25,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -159,7 +159,7 @@ public class Sign {
 
 
     public void writeJSONData(JSONObjectWriter wr) throws IOException {
-        wr.setDateTime("Now", new Date(), false);
+        wr.setDateTime("Now", new GregorianCalendar(), false);
         JSONObjectWriter payment_request = wr.setObject("PaymentRequest");
         payment_request.setString("Currency", "USD");
         payment_request.setBigDecimal("VAT", new BigDecimal("1.45"));

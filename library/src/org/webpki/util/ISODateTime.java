@@ -19,8 +19,8 @@ package org.webpki.util;
 import java.io.IOException;
 
 import java.text.SimpleDateFormat;
+
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
@@ -103,25 +103,23 @@ public class ISODateTime {
      * @param forceUtc <i>Representation:</i> <code>true</code> for UTC, <code>false</code> for local time
      * @return String
      */
-    public static String formatDateTime(Date dateTime, boolean forceUtc) {
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(dateTime);
+    public static String formatDateTime(GregorianCalendar dateTime, boolean forceUtc) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        if (forceUtc) {
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        }
-        StringBuffer s = new StringBuffer(sdf.format(dateTime));
+        sdf.setTimeZone(forceUtc ? TimeZone.getTimeZone("UTC") : dateTime.getTimeZone());
+        StringBuffer s = new StringBuffer(sdf.format(dateTime.getTime()));
+        int tzo = forceUtc ? 0 : (dateTime.get(Calendar.ZONE_OFFSET) + dateTime.get(Calendar.DST_OFFSET)) / (60 * 1000);
 
-        int tzo = forceUtc ? 0 : (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
-
-        if (tzo > 0) {
-            int tzh = tzo / 60, tzm = tzo % 60;
-            s.append(tzh < 10 ? "+0" : "+").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
-        } else if (tzo < 0) {
-            int tzh = (-tzo) / 60, tzm = (-tzo) % 60;
-            s.append(tzh < 10 ? "-0" : "-").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
+        if (tzo == 0) {
+            s.append('Z');
         } else {
-            s.append("Z");
+            if (tzo < 0) {
+                tzo = - tzo;
+                s.append('-');
+            } else {
+                s.append('+');
+            }
+            int tzh = tzo / 60, tzm = tzo % 60;
+            s.append(tzh < 10 ? "0" : "").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
         }
         return s.toString();
     }

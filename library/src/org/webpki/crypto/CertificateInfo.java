@@ -18,7 +18,6 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -47,9 +46,9 @@ public class CertificateInfo {
 
     private String subjectDn;
 
-    private Date notValidBefore;
+    private GregorianCalendar notValidBefore = new GregorianCalendar();
 
-    private Date notValidAfter;
+    private GregorianCalendar notValidAfter = new GregorianCalendar();
 
     private X509Certificate certificate;
 
@@ -65,8 +64,8 @@ public class CertificateInfo {
         issuerDn = CertificateUtil.convertRFC2253ToLegacy(certificate.getIssuerX500Principal().getName());
         serialNumber = certificate.getSerialNumber().toString();
         subjectDn = CertificateUtil.convertRFC2253ToLegacy(certificate.getSubjectX500Principal().getName());
-        notValidBefore = certificate.getNotBefore();
-        notValidAfter = certificate.getNotAfter();
+        notValidBefore.setTime(certificate.getNotBefore());
+        notValidAfter.setTime(certificate.getNotAfter());
     }
 
 
@@ -80,11 +79,9 @@ public class CertificateInfo {
         return Item == null ? "***UNKNOWN***" : Item;
     }
 
-    private static String toDate(Date t) {
-        GregorianCalendar c = new GregorianCalendar();
-        c.setTime(t);
-        return (c.get(Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + c.get(Calendar.DAY_OF_MONTH) +
-                "-" + months[c.get(Calendar.MONTH)] + "-" + String.valueOf(c.get(Calendar.YEAR));
+    private static String toDate(GregorianCalendar dateTime) {
+        return (dateTime.get(Calendar.DAY_OF_MONTH) < 10 ? "0" : "") + dateTime.get(Calendar.DAY_OF_MONTH) +
+                "-" + months[dateTime.get(Calendar.MONTH)] + "-" + String.valueOf(dateTime.get(Calendar.YEAR));
     }
 
 
@@ -239,7 +236,7 @@ public class CertificateInfo {
     /*
      * Returns the start date of this certificate's validity period.
      */
-    public Date getNotBeforeDate() {
+    public GregorianCalendar getNotBeforeDate() {
         return notValidBefore;
     }
 
@@ -247,16 +244,16 @@ public class CertificateInfo {
     /*
      * Returns the end date of this certificate's validity period.
      */
-    public Date getNotAfterDate() {
+    public GregorianCalendar getNotAfterDate() {
         return notValidAfter;
     }
 
 
     /*
-     * Checks if this certificate is currently valid.
+     * Checks certificate is currently valid.
      */
     public boolean isValid() {
-        Date d = new Date();
+        GregorianCalendar d = new GregorianCalendar();
         return d.after(notValidBefore) && d.before(notValidAfter);
     }
 

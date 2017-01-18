@@ -22,7 +22,7 @@ import java.security.PublicKey;
 
 import java.security.interfaces.RSAPublicKey;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.crypto.AsymKeySignerInterface;
@@ -61,8 +61,8 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
 
         boolean searchFilter;
 
-        Date issuedBefore;
-        Date issuedAfter;
+        GregorianCalendar issuedBefore;
+        GregorianCalendar issuedAfter;
         Grouping grouping;
         AppUsage appUsage;
 
@@ -80,14 +80,14 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
         }
 
 
-        public LookupDescriptor setIssuedBefore(Date issuedBefore) throws IOException {
+        public LookupDescriptor setIssuedBefore(GregorianCalendar issuedBefore) throws IOException {
             nullCheck(issuedBefore);
             searchFilter = true;
             this.issuedBefore = issuedBefore;
             return this;
         }
 
-        public LookupDescriptor setIssuedAfter(Date issuedAfter) throws IOException {
+        public LookupDescriptor setIssuedAfter(GregorianCalendar issuedAfter) throws IOException {
             nullCheck(issuedAfter);
             searchFilter = true;
             this.issuedAfter = issuedAfter;

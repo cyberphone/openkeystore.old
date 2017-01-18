@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import java.security.PublicKey;
@@ -75,7 +75,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
     }
 
 
-    public Date getServerTime() {
+    public GregorianCalendar getServerTime() {
         return serverTime;
     }
 
@@ -136,7 +136,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
 
     byte[] nonce;
 
-    Date serverTime;
+    GregorianCalendar serverTime;
 
     String serverTimeVerbatim;
 
@@ -166,7 +166,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
 
         serverTimeVerbatim = rd.getString(SERVER_TIME_JSON);
 
-        serverTime = ISODateTime.parseDateTime(serverTimeVerbatim).getTime();
+        serverTime = ISODateTime.parseDateTime(serverTimeVerbatim);
 
         submitUrl = getURL(rd, SUBMIT_URL_JSON);
 

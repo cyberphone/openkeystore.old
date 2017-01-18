@@ -28,7 +28,6 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import java.util.GregorianCalendar;
-import java.util.Date;
 import java.util.Vector;
 
 import java.util.regex.Pattern;
@@ -204,7 +203,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return Java <code>GregorianCalendar</code>
      * @throws IOException
      * @see org.webpki.util.ISODateTime#parseDateTime(String)
-     * @see JSONObjectWriter#setDateTime(String, Date, boolean)
+     * @see JSONObjectWriter#setDateTime(String, GregorianCalendar, boolean)
      */
     public GregorianCalendar getDateTime(String name) throws IOException {
         return ISODateTime.parseDateTime(getString(name));

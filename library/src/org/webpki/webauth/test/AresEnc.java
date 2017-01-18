@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.FileInputStream;
 
 import java.net.URL;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.security.KeyStore;
 
@@ -57,9 +56,9 @@ public class AresEnc {
                 authdec,
                 (new URL(new URL(authdec.getSubmitUrl()), "authreq")).toString(),
                 localfixed ?
-                        new GregorianCalendar(2006, 0, 1, 10, 0, 0).getTime()
+                        new GregorianCalendar(2006, 0, 1, 10, 0, 0)
                         :
-                        new Date(),
+                        new GregorianCalendar(),
                 null);
 /*        
         if (authdec.getRequestedClientPlatformFeatures ().length > 0)

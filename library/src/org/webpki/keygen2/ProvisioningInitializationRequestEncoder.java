@@ -24,7 +24,7 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.sks.SecureKeyStore;
@@ -127,7 +127,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
     }
 
 
-    public void setServerTime(Date serverTime) {
+    public void setServerTime(GregorianCalendar serverTime) {
         this.serverTime = serverTime;
     }
 
@@ -148,7 +148,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
 
     byte[] nonce;
 
-    Date serverTime;
+    GregorianCalendar serverTime;
 
     String submitUrl;
 
@@ -188,7 +188,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
         wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         if (serverTime == null) {
-            serverTime = new Date();
+            serverTime = new GregorianCalendar();
         }
         wr.setDateTime(SERVER_TIME_JSON, serverTime, true); // Server is UTC
 

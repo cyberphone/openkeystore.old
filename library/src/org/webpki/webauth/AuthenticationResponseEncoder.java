@@ -19,10 +19,9 @@ package org.webpki.webauth;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-
 import java.security.cert.X509Certificate;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
@@ -42,7 +41,7 @@ public class AuthenticationResponseEncoder extends JSONEncoder {
 
     private String serverTime;
 
-    private Date clientTime;
+    private GregorianCalendar clientTime;
 
     byte[] serverCertificateFingerprint;
 
@@ -58,7 +57,7 @@ public class AuthenticationResponseEncoder extends JSONEncoder {
     public AuthenticationResponseEncoder(JSONX509Signer signer,
                                          AuthenticationRequestDecoder auth_req_decoder,
                                          String requestUrl,
-                                         Date clientTime,
+                                         GregorianCalendar clientTime,
                                          X509Certificate server_certificate) throws IOException {
         this.signer = signer;
         this.id = auth_req_decoder.getID();

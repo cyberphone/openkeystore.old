@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.webpki.sks.SecureKeyStore;
 
@@ -55,7 +55,7 @@ public class InvocationRequestEncoder extends ServerEncoder {
         this.serverState = serverState;
         this.submitUrl = submitUrl;
         if (serverSessionId == null) {
-            serverSessionId = Long.toHexString(new Date().getTime());
+            serverSessionId = Long.toHexString(new GregorianCalendar().getTimeInMillis());
             serverSessionId += Base64URL.generateURLFriendlyRandom(SecureKeyStore.MAX_LENGTH_ID_TYPE - serverSessionId.length());
         }
         this.serverSessionId = serverState.serverSessionId = serverSessionId;

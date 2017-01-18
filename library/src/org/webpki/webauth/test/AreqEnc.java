@@ -154,7 +154,7 @@ public class AreqEnc {
         }
 
         if (fixed_server_time) {
-            areqenc.setServerTime(new GregorianCalendar(2005, 3, 10, 9, 30, 0).getTime());
+            areqenc.setServerTime(new GregorianCalendar(2005, 3, 10, 9, 30, 0));
         }
 
         if (request_client_feature) {

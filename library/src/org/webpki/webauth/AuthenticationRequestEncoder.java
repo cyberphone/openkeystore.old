@@ -18,7 +18,7 @@ package org.webpki.webauth;
 
 import java.io.IOException;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
@@ -63,7 +63,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
 
     Vector<String> requestedClientFeatures = new Vector<String>();
 
-    Date serverTime;
+    GregorianCalendar serverTime;
 
     public AuthenticationRequestEncoder(String submitUrl, String optionalAbortUrl) {
         this.submitUrl = submitUrl;
@@ -100,7 +100,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
     }
 
 
-    public AuthenticationRequestEncoder setServerTime(Date serverTime) {
+    public AuthenticationRequestEncoder setServerTime(GregorianCalendar serverTime) {
         this.serverTime = serverTime;
         return this;
     }
@@ -128,7 +128,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
         if (!id.equals(authenicationResponse.id)) {
             bad("ID attributes");
         }
-        if (!ISODateTime.formatDateTime(serverTime, true).equals(ISODateTime.formatDateTime(authenicationResponse.serverTime.getTime(), true))) {
+        if (!ISODateTime.formatDateTime(serverTime, true).equals(ISODateTime.formatDateTime(authenicationResponse.serverTime, true))) {
             bad("ServerTime attribute");
         }
         boolean sigAlgFound = false;
@@ -157,13 +157,13 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
         if (id == null) {
-            id = Long.toHexString(new Date().getTime());
+            id = Long.toHexString(new GregorianCalendar().getTimeInMillis());
             id += Base64URL.generateURLFriendlyRandom(MAX_ID_LENGTH - id.length());
         }
         wr.setString(ID_JSON, id);
 
         if (serverTime == null) {
-            serverTime = new Date();
+            serverTime = new GregorianCalendar();
         }
         wr.setDateTime(SERVER_TIME_JSON, serverTime, true);  // Server UTC
 

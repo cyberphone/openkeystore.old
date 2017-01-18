@@ -38,7 +38,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -218,7 +218,7 @@ public class ProvSess {
 
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
 
-    Date clientTime;
+    GregorianCalendar clientTime;
 
     int provisioning_handle;
 
@@ -346,9 +346,9 @@ public class ProvSess {
         this.privacy_enabled = privacy_enabled;
         PublicKey keyManagementKey = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys()[kmk_id];
         sks = device.sks;
-        serverSessionId = serv_sess == null ? "S-" + Long.toHexString(new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
+        serverSessionId = serv_sess == null ? "S-" + Long.toHexString(new GregorianCalendar().getTimeInMillis()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
         String sess_key_alg = override_session_key_algorithm == null ? session_key_algorithm : override_session_key_algorithm;
-        clientTime = new Date();
+        clientTime = new GregorianCalendar();
         ProvisioningSession sess =
                 device.sks.createProvisioningSession(sess_key_alg,
                         privacy_enabled,
@@ -359,7 +359,7 @@ public class ProvSess {
                                 ),
                         ISSUER_URI,
                         keyManagementKey,
-                        (int) (clientTime.getTime() / 1000),
+                        (int) (clientTime.getTimeInMillis() / 1000),
                         sessionLifeTime,
                         sessionKeyLimit);
         clientSessionId = sess.getClientSessionId();
@@ -381,7 +381,7 @@ public class ProvSess {
         attestation_arguments.addArray(server_ephemeral_key.getEncoded());
         attestation_arguments.addArray(sess.getClientEphemeralKey().getEncoded());
         attestation_arguments.addArray(keyManagementKey == null ? new byte[0] : keyManagementKey.getEncoded());
-        attestation_arguments.addInt((int) (clientTime.getTime() / 1000));
+        attestation_arguments.addInt((int) (clientTime.getTimeInMillis() / 1000));
         attestation_arguments.addInt(sessionLifeTime);
         attestation_arguments.addShort(sessionKeyLimit);
 

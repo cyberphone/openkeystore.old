@@ -26,7 +26,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.webpki.asn1.cert.DistinguishedName;
@@ -88,7 +87,7 @@ public class GenKey {
         X509Certificate certificate =
                 new CA().createCert(cert_spec,
                         DistinguishedName.subjectDN((X509Certificate) DemoKeyStore.getSubCAKeyStore().getCertificate("mykey")),
-                        BigInteger.valueOf(serialNumber++).shiftLeft(64).add(BigInteger.valueOf(new Date().getTime())),
+                        BigInteger.valueOf(serialNumber++).shiftLeft(64).add(BigInteger.valueOf(new GregorianCalendar().getTimeInMillis())),
                         start.getTime(),
                         end.getTime(),
                         AsymSignatureAlgorithms.RSA_SHA256,

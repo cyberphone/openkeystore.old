@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 import java.security.GeneralSecurityException;
 
@@ -45,7 +45,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
 
     String serverTimeVerbatim;
 
-    Date clientTime;
+    GregorianCalendar clientTime;
 
     ECPublicKey clientEphemeralKey;
 
@@ -63,7 +63,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
     public ProvisioningInitializationResponseEncoder(ProvisioningInitializationRequestDecoder prov_init_req,
                                                      ECPublicKey clientEphemeralKey,
                                                      String clientSessionId,
-                                                     Date clientTime,
+                                                     GregorianCalendar clientTime,
                                                      byte[] attestation,
                                                      X509Certificate[] deviceCertificatePath) throws IOException {
         this.serverSessionId = prov_init_req.serverSessionId;
