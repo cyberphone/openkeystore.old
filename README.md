@@ -28,7 +28,7 @@ $ ant testsks
 $ ant testkeygen2
 $ ant testjson
 ```
-#API
+##API
 Now you should have a file <code>library/dist/webpki.org-libext-1.00.jar</code> which
 implements the API described on https://cyberphone.github.io/doc/openkeystore/javaapi/overview-summary.html.
 ##Proof of Concept Implementation
