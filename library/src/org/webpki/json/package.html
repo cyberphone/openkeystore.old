@@ -13,7 +13,7 @@ To make the system slightly more on par with XML Schemas the JSON library also s
     </li>
     <li>Strong validation of input</li>
     <li>Emulation of &quot;missing&quot; JSON data types like <code>BigInteger</code>, <code>BigDecimal</code>,
-        <code>Date</code> and <code>byte[]</code></li>
+        <code>GregorianCalendar</code> and <code>byte[]</code></li>
 </ul>
 <p>
     In addition, there is a set of classes supporting a [very] scaled-down JSON counterpart to
@@ -36,7 +36,7 @@ The following examples should be sufficient for getting started with generating 
 from java.
 <pre>
 import org.webpki.json.*;
-import java.util.Date;
+import java.util.GregorianCalendar;
 </pre>
 <h4>1. Writing simple objects:</h4>
 <pre style="margin-left:20pt">
@@ -60,7 +60,7 @@ writer.setInt("i", 5);
 writer.setInt("j", -8).setBoolean("k", true);  // Chain commands
 JSONObjectWriter inner = writer.setObject("o");
 inner.setString("s", "hi");
-inner.setDateTime("now", new Date(), true);  // Date UTC-only option
+inner.setDateTime("now", new GregorianCalendar(), true);  // Date UTC-only option
 System.out.println(writer.toString());
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
@@ -81,7 +81,7 @@ JSONArrayWriter writer = new JSONArrayWriter();
 writer.setInt(5);
 writer.setInt(-8).setBoolean(true);  // Chain commands
 JSONObjectWriter inner = writer.setObject();
-inner.setString("s", "hi").setDateTime("now", new Date(), true);  // Date UTC-only option
+inner.setString("s", "hi").setDateTime("now", new GregorianCalendar(), true);  // Date UTC-only option
 System.out.println(writer.toString());
 </pre>
 Expected result:<pre style="margin-left:40pt;color:green">
