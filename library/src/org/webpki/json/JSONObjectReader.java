@@ -50,9 +50,9 @@ import org.webpki.util.ISODateTime;
 <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
  constructs.</p>
  <p>In addition,
- there are static methods for converting
- keys in <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>
- format to their Java counterparts.
+ there are methods for reading
+ keys supplied in the <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank">JWK</a>
+ format.
  @see JSONParser
  @see #getObject(String)
  @see JSONArrayReader#getObject()
