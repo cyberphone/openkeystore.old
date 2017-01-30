@@ -220,7 +220,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            formatCode(rsaprivatekey) + LINE_SEPARATOR +
            "AES encrypted data relying on a known symmetric key:" +
            formatCode(aesEncryption) + 
-           "Matching AES key, here is Base64URL notation:" +
+           "Matching AES key, here in Base64URL notation:" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_SYM_KEY +
            "&quot;</code></div>");
 
