@@ -220,13 +220,11 @@ public class JSONObjectWriter implements Serializable {
 
     /**
      * Set a <code>long</code> property.<p>
-     * Sample:
-     * <pre>
-     *    "quiteNegative": -800719925474099
-     * </pre></p>
-     * Note that <code>long</code> data is limited to 53 bits of precision ({@value #MAX_SAFE_INTEGER}),
+     * Sample:</p>
+     * <p><code>&nbsp;&nbsp;&nbsp;&nbsp;"quiteNegative": -800719925474099</code>
+     * </p> Note that <code>long</code> data is limited to 53 bits of precision ({@value #MAX_SAFE_INTEGER}),
      * exceeding this limit throws an exception.
-     * If you need higher precision use {@link JSONObjectWriter#setBigInteger(String, BigInteger)}.
+     * If you need higher precision use {@link JSONObjectWriter#setLong(String, long)}.
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
@@ -235,6 +233,23 @@ public class JSONObjectWriter implements Serializable {
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6Long2NumberConversion(value)));
+    }
+
+    /**
+     * Set a <code>long</code> property.<p>
+     * Sample:</p>
+     * <p><code>&nbsp;&nbsp;&nbsp;&nbsp;"quiteLong": "89007199254740991"</code>
+     * </p>Note: This method puts the value within quotes to provide full 64-bit precision
+     * which does not have a native counterpart in JavaScript.
+     * @param name Property
+     * @param value Value
+     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException
+     * @see #setInt53(String, long)
+     * @see #setBigInteger(String, BigInteger)
+     */
+    public JSONObjectWriter setLong(String name, long value) throws IOException {
+        return setBigInteger(name, BigInteger.valueOf(value));
     }
 
     /**

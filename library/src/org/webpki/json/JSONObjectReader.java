@@ -146,6 +146,14 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return (int) longValue;
     }
 
+    static long convertBigIntegerToLong(BigInteger value) throws IOException {
+        long longValue = value.longValue();
+        if (BigInteger.valueOf(longValue).compareTo(value) != 0) {
+            throw new IOException("Java \"long\" out of range: " + value);
+        }
+        return longValue;
+    }
+
     /**
      * Read a JSON integer property.<p>
      * This method only accepts true integer values.  I.e. 10.4 would throw an exception.</p>
@@ -172,6 +180,22 @@ public class JSONObjectReader implements Serializable, Cloneable {
      */
     public long getInt53(String name) throws IOException {
         return parseLong(getString(name, JSONTypes.NUMBER));
+    }
+
+    /**
+     * Read a JSON long integer property.<p>
+     * This method only accepts true integer values.  I.e. 10.4 would throw an exception.</p><p>
+     * Note: The value is put within quotes to maintain full 64-bit precision
+     * which does not have a native counterpart in JavaScript.</p>
+     * @param name Property
+     * @return Java <code>long</code>
+     * @throws IOException
+     * @see JSONObjectWriter#setLong(String, long)
+     * @see #getBigInteger(String)
+     * @see #getInt53(String)
+     */
+    public long getLong(String name) throws IOException {
+        return convertBigIntegerToLong(getBigInteger(name));
     }
 
     /**

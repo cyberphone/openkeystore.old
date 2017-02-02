@@ -2435,13 +2435,34 @@ public class JSONTest {
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals(value));
     }
 
-    void longVariables(long value) throws IOException {
+    void int53Variables(long value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setInt53(value);
         assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getInt53() == value);
         or = new JSONObjectWriter();
         or.setInt53("name", value);
         assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getInt53("name") == value);
+        or = new JSONObjectWriter();
+        or.setArray("name").setLong(value);
+        assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getLong() == value);
+        or = new JSONObjectWriter();
+        or.setLong("name", value);
+        assertTrue("long", JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getLong("name") == value);
+    }
+
+    void longRange(BigInteger value, boolean mustFail) throws IOException {
+        try {
+            JSONParser.parse(new JSONObjectWriter().setBigInteger("v", value).toString()).getLong("v");
+            assertFalse("range", mustFail);
+        } catch (Exception e) {
+            checkException(e, "Java \"long\" out of range: " + value);
+        }
+        try {
+            JSONParser.parse("[\"" + value + "\"]").getJSONArrayReader().getLong();
+            assertFalse("range", mustFail);
+        } catch (Exception e) {
+            checkException(e, "Java \"long\" out of range: " + value);
+        }
     }
 
     void badArgument(String string) {
@@ -2711,13 +2732,13 @@ public class JSONTest {
         integerValue("0", false);
         integerValue("10", false);
         try {
-            longVariables(JSONObjectWriter.MAX_SAFE_INTEGER + 1);
+            int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER + 1);
             fail("long");
         } catch (Exception e) {
             checkException(e, "Integer values must not exceed " + JSONObjectWriter.MAX_SAFE_INTEGER + " for safe representation");
         }
-        longVariables(0xa885abafaba0l);
-        longVariables(JSONObjectWriter.MAX_SAFE_INTEGER);
+        int53Variables(0xa885abafaba0l);
+        int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER);
         bigDecimalValues(new BigDecimal("3232323243243234234243234234243243243243243234243"));
         bigDecimalValues(new BigDecimal("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues(new BigInteger("3232323243243234234243234234243243243243243234243"));
@@ -2731,6 +2752,10 @@ public class JSONTest {
         integerRange(Integer.MIN_VALUE, false);
         integerRange(Integer.MAX_VALUE + 1l, true);
         integerRange(Integer.MIN_VALUE - 1l, true);
+        longRange(BigInteger.valueOf(Long.MAX_VALUE), false);
+        longRange(BigInteger.valueOf(Long.MIN_VALUE), false);
+        longRange(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), true);
+        longRange(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), true);
         badInteger(13.1);
         badInteger(1300000.1);
         assertTrue(JSONParser.parse(new JSONObjectWriter()
@@ -2761,6 +2786,12 @@ public class JSONTest {
     void integerRange(long value, boolean mustFail) throws Exception {
         try {
             JSONParser.parse(new JSONObjectWriter().setInt53("v", value).toString()).getInt("v");
+            assertFalse("range", mustFail);
+        } catch (Exception e) {
+            checkException(e, "Java \"int\" out of range: " + value);
+        }
+        try {
+            JSONParser.parse("[" + value + "]").getJSONArrayReader().getInt();
             assertFalse("range", mustFail);
         } catch (Exception e) {
             checkException(e, "Java \"int\" out of range: " + value);

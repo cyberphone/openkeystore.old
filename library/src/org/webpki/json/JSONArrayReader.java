@@ -73,8 +73,12 @@ public class JSONArrayReader implements Serializable {
         return JSONObjectReader.parseInt((String) get(JSONTypes.NUMBER));
     }
 
-    public long getInt53() throws NumberFormatException, IOException {
+    public long getInt53() throws IOException {
         return JSONObjectReader.parseLong((String) get(JSONTypes.NUMBER));
+    }
+
+    public long getLong() throws IOException {
+        return JSONObjectReader.convertBigIntegerToLong(getBigInteger());
     }
 
     public double getDouble() throws IOException {
