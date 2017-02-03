@@ -15,8 +15,8 @@ as well as a "matching" encryption scheme coined JEF:<br>
 https://cyberphone.github.io/doc/security/jef.html
 
 ##Requirements
-* Java SDK Version 6, 7 or 8
-* Ant 1.8 or later
+* Java SDK Version 8
+* Ant 1.9.4 or later
 * The projects are being developed using Eclipse but there's no dependence on Eclipse.
 
 Currently only the "library" and "resources" projects are suitable public use.
