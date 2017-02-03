@@ -356,7 +356,7 @@ public class ProxyServer {
      * Proxy server status method.
      * <p>
      *
-     * @return The last (if any) request object. Will be <code>null</code> if
+     * @return The last (if any) request object. Will be <b>null</b> if
      * there has been no external access yet.
      */
     public synchronized JavaRequestInterface getLastRequestObject() {
@@ -367,7 +367,7 @@ public class ProxyServer {
      * Proxy server status method.
      * <p>
      *
-     * @return The instance ID of the proxy client. Will be <code>null</code> if
+     * @return The instance ID of the proxy client. Will be <b>null</b> if
      * the proxy client has not yet called the proxy server.
      */
     public synchronized String getProxyClientID() {

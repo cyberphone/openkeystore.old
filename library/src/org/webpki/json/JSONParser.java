@@ -71,7 +71,7 @@ public class JSONParser {
      * Parse JSON string data.
      * @param jsonString The data to be parsed in UTF-8
      * @return JSONObjectReader
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public static JSONObjectReader parse(String jsonString) throws IOException {
         return new JSONParser().internalParse(jsonString);
@@ -81,7 +81,7 @@ public class JSONParser {
      * Parse JSON byte array data.
      * @param jsonBytes The data to be parsed in UTF-8
      * @return JSONObjectReader
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public static JSONObjectReader parse(byte[] jsonBytes) throws IOException {
         return parse(new String(jsonBytes, "UTF-8"));

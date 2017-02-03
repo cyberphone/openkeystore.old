@@ -33,13 +33,12 @@ import org.webpki.util.ArrayUtil;
  * Device Certificate, Apple-ID, etc.</p>
  * <p>The scheme also supports a truncated 20-character Device ID-variant which
  * presumably is sufficient for most real-world usages.</p>
- * <p>
  * <p>The checksum makes it easy verifying that the user has typed in the correct Device ID.</p>
  * <p>
  * To further reduce mistakes the character-set has been limited to 32 visually
- * distinguishable characters:<pre>
- *     ABCDEFGHJKLMNPQRSTUVWXYZ23456789</pre>
- * <p>
+ * distinguishable characters:<br><code>
+ *     ABCDEFGHJKLMNPQRSTUVWXYZ23456789</code>
+ * </p>
  * A user-display would typically show a 36-character Device ID like the following: <pre>
  *     CCCC-CCCC-CCCC-CCCC
  *     CCCC-CCCC-CCCC-CCCC

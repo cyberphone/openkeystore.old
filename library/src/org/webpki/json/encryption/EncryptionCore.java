@@ -78,12 +78,19 @@ public final class EncryptionCore {
         return cipher.doFinal(data);
     }
 
-    private static byte[] rsaCore(int mode, Key key, byte[] data, KeyEncryptionAlgorithms keyEncryptionAlgorithm)
+    private static byte[] rsaCore(int mode,
+                                  Key key,
+                                  byte[] data,
+                                  KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                  String providerName)
             throws GeneralSecurityException {
         if (keyEncryptionAlgorithm != KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding");
+        Cipher cipher = providerName == null ?
+            Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding")
+                                             :
+            Cipher.getInstance("RSA/ECB/OAEPWithSHA256AndMGF1Padding", providerName);
         cipher.init(mode, key);
         return cipher.doFinal(data);
     }
@@ -161,13 +168,22 @@ public final class EncryptionCore {
     public static byte[] rsaEncryptKey(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                        byte[] rawKey,
                                        PublicKey publicKey) throws GeneralSecurityException {
-        return rsaCore(Cipher.ENCRYPT_MODE, publicKey, rawKey, keyEncryptionAlgorithm);
+        return rsaCore(Cipher.ENCRYPT_MODE,
+                       publicKey,
+                       rawKey,
+                       keyEncryptionAlgorithm,
+                       null);
     }
 
     public static byte[] rsaDecryptKey(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                        byte[] encryptedKey,
-                                       PrivateKey privateKey) throws GeneralSecurityException {
-        return rsaCore(Cipher.DECRYPT_MODE, privateKey, encryptedKey, keyEncryptionAlgorithm);
+                                       PrivateKey privateKey,
+                                       String providerName) throws GeneralSecurityException {
+        return rsaCore(Cipher.DECRYPT_MODE,
+                       privateKey,
+                       encryptedKey,
+                       keyEncryptionAlgorithm,
+                       providerName);
     }
 
     private static void addInt4(MessageDigest messageDigest, int value) {
@@ -179,7 +195,8 @@ public final class EncryptionCore {
     public static byte[] receiverKeyAgreement(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                               DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                               ECPublicKey receivedPublicKey,
-                                              PrivateKey privateKey) throws GeneralSecurityException, IOException {
+                                              PrivateKey privateKey,
+                                              String providerName) throws GeneralSecurityException, IOException {
         if (keyEncryptionAlgorithm != KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID) {
             throw new GeneralSecurityException("Unsupported ECDH algorithm: " + keyEncryptionAlgorithm);
         }
@@ -187,7 +204,8 @@ public final class EncryptionCore {
             throw new GeneralSecurityException("Unsupported data encryption algorithm: " + dataEncryptionAlgorithm);
         }
         byte[] algorithmId = dataEncryptionAlgorithm.toString().getBytes("UTF-8");
-        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+        KeyAgreement keyAgreement = providerName == null ? 
+                        KeyAgreement.getInstance("ECDH") : KeyAgreement.getInstance("ECDH", providerName);
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(receivedPublicKey, true);
         // NIST Concat KDF
@@ -218,13 +236,14 @@ public final class EncryptionCore {
         return new EcdhSenderResult(receiverKeyAgreement(keyEncryptionAlgorithm,
                                                          dataEncryptionAlgorithm,
                                                          (ECPublicKey) staticKey,
-                                                         keyPair.getPrivate()),
+                                                         keyPair.getPrivate(),
+                                                         null),
                                                          (ECPublicKey) keyPair.getPublic());
     }
 
     public static boolean permittedKeyEncryptionAlgorithm(KeyEncryptionAlgorithms algorithm) {
         return algorithm == KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID ||
-                algorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
+               algorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
     }
 
     public static boolean permittedDataEncryptionAlgorithm(DataEncryptionAlgorithms algorithm) {

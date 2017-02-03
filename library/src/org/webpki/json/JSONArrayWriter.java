@@ -116,7 +116,7 @@ public class JSONArrayWriter implements Serializable {
      * Create nested array.<p>
      * This method creates a new array writer at the current position.</p>
      * @return Array writer
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONArrayWriter setArray() throws IOException {
         JSONArrayWriter writer = new JSONArrayWriter();
@@ -127,8 +127,9 @@ public class JSONArrayWriter implements Serializable {
     /**
      * Create nested array.<p>
      * This method inserts an existing array writer at the current position.</p>
+     * @param writer Instance of array writer
      * @return Array writer
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONArrayWriter setArray(JSONArrayWriter writer) throws IOException {
         add(JSONTypes.ARRAY, writer.array);

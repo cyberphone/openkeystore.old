@@ -72,6 +72,8 @@ public class JSONDecryptionDecoder {
     private byte[] encryptedKeyData;  // For RSA only
 
     private byte[] encryptedData;
+    
+    private String providerName;
 
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
 
@@ -82,6 +84,11 @@ public class JSONDecryptionDecoder {
             throw new IOException("Unknown encryption version: " + version);
         }
         return rd;
+    }
+
+    public void setProviderName(String providerName) throws IOException {
+        require(true);
+        this.providerName = providerName;
     }
 
     public PublicKey getPublicKey() {
@@ -180,12 +187,14 @@ public class JSONDecryptionDecoder {
                     return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
                             EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
                                                          encryptedKeyData,
-                                                         decryptionKey.getPrivateKey())
+                                                         decryptionKey.getPrivateKey(),
+                                                         providerName)
                             :
                             EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
                                                                 dataEncryptionAlgorithm,
                                                                 ephemeralPublicKey,
-                                                                decryptionKey.getPrivateKey()));
+                                                                decryptionKey.getPrivateKey(),
+                                                                providerName));
                 }
             }
         }

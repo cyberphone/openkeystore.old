@@ -53,9 +53,9 @@ import org.webpki.util.ISODateTime;
  * Creates JSON objects and performs serialization according to ES6.
  * <p>
  * Also provides built-in support for encoding
- <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS (JSON Cleartext Signature)</a>
+ <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS (JSON Cleartext Signature)</b></a>
  and
-<a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF (JSON Encryption Format)</a>
+<a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF (JSON Encryption Format)</b></a>
  constructs.</p>
  */
 public class JSONObjectWriter implements Serializable {
@@ -135,11 +135,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "statement": "Life is good!"
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setString(String name, String value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.STRING, value));
@@ -160,7 +160,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param value Text applied verbatim without quotes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setNumberAsText(String name, String value) throws IOException {
         return setProperty(name, setNumberAsText(value));
@@ -171,7 +171,7 @@ public class JSONObjectWriter implements Serializable {
      * This code is emulating 7.1.12.1 of the EcmaScript V6 specification.</p>
      * @param value Value to be formatted
      * @return String representation
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public static String es6JsonNumberSerialization(double value) throws IOException {
         // 1. Check for JSON compatibility.
@@ -208,11 +208,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "headCount": 300
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setInt(String name, int value) throws IOException {
         return setInt53(name, value);
@@ -228,7 +228,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see #MAX_SAFE_INTEGER
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
@@ -244,7 +244,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see #setInt53(String, long)
      * @see #setBigInteger(String, BigInteger)
      */
@@ -257,11 +257,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "Planck's Constant": 6.62607004e-34
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setDouble(String name, double value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6JsonNumberSerialization(value)));
@@ -273,11 +273,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "aPrettyHugeNumber": "94673335822222222222222222222222222222222222222222222"
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setBigInteger(String name, BigInteger value) throws IOException {
         return setString(name, value.toString());
@@ -293,11 +293,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "amount": "568790.25"
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see #setBigDecimal(String, BigDecimal, Integer)
      */
     public JSONObjectWriter setBigDecimal(String name, BigDecimal value) throws IOException {
@@ -311,7 +311,7 @@ public class JSONObjectWriter implements Serializable {
      * @param value Value
      * @param decimals Number of fractional digits
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see #setBigDecimal(String, BigDecimal)
      */
     public JSONObjectWriter setBigDecimal(String name, BigDecimal value, Integer decimals) throws IOException {
@@ -323,25 +323,25 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "theEarthIsFlat": false
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setBoolean(String name, boolean value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.BOOLEAN, Boolean.toString(value)));
     }
 
     /**
-     * Set a <code>null</code> property.<p>
+     * Set a <b>null</b> property.<p>
      * Sample:
      * <pre>
      *    "myKnowledgeOfTheLispProgrammingLanguage": null
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see JSONObjectReader#getIfNULL(String)
      */
     public JSONObjectWriter setNULL(String name) throws IOException {
@@ -354,12 +354,12 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "received": "2016-11-12T09:22:36Z"
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param dateTime Date/time value
      * @param forceUtc <code>true</code> for UTC, <code>false</code> for local time
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      * @see org.webpki.util.ISODateTime#formatDateTime(GregorianCalendar, boolean)
      */
     public JSONObjectWriter setDateTime(String name, GregorianCalendar dateTime, boolean forceUtc) throws IOException {
@@ -372,10 +372,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "nonce": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk"
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param value Array of bytes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      * @see Base64URL#encode(byte[])
      */
     public JSONObjectWriter setBinary(String name, byte[] value) throws IOException {
@@ -389,6 +390,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param objectReader Object reader
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setObject(String name, JSONObjectReader objectReader) throws IOException {
         setProperty(name, new JSONValue(JSONTypes.OBJECT, objectReader.root));
@@ -402,6 +404,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param objectWriter Object writer
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setObject(String name, JSONObjectWriter objectWriter) throws IOException {
         setProperty(name, new JSONValue(JSONTypes.OBJECT, objectWriter.root));
@@ -413,6 +416,7 @@ public class JSONObjectWriter implements Serializable {
      * This method creates an empty JSON object and links it to the current object through a property.</p> 
      * @param name Property
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setObject(String name) throws IOException {
         JSONObjectWriter writer = new JSONObjectWriter();
@@ -425,6 +429,7 @@ public class JSONObjectWriter implements Serializable {
      * This method creates an empty JSON array and links it to the current object through a property.</p> 
      * @param name Property
      * @return New instance of {@link org.webpki.json.JSONArrayWriter}
+     * @throws IOException &nbsp;
      */
     public JSONArrayWriter setArray(String name) throws IOException {
         JSONArrayWriter array = new JSONArrayWriter();
@@ -439,6 +444,7 @@ public class JSONObjectWriter implements Serializable {
      * @param name Property
      * @param arrayWriter Array writer
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setArray(String name, JSONArrayWriter arrayWriter) throws IOException {
         setProperty(name, new JSONValue(JSONTypes.ARRAY, arrayWriter.array));
@@ -459,10 +465,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "blobs": ["lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk","LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"]
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param values Vector holding arrays of bytes
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      * @see Base64URL#encode(byte[])
      */
     public JSONObjectWriter setBinaryArray(String name, Vector<byte[]> values) throws IOException {
@@ -479,10 +486,11 @@ public class JSONObjectWriter implements Serializable {
      * Sample:
      * <pre>
      *    "usPresidents": ["Clinton","Bush","Obama","Trump"]
-     * </pre></p>
+     * </pre>
      * @param name Property
      * @param values Array of <code>String</code>
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setStringArray(String name, String[] values) throws IOException {
         return setStringArray(name, values, JSONTypes.STRING);
@@ -514,7 +522,7 @@ public class JSONObjectWriter implements Serializable {
     }
 
     /**
-     * Set <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * Set <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * <code>"signature"</code>object.<p>
      * This method performs all the processing needed for adding a JCS signature to the current object.</p>
      * @param signer The interface to the signing key and type
@@ -569,7 +577,7 @@ import org.webpki.json.JSONSignatureDecoder;
     
         // Print document on the console
         System.out.println("Signed doc: " + json);
-
+</pre>
 <div id="verify" style="display:inline-block;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0">{
   "<span style="color:#C00000">myProperty</span>": "<span style="color:#0000C0">Some data</span>",
   "<span style="color:#C00000">signature</span>": {
@@ -584,7 +592,7 @@ import org.webpki.json.JSONSignatureDecoder;
   }
 }
 </div>    
-
+<pre>
         // Parse document
         JSONObjectReader reader = JSONParser.parse(json);
     
@@ -632,11 +640,11 @@ import org.webpki.json.JSONSignatureDecoder;
       <i>depends on the actual public key type and value</i>   
          .
     }
-</pre></p>
+</pre>
      * @param publicKey Public key value
      * @param algorithmPreferences JOSE or SKS algorithm notation
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public static JSONObjectWriter createCorePublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
         JSONObjectWriter corePublicKey = new JSONObjectWriter();
@@ -657,7 +665,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     /**
-     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * public key property.<p>
      * Resulting JSON:
      * <pre>
@@ -666,41 +674,41 @@ import org.webpki.json.JSONSignatureDecoder;
       <i>depends on the actual public key type and value</i>   
          .
     }
-</pre></p>
+</pre>
      * @param publicKey Public key value
      * @param algorithmPreferences JOSE or SKS algorithm notation
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
         return setObject(JSONSignatureDecoder.PUBLIC_KEY_JSON, createCorePublicKey(publicKey, algorithmPreferences));
     }
 
     /**
-     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * public key property.<p>
      * This method is equivalent to {@link #setPublicKey(PublicKey, AlgorithmPreferences)}
      * using {@link AlgorithmPreferences#JOSE_ACCEPT_PREFER} as second argument.</p>
      * @param publicKey Public key value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setPublicKey(PublicKey publicKey) throws IOException {
         return setPublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
     }
 
     /**
-     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
+     * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * certificate path property.
      * <p>Each path element (certificate) is base64url encoded and the path must be
      * <i>sorted</i> where certificate[i] is signed by certificate[i + 1].</p><p>
      * Resulting JSON:
      * <pre>
     "certificatePath": ["MIIETTCCAjWgAwIBAgIGAUoqo74...gfdd" {,...}]
-</pre></p>
+</pre>
      * @param certificatePath Sorted certificate path array
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
         X509Certificate lastCertificate = null;
@@ -742,15 +750,15 @@ import org.webpki.json.JSONSignatureDecoder;
         return this;
     }
     /**
-     * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF</a>
+     * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * public key encrypted object.
      * @param unencryptedData Data to be encrypted
      * @param dataEncryptionAlgorithm Data encryption algorithm
      * @param keyEncryptionKey Key encryption key
      * @param keyEncryptionAlgorithm Key encryption algorithm
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
-     * @throws GeneralSecurityException
+     * @throws IOException &nbsp;
+     * @throws GeneralSecurityException &nbsp;
      */
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
@@ -784,15 +792,15 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     /**
-     * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JEF</a>
+     * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * symmetric key encrypted object.
      * @param unencryptedData Data to be encrypted
      * @param dataEncryptionAlgorithm Data encryption algorithm
      * @param keyId Optional key id
      * @param dataEncryptionKey Symmetric key
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException
-     * @throws GeneralSecurityException
+     * @throws IOException &nbsp;
+     * @throws GeneralSecurityException &nbsp;
      */
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
@@ -1095,7 +1103,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * Serialize current object writer to a Java <code>String</code>.
      * @param outputFormat Any JSONOutputFormats
      * @return JSON string data
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     @SuppressWarnings("unchecked")
     public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
@@ -1119,7 +1127,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * Serialize current object writer to a Java <code>byte[]</code>.
      * @param outputFormat Any JSONOutputFormats
      * @return JSON UTF-8 data
-     * @throws IOException
+     * @throws IOException &nbsp;
      */
     public byte[] serializeToBytes(JSONOutputFormats outputFormat) throws IOException {
         return serializeToString(outputFormat).getBytes("UTF-8");

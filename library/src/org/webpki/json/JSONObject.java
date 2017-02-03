@@ -25,7 +25,7 @@ import java.util.Vector;
 /**
  * Local support class for holding JSON objects.
  * Note that outer-level arrays are (&quot;hackishly&quot;) represented as a
- * JSON object having a single <code>null</code> property.
+ * JSON object having a single <b>null</b> property.
  */
 class JSONObject implements Serializable {
 

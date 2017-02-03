@@ -38,50 +38,50 @@ import javax.servlet.http.HttpServlet;
  * This is the actual proxy channel servlet that forwards "Outer Service" proxy requests
  * into the {@link ProxyServer} instance.   It is configured by an external "web.xml" file.
  * <pre style="margin-left:20pt">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
- * <p>
- * &lt;web-app version="2.5"
- * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- * xmlns="http://java.sun.com/xml/ns/javaee"
- * xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
- * xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
- * <p>
- * &lt;display-name&gt;Sample Proxy Channel&lt;/display-name&gt;
- * <p>
- * &lt;servlet&gt;
- * &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
- * &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
- * &lt;init-param&gt;
- * &lt;description&gt;Mandatory unique proxy service name&lt;/description&gt;
- * &lt;param-name&gt;proxy-service-name&lt;/param-name&gt;
- * &lt;param-value&gt;Proxy.Demo&lt;/param-value&gt;
- * &lt;/init-param&gt;
- * &lt;!-- If you use a firewall, the following should not be necessary --&gt;
- * &lt;!--
- * &lt;init-param&gt;
- * &lt;description&gt;Optional proxy remote address check.
- * You may use an IP address or a resolvable DNS name.&lt;/description&gt;
- * &lt;param-name&gt;proxy-remote-address&lt;/param-name&gt;
- * &lt;param-value&gt;192.168.0.204&lt;/param-value&gt;
- * &lt;/init-param&gt;
- * --&gt;
- * &lt;!-- If you use a firewall, the following should not be necessary --&gt;
- * &lt;!--
- * &lt;init-param&gt;
- * &lt;description&gt;Optional proxy port check&lt;/description&gt;
- * &lt;param-name&gt;proxy-server-port&lt;/param-name&gt;
- * &lt;param-value&gt;9090&lt;/param-value&gt;
- * &lt;/init-param&gt;
- * --&gt;
- * &lt;/servlet&gt;
- * <p>
- * &lt;servlet-mapping&gt;
- * &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
- * &lt;url-pattern&gt;/proxychannel&lt;/url-pattern&gt;
- * &lt;/servlet-mapping&gt;
- * <p>
- * &lt;/web-app&gt;
- * <p>
- * </pre>
+
+ &lt;web-app version="2.5"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://java.sun.com/xml/ns/javaee"
+ xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
+
+ &lt;display-name&gt;Sample Proxy Channel&lt;/display-name&gt;
+
+ &lt;servlet&gt;
+ &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+ &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
+ &lt;init-param&gt;
+ &lt;description&gt;Mandatory unique proxy service name&lt;/description&gt;
+ &lt;param-name&gt;proxy-service-name&lt;/param-name&gt;
+ &lt;param-value&gt;Proxy.Demo&lt;/param-value&gt;
+ &lt;/init-param&gt;
+ &lt;!-- If you use a firewall, the following should not be necessary --&gt;
+ &lt;!--
+ &lt;init-param&gt;
+ &lt;description&gt;Optional proxy remote address check.
+ You may use an IP address or a resolvable DNS name.&lt;/description&gt;
+ &lt;param-name&gt;proxy-remote-address&lt;/param-name&gt;
+ &lt;param-value&gt;192.168.0.204&lt;/param-value&gt;
+ &lt;/init-param&gt;
+ --&gt;
+ &lt;!-- If you use a firewall, the following should not be necessary --&gt;
+ &lt;!--
+ &lt;init-param&gt;
+ &lt;description&gt;Optional proxy port check&lt;/description&gt;
+ &lt;param-name&gt;proxy-server-port&lt;/param-name&gt;
+ &lt;param-value&gt;9090&lt;/param-value&gt;
+ &lt;/init-param&gt;
+ --&gt;
+ &lt;/servlet&gt;
+
+ &lt;servlet-mapping&gt;
+ &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+ &lt;url-pattern&gt;/proxychannel&lt;/url-pattern&gt;
+ &lt;/servlet-mapping&gt;
+
+ &lt;/web-app&gt;
+
+</pre>
  * Note that the servlet URI may be adapted to match the rest of the "Outer Service".
  */
 public class ProxyChannelServlet extends HttpServlet {

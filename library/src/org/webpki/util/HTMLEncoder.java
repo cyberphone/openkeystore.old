@@ -20,8 +20,7 @@ package org.webpki.util;
  * The HTMLEncoder class contains a utility method for converting
  * a string into a format suitable for placing inside a HTML tag
  * parameter, sometimes known as "html encoding".
- * <p>
- * <P>To convert a <CODE>String</CODE>, each character is examined
+ * <p>To convert a <CODE>String</CODE>, each character is examined
  * in turn:
  * <UL>
  * <LI>&lt; is converted into &amp;lt;

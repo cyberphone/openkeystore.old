@@ -3460,10 +3460,12 @@ public class JSONTest {
         KeyPair bob = getKeyPairFromJwk(bobKey);
         KeyPair alice = getKeyPairFromJwk(aliceKey);
         assertTrue("Bad ECDH",
-                Base64URL.encode(EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                        (ECPublicKey) bob.getPublic(),
-                        alice.getPrivate())).equals(ECDH_RESULT_WITH_KDF));
+                Base64URL.encode(
+                        EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                            DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                            (ECPublicKey) bob.getPublic(),
+                                                            alice.getPrivate(),
+                                                            null)).equals(ECDH_RESULT_WITH_KDF));
 
         EncryptionCore.EcdhSenderResult ecdhRes =
                 EncryptionCore.senderKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
@@ -3472,9 +3474,10 @@ public class JSONTest {
         assertTrue("Bad ECDH",
                 ArrayUtil.compare(ecdhRes.getSharedSecret(),
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                                ecdhRes.getEphemeralKey(),
-                                alice.getPrivate())));
+                                                            DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                            ecdhRes.getEphemeralKey(),
+                                                            alice.getPrivate(),
+                                                            null)));
         KeyPairGenerator mallet = KeyPairGenerator.getInstance("RSA");
         mallet.initialize(2048);
         KeyPair malletKeys = mallet.generateKeyPair();

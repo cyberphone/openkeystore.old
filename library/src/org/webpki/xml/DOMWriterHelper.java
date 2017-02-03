@@ -70,7 +70,6 @@ import org.webpki.util.ISODateTime;
  * {@link #addChildElement(String) addChildElement} and {@link #addWrapped(XMLObjectWrapper) addWrapped}
  * also move the &quot;element insertion cursor&quot; (the &quot;attribute setting cursor&quot;
  * will then point to the same element as the &quot;element insertion cursor&quot;).
- * <p>
  * <h3>A small example</h3>
  * <pre>
  *   DOMWriterHelper helper = new DOMWriterHelper(doc, &quot;example:order&quot;);

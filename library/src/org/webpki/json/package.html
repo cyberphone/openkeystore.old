@@ -12,21 +12,22 @@ To make the system slightly more on par with XML Schemas the JSON library also s
     <li>Detection of missing reads. See {@link org.webpki.json.JSONObjectReader#checkForUnread()}
     </li>
     <li>Strong validation of input</li>
-    <li>Emulation of &quot;missing&quot; JSON data types like <code>BigInteger</code>, <code>BigDecimal</code>,
+    <li>Emulation of &quot;missing&quot; JSON data types like <code>True 64-bit long integer</code>,
+    <code>BigInteger</code>, <code>BigDecimal</code>,
         <code>GregorianCalendar</code> and <code>byte[]</code></li>
 </ul>
 <p>
     In addition, there is a set of classes supporting a [very] scaled-down JSON counterpart to
     enveloped XML signatures:
-    <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JSON Cleartext
-        Signature</a>.
+    <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JSON Cleartext
+        Signature</b></a>.
     <br>See {@link org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)} for programming
     information.
 </p>
 <p>
     There is also a class for encrypting data using JSON formatted containers:
-    <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank">JSON Encryption
-        Format</a>.
+    <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JSON Encryption
+        Format</b></a>.
     <br>See {@link
     org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,PublicKey,KeyEncryptionAlgorithms)}
     for more information.

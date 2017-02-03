@@ -350,15 +350,15 @@ public class JSONSignatureDecoder implements Serializable {
      * Simplified verify that only checks that there are no "keyId" or "extensions", and that the signature type matches.
      * Note that asymmetric key signatures are always checked for technical correctness.
      *
-     * @param signatureType
-     * @throws IOException
+     * @param signatureType Type of signature :-)
+     * @throws IOException &nbsp;
      */
     public void verify(JSONSignatureTypes signatureType) throws IOException {
         verify(new JSONVerifier(signatureType) {
             private static final long serialVersionUID = 1L;
 
-            @Override
-            void verify(JSONSignatureDecoder signature_decoder) throws IOException {
+                @Override
+                void verify(JSONSignatureDecoder signatureDecoder) throws IOException {
             }
         });
     }
