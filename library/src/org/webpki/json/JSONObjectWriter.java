@@ -558,7 +558,7 @@ import org.webpki.json.JSONSignatureDecoder;
     
         // Sign document
         writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
-            {@literal @}Override
+           {@literal @}Override
             public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
                 try {
                     return new SignatureWrapper(algorithm, privateKey).update(data).sign();
@@ -566,7 +566,7 @@ import org.webpki.json.JSONSignatureDecoder;
                     throw new IOException(e);
                 }
             }
-            {@literal @}Override
+           {@literal @}Override
             public PublicKey getPublicKey() throws IOException {
                 return publicKey;
             }
@@ -578,7 +578,7 @@ import org.webpki.json.JSONSignatureDecoder;
         // Print document on the console
         System.out.println("Signed doc: " + json);
 </pre>
-<div id="verify" style="display:inline-block;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0">{
+<div id="verify" style="display:inline-block;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0"><pre>{
   "<span style="color:#C00000">myProperty</span>": "<span style="color:#0000C0">Some data</span>",
   "<span style="color:#C00000">signature</span>": {
     "<span style="color:#C00000">algorithm</span>": "<span style="color:#0000C0">ES256</span>",
@@ -591,7 +591,7 @@ import org.webpki.json.JSONSignatureDecoder;
     "<span style="color:#C00000">value</span>": "<span style="color:#0000C0">gNfr9Es0cnc263tmOYMsctBhbdQUSn9K-Uk42kUMKn4gBUKu9SP4iqNCQd2h8QSePPGsKdkLILVJDBlAbkQ1eA</span>"
   }
 }
-</div>    
+</pre></div>    
 <pre>
         // Parse document
         JSONObjectReader reader = JSONParser.parse(json);

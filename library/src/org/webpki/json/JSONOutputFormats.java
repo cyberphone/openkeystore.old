@@ -49,13 +49,4 @@ public enum JSONOutputFormats {
         }
         return options.toString();
     }
-
-    public static JSONOutputFormats getFormatFromString(String string) throws IOException {
-        for (JSONOutputFormats format : JSONOutputFormats.values()) {
-            if (string.equals(format.toString())) {
-                return format;
-            }
-        }
-        throw new IOException("No such format: " + string);
-    }
 }
