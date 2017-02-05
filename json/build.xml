@@ -152,7 +152,7 @@
 
   <target name="build">
     <antcall target="_build">
-       <param name="javaversion" value="1.7"/>
+       <param name="javaversion" value="1.8"/>
        <param name="library.dir" value="${webpki_jars}"/>
     </antcall>
   </target>
