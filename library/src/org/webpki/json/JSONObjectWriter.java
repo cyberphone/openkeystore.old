@@ -575,8 +575,8 @@ import org.webpki.json.JSONSignatureDecoder;
         // Serialize document
         String json = writer.toString();
     
-        // Print document on the console
-        System.out.println("Signed doc: " + json);
+        // Print signed document on the console
+        System.out.println(json);
 </pre>
 <div id="verify" style="display:inline-block;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;padding:10pt;box-shadow:3pt 3pt 3pt #D0D0D0"><pre>{
   "<span style="color:#C00000">myProperty</span>": "<span style="color:#0000C0">Some data</span>",
