@@ -179,7 +179,7 @@ public class JSONObjectWriter implements Serializable {
             throw new IOException("NaN/Infinity are not permitted in JSON");
         }
 
-        // 2.Deal with zero separately
+        // 2.Deal with zero separately.  Note that this test takes "-0.0" as well
         if (value == 0.0) {
             return "0";
         }
