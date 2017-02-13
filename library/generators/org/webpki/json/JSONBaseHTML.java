@@ -345,15 +345,21 @@ public class JSONBaseHTML  {
 
             INT     ("int",    "<i>number</i>",                           null,
                      "Signed four-byte integer"),
-                     
+
+            INT53   ("int53",  "<i>number</i>",                           null,
+                     "Signed 53-bit integer"),
+
             UINT    ("uint",    "<i>number</i>",                          null,
                      "Unsigned four-byte integer"),
+
+            DOUBLE  ("double",  "<i>number</i>",                          null,
+                     "64-bit IEEE floating point value"),
                          
             BIGINT  ("bigint", "<i>string</i>",                           null,
                     "Base10-encoded integer with arbitrary precision"),
                      
             BIGDEC  ("decimal", "<i>string</i>",                          null,
-                     "Decimal type compatible with Java'buffer BigDecimal"),
+                     "Decimal type compatible with Java BigDecimal"),
                      
             STRING  ("string", "<i>string</i>",                           null,
                      "Arbitrary string"),
@@ -364,14 +370,16 @@ public class JSONBaseHTML  {
             ID      ("id",     "<i>string</i>",                           null,
                      "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
                      
-            BYTE_ARRAY  ("byte[]", "<i>string</i>",                           REF_BASE64,
+            BYTE_ARRAY  ("byte[]", "<i>string</i>",                       REF_BASE64,
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           null,
                      "Base64URL-encoded positive integer with arbitrary precision. Note that leading zero-valued bytes <b>must</b> be discarded"),
                      
-            DATE    ("date",   "<i>string</i>",                           null,
-                     "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
+            TIME    ("time",   "<i>string</i>",                           null,
+                     "Date-time string in ISO format <code>YYYY-MM-DDThh:mm:ss{ms}tz</code> " +
+                     "where <code>ms</code> is an <i>optional</i> field consisting of <code>'.'</code> followed by 1-3 digits, while " +
+                     "<code>tz</code> is either <code>'Z'</code> or <code>&#x00b1;hh:mm</code>."),
                      
             OBJECT  ("object", "<code>{}</code>",                         null,
                      "JSON object");

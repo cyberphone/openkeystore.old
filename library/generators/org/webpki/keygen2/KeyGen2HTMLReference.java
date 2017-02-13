@@ -399,10 +399,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
              "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
              "Extended key usage OIDs encountered in <i>end entity certificates</i> that " +
              "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
-        createOption(ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end entity certificates</i> issued before this date." + LINE_SEPARATOR +
+        createOption(ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.TIME, false, "Matching <i>end entity certificates</i> issued before this date." + LINE_SEPARATOR +
              "Note that you can combine this condition with an <code>" + 
              ISSUED_AFTER_JSON + "</code> condition using an earlier date, effectively creating a time window.");
-        createOption(ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end entity certificates</i> issued after this date.");
+        createOption(ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.TIME, false, "Matching <i>end entity certificates</i> issued after this date.");
         createOption(GROUPING_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createPinPolicy." + GROUPING_JSON + "</code> attribute." + LINE_SEPARATOR +
              "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
         createOption(APP_USAGE_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createKeyEntry." + APP_USAGE_JSON + "</code> attribute.");
@@ -804,7 +804,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addProperty(SERVER_TIME_JSON)
               .addSymbolicValue(SERVER_TIME_JSON)
             .newColumn()
-              .setType(WEBPKI_DATA_TYPES.DATE)
+              .setType(WEBPKI_DATA_TYPES.TIME)
             .newColumn()
             .newColumn()
               .addString("Server time which the client should verify as a &quot;sanity&quot; check.")
@@ -901,7 +901,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addProperty(SERVER_TIME_JSON)
               .addSymbolicValue(SERVER_TIME_JSON)
             .newColumn()
-              .setType(WEBPKI_DATA_TYPES.DATE)
+              .setType(WEBPKI_DATA_TYPES.TIME)
             .newColumn()
             .newColumn()
               .addString("Server time transferred verbatim from ")
@@ -912,7 +912,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addProperty(CLIENT_TIME_JSON)
               .addSymbolicValue(CLIENT_TIME_JSON)
             .newColumn()
-              .setType(WEBPKI_DATA_TYPES.DATE)
+              .setType(WEBPKI_DATA_TYPES.TIME)
             .newColumn()
             .newColumn()
               .addString("See <code>SKS:createProvisioningSession." + CLIENT_TIME_JSON + "</code>.")
