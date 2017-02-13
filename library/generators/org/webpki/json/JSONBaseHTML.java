@@ -259,7 +259,7 @@ public class JSONBaseHTML  {
         addReferenceEntry(REF_ES6, "A. Wirfs-Brock, " +
             "\"ECMAScript 2015 Language Specification\", ECMA-262, " +
             "June&nbsp;2015. <br>" +
-            externalWebReference ("http://www.ecma-international.org/ecma-262/6.0/ECMA-262.pdf"));
+            externalWebReference ("https://www.ecma-international.org/ecma-262/6.0/ECMA-262.pdf"));
 
         addReferenceEntry(REF_V8,
             "\"Chrome V8\", Google Chrome JavaScript Engine, " +
