@@ -331,7 +331,7 @@ public class JSONBaseHTML  {
             ANY     ("any", "&quot;any&quot;",                            null,
                      "Arbitrary JSON type or object"),
 
-            BOOLEAN ("bool",   "<code>true</code> or <code>false</code>", null,
+            BOOLEAN ("bool",   "<code>true|false</code>", null,
                      "Boolean"),
                      
             BYTE    ("byte",   "<i>number</i>",                           null,
