@@ -34,6 +34,7 @@ import java.security.spec.ECPoint;
 
 import java.util.GregorianCalendar;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -65,7 +66,7 @@ public class JSONObjectWriter implements Serializable {
     static final int STANDARD_INDENT = 2;
 
     /**
-     * Integers outside of this range are not natively supported by JSON
+     * Integers outside of this range are not natively supported by JSON.
      */
     public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
 
@@ -92,6 +93,14 @@ public class JSONObjectWriter implements Serializable {
 
     static int htmlIndent = 4;
 
+    /**
+     * Support interface for dynamic JSON generation.
+     */
+    public interface JSONSetDynamic {
+
+        public JSONObjectWriter set(JSONObjectWriter wr) throws IOException;
+
+    }
 
     /**
      * For updating already read JSON objects.
@@ -494,6 +503,20 @@ public class JSONObjectWriter implements Serializable {
      */
     public JSONObjectWriter setStringArray(String name, String[] values) throws IOException {
         return setStringArray(name, values, JSONTypes.STRING);
+    }
+
+    /**
+     * Set JSON data using an external (dynamic) interface.<p>
+     * Sample using a construct suitable for chained writing:
+     * <pre>
+     *    setDynamic((wr) -&gt; optionalString == null ? wr : wr.setString("opt", optionalString)); 
+     * </pre>
+     * @param jsonSetDynamic Interface (usually Lambda)
+     * @return An instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
+     */
+    public JSONObjectWriter setDynamic(JSONSetDynamic jsonSetDynamic) throws IOException {
+        return jsonSetDynamic.set(this);
     }
 
     void setCurvePoint(BigInteger value, String name, KeyAlgorithms ec) throws IOException {

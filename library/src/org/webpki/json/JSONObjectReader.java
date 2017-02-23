@@ -72,6 +72,14 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
+     * Create a JSON object reader from of a writer.
+     * @param objectWriter The writer object
+     */
+    public JSONObjectReader(JSONObjectWriter objectWriter) {
+        this(objectWriter.root);
+    }
+
+    /**
      * Check for unread data.
      * Throws an exception if any property or array element in the current object or
      * child objects have not been read.
