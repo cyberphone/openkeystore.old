@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="generators"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="../resources/third-party-jars/itext-1.4.2.jar"/>
-	<classpathentry kind="lib" path="../resources/third-party-jars/bcprov-jdk16-145.jar"/>
 	<classpathentry kind="lib" path="../resources/jax-ws/webservices-api.jar"/>
 	<classpathentry kind="lib" path="../resources/jax-ws/webservices-extra-api.jar"/>
 	<classpathentry kind="lib" path="../resources/jax-ws/webservices-extra.jar"/>
@@ -12,5 +11,6 @@
 	<classpathentry kind="lib" path="../resources/jax-ws/webservices-tools.jar"/>
 	<classpathentry kind="lib" path="../resources/third-party-jars/servlet-api.jar"/>
 	<classpathentry kind="lib" path="../resources/third-party-jars/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="../resources/third-party-jars/bcprov-jdk15on-151.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
