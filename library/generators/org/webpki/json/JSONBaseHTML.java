@@ -68,6 +68,8 @@ public class JSONBaseHTML  {
     
     public static final String REF_JCS                 = "JCS";
 
+    public static final String REF_JEF                 = "JEF";
+
     public static final String REF_JWS                 = "RFC7515";
 
     public static final String REF_JWE                 = "RFC7516";
@@ -236,7 +238,12 @@ public class JSONBaseHTML  {
         addReferenceEntry(REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
             externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.59, January&nbsp;2016.</span>");
+            ", <span style=\"white-space: nowrap\">V0.60, April&nbsp;2017.</span>");
+
+        addReferenceEntry(REF_JEF,
+            "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress,<br>" +
+            externalWebReference ("https://cyberphone.github.io/doc/security/jef.html") +
+            ", <span style=\"white-space: nowrap\">V0.3, August&nbsp;2016.</span>");
 
         addReferenceEntry(REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             externalWebReference ("https://cyberphone.github.io/doc/security/sks-api-arch.pdf") +

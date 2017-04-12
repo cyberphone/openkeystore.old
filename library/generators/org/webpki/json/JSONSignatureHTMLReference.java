@@ -76,7 +76,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
              "making JCS ideal for HTML5 applications. See " +
              "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
              "\"><span style=\"white-space:nowrap\">" +
-             ECMASCRIPT_MODE + "</span></a>.");
+             ECMASCRIPT_MODE + "</span></a>." + Types.LINE_SEPARATOR +
+             "There is also a &quot;companion&quot; specification coined JEF ")
+          .append(json.createReference(JSONBaseHTML.REF_JEF))
+          .append(" which deals with JSON encryption.");
 
         json.addParagraphObject(SAMPLE_SIGNATURE).append(
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
@@ -392,6 +395,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2014-12-19", "0.57", "Added an interoperability section");
         json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
+        json.addDocumentHistoryLine("2017-04-12", "0.60", "Added JEF reference");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
