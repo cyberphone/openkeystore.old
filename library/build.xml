@@ -20,6 +20,7 @@
   <property name="public_doc_dir"  location="../../doc/security"/>
   <property name="doc_dir"  location="../../doc/openkeystore/javaapi"/>
   <property name="webpki-android" value="webpki.android"/>
+  <property name="android-json" value="webpki.android.json"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar"/>
   <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar"/>
   <property name="webpki-sksws" value="webpki.org-sksws-1.00.jar"/>
@@ -362,6 +363,51 @@
     <delete dir="${dist_dir}"/>
   </target>
 
+  <target name="android-json">    
+    <delete file="${dist_dir}/${android-json}.zip"/>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${bin_dir}"/>
+    <mkdir dir="${temp_dir}"/>
+    <mkdir dir="${bin_dir}"/>
+
+    <copy todir="${temp_dir}/org/webpki" preservelastmodified="true">
+      <fileset dir="${src_dir}/org/webpki">
+        <include name="**/util/ISODateTime.java"/>
+        <include name="**/util/ArrayUtil.java"/>
+        <include name="**/util/Base64URL.java"/>
+        <include name="**/crypto/VerifierInterface.java"/>
+        <include name="**/crypto/SymKeyVerifierInterface.java"/>
+        <include name="**/crypto/SignerInterface.java"/>
+        <include name="**/crypto/AsymKeySignerInterface.java"/>
+        <include name="**/crypto/SymKeySignerInterface.java"/>
+        <include name="**/crypto/CryptoAlgorithms.java"/>
+        <include name="**/crypto/KeyAlgorithms.java"/>
+        <include name="**/crypto/MACAlgorithms.java"/>
+        <include name="**/crypto/HashAlgorithms.java"/>
+        <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AlgorithmPreferences.java"/>
+        <include name="**/crypto/AsymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SignatureWrapper.java"/>
+        <include name="**/crypto/DecryptionKeyHolder.java"/>
+        <include name="**/json/*"/>
+        <include name="**/json/encryption/*"/>
+        <include name="**/json/v8dtoa/*"/>
+      </fileset>
+    </copy>
+
+    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${bin_dir}" includeAntRuntime="false"/>
+    
+    <!-- Create Android JSON java library -->
+    <zip destfile="${dist_dir}/${android-json}.zip">
+      <zipfileset dir="${temp_dir}">
+          <include name="**/*.java"/>
+       </zipfileset>
+    </zip>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${bin_dir}"/>
+  </target>
+		
   <target name="android">    
     <delete file="${dist_dir}/${webpki-android}.zip"/>
     <delete dir="${temp_dir}"/>
