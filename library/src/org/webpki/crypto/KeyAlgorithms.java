@@ -399,13 +399,14 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
 
 
     public static KeyAlgorithms getECKeyAlgorithm(ECParameterSpec ecParameters) throws IOException {
-        EllipticCurve ecCurve = ecParameters.getCurve();
         for (KeyAlgorithms alg : values()) {
-            if (alg.isECKey() && alg.ecParmSpec.getCurve().equals(ecCurve)) {
+            if (alg.isECKey() &&
+                    alg.ecParmSpec.getCurve().equals(ecParameters.getCurve()) &&
+                    alg.ecParmSpec.getGenerator().equals(ecParameters.getGenerator())) {
                 return alg;
             }
         }
-        throw new IOException("Unknown EC curve: " + ecCurve.toString());
+        throw new IOException("Unknown EC type: " + ecParameters.toString());
     }
 
 

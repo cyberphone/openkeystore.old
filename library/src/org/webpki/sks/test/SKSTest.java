@@ -992,6 +992,9 @@ public class SKSTest {
         int i = 1;
         for (KeyAlgorithms key_algorithm : KeyAlgorithms.values()) {
             boolean doit = false;
+            if (!bc_loaded && key_algorithm == KeyAlgorithms.BRAINPOOL_P_256) {
+                continue;
+            }
             if (key_algorithm.isMandatorySKSAlgorithm()) {
                 doit = true;
             } else {
@@ -1005,16 +1008,11 @@ public class SKSTest {
             if (doit) {
                 sess.setKeyParameters((key_algorithm.isRSAKey() && key_algorithm.hasParameters()) ?
                         new byte[]{0, 0, 0, 3} : null);
-                try {
-                    sess.createKey("Key." + i++,
+                sess.createKey("Key." + i++,
                             key_algorithm,
                             null /* pin_value */,
                             null /* pinPolicy */,
                             AppUsage.AUTHENTICATION).setCertificate(cn());
-                } catch (SKSException e) {
-                    assertFalse("BC", bc_loaded || key_algorithm != KeyAlgorithms.BRAINPOOL_P_256);
-                    return;
-                }
             }
         }
         sess.closeSession();

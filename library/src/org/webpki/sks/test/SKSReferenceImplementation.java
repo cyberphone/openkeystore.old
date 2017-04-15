@@ -1279,7 +1279,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     Algorithm getEcType(ECKey ecKey) {
         for (String uri : supportedAlgorithms.keySet()) {
             ECParameterSpec ecParameterSpec = supportedAlgorithms.get(uri).ecParameterSpec;
-            if (ecParameterSpec != null && ecKey.getParams().getCurve().equals(ecParameterSpec.getCurve())) {
+            if (ecParameterSpec != null &&
+                    ecKey.getParams().getCurve().equals(ecParameterSpec.getCurve()) &&
+                    ecKey.getParams().getGenerator().equals(ecParameterSpec.getGenerator())) {
                 return supportedAlgorithms.get(uri);
             }
         }
