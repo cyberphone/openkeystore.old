@@ -1,5 +1,5 @@
 {
-    "@context": "http://xmlns.webpki.org/keygen2/beta/20150112",
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20170416",
     "@qualifier": "InvocationResponse",
     "serverSessionId": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "clientCapabilities": 

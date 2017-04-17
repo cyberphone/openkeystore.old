@@ -368,7 +368,7 @@ public class HTML {
         + JSONSignatureDecoder.PUBLIC_KEY_JSON
         + " = {};\n"
         + "    publicKeyObject."
-        + JSONSignatureDecoder.TYPE_JSON
+        + JSONSignatureDecoder.KTY_JSON
         + " = '"
         + JSONSignatureDecoder.RSA_PUBLIC_KEY
         + "';\n"
@@ -466,7 +466,7 @@ public class HTML {
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.EC
-        + "\" checked=\"checked\">EC Key (P-256)</td><td>"
+        + "\" checked>EC Key (P-256)</td><td>"
         + "<tr><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
@@ -482,7 +482,7 @@ public class HTML {
         + "\" checked value=\"true\">JOSE Algorithms</td><td>"
         + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
         + CreateServlet.ES6_FLAG
-        + "\" value=\"true\">Normalize data according to ES6/V8</td><td>"
+        + "\" checked value=\"true\">Normalize data according to ES6/V8</td><td>"
         + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
         + CreateServlet.JS_FLAG
         + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td><td>"

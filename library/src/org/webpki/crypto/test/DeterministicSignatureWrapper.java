@@ -167,7 +167,7 @@ public class DeterministicSignatureWrapper {
             .setBinary("d", DebugFormatter.getByteArrayFromHex(PRIVATE_KEY))
             .setBinary(JSONSignatureDecoder.X_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_X))
             .setBinary(JSONSignatureDecoder.Y_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_Y));
-        KeyPair keyPair = JSONParser.parse(jwk.toString()).getKeyPairFromJwk();
+        KeyPair keyPair = JSONParser.parse(jwk.toString()).getKeyPair();
         byte[] signature = new DeterministicSignatureWrapper(AsymSignatureAlgorithms.ECDSA_SHA256,
                                                              keyPair.getPrivate())
             .update(INPUT)

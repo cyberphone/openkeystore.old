@@ -60,6 +60,7 @@ import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
@@ -73,10 +74,12 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -2982,8 +2985,8 @@ public class JSONTest {
             "{" +
                     "  \"publicKey\": " +
                     "     {" +
-                    "      \"type\": \"EC\"," +
-                    "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
+                    "      \"kty\": \"EC\"," +
+                    "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
                     "      \"x\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
                     "      \"y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
                     "    }" +
@@ -2993,8 +2996,8 @@ public class JSONTest {
             "{" +
                     "  \"publicKey\": " +
                     "     {" +
-                    "      \"type\": \"EC\"," +
-                    "      \"curve\": \"P-521\"," +
+                    "      \"kty\": \"EC\"," +
+                    "      \"crv\": \"P-521\"," +
                     "      \"x\": \"AQggHPZ-De2Tq_7U7v8ADpjyouKk6eV97Lujt9NdIcZgWI_cyOLv9HZulGWtC7I3X73ABE-rx95hAKbxiqQ1q0bA\"," +
                     "      \"y\": \"AP5yYckNtHGuzZ9Gb8oqueBXwgG5Riu5LnbhQUz5Mb_Xjo4mnhqe1f396ldZMUvyJdi2O03OZdhkpVv_ks2CsYHp\"" +
                     "    }" +
@@ -3009,7 +3012,7 @@ public class JSONTest {
             "{" +
                     "  \"publicKey\":" +
                     "    {" +
-                    "      \"type\": \"RSA\"," +
+                    "      \"kty\": \"RSA\"," +
                     "      \"n\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
                     "snMwabXH4flk5Akf21Xd1GnAy-FCZoyiORHLfSLcjs2MDPbEWbol3U70PJl3OpyG81yE4lrRXd816JqRLMBFoJXMDIPYtwqa0cEfcLVIHhI" +
                     "-ktsId5WpIW-AAwYftQITGn1CarwjtVZ3_g8mlfW_G4xC43D_5LVNPQM3R7TnAP3IQ1wyntT29dpvc8_aaxOlmhwg1xhFc3smDv1R4mOo-M" +
@@ -3028,8 +3031,8 @@ public class JSONTest {
             "{" +
                     "  \"publicKey\":" +
                     "    {" +
-                    "      \"type\": \"EC\"," +
-                    "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
+                    "      \"kty\": \"EC\"," +
+                    "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
                     "      \"x\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
                     "      \"y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"" +
                     "    }" +
@@ -3039,8 +3042,8 @@ public class JSONTest {
             "{" +
                     "  \"publicKey\":" +
                     "    {" +
-                    "      \"type\": \"EC\"," +
-                    "      \"curve\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
+                    "      \"kty\": \"EC\"," +
+                    "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
                     "      \"x\": \"GRgbhKB9Mw1lDKJFMbD_HsBvHR9235X7zF2SxHkDiOU\"," +
                     "      \"y\": \"isxpqxSx6AAEmZfgL5HevS67ejfm_4HcsB883TUaccs\"," +
                     "      \"alien\": \"data\"" +
@@ -3084,7 +3087,7 @@ public class JSONTest {
         public_key2 = JSONParser.parse(ow.setPublicKey(public_key2).setInt("OK", 5).toString()).getPublicKey();
         assertTrue("Public key2+", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectReader pub_key_object = or.getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON);
-        boolean rsaFlag = pub_key_object.getString(JSONSignatureDecoder.TYPE_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
+        boolean rsaFlag = pub_key_object.getString(JSONSignatureDecoder.KTY_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
         String key_parm = rsaFlag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary(key_parm);
         boolean must_fail = true;

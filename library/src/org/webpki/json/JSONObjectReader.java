@@ -520,7 +520,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
     /**
      * Read and decode a public key in
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
-     * format.
+     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) format.
      * 
      * @param algorithmPreferences JOSE or SKS notation expected
      * @return Java <code>PublicKey</code>
@@ -534,7 +534,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
     /**
      * Read and decode a public key in
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
-     * format.
+     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) format.
      * This method is equivalent to <code>getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER)</code>.
      * 
      * @return Java <code>PublicKey</code>
@@ -548,7 +548,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
     /**
      * Read and decode a public key in
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
-     * format.
+     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) format.
      * Note: this method assumes that the current object only holds the actual public key structure (no property).
      * 
      * @param algorithmPreferences JOSE or SKS notation expected
@@ -559,37 +559,25 @@ public class JSONObjectReader implements Serializable, Cloneable {
     public PublicKey getCorePublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
         clearReadFlags();
         PublicKey publicKey = JSONSignatureDecoder.decodePublicKey(this,
-                                                                   algorithmPreferences,
-                                                                   JSONSignatureDecoder.TYPE_JSON,
-                                                                   JSONSignatureDecoder.CURVE_JSON);
+                                                                   algorithmPreferences);
         checkForUnread();
         return publicKey;
     }
 
     /**
-     * Read a public key in a <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>.<p>
-     * Note: this method assumes that the current object only holds a JWK public key structure.</p>
-     * 
-     * @return Java <code>PublicKey</code>
-     * @throws IOException &nbsp;
-     */
-    public PublicKey getPublicKeyFromJwk() throws IOException {
-        return JSONSignatureDecoder.decodePublicKey(this,
-                                                    AlgorithmPreferences.JOSE,
-                                                    JSONSignatureDecoder.JWK_KTY_JSON,
-                                                    JSONSignatureDecoder.JWK_CRV_JSON);
-    }
-
-    /**
-     * Read a public and private key in a <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>.<p>
+     * Read a public and private key in <a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a> format.<p>
      * Note: this method assumes that the current object only holds a JWK key structure.</p>
      * 
      * @return Java <code>KeyPair</code>
      * @throws IOException &nbsp;
      */
-    public KeyPair getKeyPairFromJwk() throws IOException {
-        PublicKey publicKey = getPublicKeyFromJwk();
-        return new KeyPair(publicKey, JSONSignatureDecoder.decodeJwkPrivateKey(this, publicKey));
+    public KeyPair getKeyPair() throws IOException {
+        clearReadFlags();
+        PublicKey publicKey = JSONSignatureDecoder.decodePublicKey(this,
+                                                                   AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        KeyPair keyPair = new KeyPair(publicKey, JSONSignatureDecoder.decodePrivateKey(this, publicKey));
+        checkForUnread();
+        return keyPair;
     }
 
     /**

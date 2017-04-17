@@ -236,18 +236,18 @@ public class JSONBaseHTML  {
             externalWebReference ("https://www.w3.org/TR/WebCryptoAPI/"));
 
         addReferenceEntry(REF_JCS,
-            "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress,<br>" +
-            externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html") +
-            ", <span style=\"white-space: nowrap\">V0.60, April&nbsp;2017.</span>");
+            "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
+            "<span style=\"white-space: nowrap\">V0.60, April&nbsp;2017.</span> " +
+            externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
 
         addReferenceEntry(REF_JEF,
-            "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress,<br>" +
-            externalWebReference ("https://cyberphone.github.io/doc/security/jef.html") +
-            ", <span style=\"white-space: nowrap\">V0.3, August&nbsp;2016.</span>");
+            "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress, " +
+            "<span style=\"white-space: nowrap\">V0.4, April&nbsp;2017.</span> " +
+            externalWebReference ("https://cyberphone.github.io/doc/security/jef.html"));
 
         addReferenceEntry(REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
-            externalWebReference ("https://cyberphone.github.io/doc/security/sks-api-arch.pdf") +
-            ", <span style=\"white-space: nowrap\">V1.01, January&nbsp;2016.</span>");
+            "<span style=\"white-space: nowrap\">V1.02, April&nbsp;2017.</span> " +
+            externalWebReference ("https://cyberphone.github.io/doc/security/sks-api-arch.pdf"));
 
         addReferenceEntry(REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
@@ -256,7 +256,7 @@ public class JSONBaseHTML  {
             externalWebReference ("https://github.com/cyberphone/openkeystore"));
 
         addReferenceEntry(REF_SATURN, "\"Saturn Project\", " +
-                externalWebReference ("https://github.com/cyberphone/saturn"));
+            externalWebReference ("https://github.com/cyberphone/saturn"));
 
         addReferenceEntry(REF_WEBIDL, "C. McCormack, " +
             "\"Web IDL\", W3C Candidate Recommendation, " +
@@ -277,16 +277,16 @@ public class JSONBaseHTML  {
            "RFC&nbsp;7515, May&nbsp;2015.");
 
         addReferenceEntry(REF_JWE,
-                "M. Jones, J. Hildebrand, \"JSON Web Encryption (JWE)\", " +
-                "RFC&nbsp;7516, May&nbsp;2015.");
+            "M. Jones, J. Hildebrand, \"JSON Web Encryption (JWE)\", " +
+            "RFC&nbsp;7516, May&nbsp;2015.");
 
         addReferenceEntry(REF_JWK,
-                "M. Jones, \"JSON Web Key (JWK)\", " +
-                "RFC&nbsp;7517, May&nbsp;2015.");
+            "M. Jones, \"JSON Web Key (JWK)\", " +
+            "RFC&nbsp;7517, May&nbsp;2015.");
 
         addReferenceEntry(REF_JWA,
-                "M. Jones, \"JSON Web Algorithms (JWA)\", " +
-                "RFC&nbsp;7518, May&nbsp;2015.");
+            "M. Jones, \"JSON Web Algorithms (JWA)\", " +
+            "RFC&nbsp;7518, May&nbsp;2015.");
 
         addReferenceEntry(REF_X509,
             "D. Cooper, S. Santesson, S. Farrell, S. Boeyen, " +
@@ -326,7 +326,8 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_FIPS186,
             "\"FIPS PUB 186-4: Digital Signature Standard (DSS)\", " +
-            "U.S. Department of Commerce/National Institute of Standards and Technology, June&nbsp;2013.");
+            "U.S. Department of Commerce/National Institute of Standards and Technology, June&nbsp;2013. " +
+            externalWebReference("http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf"));
       }
 
     JSONBaseHTML () {}
@@ -1179,6 +1180,9 @@ public class JSONBaseHTML  {
 
     public void addReferenceEntry(String reference, String html_description) throws IOException  {
         Reference r = new Reference();
+        if (reference.matches("RFC[1-9][0-9]+")) {
+            html_description += " " + externalWebReference("https://tools.ietf.org/html/" + reference.toLowerCase());
+        }
         r.html_description = html_description;
         Reference old = references.put(reference, r);
         if (old != null && !old.html_description.equals(html_description)) {
@@ -1368,8 +1372,8 @@ public class JSONBaseHTML  {
         addSubItemTable(JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newRow()
               .newColumn()
-                .addProperty(JSONSignatureDecoder.TYPE_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.TYPE_JSON)
+                .addProperty(JSONSignatureDecoder.KTY_JSON)
+                .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
               .newColumn()
                 .setType(Types.WEBPKI_DATA_TYPES.STRING)
               .newColumn()
@@ -1386,8 +1390,8 @@ public class JSONBaseHTML  {
         addSubItemTable(JCS_PUBLIC_KEY_EC)
            .newRow()
               .newColumn()
-                .addProperty(JSONSignatureDecoder.CURVE_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.CURVE_JSON)
+                .addProperty(JSONSignatureDecoder.CRV_JSON)
+                .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
               .newColumn()
                 .setType(Types.WEBPKI_DATA_TYPES.STRING)
               .newColumn()
@@ -1418,8 +1422,8 @@ public class JSONBaseHTML  {
               .addString(reference ?
                           " The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                          JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
                           KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                           "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "")
           .newRow()
@@ -1435,8 +1439,8 @@ public class JSONBaseHTML  {
               .addString(reference ?
                           " The length of this field <b>must</b> " +
                           "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                          JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                          "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
                           KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                           "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "");
 

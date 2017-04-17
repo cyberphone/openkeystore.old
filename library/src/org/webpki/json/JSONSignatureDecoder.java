@@ -65,7 +65,7 @@ public class JSONSignatureDecoder implements Serializable {
     // JSON properties
     public static final String ALGORITHM_JSON             = "algorithm";
   
-    public static final String CURVE_JSON                 = "curve";
+    public static final String CRV_JSON                   = "crv";
     
     public static final String E_JSON                     = "e";
     
@@ -74,6 +74,8 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String ISSUER_JSON                = "issuer";
     
     public static final String KEY_ID_JSON                = "keyId";
+
+    public static final String KTY_JSON                   = "kty";
 
     public static final String N_JSON                     = "n";
     
@@ -214,19 +216,17 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     static PublicKey decodePublicKey(JSONObjectReader rd,
-                                     AlgorithmPreferences algorithmPreferences,
-                                     String typeJson,
-                                     String curveJson) throws IOException {
+                                     AlgorithmPreferences algorithmPreferences) throws IOException {
         PublicKey publicKey = null;
         try {
-            String type = rd.getString(typeJson);
+            String type = rd.getString(KTY_JSON);
             if (type.equals(RSA_PUBLIC_KEY)) {
                 publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(getCryptoBinary(rd, N_JSON),
                         getCryptoBinary(rd, E_JSON)));
             } else if (type.equals(EC_PUBLIC_KEY)) {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID(rd.getString(curveJson), algorithmPreferences);
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID(rd.getString(CRV_JSON), algorithmPreferences);
                 if (!ec.isECKey()) {
-                    throw new IOException("\"" + curveJson + "\" is not an EC type");
+                    throw new IOException("\"" + CRV_JSON + "\" is not an EC type");
                 }
                 ECPoint w = new ECPoint(getCurvePoint(rd, X_JSON, ec), getCurvePoint(rd, Y_JSON, ec));
                 publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ec.getECParameterSpec()));
@@ -390,7 +390,7 @@ public class JSONSignatureDecoder implements Serializable {
         return parent;
     }
 
-    static PrivateKey decodeJwkPrivateKey(JSONObjectReader rd, PublicKey publicKey) throws IOException {
+    static PrivateKey decodePrivateKey(JSONObjectReader rd, PublicKey publicKey) throws IOException {
         try {
             KeyAlgorithms keyAlgorithm = KeyAlgorithms.getKeyAlgorithm(publicKey);
             if (keyAlgorithm.isECKey()) {

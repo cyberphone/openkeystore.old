@@ -597,13 +597,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addParagraphSubObject("SOP Adherance").append("The KeyGen2 proxy <b>must not</b> accept <code>SubmitURL</code> requests outside of the domain which returned the " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName()) +
                                     " message, i.e. strictly following SOP (Same Origin Policy).");
 
-        json.addParagraphSubObject("JCS Profile").append("Although KeyGen2 makes extensive use of the JSON Cleartext Signature scheme " + json.createReference(JSONBaseHTML.REF_JCS) +
-                                    " a compliant implementation <b>must not</b> accept JOSE " +  json.createReference(JSONBaseHTML.REF_JWS) + 
-                                    " algorithm identifiers since these are not natively supported by the target. See " + json.createReference(JSONBaseHTML.REF_SKS) + 
-                                    " <i>Algorithm Support</i>." + LINE_SEPARATOR +
-                                    "In addition, the JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code> " +
-                                    "properties <b>must not</b> be featured in KeyGen2 messages either." + LINE_SEPARATOR +
-                                    "This document only refers to the required JCS properties.");
+        json.addParagraphSubObject("JCS Profile").append("The JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                          "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + 
+                          JSONSignatureDecoder.PEM_URL_JSON + "</code> " +
+                          "properties <b>must not</b> be featured in KeyGen2 messages.");
 
         json.addDataTypesDescription("");
         

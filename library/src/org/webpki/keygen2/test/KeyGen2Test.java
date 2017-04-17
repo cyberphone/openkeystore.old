@@ -1298,9 +1298,9 @@ public class KeyGen2Test {
                     _name.getMethodName() +
                     "." +
                     round +
-                    "\"/>&nbsp;</td></tr></table><p style=\"padding-left:10pt\">");
+                    "\"/>&nbsp;</td></tr></table><div style=\"padding:10pt;word-break:break-all\">");
             fos.write(xo.serializeJSONDecoder(JSONOutputFormats.PRETTY_HTML));
-            writeString("</p>");
+            writeString("</div>");
             return json_data;
         }
 

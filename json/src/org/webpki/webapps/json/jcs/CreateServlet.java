@@ -83,7 +83,7 @@ public class CreateServlet extends HttpServlet {
             if (es6) {
                 writer = new JSONObjectWriter();
                 es6Normalize(reader, writer);
-            }
+             }
             byte[] signed_json = new GenerateSignature(action, jose)
                     .sign(writer);
             RequestDispatcher rd = request

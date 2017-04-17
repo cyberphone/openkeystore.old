@@ -17,23 +17,18 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.KeyPair;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -80,9 +75,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String formatCode(JSONObjectReader rd) {
-        String res = rd.toString();
-        res = res.substring(0, res.length() - 1).replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>");
-        return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" + res + "</code></div>";
+        return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" +
+                rd.toString().replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>") +
+                "</code></div>";
     }
 
     static Column preAmble(String qualifier) throws IOException {
@@ -112,13 +107,26 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         CustomCryptoProvider.forcedLoad(true);
 
         JSONObjectReader ecdhEncryption = readJSON("ecdh-es.json");
+        JSONObjectReader authData = ecdhEncryption.clone();
+        authData.removeProperty(JSONDecryptionDecoder.TAG_JSON);
+        authData.removeProperty(JSONDecryptionDecoder.IV_JSON);
+        authData.removeProperty(JSONDecryptionDecoder.CIPHER_TEXT_JSON);
+        String formattedAuthData = authData.serializeToString(JSONOutputFormats.NORMALIZED);
+        for (int l = formattedAuthData.length(), j = 0, i = 0; i < l; i++) {
+            if (i % 119 == 0 && i > 0) {
+                formattedAuthData = formattedAuthData.substring(0, i + j) + 
+                        "<br>" + formattedAuthData.substring(i + j);
+                j += 4;
+            }
+        }
+        formattedAuthData = formattedAuthData.replace("\"", "&quot;");
         JSONDecryptionDecoder dec = ecdhEncryption.getEncryptionObject();
-        JSONObjectReader ecprivatekey = readJSON("ecprivatekey.json");
-        KeyPair keyPair = ecprivatekey.getKeyPairFromJwk();
+        JSONObjectReader ecprivatekey = readJSON("ecprivatekey.jwk");
+        KeyPair keyPair = ecprivatekey.getKeyPair();
         Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
         keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
-        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.json");
-        keyPair = rsaprivatekey.getKeyPairFromJwk();
+        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
+        keyPair = rsaprivatekey.getKeyPair();
         keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
         verifyDecryption(dec.getDecryptedData(keys));
         JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
@@ -139,10 +147,14 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .append("This document specifies a container formatted in JSON ")
           .append(json.createReference(JSONBaseHTML.REF_JSON))
           .append(" for holding encrypted binary data, coined JEF (JSON Encryption Format)." + LINE_SEPARATOR +
-            "JEF is similar to IETF's JWE ")
+            "JEF was derived from IETF's JWE ")
           .append(json.createReference(JSONBaseHTML.REF_JWE))
           .append(
-            " and supports a <i>subset</i> of the same algorithms while utilizing the JCS ")
+            " specification and supports a <i>subset</i> of the same algorithms ")
+          .append(json.createReference(JSONBaseHTML.REF_JWA))
+          .append(". Public key are expressed as JWK ")
+          .append(json.createReference(JSONBaseHTML.REF_JWK))
+          .append(" objects while the encryption container itself utilizes JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
           .append(" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures."
                   + LINE_SEPARATOR +
@@ -190,14 +202,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 "<i>recreated</i> using the actual text left after applying the previous measures.</li></ul>" +
                 "Applied on the <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT +
                 "</a>, a conforming JEF <i>Additional Authenticated Data</i> process should return the following JSON string:" +
-                "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-
-                "{&quot;algorithm&quot;:&quot;A128CBC-HS256&quot;,&quot;encryptedKey&quot;:{&quot;algorithm&quot;:&quot;ECDH-ES&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,<br>" +
-                "&quot;x&quot;:&quot;Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0&quot;,&quot;y&quot;:&quot;HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw&quot;},&quot;epheme<br>"+
-                "ralKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;cE3IC433cIKWIec9o1PkQyFIffjQA2k5DAsPX0pf704&quot;,&quot;y&quot;:&quot;NmRFMXoBG8JafNmP<br>" +
-                "jpMgindolKt3Axcmzs2lVtOcjiI&quot;}}}" +
-
-                "</code></div>" +
+                "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" + formattedAuthData + "</code></div>" +
                 "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
                 "The <i>Additional Authenticated Data</i> string is subsequently <span style=\"white-space:nowrap\">UTF-8</span> encoded " +
                 "before being applied to the encryption algorithm.");
@@ -227,6 +232,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addReferenceTable();
         
         json.addDocumentHistoryLine("2016-08-03", "0.3", "Initial publication in HTML5");
+        json.addDocumentHistoryLine("2017-04-16", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
 
         json.addParagraphObject("Author").append("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
@@ -348,8 +354,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
         .newRow()
           .newColumn()
-            .addProperty(JSONSignatureDecoder.TYPE_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.TYPE_JSON)
+            .addProperty(JSONSignatureDecoder.KTY_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
@@ -365,8 +371,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     json.addSubItemTable (JCS_PUBLIC_KEY_EC)
        .newRow()
           .newColumn()
-            .addProperty(JSONSignatureDecoder.CURVE_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.CURVE_JSON)
+            .addProperty(JSONSignatureDecoder.CRV_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
@@ -384,8 +390,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("EC curve point X." +
                   " The length of this field <b>must</b> " +
                   "be the full size of a coordinate for the curve specified in the <code>" + 
-                  JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                  "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                  JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                  "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
                   KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                   "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.")
       .newRow()
@@ -399,8 +405,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("EC curve point Y." +
                   " The length of this field <b>must</b> " +
                   "be the full size of a coordinate for the curve specified in the <code>" + 
-                  JSONSignatureDecoder.CURVE_JSON + "</code> parameter.  For example, " +
-                  "if the value of <code>" + JSONSignatureDecoder.CURVE_JSON + "</code> is <code>" +
+                  JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                  "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
                   KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                   "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
 

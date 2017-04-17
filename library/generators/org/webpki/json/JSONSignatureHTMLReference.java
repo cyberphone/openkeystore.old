@@ -33,7 +33,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     private static final String INTEROPERABILITY = "Interoperability";
 
-    private static final String ECMASCRIPT_MODE  = "ECMAScript Compatibility Mode";
+    private static final String ECMASCRIPT_MODE  = "ECMAScript Mode";
     
     private static final String SAMPLE_SIGNATURE = "Sample Signature";
 
@@ -85,20 +85,21 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
-"&nbsp;&nbsp;&quot;now&quot;:&nbsp;&quot;2015-01-12T09:22:36Z&quot;,<br>" +
+"&nbsp;&nbsp;&quot;now&quot;:&nbsp;&quot;2017-04-16T11:23:06Z&quot;,<br>" +
 "&nbsp;&nbsp;&quot;escapeMe&quot;:&nbsp;&quot;\\u20ac$\\u000F\\u000aA'\\u0042\\u0022\\u005c\\\\\\&quot;\\/&quot;,<br>" +
-"&nbsp;&nbsp;&quot;numbers&quot;:&nbsp;[1e0,&nbsp;4.50,&nbsp;6],<br>" +
+"&nbsp;&nbsp;&quot;numbers&quot;:&nbsp;[1e+30,4.5,6],<br>" +
 "&nbsp;&nbsp;&quot;signature&quot;:&nbsp;{<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&quot;algorithm&quot;:&nbsp;&quot;ES256&quot;,<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&quot;publicKey&quot;:&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;type&quot;:&nbsp;&quot;EC&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;curve&quot;:&nbsp;&quot;P-256&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;kty&quot;:&nbsp;&quot;EC&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;crv&quot;:&nbsp;&quot;P-256&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<span style=\"background:#f0f0f0\">,</span><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;C1qP8PghKOl6NT8gpoy6cDI1Uzls_o8mYECYnWT-CkRaIaiZd9u_4nDKRhQvjbbeWZ1FiHPMs3TKmXIBSCuUHg&quot;</span><br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;hp6af4GTZMr2fM8A1QeanPD4IcvlV0ToiKA0NDrtsmyGxDQST24ehsAVRzVHXSGM1O1GG0xO3ev4LbvNNRpH5g&quot;</span><br>" +
 "&nbsp;&nbsp;}<br>" +
-"}</code></div>" +
+"}" +
+"</code></div>" +
 "The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
 "Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
 
@@ -127,13 +128,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
             "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON object associated with the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> now be " +
-            "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
-            "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
-            "As an example, floating point data is often expressed like <code>4.50</code> in spite of the " +
-            "trailing zero being redundant. To cope with this " +
-            "potential problem, compliant parsers <b>must</b> <i>preserve</i> the original textual representation of " +
-            "properties internally in order to support JCS normalization requirements. " + LINE_SEPARATOR +
+            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type must <i>already before validation</i> be "+
+            "serialized according to ECMAScript " +
+            json.createReference(JSONBaseHTML.REF_ES6) +
+            " including the V8 " +
+            json.createReference(JSONBaseHTML.REF_V8) +
+            " option in order to achieve interoperability between different platforms and implementations.</li>" +
+            "<li style=\"padding-top:4pt\">Now the JSON object associated with the <code>" +
+            JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> be " +
+            "<i>recreated</i> using the actual text left after applying the previous measures." + LINE_SEPARATOR +
             "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a> and " +
             "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
             "\"><span style=\"white-space:nowrap\">" +
@@ -144,11 +147,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
              "</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-
-            "{&quot;now&quot;:&quot;2015-01-12T09:22:36Z&quot;,&quot;escapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">&#x20AC;</b>$<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A'<b style=\"color:red;background:Yellow\">B\\&quot;\\\\</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[<b style=\"color:red;background:Yellow\">1e0</b>,<b style=\"color:red;background:Yellow\">4.50</b>,6],&quot;signature&quot;:<br>" +
-            "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;type&quot;:&quot;EC&quot;,&quot;curve&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWW<br>" +
-            "fyg023FCk&quot;,&quot;y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}</code></div>" +
-            "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the normalization process. " +
+            "{&quot;now&quot;:&quot;2017-04-16T11:23:06Z&quot;,&quot;escapeMe&quot;:&quot;" +
+            "<b style=\"color:red;background:Yellow\">€</b>$<b style=\"color:red;background:Yellow\">" +
+            "\\u000f\\nA</b>'B<b style=\"color:red;background:Yellow\">\\&quot;\\\\</b>\\\\\\&quot;" +
+            "<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[1e+30,4.5,6],&quot;signature&quot;:<br>" +
+            "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;kty&quot;" +
+            ":&quot;EC&quot;,&quot;crv&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY<br>" +
+            "1bQDs&quot;,&quot;y&quot;:&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;}}}" +
+            "</code></div>" +
+            "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the string normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in the <code>" +
                   JSONSignatureDecoder.ALGORITHM_JSON + "</code> property using the signature key over the " +
@@ -178,12 +185,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
            "&nbsp;&nbsp;signature:&nbsp;{<br>" +
            "&nbsp;&nbsp;&nbsp;&nbsp;algorithm:&nbsp;&quot;ES256&quot;,<br>" +
            "&nbsp;&nbsp;&nbsp;&nbsp;publicKey:&nbsp;{<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type:&nbsp;&quot;EC&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;curve:&nbsp;&quot;P-256&quot;,<br>" +
+           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kty:&nbsp;&quot;EC&quot;,<br>" +
+           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crv:&nbsp;&quot;P-256&quot;,<br>" +
            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x:&nbsp;&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs&quot;,<br>" +
            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y:&nbsp;&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;<br>" +
            "&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;value:&nbsp;&quot;2H__TkcV28QpGWPkyVbR1CW0I8L4xARrVGL0LjOeHJLOPozdzRqCTyYfmAippJXqdzgNAonnFPVCSI5A6novMQ&quot;<br>" +
+           "&nbsp;&nbsp;&nbsp;&nbsp;value:&nbsp;&quot;bEkQ2Owed_oe8MbZjSTXffHOINm2fV5y7GzmGwdH9JrP6fV57tjuxLHQD-wf9eOp-zpu2U_v3RZgaobBkt9rNA&quot;<br>" +
            "&nbsp;&nbsp;}<br>" +
            "};</code></div>" +
            "This signature could be verified by the following code:" +
@@ -224,11 +231,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;the&nbsp;actual&nbsp;crypto,&nbsp;here&nbsp;using&nbsp;W3C&nbsp;WebCrypto</span> </code>")
             .append(json.createReference(JSONBaseHTML.REF_WEB_CRYPTO))
             .append("<code><br>" +
-            "&nbsp;&nbsp;crypto.subtle.importKey('jwk',&nbsp;{&nbsp;kty:&nbsp;clone.publicKey.type,&nbsp;<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crv:&nbsp;clone.publicKey.curve,<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x:&nbsp;clone.publicKey.x,<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y:&nbsp;clone.publicKey.y&nbsp;},<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;name:&nbsp;'ECDSA',&nbsp;namedCurve:&nbsp;clone.publicKey.curve&nbsp;},<br>" +
+            "&nbsp;&nbsp;crypto.subtle.importKey('jwk',&nbsp;clone.publicKey,&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;JCS&nbsp;public&nbsp;key&nbsp;is&nbsp;a&nbsp;JWK</span><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;name:&nbsp;'ECDSA',&nbsp;namedCurve:&nbsp;clone.publicKey.crv&nbsp;},<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true,&nbsp;['verify']).then(function(publicKey)&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;crypto.subtle.verify({&nbsp;name:&nbsp;'ECDSA',&nbsp;hash:&nbsp;{&nbsp;name:&nbsp;'SHA-256'&nbsp;}&nbsp;},&nbsp;<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;publicKey,&nbsp;signature,&nbsp;data).then(function(result)&nbsp;{<br>" +
@@ -390,12 +394,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "</code> option");
         json.addDocumentHistoryLine("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
         json.addDocumentHistoryLine("2014-09-17", "0.54", "Changed canonicalization to normalization");
-        json.addDocumentHistoryLine("2014-09-23", "0.55", "Aligned EC parameter representation with " + json.createReference(JSONBaseHTML.REF_JWS));
-        json.addDocumentHistoryLine("2014-12-08", "0.56", "Major upgrade including removal of " + json.createReference(JSONBaseHTML.REF_XMLDSIG) + " bloat and adding support for " + json.createReference(JSONBaseHTML.REF_JWS) + " algorithm identifiers");
+        json.addDocumentHistoryLine("2014-09-23", "0.55", "Aligned EC parameter representation with JWS " + json.createReference(JSONBaseHTML.REF_JWS));
+        json.addDocumentHistoryLine("2014-12-08", "0.56", "Removed " + json.createReference(JSONBaseHTML.REF_XMLDSIG) + " bloat and added support for JWA " + json.createReference(JSONBaseHTML.REF_JWS) + " algorithm identifiers");
         json.addDocumentHistoryLine("2014-12-19", "0.57", "Added an interoperability section");
         json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
-        json.addDocumentHistoryLine("2017-04-12", "0.60", "Added JEF reference");
+        json.addDocumentHistoryLine("2017-04-16", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +

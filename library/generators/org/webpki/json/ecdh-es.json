@@ -3,19 +3,19 @@
   "encryptedKey": {
     "algorithm": "ECDH-ES",
     "publicKey": {
-      "type": "EC",
-      "curve": "P-256",
+      "kty": "EC",
+      "crv": "P-256",
       "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
       "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw"
     },
     "ephemeralKey": {
-      "type": "EC",
-      "curve": "P-256",
-      "x": "cE3IC433cIKWIec9o1PkQyFIffjQA2k5DAsPX0pf704",
-      "y": "NmRFMXoBG8JafNmPjpMgindolKt3Axcmzs2lVtOcjiI"
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "cVuSTKWBar1dfOfVuy8rRH8ofzrDzhiUJ533fmcLpYE",
+      "y": "TklGGp4pyL8eqB-jlAyR6y9yn2xwIkYAT1wkvSvdSe0"
     }
   },
-  "iv": "eBhaWBO67OYntG0oeWyACw",
-  "tag": "uTcJgBgXhGqX-pVbi5n-4g",
-  "cipherText": "aHk6ZB9eNv5_1V5MXOvtxxi_GgtGaItG2KeXv7Y4NVY"
+  "iv": "AF-G9ts4CLJjhxfKOZCGfQ",
+  "tag": "U3W77BkRM9LIGAtmVDqf_Q",
+  "cipherText": "J_AGbjlmPJ8dTVCM1fgcseK_V7kzUwT6-CRGGN8B7JA"
 }
