@@ -31,7 +31,7 @@ $ ant testjson
 ## API
 Now you should have a file <code>library/dist/webpki.org-libext-1.00.jar</code> which
 implements the API described in https://cyberphone.github.io/doc/openkeystore/javaapi/overview-summary.html.
-##Proof of Concept Implementation
+## Proof of Concept Implementation
 There also is an Android proof-of-concept implementation which allows you to test provisioning
 and then using provisioned keys for authentication:<br>
 https://play.google.com/store/apps/details?id=org.webpki.mobile.android
