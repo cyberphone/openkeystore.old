@@ -1,12 +1,12 @@
 ##############################################################################
 #                                                                            #
-#  Copyright 2006-2015 WebPKI.org (http://webpki.org).                       #
+#  Copyright 2006-2017 WebPKI.org (http://webpki.org).                       #
 #                                                                            #
 #  Licensed under the Apache License, Version 2.0 (the "License");           #
 #  you may not use this file except in compliance with the License.          #
 #  You may obtain a copy of the License at                                   #
 #                                                                            #
-#      http://www.apache.org/licenses/LICENSE-2.0                            #
+#      https://www.apache.org/licenses/LICENSE-2.0                           #
 #                                                                            #
 #  Unless required by applicable law or agreed to in writing, software       #
 #  distributed under the License is distributed on an "AS IS" BASIS,         #
@@ -117,26 +117,20 @@ class new(BaseKey):
 
     def getPublicKey(self,format='JWK'):
         """
-        Return public key as a PEM or JWK string or as a JCS in an JSONObjectWriter
+        Return public key as a PEM or JWK string or as a JCS/JWK in an JSONObjectWriter
         """ 
         if exportFormatCheck(format) == 'PEM':
             if self.isRSA():
                 return exportPublicKeyAsPem(self.nativePrivateKey.publickey())
             return exportPublicKeyAsPem(self.nativePrivateKey.get_verifying_key())
-        if format == 'JWK':
-            keyTypeMnemonic = 'kty'
-            curveMnemonic = 'crv'
-        else:
-            keyTypeMnemonic = 'type'
-            curveMnemonic = 'curve'
         publicKey = JSONObjectWriter()
         if self.isRSA():
-            publicKey.setString(keyTypeMnemonic, 'RSA')
+            publicKey.setString('kty', 'RSA')
             publicKey.setCryptoBigNum('n', self.nativePrivateKey.n)
             publicKey.setCryptoBigNum('e', self.nativePrivateKey.e)
         else:
-            publicKey.setString(keyTypeMnemonic, 'EC')
-            publicKey.setString(curveMnemonic, getEcCurveName(self.nativePrivateKey))
+            publicKey.setString('kty', 'EC')
+            publicKey.setString('crv', getEcCurveName(self.nativePrivateKey))
             point = self.nativePrivateKey.get_verifying_key().to_string()
             length = len(point)
             if length % 2:
