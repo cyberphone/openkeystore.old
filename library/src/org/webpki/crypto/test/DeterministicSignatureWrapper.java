@@ -162,8 +162,8 @@ public class DeterministicSignatureWrapper {
     
     public static void rfc4754() throws Exception {
         JSONObjectWriter jwk = new JSONObjectWriter()
-            .setString(JSONSignatureDecoder.JWK_KTY_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY)
-            .setString(JSONSignatureDecoder.JWK_CRV_JSON,"P-256")
+            .setString(JSONSignatureDecoder.KTY_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY)
+            .setString(JSONSignatureDecoder.CRV_JSON,"P-256")
             .setBinary("d", DebugFormatter.getByteArrayFromHex(PRIVATE_KEY))
             .setBinary(JSONSignatureDecoder.X_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_X))
             .setBinary(JSONSignatureDecoder.Y_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_Y));

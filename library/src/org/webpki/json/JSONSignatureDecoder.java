@@ -65,9 +65,11 @@ public class JSONSignatureDecoder implements Serializable {
     // JSON properties
     public static final String ALGORITHM_JSON             = "algorithm";
   
-    public static final String CRV_JSON                   = "crv";
+    public static final String CERTIFICATE_PATH_JSON      = "certificatePath";
     
-    public static final String E_JSON                     = "e";
+    public static final String CRV_JSON                   = "crv";          // JWK
+
+    public static final String E_JSON                     = "e";            // JWK
     
     public static final String EXTENSIONS_JSON            = "extensions";
 
@@ -75,9 +77,9 @@ public class JSONSignatureDecoder implements Serializable {
     
     public static final String KEY_ID_JSON                = "keyId";
 
-    public static final String KTY_JSON                   = "kty";
+    public static final String KTY_JSON                   = "kty";          // JWK
 
-    public static final String N_JSON                     = "n";
+    public static final String N_JSON                     = "n";            // JWK
     
     public static final String PUBLIC_KEY_JSON            = "publicKey";
     
@@ -97,15 +99,9 @@ public class JSONSignatureDecoder implements Serializable {
     
     public static final String VERSION_JSON               = "version";
     
-    public static final String X_JSON                     = "x";
+    public static final String X_JSON                     = "x";            // JWK
     
-    public static final String CERTIFICATE_PATH_JSON      = "certificatePath";
-    
-    public static final String Y_JSON                     = "y";
-
-    public static final String JWK_KTY_JSON               = "kty";
-
-    public static final String JWK_CRV_JSON               = "crv";
+    public static final String Y_JSON                     = "y";            // JWK
 
     SignatureAlgorithms algorithm;
 
