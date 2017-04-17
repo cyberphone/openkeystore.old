@@ -1,12 +1,12 @@
 ##############################################################################
 #                                                                            #
-#  Copyright 2006-2015 WebPKI.org (http://webpki.org).                       #
+#  Copyright 2006-2017 WebPKI.org (http://webpki.org).                       #
 #                                                                            #
 #  Licensed under the Apache License, Version 2.0 (the "License");           #
 #  you may not use this file except in compliance with the License.          #
 #  You may obtain a copy of the License at                                   #
 #                                                                            #
-#      http://www.apache.org/licenses/LICENSE-2.0                            #
+#      https://www.apache.org/licenses/LICENSE-2.0                           #
 #                                                                            #
 #  Unless required by applicable law or agreed to in writing, software       #
 #  distributed under the License is distributed on an "AS IS" BASIS,         #
@@ -57,7 +57,7 @@ class new:
         hashObject = algorithmEntry[1].new(serializeJson(jsonObject).encode("utf-8"))
         jsonObject['signature'] = clonedSignatureObject
         self.publicKey = signatureObject['publicKey']
-        keyType = self.publicKey['type']
+        keyType = self.publicKey['kty']
         if algorithmEntry[0]:
             if keyType != 'RSA':
                 raise TypeError('"RSA" expected')
@@ -70,7 +70,7 @@ class new:
                 raise TypeError('"EC" expected')
             self.nativePublicKey = EC.from_string(base64UrlDecode(self.publicKey['x']) + 
                                                   base64UrlDecode(self.publicKey['y']),
-                                                  curve=getEcCurve(self.publicKey['curve']))
+                                                  curve=getEcCurve(self.publicKey['crv']))
             self.nativePublicKey.verify_digest(signatureValue,hashObject.digest())
             
 
@@ -81,15 +81,7 @@ class new:
         if exportFormatCheck(format) == 'PEM':
             return exportPublicKeyAsPem(self.nativePublicKey)
         if format == 'JWK':
-            jwk = OrderedDict()
-            for item in self.publicKey:
-                key = item
-                if key == 'type':
-                    key = 'kty'
-                elif key == 'curve':
-                    key = 'crv'
-                jwk[key] = self.publicKey[item]
-            return serializeJson(jwk)
+            return serializeJson(self.publicKey)
         return JSONObjectWriter(self.publicKey)
 
 # TODO: "extensions", "version", "keyId" and checks for extranous properties
