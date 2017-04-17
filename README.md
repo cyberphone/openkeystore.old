@@ -42,4 +42,4 @@ To create a source distribution for Android perform:
 $ cd library
 $ ant android-json
 ```
-Now you should have a file <code>library/dist/webpki.android.json.zip</code> which can be imported to an Android project.
+Now you should have a file <code>library/dist/webpki.android.json.zip</code> which can be imported in an Android project.
