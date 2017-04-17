@@ -106,6 +106,8 @@ public class JSONBaseHTML  {
 
     public static final String REF_SATURN              = "SATURN";
 
+    public static final String REF_YASMIN              = "YASMIN";
+
     public static final String REF_WEBIDL              = "WEBIDL";
     
     public static final String JCS_PUBLIC_KEY_RSA      = "Additional RSA properties";
@@ -239,6 +241,11 @@ public class JSONBaseHTML  {
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
             "<span style=\"white-space: nowrap\">V0.60, April&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
+
+        addReferenceEntry(REF_YASMIN,
+                "A. Rundgren, \"YASMIN - Yet Another jSon Message notatIoN\", Work in progress, " +
+                "<span style=\"white-space: nowrap\">V0.6, April&nbsp;2017.</span> " +
+                externalWebReference ("https://cyberphone.github.io/doc/web/yasmin.html"));
 
         addReferenceEntry(REF_JEF,
             "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress, " +
