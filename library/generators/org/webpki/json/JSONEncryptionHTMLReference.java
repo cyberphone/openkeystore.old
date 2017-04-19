@@ -207,12 +207,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 "used by the symmetric chipers. " +
                 "This difference is due to the way encryption meta-data is formatted. " +
                 "The process for creating <i>Additional Authenticated Data</i> is as follows:<ul>" +
-                "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
+                "<li>The <i>top level</i> properties <code>" + JSONDecryptionDecoder.IV_JSON + "</code>, " +
+                "<code>" + JSONDecryptionDecoder.TAG_JSON + "</code>, and <code>" + 
+                JSONDecryptionDecoder.CIPHER_TEXT_JSON +
+                "</code> (including leading <i>or</i> trailing <code>','</code> characters) " +
+                "<b>must</b> " + "be deleted from the JEF object.</li>" +
+                "<li style=\"padding-top:4pt\">Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
                 "having a value of x09, x0a, x0d or x20.</li>" +
-                "<li style=\"padding-top:4pt\">The properties <code>" + JSONDecryptionDecoder.IV_JSON + "</code>, " +
-                "<code>" + JSONDecryptionDecoder.TAG_JSON + "</code>, and <code>" + JSONDecryptionDecoder.CIPHER_TEXT_JSON +
-                "</code> <b>must</b> " + "be removed and the JEF object be " +
-                "<i>recreated</i> using the actual text left after applying the previous measures.</li></ul>" +
+                "<li style=\"padding-top:4pt\">Now the JEF object <b>must</b> be " +
+                "<i>recreated</i> using the actual text left after applying the previous measures.</li>" +
+                "</ul>" +
                 "Applied on the <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT +
                 "</a>, a conforming JEF <i>Additional Authenticated Data</i> process should return the following JSON string:" +
                 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" + formattedAuthData + "</code></div>" +
