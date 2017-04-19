@@ -1,0 +1,16 @@
+{
+  "algorithm": "A128CBC-HS256",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES",
+    "keyId": "mykey",
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "hf9TQtzkc8jv8jU6ZQu6NRH8dX31Grq5kFUQmDJLwUQ",
+      "y": "Oh0gqJYobURCOfEoS_wS8930JPV656dWpMgcdnbKB3Q"
+    }
+  },
+  "iv": "YejK0pSarqXS8aFZM7cFEA",
+  "tag": "aY0uf4We4CBrLZD6rBo_4w",
+  "cipherText": "TNUO2x3fqbkaew1kXjm6a1toKaQOzcoM5ELwWLMuNAE"
+}

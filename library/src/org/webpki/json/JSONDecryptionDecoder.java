@@ -19,6 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
@@ -74,6 +75,8 @@ public class JSONDecryptionDecoder {
     private byte[] encryptedData;
     
     private String providerName;
+    
+    private boolean sharedSecretMode;
 
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
 
@@ -96,11 +99,11 @@ public class JSONDecryptionDecoder {
     }
 
     public boolean isSharedSecret() {
-        return publicKey == null;
+        return sharedSecretMode;
     }
 
     public JSONDecryptionDecoder require(boolean publicKeyEncryption) throws IOException {
-        if (publicKeyEncryption == isSharedSecret()) {
+        if (publicKeyEncryption == sharedSecretMode) {
             throw new IOException((publicKeyEncryption ? "Missing" : "Unexpected") + " public key");
         }
         return this;
@@ -148,7 +151,11 @@ public class JSONDecryptionDecoder {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(ENCRYPTED_KEY_JSON));
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
-            publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
+            if (encryptedKey.hasProperty(JSONSignatureDecoder.KEY_ID_JSON)){
+                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
+            } else {
+                publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
+            }
             if (keyEncryptionAlgorithm.isRsa()) {
                 encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
             } else {
@@ -156,6 +163,7 @@ public class JSONDecryptionDecoder {
                         (ECPublicKey) encryptedKey.getObject(EPHEMERAL_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
         } else {
+            sharedSecretMode = true;
             keyId = rd.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
         }
         encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
@@ -176,25 +184,29 @@ public class JSONDecryptionDecoder {
         return localDecrypt(dataDecryptionKey);
     }
 
+    public byte[] getDecryptedData(PrivateKey privateKey) throws IOException, GeneralSecurityException {
+        require(true);
+        return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
+                EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
+                                             encryptedKeyData,
+                                             privateKey,
+                                             providerName)
+                                                           :
+                EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
+                                                    dataEncryptionAlgorithm,
+                                                    ephemeralPublicKey,
+                                                    privateKey,
+                                                    providerName));
+    }
+
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
             throws IOException, GeneralSecurityException {
-        require(true);
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
             if (decryptionKey.getPublicKey().equals(publicKey)) {
                 notFound = false;
                 if (decryptionKey.getKeyEncryptionAlgorithm().equals(keyEncryptionAlgorithm)) {
-                    return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
-                            EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
-                                                         encryptedKeyData,
-                                                         decryptionKey.getPrivateKey(),
-                                                         providerName)
-                            :
-                            EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
-                                                                dataEncryptionAlgorithm,
-                                                                ephemeralPublicKey,
-                                                                decryptionKey.getPrivateKey(),
-                                                                providerName));
+                    return getDecryptedData(decryptionKey.getPrivateKey());
                 }
             }
         }

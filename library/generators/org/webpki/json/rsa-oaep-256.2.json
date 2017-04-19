@@ -1,0 +1,11 @@
+{
+  "algorithm": "A128CBC-HS256",
+  "encryptedKey": {
+    "algorithm": "RSA-OAEP-256",
+    "keyId": "mykey",
+    "cipherText": "w8ErlK0J8m7KYc0Fhobn4ip08ZqUYrnprKJUtg2jmwwqlogCuPFbDr7PSTdPyvcTQAyEOJEOd1i2sBgkAUBS0FjKdLcRGwsNxZxR46hgraWZHsJ2KOcZhawWmGYuE0UyDxPKLcKpUFDEZGiCpQu-5N4oAYuHMjfY19at0cR8J1U00SgQjPq_CS70KiyPiA-8fAYyqFLr5MwmgaXFiLcZwwjTymYGBnR8eq193Nc0h2KrBYlDx7tOaFm-xN-K1U4c-kDCw19MF9_4vkIsIUFGc6qMH8HxmpD-VmY4xJ2mm7amO7aE558Ukhp2kwTQxis0lqInybtioOt_QsjlbTRHog"
+  },
+  "iv": "aPeRyQvxfvvlWYGj9mGIYg",
+  "tag": "2iLGVl_zYbjCbyR9oaVclQ",
+  "cipherText": "BzWGqvPbmumyfebz6rUZCNGRNhuVIddMSYY1Qi3NHUA"
+}

@@ -17,18 +17,24 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.KeyPair;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
+
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -107,6 +113,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         CustomCryptoProvider.forcedLoad(true);
 
         JSONObjectReader ecdhEncryption = readJSON("ecdh-es.json");
+        JSONObjectReader ecdhEncryption2 = readJSON("ecdh-es.2.json");
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONDecryptionDecoder.TAG_JSON);
         authData.removeProperty(JSONDecryptionDecoder.IV_JSON);
@@ -123,6 +130,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONDecryptionDecoder dec = ecdhEncryption.getEncryptionObject();
         JSONObjectReader ecprivatekey = readJSON("ecprivatekey.jwk");
         KeyPair keyPair = ecprivatekey.getKeyPair();
+        verifyDecryption(ecdhEncryption2.getEncryptionObject().getDecryptedData(keyPair.getPrivate()));
         Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
         keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
         JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
@@ -132,6 +140,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
         dec = rsaEncryption.getEncryptionObject();
         verifyDecryption(dec.getDecryptedData(keys));
+        JSONObjectReader rsaEncryption2 = readJSON("rsa-oaep-256.2.json");
+        dec = rsaEncryption2.getEncryptionObject();
+        verifyDecryption(dec.getDecryptedData(keyPair.getPrivate()));
         JSONObjectReader aesEncryption = readJSON("a128cbc-hs256.json");
         dec = aesEncryption.getEncryptionObject();
         verifyDecryption(dec.getDecryptedData(Base64URL.decode(JEF_SYM_KEY)));
@@ -152,7 +163,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .append(
             " specification and supports a <i>subset</i> of the same algorithms ")
           .append(json.createReference(JSONBaseHTML.REF_JWA))
-          .append(". Public key are expressed as JWK ")
+          .append(". Public keys are represented as JWK ")
           .append(json.createReference(JSONBaseHTML.REF_JWK))
           .append(" objects while the encryption container itself utilizes JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
@@ -217,14 +228,20 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
             " can be decrypted by the following private key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-           formatCode(ecprivatekey) + LINE_SEPARATOR +
+           formatCode(ecprivatekey) +
+           "Alternative ECDH encryption object <i>using the same private key</i> but using a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+           "</code> for identifying the public key instead of providing it in-line:" +
+           formatCode(ecdhEncryption2) + LINE_SEPARATOR +
            "AES encrypted data using RSA for key encryption:" +
            formatCode(rsaEncryption) +
            "Matching RSA private (decryption) key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-           formatCode(rsaprivatekey) + LINE_SEPARATOR +
+           formatCode(rsaprivatekey) +
+           "Alternative RSA encryption object <i>using the same private key</i> but using a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+           "</code> for identifying the public key instead of providing it in-line:" +
+           formatCode(rsaEncryption2) + LINE_SEPARATOR +
            "AES encrypted data relying on a known symmetric key:" +
-           formatCode(aesEncryption) + 
+           formatCode(aesEncryption) +
            "Matching AES key, here in Base64URL notation:" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_SYM_KEY +
            "&quot;</code></div>");
@@ -232,7 +249,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addReferenceTable();
         
         json.addDocumentHistoryLine("2016-08-03", "0.3", "Initial publication in HTML5");
-        json.addDocumentHistoryLine("2017-04-16", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
+        json.addDocumentHistoryLine("2017-04-19", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
 
         json.addParagraphObject("Author").append("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
@@ -312,6 +329,17 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .addString("</li></ul>");
         
         json.addSubItemTable(ECDH_PROPERTIES)
+            .newRow()
+        .newColumn()
+            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+        .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+        .newColumn()
+             .setChoice (true, 2)
+        .newColumn()
+            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                   "</code> property is defined, it is supposed to identify the static EC key pair.")
         .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -320,7 +348,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
         .newColumn()
-          .addString("EC public key.")
+          .addString("Static EC public key.")
         .newRow()
         .newColumn()
           .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
@@ -329,9 +357,20 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
         .newColumn()
-          .addString("EC public key.");
+          .addString("Ephemeral EC public key.");
 
         json.addSubItemTable(RSA_PROPERTIES)
+            .newRow()
+        .newColumn()
+            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+        .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+        .newColumn()
+             .setChoice (true, 2)
+        .newColumn()
+            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                   "</code> property is defined, it is supposed to identify the RSA key pair.")
         .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)

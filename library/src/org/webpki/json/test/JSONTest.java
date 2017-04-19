@@ -59,11 +59,13 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
+
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONOutputFormats;
@@ -2354,7 +2356,7 @@ public class JSONTest {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
         EXPECTED("Expected '"),
-        SYNTAX("Undecodable argument");
+        SYNTAX("Syntax error");
 
         String mess;
 
@@ -2715,6 +2717,7 @@ public class JSONTest {
         badArgument(".");
         badArgument("e-3");
         badArgument("flase");
+        badArgument("+1");
         expected_error = PARSER_ERR.EXPECTED;
         badArgument("1.0 e4");
         floatingPoint("1.0e4", 1.0e4);
@@ -2723,7 +2726,6 @@ public class JSONTest {
         floatingPoint("0.00000000000000000001", 1.0e-20);
         floatingPoint("1.0e4", 1.0e4);
         floatingPoint("-0.0", -0.0);
-        floatingPoint("+0.0", +0.0);
         floatingPoint(".1", .1);
         floatingPoint("1.", 1.0);
         integerValue("+1", true);
@@ -3367,7 +3369,7 @@ public class JSONTest {
             new JSONObjectWriter().setNumberAsText("value", "0.0000000000001-");
             fail("bad number");
         } catch (IOException e) {
-            checkException(e, "Undecodable argument: 0.0000000000001-");
+            checkException(e, "Syntax error: 0.0000000000001-");
         }
         try {
             new JSONObjectWriter().setNumberAsText("value", "0,6");
@@ -3493,6 +3495,7 @@ public class JSONTest {
         String encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
                                                                  DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                                  bob.getPublic(),
+                                                                 null,
                                                                  KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
@@ -3501,14 +3504,36 @@ public class JSONTest {
 
         encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
                                                           DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                          bob.getPublic(),
+                                                          "mykey",
+                                                          KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
+        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject();
+        assertTrue("kid", decDec.getKeyId().equals("mykey"));
+        assertTrue("Bad JOSE ECDH",
+                unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(bob.getPrivate())).toString()));
+
+        encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                                                          DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                           malletKeys.getPublic(),
+                                                          null,
                                                           KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
                         .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()
                                 .getDecryptedData(decryptionKeys)).toString()));
 
-        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+        encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                malletKeys.getPublic(),
+                "mykey",
+                KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
+        decDec = JSONParser.parse(encJson).getEncryptionObject();
+        assertTrue("kid", decDec.getKeyId().equals("mykey"));
+        assertTrue("Bad JOSE RSA",
+                unEncJson.toString()
+                    .equals(JSONParser.parse(decDec.getDecryptedData(malletKeys.getPrivate())).toString()));
+
+KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());
         keyAgreement.doPhase(bob.getPublic(), true);
         assertTrue("Bad ECDH", Base64URL.encode(keyAgreement.generateSecret()).equals(ECDH_RESULT_WITHOUT_KDF));

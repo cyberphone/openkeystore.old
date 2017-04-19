@@ -779,6 +779,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @param unencryptedData Data to be encrypted
      * @param dataEncryptionAlgorithm Data encryption algorithm
      * @param keyEncryptionKey Key encryption key
+     * @param optionalKeyId If defined it replaces public key data
      * @param keyEncryptionAlgorithm Key encryption algorithm
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
@@ -787,12 +788,17 @@ import org.webpki.json.JSONSignatureDecoder;
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                           PublicKey keyEncryptionKey,
+                                                          String optionalKeyId,
                                                           KeyEncryptionAlgorithms keyEncryptionAlgorithm)
             throws IOException, GeneralSecurityException {
         JSONObjectWriter encryptedKey = new JSONObjectWriter()
                 .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
         byte[] dataEncryptionKey = null;
-        encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
+        if (optionalKeyId == null) {
+            encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
+        } else {
+            encryptedKey.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
+        }
         if (keyEncryptionAlgorithm.isRsa()) {
             dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dataEncryptionAlgorithm);
             encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,

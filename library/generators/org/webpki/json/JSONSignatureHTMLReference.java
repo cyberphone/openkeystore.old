@@ -47,12 +47,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
         json.addParagraphObject("Introduction").append("JCS is a scheme for signing data expressed as JSON ")
           .append(json.createReference(JSONBaseHTML.REF_JSON))
-          .append(" objects. " +
-            "It is loosely modeled after XML&nbsp;DSig's ")
+          .append(" objects, loosely modeled after XML&nbsp;DSig's ")
           .append(json.createReference(JSONBaseHTML.REF_XMLDSIG))
           .append(" &quot;enveloped&quot; signatures. " +
             "Compared to its XML counterpart JCS is quite primitive but on the other hand it has proved to be " +
-            "simple to implement and use.  That is, JCS follows the &quot;spirit&quot; of JSON." +
+            "simple to implement and use." +
             Types.LINE_SEPARATOR +
             "Unlike JWS ")
           .append(json.createReference(JSONBaseHTML.REF_JWS))
@@ -67,14 +66,14 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "However, version 6 of ECMAScript ")
            .append(json.createReference(JSONBaseHTML.REF_ES6))
            .append(" introduced a <i>predictable serialization</i> scheme which enables both <i>data</i> " +
-            "and <i>header</i> information to be featured as clear text." + Types.LINE_SEPARATOR +
+            "and <i>header information</i> to be featured as clear text." + Types.LINE_SEPARATOR +
             "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
           .append(json.createReference(JSONBaseHTML.REF_JWS))
           .append(", JCS supports the same algorithms ")
           .append(json.createReference(JSONBaseHTML.REF_JWA))
           .append(" as well as using JWK ")
           .append(json.createReference(JSONBaseHTML.REF_JWK))
-          .append(" for public key data. " + Types.LINE_SEPARATOR +
+          .append(" for representing public key data. " + Types.LINE_SEPARATOR +
             "Since JCS is rooted in ECMAScript" +
             ", JCS may also be used for &quot;in-object&quot; JavaScript signatures, " +
              "making JCS suitable for HTML5 applications. See " +
@@ -121,9 +120,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<li>The original property serialization order <b>must</b> be <i>preserved</i>.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
-            "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub-object." +
+            "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object." +
             "</ul>The normalization steps are as follows:<ul>" +
-            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
+            "<li>The <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property " +
+            "(including leading <i>or</i> trailing <code>','</code>) <b>must</b> be deleted from the " +
+            "<code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object.</li>" +
+            "<li style=\"padding-top:4pt\">Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be adjusted as follows: " +
@@ -132,7 +134,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
             "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type must <i>already before validation</i> be "+
+            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type <b>must</b> <i>already before validation</i> be "+
             "serialized according to ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
             " including the V8 " +
@@ -145,10 +147,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
             "\"><span style=\"white-space:nowrap\">" +
             ECMASCRIPT_MODE + "</span></a>." + LINE_SEPARATOR +
-            "Note that the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> " +
-            "property including the comma (leading or trailing depending on the position of <code>" +
-             JSONSignatureDecoder.VALUE_JSON + "</code> " + " in the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
-             "</code> object), <b>must</b> be <i>excluded</i> from the normalization process.</li></ul>" +
+         "</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
             "{&quot;now&quot;:&quot;2017-04-16T11:23:06Z&quot;,&quot;escapeMe&quot;:&quot;" +
@@ -386,7 +385,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2014-12-19", "0.57", "Added an interoperability section");
         json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
-        json.addDocumentHistoryLine("2017-04-16", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
+        json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
