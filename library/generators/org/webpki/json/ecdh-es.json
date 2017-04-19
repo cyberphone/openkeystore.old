@@ -2,20 +2,15 @@
   "algorithm": "A128CBC-HS256",
   "encryptedKey": {
     "algorithm": "ECDH-ES",
-    "publicKey": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-      "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw"
-    },
+    "keyId": "20170101:mybank:ec",
     "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "cVuSTKWBar1dfOfVuy8rRH8ofzrDzhiUJ533fmcLpYE",
-      "y": "TklGGp4pyL8eqB-jlAyR6y9yn2xwIkYAT1wkvSvdSe0"
+      "x": "ZuESJhuxPPTuloRigAh0aWZrgfFpBgjKQO3qzPFKiKs",
+      "y": "_SwkU496ZCpmwiN2WvVVGFMfUstH1mGSZIbcvTtzdtc"
     }
   },
-  "iv": "AF-G9ts4CLJjhxfKOZCGfQ",
-  "tag": "U3W77BkRM9LIGAtmVDqf_Q",
-  "cipherText": "J_AGbjlmPJ8dTVCM1fgcseK_V7kzUwT6-CRGGN8B7JA"
+  "iv": "FwpBD07mlfkaoIcrEZouig",
+  "tag": "MQYMFMpDtjmlxPop42hoQg",
+  "cipherText": "ito6qBV4xYTIv7C4-vNs3d95NNRpCZLC6dhkInrWn8M"
 }
