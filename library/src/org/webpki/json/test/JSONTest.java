@@ -3487,9 +3487,18 @@ public class JSONTest {
         mallet.initialize(2048);
         KeyPair malletKeys = mallet.generateKeyPair();
         Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
-        decryptionKeys.add(new DecryptionKeyHolder(alice.getPublic(), alice.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
-        decryptionKeys.add(new DecryptionKeyHolder(bob.getPublic(), bob.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
-        decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(), malletKeys.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
+        decryptionKeys.add(new DecryptionKeyHolder(alice.getPublic(), 
+                                                   alice.getPrivate(),
+                                                   KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                   "alice"));
+        decryptionKeys.add(new DecryptionKeyHolder(bob.getPublic(),
+                                                   bob.getPrivate(),
+                                                   KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                   "bob"));
+        decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(),
+                                                   malletKeys.getPrivate(),
+                                                   KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
+                                                   "mallet"));
 
         JSONObjectReader unEncJson = JSONParser.parse("{\"hi\":\"\\u20ac\\u00e5\\u00f6k\"}");
         String encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
@@ -3505,12 +3514,12 @@ public class JSONTest {
         encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
                                                           DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                           bob.getPublic(),
-                                                          "mykey",
+                                                          "bob",
                                                           KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).toString();
         JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject();
-        assertTrue("kid", decDec.getKeyId().equals("mykey"));
+        assertTrue("kid", decDec.getKeyId().equals("bob"));
         assertTrue("Bad JOSE ECDH",
-                unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(bob.getPrivate())).toString()));
+                unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
                                                           DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
@@ -3525,10 +3534,10 @@ public class JSONTest {
         encJson = JSONObjectWriter.createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
                 DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                 malletKeys.getPublic(),
-                "mykey",
+                "mallet",
                 KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).toString();
         decDec = JSONParser.parse(encJson).getEncryptionObject();
-        assertTrue("kid", decDec.getKeyId().equals("mykey"));
+        assertTrue("kid", decDec.getKeyId().equals("mallet"));
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()
                     .equals(JSONParser.parse(decDec.getDecryptedData(malletKeys.getPrivate())).toString()));

@@ -24,6 +24,8 @@ public class DecryptionKeyHolder {
     PublicKey publicKey;
 
     PrivateKey privateKey;
+    
+    String optionalKeyId;
 
     KeyEncryptionAlgorithms keyEncryptionAlgorithm;
 
@@ -35,13 +37,21 @@ public class DecryptionKeyHolder {
         return privateKey;
     }
 
+    public String getKeyId() {
+        return optionalKeyId;
+    }
+
     public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
         return keyEncryptionAlgorithm;
     }
 
-    public DecryptionKeyHolder(PublicKey publicKey, PrivateKey privateKey, KeyEncryptionAlgorithms keyEncryptionAlgorithm) {
+    public DecryptionKeyHolder(PublicKey publicKey, 
+                               PrivateKey privateKey,
+                               KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                               String optionalKeyId) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+        this.optionalKeyId = optionalKeyId;
     }
 }

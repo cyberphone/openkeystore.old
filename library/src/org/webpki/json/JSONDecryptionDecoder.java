@@ -152,8 +152,8 @@ public class JSONDecryptionDecoder {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
             if (encryptedKey.hasProperty(JSONSignatureDecoder.KEY_ID_JSON)){
-                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
-            } else {
+                keyId = encryptedKey.getString(JSONSignatureDecoder.KEY_ID_JSON);
+            } else if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
                 publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
             }
             if (keyEncryptionAlgorithm.isRsa()) {
@@ -203,7 +203,8 @@ public class JSONDecryptionDecoder {
             throws IOException, GeneralSecurityException {
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
-            if (decryptionKey.getPublicKey().equals(publicKey)) {
+            if ((decryptionKey.getKeyId() != null && decryptionKey.getKeyId().equals(keyId)) || 
+                decryptionKey.getPublicKey().equals(publicKey)) {
                 notFound = false;
                 if (decryptionKey.getKeyEncryptionAlgorithm().equals(keyEncryptionAlgorithm)) {
                     return getDecryptedData(decryptionKey.getPrivateKey());

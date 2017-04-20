@@ -114,8 +114,25 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     public static void main (String args[]) throws Exception {
         CustomCryptoProvider.forcedLoad(true);
 
+        Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
+
+        JSONObjectReader ecprivatekey = readJSON("ecprivatekey.jwk");
+        KeyPair keyPair = ecprivatekey.getKeyPair();
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
+                                         keyPair.getPrivate(),
+                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                         JEF_EC_KEY_ID));
+
+        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
+        keyPair = rsaprivatekey.getKeyPair();
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
+                                         keyPair.getPrivate(),
+                                         KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
+                                         JEF_RSA_KEY_ID));
+
         JSONObjectReader ecdhEncryption = readJSON("ecdh-es.json");
-        JSONObjectReader ecdhEncryption2 = readJSON("ecdh-es.2.json");
+        verifyDecryption(ecdhEncryption.getEncryptionObject().getDecryptedData(keys));
+
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONDecryptionDecoder.TAG_JSON);
         authData.removeProperty(JSONDecryptionDecoder.IV_JSON);
@@ -129,25 +146,18 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             }
         }
         formattedAuthData = formattedAuthData.replace("\"", "&quot;");
-        JSONDecryptionDecoder dec = ecdhEncryption2.getEncryptionObject();
-        JSONObjectReader ecprivatekey = readJSON("ecprivatekey.jwk");
-        KeyPair keyPair = ecprivatekey.getKeyPair();
-        verifyDecryption(ecdhEncryption.getEncryptionObject().getDecryptedData(keyPair.getPrivate()));
-        Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID));
-        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
-        keyPair = rsaprivatekey.getKeyPair();
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), keyPair.getPrivate(), KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID));
-        verifyDecryption(dec.getDecryptedData(keys));
-        JSONObjectReader rsaEncryption2 = readJSON("rsa-oaep-256.2.json");
-        dec = rsaEncryption2.getEncryptionObject();
-        verifyDecryption(dec.getDecryptedData(keys));
+
+        JSONObjectReader ecdhEncryption2 = readJSON("ecdh-es.2.json");
+        verifyDecryption(ecdhEncryption2.getEncryptionObject().getDecryptedData(keys));
+        
         JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
-        dec = rsaEncryption.getEncryptionObject();
-        verifyDecryption(dec.getDecryptedData(keyPair.getPrivate()));
+        verifyDecryption(rsaEncryption.getEncryptionObject().getDecryptedData(keys));
+
+        JSONObjectReader rsaEncryption2 = readJSON("rsa-oaep-256.2.json");
+        verifyDecryption(rsaEncryption2.getEncryptionObject().getDecryptedData(keys));
+
         JSONObjectReader aesEncryption = readJSON("a128cbc-hs256.json");
-        dec = aesEncryption.getEncryptionObject();
-        verifyDecryption(dec.getDecryptedData(Base64URL.decode(JEF_SYM_KEY)));
+        verifyDecryption(aesEncryption.getEncryptionObject().getDecryptedData(Base64URL.decode(JEF_SYM_KEY)));
 
         json = new JSONBaseHTML(args, "JEF - JSON Encryption Format");
         
@@ -346,7 +356,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
-             .setChoice (true, 2)
+             .setChoice (false, 2)
         .newColumn()
             .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                    "</code> property is defined, it is supposed to identify the static EC key pair.")
@@ -367,7 +377,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
         .newColumn()
-          .addString("Ephemeral EC public key.");
+          .addString("Ephemeral EC public key.")
+            .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                  "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
+                  "</code> are defined, the static EC key pair to use is assumed to known by the recepient.");
 
         json.addSubItemTable(RSA_PROPERTIES)
             .newRow()
@@ -377,7 +390,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
-             .setChoice (true, 2)
+             .setChoice (false, 2)
         .newColumn()
             .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                    "</code> property is defined, it is supposed to identify the RSA key pair.")
@@ -398,7 +411,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn()
         .newColumn()
-          .addString("Encrypted symmetric key.");
+          .addString("Encrypted symmetric key.")
+              .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
+                "</code> are defined, the RSA key pair to use is assumed to known by the recepient.");
 
         json.addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
         .newRow()
