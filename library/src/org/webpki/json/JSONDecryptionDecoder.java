@@ -151,10 +151,10 @@ public class JSONDecryptionDecoder {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(ENCRYPTED_KEY_JSON));
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
-            if (encryptedKey.hasProperty(JSONSignatureDecoder.KEY_ID_JSON)){
-                keyId = encryptedKey.getString(JSONSignatureDecoder.KEY_ID_JSON);
-            } else if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
+            if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
                 publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
+            } else {
+                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
             }
             if (keyEncryptionAlgorithm.isRsa()) {
                 encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
