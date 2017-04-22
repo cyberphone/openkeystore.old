@@ -17,24 +17,19 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.KeyPair;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
-
+import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
-
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
@@ -48,6 +43,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static JSONBaseHTML json;
     static RowInterface row;
     static String ECDH_PROPERTIES       = "Additional ECDH properties";
+    static String ECDH_KW_PROPERTIES    = "Additional ECDH+KW properties";
     static String RSA_PROPERTIES        = "Additional RSA encryption properties";
     static String JCS_PUBLIC_KEY_EC     = "Additional EC key properties";
     static String JCS_PUBLIC_KEY_RSA    = "Additional RSA key properties";
@@ -275,17 +271,22 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                                                  "of the OpenKeyStore project " +
                                                  json.createReference(JSONBaseHTML.REF_OPENKEYSTORE)  + ".");
 
-        StringBuffer dataEnccryptionAlgorithm = new StringBuffer("Data encryption algorithm. Currently the following JWA ")
-            .append(json.createReference(JSONBaseHTML.REF_JWA))
-            .append(" algorithms are recognized:<ul>");
-        for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
-            dataEnccryptionAlgorithm.append("<li><code>")
-                                    .append(dea.toString())
-                                    .append("</code></li>");
-        }
-
-        preAmble(ENCRYPTED_DATA)
-            .addString(dataEnccryptionAlgorithm.append("</ul>").toString())
+    preAmble(ENCRYPTED_DATA)
+        .addString("Data encryption algorithm. Currently the following JWA " +
+            json.createReference(JSONBaseHTML.REF_JWA) +
+            " algorithms are recognized:<ul>")
+        .newExtensionRow(new Extender() {
+            @Override
+            public Column execute(Column column) throws IOException {
+                for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+                    column.addString("<li><code>")
+                          .addString(dea.toString())
+                          .addString("</code></li>");
+                }
+                return column;
+            }
+        })
+        .addString("</ul>")
             .newRow()
         .newColumn()
             .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
@@ -340,13 +341,28 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                       "</code> are defined, the (symmetric) encryption key is assumed to known by the recepient.");
           
         preAmble(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
-                .addString("Key encryption algorithm. Currently the following JWA " +
-                          json.createReference (JSONBaseHTML.REF_JWA) + " algorithms are recognized:<ul>" +
-                 "<li>" + JSONBaseHTML.codeVer(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID.toString(), 16) + "See: ")
-                .addLink (ECDH_PROPERTIES)
-        .addString("</li><li>" + JSONBaseHTML.codeVer(KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID.toString(), 16) + "See: ")
-        .addLink (RSA_PROPERTIES)
-        .addString("</li></ul>");
+            .addString("Key encryption algorithm. Currently the following JWA " +
+                                json.createReference (JSONBaseHTML.REF_JWA) +
+                                " algorithms are recognized:<ul>")
+            .newExtensionRow(new Extender() {
+                @Override
+                public Column execute(Column column) throws IOException {
+                    for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
+                        column.addString(new StringBuffer("<li>")
+                                               .append(JSONBaseHTML.codeVer(kea.toString(), 16))
+                                               .append("See: ").toString());
+                        String link = ECDH_PROPERTIES;
+                        if (kea.isRsa()) {
+                            link = RSA_PROPERTIES;
+                        } else if (kea.isKeyWrap()) {
+                            link = ECDH_KW_PROPERTIES;
+                        }
+                        column.addLink(link).addString("</li>");
+                    }
+                    return column;
+                }
+            })
+            .addString("</ul>");
         
         json.addSubItemTable(ECDH_PROPERTIES)
             .newRow()
@@ -378,6 +394,49 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Ephemeral EC public key.")
+            .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                  "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
+                  "</code> are defined, the static EC key pair to use is assumed to known by the recepient.");
+
+        json.addSubItemTable(ECDH_KW_PROPERTIES)
+            .newRow()
+        .newColumn()
+            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+        .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+        .newColumn()
+             .setChoice (false, 2)
+        .newColumn()
+            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+                   "</code> property is defined, it is supposed to identify the static EC key pair.")
+        .newRow()
+        .newColumn()
+          .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
+        .newColumn()
+        .newColumn()
+          .addString("Static EC public key.")
+        .newRow()
+        .newColumn()
+          .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
+          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
+        .newColumn()
+        .newColumn()
+          .addString("Ephemeral EC public key.")
+        .newRow()
+        .newColumn()
+          .addProperty(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
+          .addSymbolicValue(JSONDecryptionDecoder.CIPHER_TEXT_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
+        .newColumn()
+        .newColumn()
+          .addString("Encrypted symmetric key.")
             .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                   "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
                   "</code> are defined, the static EC key pair to use is assumed to known by the recepient.");

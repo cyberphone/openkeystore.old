@@ -23,19 +23,21 @@ import java.io.IOException;
  */
 public enum DataEncryptionAlgorithms {
 
-    JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32),
-    JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64);
+    JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32, "HMACSHA256", false),
+    JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64, "HMACSHA512", false),
+    JOSE_A128GCM_ALG_ID       ("A128GCM",       16,  null,        true),
+    JOSE_A256GCM_ALG_ID       ("A256GCM",       32,  null,        true);
 
     String JsonName;
     int keyLength;
+    String jceNameOfTagHmac;
+    boolean gcm;
 
-    DataEncryptionAlgorithms(String JsonName, int keyLength) {
+    DataEncryptionAlgorithms(String JsonName, int keyLength, String jceNameOfTagHmac, boolean gcm) {
         this.JsonName = JsonName;
         this.keyLength = keyLength;
-    }
-
-    public int getKeyLength() {
-        return keyLength;
+        this.jceNameOfTagHmac = jceNameOfTagHmac;
+        this.gcm = gcm;
     }
 
     @Override

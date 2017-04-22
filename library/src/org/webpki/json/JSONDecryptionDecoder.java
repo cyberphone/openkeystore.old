@@ -74,8 +74,6 @@ public class JSONDecryptionDecoder {
 
     private byte[] encryptedData;
     
-    private String providerName;
-    
     private boolean sharedSecretMode;
 
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
@@ -87,11 +85,6 @@ public class JSONDecryptionDecoder {
             throw new IOException("Unknown encryption version: " + version);
         }
         return rd;
-    }
-
-    public void setProviderName(String providerName) throws IOException {
-        require(true);
-        this.providerName = providerName;
     }
 
     public PublicKey getPublicKey() {
@@ -156,9 +149,10 @@ public class JSONDecryptionDecoder {
             } else {
                 keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
             }
-            if (keyEncryptionAlgorithm.isRsa()) {
+            if (keyEncryptionAlgorithm.isKeyWrap()) {
                 encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
-            } else {
+            }
+            if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
                         (ECPublicKey) encryptedKey.getObject(EPHEMERAL_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
@@ -189,14 +183,13 @@ public class JSONDecryptionDecoder {
         return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
                 EncryptionCore.rsaDecryptKey(keyEncryptionAlgorithm,
                                              encryptedKeyData,
-                                             privateKey,
-                                             providerName)
+                                             privateKey)
                                                            :
                 EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
                                                     dataEncryptionAlgorithm,
                                                     ephemeralPublicKey,
                                                     privateKey,
-                                                    providerName));
+                                                    encryptedKeyData));
     }
 
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)

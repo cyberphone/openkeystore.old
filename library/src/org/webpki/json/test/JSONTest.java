@@ -3477,7 +3477,7 @@ public class JSONTest {
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                         alice.getPublic());
         assertTrue("Bad ECDH",
-                ArrayUtil.compare(ecdhRes.getSharedSecret(),
+                ArrayUtil.compare(ecdhRes.getDataEncryptionKey(),
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                                             DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                             ecdhRes.getEphemeralKey(),

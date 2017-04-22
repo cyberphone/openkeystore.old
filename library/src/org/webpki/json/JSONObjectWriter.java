@@ -810,9 +810,12 @@ import org.webpki.json.JSONSignatureDecoder;
                     EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
                                                       dataEncryptionAlgorithm,
                                                       keyEncryptionKey);
-            dataEncryptionKey = result.getSharedSecret();
+            dataEncryptionKey = result.getDataEncryptionKey();
             encryptedKey.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
                                    createCorePublicKey(result.getEphemeralKey(), AlgorithmPreferences.JOSE));
+            if (keyEncryptionAlgorithm.isKeyWrap()) {
+                encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getEncryptedKeyData());
+            }
         }
         return new JSONObjectWriter().encryptData(unencryptedData,
                                                   dataEncryptionAlgorithm,

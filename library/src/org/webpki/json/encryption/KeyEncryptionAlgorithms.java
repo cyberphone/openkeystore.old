@@ -23,19 +23,29 @@ import java.io.IOException;
  */
 public enum KeyEncryptionAlgorithms {
 
-    JOSE_ECDH_ES_ALG_ID      ("ECDH-ES",      false),
-    JOSE_RSA_OAEP_256_ALG_ID ("RSA-OAEP-256", true);
+    JOSE_ECDH_ES_ALG_ID        ("ECDH-ES",        false, false, -1),
+    JOSE_ECDH_ES_A128KW_ALG_ID ("ECDH-ES+A128KW", false, true,  16),
+    JOSE_ECDH_ES_A256KW_ALG_ID ("ECDH-ES+A256KW", false, true,  32),
+    JOSE_RSA_OAEP_256_ALG_ID   ("RSA-OAEP-256",   true,  true,  -1);
 
     String JsonName;
     boolean rsa;
+    boolean keyWrap;
+    int keyEncryptionKeyLength;
 
-    KeyEncryptionAlgorithms(String JsonName, boolean rsa) {
+    KeyEncryptionAlgorithms(String JsonName, boolean rsa, boolean keyWrap, int keyEncryptionKeyLength) {
         this.JsonName = JsonName;
         this.rsa = rsa;
+        this.keyWrap = keyWrap;
+        this.keyEncryptionKeyLength = keyEncryptionKeyLength;
     }
 
     public boolean isRsa() {
         return rsa;
+    }
+
+    public boolean isKeyWrap() {
+        return keyWrap;
     }
 
     @Override
