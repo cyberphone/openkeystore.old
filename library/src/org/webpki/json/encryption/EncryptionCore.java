@@ -99,7 +99,7 @@ public final class EncryptionCore {
                                  byte[] iv,
                                  byte[] authenticatedData,
                                  DataEncryptionAlgorithms dataEncryptionAlgorithm) throws GeneralSecurityException {
-        int tagLength = dataEncryptionAlgorithm.keyLength / 2;
+        int tagLength = dataEncryptionAlgorithm.tagLength;
         byte[] al = new byte[8];
         int value = authenticatedData.length * 8;
         for (int q = 24, i = 4; q >= 0; q -= 8, i++) {
@@ -199,17 +199,31 @@ public final class EncryptionCore {
         }
     }
 
+    private static void check(byte[] parameter,
+                              String parameterName,
+                              int expectedLength,
+                              DataEncryptionAlgorithms dataEncryptionAlgorithm)
+            throws GeneralSecurityException {
+        if (parameter == null) {
+            throw new GeneralSecurityException("Parameter \"" + parameterName +
+                                               "\"=null for " +
+                                               dataEncryptionAlgorithm);
+        }
+        if (parameter.length != expectedLength) {
+            throw new GeneralSecurityException("Incorrect parameter \"" + parameterName +
+                                               "\" length (" + parameter.length + ") for " +
+                                               dataEncryptionAlgorithm);
+        }
+    }
+
     public static AuthEncResult contentEncryption(DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                   byte[] key,
                                                   byte[] plainText,
                                                   byte[] authenticatedData) throws GeneralSecurityException {
-        if (key.length != dataEncryptionAlgorithm.keyLength) {
-            throw new GeneralSecurityException("Incorrect key length (" +
-                                               key.length + ") for " + dataEncryptionAlgorithm);
-        }
+        check(key, "key", dataEncryptionAlgorithm.keyLength, dataEncryptionAlgorithm);
+        byte[] iv = new byte[dataEncryptionAlgorithm.ivLength];
+        new SecureRandom().nextBytes(iv);
         if (dataEncryptionAlgorithm.gcm) {
-            byte[] iv = new byte[AES_GCM_IV_LENGTH];
-            new SecureRandom().nextBytes(iv);
             byte[] cipherOutput = aesGcmCore(Cipher.ENCRYPT_MODE, key, iv, authenticatedData, plainText);
             int tagPos = cipherOutput.length - AES_GCM_AUTH_TAG_LENGTH;
             byte[] cipherText = ArrayUtil.copy(cipherOutput, tagPos);
@@ -217,8 +231,6 @@ public final class EncryptionCore {
             System.arraycopy(cipherOutput, tagPos, tag, 0, AES_GCM_AUTH_TAG_LENGTH);
             return new AuthEncResult(iv, tag, cipherText);
         }
-        byte[] iv = new byte[AES_CBC_IV_LENGTH];
-        new SecureRandom().nextBytes(iv);
         byte[] cipherText = aesCbcCore(Cipher.ENCRYPT_MODE, key, iv, plainText, dataEncryptionAlgorithm);
         return new AuthEncResult(iv, getTag(key, cipherText, iv, authenticatedData, dataEncryptionAlgorithm), cipherText);
     }
@@ -235,8 +247,11 @@ public final class EncryptionCore {
                                            byte[] iv,
                                            byte[] authenticatedData,
                                            byte[] tag) throws GeneralSecurityException {
+        check(key, "key", dataEncryptionAlgorithm.keyLength, dataEncryptionAlgorithm);
+        check(iv, "iv", dataEncryptionAlgorithm.ivLength, dataEncryptionAlgorithm);
+        check(tag, "tag", dataEncryptionAlgorithm.tagLength, dataEncryptionAlgorithm);
         if (dataEncryptionAlgorithm.gcm) {
-            return aesGcmCore(Cipher.ENCRYPT_MODE, key, iv, authenticatedData, ArrayUtil.add(cipherText, tag));
+            return aesGcmCore(Cipher.DECRYPT_MODE, key, iv, authenticatedData, ArrayUtil.add(cipherText, tag));
         }
         if (!ArrayUtil.compare(tag, getTag(key, cipherText, iv, authenticatedData, dataEncryptionAlgorithm))) {
             throw new GeneralSecurityException("Authentication error on algorithm: " + dataEncryptionAlgorithm);
@@ -338,8 +353,7 @@ public final class EncryptionCore {
             derivedKey = cipher.unwrap(encryptedKeyData, "AES", Cipher.SECRET_KEY).getEncoded();
         }
         return derivedKey;
-     }
-
+    }
 
     public static EcdhSenderResult senderKeyAgreement(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                                       DataEncryptionAlgorithms dataEncryptionAlgorithm,

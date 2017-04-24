@@ -32,6 +32,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 
 import java.security.cert.X509Certificate;
 
@@ -40,6 +41,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
+
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.GregorianCalendar;
@@ -112,6 +114,15 @@ public class JSONTest {
     static final String STRING_LIST = "stringlist";
     static final String[] STRING_LIST_VALUE = {"one", "two", "three"};
     static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
+    
+    // From http://tools.ietf.org/html/rfc7520#section-5.4
+
+    static final String jwePlainText = 
+        "You can trust us to stick with you through thick and " +
+        "thin\u2013to the bitter end. And you can trust us to "+
+        "keep any secret of yours\u2013closer than you keep it " +
+        "yourself. But you cannot trust us to let you face trouble " +
+        "alone, and go off without a word. We are your friends, Frodo.";
 
     static final String[] ES6_NUMBERS = {
             "-3.3333333333333335E21", "-3.3333333333333335e+21",
@@ -3433,6 +3444,36 @@ public class JSONTest {
                    dea);
     }
 
+    byte[] genRandom(int size) {
+        byte[] random = new byte[size];
+        new SecureRandom().nextBytes(random);
+        return random;
+    }
+
+    void randomSymmetricEncryption() throws Exception{
+        byte[] authData = genRandom(20);
+        for (int i = 0; i < 10; i++) {
+            byte[] plainText = jwePlainText.getBytes("UTF-8");
+            for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+                byte[] key = genRandom(dea.getKeyLength());
+                EncryptionCore.AuthEncResult aer = 
+                        EncryptionCore.contentEncryption(dea,
+                                                         key, 
+                                                         plainText, 
+                                                         authData);
+                if (!ArrayUtil.compare(plainText,
+                                       EncryptionCore.contentDecryption(dea,
+                                                                        key, 
+                                                                        aer.getCipherText(), 
+                                                                        aer.getIv(), 
+                                                                        authData,
+                                                                        aer.getTag()))) {
+                    fail("compare " + dea);
+                }
+            }
+        }
+    }
+
     @Test
     public void Encryption() throws Exception {
 
@@ -3528,6 +3569,8 @@ public class JSONTest {
                    e256,
                    t256,
                    DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
+        
+        randomSymmetricEncryption();
 
         KeyPair bob = getKeyPairFromJwk(bobKey);
         KeyPair alice = getKeyPairFromJwk(aliceKey);

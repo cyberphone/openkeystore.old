@@ -23,19 +23,32 @@ import java.io.IOException;
  */
 public enum DataEncryptionAlgorithms {
 
-    JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32, "HMACSHA256", false),
-    JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64, "HMACSHA512", false),
-    JOSE_A128GCM_ALG_ID       ("A128GCM",       16,  null,        true),
-    JOSE_A256GCM_ALG_ID       ("A256GCM",       32,  null,        true);
+    JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32, EncryptionCore.AES_CBC_IV_LENGTH, 
+                               16,                                     "HMACSHA256", false),
+    JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64, EncryptionCore.AES_CBC_IV_LENGTH,
+                               32,                                     "HMACSHA512", false),
+    JOSE_A128GCM_ALG_ID       ("A128GCM",       16, EncryptionCore.AES_GCM_IV_LENGTH,
+                               EncryptionCore.AES_GCM_AUTH_TAG_LENGTH, null,         true),
+    JOSE_A256GCM_ALG_ID       ("A256GCM",       32, EncryptionCore.AES_GCM_IV_LENGTH,
+                               EncryptionCore.AES_GCM_AUTH_TAG_LENGTH, null,         true);
 
     String JsonName;
     int keyLength;
+    int ivLength;
+    int tagLength;
     String jceNameOfTagHmac;
     boolean gcm;
 
-    DataEncryptionAlgorithms(String JsonName, int keyLength, String jceNameOfTagHmac, boolean gcm) {
+    DataEncryptionAlgorithms(String JsonName,
+                             int keyLength,
+                             int ivLength,
+                             int tagLength,
+                             String jceNameOfTagHmac, 
+                             boolean gcm) {
         this.JsonName = JsonName;
         this.keyLength = keyLength;
+        this.ivLength = ivLength;
+        this.tagLength = tagLength;
         this.jceNameOfTagHmac = jceNameOfTagHmac;
         this.gcm = gcm;
     }
@@ -45,6 +58,18 @@ public enum DataEncryptionAlgorithms {
         return JsonName;
     }
 
+    public int getKeyLength() {
+        return keyLength;
+    }
+
+    public int getIvLength() {
+        return ivLength;
+    }
+
+    public int getTagLength() {
+        return tagLength;
+    }
+    
     public static DataEncryptionAlgorithms getAlgorithmFromString(String string) throws IOException {
         for (DataEncryptionAlgorithms algorithm : DataEncryptionAlgorithms.values()) {
             if (string.equals(algorithm.JsonName)) {
