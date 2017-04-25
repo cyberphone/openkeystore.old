@@ -25,9 +25,13 @@ public enum DataEncryptionAlgorithms {
 
     JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32, EncryptionCore.AES_CBC_IV_LENGTH, 
                                16,                                     "HMACSHA256", false),
+    JOSE_A192CBC_HS384_ALG_ID ("A192CBC-HS384", 48, EncryptionCore.AES_CBC_IV_LENGTH, 
+                               24,                                     "HMACSHA384", false),
     JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64, EncryptionCore.AES_CBC_IV_LENGTH,
                                32,                                     "HMACSHA512", false),
     JOSE_A128GCM_ALG_ID       ("A128GCM",       16, EncryptionCore.AES_GCM_IV_LENGTH,
+                               EncryptionCore.AES_GCM_AUTH_TAG_LENGTH, null,         true),
+    JOSE_A192GCM_ALG_ID       ("A192GCM",       24, EncryptionCore.AES_GCM_IV_LENGTH,
                                EncryptionCore.AES_GCM_AUTH_TAG_LENGTH, null,         true),
     JOSE_A256GCM_ALG_ID       ("A256GCM",       32, EncryptionCore.AES_GCM_IV_LENGTH,
                                EncryptionCore.AES_GCM_AUTH_TAG_LENGTH, null,         true);

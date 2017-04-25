@@ -1,0 +1,17 @@
+{
+  "algorithm": "A128GCM",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES+A128KW",
+    "keyId": "20170101:mybank:ec",
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "3mh9dxnb_sRAMAnOI4jqB4OFFWwpeMkcbPSGW8_-iUY",
+      "y": "hOAWi6hMjd8bejNLwho0qlUsNeCTzKf-YlUD04tbVww"
+    },
+    "cipherText": "JiYz5QLtNoOTLo9qdm3ec6fJ28jT8gEl"
+  },
+  "iv": "0giBNCmPK1qw6AFR",
+  "tag": "PoVJwlOpAF3vTDPlbvP4PQ",
+  "cipherText": "0f4E3AjMjKA6luksEgvdF9U1"
+}

@@ -119,6 +119,21 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                                          KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                          JEF_EC_KEY_ID));
 
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
+                                         keyPair.getPrivate(),
+                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID,
+                                         JEF_EC_KEY_ID));
+
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
+                                         keyPair.getPrivate(),
+                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A192KW_ALG_ID,
+                                         JEF_EC_KEY_ID));
+
+        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
+                                         keyPair.getPrivate(),
+                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A256KW_ALG_ID,
+                                         JEF_EC_KEY_ID));
+
         JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
         keyPair = rsaprivatekey.getKeyPair();
         keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
@@ -146,6 +161,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader ecdhEncryption2 = readJSON("ecdh-es.2.json");
         verifyDecryption(ecdhEncryption2.getEncryptionObject().getDecryptedData(keys));
         
+        JSONObjectReader ecdhEncryption3 = readJSON("ecdh-es.3.json");
+        verifyDecryption(ecdhEncryption3.getEncryptionObject().getDecryptedData(keys));
+
+        JSONObjectReader ecdhEncryption4 = readJSON("ecdh-es.4.json");
+        verifyDecryption(ecdhEncryption4.getEncryptionObject().getDecryptedData(keys));
+
+        JSONObjectReader ecdhEncryption5 = readJSON("ecdh-es.5.json");
+        verifyDecryption(ecdhEncryption5.getEncryptionObject().getDecryptedData(keys));
+
         JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
         verifyDecryption(rsaEncryption.getEncryptionObject().getDecryptedData(keys));
 
@@ -245,7 +269,19 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            "Alternative ECDH encryption object <i>using the same private key</i> " +
            "while providing the public key information in line, instead of using a <code>" +
            JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
-           formatCode(ecdhEncryption2) + LINE_SEPARATOR +
+           formatCode(ecdhEncryption2) +
+           "Alternative ECDH encryption object <i>using the same private key</i> " +
+           "while using a different set of " +
+           "algorithms both for key derivation and content encryption:" +
+           formatCode(ecdhEncryption3) +
+           "Alternative ECDH encryption object <i>using the same private key</i> " +
+           "while using a different set of " +
+           "algorithms both for key derivation and content encryption:" +
+           formatCode(ecdhEncryption4) +
+           "Alternative ECDH encryption object <i>using the same private key</i> " +
+           "while using a different set of " +
+           "algorithms both for key derivation and content encryption:" +
+           formatCode(ecdhEncryption5) + LINE_SEPARATOR +
            "AES encrypted data using RSA for key encryption:" +
            formatCode(rsaEncryption) +
            "Matching RSA private key (also known as <code>" +
@@ -266,10 +302,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         
         json.addDocumentHistoryLine("2016-08-03", "0.3", "Initial publication in HTML5");
         json.addDocumentHistoryLine("2017-04-19", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
+        json.addDocumentHistoryLine("2017-04-25", "0.5", "Added KW and GCM algorithms");
 
         json.addParagraphObject("Author").append("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
-                                                 "of the OpenKeyStore project " +
-                                                 json.createReference(JSONBaseHTML.REF_OPENKEYSTORE)  + ".");
+                                                 "of the OpenKeyStore " +
+                                                 json.createReference(JSONBaseHTML.REF_OPENKEYSTORE) + " project .");
 
     preAmble(ENCRYPTED_DATA)
         .addString("Data encryption algorithm. Currently the following JWA " +

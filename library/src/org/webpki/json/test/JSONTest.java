@@ -41,7 +41,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
-
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.GregorianCalendar;
@@ -79,11 +78,12 @@ import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 
+import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-
+import org.webpki.json.encryption.SymmetricEncryptionResult;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -3422,19 +3422,19 @@ public class JSONTest {
                                                        t);
         assertTrue("pout 1", ArrayUtil.compare(p, pout));
 
-        EncryptionCore.AuthEncResult aer = EncryptionCore.contentEncryption(dea,
-                                                                            k,
-                                                                            p,
-                                                                            a);
+        SymmetricEncryptionResult symmetricEncryptionResult = EncryptionCore.contentEncryption(dea,
+                                                                                               k,
+                                                                                               p,
+                                                                                               a);
         pout = EncryptionCore.contentDecryption(dea,
                                                 k,
-                                                aer.getCipherText(),
-                                                aer.getIv(),
+                                                symmetricEncryptionResult.getCipherText(),
+                                                symmetricEncryptionResult.getIv(),
                                                 a,
-                                                aer.getTag());
+                                                symmetricEncryptionResult.getTag());
         assertTrue("pout 2", ArrayUtil.compare(p, pout));
 
-        byte[] dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dea);
+        byte[] dataEncryptionKey = genRandom(dea.getKeyLength());
         JSONObjectReader json = JSONParser.parse("{\"data\":\"hello!\"}");
         String encrec = JSONObjectWriter.createEncryptionObject(json.serializeToBytes(JSONOutputFormats.NORMALIZED),
                                                                 dea,
@@ -3473,7 +3473,7 @@ public class JSONTest {
             byte[] plainText = jwePlainText.getBytes("UTF-8");
             for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
                 byte[] key = genRandom(dea.getKeyLength());
-                EncryptionCore.AuthEncResult aer = 
+                SymmetricEncryptionResult symmetricEncryptionResult = 
                         EncryptionCore.contentEncryption(dea,
                                                          key, 
                                                          plainText, 
@@ -3481,10 +3481,10 @@ public class JSONTest {
                 if (!ArrayUtil.compare(plainText,
                                        EncryptionCore.contentDecryption(dea,
                                                                         key, 
-                                                                        aer.getCipherText(), 
-                                                                        aer.getIv(), 
+                                                                        symmetricEncryptionResult.getCipherText(), 
+                                                                        symmetricEncryptionResult.getIv(), 
                                                                         authData,
-                                                                        aer.getTag()))) {
+                                                                        symmetricEncryptionResult.getTag()))) {
                     fail("compare " + dea);
                 }
             }
@@ -3628,15 +3628,15 @@ public class JSONTest {
                                                             alice.getPrivate(),
                                                             null)).equals(ECDH_RESULT_WITH_KDF));
 
-        EncryptionCore.EcdhSenderResult ecdhRes =
+        AsymmetricEncryptionResult asymmetricEncryptionResult =
                 EncryptionCore.senderKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                         alice.getPublic());
         assertTrue("Bad ECDH",
-                ArrayUtil.compare(ecdhRes.getDataEncryptionKey(),
+                ArrayUtil.compare(asymmetricEncryptionResult.getDataEncryptionKey(),
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                                             DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                                                            ecdhRes.getEphemeralKey(),
+                                                            asymmetricEncryptionResult.getEphemeralKey(),
                                                             alice.getPrivate(),
                                                             null)));
         KeyPairGenerator mallet = KeyPairGenerator.getInstance("RSA");

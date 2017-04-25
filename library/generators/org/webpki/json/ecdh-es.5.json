@@ -1,0 +1,17 @@
+{
+  "algorithm": "A192CBC-HS384",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES+A192KW",
+    "keyId": "20170101:mybank:ec",
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "t7t77Muifi2-F05dQCLCoI1KqJAtG8YZjEAuw1IZ9rE",
+      "y": "Pk00HjxpKyJAufMXXTFJw459Y4u01fjNOe3nXu8PerI"
+    },
+    "cipherText": "7wwUDOc8ms_acMpDYqcDnjhXwxoVUpF3PPI9u4x2GRN7Z9GzcOuaOPiPVZo_BsXiircVIXKfZX4"
+  },
+  "iv": "7ZZtj2ZM_KD0Pe_a57oV9A",
+  "tag": "is_cb3c-yxJt740H1wA9l5GphbKN43ln",
+  "cipherText": "mKH43KiVV0SV7jNoXGh3EdmbcBv1V0_64FlDzG-Aw2g"
+}

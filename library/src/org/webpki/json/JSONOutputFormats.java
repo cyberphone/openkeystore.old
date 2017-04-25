@@ -16,8 +16,6 @@
  */
 package org.webpki.json;
 
-import java.io.IOException;
-
 /**
  * JSON output types.
  * It is used by {@link JSONObjectWriter}.

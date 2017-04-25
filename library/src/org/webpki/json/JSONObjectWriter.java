@@ -40,9 +40,11 @@ import java.util.regex.Pattern;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 
+import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+import org.webpki.json.encryption.SymmetricEncryptionResult;
 
 import org.webpki.json.v8dtoa.FastDtoa;
 
@@ -763,14 +765,14 @@ import org.webpki.json.JSONSignatureDecoder;
         } else {
             setObject(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON, encryptedKey);
         }
-        EncryptionCore.AuthEncResult result =
-                EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
-                                                 dataEncryptionKey,
-                                                 unencryptedData,
-                                                 serializeToBytes(JSONOutputFormats.NORMALIZED));
-        setBinary(JSONDecryptionDecoder.IV_JSON, result.getIv());
-        setBinary(JSONDecryptionDecoder.TAG_JSON, result.getTag());
-        setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getCipherText());
+        SymmetricEncryptionResult symmetricEncryptionResult =
+            EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
+                                             dataEncryptionKey,
+                                             unencryptedData,
+                                             serializeToBytes(JSONOutputFormats.NORMALIZED));
+        setBinary(JSONDecryptionDecoder.IV_JSON, symmetricEncryptionResult.getIv());
+        setBinary(JSONDecryptionDecoder.TAG_JSON, symmetricEncryptionResult.getTag());
+        setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, symmetricEncryptionResult.getCipherText());
         return this;
     }
     /**
@@ -799,23 +801,24 @@ import org.webpki.json.JSONSignatureDecoder;
         } else {
             encryptedKey.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
         }
-        if (keyEncryptionAlgorithm.isRsa()) {
-            dataEncryptionKey = EncryptionCore.generateDataEncryptionKey(dataEncryptionAlgorithm);
-            encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
+        AsymmetricEncryptionResult asymmetricEncryptionResult =
+            keyEncryptionAlgorithm.isRsa() ?
                     EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
-                                                 dataEncryptionKey,
-                                                 keyEncryptionKey));
-        } else {
-            EncryptionCore.EcdhSenderResult result =
+                                                 dataEncryptionAlgorithm,
+                                                 keyEncryptionKey)
+                                            :
                     EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
                                                       dataEncryptionAlgorithm,
                                                       keyEncryptionKey);
-            dataEncryptionKey = result.getDataEncryptionKey();
+        dataEncryptionKey = asymmetricEncryptionResult.getDataEncryptionKey();
+        if (!keyEncryptionAlgorithm.isRsa()) {
             encryptedKey.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
-                                   createCorePublicKey(result.getEphemeralKey(), AlgorithmPreferences.JOSE));
-            if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, result.getEncryptedKeyData());
-            }
+                                   createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
+                                                       AlgorithmPreferences.JOSE));
+        }
+        if (keyEncryptionAlgorithm.isKeyWrap()) {
+            encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
+                                   asymmetricEncryptionResult.getEncryptedKeyData());
         }
         return new JSONObjectWriter().encryptData(unencryptedData,
                                                   dataEncryptionAlgorithm,
