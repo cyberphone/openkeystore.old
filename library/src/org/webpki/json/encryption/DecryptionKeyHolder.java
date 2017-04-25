@@ -19,6 +19,11 @@ package org.webpki.json.encryption;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+/**
+ *  JEF (JSON Encryption Format) support.
+ *  This class can be used for automatically selecting the proper asymmetric private key
+ *  to use for decryption among a set of possible keys.
+ */
 public class DecryptionKeyHolder {
 
     PublicKey publicKey;

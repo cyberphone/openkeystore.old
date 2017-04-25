@@ -44,7 +44,10 @@ import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 
-// Core encryption class implementing a subset of the RFC7516 (JWE) algorithms
+/**
+ *  Core JEF (JSON Encryption Format) class.
+ *  Implements a subset of the RFC7516 (JWE) algorithms
+ */
 
 public final class EncryptionCore {
 

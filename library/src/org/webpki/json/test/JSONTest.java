@@ -114,7 +114,24 @@ public class JSONTest {
     static final String STRING_LIST = "stringlist";
     static final String[] STRING_LIST_VALUE = {"one", "two", "three"};
     static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk";
-    
+
+    static final String aliceKey =
+            "{\"kty\":\"EC\"," +
+            "\"crv\":\"P-256\"," +
+            "\"x\":\"Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0\"," +
+            "\"y\":\"HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw\"," +
+            "\"d\":\"r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8\"" +
+            "}";
+
+
+    static final String bobKey =
+            "{\"kty\":\"EC\"," +
+            "\"crv\":\"P-256\"," +
+            "\"x\":\"mPUKT_bAWGHIhg0TpjjqVsP1rXWQu_vwVOHHtNkdYoA\"," +
+            "\"y\":\"8BQAsImGeAS46fyWw5MhYfGTT0IjBpFw2SS34Dv4Irs\"," +
+            "\"d\":\"AtH35vJsQ9SGjYfOsjUxYXQKrPH3FjZHmEtSKoSN8cM\"" +
+            "}";
+
     // From http://tools.ietf.org/html/rfc7520#section-5.4
 
     static final String jwePlainText = 
@@ -3474,6 +3491,33 @@ public class JSONTest {
         }
     }
 
+    void allJefCombinations() throws Exception {
+        KeyPairGenerator mallet = KeyPairGenerator.getInstance("RSA");
+        mallet.initialize(2048);
+        KeyPair malletKeys = mallet.generateKeyPair();
+        KeyPair alice = JSONParser.parse(aliceKey).getKeyPair();
+        byte[] plainText = jwePlainText.getBytes("UTF-8");
+        for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
+            for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+                JSONObjectWriter json = 
+                        JSONObjectWriter.createEncryptionObject(plainText,
+                                                                dea,
+                                                                (kea.isRsa() ?
+                                                                  malletKeys : alice).getPublic(),
+                                                                null, 
+                                                                kea);
+                if (!ArrayUtil.compare(plainText,
+                                  JSONParser
+                                      .parse(json.toString())
+                                          .getEncryptionObject()
+                                              .getDecryptedData((kea.isRsa() ?
+                                                      malletKeys : alice).getPrivate()))) {
+                    throw new IOException("Fail on " + kea + "/" + dea);
+                }
+            }
+        }
+    }
+
     @Test
     public void Encryption() throws Exception {
 
@@ -3571,6 +3615,8 @@ public class JSONTest {
                    DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
         
         randomSymmetricEncryption();
+        
+        allJefCombinations();
 
         KeyPair bob = getKeyPairFromJwk(bobKey);
         KeyPair alice = getKeyPairFromJwk(aliceKey);
