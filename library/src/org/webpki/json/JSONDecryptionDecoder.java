@@ -50,6 +50,7 @@ public class JSONDecryptionDecoder {
 
     public static final String ENCRYPTION_VERSION_ID = "http://xmlns.webpki.org/jef/v1";
 
+    public static final String KEY_ENCRYPTION_JSON   = "keyEncryption";
     public static final String ENCRYPTED_KEY_JSON    = "encryptedKey";
     public static final String EPHEMERAL_KEY_JSON    = "ephemeralKey";
     public static final String IV_JSON               = "iv";
@@ -140,8 +141,8 @@ public class JSONDecryptionDecoder {
                 .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
-        if (rd.hasProperty(ENCRYPTED_KEY_JSON)) {
-            JSONObjectReader encryptedKey = checkVersion(rd.getObject(ENCRYPTED_KEY_JSON));
+        if (rd.hasProperty(KEY_ENCRYPTION_JSON)) {
+            JSONObjectReader encryptedKey = checkVersion(rd.getObject(KEY_ENCRYPTION_JSON));
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
             if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
@@ -150,7 +151,7 @@ public class JSONDecryptionDecoder {
                 keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
             }
             if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKeyData = encryptedKey.getBinary(CIPHER_TEXT_JSON);
+                encryptedKeyData = encryptedKey.getBinary(ENCRYPTED_KEY_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =

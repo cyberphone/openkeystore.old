@@ -1,11 +1,11 @@
 {
   "algorithm": "A128CBC-HS256",
-  "encryptedKey": {
+  "keyEncryption": {
     "algorithm": "RSA-OAEP-256",
     "keyId": "20170101:mybank:rsa",
-    "cipherText": "uy2s4RQTD6NOQOUJrAJmAQbPkXFIcNq-Nl4IpUAkkMqqppmjAsYRV4TBBVL4daJ31A1ckuWzAikJ9xcAS0N4Feo7JnItgEQyYdEsg1GlpszrlFGRO5HX0qnwzQ6zpE7ck1QrUsPryNZxPlLiyJtmSqNKML-guR_Y8qQytqryLapzT804BGve2_yG1F-gU6m8d9xtHRG7_FSqA4XT6Gpoprsf3hQoqdRXYDYXmez_brXWq4TRN34KmXb4Wvv09FsTaq0kKWKRBIub6hNALVTKhV9SMF3ackJB6PtSuJunkScBFiAp3CRwS-QH_okgAQxEVX1SMAsk4C5pjU3_2CsuIg"
+    "encryptedKey": "EcF4GdB8VmJ3I-QfRORpYPa-2ja9z42KPeaVJH_C0ngEkhNHBT6haGqHJcOMBSUxqhZVJGgeA2lCSsPZfiuI0u6OcL20tuvGzvK3hYpGWPUQut4-5GKKoqaSe0Iw2VQRKLueNlf6OLQPaO70XJsqybas6IOMp2Bf7sxCO1WIL33x_X4oNNCz4pGY9cCvReUoIKUPdvcN0tOo-Yak4b-5UPLhuqeyBODBX6mG235hxEWeVOmeCQ1huh2ufch50ktZ1MyoHl2aBPIB6TEMTDmfFthk-AxXkyGoYQ_wpSF15hf8N00XuDgExyXhaezKXaPFqbREAWCtU0zCrqeLlu7Trg"
   },
-  "iv": "eaOw8A5GaQFGgay2HMTABw",
-  "tag": "DFl573wNxN4GlS5_vmdA-g",
-  "cipherText": "QsccpGXq_FXtC2abb7RRWOQYz0ddmAB2a-8i1OwSyQ0"
+  "iv": "hFCQiZJ5drWDYn7mqAobTA",
+  "tag": "N30VN8KmyK8tzwjSWrBvzw",
+  "cipherText": "NvU8AO7ZZ4JTytXPfNh0JZn8oAtp_FVTufMJX-nuyQc"
 }

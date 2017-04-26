@@ -218,8 +218,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
         json.addProtocolTableEntry("JEF Objects")
           .append("The following tables describe the JEF JSON structures in detail." +
-                   " Note that <a href=\"#" + JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + "\">" + 
-                   JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + "</a>" +
+                   " Note that <a href=\"#" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + "\">" + 
+                   JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + "</a>" +
                    " can be used as a stand-alone object as well as a part of an <a href=\"#" + 
                    ENCRYPTED_DATA + "\">" + ENCRYPTED_DATA + "</a> object.");
         
@@ -338,13 +338,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             .newRow()
 
         .newColumn()
-        .addProperty(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
-        .addLink(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
+        .addProperty(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
+        .addLink(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
     .newColumn()
         .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
     .newColumn()
     .newColumn()
-        .addString("If the <code>" + JSONDecryptionDecoder.ENCRYPTED_KEY_JSON +
+        .addString("If the <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON +
                    "</code> property is defined, the (symmetric) encryption key is supposed to be provided " +
                    "in-line, encrypted by a public key.")
         .newRow()
@@ -374,10 +374,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                      "</code> nor <code>" + JSONDecryptionDecoder.ENCRYPTED_KEY_JSON + 
+                      "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
                       "</code> are defined, the (symmetric) encryption key is assumed to known by the recepient.");
           
-        preAmble(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
+        preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
             .addString("Key encryption algorithm. Currently the following JWA " +
                                 json.createReference (JSONBaseHTML.REF_JWA) +
                                 " algorithms are recognized:<ul>")

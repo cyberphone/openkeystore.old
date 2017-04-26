@@ -755,15 +755,15 @@ import org.webpki.json.JSONSignatureDecoder;
                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                          String keyId,
                                          byte[] dataEncryptionKey,
-                                         JSONObjectWriter encryptedKey)
+                                         JSONObjectWriter keyEncryption)
             throws IOException, GeneralSecurityException {
         setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
-        if (encryptedKey == null) {
+        if (keyEncryption == null) {
             if (keyId != null) {
                 setString(JSONSignatureDecoder.KEY_ID_JSON, keyId);
             }
         } else {
-            setObject(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON, encryptedKey);
+            setObject(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, keyEncryption);
         }
         SymmetricEncryptionResult symmetricEncryptionResult =
             EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
@@ -793,13 +793,13 @@ import org.webpki.json.JSONSignatureDecoder;
                                                           String optionalKeyId,
                                                           KeyEncryptionAlgorithms keyEncryptionAlgorithm)
             throws IOException, GeneralSecurityException {
-        JSONObjectWriter encryptedKey = new JSONObjectWriter()
+        JSONObjectWriter keyEncryption = new JSONObjectWriter()
                 .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
         byte[] dataEncryptionKey = null;
         if (optionalKeyId == null) {
-            encryptedKey.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
+            keyEncryption.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
         } else {
-            encryptedKey.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
+            keyEncryption.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
         }
         AsymmetricEncryptionResult asymmetricEncryptionResult =
             keyEncryptionAlgorithm.isRsa() ?
@@ -812,19 +812,19 @@ import org.webpki.json.JSONSignatureDecoder;
                                                       keyEncryptionKey);
         dataEncryptionKey = asymmetricEncryptionResult.getDataEncryptionKey();
         if (!keyEncryptionAlgorithm.isRsa()) {
-            encryptedKey.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
+            keyEncryption.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
                                    createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
                                                        AlgorithmPreferences.JOSE));
         }
         if (keyEncryptionAlgorithm.isKeyWrap()) {
-            encryptedKey.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON,
+            keyEncryption.setBinary(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON,
                                    asymmetricEncryptionResult.getEncryptedKeyData());
         }
         return new JSONObjectWriter().encryptData(unencryptedData,
                                                   dataEncryptionAlgorithm,
                                                   null,
                                                   dataEncryptionKey,
-                                                  encryptedKey);
+                                                  keyEncryption);
     }
 
     /**

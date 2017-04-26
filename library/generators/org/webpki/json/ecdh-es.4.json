@@ -1,17 +1,17 @@
 {
   "algorithm": "A256CBC-HS512",
-  "encryptedKey": {
+  "keyEncryption": {
     "algorithm": "ECDH-ES+A256KW",
     "keyId": "20170101:mybank:ec",
     "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "qfOOYXBnIynHMJTioKriyrquyrqFLyx2LB3vvlTkAi4",
-      "y": "zJiL1rsxYBuXlwIzToDlPrGbJJx1v9Vuwd5m23wCE9k"
+      "x": "IY40ny5m_aQp_5Acu541h4N6_ifk3elZpTu_6MBADSk",
+      "y": "4Pwn4hl0CG7kmHTqdkbH1X3-TulOkuXvAAZPWdf0Ox4"
     },
-    "cipherText": "fxbneKoyLzfXwfm3KRMbhmmR556OPW9jIxwlSxDZT7qLI-ovEl8PAtUx5Rs37SKMgO1ZnGvPBPflmu434YVe8AMRlNkF83ic"
+    "encryptedKey": "fo6KNjwZ6NqQ9_ICDrRqVlpMqfM7K4YhUleWPhrnZPOFfrh0RKptQDneDnmm4ZssH1s7Qvxtp7tD9KESvvpAgJ5FikVLmDXi"
   },
-  "iv": "4KnQzvIuD7LF9JQ0Ty7GmQ",
-  "tag": "QFP-i9SHhE1IPbqpMWgwgBoUnepwV0iunrVVaMtcX7E",
-  "cipherText": "h-EuA1f0DdVLDx1h3BpdBI76LiO_2wEa1NtS-Zbr2_A"
+  "iv": "q0egWYttaxh2Jl3ZXfVxyw",
+  "tag": "F8eet3Zrv5Vwf_KrHMfWsfusMgNe5U3l5zC7KpR4frA",
+  "cipherText": "Yyj6Vn0JFwWcoQ3EilmTNu4HIgtt-30vNwYuPY0qp-I"
 }
