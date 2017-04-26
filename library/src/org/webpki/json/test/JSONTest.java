@@ -3460,6 +3460,44 @@ public class JSONTest {
                    DebugFormatter.getByteArrayFromHex(t),
                    dea);
     }
+    
+    void joseCookBook(String resource) throws Exception {
+        JSONObjectReader test = JSONParser.
+                parse(ArrayUtil.getByteArrayFromInputStream(this.getClass()
+                        .getResourceAsStream(resource)));
+        KeyPair staticKey = test.getObject("input")
+            .getObject("key")
+                .removeProperty("kid")
+                    .removeProperty("use").getKeyPair();
+        KeyPair ephemeralKey = test.getObject("encrypting_key").getObject("epk").getKeyPair();
+         byte[] iv = test.getObject("generated").getBinary("iv");
+        DataEncryptionAlgorithms dataEncryptionAlgorithm = 
+                DataEncryptionAlgorithms.getAlgorithmFromString(test.getObject("input").getString("enc"));
+        KeyEncryptionAlgorithms keyEncryptionAlgorithm = 
+                KeyEncryptionAlgorithms.getAlgorithmFromString(test.getObject("input").getString("alg"));
+        byte[] cek = test.getObject(keyEncryptionAlgorithm.isKeyWrap() ?
+                "generated" : "encrypting_key").getBinary("cek");
+        byte[] kek = keyEncryptionAlgorithm.isKeyWrap() ?
+                test.getObject("encrypting_key").getBinary("encrypted_key") : null;
+        byte[] cek2 = EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm, 
+                                            dataEncryptionAlgorithm,
+                                            (ECPublicKey)ephemeralKey.getPublic(),
+                                            staticKey.getPrivate(),
+                                            kek);
+        if (!ArrayUtil.compare(cek, cek2)) {
+            fail("Fail CEK");
+        }
+        byte[] plainText = test.getObject("input").getString("plaintext").getBytes("UTF-8");
+        byte[] cipherText = test.getObject("output").getObject("json").getBinary("ciphertext");
+        byte[] authData = test.getObject("encrypting_content").getString("protected_b64u").getBytes("UTF-8");
+        byte[] tag = test.getObject("encrypting_content").getBinary("tag");
+        byte[] res = EncryptionCore.contentDecryption(dataEncryptionAlgorithm, 
+                                                      cek, cipherText, iv, authData, tag);
+
+        if (!ArrayUtil.compare(res, plainText)) {
+            fail("Fail plain text");
+        }
+    }
 
     byte[] genRandom(int size) {
         byte[] random = new byte[size];
@@ -3617,6 +3655,9 @@ public class JSONTest {
         randomSymmetricEncryption();
         
         allJefCombinations();
+        
+        joseCookBook("5_4.key_agreement_with_key_wrapping_using_ecdh-es_and_aes-keywrap_with_aes-gcm.json");
+        joseCookBook("5_5.key_agreement_using_ecdh-es_with_aes-cbc-hmac-sha2.json");
 
         KeyPair bob = getKeyPairFromJwk(bobKey);
         KeyPair alice = getKeyPairFromJwk(aliceKey);

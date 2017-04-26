@@ -19,7 +19,7 @@ package org.webpki.json.encryption;
 import java.io.IOException;
 
 /**
- * JEF (JSON Encryption Format) key encryption algorithms
+ * JEF (JSON Encryption Format) key encryption algorithms.
  */
 public enum KeyEncryptionAlgorithms {
 

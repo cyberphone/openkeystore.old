@@ -59,7 +59,7 @@ public final class EncryptionCore {
 
     // AES GCM static
     static final int    AES_GCM_IV_LENGTH        = 12;
-    static final int    AES_GCM_AUTH_TAG_LENGTH  = 16;
+    static final int    AES_GCM_TAG_LENGTH       = 16;
     static final String AES_GCM_JCENAME          = "AES/GCM/NoPadding";
 
     // AES Key Wrap static
@@ -69,13 +69,13 @@ public final class EncryptionCore {
     static final String CONCAT_KDF_DIGEST_JCENAME = "SHA-256";
     static final int    CONCAT_KDF_DIGEST_LENGTH  = 32;
     
-    // RSA OAEP static
-    static final String RSA_OAEP_MGF1_JCENAME     = "RSA/ECB/OAEPWithSHA256AndMGF1Padding";
+    // RSA OAEP 256 static
+    static final String RSA_OAEP_256_JCENAME      = "RSA/ECB/OAEPWithSHA256AndMGF1Padding";
     
     private static String aesProviderName;
 
     /**
-     * Explicitly set provider for AES operations
+     * Explicitly set provider for AES operations.
      * @param providerName Name of provider
      */
     public static void setAesProvider(String providerName) {
@@ -85,7 +85,7 @@ public final class EncryptionCore {
     private static String ecProviderName;
     
     /**
-     * Explicitly set provider for EC operations
+     * Explicitly set provider for EC operations.
      * @param providerName Name of provider
      */
     public static void setEcProvider(String providerName) {
@@ -95,7 +95,7 @@ public final class EncryptionCore {
     private static String rsaProviderName;
     
     /**
-     * Explicitly set provider for RSA operations
+     * Explicitly set provider for RSA operations.
      * @param providerName Name of provider
      */
     public static void setRsaProvider(String providerName) {
@@ -142,7 +142,7 @@ public final class EncryptionCore {
     private static byte[] aesGcmCore(int mode, byte[] key, byte[] iv, byte[] authData, byte[] data)
             throws GeneralSecurityException {
         Cipher cipher = getAesCipher(AES_GCM_JCENAME);
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(AES_GCM_IV_LENGTH * 8, iv);
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(AES_GCM_TAG_LENGTH * 8, iv);
         cipher.init(mode, new SecretKeySpec(key, "AES"), gcmSpec);
         cipher.updateAAD(authData);
         return cipher.doFinal(data);
@@ -153,13 +153,13 @@ public final class EncryptionCore {
                                   byte[] data,
                                   KeyEncryptionAlgorithms keyEncryptionAlgorithm)
             throws GeneralSecurityException {
-        if (keyEncryptionAlgorithm != KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID) {
+        if (!keyEncryptionAlgorithm.rsa) {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
         Cipher cipher = rsaProviderName == null ?
-            Cipher.getInstance(RSA_OAEP_MGF1_JCENAME)
+            Cipher.getInstance(RSA_OAEP_256_JCENAME)
                                                 :
-            Cipher.getInstance(RSA_OAEP_MGF1_JCENAME, rsaProviderName);
+            Cipher.getInstance(RSA_OAEP_256_JCENAME, rsaProviderName);
         cipher.init(mode, key);
         return cipher.doFinal(data);
     }
@@ -204,10 +204,10 @@ public final class EncryptionCore {
         byte[] iv = generateRandom(dataEncryptionAlgorithm.ivLength);
          if (dataEncryptionAlgorithm.gcm) {
             byte[] cipherOutput = aesGcmCore(Cipher.ENCRYPT_MODE, key, iv, authData, plainText);
-            int tagPos = cipherOutput.length - AES_GCM_AUTH_TAG_LENGTH;
+            int tagPos = cipherOutput.length - AES_GCM_TAG_LENGTH;
             byte[] cipherText = ArrayUtil.copy(cipherOutput, tagPos);
-            byte[] tag = new byte[AES_GCM_AUTH_TAG_LENGTH];
-            System.arraycopy(cipherOutput, tagPos, tag, 0, AES_GCM_AUTH_TAG_LENGTH);
+            byte[] tag = new byte[AES_GCM_TAG_LENGTH];
+            System.arraycopy(cipherOutput, tagPos, tag, 0, AES_GCM_TAG_LENGTH);
             return new SymmetricEncryptionResult(iv, tag, cipherText);
         }
         byte[] cipherText = aesCbcCore(Cipher.ENCRYPT_MODE, key, iv, plainText, dataEncryptionAlgorithm);
@@ -244,7 +244,7 @@ public final class EncryptionCore {
     }
 
     /**
-     * Encryption using an RSA public key.
+     * Generate a random key and encrypt it using an RSA cipher.
      * @param keyEncryptionAlgorithm Algorithm to use
      * @param dataEncryptionAlgorithm The designated content encryption algorithm
      * @param publicKey The RSA key
@@ -264,11 +264,11 @@ public final class EncryptionCore {
     }
 
     /**
-     * Decrypt RSA encrypted data.
+     * Decrypt a symmetric key using an RSA cipher.
      * @param keyEncryptionAlgorithm The algorithm to use
      * @param encryptedKey Contains a symmetric key used for encrypting the data
      * @param privateKey The RSA private key
-     * @return Tha plain text
+     * @return The key in plain text
      * @throws GeneralSecurityException &nbsp;
      */
     public static byte[] rsaDecryptKey(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
@@ -339,8 +339,8 @@ public final class EncryptionCore {
      * @param keyEncryptionAlgorithm The ECDH algorithm
      * @param dataEncryptionAlgorithm The designated content encryption algorithm
      * @param receivedPublicKey The sender's (usually ephemeral) public key
-     * @param privateKey The receiver's own private key
-     * @param encryptedKeyData For ECDH+KW based operations
+     * @param privateKey The receiver's private key
+     * @param encryptedKeyData For ECDH+KW based operations only
      * @return Shared secret
      * @throws GeneralSecurityException &nbsp;
      * @throws IOException &nbsp;
@@ -349,7 +349,7 @@ public final class EncryptionCore {
                                               DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                               ECPublicKey receivedPublicKey,
                                               PrivateKey privateKey,
-                                              byte[] encryptedKeyData)  // For ECDH+KW
+                                              byte[] encryptedKeyData)
     throws GeneralSecurityException, IOException {
         // Sanity check
         if (keyEncryptionAlgorithm.keyWrap ^ (encryptedKeyData != null)) {
@@ -374,7 +374,7 @@ public final class EncryptionCore {
      * @param keyEncryptionAlgorithm The ECDH algorithm
      * @param dataEncryptionAlgorithm The designated content encryption algorithm
      * @param staticKey The receiver's (usually static) public key
-     * @return A composite object including the data encryption key
+     * @return A composite object including the (plain text) data encryption key
      * @throws GeneralSecurityException &nbsp;
      * @throws IOException &nbsp;
      */
