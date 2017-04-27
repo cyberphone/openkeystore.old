@@ -51,7 +51,7 @@ public class CertificateUtil {
     public static final String AIA_OCSP_RESPONDER = "1.3.6.1.5.5.7.48.1";
 
     private static ASN1Sequence getExtension(X509Certificate certificate, CertificateExtensions extension) throws IOException {
-        byte[] extensionBytes = certificate.getExtensionValue(extension.getOID());
+        byte[] extensionBytes = certificate.getExtensionValue(extension.getOid());
         if (extensionBytes == null) {
             return null;
         }

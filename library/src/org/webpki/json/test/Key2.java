@@ -99,7 +99,7 @@ public class Key2 {
         AlgorithmParameterSpec alg_par_spec = rsa ?
                 new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4)
                 :
-                new ECGenParameterSpec(ec_curves[ec_index++ % ec_curves.length].getJCEName());
+                new ECGenParameterSpec(ec_curves[ec_index++ % ec_curves.length].getJceName());
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(rsa ? "RSA" : "EC");
         kpg.initialize(alg_par_spec, new SecureRandom());
         KeyPair key_pair = kpg.generateKeyPair();
@@ -122,7 +122,7 @@ public class Key2 {
             CustomCryptoProvider.conditionalLoad(true);
             for (KeyAlgorithms ka : KeyAlgorithms.values()) {
                 if (ka.isECKey()) {
-                    AlgorithmParameterSpec alg_par_spec = new ECGenParameterSpec(ka.getJCEName());
+                    AlgorithmParameterSpec alg_par_spec = new ECGenParameterSpec(ka.getJceName());
                     KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
                     kpg.initialize(alg_par_spec, new SecureRandom());
                     KeyPair key_pair = kpg.generateKeyPair();

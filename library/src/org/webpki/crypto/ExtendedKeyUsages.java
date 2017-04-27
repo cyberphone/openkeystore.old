@@ -50,7 +50,7 @@ public enum ExtendedKeyUsages {
         throw new IOException("Unknown EKU: " + x509Name);
     }
 
-    public static String getOptionallyTranslatedEKU(String oid) throws IOException {
+    public static String getOptionallyTranslatedEku(String oid) throws IOException {
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
             if (oid.equals(eku.oid)) {
                 return eku.x509Name;

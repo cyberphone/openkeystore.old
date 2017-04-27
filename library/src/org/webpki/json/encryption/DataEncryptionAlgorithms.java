@@ -36,20 +36,20 @@ public enum DataEncryptionAlgorithms {
     JOSE_A256GCM_ALG_ID       ("A256GCM",       32, EncryptionCore.AES_GCM_IV_LENGTH,
                                EncryptionCore.AES_GCM_TAG_LENGTH, null,         true);
 
-    String JsonName;
+    String JoseName;
     int keyLength;
     int ivLength;
     int tagLength;
     String jceNameOfTagHmac;
     boolean gcm;
 
-    DataEncryptionAlgorithms(String JsonName,
+    DataEncryptionAlgorithms(String JoseName,
                              int keyLength,
                              int ivLength,
                              int tagLength,
                              String jceNameOfTagHmac, 
                              boolean gcm) {
-        this.JsonName = JsonName;
+        this.JoseName = JoseName;
         this.keyLength = keyLength;
         this.ivLength = ivLength;
         this.tagLength = tagLength;
@@ -59,7 +59,7 @@ public enum DataEncryptionAlgorithms {
 
     @Override
     public String toString() {
-        return JsonName;
+        return JoseName;
     }
 
     public int getKeyLength() {
@@ -74,12 +74,12 @@ public enum DataEncryptionAlgorithms {
         return tagLength;
     }
     
-    public static DataEncryptionAlgorithms getAlgorithmFromString(String string) throws IOException {
+    public static DataEncryptionAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
         for (DataEncryptionAlgorithms algorithm : DataEncryptionAlgorithms.values()) {
-            if (string.equals(algorithm.JsonName)) {
+            if (algorithmId.equals(algorithm.JoseName)) {
                 return algorithm;
             }
         }
-        throw new IOException("No such algorithm: " + string);
+        throw new IOException("No such algorithm: " + algorithmId);
     }
 }

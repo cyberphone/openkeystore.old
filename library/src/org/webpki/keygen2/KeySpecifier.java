@@ -58,7 +58,7 @@ public class KeySpecifier implements Serializable {
 
 
     public KeySpecifier(String uri, byte[] optionalParameters) throws IOException {
-        this(KeyAlgorithms.getKeyAlgorithmFromID(uri, AlgorithmPreferences.SKS), optionalParameters);
+        this(KeyAlgorithms.getKeyAlgorithmFromId(uri, AlgorithmPreferences.SKS), optionalParameters);
     }
 
 

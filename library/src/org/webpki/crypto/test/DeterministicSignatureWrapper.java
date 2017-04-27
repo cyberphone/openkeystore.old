@@ -96,9 +96,9 @@ public class DeterministicSignatureWrapper {
     ECParameterSpec ecParameters;
 
     private DeterministicSignatureWrapper(AsymSignatureAlgorithms algorithm, String provider, Key key) throws GeneralSecurityException, IOException {
-        instance = provider == null ? Signature.getInstance(algorithm.getJCEName())
+        instance = provider == null ? Signature.getInstance(algorithm.getJceName())
                                                     : 
-                                      Signature.getInstance(algorithm.getJCEName(), provider);
+                                      Signature.getInstance(algorithm.getJceName(), provider);
         rsaFlag = key instanceof RSAKey;
         if (!rsaFlag) {
             ecParameters = ((ECKey) key).getParams();

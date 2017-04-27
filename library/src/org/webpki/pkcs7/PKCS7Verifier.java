@@ -100,7 +100,7 @@ public class PKCS7Verifier {
 
             issuer_and_serial = new IssuerAndSerialNumber(seq.get(1));
 
-            if (HashAlgorithms.getAlgorithmFromOID(getAlgorithmIdentifier(seq.get(2))) != digest_algorithm) {
+            if (HashAlgorithms.getAlgorithmFromOid(getAlgorithmIdentifier(seq.get(2))) != digest_algorithm) {
                 throw new IOException("Inconsistent digest algorithms");
             }
 
@@ -110,7 +110,7 @@ public class PKCS7Verifier {
                 throw new IOException("Authenticated not supported");
             }
 
-            if (AsymEncryptionAlgorithms.getAlgorithmFromOID(getAlgorithmIdentifier(seq.get(i++))) != AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5) {
+            if (AsymEncryptionAlgorithms.getAlgorithmFromOid(getAlgorithmIdentifier(seq.get(i++))) != AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5) {
                 throw new IOException("Only RSA is supported by this implementation");
             }
 
@@ -141,7 +141,7 @@ public class PKCS7Verifier {
 
             ParseUtil.integer(contents.get(0), 1);
 
-            digest_algorithm = HashAlgorithms.getAlgorithmFromOID(getAlgorithmIdentifier(ParseUtil.set(contents.get(1), 1).get(0)));
+            digest_algorithm = HashAlgorithms.getAlgorithmFromOid(getAlgorithmIdentifier(ParseUtil.set(contents.get(1), 1).get(0)));
 
             if (detached_data != null) {
                 message = detached_data;
@@ -192,7 +192,7 @@ public class PKCS7Verifier {
             throw new IOException("Signer certificate descriptor error");
         }
         if (!new SignatureWrapper(getSignatureAlgorithm(), certpath[0].getPublicKey())
-                .setECDSASignatureEncoding(true)
+                .setEcdsaSignatureEncoding(true)
                 .update(message)
                 .verify(signer_info.encrypted_digest)) {
             throw new IOException("Incorrect signature");

@@ -172,7 +172,7 @@ public class JSONSignatureDecoder implements Serializable {
                 break;
 
             default:
-                algorithm = MACAlgorithms.getAlgorithmFromID(algorithmString, algorithmPreferences);
+                algorithm = MACAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
         }
     }
 
@@ -220,7 +220,7 @@ public class JSONSignatureDecoder implements Serializable {
                 publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(getCryptoBinary(rd, N_JSON),
                         getCryptoBinary(rd, E_JSON)));
             } else if (type.equals(EC_PUBLIC_KEY)) {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID(rd.getString(CRV_JSON), algorithmPreferences);
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString(CRV_JSON), algorithmPreferences);
                 if (!ec.isECKey()) {
                     throw new IOException("\"" + CRV_JSON + "\" is not an EC type");
                 }
@@ -286,8 +286,8 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     void asymmetricSignatureVerification(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromID(algorithmString, algorithmPreferences);
-        if (((AsymSignatureAlgorithms) algorithm).isRSA() != publicKey instanceof RSAPublicKey) {
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
+        if (((AsymSignatureAlgorithms) algorithm).isRsa() != publicKey instanceof RSAPublicKey) {
             throw new IOException("\"" + algorithmString + "\" doesn't match key type: " + publicKey.getAlgorithm());
         }
         try {

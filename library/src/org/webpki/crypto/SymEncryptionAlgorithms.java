@@ -79,19 +79,19 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
 
 
     @Override
-    public boolean isMandatorySKSAlgorithm() {
+    public boolean isMandatorySksAlgorithm() {
         return sksMandatory;
     }
 
 
     @Override
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
     @Override
-    public String getOID() {
+    public String getOid() {
         return null;
     }
 
@@ -101,12 +101,12 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
     }
 
 
-    public boolean needsIV() {
+    public boolean needsIv() {
         return ivMode;
     }
 
 
-    public boolean internalIV() {
+    public boolean internalIv() {
         return internalIv;
     }
 
@@ -116,7 +116,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
     }
 
 
-    public static SymEncryptionAlgorithms getAlgorithmFromID(String algorithmId) throws IOException {
+    public static SymEncryptionAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
         for (SymEncryptionAlgorithms alg : values()) {
             if (algorithmId.equals(alg.sksName)) {
                 return alg;

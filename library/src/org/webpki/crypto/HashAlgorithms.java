@@ -49,12 +49,12 @@ public enum HashAlgorithms {
     }
 
 
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
-    public static boolean testAlgorithmURI(String sksName) {
+    public static boolean testAlgorithmUri(String sksName) {
         for (HashAlgorithms alg : HashAlgorithms.values()) {
             if (sksName.equals(alg.sksName)) {
                 return true;
@@ -66,14 +66,14 @@ public enum HashAlgorithms {
 
     public byte[] digest(byte[] data) throws IOException {
         try {
-            return MessageDigest.getInstance(getJCEName()).digest(data);
+            return MessageDigest.getInstance(getJceName()).digest(data);
         } catch (GeneralSecurityException gse) {
             throw new IOException(gse);
         }
     }
 
 
-    public static HashAlgorithms getAlgorithmFromID(String algorithmId) throws IOException {
+    public static HashAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
         for (HashAlgorithms alg : values()) {
             if (algorithmId.equals(alg.sksName)) {
                 return alg;
@@ -83,7 +83,7 @@ public enum HashAlgorithms {
     }
 
 
-    public static HashAlgorithms getAlgorithmFromOID(String oid) throws IOException {
+    public static HashAlgorithms getAlgorithmFromOid(String oid) throws IOException {
         for (HashAlgorithms alg : values()) {
             if (oid.equals(alg.oid)) {
                 return alg;

@@ -1361,7 +1361,7 @@ public class ServerState implements Serializable {
     }
 
     public String getDeviceIDString(boolean longVersion) {
-        return DeviceID.getDeviceID(getDeviceCertificate(), longVersion);
+        return DeviceID.getDeviceId(getDeviceCertificate(), longVersion);
     }
 
 

@@ -2588,7 +2588,7 @@ public class JSONTest {
 
     static KeyPair getKeyPairFromJwk(String jwk) throws Exception {
         JSONObjectReader rd = JSONParser.parse(jwk);
-        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromID(rd.getString("crv"),
+        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString("crv"),
                 AlgorithmPreferences.JOSE);
         if (!ec.isECKey()) {
             throw new IOException("\"crv\" is not an EC type");
@@ -3472,9 +3472,9 @@ public class JSONTest {
         KeyPair ephemeralKey = test.getObject("encrypting_key").getObject("epk").getKeyPair();
          byte[] iv = test.getObject("generated").getBinary("iv");
         DataEncryptionAlgorithms dataEncryptionAlgorithm = 
-                DataEncryptionAlgorithms.getAlgorithmFromString(test.getObject("input").getString("enc"));
+                DataEncryptionAlgorithms.getAlgorithmFromId(test.getObject("input").getString("enc"));
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = 
-                KeyEncryptionAlgorithms.getAlgorithmFromString(test.getObject("input").getString("alg"));
+                KeyEncryptionAlgorithms.getAlgorithmFromId(test.getObject("input").getString("alg"));
         byte[] cek = test.getObject(keyEncryptionAlgorithm.isKeyWrap() ?
                 "generated" : "encrypting_key").getBinary("cek");
         byte[] kek = keyEncryptionAlgorithm.isKeyWrap() ?

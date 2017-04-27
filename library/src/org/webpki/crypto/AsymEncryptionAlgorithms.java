@@ -61,24 +61,24 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms {
 
 
     @Override
-    public boolean isMandatorySKSAlgorithm() {
+    public boolean isMandatorySksAlgorithm() {
         return true;
     }
 
 
     @Override
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
     @Override
-    public String getOID() {
+    public String getOid() {
         return oid;
     }
 
 
-    public static AsymEncryptionAlgorithms getAlgorithmFromOID(String oid) throws IOException {
+    public static AsymEncryptionAlgorithms getAlgorithmFromOid(String oid) throws IOException {
         for (AsymEncryptionAlgorithms alg : values()) {
             if (oid.equals(alg.oid)) {
                 return alg;
@@ -88,7 +88,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms {
     }
 
 
-    public static AsymEncryptionAlgorithms getAlgorithmFromID(String algorithmId,
+    public static AsymEncryptionAlgorithms getAlgorithmFromId(String algorithmId,
                                                               AlgorithmPreferences algorithmPreferences) throws IOException {
         for (AsymEncryptionAlgorithms alg : values()) {
             if (algorithmId.equals(alg.sksName)) {

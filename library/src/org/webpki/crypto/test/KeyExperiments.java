@@ -54,7 +54,7 @@ public class KeyExperiments {
             }
             alg_par_spec = new RSAKeyGenParameterSpec(rsa_key_size, exponent);
         } else {
-            alg_par_spec = new ECGenParameterSpec(key_alg.getJCEName());
+            alg_par_spec = new ECGenParameterSpec(key_alg.getJceName());
         }
         KeyPairGenerator generator = KeyPairGenerator.getInstance(alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
         generator.initialize(alg_par_spec, new SecureRandom());

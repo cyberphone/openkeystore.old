@@ -115,7 +115,7 @@ public class CA {
 
         void add(CertificateExtensions extension, boolean critical, BaseASN1Object argument) throws IOException {
             BaseASN1Object[] o = new BaseASN1Object[critical ? 3 : 2];
-            o[0] = new ASN1ObjectID(extension.getOID());
+            o[0] = new ASN1ObjectID(extension.getOid());
             if (critical) {
                 o[1] = new ASN1Boolean(true);
             }
@@ -168,7 +168,7 @@ public class CA {
                 getASN1Time(end_date)});
 
         BaseASN1Object signatureAlgorithm =
-                new ASN1Sequence(new BaseASN1Object[]{new ASN1ObjectID(certalg.getOID()),
+                new ASN1Sequence(new BaseASN1Object[]{new ASN1ObjectID(certalg.getOid()),
                         new ASN1Null()});
 
         BaseASN1Object subjectPublicKeyInfo = DerDecoder.decode(subject_public_key.getEncoded());

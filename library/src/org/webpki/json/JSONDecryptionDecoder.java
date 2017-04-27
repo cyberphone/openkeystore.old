@@ -138,13 +138,13 @@ public class JSONDecryptionDecoder {
         // End JEF normalization                                                //
         //////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromString(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
+                .getAlgorithmFromId(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(KEY_ENCRYPTION_JSON)) {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(KEY_ENCRYPTION_JSON));
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
-                    .getAlgorithmFromString(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
+                    .getAlgorithmFromId(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
             if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
                 publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
             } else {

@@ -224,7 +224,7 @@ public class CommandLineCA {
         public byte[] signData(byte[] data, AsymSignatureAlgorithms certalg) throws IOException {
             try {
                 return new SignatureWrapper(certalg, sign_key)
-                        .setECDSASignatureEncoding(true)
+                        .setEcdsaSignatureEncoding(true)
                         .update(data)
                         .sign();
             } catch (GeneralSecurityException e) {
@@ -686,7 +686,7 @@ public class CommandLineCA {
             KeyPairGenerator kpg = null;
             if (CMD_ecc_curve.found) {
                 kpg = KeyPairGenerator.getInstance("EC");
-                kpg.initialize(new ECGenParameterSpec(CMD_ecc_curve.getECCDomain().getJCEName()));
+                kpg.initialize(new ECGenParameterSpec(CMD_ecc_curve.getECCDomain().getJceName()));
             } else {
                 kpg = KeyPairGenerator.getInstance("RSA");
                 if (CMD_exponent.found) {

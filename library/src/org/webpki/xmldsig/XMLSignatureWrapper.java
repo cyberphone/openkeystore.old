@@ -328,7 +328,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         rd.getParent();
         rd.getParent();
         rd.getNext(DIGEST_METHOD_ELEM);
-        ref.digestAlg = HashAlgorithms.getAlgorithmFromID(aHelper.getString(ALGORITHM_ATTR));
+        ref.digestAlg = HashAlgorithms.getAlgorithmFromId(aHelper.getString(ALGORITHM_ATTR));
         rd.getChild();
         if (rd.hasNext()) throw new IOException("No \"DigestMethod\" elements allowed");
         rd.getParent();
@@ -363,10 +363,10 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
         rd.getNext(SIGNATURE_METHOD_ELEM);
         String signature_alg = aHelper.getString(ALGORITHM_ATTR);
-        if (AsymSignatureAlgorithms.testAlgorithmURI(signature_alg)) {
-            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromID(signature_alg, AlgorithmPreferences.SKS);
+        if (AsymSignatureAlgorithms.testAlgorithmUri(signature_alg)) {
+            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromId(signature_alg, AlgorithmPreferences.SKS);
         } else {
-            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromID(signature_alg, AlgorithmPreferences.SKS);
+            signedinfo_object.sym_signature_alg = MACAlgorithms.getAlgorithmFromId(signature_alg, AlgorithmPreferences.SKS);
         }
         rd.getChild();
         if (rd.hasNext()) throw new IOException("No \"SignatureMethod\" elements allowed");

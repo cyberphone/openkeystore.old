@@ -51,26 +51,26 @@ public enum MACAlgorithms implements SignatureAlgorithms {
 
 
     @Override
-    public boolean isMandatorySKSAlgorithm() {
+    public boolean isMandatorySksAlgorithm() {
         return sksMandatory;
     }
 
 
     @Override
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
     @Override
-    public String getOID() {
+    public String getOid() {
         return null;
     }
 
 
     public byte[] digest(byte[] key, byte[] data) throws IOException {
         try {
-            Mac mac = Mac.getInstance(getJCEName());
+            Mac mac = Mac.getInstance(getJceName());
             mac.init(new SecretKeySpec(key, "RAW"));  // Note: any length is OK in HMAC
             return mac.doFinal(data);
         } catch (GeneralSecurityException gse) {
@@ -79,7 +79,7 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static boolean testAlgorithmURI(String sksName) {
+    public static boolean testAlgorithmUri(String sksName) {
         for (MACAlgorithms alg : MACAlgorithms.values()) {
             if (sksName.equals(alg.sksName)) {
                 return true;
@@ -89,7 +89,7 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static MACAlgorithms getAlgorithmFromID(String algorithmId,
+    public static MACAlgorithms getAlgorithmFromId(String algorithmId,
                                                    AlgorithmPreferences algorithmPreferences) throws IOException {
         for (MACAlgorithms alg : values()) {
             if (algorithmId.equals(alg.sksName)) {

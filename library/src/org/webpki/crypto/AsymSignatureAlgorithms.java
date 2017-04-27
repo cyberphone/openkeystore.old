@@ -79,19 +79,19 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
 
 
     @Override
-    public boolean isMandatorySKSAlgorithm() {
+    public boolean isMandatorySksAlgorithm() {
         return sksMandatory;
     }
 
 
     @Override
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
     @Override
-    public String getOID() {
+    public String getOid() {
         return oid;
     }
 
@@ -101,12 +101,12 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public boolean isRSA() {
+    public boolean isRsa() {
         return rsa;
     }
 
 
-    public static boolean testAlgorithmURI(String sksName) {
+    public static boolean testAlgorithmUri(String sksName) {
         for (AsymSignatureAlgorithms alg : values()) {
             if (sksName.equals(alg.sksName)) {
                 return true;
@@ -116,7 +116,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     }
 
 
-    public static AsymSignatureAlgorithms getAlgorithmFromID(String algorithmId,
+    public static AsymSignatureAlgorithms getAlgorithmFromId(String algorithmId,
                                                              AlgorithmPreferences algorithmPreferences) throws IOException {
         for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values()) {
             if (algorithmId.equals(alg.sksName)) {

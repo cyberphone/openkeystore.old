@@ -65,7 +65,7 @@ public class Verify {
                         switch (signature.getSignatureType()) {
                             case ASYMMETRIC_KEY:
                                 try {
-                                    KeyStore ks = ((AsymSignatureAlgorithms) signature.getAlgorithm()).isRSA() ?
+                                    KeyStore ks = ((AsymSignatureAlgorithms) signature.getAlgorithm()).isRsa() ?
                                             DemoKeyStore.getMybankDotComKeyStore() : DemoKeyStore.getECDSAStore();
                                     PublicKey publicKey = ks.getCertificate("mykey").getPublicKey();
                                     signature.verify(new JSONAsymKeyVerifier(publicKey));

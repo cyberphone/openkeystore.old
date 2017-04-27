@@ -770,7 +770,7 @@ public class SKSTest {
         sess.closeSession();
         Cipher cipher = null;
         try {
-            cipher = Cipher.getInstance(encryption_algorithm.getJCEName());
+            cipher = Cipher.getInstance(encryption_algorithm.getJceName());
         } catch (Exception e) {
             assertFalse(bc_loaded || encryption_algorithm != AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P);
             return;
@@ -995,7 +995,7 @@ public class SKSTest {
             if (!bc_loaded && key_algorithm == KeyAlgorithms.BRAINPOOL_P_256) {
                 continue;
             }
-            if (key_algorithm.isMandatorySKSAlgorithm()) {
+            if (key_algorithm.isMandatorySksAlgorithm()) {
                 doit = true;
             } else {
                 for (String algorithm : device.device_info.getSupportedAlgorithms()) {
@@ -1531,7 +1531,7 @@ public class SKSTest {
     @Test
     public void test30() throws Exception {
         for (AsymEncryptionAlgorithms algorithm : AsymEncryptionAlgorithms.values()) {
-            if (algorithm.isMandatorySKSAlgorithm()) {
+            if (algorithm.isMandatorySksAlgorithm()) {
                 rsaEncryptionTest(algorithm);
             }
         }
@@ -1569,7 +1569,7 @@ public class SKSTest {
         }
         key.changePIN(good_pin, good_pin = "8463");
 
-        Cipher cipher = Cipher.getInstance(AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJCEName());
+        Cipher cipher = Cipher.getInstance(AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJceName());
         cipher.init(Cipher.ENCRYPT_MODE, key.getPublicKey());
         byte[] enc = cipher.doFinal(TEST_STRING);
         assertTrue("Encryption error", ArrayUtil.compare(device.sks.asymmetricKeyDecrypt(key.keyHandle,
@@ -1935,7 +1935,7 @@ public class SKSTest {
                         new String[]{sym_enc.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
                 key.setSymmetricKey(symmetricKey);
             } catch (SKSException e) {
-                assertFalse("Should not throw", sym_enc.isMandatorySKSAlgorithm());
+                assertFalse("Should not throw", sym_enc.isMandatorySksAlgorithm());
                 checkException(e, "Unsupported algorithm: " + sym_enc.getAlgorithmId(AlgorithmPreferences.SKS));
                 continue;
             }
@@ -1944,13 +1944,13 @@ public class SKSTest {
             new SecureRandom().nextBytes(iv_val);
             byte[] result = key.symmetricKeyEncrypt(sym_enc,
                     true,
-                    sym_enc.needsIV() && !sym_enc.internalIV() ? iv_val : null,
+                    sym_enc.needsIv() && !sym_enc.internalIv() ? iv_val : null,
                     good_pin,
                     data);
             byte[] res2 = result.clone();
-            Cipher crypt = Cipher.getInstance(sym_enc.getJCEName());
-            if (sym_enc.needsIV()) {
-                if (sym_enc.internalIV()) {
+            Cipher crypt = Cipher.getInstance(sym_enc.getJceName());
+            if (sym_enc.needsIv()) {
+                if (sym_enc.internalIv()) {
                     byte[] temp = new byte[result.length - 16];
                     System.arraycopy(res2, 0, iv_val, 0, 16);
                     System.arraycopy(res2, 16, temp, 0, temp.length);
@@ -1963,13 +1963,13 @@ public class SKSTest {
             assertTrue("encrypt error", ArrayUtil.compare(res2, crypt.doFinal(data)));
             assertTrue("decrypt error", ArrayUtil.compare(data, key.symmetricKeyEncrypt(sym_enc,
                     false,
-                    sym_enc.needsIV() && !sym_enc.internalIV() ? iv_val : null,
+                    sym_enc.needsIv() && !sym_enc.internalIv() ? iv_val : null,
                     good_pin,
                     result)));
             try {
                 key.symmetricKeyEncrypt(sym_enc,
                         true,
-                        sym_enc.needsIV() && !sym_enc.internalIV() ? null : iv_val,
+                        sym_enc.needsIv() && !sym_enc.internalIv() ? null : iv_val,
                         good_pin,
                         data);
                 fail("Incorrect IV must fail");
@@ -2005,7 +2005,7 @@ public class SKSTest {
                         new String[]{hmac.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
                 key.setSymmetricKey(symmetricKey);
             } catch (SKSException e) {
-                assertFalse("Should not throw", hmac.isMandatorySKSAlgorithm());
+                assertFalse("Should not throw", hmac.isMandatorySksAlgorithm());
                 checkException(e, "Unsupported algorithm: " + hmac.getAlgorithmId(AlgorithmPreferences.SKS));
                 continue;
             }
@@ -2163,7 +2163,7 @@ public class SKSTest {
             key.setPrivateKey(key_pair.getPrivate());
             sess.closeSession();
             assertTrue("IMPORTED must be set", key.getKeyProtectionInfo().getKeyBackup() == KeyProtectionInfo.KEYBACKUP_IMPORTED);
-            Cipher cipher = Cipher.getInstance(AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJCEName());
+            Cipher cipher = Cipher.getInstance(AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5.getJceName());
             cipher.init(Cipher.ENCRYPT_MODE, key.getPublicKey());
             byte[] enc = cipher.doFinal(TEST_STRING);
             assertTrue("Encryption error", ArrayUtil.compare(key.asymmetricKeyDecrypt(AsymEncryptionAlgorithms.RSA_ES_PKCS_1_5,
@@ -3083,7 +3083,7 @@ public class SKSTest {
         sess.closeSession();
 
         for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values()) {
-            GenKey tk = alg.isRSA() ? rsa : ec;
+            GenKey tk = alg.isRsa() ? rsa : ec;
             byte[] result = tk.signData(alg, null, TEST_STRING);
             SignatureWrapper verify = new SignatureWrapper(alg, tk.getPublicKey());
             verify.update(TEST_STRING);

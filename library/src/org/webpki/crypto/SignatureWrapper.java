@@ -137,9 +137,9 @@ public class SignatureWrapper {
     ECParameterSpec ecParameters;
 
     private SignatureWrapper(AsymSignatureAlgorithms algorithm, String provider, Key key) throws GeneralSecurityException, IOException {
-        instance = provider == null ? Signature.getInstance(algorithm.getJCEName())
+        instance = provider == null ? Signature.getInstance(algorithm.getJceName())
                                                     : 
-                                      Signature.getInstance(algorithm.getJCEName(), provider);
+                                      Signature.getInstance(algorithm.getJceName(), provider);
         rsaFlag = key instanceof RSAKey;
         if (!rsaFlag) {
             ecParameters = ((ECKey) key).getParams();
@@ -170,7 +170,7 @@ public class SignatureWrapper {
         this(algorithm, privateKey, null);
     }
 
-    public SignatureWrapper setECDSASignatureEncoding(boolean derEncoded) {
+    public SignatureWrapper setEcdsaSignatureEncoding(boolean derEncoded) {
         ecdsaDerEncoded = derEncoded;
         return this;
     }

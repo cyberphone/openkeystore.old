@@ -36,7 +36,7 @@ public enum CertificateExtensions {
     }
 
 
-    public String getOID() {
+    public String getOid() {
         return oid;
     }
 

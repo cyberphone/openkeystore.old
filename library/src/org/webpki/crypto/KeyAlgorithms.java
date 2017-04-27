@@ -346,19 +346,19 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
 
 
     @Override
-    public boolean isMandatorySKSAlgorithm() {
+    public boolean isMandatorySksAlgorithm() {
         return sksMandatory;
     }
 
 
     @Override
-    public String getJCEName() {
+    public String getJceName() {
         return jceName;
     }
 
 
     @Override
-    public String getOID() {
+    public String getOid() {
         return null;
     }
 
@@ -431,7 +431,7 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
     }
 
 
-    public static KeyAlgorithms getKeyAlgorithmFromID(String algorithmId, 
+    public static KeyAlgorithms getKeyAlgorithmFromId(String algorithmId, 
                                                       AlgorithmPreferences algorithmPreferences) throws IOException {
         for (KeyAlgorithms alg : values()) {
             if (algorithmId.equals(alg.sksName)) {

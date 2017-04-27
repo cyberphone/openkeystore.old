@@ -108,7 +108,7 @@ public class ProvSess {
         public ECPublicKey generateEphemeralKey(KeyAlgorithms ec_key_algorithm) throws IOException {
             try {
                 KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-                ECGenParameterSpec eccgen = new ECGenParameterSpec(ec_key_algorithm.getJCEName());
+                ECGenParameterSpec eccgen = new ECGenParameterSpec(ec_key_algorithm.getJceName());
                 generator.initialize(eccgen, new SecureRandom());
                 KeyPair kp = generator.generateKeyPair();
                 server_ec_private_key = (ECPrivateKey) kp.getPrivate();
@@ -131,13 +131,13 @@ public class ProvSess {
                 byte[] Z = key_agreement.generateSecret();
 
                 // The custom KDF
-                Mac mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJCEName());
+                Mac mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJceName());
                 mac.init(new SecretKeySpec(Z, "RAW"));
                 session_key = mac.doFinal(kdf_data);
 
                 if (device_certificate == null) {
                     // The session key signature
-                    mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJCEName());
+                    mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJceName());
                     mac.init(new SecretKeySpec(session_key, "RAW"));
                     byte[] session_key_attest = mac.doFinal(attestation_arguments);
                     if (!ArrayUtil.compare(session_key_attest, session_attestation)) {
@@ -162,7 +162,7 @@ public class ProvSess {
 
         public byte[] mac(byte[] data, byte[] key_modifier) throws IOException {
             try {
-                Mac mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJCEName());
+                Mac mac = Mac.getInstance(MACAlgorithms.HMAC_SHA256.getJceName());
                 mac.init(new SecretKeySpec(ArrayUtil.add(session_key, key_modifier), "RAW"));
                 return mac.doFinal(data);
             } catch (GeneralSecurityException e) {

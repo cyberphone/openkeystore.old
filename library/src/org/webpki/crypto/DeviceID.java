@@ -88,7 +88,7 @@ public class DeviceID {
         return result;
     }
 
-    private static String getDeviceIDFromHash(byte[] hash) {
+    private static String getDeviceIdFromHash(byte[] hash) {
         try {
             if (hash.length != 20 && hash.length != 10) {
                 throw new IllegalArgumentException("Hash length: " + hash.length);
@@ -116,11 +116,11 @@ public class DeviceID {
         }
     }
 
-    public static String getDeviceID(byte[] identityBlobOrNull, boolean longVersion) {
+    public static String getDeviceId(byte[] identityBlobOrNull, boolean longVersion) {
         if (identityBlobOrNull != null) {
             try {
                 byte[] hash = HashAlgorithms.SHA1.digest(identityBlobOrNull);
-                return getDeviceIDFromHash(longVersion ? hash : half(hash));
+                return getDeviceIdFromHash(longVersion ? hash : half(hash));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -128,9 +128,9 @@ public class DeviceID {
         return "N/A";
     }
 
-    public static String getDeviceID(X509Certificate deviceCertificateOrNull, boolean longVersion) {
+    public static String getDeviceId(X509Certificate deviceCertificateOrNull, boolean longVersion) {
         try {
-            return getDeviceID(deviceCertificateOrNull == null ? null : deviceCertificateOrNull.getEncoded(), longVersion);
+            return getDeviceId(deviceCertificateOrNull == null ? null : deviceCertificateOrNull.getEncoded(), longVersion);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
@@ -167,7 +167,7 @@ public class DeviceID {
             }
             bitPosition = (bitPosition + 5) % 8;
         }
-        if (!deviceId.equals(getDeviceIDFromHash(hash))) {
+        if (!deviceId.equals(getDeviceIdFromHash(hash))) {
             throw new IOException("DeviceID checksum error");
         }
     }
@@ -177,6 +177,6 @@ public class DeviceID {
             System.out.println("\n" + DeviceID.class.getName() + " certificate-in-der-format long_version_expressed_as_true_or_false\n");
             System.exit(3);
         }
-        System.out.println("Device ID=" + getDeviceID(ArrayUtil.readFile(args[0]), new Boolean(args[1])));
+        System.out.println("Device ID=" + getDeviceId(ArrayUtil.readFile(args[0]), new Boolean(args[1])));
     }
 }

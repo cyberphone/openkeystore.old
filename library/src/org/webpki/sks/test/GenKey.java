@@ -108,7 +108,7 @@ public class GenKey {
                                     SignatureWrapper signer = new SignatureWrapper(algorithm,
                                             (PrivateKey) DemoKeyStore.getSubCAKeyStore()
                                                     .getKey("mykey", DemoKeyStore.getSignerPassword().toCharArray()));
-                                    signer.setECDSASignatureEncoding(true);
+                                    signer.setEcdsaSignatureEncoding(true);
                                     signer.update(data);
                                     return signer.sign();
                                 } catch (GeneralSecurityException e) {

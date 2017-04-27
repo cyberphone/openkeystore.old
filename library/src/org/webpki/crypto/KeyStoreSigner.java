@@ -129,7 +129,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi {
     public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
         try {
             return new SignatureWrapper(algorithm, privateKey)
-                .setECDSASignatureEncoding(ecdsaDerEncoded)
+                .setEcdsaSignatureEncoding(ecdsaDerEncoded)
                 .update(data)
                 .sign();
         } catch (GeneralSecurityException e) {

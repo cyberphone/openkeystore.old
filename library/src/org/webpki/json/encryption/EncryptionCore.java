@@ -389,7 +389,7 @@ public final class EncryptionCore {
     throws GeneralSecurityException, IOException {
         KeyPairGenerator generator = ecProviderName == null ?
                          KeyPairGenerator.getInstance("EC") : KeyPairGenerator.getInstance("EC", ecProviderName);
-        ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJCEName());
+        ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJceName());
         generator.initialize(eccgen, new SecureRandom());
         KeyPair keyPair = generator.generateKeyPair();
         byte[] derivedKey = coreKeyAgreement(keyEncryptionAlgorithm,

@@ -23,13 +23,13 @@ import java.io.IOException;
  */
 public interface CryptoAlgorithms {
 
-    public boolean isMandatorySKSAlgorithm();
+    public boolean isMandatorySksAlgorithm();
 
     public String getAlgorithmId(AlgorithmPreferences algorithmPreferences) throws IOException;
 
-    public String getOID();
+    public String getOid();
 
-    public String getJCEName();
+    public String getJceName();
 
     public boolean isSymmetric();
 

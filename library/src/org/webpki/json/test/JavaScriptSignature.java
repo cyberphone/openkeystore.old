@@ -41,7 +41,7 @@ public class JavaScriptSignature {
 
         // Get a key-pair.  Here created one from scratch.
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        kpg.initialize(new ECGenParameterSpec(KeyAlgorithms.NIST_P_256.getJCEName()), new SecureRandom());
+        kpg.initialize(new ECGenParameterSpec(KeyAlgorithms.NIST_P_256.getJceName()), new SecureRandom());
         final KeyPair keyPair = kpg.generateKeyPair();
 
         // Create an empty JSON object

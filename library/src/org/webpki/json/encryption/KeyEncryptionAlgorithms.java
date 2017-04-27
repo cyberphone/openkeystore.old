@@ -29,13 +29,13 @@ public enum KeyEncryptionAlgorithms {
     JOSE_ECDH_ES_A256KW_ALG_ID ("ECDH-ES+A256KW", false, true,  32),
     JOSE_RSA_OAEP_256_ALG_ID   ("RSA-OAEP-256",   true,  true,  -1);
 
-    String JsonName;
+    String JoseName;
     boolean rsa;
     boolean keyWrap;
     int keyEncryptionKeyLength;
 
-    KeyEncryptionAlgorithms(String JsonName, boolean rsa, boolean keyWrap, int keyEncryptionKeyLength) {
-        this.JsonName = JsonName;
+    KeyEncryptionAlgorithms(String JoseName, boolean rsa, boolean keyWrap, int keyEncryptionKeyLength) {
+        this.JoseName = JoseName;
         this.rsa = rsa;
         this.keyWrap = keyWrap;
         this.keyEncryptionKeyLength = keyEncryptionKeyLength;
@@ -51,15 +51,15 @@ public enum KeyEncryptionAlgorithms {
 
     @Override
     public String toString() {
-        return JsonName;
+        return JoseName;
     }
 
-    public static KeyEncryptionAlgorithms getAlgorithmFromString(String string) throws IOException {
+    public static KeyEncryptionAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
         for (KeyEncryptionAlgorithms algorithm : KeyEncryptionAlgorithms.values()) {
-            if (string.equals(algorithm.JsonName)) {
+            if (algorithmId.equals(algorithm.JoseName)) {
                 return algorithm;
             }
         }
-        throw new IOException("No such algorithm: " + string);
+        throw new IOException("No such algorithm: " + algorithmId);
     }
 }

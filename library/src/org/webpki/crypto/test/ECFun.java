@@ -40,7 +40,7 @@ public class ECFun {
                         AlgorithmParameterSpec algParSpec = ka.isRSAKey() ?
                                 new RSAKeyGenParameterSpec(ka.getPublicKeySizeInBits(), RSAKeyGenParameterSpec.F4)
                                 :
-                                new ECGenParameterSpec(ka.getJCEName());
+                                new ECGenParameterSpec(ka.getJceName());
                         KeyPairGenerator kpg = KeyPairGenerator.getInstance(ka.isRSAKey() ? "RSA" : "EC");
                         kpg.initialize(algParSpec, new SecureRandom());
                         KeyPair keyPair = kpg.generateKeyPair();
@@ -62,10 +62,10 @@ public class ECFun {
     }
 
     private static void performOneOp(PublicKey publicKey, PrivateKey privateKey, AsymSignatureAlgorithms algorithm) throws Exception {
-        SignatureWrapper sign = new SignatureWrapper(algorithm, privateKey).setECDSASignatureEncoding(ecdsa_der);
+        SignatureWrapper sign = new SignatureWrapper(algorithm, privateKey).setEcdsaSignatureEncoding(ecdsa_der);
         sign.update(DATA);
         byte[] signature = sign.sign();
-        SignatureWrapper ver = new SignatureWrapper(algorithm, publicKey).setECDSASignatureEncoding(ecdsa_der);
+        SignatureWrapper ver = new SignatureWrapper(algorithm, publicKey).setEcdsaSignatureEncoding(ecdsa_der);
         ver.update(DATA);
         if (!ver.verify(signature)) {
             throw new Exception("Didn't verify");

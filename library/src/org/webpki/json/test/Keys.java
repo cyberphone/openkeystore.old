@@ -104,7 +104,7 @@ public class Keys {
         AlgorithmParameterSpec alg_par_spec = rsa ?
                 new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4)
                 :
-                new ECGenParameterSpec(ec_curves[ec_index % ec_curves.length].getJCEName());
+                new ECGenParameterSpec(ec_curves[ec_index % ec_curves.length].getJceName());
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(rsa ? "RSA" : "EC");
         kpg.initialize(alg_par_spec, new SecureRandom());
         KeyPair key_pair = kpg.generateKeyPair();
