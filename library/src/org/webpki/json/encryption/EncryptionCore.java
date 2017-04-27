@@ -164,7 +164,12 @@ public final class EncryptionCore {
         return cipher.doFinal(data);
     }
 
-    private static byte[] generateRandom(int length) {
+    /**
+     * Generate byte[] with random data.
+     * @param length Number of bytes
+     * @return byte[]
+     */
+    public static byte[] generateRandom(int length) {
         byte[] random = new byte[length];
         new SecureRandom().nextBytes(random);
         return random;
