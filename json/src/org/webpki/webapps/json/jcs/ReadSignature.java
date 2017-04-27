@@ -96,7 +96,7 @@ public class ReadSignature {
                                 .append(" bits)");
                         if (key_alg.isECKey()) {
                             asym_text.append(", Curve=").append(
-                                    key_alg.getJCEName());
+                                    key_alg.getJceName());
                             ECPoint ec_point = ((ECPublicKey) publicKey)
                                     .getW();
                             asym_text
