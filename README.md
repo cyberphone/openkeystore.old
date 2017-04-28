@@ -43,3 +43,5 @@ $ cd library
 $ ant android-json
 ```
 Now you should have a file <code>library/dist/webpki.android.json.zip</code> which can be imported in an Android project.
+For use with a larger base of Android devices the Spongycastle library is recommended:<br>
+https://rtyley.github.io/spongycastle/
