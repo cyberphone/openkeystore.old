@@ -151,7 +151,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
             "{&quot;now&quot;:&quot;2017-04-16T11:23:06Z&quot;,&quot;escapeMe&quot;:&quot;" +
-            "<b style=\"color:red;background:Yellow\">\u20ac</b>$<b style=\"color:red;background:Yellow\">" +
+            "<b style=\"color:red;background:Yellow\">&#x20ac</b>$<b style=\"color:red;background:Yellow\">" +
             "\\u000f\\nA</b>'B<b style=\"color:red;background:Yellow\">\\&quot;\\\\</b>\\\\\\&quot;" +
             "<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[1e+30,4.5,6],&quot;signature&quot;:<br>" +
             "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;kty&quot;" +
