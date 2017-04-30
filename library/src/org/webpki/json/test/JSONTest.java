@@ -84,6 +84,7 @@ import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.SymmetricEncryptionResult;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -3337,6 +3338,7 @@ public class JSONTest {
         for (BAD_SIGNATURE test : BAD_SIGNATURE.values()) {
             badSignature(test);
         }
+        // This does NOT work with the SUN JCE
         DeterministicSignatureWrapper.rfc4754();
     }
 
