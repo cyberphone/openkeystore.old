@@ -70,7 +70,7 @@ public final class EncryptionCore {
     static final int    CONCAT_KDF_DIGEST_LENGTH  = 32;
     
     // RSA OAEP 256 static
-    static final String RSA_OAEP_256_JCENAME      = "RSA/ECB/OAEPWithSHA256AndMGF1Padding";
+    static final String RSA_OAEP_256_JCENAME      = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
     
     private static String aesProviderName;
 
