@@ -453,11 +453,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @throws IOException &nbsp;
      */
     public Vector<byte[]> getBinaryArray(String name) throws IOException {
-        Vector<byte[]> blobs = new Vector<byte[]>();
-        for (String blob : getStringArray(name)) {
-            blobs.add(Base64URL.decode(blob));
-        }
-        return blobs;
+        return getArray(name).getBinaryArray();
     }
 
     /**

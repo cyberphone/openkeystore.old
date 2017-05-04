@@ -235,10 +235,10 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
+    static X509Certificate[] makeCertificatePath(Vector<byte[]> certificateBlobs) throws IOException {
         X509Certificate lastCertificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate>();
-        for (byte[] certificateBlob : rd.getBinaryArray(CERTIFICATE_PATH_JSON)) {
+        for (byte[] certificateBlob : certificateBlobs) {
             try {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBlob));
@@ -248,6 +248,10 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
         return certificates.toArray(new X509Certificate[0]);
+    }
+
+    static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
+        return makeCertificatePath(rd.getBinaryArray(CERTIFICATE_PATH_JSON));
     }
 
     void readCertificateData(JSONObjectReader rd) throws IOException {

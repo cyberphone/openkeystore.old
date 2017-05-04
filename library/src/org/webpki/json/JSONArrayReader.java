@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.cert.X509Certificate;
+
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -133,5 +135,17 @@ public class JSONArrayReader implements Serializable {
 
     public void scanAway() throws IOException {
         get(getElementType());
+    }
+
+    public Vector<byte[]> getBinaryArray() throws IOException {
+        Vector<byte[]> blobs = new Vector<byte[]>();
+        do {
+            blobs.add(getBinary());
+        } while (hasMore());
+        return blobs;
+    }
+
+    public X509Certificate[] getCertificatePath () throws IOException {
+        return JSONSignatureDecoder.makeCertificatePath(getBinaryArray());
     }
 }
