@@ -291,7 +291,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          .append(" which features an integrated " +
          "JSON encoder, decoder and signature solution:" +
          "<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
-         "public&nbsp;void&nbsp;signAndVerifyJCS(final&nbsp;PublicKey&nbsp;publicKey,&nbsp;final&nbsp;PrivateKey&nbsp;privateKey)&nbsp;throws&nbsp;IOException&nbsp;{<br>" +
+         "public&nbsp;void&nbsp;signAndVerifyJCS(PrivateKey&nbsp;privateKey,&nbsp;PublicKey&nbsp;publicKey)&nbsp;throws&nbsp;IOException&nbsp;{<br>" +
          "<br>" +
          "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Create&nbsp;an&nbsp;empty&nbsp;JSON&nbsp;document</span><br>" +
          "&nbsp;&nbsp;JSONObjectWriter&nbsp;writer&nbsp;=&nbsp;new&nbsp;JSONObjectWriter();<br>" +
@@ -300,20 +300,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          "&nbsp;&nbsp;writer.setString(&quot;myProperty&quot;,&nbsp;&quot;Some&nbsp;data&quot;);<br>" +
          "<br>" +
          "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Sign&nbsp;document</span><br>" +
-         "&nbsp;&nbsp;writer.setSignature(new&nbsp;JSONAsymKeySigner(new&nbsp;AsymKeySignerInterface()&nbsp;{<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;@Override<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;byte[]&nbsp;signData&nbsp;(byte[]&nbsp;data,&nbsp;AsymSignatureAlgorithms&nbsp;algorithm)&nbsp;throws&nbsp;IOException&nbsp;{<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try&nbsp;{<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;new&nbsp;SignatureWrapper(algorithm,&nbsp;privateKey).update(data).sign();<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;catch&nbsp;(GeneralSecurityException&nbsp;e)&nbsp;{<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw&nbsp;new&nbsp;IOException(e);<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;@Override<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;PublicKey&nbsp;getPublicKey()&nbsp;throws&nbsp;IOException&nbsp;{<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;publicKey;<br>" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-         "&nbsp;&nbsp;}));<br>" +
+         "&nbsp;&nbsp;writer.setSignature(new&nbsp;JSONAsymKeySigner(privateKey,&nbsp;publicKey,&nbsp;null));<br>" +
          "<br>" +
          "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Serialize&nbsp;document</span><br>" +
          "&nbsp;&nbsp;String&nbsp;json&nbsp;=&nbsp;writer.toString();<br>" +

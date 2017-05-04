@@ -574,7 +574,7 @@ import org.webpki.json.JSONSignatureDecoder;
            .
            .
            .
-    public void signAndVerifyJCS(final PublicKey publicKey, final PrivateKey privateKey) throws IOException {
+    public void signAndVerifyJCS(PrivateKey privateKey, PublicKey publicKey) throws IOException {
     
         // Create an empty JSON document
         JSONObjectWriter writer = new JSONObjectWriter();
@@ -583,21 +583,8 @@ import org.webpki.json.JSONSignatureDecoder;
         writer.setString("myProperty", "Some data");
     
         // Sign document
-        writer.setSignature(new JSONAsymKeySigner(new AsymKeySignerInterface() {
-           {@literal @}Override
-            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
-                try {
-                    return new SignatureWrapper(algorithm, privateKey).update(data).sign();
-                } catch (GeneralSecurityException e) {
-                    throw new IOException(e);
-                }
-            }
-           {@literal @}Override
-            public PublicKey getPublicKey() throws IOException {
-                return publicKey;
-            }
-        }));
-    
+        writer.setSignature(privateKey, publicKey, null);
+
         // Serialize document
         String json = writer.toString();
     

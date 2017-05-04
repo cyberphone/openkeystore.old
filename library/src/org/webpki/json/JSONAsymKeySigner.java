@@ -18,13 +18,16 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.PrivateKey;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 
 /**
  * Initiatiator object for asymmetric key signatures.
@@ -39,10 +42,44 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     PublicKey publicKey;
 
+    /**
+     * Constructor for custom crypto solutions.
+     * @param signer Handle to implementation
+     * @throws IOException &nbsp;
+     */
     public JSONAsymKeySigner(AsymKeySignerInterface signer) throws IOException {
         this.signer = signer;
         publicKey = signer.getPublicKey();
         algorithm = KeyAlgorithms.getKeyAlgorithm(publicKey).getRecommendedSignatureAlgorithm();
+    }
+
+    /**
+     * Constructor for JCE based solutions.
+     * @param privateKey Private key
+     * @param publicKey Public key
+     * @param provider Optional JCE provider or null
+     * @throws IOException &nbsp;
+     */
+    public JSONAsymKeySigner(final PrivateKey privateKey,
+                             final PublicKey publicKey,
+                             final String provider) throws IOException {
+        this(new AsymKeySignerInterface() {
+
+            @Override
+            public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+                try {
+                    return new SignatureWrapper(algorithm, privateKey, provider).update(data).sign();
+                } catch (GeneralSecurityException e) {
+                    throw new IOException(e);
+                }
+            }
+
+            @Override
+            public PublicKey getPublicKey() throws IOException {
+                 return publicKey;
+            }
+            
+        });
     }
 
     public JSONAsymKeySigner setSignatureAlgorithm(AsymSignatureAlgorithms algorithm) {

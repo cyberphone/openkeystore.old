@@ -18,12 +18,16 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+
 import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.SignatureWrapper;
 import org.webpki.crypto.SignerInterface;
 
 /**
@@ -41,10 +45,44 @@ public class JSONX509Signer extends JSONSigner {
 
     boolean outputSignatureCertificateAttributes;
 
+    /**
+     * Constructor for custom crypto solutions.
+     * @param signer Handle to implementation
+     * @throws IOException &nbsp;
+     */
     public JSONX509Signer(SignerInterface signer) throws IOException {
         this.signer = signer;
         certificatePath = signer.getCertificatePath();
         algorithm = KeyAlgorithms.getKeyAlgorithm(certificatePath[0].getPublicKey()).getRecommendedSignatureAlgorithm();
+    }
+
+    /**
+     * Constructor for JCE based solutions.
+     * @param privateKey Private key
+     * @param certificatePath Certificate path
+     * @param provider Optional JCE provider or null
+     * @throws IOException &nbsp;
+     */
+    public JSONX509Signer(final PrivateKey privateKey,
+                          final X509Certificate[] certificatePath,
+                          final String provider) throws IOException {
+        this(new SignerInterface() {
+
+            @Override
+            public X509Certificate[] getCertificatePath() throws IOException {
+                return certificatePath;
+            }
+
+            @Override
+            public byte[] signData(byte[] data, AsymSignatureAlgorithms algorithm) throws IOException {
+                try {
+                    return new SignatureWrapper(algorithm, privateKey, provider).update(data).sign();
+                } catch (GeneralSecurityException e) {
+                    throw new IOException(e);
+                }
+            }
+            
+        });
     }
 
     public JSONX509Signer setSignatureAlgorithm(AsymSignatureAlgorithms algorithm) {
