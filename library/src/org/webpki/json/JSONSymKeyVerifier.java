@@ -21,6 +21,8 @@ import java.io.IOException;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
+import org.webpki.util.ArrayUtil;
+
 /**
  * Initiatiator object for symmetric key signature verifiers.
  */
@@ -31,14 +33,34 @@ public class JSONSymKeyVerifier extends JSONVerifier {
     SymKeyVerifierInterface verifier;
 
     /**
-     * Verifier for symmetric keys.
-     * Note that you can access the received KeyID from {@link JSONSignatureDecoder}.
+     * Custom crypto verifier for symmetric keys.
+     * Note that you can access the received KeyIi from {@link JSONSignatureDecoder}.
      *
-     * @param verifier Verifies that the key and signature value match.
+     * @param verifier Handle to implementation
      */
     public JSONSymKeyVerifier(SymKeyVerifierInterface verifier) {
         super(JSONSignatureTypes.SYMMETRIC_KEY);
         this.verifier = verifier;
+    }
+
+    /**
+     * JCE based verifier for symmetric keys.
+     * Note that you can access the received KeyId from {@link JSONSignatureDecoder}.
+     *
+     * @param rawKey Key
+     */
+    public JSONSymKeyVerifier(final byte[] rawKey) {
+        this(new SymKeyVerifierInterface() {
+
+            @Override
+            public boolean verifyData(byte[] data,
+                                      byte[] digest,
+                                      MACAlgorithms algorithm,
+                                      String keyId) throws IOException {
+                return ArrayUtil.compare(digest, algorithm.digest(rawKey, data));
+            }
+            
+        });
     }
 
     @Override

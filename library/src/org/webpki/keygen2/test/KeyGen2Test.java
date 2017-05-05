@@ -604,7 +604,7 @@ public class KeyGen2Test {
                     return MACAlgorithms.HMAC_SHA256;
                 }
 
-                public byte[] signData(byte[] data) throws IOException {
+                public byte[] signData(byte[] data, MACAlgorithms algorithm) throws IOException {
                     return sks.signProvisioningSessionData(provisioning_handle, data);
                 }
             });

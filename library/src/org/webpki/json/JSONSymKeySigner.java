@@ -34,9 +34,36 @@ public class JSONSymKeySigner extends JSONSigner {
 
     SymKeySignerInterface signer;
 
+    /**
+     * Constructor for custom crypto solutions.
+     * @param signer Handle to implementation
+     * @throws IOException &nbsp;
+     */
     public JSONSymKeySigner(SymKeySignerInterface signer) throws IOException {
         this.signer = signer;
         algorithm = signer.getMacAlgorithm();
+    }
+
+    /**
+     * Constructor for JCE based solutions.
+     * @param rawKey Key
+     * @param algorithm MAC algorithm
+     * @throws IOException &nbsp;
+     */
+    public JSONSymKeySigner(final byte[] rawKey, final MACAlgorithms algorithm) throws IOException {
+        this(new SymKeySignerInterface() {
+
+            @Override
+            public byte[] signData(byte[] data, MACAlgorithms algorithm) throws IOException {
+                return algorithm.digest(rawKey, data);
+            }
+
+            @Override
+            public MACAlgorithms getMacAlgorithm() throws IOException {
+                return algorithm;
+            }
+           
+        });
     }
 
     public JSONSymKeySigner setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
@@ -51,7 +78,7 @@ public class JSONSymKeySigner extends JSONSigner {
 
     @Override
     byte[] signData(byte[] data) throws IOException {
-        return signer.signData(data);
+        return signer.signData(data, algorithm);
     }
 
     @Override

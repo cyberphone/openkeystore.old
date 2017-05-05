@@ -65,8 +65,8 @@ public class Sign {
 
     public static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface {
         @Override
-        public byte[] signData(byte[] data) throws IOException {
-            return getMacAlgorithm().digest(SYMMETRIC_KEY, data);
+        public byte[] signData(byte[] data, MACAlgorithms algorithm) throws IOException {
+            return algorithm.digest(SYMMETRIC_KEY, data);
         }
 
         @Override

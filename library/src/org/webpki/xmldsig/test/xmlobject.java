@@ -200,8 +200,8 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput {
                         return MACAlgorithms.HMAC_SHA256;
                     }
 
-                    public byte[] signData(byte[] data) throws IOException {
-                        return MACAlgorithms.HMAC_SHA256.digest(symkey, data);
+                    public byte[] signData(byte[] data, MACAlgorithms algorithm) throws IOException {
+                        return algorithm.digest(symkey, data);
                     }
 
                 });
