@@ -78,11 +78,10 @@ public class GenerateSignature {
         }
     }
 
-    static class SymmetricOperations implements SymKeySignerInterface,
-            SymKeyVerifierInterface {
+    static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface {
         @Override
-        public byte[] signData(byte[] data) throws IOException {
-            return getMacAlgorithm().digest(SYMMETRIC_KEY, data);
+        public byte[] signData(byte[] data, MACAlgorithms algorithm) throws IOException {
+            return algorithm.digest(SYMMETRIC_KEY, data);
         }
 
         @Override
@@ -91,11 +90,10 @@ public class GenerateSignature {
         }
 
         @Override
-        public boolean verifyData(byte[] data, byte[] digest,
-                MACAlgorithms algorithm, String keyId) throws IOException {
+        public boolean verifyData(byte[] data, byte[] digest, MACAlgorithms algorithm, String keyId) throws IOException {
             if (KEY_NAME.equals(keyId)) {
                 return ArrayUtil.compare(digest,
-                        getMacAlgorithm().digest(SYMMETRIC_KEY, data));
+                        algorithm.digest(SYMMETRIC_KEY, data));
             }
             throw new IOException("Unknown key id: " + keyId);
         }
