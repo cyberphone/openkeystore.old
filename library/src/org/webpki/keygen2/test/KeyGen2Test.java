@@ -256,6 +256,8 @@ public class KeyGen2Test {
 
     static X509Certificate server_certificate;
 
+    static boolean bcLoaded;
+
     int round;
 
     @BeforeClass
@@ -265,7 +267,7 @@ public class KeyGen2Test {
             fos = new FileOutputStream(dir + "/keygen2.junit.run.html");
             fos.write(HTMLHeader.createHTMLHeader(false, true, "KeyGen2 JUinit test output", null).append("<body><h3>KeyGen2 JUnit Test</h3><p>").toString().getBytes("UTF-8"));
         }
-        CustomCryptoProvider.forcedLoad(true);
+        bcLoaded = CustomCryptoProvider.conditionalLoad(true);
         server_certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(KeyGen2Test.class.getResourceAsStream("server-certificate.der"));
         sks = (SecureKeyStore) Class.forName(System.getProperty("sks.implementation")).newInstance();
         if (fos != null) {
@@ -1420,8 +1422,10 @@ public class KeyGen2Test {
 
     @Test
     public void BrainpoolOption() throws Exception {
-        brain_pool = true;
-        new Doer().perform();
+        if (bcLoaded) {
+            brain_pool = true;
+            new Doer().perform();
+        }
     }
 
     @Test

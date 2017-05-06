@@ -81,6 +81,10 @@
      </fileset>
   </path>
 
+  <condition property="junit.exclude" value="bc*.*" else="nosuchfile.jar">
+     <isset property="jceonly"/>
+  </condition>
+
   <path id="junit.classpath">
     <fileset dir="${dist_dir}">
 	   <include name="${webpki-libext}"/>
@@ -88,6 +92,7 @@
     </fileset>
 	 <fileset dir="${ext.jar}">
         <include name="*.jar"/>
+        <exclude name="${junit.exclude}"/>
 	 </fileset>
   </path>
 

@@ -2293,9 +2293,11 @@ public class JSONTest {
 
     static JSONDecoderCache cache = new JSONDecoderCache();
 
+    static boolean bcLoaded;
+
     @BeforeClass
     public static void openFile() throws Exception {
-        CustomCryptoProvider.forcedLoad(true);
+        bcLoaded = CustomCryptoProvider.conditionalLoad(true);
         Locale.setDefault(Locale.FRANCE);  // Should create HUGE problems :-)
     }
 
@@ -3241,8 +3243,6 @@ public class JSONTest {
         }
     }
 
-    ;
-
     private void badSignature(BAD_SIGNATURE test) throws Exception {
         KeyStore ks = KeyStoreReader.loadKeyStore(JSONTest.class.getResourceAsStream("demomerchant-eecert.p12"), "foo123");
         KeyStoreSigner signer = new KeyStoreSigner(ks, null);
@@ -3339,7 +3339,9 @@ public class JSONTest {
             badSignature(test);
         }
         // This does NOT work with the SUN JCE
-        DeterministicSignatureWrapper.rfc4754();
+        if (bcLoaded) {
+            DeterministicSignatureWrapper.rfc4754();
+        }
     }
 
     @Test
