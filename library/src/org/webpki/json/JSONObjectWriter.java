@@ -724,18 +724,8 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
-        X509Certificate lastCertificate = null;
-        Vector<byte[]> certificates = new Vector<byte[]>();
-        for (X509Certificate certificate : certificatePath) {
-            try {
-                certificates.add(JSONSignatureDecoder.pathCheck(lastCertificate, 
-                                                                lastCertificate = certificate).getEncoded());
-            } catch (GeneralSecurityException e) {
-                throw new IOException(e);
-            }
-        }
-        setBinaryArray(JSONSignatureDecoder.CERTIFICATE_PATH_JSON, certificates);
-        return this;
+        return setArray(JSONSignatureDecoder.CERTIFICATE_PATH_JSON, 
+                        JSONArrayWriter.createCoreCertificatePath(certificatePath));
     }
 
     private JSONObjectWriter encryptData(byte[] unencryptedData,

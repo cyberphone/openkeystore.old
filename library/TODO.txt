@@ -1,0 +1,9 @@
+KeyGen2:
+1. Remove URLs from the protocol
+2. Remove "publicKey" from "clientEphemeralKey" and "serverEphemeralKey". JWK suffice!
+3. Remove request signatures (too much and no major advantage)
+4. Remove virtual environment (too complex)
+
+Remove test directories.  Put these on a specific path using the same package names
+as the real classes to make it more in line with other systems.  Put the tests in a
+specific JAR as well?

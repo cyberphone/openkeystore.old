@@ -22,6 +22,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
+
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -110,6 +114,21 @@ public class JSONArrayWriter implements Serializable {
 
     public JSONArrayWriter setBinary(byte[] value) throws IOException {
         return setString(Base64URL.encode(value));
+    }
+
+    static public JSONArrayWriter createCoreCertificatePath(X509Certificate[] certificatePath) throws IOException {
+        JSONArrayWriter arrayWriter = new JSONArrayWriter();
+        X509Certificate lastCertificate = null;
+        for (X509Certificate certificate : certificatePath) {
+            try {
+                arrayWriter.setBinary(
+                        JSONSignatureDecoder.pathCheck(lastCertificate, 
+                                                       lastCertificate = certificate).getEncoded());
+            } catch (GeneralSecurityException e) {
+                throw new IOException(e);
+            }
+        }
+        return arrayWriter;
     }
 
     /**
