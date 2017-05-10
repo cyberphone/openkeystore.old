@@ -40,6 +40,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     public static void main (String args[]) throws IOException {
         json = new JSONBaseHTML(args, "JCS - JSON Cleartext Signature");
         
+        json.setFavIcon("../webpkiorg.png");
+        
         json.addParagraphObject().append("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
         

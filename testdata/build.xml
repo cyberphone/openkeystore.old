@@ -1,0 +1,159 @@
+<project name="Open Key Store test data" default="help" basedir=".">
+
+  <property name="key.dir" location="keys"/>
+  <property name="temp.dir" location=".tmp"/>
+  <property name="keyBase" location="keys"/>
+  <property name="signatureBase" location="signatures"/>
+
+  <path id="lib.classpath">
+    <fileset dir="../library/dist">
+       <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../resources/third-party-jars">
+       <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="help">
+    <echo message="Targets: help createcerts signatures"/>
+  </target>
+	
+  <target name="_compile">
+  	<!-- Create temp directory -->
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+
+  	<!-- Compile -->
+    <javac debug="on"
+           srcdir="src"
+           destdir="${temp.dir}" 
+           classpathref="lib.classpath"
+           includeAntRuntime="false">
+       <compilerarg value="-Xlint:all,-path"/>
+    </javac>
+
+  </target>
+
+  <target name="signatures" depends="_compile">
+  	<!-- Run target -->
+    <java fork="yes"
+          classname="org.webpki.testdata.Signatures"
+    	  dir="${temp.dir}"
+          failonerror="true">
+    	<classpath>
+            <pathelement path="${temp.dir}"/>
+       	    <path refid="lib.classpath"/>
+    	</classpath>
+        <arg value="${keyBase}"/>
+        <arg value="${signatureBase}"/>
+    </java>
+  </target>
+
+  <target name="_createcert">
+    <java fork="yes"
+          classname="org.webpki.ca.CommandLineCA"
+    	  classpathref="lib.classpath"
+          failonerror="true">
+        <arg line="${cmd}"/>
+    </java>
+  </target>
+
+   <target name="_createjwk">
+    <java fork="yes"
+          classname="org.webpki.tools.KeyStore2JWKConverter"
+     	  classpathref="lib.classpath"
+    	  dir="${key.dir}"
+    	  failonerror="true">
+        <arg line="${cmd}"/>
+    </java>
+  </target>
+
+   <target name="_createpem">
+    <java fork="yes"
+          classname="org.webpki.tools.KeyStore2PEMConverter"
+  	      classpathref="lib.classpath"
+    	  dir="${key.dir}"
+    	  failonerror="true">
+        <arg line="${cmd}"/>
+    </java>
+  </target>
+
+<target name="createcerts">
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2015-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype PKCS12 -out/keystore rootca.p12 -out/storepass foo123 -out/keypass foo123 -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="rootca.p12 foo123 rootca.jcer certificate"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="rootca.p12 foo123 rootca.pem certificate"/>
+    </antcall>
+     <exec executable="keytool" failonerror="true" dir="${key.dir}">
+      <arg line="-exportcert -keystore rootca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file rootca.cer"/>
+    </exec>
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore rootca.p12 -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2016-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype PKCS12 -out/keystore subca.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg RSA_SHA512 -serial 3"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p256certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_256 -sigalg ECDSA_SHA512"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p384certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_384 -sigalg ECDSA_SHA512"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p521certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg ECDSA_SHA512"/>
+    </antcall>
+    <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore r2048certificate.p12 -out/storepass foo123 -out/keypass foo123 -keysize 2048 -sigalg ECDSA_SHA512"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.jwk private"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate.jcer certificate"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.pem private"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate-key.pem private certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.jwk private"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p256certificate.p12 foo123 p256certificate.jcer certificate"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.pem private"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p256certificate.p12 foo123 p256certificate-key.pem private certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.jwk private"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p384certificate.p12 foo123 p384certificate.jcer certificate"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.pem private"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p384certificate.p12 foo123 p384certificate-key.pem private certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.jwk private"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="p521certificate.p12 foo123 p521certificate.jcer certificate"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.pem private"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="p521certificate.p12 foo123 p521certificate-key.pem private certificate"/>
+    </antcall>
+  </target>
+
+</project>

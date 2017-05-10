@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.util.Enumeration;
 
 import java.security.KeyStore;
-import java.security.PublicKey;
 
 import java.security.cert.Certificate;
 
@@ -29,7 +28,6 @@ import org.webpki.crypto.KeyStoreReader;
 import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.util.Base64;
-
 
 public class KeyStore2PEMConverter {
     private static void fail() {

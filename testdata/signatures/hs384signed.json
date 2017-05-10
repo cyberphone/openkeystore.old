@@ -1,0 +1,10 @@
+{
+  "now": "2017-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "algorithm": "HS384",
+    "keyId": "s384bitkey",
+    "value": "lmYpsMW5GnvV1wtE7fJdenxyO-cV_fPyFbNotC35CrvEBkI4_w3pUDWB1Qt2V_VP"
+  }
+}

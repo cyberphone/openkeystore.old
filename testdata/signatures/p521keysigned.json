@@ -1,0 +1,15 @@
+{
+  "now": "2017-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "algorithm": "ES512",
+    "publicKey": {
+      "kty": "EC",
+      "crv": "P-521",
+      "x": "ARYgNZS1QXilZ0fSDrQOLltpriBc8F510oiTD2h9BG56q99NKBSyOeyNKAv7X7WlOnXStIkPCEsmgeyhcZUUVt4G",
+      "y": "AI_WnmbN640j2PdDa3J3EVhL8T4_PW3px3Ly85t1P5qUmimm38AMqy_ZRhWeqTxmAJAyn-sZCsVc4cczXk1Ad1lP"
+    },
+    "value": "ANMTAc4cJVLEn3BG5l4lxHEJwP2zEGsVIFecYgzxlHE_TXz2mhjlf7QsElbBhBdcTKWanwS2GrPJ7lidAyoVY6uyAdOovqZltXn2fUNkz8uaUHeFCd_lvYqVTWf2BSi98roZ4MLtNhO7efU-l0jQDSyvtEdS8RPCWOwdX5Dqgc26NeJT"
+  }
+}

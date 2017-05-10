@@ -499,10 +499,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
     }
 
     public static void main(String args[]) throws IOException {
-        if (args.length != 1) {
-            new RuntimeException("Missing file argument");
-        }
+
         json = new JSONBaseHTML(args, "KeyGen2 - Credential Enrollment and Management Protocol");
+        
+        json.setFavIcon("../webpkiorg.png");
         
         json.addGlobalStyle(".kg2box {padding:20pt;font-size:14pt;text-align:center;" +
           "background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%)" +

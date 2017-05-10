@@ -17,9 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.net.URLEncoder;
-
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -29,7 +27,6 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -976,8 +973,14 @@ public class JSONBaseHTML  {
         html = new StringBuffer(
             "<!DOCTYPE html>" +
             "<html><head><title>")
-        .append(subsystem_name)
-        .append("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
+         .append(subsystem_name)
+         .append("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">");
+        if (favIcon != null) {
+            html.append("<link rel=\"icon\" href=\"")
+                .append(favIcon)
+                .append("\" sizes=\"192x192\">");
+        }
+        html.append("<style type=\"text/css\">\n" +
                  ".tftable {border-collapse: collapse}\n" +
                  ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
                  ".tftable tr {background-color:#FFFFE0}\n" +
@@ -1215,6 +1218,110 @@ public class JSONBaseHTML  {
         }
         doc_history.insert (doc_history.lastIndexOf ("</table>"), "<tr><td>" + date + "</td><td style=\"text-align:center\">" + version + "</td><td>" + comment + "</td></tr>");
     }
+    
+    public void AddPublicKeyDefinitions(String jcs, String sks_alg_ref, boolean reference) throws IOException {
+        addSubItemTable(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+        .newRow()
+          .newColumn()
+            .addProperty(JSONSignatureDecoder.KTY_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
+          .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+          .newColumn()
+          .newColumn()
+            .addString(jcs)
+            .addString("Key type indicator.  Currently the following types are recognized:<ul>" +
+                    "<li>" + JSONBaseHTML.codeVer(JSONSignatureDecoder.EC_PUBLIC_KEY, 6) + "See: ")
+                    .addLink (JCS_PUBLIC_KEY_EC)
+            .addString("</li><li>" + 
+                     JSONBaseHTML.codeVer(JSONSignatureDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
+            .addLink (JCS_PUBLIC_KEY_RSA)
+            .addString("</li></ul>");
+
+    addSubItemTable(JCS_PUBLIC_KEY_EC)
+       .newRow()
+          .newColumn()
+            .addProperty(JSONSignatureDecoder.CRV_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
+          .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+          .newColumn()
+          .newColumn()
+            .addString(jcs)
+            .addString("EC curve ID.")
+            .addString(sks_alg_ref)
+            .addString("The currently recognized EC curves include:" +
+                    enumerateStandardAlgorithms (KeyAlgorithms.values (), false, true))
+            .addString(reference ?
+"The NIST algorithms are described in FIPS 186-4 " + createReference(REF_FIPS186) +
+", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference(REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
+"The algorithm names were derived from the SKS " + createReference(REF_SKS) + " specification. " + 
+Types.LINE_SEPARATOR : "")
+             .addString("A subset of the EC curves may also be expressed in the JWS " +  createReference(REF_JWS) + 
+                         " notation:")
+             .addString(enumerateJOSEAlgorithms (KeyAlgorithms.values ()))
+      .newRow()
+        .newColumn()
+          .addProperty(JSONSignatureDecoder.X_JSON)
+          .addSymbolicValue(JSONSignatureDecoder.X_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
+        .newColumn()
+        .newColumn()
+          .addString(jcs)
+          .addString("EC curve point X.")
+          .addString(reference ?
+                      " The length of this field <b>must</b> " +
+                      "be the full size of a coordinate for the curve specified in the <code>" + 
+                      JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                      "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
+                      KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
+                      "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "")
+      .newRow()
+        .newColumn()
+          .addProperty(JSONSignatureDecoder.Y_JSON)
+          .addSymbolicValue(JSONSignatureDecoder.Y_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
+        .newColumn()
+        .newColumn()
+          .addString(jcs)
+          .addString("EC curve point Y.")
+          .addString(reference ?
+                      " The length of this field <b>must</b> " +
+                      "be the full size of a coordinate for the curve specified in the <code>" + 
+                      JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
+                      "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
+                      KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
+                      "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "");
+
+    addSubItemTable(JCS_PUBLIC_KEY_RSA)
+      .newRow()
+        .newColumn()
+          .addProperty(JSONSignatureDecoder.N_JSON)
+          .addSymbolicValue(JSONSignatureDecoder.N_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
+        .newColumn()
+        .newColumn()
+          .addString(jcs)
+          .addString("RSA modulus. Also see the ")
+          .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+          .addString(" data type.")
+      .newRow()
+        .newColumn()
+          .addProperty(JSONSignatureDecoder.E_JSON)
+          .addSymbolicValue(JSONSignatureDecoder.E_JSON)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
+        .newColumn()
+        .newColumn()
+          .addString(jcs)
+          .addString("RSA exponent. Also see the ")
+          .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
+          .addString(" data type.");
+        
+    }
 
     public void addJSONSignatureDefinitions (boolean reference, String url_option, 
                                              String extension_option, boolean key_id_option) throws IOException {
@@ -1375,108 +1482,8 @@ public class JSONBaseHTML  {
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
                    "</code> property since the key may be given by the context or through the <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code> property." : null);
 
-        
-        addSubItemTable(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-            .newRow()
-              .newColumn()
-                .addProperty(JSONSignatureDecoder.KTY_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
-              .newColumn()
-                .setType(Types.WEBPKI_DATA_TYPES.STRING)
-              .newColumn()
-              .newColumn()
-                .addString(jcs)
-                .addString("Key type indicator.  Currently the following types are recognized:<ul>" +
-                        "<li>" + JSONBaseHTML.codeVer(JSONSignatureDecoder.EC_PUBLIC_KEY, 6) + "See: ")
-                        .addLink (JCS_PUBLIC_KEY_EC)
-                .addString("</li><li>" + 
-                         JSONBaseHTML.codeVer(JSONSignatureDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
-                .addLink (JCS_PUBLIC_KEY_RSA)
-                .addString("</li></ul>");
-
-        addSubItemTable(JCS_PUBLIC_KEY_EC)
-           .newRow()
-              .newColumn()
-                .addProperty(JSONSignatureDecoder.CRV_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
-              .newColumn()
-                .setType(Types.WEBPKI_DATA_TYPES.STRING)
-              .newColumn()
-              .newColumn()
-                .addString(jcs)
-                .addString("EC curve ID.")
-                .addString(sks_alg_ref)
-                .addString("The currently recognized EC curves include:" +
-                        enumerateStandardAlgorithms (KeyAlgorithms.values (), false, true))
-                .addString(reference ?
-  "The NIST algorithms are described in FIPS 186-4 " + createReference(REF_FIPS186) +
-  ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference(REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
-  "The algorithm names were derived from the SKS " + createReference(REF_SKS) + " specification. " + 
-  Types.LINE_SEPARATOR : "")
-                 .addString("A subset of the EC curves may also be expressed in the JWS " +  createReference(REF_JWS) + 
-                             " notation:")
-                 .addString(enumerateJOSEAlgorithms (KeyAlgorithms.values ()))
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.X_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.X_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
-            .newColumn()
-            .newColumn()
-              .addString(jcs)
-              .addString("EC curve point X.")
-              .addString(reference ?
-                          " The length of this field <b>must</b> " +
-                          "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
-                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
-                          "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "")
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.Y_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.Y_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
-            .newColumn()
-            .newColumn()
-              .addString(jcs)
-              .addString("EC curve point Y.")
-              .addString(reference ?
-                          " The length of this field <b>must</b> " +
-                          "be the full size of a coordinate for the curve specified in the <code>" + 
-                          JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                          "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
-                          KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
-                          "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes." : "");
-
-        addSubItemTable(JCS_PUBLIC_KEY_RSA)
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.N_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.N_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
-            .newColumn()
-            .newColumn()
-              .addString(jcs)
-              .addString("RSA modulus. Also see the ")
-              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-              .addString(" data type.")
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.E_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.E_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
-            .newColumn()
-            .newColumn()
-              .addString(jcs)
-              .addString("RSA exponent. Also see the ")
-              .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-              .addString(" data type.");
-
+        AddPublicKeyDefinitions(jcs, sks_alg_ref, reference);
+ 
         addSubItemTable(JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
           .newRow()
             .newColumn()
@@ -1549,6 +1556,8 @@ public class JSONBaseHTML  {
     }
 
     private boolean has_already_out_dialog_styles;
+
+    private String favIcon;
     
     public String createDialog(String header, String content) {
         if (!has_already_out_dialog_styles) {
@@ -1603,5 +1612,9 @@ public class JSONBaseHTML  {
           "</code><i>Other properties associated with the request object</i><code>}') {<br>" +
           "&nbsp;&nbsp;alert('Not supported');<br>" +
           "};</code></div>Note that properties do not have to be ordered and that whitespace between elements is ignored.";
+    }
+
+    public void setFavIcon(String favIcon) {
+        this.favIcon = favIcon;
     }
 }

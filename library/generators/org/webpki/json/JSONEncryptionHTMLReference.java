@@ -181,6 +181,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
         json = new JSONBaseHTML(args, "JEF - JSON Encryption Format");
         
+        json.setFavIcon("../webpkiorg.png");
+        
         json.addParagraphObject().append("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JEF</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Encryption Format</span></div>");
         
