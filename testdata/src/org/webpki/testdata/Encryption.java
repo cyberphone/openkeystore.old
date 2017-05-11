@@ -67,21 +67,27 @@ public class Encryption {
         symmEnc(512, DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
         symmEnc(128, DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
+
+        coreSymmEnc(256, ".implicitkey.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
     }
     
-    static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
+    static void coreSymmEnc(int keyBits, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
         byte[] encryptedData = 
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                         dataEncryptionAlgorithm, 
-                                                        keyName, 
+                                                        wantKeyId ? keyName : null, 
                                                         key).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + ".encrypted.json", encryptedData);
+        ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
                        JSONParser.parse(encryptedData).getEncryptionObject().getDecryptedData(key))) {
             throw new Exception("Encryption fail");
         }
+    }
+
+    static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
+        coreSymmEnc(keyBits, ".encrypted.json", dataEncryptionAlgorithm, true);
     }
 
     static String getDataToSign() throws Exception {
