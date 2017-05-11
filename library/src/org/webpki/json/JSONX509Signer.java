@@ -118,7 +118,7 @@ public class JSONX509Signer extends JSONSigner {
                 .setString(JSONSignatureDecoder.ISSUER_JSON, signerCertificate.getIssuerX500Principal().getName())
                 .setBigInteger(JSONSignatureDecoder.SERIAL_NUMBER_JSON, signerCertificate.getSerialNumber())
                 .setString(JSONSignatureDecoder.SUBJECT_JSON, signerCertificate.getSubjectX500Principal().getName());
-    }
+        }
         wr.setCertificatePath(certificatePath);
     }
 }

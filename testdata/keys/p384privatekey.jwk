@@ -1,7 +1,8 @@
 {
+  "kid": "20170101:mybank:p384",
   "kty": "EC",
   "crv": "P-384",
-  "x": "B4zwwuyQ8Pp-xj21YbkmxP3xPumUzLwe7Ayvltg9zR6uAIj2IPQScutZAcw90dtY",
-  "y": "LcMghlpWjdqnVman5qT_RiRFhpPc25pJbQ2E_chfG9rTvBm0MU-UGnpy9zo8tzZU",
-  "d": "LvTAFKTDkGo0NTKT0edZK0TLWho0V1BpKAOoEH9FB-3pRgsPbzavzyymy-ku_vXk"
+  "x": "SxtEVg93j4L2bK7Q8qJDYo6xRvP3p3ptyqmQaYnZRH5Ube2T2RogGMl-HHZRTYMO",
+  "y": "Zu8b16lT-c5VstC4H9WA28LvcLleE6auP-A9Dr76uu8MI5YjOGH64MJZFswOX8Vz",
+  "d": "PWoaRCsLI8sGkKy9O6yTPx8f0lN6CAYu9jfmlI5YmW6XW9qc6Qd2hz6FsrsZ2cxd"
 }

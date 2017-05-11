@@ -491,12 +491,27 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * <code>"signature"</code> object.
      * 
      * @param algorithmPreferences JOSE or SKS notation expected
+     * @param requirePublicKeyInfo If public keys must be provided in a JWK or certificate path
+     * @return An object which can be used to verify keys etc.
+     * @throws IOException &nbsp;
+     * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
+     */
+    public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences, 
+                                             boolean requirePublicKeyInfo) throws IOException {
+        return new JSONSignatureDecoder(this, algorithmPreferences, requirePublicKeyInfo);
+    }
+    /**
+     * Read and decode a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
+     * <code>"signature"</code> object.
+     * This method is equivalent to <code>getSignature(AlgorithmPreferences, true)</code>.
+     * 
+     * @param algorithmPreferences JOSE or SKS notation expected
      * @return An object which can be used to verify keys etc.
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      */
     public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return new JSONSignatureDecoder(this, algorithmPreferences);
+        return getSignature(algorithmPreferences, true);
     }
 
     /**
@@ -510,7 +525,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      */
     public JSONSignatureDecoder getSignature() throws IOException {
-        return new JSONSignatureDecoder(this, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        return getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
     }
 
     /**

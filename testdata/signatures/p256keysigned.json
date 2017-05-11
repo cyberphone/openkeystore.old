@@ -7,9 +7,9 @@
     "publicKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "_GjwzV90vZy6NwiQ5dvQ1PNIMs3NLo34QRVan5FfXb4",
-      "y": "xOKfqZZtlvTz3iHZjzuWJVyt8lG_HRZxkwFBd6S0qXg"
+      "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
+      "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
     },
-    "value": "hzZ4eqoBmMWs0BDxtKVdTMtEd2RmgcECS7Mw47dPiBPj_zGx8876q-jpNWND5qxx4DNa8PJfzICdjjlAADeTtQ"
+    "value": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
   }
 }

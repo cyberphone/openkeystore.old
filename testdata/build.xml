@@ -53,6 +53,7 @@
     <java fork="yes"
           classname="org.webpki.ca.CommandLineCA"
     	  classpathref="lib.classpath"
+       	  dir="${key.dir}"
           failonerror="true">
         <arg line="${cmd}"/>
     </java>
@@ -95,19 +96,19 @@
        <param name="cmd" value="-out/keyalias mykey -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore rootca.p12 -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2016-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype PKCS12 -out/keystore subca.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg RSA_SHA512 -serial 3"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p256certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_256 -sigalg ECDSA_SHA512"/>
+       <param name="cmd" value="-out/keyalias 20170101:mybank:p256 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p256certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_256 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p384certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_384 -sigalg ECDSA_SHA512"/>
+       <param name="cmd" value="-out/keyalias 20170101:mybank:p384 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p384certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_384 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p521certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg ECDSA_SHA512"/>
+       <param name="cmd" value="-out/keyalias 20170101:mybank:p521 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore p521certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
-       <param name="cmd" value="-out/keyalias mykey -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore r2048certificate.p12 -out/storepass foo123 -out/keypass foo123 -keysize 2048 -sigalg ECDSA_SHA512"/>
+       <param name="cmd" value="-out/keyalias 20170101:mybank:r2048 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore r2048certificate.p12 -out/storepass foo123 -out/keypass foo123 -keysize 2048 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.jwk private"/>
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate.jcer certificate"/>
@@ -119,7 +120,7 @@
        <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate-key.pem private certificate"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.jwk private"/>
+       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="p256certificate.p12 foo123 p256certificate.jcer certificate"/>
@@ -131,7 +132,7 @@
        <param name="cmd" value="p256certificate.p12 foo123 p256certificate-key.pem private certificate"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.jwk private"/>
+       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="p384certificate.p12 foo123 p384certificate.jcer certificate"/>
@@ -143,7 +144,7 @@
        <param name="cmd" value="p384certificate.p12 foo123 p384certificate-key.pem private certificate"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.jwk private"/>
+       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="p521certificate.p12 foo123 p521certificate.jcer certificate"/>

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-
 import java.util.Vector;
 
 import java.security.KeyStore;
@@ -43,6 +42,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
@@ -50,12 +50,18 @@ import org.webpki.util.Base64URL;
 public class KeyStore2JWKConverter {
     private static void fail() {
         System.out.println(KeyStore2JWKConverter.class.getName() + "  keystore-file password JWK-file qualifier\n" +
-                "   qualifier = [public private certificate trust]");
+                "   qualifier = [public private certificate trust keyid]");
         System.exit(3);
     }
     
-    static LinkedHashMap<String,String> privateKeyInfo;
+    static LinkedHashMap<String,String> privateKeyInfo = new LinkedHashMap<String,String>();
     
+    static boolean privateKeyFlag;
+    static boolean publicKeyFlag;
+    static boolean certificateFlag;
+    static boolean trustFlag;
+    static boolean keyidFlag;
+
     static void addPrivateKeyElement(String property, byte[] value) throws IOException {
         privateKeyInfo.put(property, Base64URL.encode(value));
     }
@@ -74,10 +80,6 @@ public class KeyStore2JWKConverter {
         if (argv.length < 4) {
             fail();
         }
-        boolean privateKeyFlag = false;
-        boolean publicKeyFlag = false;
-        boolean certificateFlag = false;
-        boolean trustFlag = false;
         for (int i = 3; i < argv.length; i++) {
             if (argv[i].equals("public")) {
                 publicKeyFlag = true;
@@ -87,6 +89,8 @@ public class KeyStore2JWKConverter {
                 certificateFlag = true;
             } else if (argv[i].equals("trust")) {
                 trustFlag = true;
+            } else if (argv[i].equals("keyid")) {
+                keyidFlag = true;
             } else {
                 fail();
             }
@@ -98,7 +102,6 @@ public class KeyStore2JWKConverter {
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
             if (ks.isKeyEntry(alias)) {
-                privateKeyInfo = new LinkedHashMap<String,String>();
                 PublicKey publicKey = ks.getCertificateChain(alias)[0].getPublicKey();
                 if (privateKeyFlag) {
                     KeyAlgorithms keyAlgorithm = KeyAlgorithms.getKeyAlgorithm(publicKey);
@@ -125,7 +128,7 @@ public class KeyStore2JWKConverter {
                         setCryptoBinary("dq", rsaPrivateKey.getPrimeExponentQ());
                         setCryptoBinary("qi", rsaPrivateKey.getCrtCoefficient());
                     }
-                    writeJwk(fis, publicKey);
+                    writeJwk(fis, publicKey, alias);
                 }
                 if (certificateFlag) {
                     Vector<X509Certificate> certPath = new Vector<X509Certificate>();
@@ -135,7 +138,7 @@ public class KeyStore2JWKConverter {
                     writeCert(fis, certPath.toArray(new X509Certificate[0]));
                 }
                 if (publicKeyFlag) {
-                    writeJwk(fis, publicKey);
+                    writeJwk(fis, publicKey, alias);
                 }
             } else if (ks.isCertificateEntry(alias)) {
                 if (trustFlag) {
@@ -148,12 +151,17 @@ public class KeyStore2JWKConverter {
     }
 
     static void writeJwk(FileOutputStream fis, 
-                         PublicKey publicKey) throws Exception {
+                         PublicKey publicKey,
+                         String keyId) throws Exception {
         JSONObjectWriter jwk = JSONObjectWriter.createCorePublicKey(publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         for (String key : privateKeyInfo.keySet()) {
             jwk.setString(key, privateKeyInfo.get(key));
         }
-        fis.write(jwk.serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
+        String key = jwk.serializeToString(JSONOutputFormats.NORMALIZED);
+        if (keyidFlag) {
+            key = "{\"kid\":\"" + keyId + "\"," + key.substring(1);
+        }
+        fis.write(JSONParser.parse(key).serializeToBytes(JSONOutputFormats.PRETTY_PRINT));
     }
 
     static void writeCert(FileOutputStream fis, X509Certificate[] certificatePath) throws Exception {

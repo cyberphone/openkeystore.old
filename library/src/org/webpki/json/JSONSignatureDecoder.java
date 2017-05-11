@@ -116,17 +116,30 @@ public class JSONSignatureDecoder implements Serializable {
     PublicKey publicKey;
 
     String keyId;
+    
+    boolean requirePublicKeyInfo;
+    
+    AlgorithmPreferences algorithmPreferences;
 
     Vector<JSONObjectReader> extensions;
 
-    JSONSignatureDecoder(JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException {
+    JSONSignatureDecoder(JSONObjectReader rd, 
+                         AlgorithmPreferences algorithmPreferences,
+                         boolean requirePublicKeyInfo) throws IOException {
+        this.requirePublicKeyInfo = requirePublicKeyInfo;
+        this.algorithmPreferences = algorithmPreferences;
         JSONObjectReader signature = rd.getObject(SIGNATURE_JSON);
         String version = signature.getStringConditional(VERSION_JSON, SIGNATURE_VERSION_ID);
         if (!version.equals(SIGNATURE_VERSION_ID)) {
             throw new IOException("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
         }
         algorithmString = signature.getString(ALGORITHM_JSON);
-        getKeyInfo(signature, algorithmPreferences);
+        keyId = signature.getStringConditional(KEY_ID_JSON);
+        if (requirePublicKeyInfo) {
+            getKeyInfo(signature);
+        } else {
+            algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
+        }
         if (signature.hasProperty(EXTENSIONS_JSON)) {
             extensions = new Vector<JSONObjectReader>();
             JSONArrayReader ar = signature.getArray(EXTENSIONS_JSON);
@@ -162,13 +175,13 @@ public class JSONSignatureDecoder implements Serializable {
         // End JCS normalization                                                //
         //////////////////////////////////////////////////////////////////////////
 
-        switch (getSignatureType()) {
+        if (requirePublicKeyInfo) switch (getSignatureType()) {
             case X509_CERTIFICATE:
-                asymmetricSignatureVerification(certificatePath[0].getPublicKey(), algorithmPreferences);
+                asymmetricSignatureVerification(certificatePath[0].getPublicKey());
                 break;
 
             case ASYMMETRIC_KEY:
-                asymmetricSignatureVerification(publicKey, algorithmPreferences);
+                asymmetricSignatureVerification(publicKey);
                 break;
 
             default:
@@ -176,11 +189,12 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    void getKeyInfo(JSONObjectReader rd, AlgorithmPreferences algorithmPreferences) throws IOException {
-        keyId = rd.getStringConditional(KEY_ID_JSON);
+    void getKeyInfo(JSONObjectReader rd) throws IOException {
         if (rd.hasProperty(CERTIFICATE_PATH_JSON)) {
+            algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
             readCertificateData(rd);
         } else if (rd.hasProperty(PUBLIC_KEY_JSON)) {
+            algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
             publicKey = rd.getPublicKey(algorithmPreferences);
         } else if (rd.hasProperty(PEM_URL_JSON)) {
             throw new IOException("\"" + PEM_URL_JSON + "\" not yet implemented");
@@ -289,8 +303,7 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    void asymmetricSignatureVerification(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
+    void asymmetricSignatureVerification(PublicKey publicKey) throws IOException {
         if (((AsymSignatureAlgorithms) algorithm).isRsa() != publicKey instanceof RSAPublicKey) {
             throw new IOException("\"" + algorithmString + "\" doesn't match key type: " + publicKey.getAlgorithm());
         }
@@ -343,12 +356,13 @@ public class JSONSignatureDecoder implements Serializable {
         if (certificatePath != null) {
             return JSONSignatureTypes.X509_CERTIFICATE;
         }
-        return publicKey == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
+        return algorithm instanceof AsymSignatureAlgorithms ? JSONSignatureTypes.ASYMMETRIC_KEY : JSONSignatureTypes.SYMMETRIC_KEY;
     }
 
     /**
      * Simplified verify that only checks that there are no "keyId" or "extensions", and that the signature type matches.
-     * Note that asymmetric key signatures are always checked for technical correctness.
+     * Note that asymmetric key signatures are always checked for technical correctness unless
+     * you have specified false for requirePublicKeyInfo.
      *
      * @param signatureType Type of signature :-)
      * @throws IOException &nbsp;

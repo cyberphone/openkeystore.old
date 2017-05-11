@@ -1,7 +1,8 @@
 {
+  "kid": "20170101:mybank:p521",
   "kty": "EC",
   "crv": "P-521",
-  "x": "ARYgNZS1QXilZ0fSDrQOLltpriBc8F510oiTD2h9BG56q99NKBSyOeyNKAv7X7WlOnXStIkPCEsmgeyhcZUUVt4G",
-  "y": "AI_WnmbN640j2PdDa3J3EVhL8T4_PW3px3Ly85t1P5qUmimm38AMqy_ZRhWeqTxmAJAyn-sZCsVc4cczXk1Ad1lP",
-  "d": "AQeAn0vNuxhJAknyllrrXMWr9K4CmubbynvVHN6KlmUz_Iwipi1GCn5LpcZLc2mo-BgkzSZjFMEe8uJqZjoIrHDl"
+  "x": "AKwELPGw-uyxNNMpqynB-71e-5GNMcLmFM0j0mbyVToRflwlWnXS-iAXxR_nOoWK426QoXlyNieyaWBQdwXrnKfj",
+  "y": "AIgLgTCaxgKc461uMwFZ04qdBaVa9Wgy8VLNiHrZkKYL3Q_qmLTa9TKQgRThuCpcqlZFnhMPrPLgb3ev6rqCt0GS",
+  "d": "AXfJ2R7ao8c2_gL9porCC1yR90w-R8MZ0HNjXcftOlkBD7njIFj7QAYlljJCkx7M3LJSeo5ha4Dg7mD0V1a_vhqr"
 }

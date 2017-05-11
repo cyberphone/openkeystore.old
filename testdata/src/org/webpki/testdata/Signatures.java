@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2017 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import java.security.KeyStore;
 
 import java.security.cert.X509Certificate;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSigner;
@@ -47,6 +49,7 @@ public class Signatures {
     static String baseSignatures;
     static SymmetricKeys symmetricKeys;
     static JSONX509Verifier x509Verifier;
+    static String keyId;
    
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
@@ -69,6 +72,9 @@ public class Signatures {
         asymSign("p384");
         asymSign("p521");
         asymSign("r2048");
+
+        asymSignNoPublicKeyInfo("p256", true);
+        asymSignNoPublicKeyInfo("p521", false);
 
         certSign("p256");
         certSign("p384");
@@ -104,16 +110,40 @@ public class Signatures {
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
     }
+    
+    static KeyPair readJwk(String keyType) throws Exception {
+        JSONObjectReader jwkPlus = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "privatekey.jwk"));
+        // Note: The built-in JWK decoder does not accept "kid" since it doesn't have a meaning in JCS or JEF. 
+        if ((keyId = jwkPlus.getStringConditional("kid")) != null) {
+            jwkPlus.removeProperty("kid");
+        }
+        return jwkPlus.getKeyPair();
+    }
 
     static void asymSign(String keyType) throws Exception {
-        KeyPair keyPair = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "privatekey.jwk")).getKeyPair();
+        KeyPair keyPair = readJwk(keyType);
         byte[] signedData = createSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
         ArrayUtil.writeFile(baseSignatures + keyType + "keysigned.json", signedData);
         JSONParser.parse(signedData).getSignature().verify(new JSONAsymKeyVerifier(keyPair.getPublic()));;
      }
 
+    static void asymSignNoPublicKeyInfo(String keyType, boolean wantKeyId) throws Exception {
+        KeyPair keyPair = readJwk(keyType);
+        JSONAsymKeySigner signer = 
+                new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null)
+                    .setGeneratePublicKeyInfo(false);
+        if (wantKeyId) {
+            signer.setKeyId(keyId);
+        }
+        byte[] signedData = createSignature(signer);
+        ArrayUtil.writeFile(baseSignatures + keyType + "implicitkeysigned.json", signedData);
+        JSONParser.parse(signedData).getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER,
+                                                  false).verify(
+                                                          new JSONAsymKeyVerifier(keyPair.getPublic()).permitKeyId(wantKeyId));
+     }
+
     static void certSign(String keyType) throws Exception {
-        KeyPair keyPair = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "privatekey.jwk")).getKeyPair();
+        KeyPair keyPair = readJwk(keyType);
         X509Certificate[] certPath = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
                 .getJSONArrayReader().getCertificatePath();
         byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null).setSignatureCertificateAttributes(true));

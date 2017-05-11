@@ -1,0 +1,10 @@
+{
+  "now": "2017-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "algorithm": "ES256",
+    "keyId": "20170101:mybank:p256",
+    "value": "nJgDRESd3-Q5b5xEykEq1uLOe4MSkxLLTylkioC4j2-KG-qkovb9diSf83nsYKX1-wySf66OJSQKxaCr7CNWQg"
+  }
+}

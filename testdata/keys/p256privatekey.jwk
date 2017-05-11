@@ -1,7 +1,8 @@
 {
+  "kid": "20170101:mybank:p256",
   "kty": "EC",
   "crv": "P-256",
-  "x": "_GjwzV90vZy6NwiQ5dvQ1PNIMs3NLo34QRVan5FfXb4",
-  "y": "xOKfqZZtlvTz3iHZjzuWJVyt8lG_HRZxkwFBd6S0qXg",
-  "d": "jXHDWSj0QYje_65H0Uu0Za0mkecv72uNdcOlBduyfvA"
+  "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
+  "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ",
+  "d": "4f5C3onScS-l9MmKlvIbOV_M3jcQ9qOd4RoYFVlJUIo"
 }

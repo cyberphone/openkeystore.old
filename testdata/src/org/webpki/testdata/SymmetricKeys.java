@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2016 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2017 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,18 +16,9 @@
  */
 package org.webpki.testdata;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
-
-import org.webpki.crypto.CustomCryptoProvider;
-import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-import org.webpki.json.JSONSigner;
-import org.webpki.json.JSONX509Signer;
+
 import org.webpki.util.ArrayUtil;
 
 /*
