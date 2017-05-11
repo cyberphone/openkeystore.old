@@ -623,9 +623,12 @@ import org.webpki.json.JSONSignatureDecoder;
         signatureWriter.setString(JSONSignatureDecoder.ALGORITHM_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
         if (signer.keyId != null) {
-            signatureWriter.setString(JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+            if (signer.keyId.length() > 0) {
+                signatureWriter.setString(JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+            }
+        } else {
+            signer.writeKeyData(signatureWriter);
         }
-        signer.writeKeyData(signatureWriter);
         if (signer.extensions != null) {
             Vector<JSONValue> array = new Vector<JSONValue>();
             for (JSONObjectWriter jor : signer.extensions) {
@@ -775,7 +778,7 @@ import org.webpki.json.JSONSignatureDecoder;
         byte[] dataEncryptionKey = null;
         if (optionalKeyId == null) {
             keyEncryption.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
-        } else {
+        } else if (optionalKeyId.length() > 0){
             keyEncryption.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
         }
         AsymmetricEncryptionResult asymmetricEncryptionResult =

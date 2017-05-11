@@ -1,0 +1,7 @@
+{
+  "algorithm": "A128CBC-HS256",
+  "keyId": "s256bitkey",
+  "iv": "sTDjHH63ExGWVcs03MFULg",
+  "tag": "AsM_vPiUUIj-rwJ_dCcUeA",
+  "cipherText": "_fibK407sl3X3VFALJ0oCF4ikIH1ozWeqEyXycTW-U8"
+}

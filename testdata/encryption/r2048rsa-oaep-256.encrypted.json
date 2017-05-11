@@ -1,0 +1,15 @@
+{
+  "algorithm": "A256GCM",
+  "keyEncryption": {
+    "algorithm": "RSA-OAEP-256",
+    "publicKey": {
+      "kty": "RSA",
+      "n": "oBq8_RJIJF9h2dm4r1kjBwv_W-G_YM-clG7GYwGWih3Y22HZnBmMn2Iqf4uXiwty9lICxrdBNcU6b79DY_GmNbA5j16dsuBIqZSq8yMtXfDpC8OS7Dy6OxjFyMZrA4IEqqjvDEmJC5aXoaBD3exECDvsRgB18jNoKyq2CDWgg22wuLz7I0B_T2tM26hPLRw8KfM8pQ1bPUcFn_nUKCrW7Wc2KIWGPwsPmL24VVctzhUWkr-nHuR_RKs2KAff0SYTpWElyEau7AqHiHAOhnPnGOxfb7r6V1AbDx-F95gSDFtoFPRWhNJDng1qHI23UD_7ONTGIK_I4I6y1rf7r26TDQ",
+      "e": "AQAB"
+    },
+    "encryptedKey": "W1SK7cTXLI5mWg8zrc633VVEM9PIqAa3jxkMGpVqqvV9BBgiOnpLtokJaoWkbf6otk72-C6tUIL6anuVf7M1EjH5a5xzqnV99PiusfSnEAsflTlYKMRFG-wItYgAo4EkxiZzB8bKhwA8NYA2fOiV0I8R-gZncNlmV2iq4RIKdNKNhXdvzK2VTE9iO0okJCOTEgXFRoieReaoZewsdglFxqnPC1ClJuZr-HKatYI_2hufAugq5_bx1ckB3CMBSGifG8VnQjvv8VGhe2Enlwaan9RgefKI_awVp2d-Gcv7aCp6d5gZdu4fGVkAuG5vsNlAFC0y3X_sVtWM-wo8I2lFIA"
+  },
+  "iv": "3PfAxawUT6IcXufN",
+  "tag": "VlkEtudGlgm5lD6t3tDJDA",
+  "cipherText": "ZErCjUxJnqATD0-bNRnnR5ft0x5hsA"
+}

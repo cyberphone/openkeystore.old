@@ -129,12 +129,9 @@ public class Signatures {
 
     static void asymSignNoPublicKeyInfo(String keyType, boolean wantKeyId) throws Exception {
         KeyPair keyPair = readJwk(keyType);
-        JSONAsymKeySigner signer = 
+        JSONSigner signer = 
                 new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null)
-                    .setGeneratePublicKeyInfo(false);
-        if (wantKeyId) {
-            signer.setKeyId(keyId);
-        }
+            .setKeyId(wantKeyId ? keyId : "");
         byte[] signedData = createSignature(signer);
         ArrayUtil.writeFile(baseSignatures + keyType + "implicitkeysigned.json", signedData);
         JSONParser.parse(signedData).getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER,

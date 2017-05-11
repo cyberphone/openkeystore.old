@@ -27,6 +27,8 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -1323,8 +1325,8 @@ Types.LINE_SEPARATOR : "")
         
     }
 
-    public void addJSONSignatureDefinitions (boolean reference, String url_option, 
-                                             String extension_option, boolean key_id_option) throws IOException {
+    public void addJSONSignatureDefinitions (boolean reference, final String url_option, 
+                                             String extension_option, final boolean key_id_option) throws IOException {
         String jcs = reference ? "" : createReference(REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference(REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
@@ -1378,7 +1380,7 @@ Types.LINE_SEPARATOR : "")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
-               .setUsage (false)
+              .setChoice (false, url_option == null ? 3 : 4)
             .newColumn()
               .addString(option)
               .addString("Application specific string identifying the signature key.");
@@ -1391,7 +1393,15 @@ Types.LINE_SEPARATOR : "")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
-              .setChoice (false, url_option == null ? 2 : 3)
+            .newExtensionRow(new Extender() {
+                @Override
+                public Column execute(Column column) throws IOException {
+                    if (!key_id_option) {
+                        column.setChoice (false, url_option == null ? 2 : 3);
+                    }
+                    return column;
+                }
+            })
             .newColumn()
               .addString(option)
               .addString("Public key object.");

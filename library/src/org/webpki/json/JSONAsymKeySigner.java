@@ -42,8 +42,6 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     PublicKey publicKey;
     
-    boolean generatePublicKeyInfo = true;
-
     /**
      * Constructor for custom crypto solutions.
      * @param signer Handle to implementation
@@ -89,11 +87,6 @@ public class JSONAsymKeySigner extends JSONSigner {
         return this;
     }
 
-    public JSONAsymKeySigner setGeneratePublicKeyInfo(boolean flag) {
-        this.generatePublicKeyInfo = flag;
-        return this;
-    }
-
     public JSONAsymKeySigner setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
         this.algorithmPreferences = algorithmPreferences;
         return this;
@@ -111,8 +104,6 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
-        if (generatePublicKeyInfo) {
-            wr.setPublicKey(publicKey, algorithmPreferences);
-        }
+        wr.setPublicKey(publicKey, algorithmPreferences);
     }
 }
