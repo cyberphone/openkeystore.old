@@ -18,7 +18,9 @@ package org.webpki.json;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URLEncoder;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -28,7 +30,9 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.util.ArrayUtil;
 
 /**

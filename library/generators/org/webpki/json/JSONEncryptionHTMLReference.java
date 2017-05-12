@@ -55,11 +55,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static String JCS_PUBLIC_KEY_EC     = "Additional EC key properties";
     static String JCS_PUBLIC_KEY_RSA    = "Additional RSA key properties";
 
-    static final String JEF_TEST_STRING = "Hello encrypted world!";
-    static final String JEF_SYM_KEY     = "ooQSGRnwUQYbvHjCMi0zPNARka2BuksLM7UK1RHiQwI";
-    static final String JEF_EC_KEY_ID   = "20170101:mybank:ec";
-    static final String JEF_RSA_KEY_ID  = "20170101:mybank:rsa";
-    
     static final String ENCRYPTED_DATA  = "encryptedData";
     
     static final String TEST_VECTORS    = "Test Vectors";
@@ -275,7 +270,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 json.createReference(JSONBaseHTML.REF_JWE) +
                 " the JWA " + json.createReference(JSONBaseHTML.REF_JWA) +
                 " reference apply with one important exception: <i>Additional Authenticated Data</i> " +
-                "used by the symmetric chipers. " +
+                "used by the symmetric ciphers. " +
                 "This difference is due to the way encryption meta-data is formatted. " +
                 "The process for creating <i>Additional Authenticated Data</i> is as follows:<ul>" +
                 "<li>The <i>top level</i> properties <code>" + JSONDecryptionDecoder.IV_JSON + "</code>, " +
@@ -297,13 +292,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
         json.setAppendixMode();
 
-        json.addParagraphObject(TEST_VECTORS).append("The following test data can be used to verify the correctness " +
+        json.addParagraphObject(TEST_VECTORS).append("This section holds test data which can be used to verify the correctness " +
             "of a JEF implementation." + LINE_SEPARATOR + 
-           "All encryption tests encrypt the following string (after first having converted it to UTF-8):" +
+           "All encryption tests encrypt the string below (after first having converted it to UTF-8):" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + new String(dataToEncrypt, "UTF-8") +
            "&quot;</code></div>" + LINE_SEPARATOR +
            "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
-            " can be decrypted by the following private key in JWK " + 
+            " can be decrypted by the <i>private</i> part of the following EC key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
            formatCode(p256key) +
            "Alternative ECDH encryption object <i>requiring the same private key</i> " +
@@ -415,7 +410,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
           .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                       "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
-                      "</code> are defined, the (symmetric) encryption key is assumed to known by the recepient.");
+                      "</code> are defined, the (symmetric) encryption key is assumed to known by the recipient.");
           
         preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
             .addString("Key encryption algorithm. Currently the following JWA " +
@@ -473,7 +468,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("Ephemeral EC public key.")
             .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                   "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                  "</code> are defined, the static EC key pair to use is assumed to known by the recepient.");
+                  "</code> are defined, the static EC key pair to use is assumed to known by the recipient.");
 
         json.addSubItemTable(ECDH_KW_PROPERTIES)
             .newRow()
@@ -516,7 +511,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("Encrypted symmetric key.")
             .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                   "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                  "</code> are defined, the static EC key pair to use is assumed to known by the recepient.");
+                  "</code> are defined, the static EC key pair to use is assumed to known by the recipient.");
 
         json.addSubItemTable(RSA_PROPERTIES)
             .newRow()
@@ -550,7 +545,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("Encrypted symmetric key.")
               .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                 "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                "</code> are defined, the RSA key pair to use is assumed to known by the recepient.");
+                "</code> are defined, the RSA key pair to use is assumed to known by the recipient.");
 
         json.addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
         .newRow()

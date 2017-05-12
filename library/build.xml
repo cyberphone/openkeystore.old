@@ -312,8 +312,8 @@
      <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
        <param name="doc.file" value="${public_doc_dir}/jcs.html"/>
-       <param name="file.base1" value=""/>
-       <param name="file.base2" value=""/>
+       <param name="file.base1" value="${testdata_dir}/keys"/>
+       <param name="file.base2" value="${testdata_dir}/signatures"/>
      </antcall>
      <!-- HTML Doc task for JEF -->
      <antcall target="_java2html">
@@ -647,6 +647,9 @@
     <!-- Copy all files  -->
     <copy todir="${temp_dir}">
       <fileset dir="${src_generators}"/>
+    </copy>
+    <copy todir="${temp_dir}">
+      <fileset dir="${src_dir}"/>
     </copy>
     
     <!-- Compile all -->

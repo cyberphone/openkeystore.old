@@ -18,8 +18,18 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+
+import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.KeyStoreVerifier;
+
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
+
+import org.webpki.util.ArrayUtil;
 
 /**
  * Create an HTML description of the JSON Clear-text Signature system.
@@ -31,17 +41,114 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     static JSONBaseHTML json;
     static RowInterface row;
     
-    private static final String INTEROPERABILITY = "Interoperability";
+    static final String INTEROPERABILITY = "Interoperability";
 
-    private static final String ECMASCRIPT_MODE  = "ECMAScript Mode";
+    static final String ECMASCRIPT_MODE  = "ECMAScript Mode";
+
+    static final String TEST_VECTORS     = "Test Vectors";
     
-    private static final String SAMPLE_SIGNATURE = "Sample Signature";
+    static final String SAMPLE_SIGNATURE = "Sample Signature";
 
-    public static void main (String args[]) throws IOException {
+    static JSONObjectReader readJSON(String name) throws IOException {
+        return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
+    }
+    
+    static String formatCode(String code) {
+        return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" +
+                code.replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>") +
+                "</code></div>";
+    }
+    
+    static String formatCode(JSONObjectReader rd) {
+        return formatCode(rd.toString());
+    }
+
+    static String formatCode(AsymKey asymKey) {
+        return formatCode(asymKey.json);
+    }
+    
+    static class AsymKey {
+        String keyId;
+        KeyPair keyPair;
+        String json;
+    }
+    
+    static AsymKey readAsymKey(String name) throws IOException {
+        AsymKey asymKey = new AsymKey();
+        JSONObjectReader key = json.readJson1(name);
+        asymKey.json = key.toString();
+        asymKey.keyId = key.getString("kid");
+        key.removeProperty("kid");
+        asymKey.keyPair = key.getKeyPair();
+        return asymKey;
+    }
+    
+    static String readSignature(String name) throws IOException {
+        return new String(json.readFile2(name), "UTF-8");
+    }
+    
+    static String readAsymSignature(String name, 
+                                    AsymKey asymKey,
+                                    boolean requirePublicKeyInfo,
+                                    boolean permitKeyId) throws IOException, GeneralSecurityException {
+        String raw = readSignature(name);
+        JSONObjectReader rd = JSONParser.parse(raw);
+        JSONSignatureDecoder verifier = requirePublicKeyInfo ?
+                rd.getSignature() : rd.getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER, requirePublicKeyInfo);
+        verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()).permitKeyId(permitKeyId));        
+        return formatCode(raw);
+    }
+
+    static JSONX509Verifier certroot;
+
+    static String readCertSignature(String name) throws IOException, GeneralSecurityException {
+        String raw = readSignature(name);
+        JSONParser.parse(raw).getSignature().verify(certroot);
+        return formatCode(raw);
+    }
+
+    static String readSymSignature(String[] encObjects) throws IOException, GeneralSecurityException {
+        StringBuffer s = new StringBuffer();
+        JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
+        for (String name : encObjects) {
+            String signature = readSignature(name);
+            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature();
+            for (String keyProp : symmetricKeys.getProperties()) {
+                byte[] key = symmetricKeys.getBinary(keyProp);
+                if (key.length == dec.getValue().length) {
+                    s.append(LINE_SEPARATOR + "HMAC key named <code>&quot;")
+                     .append(keyProp)
+                     .append("&quot;</code> here provided in Base64URL notation:")
+                     .append(formatCode(symmetricKeys.getString(keyProp)))
+                     .append("Signature object requiring the key above for validation:")
+                     .append(formatCode(signature));
+                    dec.verify(new JSONSymKeyVerifier(key).permitKeyId(true));
+                    if (!keyProp.equals(dec.getKeyId())) {
+                        throw new IOException("Sym sign");
+                    }
+                    break;
+                }
+            }
+        }
+        return s.toString();
+    }
+
+    public static void main (String args[]) throws Exception {
         json = new JSONBaseHTML(args, "JCS - JSON Cleartext Signature");
         
         json.setFavIcon("../webpkiorg.png");
-        
+
+        AsymKey p256key = readAsymKey("p256privatekey.jwk");
+        AsymKey p384key = readAsymKey("p384privatekey.jwk");
+        AsymKey p521key = readAsymKey("p521privatekey.jwk");
+        AsymKey r2048key = readAsymKey("r2048privatekey.jwk");
+
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load (null, null);
+        keyStore.setCertificateEntry ("mykey",
+                                      CertificateUtil.getCertificateFromBlob (json.readFile1("rootca.cer")));        
+        certroot = new JSONX509Verifier(new KeyStoreVerifier(keyStore));
+
         json.addParagraphObject().append("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
         
@@ -98,10 +205,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 "&nbsp;&nbsp;&nbsp;&nbsp;&quot;publicKey&quot;:&nbsp;{<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;kty&quot;:&nbsp;&quot;EC&quot;,<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;crv&quot;:&nbsp;&quot;P-256&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;x&quot;:&nbsp;&quot;_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU&quot;,<br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;y&quot;:&nbsp;&quot;bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ&quot;<br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<span style=\"background:#f0f0f0\">,</span><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;hp6af4GTZMr2fM8A1QeanPD4IcvlV0ToiKA0NDrtsmyGxDQST24ehsAVRzVHXSGM1O1GG0xO3ev4LbvNNRpH5g&quot;</span><br>" +
+"&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"background:#f0f0f0\">&quot;value&quot;:&nbsp;&quot;aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA&quot;</span><br>" +
 "&nbsp;&nbsp;}<br>" +
 "}" +
 "</code></div>" +
@@ -157,8 +264,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "\\u000f\\nA</b>'B<b style=\"color:red;background:Yellow\">\\&quot;\\\\</b>\\\\\\&quot;" +
             "<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;numbers&quot;:[1e+30,4.5,6],&quot;signature&quot;:<br>" +
             "{&quot;algorithm&quot;:&quot;ES256&quot;,&quot;publicKey&quot;:{&quot;kty&quot;" +
-            ":&quot;EC&quot;,&quot;crv&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY<br>" +
-            "1bQDs&quot;,&quot;y&quot;:&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;}}}" +
+            ":&quot;EC&quot;,&quot;crv&quot;:&quot;P-256&quot;,&quot;x&quot;:&quot;_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZT<br>" +
+            "YCnqU&quot;,&quot;y&quot;:&quot;bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ&quot;}}}" +
             "</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the string normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
@@ -350,6 +457,52 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\"># Restore JSON object" + 
          "</span></code></div><div style=\"padding:5pt 0pt 0pt 200pt\"><i>... Signature Validation Code ...</i></div>");   
 
+        readAsymSignature("p256keysigned.json", p256key, true, false);
+        
+        json.addParagraphObject(TEST_VECTORS).append(
+       "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
+       "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
+       " can be verified by the <i>public</i> part of the following EC key in JWK " + 
+       json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
+       formatCode(p256key) + LINE_SEPARATOR +
+       "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+       "</code> for identifying the public key can be verified with the key above:" + 
+        readAsymSignature("p256implicitkeysigned.json", p256key, false, true) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
+        "EC key for verifying <i>succeeding</i> objects:" +
+        formatCode(p384key) +
+        "The follwing signature object can be verified by the key above:" +
+        readAsymSignature("p384keysigned.json", p384key, true, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
+        "EC key for verifying <i>succeeding</i> objects:" +
+        formatCode(p521key) +
+        "The follwing signature object can be verified by the key above:" +
+        readAsymSignature("p521keysigned.json", p521key, true, false) +
+        "The follwing signature object uses the same key as in the previous example but builds on that " +
+        "the receipient already knows which key to use in advance:" +
+        readAsymSignature("p521implicitkeysigned.json", p521key, false, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
+        "RSA key for verifying <i>succeeding</i> objects:" +
+        formatCode(r2048key) +
+        "The follwing signature object can be verified by the key above:" +
+        readAsymSignature("r2048keysigned.json", r2048key, true, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("r2048certsigned.json") +
+        readSymSignature(new String[]{"hs256signed.json",
+                                      "hs384signed.json",
+                                      "hs512signed.json"}) + LINE_SEPARATOR +
+        "The certficate based signatures all link to a common root (here supplied in PEM ")
+        .append(json.createReference(JSONBaseHTML.REF_PEM))
+        .append(" format), which can be used for validation:" +
+        formatCode(new String(json.readFile1("rootca.pem"), "UTF-8")));
+        
         json.addParagraphObject("Acknowledgements").append("During the initial phases of the design process, highly appreciated " +
        "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, " +
        "Jeffrey&nbsp;Walton, David&nbsp;Chadwick, Jim&nbsp;Schaad, Mike&nbsp;Jones, David&nbsp;Waite, " +
