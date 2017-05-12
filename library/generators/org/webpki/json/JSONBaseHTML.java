@@ -16,6 +16,7 @@
  */
 package org.webpki.json;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -28,7 +29,6 @@ import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -201,16 +201,45 @@ public class JSONBaseHTML  {
 
     StringBuffer external_styles = new StringBuffer();
 
+    String fileReaderBase1;
+    String fileReaderBase2;
+
     public void addGlobalStyle(String style) {
         external_styles.append(style);
     }
     
-    public JSONBaseHTML(String[] args, String subsystem_name) throws IOException  {
-        if (args.length != 1) {
-            throw new IOException("One argument expeced, got: " + args.length);
+    public byte[] readFile1(String name) throws IOException {
+        return readFile(fileReaderBase1, name);
+    }
+    
+    public byte[] readFile2(String name) throws IOException {
+        return readFile(fileReaderBase2, name);
+    }
+    
+    public JSONObjectReader readJson1(String name) throws IOException {
+        return JSONParser.parse(readFile1(name));
+    }
+
+    public JSONObjectReader readJson2(String name) throws IOException {
+        return JSONParser.parse(readFile2(name));
+    }
+
+    byte[] readFile(String fileReaderBase, String name) throws IOException {
+        if (fileReaderBase == null) {
+            throw new IOException("File reader base missing!");
         }
+        return ArrayUtil.readFile(fileReaderBase + name);
+    }
+
+    public JSONBaseHTML(String[] args, String subsystem_name) throws IOException {
         file_name = args[0];
         this.subsystem_name = subsystem_name;
+        if (args.length > 1) {
+            fileReaderBase1 = args[1] + File.separator;
+        }
+        if (args.length > 2) {
+            fileReaderBase2 = args[2] + File.separator;
+        }
 
         addReferenceEntry(REF_JSON,
             "T. Bray, \"The JavaScript Object Notation (JSON) Data Interchange Format\"" +

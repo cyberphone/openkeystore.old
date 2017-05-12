@@ -17,21 +17,28 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+
+import java.security.interfaces.RSAPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
+
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64URL;
 
 /**
  * Create an HTML description of JEF (JSON Encryption Format).
@@ -78,10 +85,18 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
     }
     
-    static String formatCode(JSONObjectReader rd) {
+    static String formatCode(String code) {
         return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" +
-                rd.toString().replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>") +
+                code.replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>") +
                 "</code></div>";
+    }
+    
+    static String formatCode(JSONObjectReader rd) {
+        return formatCode(rd.toString());
+    }
+
+    static String formatCode(AsymKey asymKey) {
+        return formatCode(asymKey.json);
     }
 
     static Column preAmble(String qualifier) throws IOException {
@@ -107,81 +122,104 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 .newColumn();
     }
     
+    static Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
+    
+    static byte[] dataToEncrypt;
+
+    static class AsymKey {
+        String keyId;
+        KeyPair keyPair;
+        String json;
+    }
+    
+    static AsymKey readAsymKey(String name) throws IOException {
+        AsymKey asymKey = new AsymKey();
+        JSONObjectReader key = json.readJson1(name);
+        asymKey.json = key.toString();
+        asymKey.keyId = key.getString("kid");
+        key.removeProperty("kid");
+        asymKey.keyPair = key.getKeyPair();
+        for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
+            if (kea.isRsa() == asymKey.keyPair.getPublic() instanceof RSAPublicKey) {
+                keys.add(new DecryptionKeyHolder(asymKey.keyPair.getPublic(),
+                                                 asymKey.keyPair.getPrivate(),
+                                                 kea,
+                                                 asymKey.keyId));
+            }
+        }
+        return asymKey;
+    }
+    
+    static String readAsymEncryption(String name) throws IOException, GeneralSecurityException {
+        JSONObjectReader rd = json.readJson2(name);
+        if (!ArrayUtil.compare(rd.getEncryptionObject().getDecryptedData(keys), dataToEncrypt)) {
+            throw new IOException(name);
+        }
+        return formatCode(rd);
+    }
+    
+    static String readAsymEncryption(String name, AsymKey asymKey) throws IOException, GeneralSecurityException {
+        JSONObjectReader rd = json.readJson2(name);
+        if (!ArrayUtil.compare(rd.getEncryptionObject().getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
+            throw new IOException(name);
+        }
+        return formatCode(rd);
+    }
+
+    static String aesCrypto(String[] encObjects) throws IOException, GeneralSecurityException {
+        StringBuffer s = new StringBuffer();
+        JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
+        for (String name : encObjects) {
+            JSONObjectReader rd = json.readJson2(name);
+            JSONDecryptionDecoder dec = rd.getEncryptionObject();
+            for (String keyProp : symmetricKeys.getProperties()) {
+                byte[] key = symmetricKeys.getBinary(keyProp);
+                if (key.length == dec.getDataEncryptionAlgorithm().getKeyLength()) {
+                    s.append(LINE_SEPARATOR + "AES key named <code>&quot;")
+                     .append(keyProp)
+                     .append("&quot;</code> here provided in Base64URL notation:")
+                     .append(formatCode(symmetricKeys.getString(keyProp)))
+                     .append("Encryption object requiring the key above for decryption:")
+                     .append(formatCode(rd));
+                    if (!ArrayUtil.compare(dec.getDecryptedData(key), dataToEncrypt)) {
+                        throw new IOException("Sym enc");
+                    }
+                    break;
+                }
+            }
+        }
+        return s.toString();
+    }
+
     public static void main (String args[]) throws Exception {
         CustomCryptoProvider.forcedLoad(true);
 
-        Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
+        json = new JSONBaseHTML(args, "JEF - JSON Encryption Format");
+        
+        json.setFavIcon("../webpkiorg.png");
+        
+        dataToEncrypt = json.readFile2("datatobeencrypted.txt");
+     
+        AsymKey p256key = readAsymKey("p256privatekey.jwk");
+        AsymKey p384key = readAsymKey("p384privatekey.jwk");
+        AsymKey p521key = readAsymKey("p521privatekey.jwk");
+        AsymKey r2048key = readAsymKey("r2048privatekey.jwk");
+        
 
-        JSONObjectReader ecprivatekey = readJSON("ecprivatekey.jwk");
-        KeyPair keyPair = ecprivatekey.getKeyPair();
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
-                                         keyPair.getPrivate(),
-                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                         JEF_EC_KEY_ID));
-
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
-                                         keyPair.getPrivate(),
-                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID,
-                                         JEF_EC_KEY_ID));
-
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
-                                         keyPair.getPrivate(),
-                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A192KW_ALG_ID,
-                                         JEF_EC_KEY_ID));
-
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
-                                         keyPair.getPrivate(),
-                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_A256KW_ALG_ID,
-                                         JEF_EC_KEY_ID));
-
-        JSONObjectReader rsaprivatekey = readJSON("rsaprivatekey.jwk");
-        keyPair = rsaprivatekey.getKeyPair();
-        keys.add(new DecryptionKeyHolder(keyPair.getPublic(), 
-                                         keyPair.getPrivate(),
-                                         KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
-                                         JEF_RSA_KEY_ID));
-
-        JSONObjectReader ecdhEncryption = readJSON("ecdh-es.json");
-        verifyDecryption(ecdhEncryption.getEncryptionObject().getDecryptedData(keys));
-
+        JSONObjectReader ecdhEncryption = json.readJson2("p256ecdh-es+a256kw.implicitkey.json");
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONDecryptionDecoder.TAG_JSON);
         authData.removeProperty(JSONDecryptionDecoder.IV_JSON);
         authData.removeProperty(JSONDecryptionDecoder.CIPHER_TEXT_JSON);
         String formattedAuthData = authData.serializeToString(JSONOutputFormats.NORMALIZED);
         for (int l = formattedAuthData.length(), j = 0, i = 0; i < l; i++) {
-            if (i % 118 == 0 && i > 0) {
+            if (i % 120 == 0 && i > 0) {
                 formattedAuthData = formattedAuthData.substring(0, i + j) + 
                         "<br>" + formattedAuthData.substring(i + j);
                 j += 4;
             }
         }
         formattedAuthData = formattedAuthData.replace("\"", "&quot;");
-
-        JSONObjectReader ecdhEncryption2 = readJSON("ecdh-es.2.json");
-        verifyDecryption(ecdhEncryption2.getEncryptionObject().getDecryptedData(keys));
-        
-        JSONObjectReader ecdhEncryption3 = readJSON("ecdh-es.3.json");
-        verifyDecryption(ecdhEncryption3.getEncryptionObject().getDecryptedData(keys));
-
-        JSONObjectReader ecdhEncryption4 = readJSON("ecdh-es.4.json");
-        verifyDecryption(ecdhEncryption4.getEncryptionObject().getDecryptedData(keys));
-
-        JSONObjectReader ecdhEncryption5 = readJSON("ecdh-es.5.json");
-        verifyDecryption(ecdhEncryption5.getEncryptionObject().getDecryptedData(keys));
-
-        JSONObjectReader rsaEncryption = readJSON("rsa-oaep-256.json");
-        verifyDecryption(rsaEncryption.getEncryptionObject().getDecryptedData(keys));
-
-        JSONObjectReader rsaEncryption2 = readJSON("rsa-oaep-256.2.json");
-        verifyDecryption(rsaEncryption2.getEncryptionObject().getDecryptedData(keys));
-
-        JSONObjectReader aesEncryption = readJSON("a128cbc-hs256.json");
-        verifyDecryption(aesEncryption.getEncryptionObject().getDecryptedData(Base64URL.decode(JEF_SYM_KEY)));
-
-        json = new JSONBaseHTML(args, "JEF - JSON Encryption Format");
-        
-        json.setFavIcon("../webpkiorg.png");
         
         json.addParagraphObject().append("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JEF</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Encryption Format</span></div>");
@@ -201,7 +239,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .append(json.createReference(JSONBaseHTML.REF_JWK))
           .append(" objects while the encryption container itself utilizes JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
-          .append(" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures."
+          .append(" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures, " +
+                  "including header information in <i>clear text</i>."
                   + LINE_SEPARATOR +
                   "The JEF encryption scheme is fully compatible with the ES6 ")
           .append(json.createReference(JSONBaseHTML.REF_ES6))
@@ -261,44 +300,43 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(TEST_VECTORS).append("The following test data can be used to verify the correctness " +
             "of a JEF implementation." + LINE_SEPARATOR + 
            "All encryption tests encrypt the following string (after first having converted it to UTF-8):" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_TEST_STRING +
+           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + new String(dataToEncrypt, "UTF-8") +
            "&quot;</code></div>" + LINE_SEPARATOR +
            "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
-            " can be decrypted by the following private key (also known as <code>" +
-           JEF_EC_KEY_ID + "</code>) in JWK " + 
+            " can be decrypted by the following private key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-           formatCode(ecprivatekey) +
-           "Alternative ECDH encryption object <i>using the same private key</i> " +
+           formatCode(p256key) +
+           "Alternative ECDH encryption object <i>requiring the same private key</i> " +
            "while providing the public key information in line, instead of using a <code>" +
            JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
-           formatCode(ecdhEncryption2) +
-           "Alternative ECDH encryption object <i>using the same private key</i> " +
+           readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") +
+           "Alternative ECDH encryption object <i>requiring the same private key</i> " +
            "while using a different set of " +
            "algorithms both for key derivation and content encryption:" +
-           formatCode(ecdhEncryption3) +
-           "Alternative ECDH encryption object <i>using the same private key</i> " +
-           "while using a different set of " +
-           "algorithms both for key derivation and content encryption:" +
-           formatCode(ecdhEncryption4) +
-           "Alternative ECDH encryption object <i>using the same private key</i> " +
-           "while using a different set of " +
-           "algorithms both for key derivation and content encryption:" +
-           formatCode(ecdhEncryption5) + LINE_SEPARATOR +
-           "AES encrypted data using RSA for key encryption:" +
-           formatCode(rsaEncryption) +
-           "Matching RSA private key (also known as <code>" +
-           JEF_RSA_KEY_ID + "</code>) in JWK " + 
-           json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-           formatCode(rsaprivatekey) +
-           "Alternative RSA encryption object <i>using the same private key</i> " +
-           "while providing the public key information in line, instead of using a <code>" +
-           JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
-           formatCode(rsaEncryption2) + LINE_SEPARATOR +
-           "AES encrypted data relying on a known symmetric key:" +
-           formatCode(aesEncryption) +
-           "Matching AES key, here in Base64URL notation:" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + JEF_SYM_KEY +
-           "&quot;</code></div>");
+           readAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") + LINE_SEPARATOR +
+           "Private key for decrypting the <i>succeeding</i> object:" +
+           formatCode(p384key) +
+           "ECDH encryption object <i>requiring the private key above</i>:" +
+           readAsymEncryption("p384ecdh-es.encrypted.json") + LINE_SEPARATOR +
+           "Private key for decrypting the <i>succeeding</i> object:" +
+           formatCode(p521key) +
+           "ECDH encryption object <i>requiring the private key above</i>:" +
+           readAsymEncryption("p521ecdh-es+a128kw.encrypted.json") + LINE_SEPARATOR +
+           "Private key for decrypting the <i>succeeding</i> object:" +
+           formatCode(r2048key) +
+           "RSA encryption object <i>requiring the private key above</i>:" +
+           readAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
+           "Alternative RSA encryption object <i>requiring the same private key</i> " +
+           "but relying on that being <i>implicitely known</i> since the encryption object " +
+           "does neither specify a <code>" +
+           JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" +
+           JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>:" +
+           readAsymEncryption("r2048rsa-oaep-256.implicitkey.json", r2048key) +
+           aesCrypto(new String[]{"a128gcm.encrypted.json",
+                                  "a128cbc-hs256.encrypted.json",
+                                  "a256gcm.implicitkey.json",
+                                  "a256gcm.encrypted.json",
+                                  "a256cbc-hs512.encrypted.json"}));
 
         json.addReferenceTable();
         
@@ -600,9 +638,4 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.writeHTML();
       }
 
-    static void verifyDecryption(byte[] decryptedData) throws IOException {
-        if (!ArrayUtil.compare(JEF_TEST_STRING.getBytes("UTF-8"), decryptedData)) {
-            throw new IOException("Decrypt");
-        }
-    }
 }

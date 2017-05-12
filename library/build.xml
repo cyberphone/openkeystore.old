@@ -18,6 +18,7 @@
   <property name="spts_dir"  value="securityproxy-test"/>
   <property name="ext.jar"  value="../resources/third-party-jars"/>
   <property name="public_doc_dir"  location="../../doc/security"/>
+  <property name="testdata_dir" location="../testdata"/>
   <property name="doc_dir"  location="../../doc/openkeystore/javaapi"/>
   <property name="webpki-android" value="webpki.android"/>
   <property name="android-json" value="webpki.android.json"/>
@@ -304,16 +305,22 @@
     <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.keygen2.KeyGen2HTMLReference"/>
        <param name="doc.file" value="${public_doc_dir}/keygen2.html"/>
+       <param name="file.base1" value=""/>
+       <param name="file.base2" value=""/>
      </antcall>
      <!-- HTML Doc task for JCS -->
      <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
        <param name="doc.file" value="${public_doc_dir}/jcs.html"/>
+       <param name="file.base1" value=""/>
+       <param name="file.base2" value=""/>
      </antcall>
      <!-- HTML Doc task for JEF -->
      <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.json.JSONEncryptionHTMLReference"/>
        <param name="doc.file" value="${public_doc_dir}/jef.html"/>
+       <param name="file.base1" value="${testdata_dir}/keys"/>
+       <param name="file.base2" value="${testdata_dir}/encryption"/>
      </antcall>
   </target>
 
@@ -659,7 +666,7 @@
   		        <include name="*.jar"/>
   			 </fileset>
   		</classpath>
-        <arg value="${doc.file}"/>
+        <arg line="${doc.file} ${file.base1} ${file.base2}"/>
      </java>
   </target>
   
