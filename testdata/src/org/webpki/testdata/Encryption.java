@@ -116,8 +116,11 @@ public class Encryption {
         return jwkPlus.getKeyPair();
     }
 
-    static void coreAsymEnc(String keyType, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, String keyId) throws Exception {
+    static void coreAsymEnc(String keyType, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, String wantKeyId) throws Exception {
         KeyPair keyPair = readJwk(keyType);
+        if (wantKeyId != null && wantKeyId.equals("yes")) {
+            wantKeyId = keyId;
+        }
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
             switch (dataEncryptionAlgorithm.getKeyLength()) {
@@ -136,7 +139,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm, 
                                                        keyPair.getPublic(),
-                                                       keyId,
+                                                       wantKeyId,
                                                        keyEncryptionAlgorithm).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
@@ -151,6 +154,6 @@ public class Encryption {
     }
 
     static void asymEncNoPublicKeyInfo(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
-        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId ? keyId : "");
+        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId ? "yes" : "");
     }
 }
