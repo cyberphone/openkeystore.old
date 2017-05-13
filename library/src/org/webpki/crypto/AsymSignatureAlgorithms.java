@@ -143,6 +143,11 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
                 throw new IOException("There is no JOSE algorithm for: " + toString());
             }
             return sksName;
+        } else if (sksName == null) {
+            if (algorithmPreferences == AlgorithmPreferences.SKS) {
+                throw new IOException("There is no SKS algorithm for: " + toString());
+            }
+            return joseName;
         }
         return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
     }

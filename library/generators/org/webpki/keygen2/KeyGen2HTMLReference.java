@@ -1248,7 +1248,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
-              .addString("Identical representation as the <code>" +
+              .addString("Identical representation to <code>" +
                           JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink(JSONSignatureDecoder.SIGNATURE_JSON)
@@ -1941,7 +1941,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                          "</code> <b>must</b> be an EC key using the same curve as <code>" + 
                          SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
-        json.addJSONSignatureDefinitions(false, null, null, false);
+        json.addJSONSignatureDefinitions();
         
         json.writeHTML();
     }

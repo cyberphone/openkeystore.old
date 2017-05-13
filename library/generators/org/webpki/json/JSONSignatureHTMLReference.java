@@ -546,7 +546,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .addString("The mandatory top-level property");
             
-        json.addJSONSignatureDefinitions(true, "", "", true);
+        json.addJSONSignatureDefinitions();
 
         json.writeHTML();
     }
