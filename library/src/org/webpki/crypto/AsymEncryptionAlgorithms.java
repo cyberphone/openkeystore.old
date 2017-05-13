@@ -62,7 +62,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms {
 
     @Override
     public boolean isMandatorySksAlgorithm() {
-        return true;
+        return this != RSA_OAEP_SHA1_MGF1P;
     }
 
 
@@ -117,5 +117,11 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms {
             return sksName;
         }
         return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
+    }
+
+
+    @Override
+    public boolean isDeprecated() {
+        return this == RSA_ES_PKCS_1_5;
     }
 }

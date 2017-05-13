@@ -32,5 +32,7 @@ public interface CryptoAlgorithms {
     public String getJceName();
 
     public boolean isSymmetric();
+    
+    public boolean isDeprecated();
 
 }

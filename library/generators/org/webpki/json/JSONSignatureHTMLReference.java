@@ -462,35 +462,37 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(TEST_VECTORS).append(
        "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
        "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
-       " can be verified by the <i>public</i> part of the following EC key in JWK " + 
+       " can be verified by the <i>public part</i> of the following EC key in JWK " + 
        json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
        formatCode(p256key) + LINE_SEPARATOR +
        "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-       "</code> for identifying the public key can be verified with the key above:" + 
+       "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
         readAsymSignature("p256implicitkeysigned.json", p256key, false, true) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying <i>succeeding</i> objects:" +
+        "EC key for verifying the subsequent object:" +
         formatCode(p384key) +
-        "The follwing signature object can be verified by the key above:" +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
         readAsymSignature("p384keysigned.json", p384key, true, false) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying <i>succeeding</i> objects:" +
+        "EC key for verifying the subsequent object:" +
         formatCode(p521key) +
-        "The follwing signature object can be verified by the key above:" +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
         readAsymSignature("p521keysigned.json", p521key, true, false) +
-        "The follwing signature object uses the same key as in the previous example but builds on that " +
-        "the receipient already knows which key to use in advance:" +
+        "The following signature object uses the same key as in the previous example but builds on that " +
+        "the key to use is <i>implicitely known</i> since the object neither contains a <code>" +
+        JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" + 
+        JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
         readAsymSignature("p521implicitkeysigned.json", p521key, false, false) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
-        "RSA key for verifying <i>succeeding</i> objects:" +
+        "RSA key for verifying the subsequent object:" +
         formatCode(r2048key) +
-        "The follwing signature object can be verified by the key above:" +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
         readAsymSignature("r2048keysigned.json", r2048key, true, false) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
@@ -498,9 +500,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
                                       "hs512signed.json"}) + LINE_SEPARATOR +
-        "The certficate based signatures all link to a common root (here supplied in PEM ")
+        "The certificate based signatures share a common root (here supplied in PEM ")
         .append(json.createReference(JSONBaseHTML.REF_PEM))
-        .append(" format), which can be used for validation:" +
+        .append(" format), which can be used for path validation:" +
         formatCode(new String(json.readFile1("rootca.pem"), "UTF-8")));
         
         json.addParagraphObject("Acknowledgements").append("During the initial phases of the design process, highly appreciated " +

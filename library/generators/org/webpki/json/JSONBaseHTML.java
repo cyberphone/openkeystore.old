@@ -421,7 +421,7 @@ public class JSONBaseHTML  {
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           null,
-                     "Base64URL-encoded positive integer with arbitrary precision. Note that leading zero-valued bytes <b>must</b> be discarded"),
+                     "Base64URL-encoded positive integer with arbitrary precision. Note that the value <b>must not</b> contain <i>leading</i> zero-valued bytes"),
                      
             TIME    ("time",   "<i>string</i>",                           null,
                      "Date-time string in ISO format <code>YYYY-MM-DDThh:mm:ss{ms}tz</code> " +

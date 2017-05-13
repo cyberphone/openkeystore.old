@@ -302,30 +302,31 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
            formatCode(p256key) +
            "Alternative ECDH encryption object <i>requiring the same private key</i> " +
-           "while providing the public key information in line, instead of using a <code>" +
-           JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
+           "as in the previous example while providing the public key information in line, " +
+           "instead of using a <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
            readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") +
            "Alternative ECDH encryption object <i>requiring the same private key</i> " +
-           "while using a different set of " +
+           "as in the previous example while using a different set of " +
            "algorithms both for key derivation and content encryption:" +
            readAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") + LINE_SEPARATOR +
-           "Private key for decrypting the <i>succeeding</i> object:" +
+           "Private key for decrypting the subsequent object:" +
            formatCode(p384key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("p384ecdh-es.encrypted.json") + LINE_SEPARATOR +
-           "Private key for decrypting the <i>succeeding</i> object:" +
+           "Private key for decrypting the subsequent object:" +
            formatCode(p521key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("p521ecdh-es+a128kw.encrypted.json") + LINE_SEPARATOR +
-           "Private key for decrypting the <i>succeeding</i> object:" +
+           "Private key for decrypting the subsequent object:" +
            formatCode(r2048key) +
            "RSA encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
            "Alternative RSA encryption object <i>requiring the same private key</i> " +
-           "but relying on that being <i>implicitely known</i> since the encryption object " +
-           "does neither specify a <code>" +
+           "as in the previous example but relying on that this being " +
+           "<i>implicitely known</i> since the encryption object " +
+           "does neither contains a <code>" +
            JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" +
-           JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>:" +
+           JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
            readAsymEncryption("r2048rsa-oaep-256.implicitkey.json", r2048key) +
            aesCrypto(new String[]{"a128gcm.encrypted.json",
                                   "a128cbc-hs256.encrypted.json",

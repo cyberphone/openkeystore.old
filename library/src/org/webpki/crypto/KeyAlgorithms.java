@@ -25,7 +25,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECParameterSpec;
-import java.security.spec.EllipticCurve;
 
 import java.security.spec.X509EncodedKeySpec;
 
@@ -34,7 +33,7 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
     RSA1024     ("http://xmlns.webpki.org/sks/algorithm#rsa1024", null,
                 "RSA",
                 1024,
-                AsymSignatureAlgorithms.RSA_SHA1,
+                AsymSignatureAlgorithms.RSA_SHA256,
                 false,
                 true,
                 null,
@@ -70,7 +69,7 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
     RSA1024_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa1024.exp", null,
                 "RSA",
                 1024,
-                AsymSignatureAlgorithms.RSA_SHA1,
+                AsymSignatureAlgorithms.RSA_SHA256,
                 true,
                 false,
                 null,
@@ -102,24 +101,6 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
                 false,
                 null,
                 null),
-    
-    NIST_B_163  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b163", null,
-                "sect163r2",
-                163,
-                AsymSignatureAlgorithms.ECDSA_SHA256,
-                false,
-                false,
-                "1.3.132.0.15",
-                new byte[]
-                   {(byte)0x30, (byte)0x40, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
-                    (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
-                    (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x0F, (byte)0x03, (byte)0x2C, (byte)0x00, (byte)0x04,
-                    (byte)0x03, (byte)0x9A, (byte)0xC6, (byte)0x0F, (byte)0x63, (byte)0x03, (byte)0xC3, (byte)0x77,
-                    (byte)0x14, (byte)0xFD, (byte)0x80, (byte)0xC5, (byte)0xA8, (byte)0xEE, (byte)0x72, (byte)0x95,
-                    (byte)0x72, (byte)0x10, (byte)0xAC, (byte)0x6C, (byte)0xA7, (byte)0x02, (byte)0xD7, (byte)0x30,
-                    (byte)0x15, (byte)0xEC, (byte)0xE1, (byte)0x53, (byte)0xC1, (byte)0x50, (byte)0x74, (byte)0x47,
-                    (byte)0x56, (byte)0x8A, (byte)0xBC, (byte)0x0F, (byte)0x05, (byte)0x53, (byte)0x78, (byte)0xB1,
-                    (byte)0x30, (byte)0x8E}),
     
     NIST_B_233  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b233", null,
                 "sect233r1",
@@ -161,25 +142,6 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
                     (byte)0xC9, (byte)0x44, (byte)0xDC, (byte)0x76, (byte)0x1B, (byte)0xDF, (byte)0x33, (byte)0x51,
                     (byte)0xCF, (byte)0x07, (byte)0x7D, (byte)0x84, (byte)0xEC, (byte)0x23, (byte)0xC6, (byte)0x2C,
                     (byte)0x1E, (byte)0x12, (byte)0x0D, (byte)0x95, (byte)0xFD, (byte)0xC7, (byte)0xC7, (byte)0x0C}),
-    
-    NIST_P_192  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p192", null,
-                "secp192r1",
-                192,
-                AsymSignatureAlgorithms.ECDSA_SHA256,
-                false,
-                false,
-                "1.2.840.10045.3.1.1",
-                new byte[]
-                   {(byte)0x30, (byte)0x49, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
-                    (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
-                    (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x01, (byte)0x03,
-                    (byte)0x32, (byte)0x00, (byte)0x04, (byte)0xCC, (byte)0xE7, (byte)0x03, (byte)0x5B, (byte)0xF6,
-                    (byte)0xAB, (byte)0xA7, (byte)0xFD, (byte)0xF5, (byte)0x71, (byte)0xDB, (byte)0x98, (byte)0xF4,
-                    (byte)0x97, (byte)0xEF, (byte)0x84, (byte)0x86, (byte)0x4C, (byte)0x45, (byte)0x2A, (byte)0xF8,
-                    (byte)0x0F, (byte)0xD9, (byte)0x04, (byte)0x9C, (byte)0x5F, (byte)0xF7, (byte)0xE8, (byte)0xF3,
-                    (byte)0xC3, (byte)0xBE, (byte)0xF7, (byte)0x06, (byte)0x6E, (byte)0xCC, (byte)0x33, (byte)0xA7,
-                    (byte)0xAC, (byte)0x61, (byte)0x5C, (byte)0x58, (byte)0x7C, (byte)0x98, (byte)0x25, (byte)0x82,
-                    (byte)0x17, (byte)0xD7, (byte)0x69}),
     
     NIST_P_256  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p256", "P-256",
                 "secp256r1",
@@ -460,5 +422,11 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
             return sksName;
         }
         return algorithmPreferences == AlgorithmPreferences.SKS ? sksName : joseName;
+    }
+
+
+    @Override
+    public boolean isDeprecated() {
+        return this == RSA1024 || this == RSA1024_EXP;
     }
 }

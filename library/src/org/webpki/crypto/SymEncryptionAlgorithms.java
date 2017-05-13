@@ -133,4 +133,10 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms {
         }
         return sksName;
     }
+
+
+    @Override
+    public boolean isDeprecated() {
+        return false;
+    }
 }

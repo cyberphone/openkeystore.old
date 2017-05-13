@@ -205,10 +205,12 @@ public class SKSTest {
             while ((q + i) < m.length() && m.charAt(i + q) >= '0' && m.charAt(i + q) <= '9') {
                 q++;
             }
-            m = m.substring(0, i) + m.substring(i + q);
+            if (q != 0) {
+                m = m.substring(0, i) + m.substring(i + q);
+            }
         }
         if (m == null || (reference_implementation && !m.equals(compare_message))) {
-            fail("Exception: " + m);
+            fail("Check: " + m + "\n" + compare_message);
         }
         if (sks_error_code != null) {
             assertTrue("Error code: " + sks_error_code.intValue() + " found " + e.getError(),
@@ -220,7 +222,7 @@ public class SKSTest {
         try {
             ProvSess sess = new ProvSess(device, 0);
             sess.createKey("Key.1",
-                    KeyAlgorithms.RSA1024,
+                    KeyAlgorithms.RSA2048,
                     null /* pin_value */,
                     null,
                     AppUsage.AUTHENTICATION,
@@ -1083,8 +1085,8 @@ public class SKSTest {
         verify.update(TEST_STRING);
         assertTrue("Bad signature", verify.verify(result));
 
-        result = key.signData(AsymSignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
-        verify = new SignatureWrapper(AsymSignatureAlgorithms.RSA_SHA1, key.getPublicKey());
+        result = key.signData(AsymSignatureAlgorithms.RSA_SHA512, null, TEST_STRING);
+        verify = new SignatureWrapper(AsymSignatureAlgorithms.RSA_SHA512, key.getPublicKey());
         verify.update(TEST_STRING);
         assertTrue("Bad signature", verify.verify(result));
     }
@@ -1852,7 +1854,7 @@ public class SKSTest {
                     good_pin /* pin_value */,
                     pinPolicy,
                     keyUsage,
-                    new String[]{MACAlgorithms.HMAC_SHA1.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
+                    new String[]{MACAlgorithms.HMAC_SHA256.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
             key.setSymmetricKey(symmetricKey);
             sess.closeSession();
             assertTrue("IMPORTED must be set", key.getKeyProtectionInfo().getKeyBackup() == KeyProtectionInfo.KEYBACKUP_IMPORTED);
@@ -1877,15 +1879,15 @@ public class SKSTest {
                 good_pin /* pin_value */,
                 pinPolicy,
                 AppUsage.AUTHENTICATION,
-                new String[]{MACAlgorithms.HMAC_SHA1.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
+                new String[]{MACAlgorithms.HMAC_SHA256.getAlgorithmId(AlgorithmPreferences.SKS)}).setCertificate(cn());
         key.setSymmetricKey(symmetricKey);
         sess.closeSession();
         assertTrue("Not symmetric key", device.sks.getKeyAttributes(key.keyHandle).isSymmetricKey());
-        byte[] result = key.performHMAC(MACAlgorithms.HMAC_SHA1, good_pin, TEST_STRING);
-        assertTrue("HMAC error", ArrayUtil.compare(result, MACAlgorithms.HMAC_SHA1.digest(symmetricKey, TEST_STRING)));
+        byte[] result = key.performHMAC(MACAlgorithms.HMAC_SHA256, good_pin, TEST_STRING);
+        assertTrue("HMAC error", ArrayUtil.compare(result, MACAlgorithms.HMAC_SHA256.digest(symmetricKey, TEST_STRING)));
         try {
             sess.sks.performHmac(key.keyHandle,
-                    MACAlgorithms.HMAC_SHA256.getAlgorithmId(AlgorithmPreferences.SKS),
+                    MACAlgorithms.HMAC_SHA512.getAlgorithmId(AlgorithmPreferences.SKS),
                     null,
                     good_pin.getBytes("UTF-8"),
                     TEST_STRING);
@@ -2434,14 +2436,14 @@ public class SKSTest {
 
     @Test
     public void test57() throws Exception {
-        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS),
-                        AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS)},
-                AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS));
-        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS),
-                        AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS)},
-                AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS));
-        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA1.getAlgorithmId(AlgorithmPreferences.SKS),
+        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA512.getAlgorithmId(AlgorithmPreferences.SKS),
+                        AsymSignatureAlgorithms.RSA_SHA512.getAlgorithmId(AlgorithmPreferences.SKS)},
+                AsymSignatureAlgorithms.RSA_SHA512.getAlgorithmId(AlgorithmPreferences.SKS));
+        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA512.getAlgorithmId(AlgorithmPreferences.SKS),
                         AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS)},
+                AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS));
+        algOrder(new String[]{AsymSignatureAlgorithms.RSA_SHA256.getAlgorithmId(AlgorithmPreferences.SKS),
+                        AsymSignatureAlgorithms.RSA_SHA512.getAlgorithmId(AlgorithmPreferences.SKS)},
                 null);
     }
 
@@ -2735,7 +2737,7 @@ public class SKSTest {
 
     @Test
     public void test67() throws Exception {
-        ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.NIST_P_192;
+        ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.NIST_B_233;
         try {
             new ProvSess(device);
             fail("Bad server key");
@@ -3084,10 +3086,16 @@ public class SKSTest {
 
         for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values()) {
             GenKey tk = alg.isRsa() ? rsa : ec;
-            byte[] result = tk.signData(alg, null, TEST_STRING);
-            SignatureWrapper verify = new SignatureWrapper(alg, tk.getPublicKey());
-            verify.update(TEST_STRING);
-            assertTrue("Bad signature " + alg.getAlgorithmId(AlgorithmPreferences.SKS), verify.verify(result));
+            try {
+                byte[] result = tk.signData(alg, null, TEST_STRING);
+                SignatureWrapper verify = new SignatureWrapper(alg, tk.getPublicKey());
+                verify.update(TEST_STRING);
+                assertTrue("Bad signature " + alg.getAlgorithmId(AlgorithmPreferences.SKS), verify.verify(result));
+            } catch (SKSException e) {
+                assertTrue("SKS missing: " + alg.getAlgorithmId(AlgorithmPreferences.SKS), 
+                           !alg.isMandatorySksAlgorithm());
+                checkException(e, "Unsupported algorithm: " + alg.getAlgorithmId(AlgorithmPreferences.SKS));
+            }
         }
     }
 
