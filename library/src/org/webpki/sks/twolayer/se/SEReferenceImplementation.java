@@ -325,11 +325,11 @@ public class SEReferenceImplementation {
                      ALG_ASYM_ENC | ALG_RSA_KEY);
 
         addAlgorithm("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
-                     "RSA/ECB/OAEPWithSHA1AndMGF1Padding",
+                     "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
                      ALG_ASYM_ENC | ALG_RSA_KEY);
 
         addAlgorithm("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
-                     "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
+                     "RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
                      ALG_ASYM_ENC | ALG_RSA_KEY);
 
         addAlgorithm("http://xmlns.webpki.org/sks/algorithm#rsa.raw",

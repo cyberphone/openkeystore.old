@@ -94,8 +94,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         return formatCode(asymKey.json);
     }
 
-    static Column preAmble(String qualifier) throws IOException {
-        return json.addProtocolTable (qualifier)
+    static Column preAmble(String qualifier, boolean subItem) throws IOException {
+        return (subItem ? json.addSubItemTable(qualifier) : json.addProtocolTable(qualifier))
             .newRow()
                 .newColumn()
                     .addProperty(JSONSignatureDecoder.VERSION_JSON)
@@ -232,10 +232,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .append(json.createReference(JSONBaseHTML.REF_JWA))
           .append(". Public keys are represented as JWK ")
           .append(json.createReference(JSONBaseHTML.REF_JWK))
-          .append(" objects while the encryption container itself utilizes JCS ")
+          .append(" objects while the encryption container itself utilizes a notation similar to JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
-          .append(" notation in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures, " +
-                  "including header information in <i>clear text</i>."
+          .append(" in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures, " +
+                  "<i>including providing header information in clear</i>."
                   + LINE_SEPARATOR +
                   "The JEF encryption scheme is fully compatible with the ES6 ")
           .append(json.createReference(JSONBaseHTML.REF_ES6))
@@ -253,11 +253,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addDataTypesDescription("JEF containers always start with a top-level JSON object. " + LINE_SEPARATOR);
 
         json.addProtocolTableEntry("JEF Objects")
-          .append("The following tables describe the JEF JSON structures in detail." +
-                   " Note that <a href=\"#" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + "\">" + 
-                   JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + "</a>" +
-                   " can be used as a stand-alone object as well as a part of an <a href=\"#" + 
-                   ENCRYPTED_DATA + "\">" + ENCRYPTED_DATA + "</a> object.");
+          .append("The following tables describe the JEF JSON structures in detail.");
         
         json.addParagraphObject("Operation").append(
                 "Prerequisite: A JSON object in accordance with ")
@@ -301,33 +297,37 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             " can be decrypted by the <i>private</i> part of the following EC key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
            formatCode(p256key) +
-           "Alternative ECDH encryption object <i>requiring the same private key</i> " +
-           "as in the previous example while providing the public key information in line, " +
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while using a different set of " +
+           "algorithms both for key encryption and content encryption:" +
+           readAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") +
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while providing the public key information in line, " +
            "instead of using a <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
-           readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") +
-           "Alternative ECDH encryption object <i>requiring the same private key</i> " +
-           "as in the previous example while using a different set of " +
-           "algorithms both for key derivation and content encryption:" +
-           readAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") + LINE_SEPARATOR +
-           "Private key for decrypting the subsequent object:" +
+           readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") + LINE_SEPARATOR +
+           "EC private key for decrypting the subsequent object:" +
            formatCode(p384key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("p384ecdh-es.encrypted.json") + LINE_SEPARATOR +
-           "Private key for decrypting the subsequent object:" +
+           "EC private key for decrypting the subsequent object:" +
            formatCode(p521key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("p521ecdh-es+a128kw.encrypted.json") + LINE_SEPARATOR +
-           "Private key for decrypting the subsequent object:" +
+           "RSA private key for decrypting the subsequent object:" +
            formatCode(r2048key) +
            "RSA encryption object <i>requiring the private key above</i>:" +
            readAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
-           "Alternative RSA encryption object <i>requiring the same private key</i> " +
+           "RSA encryption object <i>requiring the same private key</i> " +
            "as in the previous example but relying on that this being " +
            "<i>implicitely known</i> since the encryption object " +
-           "does neither contains a <code>" +
+           "neither contains a <code>" +
            JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" +
            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
            readAsymEncryption("r2048rsa-oaep-256.implicitkey.json", r2048key) +
+           "RSA encryption object <i>requiring the same private key</i> " +
+           "as in the previous example while using a different set of " +
+           "algorithms both for key encryption and content encryption:" +
+           readAsymEncryption("r2048rsa-oaep.implicitkey.json", r2048key) +
            aesCrypto(new String[]{"a128gcm.encrypted.json",
                                   "a128cbc-hs256.encrypted.json",
                                   "a256gcm.implicitkey.json",
@@ -339,14 +339,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2016-08-03", "0.3", "Initial publication in HTML5");
         json.addDocumentHistoryLine("2017-04-19", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
         json.addDocumentHistoryLine("2017-04-25", "0.5", "Added KW and GCM algorithms");
+        json.addDocumentHistoryLine("2017-05-15", "0.51", "Added test vectors and missing RSA-OAEP algorithm");
 
         json.addParagraphObject("Author").append("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore " +
                                                  json.createReference(JSONBaseHTML.REF_OPENKEYSTORE) + " project .");
 
-    preAmble(ENCRYPTED_DATA)
-        .addString("Data encryption algorithm. Currently the following JWA " +
-            json.createReference(JSONBaseHTML.REF_JWA) +
+    preAmble(ENCRYPTED_DATA, false)
+        .addString("Data encryption algorithm. Currently the following JWE " +
+            json.createReference(JSONBaseHTML.REF_JWE) +
             " algorithms are recognized:<ul>")
         .newExtensionRow(new Extender() {
             @Override
@@ -413,9 +414,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                       "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
                       "</code> are defined, the (symmetric) encryption key is assumed to known by the recipient.");
           
-        preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
-            .addString("Key encryption algorithm. Currently the following JWA " +
-                                json.createReference (JSONBaseHTML.REF_JWA) +
+        preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, true)
+            .addString("Key encryption algorithm. Currently the following JWE " +
+                                json.createReference (JSONBaseHTML.REF_JWE) +
                                 " algorithms are recognized:<ul>")
             .newExtensionRow(new Extender() {
                 @Override
@@ -548,88 +549,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
                 "</code> are defined, the RSA key pair to use is assumed to known by the recipient.");
 
-        json.addSubItemTable (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-        .newRow()
-          .newColumn()
-            .addProperty(JSONSignatureDecoder.KTY_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
-          .newColumn()
-            .setType(Types.WEBPKI_DATA_TYPES.STRING)
-          .newColumn()
-          .newColumn()
-            .addString("Key type indicator.  Currently the following types are recognized:<ul>" +
-                    "<li>" + JSONBaseHTML.codeVer(JSONSignatureDecoder.EC_PUBLIC_KEY, 6) + "See: ")
-                    .addLink (JCS_PUBLIC_KEY_EC)
-            .addString("</li><li>" + 
-                     JSONBaseHTML.codeVer(JSONSignatureDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
-            .addLink (JCS_PUBLIC_KEY_RSA)
-            .addString("</li></ul>");
-
-    json.addSubItemTable (JCS_PUBLIC_KEY_EC)
-       .newRow()
-          .newColumn()
-            .addProperty(JSONSignatureDecoder.CRV_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
-          .newColumn()
-            .setType(Types.WEBPKI_DATA_TYPES.STRING)
-          .newColumn()
-          .newColumn()
-            .addString("EC curve ID. The currently recognized EC curves include:")
-            .addString(enumerateJoseEcCurves ())
-      .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.X_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.X_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
-        .newColumn()
-        .newColumn()
-          .addString("EC curve point X." +
-                  " The length of this field <b>must</b> " +
-                  "be the full size of a coordinate for the curve specified in the <code>" + 
-                  JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                  "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
-                  KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
-                  "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.")
-      .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.Y_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.Y_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
-        .newColumn()
-        .newColumn()
-          .addString("EC curve point Y." +
-                  " The length of this field <b>must</b> " +
-                  "be the full size of a coordinate for the curve specified in the <code>" + 
-                  JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                  "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
-                  KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
-                  "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.");
-
-    json.addSubItemTable (JCS_PUBLIC_KEY_RSA)
-      .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.N_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.N_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
-        .newColumn()
-        .newColumn()
-          .addString("RSA modulus. Also see the ")
-          .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-          .addString(" data type.")
-      .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.E_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.E_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
-        .newColumn()
-        .newColumn()
-          .addString("RSA exponent. Also see the ")
-          .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-          .addString(" data type.");
+        json.AddPublicKeyDefinitions();
 
         json.writeHTML();
       }

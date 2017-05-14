@@ -1,0 +1,10 @@
+{
+  "algorithm": "A128GCM",
+  "keyEncryption": {
+    "algorithm": "RSA-OAEP",
+    "encryptedKey": "W8U7Y6t7Je7UlOmRqi84y49UBtX8NQfGBBsedj_LH0capiyDAt8U9yuBij8yLoRjbwHdiBDPEDtfrfWY19uj2G4_XEBcRRCfrtiizKrsgCdlC5FQel8byEkPMEOgSsZpeVwzzjyd7SCAZG9aUdcbX8iG3wyg7mBhUpgJXC8HBeOeLSdl0Fq6l3SdDxdZ7JYpXLvZY2af1C-8PbHzBMGHyxI2ncUoGerysgGflZ5l1i7vuPpsAtbSN7wv-jmQRNawJ___HRnpeAUB2PV_B0C9XNQFIe9J3FRuQ5fSTqfn_W5uYzkA0AVlr4MQoIwGl2uJPBTDSCljmlVMFYWvsPTvUQ"
+  },
+  "iv": "vDvjPmGYAjv2-jB5",
+  "tag": "_LnV0CZ7ehDtbqurupxZHA",
+  "cipherText": "ykDyiibT8OXW-13HtDvcxmdqajkoLQ"
+}

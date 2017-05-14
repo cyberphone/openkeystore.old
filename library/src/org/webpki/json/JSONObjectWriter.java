@@ -755,6 +755,7 @@ import org.webpki.json.JSONSignatureDecoder;
         setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, symmetricEncryptionResult.getCipherText());
         return this;
     }
+
     /**
      * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * public key encrypted object.
@@ -773,9 +774,9 @@ import org.webpki.json.JSONSignatureDecoder;
                                                           String optionalKeyId,
                                                           KeyEncryptionAlgorithms keyEncryptionAlgorithm)
             throws IOException, GeneralSecurityException {
-        JSONObjectWriter keyEncryption = new JSONObjectWriter()
-                .setString(JSONSignatureDecoder.ALGORITHM_JSON, keyEncryptionAlgorithm.toString());
-        byte[] dataEncryptionKey = null;
+        JSONObjectWriter keyEncryption =
+                new JSONObjectWriter().setString(JSONSignatureDecoder.ALGORITHM_JSON,
+                                                 keyEncryptionAlgorithm.toString());
         if (optionalKeyId == null) {
             keyEncryption.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
         } else if (optionalKeyId.length() > 0){
@@ -783,27 +784,26 @@ import org.webpki.json.JSONSignatureDecoder;
         }
         AsymmetricEncryptionResult asymmetricEncryptionResult =
             keyEncryptionAlgorithm.isRsa() ?
-                    EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
-                                                 dataEncryptionAlgorithm,
-                                                 keyEncryptionKey)
-                                            :
-                    EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
-                                                      dataEncryptionAlgorithm,
-                                                      keyEncryptionKey);
-        dataEncryptionKey = asymmetricEncryptionResult.getDataEncryptionKey();
+                EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
+                                             dataEncryptionAlgorithm,
+                                             keyEncryptionKey)
+                                           :
+                EncryptionCore.senderKeyAgreement(keyEncryptionAlgorithm,
+                                                  dataEncryptionAlgorithm,
+                                                  keyEncryptionKey);
         if (!keyEncryptionAlgorithm.isRsa()) {
             keyEncryption.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
-                                   createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
+                                    createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
                                                        AlgorithmPreferences.JOSE));
         }
         if (keyEncryptionAlgorithm.isKeyWrap()) {
             keyEncryption.setBinary(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON,
-                                   asymmetricEncryptionResult.getEncryptedKeyData());
+                                    asymmetricEncryptionResult.getEncryptedKeyData());
         }
         return new JSONObjectWriter().encryptData(unencryptedData,
                                                   dataEncryptionAlgorithm,
                                                   null,
-                                                  dataEncryptionKey,
+                                                  asymmetricEncryptionResult.getDataEncryptionKey(),
                                                   keyEncryption);
     }
 
@@ -812,7 +812,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * symmetric key encrypted object.
      * @param unencryptedData Data to be encrypted
      * @param dataEncryptionAlgorithm Data encryption algorithm
-     * @param keyId Optional key id
+     * @param optionalKeyId Optional key id
      * @param dataEncryptionKey Symmetric key
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
@@ -820,10 +820,13 @@ import org.webpki.json.JSONSignatureDecoder;
      */
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                          String keyId,
+                                                          String optionalKeyId,
                                                           byte[] dataEncryptionKey)
             throws IOException, GeneralSecurityException {
-        return new JSONObjectWriter().encryptData(unencryptedData, dataEncryptionAlgorithm, keyId, dataEncryptionKey, null);
+        return new JSONObjectWriter().encryptData(unencryptedData,
+                                                  dataEncryptionAlgorithm,
+                                                  optionalKeyId,
+                                                  dataEncryptionKey, null);
     }
 
     void newLine() {

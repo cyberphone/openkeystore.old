@@ -770,13 +770,7 @@ public class SKSTest {
                 pinPolicy /* pinPolicy */,
                 AppUsage.ENCRYPTION).setCertificate(cn());
         sess.closeSession();
-        Cipher cipher = null;
-        try {
-            cipher = Cipher.getInstance(encryption_algorithm.getJceName());
-        } catch (Exception e) {
-            assertFalse(bc_loaded || encryption_algorithm != AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P);
-            return;
-        }
+        Cipher cipher = Cipher.getInstance(encryption_algorithm.getJceName());
         cipher.init(Cipher.ENCRYPT_MODE, key.getPublicKey());
         byte[] enc = cipher.doFinal(TEST_STRING);
         assertTrue("Encryption error" + encryption_algorithm,

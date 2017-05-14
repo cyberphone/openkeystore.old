@@ -69,9 +69,6 @@ public final class EncryptionCore {
     static final String CONCAT_KDF_DIGEST_JCENAME = "SHA-256";
     static final int    CONCAT_KDF_DIGEST_LENGTH  = 32;
     
-    // RSA OAEP 256 static
-    static final String RSA_OAEP_256_JCENAME      = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
-    
     private static String aesProviderName;
 
     /**
@@ -157,9 +154,9 @@ public final class EncryptionCore {
             throw new GeneralSecurityException("Unsupported RSA algorithm: " + keyEncryptionAlgorithm);
         }
         Cipher cipher = rsaProviderName == null ?
-            Cipher.getInstance(RSA_OAEP_256_JCENAME)
+            Cipher.getInstance(keyEncryptionAlgorithm.jceName)
                                                 :
-            Cipher.getInstance(RSA_OAEP_256_JCENAME, rsaProviderName);
+            Cipher.getInstance(keyEncryptionAlgorithm.jceName, rsaProviderName);
         cipher.init(mode, key);
         return cipher.doFinal(data);
     }
@@ -297,7 +294,9 @@ public final class EncryptionCore {
                                            PrivateKey privateKey) throws GeneralSecurityException, IOException {
         // Begin by calculating Z (do the DH)
         KeyAgreement keyAgreement = ecProviderName == null ?
-                KeyAgreement.getInstance("ECDH") : KeyAgreement.getInstance("ECDH", ecProviderName);
+                KeyAgreement.getInstance(keyEncryptionAlgorithm.jceName)
+                                                           :
+                KeyAgreement.getInstance(keyEncryptionAlgorithm.jceName, ecProviderName);
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(receivedPublicKey, true);
         byte[] Z = keyAgreement.generateSecret();

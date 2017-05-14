@@ -269,7 +269,7 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.60, April&nbsp;2017.</span> " +
+            "<span style=\"white-space: nowrap\">V0.61, May&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
 
         addReferenceEntry(REF_YASMIN,
@@ -279,7 +279,7 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JEF,
             "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.4, April&nbsp;2017.</span> " +
+            "<span style=\"white-space: nowrap\">V0.51, May&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/jef.html"));
 
         addReferenceEntry(REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
@@ -1281,9 +1281,9 @@ public class JSONBaseHTML  {
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
           .newColumn()
-            .addString("EC curve ID. The currently recognized EC curves include:")
+            .addString("EC curve name. The currently recognized EC curves include:")
             .addString(enumerateJOSEAlgorithms(KeyAlgorithms.values()))
-            .addString("Note: If <i>proprietary</i> curve IDs are added, they <b>must</b> be expressed as URIs.")
+            .addString("Note: If <i>proprietary</i> curve names are added, they <b>must</b> be expressed as URIs.")
       .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.X_JSON)
@@ -1360,11 +1360,15 @@ public class JSONBaseHTML  {
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
             .newColumn()
-              .addString("Signature algorithm ID. The currently recognized asymmetric key algorithms include:")
+              .addString("Signature algorithm. The currently recognized JWS ")
+              .addString(createReference(REF_JWS))
+              .addString(" asymmetric key algorithms include:")
               .addString(enumerateJOSEAlgorithms(AsymSignatureAlgorithms.values()))
-              .addString("The currently recognized symmetric key algorithms include:")
+              .addString("The currently recognized JWS ")
+              .addString(createReference(REF_JWS))
+              .addString(" symmetric key algorithms include:")
               .addString(enumerateJOSEAlgorithms(MACAlgorithms.values()))
-              .addString("Note: If <i>proprietary</i> algorithm IDs are added, they <b>must</b> be expressed as URIs.")
+              .addString("Note: If <i>proprietary</i> signature algorithms are added, they <b>must</b> be expressed as URIs.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
