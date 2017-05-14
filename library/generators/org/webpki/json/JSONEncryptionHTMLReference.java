@@ -235,7 +235,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .append(" objects while the encryption container itself utilizes a notation similar to JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
           .append(" in order to maintain a consistent &quot;style&quot; in applications using encryption and signatures, " +
-                  "<i>including providing header information in clear</i>."
+                  "<i>including providing header information in plain text</i>."
                   + LINE_SEPARATOR +
                   "The JEF encryption scheme is fully compatible with the ES6 ")
           .append(json.createReference(JSONBaseHTML.REF_ES6))
@@ -319,7 +319,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            readAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
            "RSA encryption object <i>requiring the same private key</i> " +
            "as in the previous example but relying on that this being " +
-           "<i>implicitely known</i> since the encryption object " +
+           "<i>implicitly known</i> since the encryption object " +
            "neither contains a <code>" +
            JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" +
            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +

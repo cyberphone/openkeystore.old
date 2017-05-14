@@ -174,8 +174,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "due to the lack of a standardized normalization method for JSON data. " +
             "However, version 6 of ECMAScript ")
            .append(json.createReference(JSONBaseHTML.REF_ES6))
-           .append(" introduced a <i>predictable serialization</i> scheme which enables both <i>data</i> " +
-            "and <i>header information</i> to be featured as clear text." + Types.LINE_SEPARATOR +
+           .append(" introduced a <i>predictable serialization</i> scheme which enables both <i>data " +
+            "and header information to be provided in plain text</i>." + Types.LINE_SEPARATOR +
             "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
           .append(json.createReference(JSONBaseHTML.REF_JWS))
           .append(", JCS supports the same algorithms ")
@@ -213,7 +213,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 "}" +
 "</code></div>" +
 "The sample signature's payload consists of the properties above <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
-"Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
+"Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample." + LINE_SEPARATOR +
+"For more examples see <a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
+               "\"><span style=\"white-space:nowrap\">" +
+               TEST_VECTORS + "</span></a>.");
 
         json.addParagraphObject("Signature Scope").append(
             "The scope of a signature (what is actually signed) comprises all " +
@@ -284,6 +287,56 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
           .append("The following tables describe the JCS JSON structures in detail.");
         
         json.setAppendixMode();
+
+        readAsymSignature("p256keysigned.json", p256key, true, false);
+        
+        json.addParagraphObject(TEST_VECTORS).append(
+       "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
+       "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
+       " can be verified by the <i>public part</i> of the following EC key in JWK " + 
+       json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
+       formatCode(p256key) + LINE_SEPARATOR +
+       "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+       "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
+        readAsymSignature("p256implicitkeysigned.json", p256key, false, true) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
+        "EC key for verifying the subsequent object:" +
+        formatCode(p384key) +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        readAsymSignature("p384keysigned.json", p384key, true, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
+        "EC key for verifying the subsequent object:" +
+        formatCode(p521key) +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        readAsymSignature("p521keysigned.json", p521key, true, false) +
+        "The following signature object uses the same key as in the previous example but builds on that " +
+        "the key to use is <i>implicitly known</i> since the object neither contains a <code>" +
+        JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" + 
+        JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
+        readAsymSignature("p521implicitkeysigned.json", p521key, false, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
+        "RSA key for verifying the subsequent object:" +
+        formatCode(r2048key) +
+        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        readAsymSignature("r2048keysigned.json", r2048key, true, false) +
+        "The following signature object uses the same key as in the previous example but featured in " +
+        "a certificate path:" +
+        readCertSignature("r2048certsigned.json") +
+        readSymSignature(new String[]{"hs256signed.json",
+                                      "hs384signed.json",
+                                      "hs512signed.json"}) + LINE_SEPARATOR +
+        "The certificate based signatures share a common root (here supplied in PEM ")
+        .append(json.createReference(JSONBaseHTML.REF_PEM))
+        .append(" format), which can be used for path validation:" +
+        formatCode(new String(json.readFile1("rootca.pem"), "UTF-8")
+                          .replace("END CERTIFICATE-----\n", 
+                                   "END CERTIFICATE-----")).replace(" 10pt ", " 0pt "));
 
         json.addParagraphObject(ECMASCRIPT_MODE).append("ECMAScript mode in this context refers to " +
            "the ability to sign JavaScript objects as well as using the standard JSON support for parsing and " +
@@ -457,54 +510,6 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\"># Restore JSON object" + 
          "</span></code></div><div style=\"padding:5pt 0pt 0pt 200pt\"><i>... Signature Validation Code ...</i></div>");   
 
-        readAsymSignature("p256keysigned.json", p256key, true, false);
-        
-        json.addParagraphObject(TEST_VECTORS).append(
-       "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
-       "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
-       " can be verified by the <i>public part</i> of the following EC key in JWK " + 
-       json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-       formatCode(p256key) + LINE_SEPARATOR +
-       "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-       "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
-        readAsymSignature("p256implicitkeysigned.json", p256key, false, true) +
-        "The following signature object uses the same key as in the previous example but featured in " +
-        "a certificate path:" +
-        readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying the subsequent object:" +
-        formatCode(p384key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("p384keysigned.json", p384key, true, false) +
-        "The following signature object uses the same key as in the previous example but featured in " +
-        "a certificate path:" +
-        readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying the subsequent object:" +
-        formatCode(p521key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("p521keysigned.json", p521key, true, false) +
-        "The following signature object uses the same key as in the previous example but builds on that " +
-        "the key to use is <i>implicitely known</i> since the object neither contains a <code>" +
-        JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" + 
-        JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
-        readAsymSignature("p521implicitkeysigned.json", p521key, false, false) +
-        "The following signature object uses the same key as in the previous example but featured in " +
-        "a certificate path:" +
-        readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
-        "RSA key for verifying the subsequent object:" +
-        formatCode(r2048key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("r2048keysigned.json", r2048key, true, false) +
-        "The following signature object uses the same key as in the previous example but featured in " +
-        "a certificate path:" +
-        readCertSignature("r2048certsigned.json") +
-        readSymSignature(new String[]{"hs256signed.json",
-                                      "hs384signed.json",
-                                      "hs512signed.json"}) + LINE_SEPARATOR +
-        "The certificate based signatures share a common root (here supplied in PEM ")
-        .append(json.createReference(JSONBaseHTML.REF_PEM))
-        .append(" format), which can be used for path validation:" +
-        formatCode(new String(json.readFile1("rootca.pem"), "UTF-8")));
-        
         json.addParagraphObject("Acknowledgements").append("During the initial phases of the design process, highly appreciated " +
        "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, " +
        "Jeffrey&nbsp;Walton, David&nbsp;Chadwick, Jim&nbsp;Schaad, Mike&nbsp;Jones, David&nbsp;Waite, " +
@@ -530,6 +535,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
         json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
+        json.addDocumentHistoryLine("2017-05-15", "0.61", "Added test vectors");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
