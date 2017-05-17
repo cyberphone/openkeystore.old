@@ -246,7 +246,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
             "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type <b>must</b> <i>already before validation</i> be "+
+            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type <b>must</b> <i>already during signature creation</i> be "+
             "serialized according to ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
             " including the V8 " +
