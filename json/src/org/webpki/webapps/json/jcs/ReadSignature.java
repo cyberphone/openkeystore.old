@@ -30,6 +30,7 @@ import java.security.spec.ECPoint;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONSignatureDecoder;
@@ -81,8 +82,16 @@ public class ReadSignature {
             switch (rd.getPropertyType(property)) {
             case OBJECT:
                 if (property.equals(JSONSignatureDecoder.SIGNATURE_JSON)) {
-                    JSONSignatureDecoder signature = rd.getSignature(new JSONSignatureDecoder.Options()
-                        .setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER));
+                    JSONSignatureDecoder.Options options = new JSONSignatureDecoder.Options();
+                    options.setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                    String algo = rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).getString(JSONSignatureDecoder.ALGORITHM_JSON);
+                    for (MACAlgorithms macs : MACAlgorithms.values()) {
+                        if (algo.equals(macs.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER))) {
+                            options.setRequirePublicKeyInfo(false)
+                                   .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED);
+                        }
+                    }
+                    JSONSignatureDecoder signature = rd.getSignature(options);
                     switch (signature.getSignatureType()) {
                     case ASYMMETRIC_KEY:
                         PublicKey publicKey = signature.getPublicKey();
@@ -123,8 +132,7 @@ public class ReadSignature {
 
                     case SYMMETRIC_KEY:
                         signature.verify(new JSONSymKeyVerifier(
-                                new GenerateSignature.SymmetricOperations())
-                                .permitKeyId(true));
+                                new GenerateSignature.SymmetricOperations()));
                         debugOutput("Symmetric key signature validated for Key ID: "
                                 + signature.getKeyId()
                                 + "\nValue="

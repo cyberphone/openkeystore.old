@@ -33,18 +33,4 @@ public abstract class JSONVerifier implements Serializable {
     abstract void verify(JSONSignatureDecoder signatureDecoder) throws IOException;
 
     JSONSignatureTypes signatureType;
-
-    boolean extensionsAllowed;
-
-    boolean keyIdAllowed;
-
-    public JSONVerifier permitExtensions(boolean flag) {
-        extensionsAllowed = flag;
-        return this;
-    }
-
-    public JSONVerifier permitKeyId(boolean flag) {
-        keyIdAllowed = flag;
-        return this;
-    }
 }

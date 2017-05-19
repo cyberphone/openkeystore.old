@@ -1434,13 +1434,13 @@ public class JSONBaseHTML  {
               .newRow()
                 .newColumn()
                   .addProperty(JSONSignatureDecoder.EXTENSIONS_JSON)
-                  .addArrayLink (JSONSignatureDecoder.EXTENSIONS_JSON, 1)
+                  .addLink (JSONSignatureDecoder.EXTENSIONS_JSON)
                 .newColumn()
                   .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
                 .newColumn()
                   .setUsage (false)
                 .newColumn()
-                  .addString("<i>Optional.</i> Array holding custom extension objects like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
+                  .addString("<i>Optional.</i> Object holding custom data like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
                               "A conforming implementation <b>must</b> reject extensions that are not recognized.")
           .newRow()
             .newColumn()
@@ -1496,25 +1496,28 @@ public class JSONBaseHTML  {
               .addString(" notation.");
 
             addSubItemTable(JSONSignatureDecoder.EXTENSIONS_JSON)
-              .newRow()
-                .newColumn()
-                  .addProperty(JSONSignatureDecoder.TYPE_JSON)
-                  .addSymbolicValue(JSONSignatureDecoder.TYPE_JSON)
-                .newColumn()
-                  .setType(Types.WEBPKI_DATA_TYPES.URI)
-                .newColumn()
-                .newColumn()
-                  .addString("Mandatory unique extension type.")
-              .newRow()
+             .newRow()
                 .newColumn()
                   .addProperty("...")
                   .addUnquotedValue("<code>...</code>")
                 .newColumn()
                   .setType(Types.WEBPKI_DATA_TYPES.ANY)
                 .newColumn()
-                  .setUsage (false)
                 .newColumn()
-                  .addString("Extension-specfic properties.");
+                  .addString("One or more application specfic extension properties expressed as <i>URI</i>: <i>Arbitrary JSON data</i>.")
+                  .setNotes("Examples:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
+                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
+                  "&nbsp;&nbsp;&quot;https://standards.org/pki/jcs/ocspResponse&quot;: " +
+                   "&quot;DgYDVR0PAQH_BAQDAgEGMB0GA1UdDgQWBBQT...VZI1YQdQFC63ncCTQ3iTAfBgNVHSMEGDAWg&quot;<br>" +
+                  "}<br><br>" +
+                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
+                  "&nbsp;&nbsp;&quot;https://example.com/ext&quot;: &quot;foobar&quot;,<br>" +
+                  "&nbsp;&nbsp;&quot;https://example.com/otherExt&quot;: {<br>" +
+                  "&nbsp;&nbsp;&nbsp;&nbsp;&quot;name&quot;: &quot;johndoe&quot;,<br>" +
+                  "&nbsp;&nbsp;&nbsp;&nbsp;&quot;role&quot;: &quot;client&quot;<br>" +
+                  "&nbsp;&nbsp;}<br>" +
+                  "}" +
+                  "</code></div>");
     }
 
     public void addTOC() {

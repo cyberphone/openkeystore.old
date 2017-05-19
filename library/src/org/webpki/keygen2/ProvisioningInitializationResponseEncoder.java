@@ -26,6 +26,7 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
@@ -106,7 +107,8 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON).setPublicKey(clientEphemeralKey);
+        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON).setPublicKey(clientEphemeralKey,
+                                                             AlgorithmPreferences.JOSE_ACCEPT_PREFER);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional device certificate path

@@ -34,6 +34,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
 
@@ -136,7 +137,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
             JSONArrayWriter kmkuArr = wr.setArray(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
             for (KeyManagementKeyUpdateHolder child : kmk.children) {
                 JSONObjectWriter kmkuObject = kmkuArr.setObject();
-                kmkuObject.setPublicKey(child.keyManagementKey);
+                kmkuObject.setPublicKey(child.keyManagementKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
                 kmkuObject.setBinary(AUTHORIZATION_JSON, child.authorization);
                 scanForUpdatedKeys(kmkuObject, child);
             }
@@ -201,14 +202,15 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.setObject(SERVER_EPHEMERAL_KEY_JSON).setPublicKey(serverEphemeralKey);
+        wr.setObject(SERVER_EPHEMERAL_KEY_JSON).setPublicKey(serverEphemeralKey, 
+                                                             AlgorithmPreferences.JOSE_ACCEPT_PREFER);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional key management key
         ////////////////////////////////////////////////////////////////////////
         if (kmkRoot != null) {
             JSONObjectWriter kmkWriter = wr.setObject(KEY_MANAGEMENT_KEY_JSON);
-            kmkWriter.setPublicKey(kmkRoot.keyManagementKey);
+            kmkWriter.setPublicKey(kmkRoot.keyManagementKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             scanForUpdatedKeys(kmkWriter, kmkRoot);
         }
 

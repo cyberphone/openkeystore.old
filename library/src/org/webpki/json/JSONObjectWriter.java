@@ -59,7 +59,7 @@ import org.webpki.util.ISODateTime;
  <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS (JSON Cleartext Signature)</b></a>, 
 <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF (JSON Encryption Format)</b></a>
 and
-<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>
+<a href="https://tools.ietf.org/html/rfc7517" target="_blank"><b>JWK</b></a>
  objects.</p>
  */
 public class JSONObjectWriter implements Serializable {
@@ -558,12 +558,7 @@ public class JSONObjectWriter implements Serializable {
             signer.writeKeyData(signatureWriter);
         }
         if (signer.extensions != null) {
-            Vector<JSONValue> array = new Vector<JSONValue>();
-            for (JSONObjectWriter jor : signer.extensions) {
-                array.add(new JSONValue(JSONTypes.OBJECT, jor.root));
-            }
-            signatureWriter.setProperty(JSONSignatureDecoder.EXTENSIONS_JSON, 
-                                        new JSONValue(JSONTypes.ARRAY, array));
+            signatureWriter.setObject(JSONSignatureDecoder.EXTENSIONS_JSON, signer.extensions); 
         }
         signatureWriter.setBinary(JSONSignatureDecoder.VALUE_JSON,
                                   signer.signData(signer.normalizedData = 
@@ -672,7 +667,7 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Create a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) formatted public key.<p>
+     * (<a href="https://tools.ietf.org/html/rfc7517" target="_blank"><b>JWK</b></a>) formatted public key.<p>
      * Typical use:
      *<pre>
     setObject("myPublicKey", JSONObjectWriter.setCorePublicKey(myPublicKey, AlgorithmPreferences.JOSE);
@@ -710,7 +705,7 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) formatted public key.<p>
+     * (<a href="https://tools.ietf.org/html/rfc7517" target="_blank"><b>JWK</b></a>) formatted public key.<p>
      * Resulting JSON:
      * <pre>
     "publicKey": {
@@ -730,7 +725,7 @@ import org.webpki.json.JSONSignatureDecoder;
 
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank">JCS</a>
-     * (<a href="https://tools.ietf.org/rfc/rfc7517.txt" target="_blank"><b>JWK</b></a>) formatted public key.<p>
+     * (<a href="https://tools.ietf.org/html/rfc7517" target="_blank"><b>JWK</b></a>) formatted public key.<p>
      * This method is equivalent to {@link #setPublicKey(PublicKey, AlgorithmPreferences)}
      * using {@link AlgorithmPreferences#JOSE} as second argument.</p>
      * @param publicKey Public key value

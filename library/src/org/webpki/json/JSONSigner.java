@@ -29,7 +29,7 @@ public abstract class JSONSigner implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    JSONObjectWriter[] extensions;
+    JSONObjectWriter extensions;
 
     String keyId;
 
@@ -46,7 +46,10 @@ public abstract class JSONSigner implements Serializable {
 
     abstract void writeKeyData(JSONObjectWriter wr) throws IOException;
 
-    public JSONSigner setExtensions(JSONObjectWriter[] extensions) {
+    public JSONSigner setExtensions(JSONObjectWriter extensions) throws IOException {
+        if (extensions.root.properties.isEmpty()) {
+            throw new IOException("Empty \"" + JSONSignatureDecoder.EXTENSIONS_JSON + "\" object not allowed");
+        }
         this.extensions = extensions;
         return this;
     }

@@ -17,11 +17,10 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
-
 import java.security.PublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -63,7 +62,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator {
             GeneratedPublicKey gk = new GeneratedPublicKey();
             gk.id = keyReader.getString(ID_JSON);
             gk.attestation = keyReader.getBinary(ATTESTATION_JSON);
-            gk.publicKey = keyReader.getPublicKey();
+            gk.publicKey = keyReader.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             if (generatedKeys.put(gk.id, gk) != null) {
                 ServerState.bad("Duplicate key id:" + gk.id);
             }

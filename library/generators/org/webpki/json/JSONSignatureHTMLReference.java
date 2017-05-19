@@ -95,14 +95,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static String readAsymSignature(String name, 
                                     AsymKey asymKey,
-                                    boolean requirePublicKeyInfo,
-                                    boolean permitKeyId) throws IOException, GeneralSecurityException {
+                                    JSONSignatureDecoder.Options options) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
-        JSONSignatureDecoder verifier = rd.getSignature(new JSONSignatureDecoder.Options()
-                .setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER)
-                .setRequirePublicKeyInfo(requirePublicKeyInfo));
-        verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()).permitKeyId(permitKeyId));        
+        JSONSignatureDecoder verifier = rd.getSignature(options);
+        verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()));        
         return formatCode(raw);
     }
 
@@ -130,7 +127,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             String signature = readSignature(name);
-            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(new JSONSignatureDecoder.Options());
+            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
+                    new JSONSignatureDecoder.Options()
+                        .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)
+                        .setRequirePublicKeyInfo(false));
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
                 if (key.length == dec.getValue().length) {
@@ -140,7 +140,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                      .append(formatCode(symmetricKeys.getString(keyProp)))
                      .append("Signature object requiring the key above for validation:")
                      .append(formatCode(signature));
-                    dec.verify(new JSONSymKeyVerifier(key).permitKeyId(true));
+                    dec.verify(new JSONSymKeyVerifier(key));
                     if (!keyProp.equals(dec.getKeyId())) {
                         throw new IOException("Sym sign");
                     }
@@ -317,7 +317,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         
         json.setAppendixMode();
 
-        readAsymSignature("p256keysigned.json", p256key, true, false);
+        readAsymSignature("p256keysigned.json", p256key, new JSONSignatureDecoder.Options());
         
         json.addParagraphObject(TEST_VECTORS).append(
        "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
@@ -327,33 +327,36 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
        formatCode(p256key) + LINE_SEPARATOR +
        "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
        "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
-        readAsymSignature("p256implicitkeysigned.json", p256key, false, true) +
+        readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
+            .setRequirePublicKeyInfo(false)
+            .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
         "EC key for verifying the subsequent object:" +
         formatCode(p384key) +
         "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("p384keysigned.json", p384key, true, false) +
+        readAsymSignature("p384keysigned.json", p384key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
         "EC key for verifying the subsequent object:" +
         formatCode(p521key) +
         "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("p521keysigned.json", p521key, true, false) +
+        readAsymSignature("p521keysigned.json", p521key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but builds on that " +
         "the key to use is <i>implicitly known</i> since the object neither contains a <code>" +
         JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" + 
         JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
-        readAsymSignature("p521implicitkeysigned.json", p521key, false, false) +
+        readAsymSignature("p521implicitkeysigned.json", p521key, new JSONSignatureDecoder.Options()
+            .setRequirePublicKeyInfo(false)) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
         "RSA key for verifying the subsequent object:" +
         formatCode(r2048key) +
         "The following signature object can be verified by the <i>public part</i> of the key above:" +
-        readAsymSignature("r2048keysigned.json", r2048key, true, false) +
+        readAsymSignature("r2048keysigned.json", r2048key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") +
@@ -449,11 +452,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
         json.addParagraphObject(COUNTER_SIGNATURES).append(
             "For counter signatures there are two entirely different solutions. " +
-            "One way dealing with counter signatures is using JCS's native " +
-            "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
-            "</a> scheme. A drawback with this method is that it doesn't support " +
-            "metadata like signing time and place etc. which often makes it more practical using an " +
-            "application-level counter signing solution like the following:" +
+            "One way dealing with counter signatures is using an " +
+            "application level counter signing solution like the following:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
             "&nbsp;&nbsp;&quot;id&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
             "&nbsp;&nbsp;&quot;object&quot;: {&quot;type&quot;: &quot;house&quot;, &quot;price&quot;: &quot;$635,000&quot;},<br>" +
@@ -480,10 +480,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "&nbsp;&nbsp;&nbsp;<span style=\"font-size:15pt\">&nbsp;</span></code><i>Counter signature...</i><code><br>" +
             "&nbsp;&nbsp;}<br>" +
             "}</code></div>" +
-            "For very sophisticated <i>peer based</i> counter signature schemes yet another possibility is using " +
+            "For sophisticated <i>peer based</i> counter signature schemes another possibility is using " +
             "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
-            "</a> and letting JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
-            " hold application specific signature metadata.");
+            "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
+            " holding application specific (per signature) metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub-objects <a href=\"#" + 
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +

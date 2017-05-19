@@ -24,6 +24,8 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -75,7 +77,8 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the ephemeral client key
         /////////////////////////////////////////////////////////////////////////////////////////
-        clientEphemeralKey = (ECPublicKey) rd.getObject(CLIENT_EPHEMERAL_KEY_JSON).getPublicKey();
+        clientEphemeralKey = (ECPublicKey) rd.getObject(CLIENT_EPHEMERAL_KEY_JSON)
+                .getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path
@@ -87,7 +90,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the mandatory provisioning session data signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature(new JSONSignatureDecoder.Options());
+        signature = rd.getSignature(new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false));
     }
 
     @Override

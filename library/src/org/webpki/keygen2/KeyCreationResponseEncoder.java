@@ -22,6 +22,8 @@ import java.util.Vector;
 
 import java.security.PublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
@@ -82,7 +84,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder {
         for (GeneratedPublicKey gk : generatedKeys) {
             keys.setObject()
                 .setString(ID_JSON, gk.id)
-                .setPublicKey(gk.publicKey)
+                .setPublicKey(gk.publicKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER)
                 .setBinary(ATTESTATION_JSON, gk.attestation);
         }
     }

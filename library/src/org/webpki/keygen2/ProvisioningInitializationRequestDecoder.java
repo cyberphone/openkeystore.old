@@ -25,6 +25,8 @@ import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.crypto.AlgorithmPreferences;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
@@ -123,7 +125,8 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
             do {
                 JSONObjectReader kmkUpd = updArr.getObject();
                 byte[] authorization = kmkUpd.getBinary(AUTHORIZATION_JSON);
-                KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder(kmkUpd.getPublicKey());
+                KeyManagementKeyUpdateHolder child = 
+                        new KeyManagementKeyUpdateHolder(kmkUpd.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER));
                 child.authorization = authorization;
                 kmk.children.add(child);
                 scanForUpdateKeys(kmkUpd, child);
@@ -177,14 +180,15 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the server key
         /////////////////////////////////////////////////////////////////////////////////////////
-        serverEphemeralKey = (ECPublicKey) rd.getObject(SERVER_EPHEMERAL_KEY_JSON).getPublicKey();
+        serverEphemeralKey = (ECPublicKey) rd.getObject(SERVER_EPHEMERAL_KEY_JSON)
+                    .getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional key management key
         /////////////////////////////////////////////////////////////////////////////////////////
         if (rd.hasProperty(KEY_MANAGEMENT_KEY_JSON)) {
             JSONObjectReader kmkrd = rd.getObject(KEY_MANAGEMENT_KEY_JSON);
-            keyManagementKey = kmkrd.getPublicKey();
+            keyManagementKey = kmkrd.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             scanForUpdateKeys(kmkrd, kmkRoot = new KeyManagementKeyUpdateHolder(keyManagementKey));
         }
 
