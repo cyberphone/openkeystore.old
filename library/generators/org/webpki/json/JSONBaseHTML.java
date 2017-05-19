@@ -111,9 +111,9 @@ public class JSONBaseHTML  {
 
     public static final String REF_WEBIDL              = "WEBIDL";
     
-    public static final String JCS_PUBLIC_KEY_RSA      = "Additional RSA properties";
+    public static final String JCS_PUBLIC_KEY_RSA      = "Additional RSA Properties";
 
-    public static final String JCS_PUBLIC_KEY_EC       = "Additional EC properties";
+    public static final String JCS_PUBLIC_KEY_EC       = "Additional EC Properties";
 
     String file_name;
     String subsystem_name;
@@ -269,7 +269,7 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.61, May&nbsp;2017.</span> " +
+            "<span style=\"white-space: nowrap\">V0.70, May&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
 
         addReferenceEntry(REF_YASMIN,

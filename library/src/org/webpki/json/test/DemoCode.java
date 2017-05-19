@@ -85,7 +85,7 @@ public class DemoCode {
         JSONObjectReader reader = JSONParser.parse(json);
 
         // Get and verify signature
-        JSONSignatureDecoder signature = reader.getSignature();
+        JSONSignatureDecoder signature = reader.getSignature(new JSONSignatureDecoder.Options());
         signature.verify(new JSONAsymKeyVerifier(publicKey));
 
         // Print document payload on the console

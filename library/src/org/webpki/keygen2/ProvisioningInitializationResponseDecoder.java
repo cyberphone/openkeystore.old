@@ -87,7 +87,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the mandatory provisioning session data signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature();
+        signature = rd.getSignature(new JSONSignatureDecoder.Options());
     }
 
     @Override

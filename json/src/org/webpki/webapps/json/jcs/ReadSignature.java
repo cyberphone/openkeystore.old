@@ -81,8 +81,8 @@ public class ReadSignature {
             switch (rd.getPropertyType(property)) {
             case OBJECT:
                 if (property.equals(JSONSignatureDecoder.SIGNATURE_JSON)) {
-                    JSONSignatureDecoder signature = rd
-                            .getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                    JSONSignatureDecoder signature = rd.getSignature(new JSONSignatureDecoder.Options()
+                        .setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER));
                     switch (signature.getSignatureType()) {
                     case ASYMMETRIC_KEY:
                         PublicKey publicKey = signature.getPublicKey();

@@ -490,42 +490,46 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * Read and decode a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * <code>"signature"</code> object.
      * 
-     * @param algorithmPreferences JOSE or SKS notation expected
-     * @param requirePublicKeyInfo If public keys must be provided in a JWK or certificate path
+     * @param options Allowed/expected options
      * @return An object which can be used to verify keys etc.
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
+     * @see org.webpki.json.JSONSignatureDecoder.Options
      */
-    public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences, 
-                                             boolean requirePublicKeyInfo) throws IOException {
-        return new JSONSignatureDecoder(this, algorithmPreferences, requirePublicKeyInfo);
-    }
-    /**
-     * Read and decode a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
-     * <code>"signature"</code> object.
-     * This method is equivalent to <code>getSignature(AlgorithmPreferences, true)</code>.
-     * 
-     * @param algorithmPreferences JOSE or SKS notation expected
-     * @return An object which can be used to verify keys etc.
-     * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
-     */
-    public JSONSignatureDecoder getSignature(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return getSignature(algorithmPreferences, true);
+    public JSONSignatureDecoder getSignature(JSONSignatureDecoder.Options options) throws IOException {
+        return new JSONSignatureDecoder(this,
+                                        getObject(JSONSignatureDecoder.SIGNATURE_JSON),
+                                        options);
     }
 
     /**
      * Read and decode a
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
-     * <code>"signature"</code> object.
-     * This method is equivalent to <code>getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER)</code>.
-     *
-     * @return An object which can be used to verify keys etc.
+     * <code>"signatures"</code> [] object.
+     * @param options Allowed/expected options
+     * @return List with signature objects
      * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
      */
-    public JSONSignatureDecoder getSignature() throws IOException {
-        return getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+    public Vector<JSONSignatureDecoder> getSignatures(JSONSignatureDecoder.Options options) throws IOException {
+        Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
+        JSONArrayReader arrayReader = getArray(JSONSignatureDecoder.SIGNATURES_JSON);
+        Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
+        do {
+            signatureObjects.add(arrayReader.getObject());
+        } while(arrayReader.hasMore());
+        @SuppressWarnings("unchecked")
+        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONSignatureDecoder.SIGNATURES_JSON).value;
+        int i = 0;
+        for (JSONObjectReader signature : signatureObjects) {
+            Vector<JSONObject> element = new Vector<JSONObject>();
+            element.add(save.get(i++));
+            root.properties.put(JSONSignatureDecoder.SIGNATURES_JSON, 
+                                new JSONValue(JSONTypes.ARRAY, element));
+            signatures.add(new JSONSignatureDecoder(this, signature, options));
+        }
+        root.properties.put(JSONSignatureDecoder.SIGNATURES_JSON, 
+                            new JSONValue(JSONTypes.ARRAY, save));
+        return signatures;
     }
 
     /**

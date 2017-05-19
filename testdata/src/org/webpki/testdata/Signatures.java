@@ -17,28 +17,26 @@
 package org.webpki.testdata;
 
 import java.io.File;
-
 import java.security.KeyPair;
 import java.security.KeyStore;
-
 import java.security.cert.X509Certificate;
+import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
-
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.util.ArrayUtil;
 
 /*
@@ -84,6 +82,8 @@ public class Signatures {
         symmSign(256, MACAlgorithms.HMAC_SHA256);
         symmSign(384, MACAlgorithms.HMAC_SHA384);
         symmSign(512, MACAlgorithms.HMAC_SHA512);
+        
+        multipleSign("p256", "r2048");
     }
     
     static void symmSign(int keyBits, MACAlgorithms algorithm) throws Exception {
@@ -91,7 +91,7 @@ public class Signatures {
         String keyName = symmetricKeys.getName(keyBits);
         byte[] signedData = createSignature(new JSONSymKeySigner(key, algorithm).setKeyId(keyName));
         ArrayUtil.writeFile(baseSignatures + "hs" + (key.length * 8) + "signed.json", signedData);
-        JSONParser.parse(signedData).getSignature().verify(new JSONSymKeyVerifier(key).permitKeyId(true));
+        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(new JSONSymKeyVerifier(key).permitKeyId(true));
     }
 
     static String getDataToSign() throws Exception {
@@ -111,6 +111,14 @@ public class Signatures {
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
     }
     
+    static byte[] createSignatures(Vector<JSONSigner> signers) throws Exception {
+        String signed = parseDataToSign().setSignatures(signers).toString();
+        int i = signed.indexOf(",\n  \"signatures\":");
+        String unsigned = getDataToSign();
+        int j = unsigned.lastIndexOf("\n}");
+        return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
+    }
+
     static KeyPair readJwk(String keyType) throws Exception {
         JSONObjectReader jwkPlus = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "privatekey.jwk"));
         // Note: The built-in JWK decoder does not accept "kid" since it doesn't have a meaning in JCS or JEF. 
@@ -124,7 +132,24 @@ public class Signatures {
         KeyPair keyPair = readJwk(keyType);
         byte[] signedData = createSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
         ArrayUtil.writeFile(baseSignatures + keyType + "keysigned.json", signedData);
-        JSONParser.parse(signedData).getSignature().verify(new JSONAsymKeyVerifier(keyPair.getPublic()));;
+        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(new JSONAsymKeyVerifier(keyPair.getPublic()));;
+     }
+
+    static void multipleSign(String keyType1, String KeyType2) throws Exception {
+        KeyPair keyPair1 = readJwk(keyType1);
+        KeyPair keyPair2 = readJwk(KeyType2);
+        Vector<JSONSigner> signers = new Vector<JSONSigner>();
+        signers.add(new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null));
+        signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
+        byte[] signedData = createSignatures(signers);
+        ArrayUtil.writeFile(baseSignatures + keyType1 + "+" + KeyType2 + "keysigned.json", signedData);
+        Vector<JSONSignatureDecoder> signatures = 
+                JSONParser.parse(signedData).getSignatures(new JSONSignatureDecoder.Options());
+        signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
+        signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
+        if (signatures.size() != 2) {
+            throw new Exception("Wrong multi");
+        }
      }
 
     static void asymSignNoPublicKeyInfo(String keyType, boolean wantKeyId) throws Exception {
@@ -134,17 +159,20 @@ public class Signatures {
             .setKeyId(wantKeyId ? keyId : "");
         byte[] signedData = createSignature(signer);
         ArrayUtil.writeFile(baseSignatures + keyType + "implicitkeysigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER,
-                                                  false).verify(
-                                                          new JSONAsymKeyVerifier(keyPair.getPublic()).permitKeyId(wantKeyId));
+        JSONParser.parse(signedData).getSignature(
+            new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false))
+                    .verify(new JSONAsymKeyVerifier(keyPair.getPublic()).permitKeyId(wantKeyId));
      }
 
     static void certSign(String keyType) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         X509Certificate[] certPath = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
                 .getJSONArrayReader().getCertificatePath();
-        byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null).setSignatureCertificateAttributes(true));
+        byte[] signedData = 
+            createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null)
+                                .setSignatureCertificateAttributes(true));
         ArrayUtil.writeFile(baseSignatures + keyType + "certsigned.json", signedData);
-        JSONParser.parse(signedData).getSignature().verify(x509Verifier);
+        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(x509Verifier);
     }
 }

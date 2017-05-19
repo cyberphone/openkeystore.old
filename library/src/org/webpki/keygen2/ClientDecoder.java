@@ -48,7 +48,7 @@ abstract class ClientDecoder extends KeyGen2Validator {
         // Must be a Signature otherwise something has gone wrong...
         //////////////////////////////////////////////////////////////////
         if (rd.hasProperty(JSONSignatureDecoder.SIGNATURE_JSON)) {
-            signature = rd.getSignature();
+            signature = rd.getSignature(new JSONSignatureDecoder.Options());
         }
     }
 }

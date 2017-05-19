@@ -57,7 +57,9 @@ public class Verify {
             switch (rd.getPropertyType(property)) {
                 case OBJECT:
                     if (property.equals(JSONSignatureDecoder.SIGNATURE_JSON)) {
-                        JSONSignatureDecoder signature = rd.getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                        JSONSignatureDecoder signature = rd.getSignature(
+                            new JSONSignatureDecoder.Options()
+                                .setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER));
                         if (output_file != null) {
                             byte[] old = ArrayUtil.readFile(output_file);
                             ArrayUtil.writeFile(output_file, ArrayUtil.add(old, ArrayUtil.add(new byte[]{'\n', '\n'}, signature.getNormalizedData())));

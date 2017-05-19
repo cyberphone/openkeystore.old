@@ -87,6 +87,8 @@ public class JSONSignatureDecoder implements Serializable {
     
     public static final String SIGNATURE_JSON             = "signature";
     
+    public static final String SIGNATURES_JSON            = "signatures";
+    
     public static final String SIGNER_CERTIFICATE_JSON    = "signerCertificate";
   
     public static final String SUBJECT_JSON               = "subject";
@@ -102,6 +104,22 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String X_JSON                     = "x";            // JWK
     
     public static final String Y_JSON                     = "y";            // JWK
+    
+    public static class Options {
+        
+        AlgorithmPreferences algorithmPreference = AlgorithmPreferences.JOSE;
+        boolean requirePublicKeyInfo = true;
+        
+        public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreference) {
+            this.algorithmPreference = algorithmPreference;
+            return this;
+        }
+
+        public Options setRequirePublicKeyInfo(boolean flag) {
+            this.requirePublicKeyInfo = flag;
+            return this;
+        }
+    }
 
     SignatureAlgorithms algorithm;
 
@@ -117,25 +135,23 @@ public class JSONSignatureDecoder implements Serializable {
 
     String keyId;
     
-    boolean requirePublicKeyInfo;
+    Options options;
     
     AlgorithmPreferences algorithmPreferences;
 
     Vector<JSONObjectReader> extensions;
 
-    JSONSignatureDecoder(JSONObjectReader rd, 
-                         AlgorithmPreferences algorithmPreferences,
-                         boolean requirePublicKeyInfo) throws IOException {
-        this.requirePublicKeyInfo = requirePublicKeyInfo;
-        this.algorithmPreferences = algorithmPreferences;
-        JSONObjectReader signature = rd.getObject(SIGNATURE_JSON);
+    JSONSignatureDecoder(JSONObjectReader rd,
+                         JSONObjectReader signature,
+                         Options options) throws IOException {
+        this.options = options;
         String version = signature.getStringConditional(VERSION_JSON, SIGNATURE_VERSION_ID);
         if (!version.equals(SIGNATURE_VERSION_ID)) {
             throw new IOException("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
         }
         algorithmString = signature.getString(ALGORITHM_JSON);
         keyId = signature.getStringConditional(KEY_ID_JSON);
-        if (requirePublicKeyInfo) {
+        if (options.requirePublicKeyInfo) {
             getKeyInfo(signature);
         } else {
             algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, algorithmPreferences);
@@ -175,7 +191,7 @@ public class JSONSignatureDecoder implements Serializable {
         // End JCS normalization                                                //
         //////////////////////////////////////////////////////////////////////////
 
-        if (requirePublicKeyInfo) switch (getSignatureType()) {
+        if (options.requirePublicKeyInfo) switch (getSignatureType()) {
             case X509_CERTIFICATE:
                 asymmetricSignatureVerification(certificatePath[0].getPublicKey());
                 break;

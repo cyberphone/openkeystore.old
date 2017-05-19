@@ -81,7 +81,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
                     appUsage = AppUsage.getAppUsageFromString(search.getString(APP_USAGE_JSON));
                 }
             }
-            JSONSignatureDecoder signature = rd.getSignature();
+            JSONSignatureDecoder signature = rd.getSignature(new JSONSignatureDecoder.Options());
             keyManagementKey = signature.getPublicKey();
             if (((AsymSignatureAlgorithms) signature.getAlgorithm()).getDigestAlgorithm() != HashAlgorithms.SHA256) {
                 throw new IOException("Lookup signature must use SHA256");

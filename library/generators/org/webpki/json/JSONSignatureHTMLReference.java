@@ -22,6 +22,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 
+import java.util.Vector;
+
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyStoreVerifier;
@@ -41,13 +43,17 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     static JSONBaseHTML json;
     static RowInterface row;
     
-    static final String INTEROPERABILITY = "Interoperability";
+    static final String INTEROPERABILITY    = "Interoperability";
 
-    static final String ECMASCRIPT_MODE  = "ECMAScript Mode";
+    static final String ECMASCRIPT_MODE     = "ECMAScript Mode";
 
-    static final String TEST_VECTORS     = "Test Vectors";
+    static final String TEST_VECTORS        = "Test Vectors";
     
-    static final String SAMPLE_SIGNATURE = "Sample Signature";
+    static final String MULTIPLE_SIGNATURES = "Multiple Signatures";
+
+    static final String COUNTER_SIGNATURES  = "Counter Signatures";
+    
+    static final String SAMPLE_SIGNATURE    = "Sample Signature";
 
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
@@ -93,9 +99,21 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                                     boolean permitKeyId) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
-        JSONSignatureDecoder verifier = requirePublicKeyInfo ?
-                rd.getSignature() : rd.getSignature(AlgorithmPreferences.JOSE_ACCEPT_PREFER, requirePublicKeyInfo);
+        JSONSignatureDecoder verifier = rd.getSignature(new JSONSignatureDecoder.Options()
+                .setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER)
+                .setRequirePublicKeyInfo(requirePublicKeyInfo));
         verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()).permitKeyId(permitKeyId));        
+        return formatCode(raw);
+    }
+
+    static String readMultiSignature(String name, 
+                                     AsymKey asymKey1,
+                                     AsymKey asymKey2) throws IOException, GeneralSecurityException {
+        String raw = readSignature(name);
+        JSONObjectReader rd = JSONParser.parse(raw);
+        Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONSignatureDecoder.Options());
+        verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.keyPair.getPublic()));
+        verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.keyPair.getPublic()));
         return formatCode(raw);
     }
 
@@ -103,7 +121,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static String readCertSignature(String name) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
-        JSONParser.parse(raw).getSignature().verify(certroot);
+        JSONParser.parse(raw).getSignature(new JSONSignatureDecoder.Options()).verify(certroot);
         return formatCode(raw);
     }
 
@@ -112,7 +130,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             String signature = readSignature(name);
-            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature();
+            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(new JSONSignatureDecoder.Options());
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
                 if (key.length == dec.getValue().length) {
@@ -286,6 +304,17 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addProtocolTableEntry("JCS Objects")
           .append("The following tables describe the JCS JSON structures in detail.");
         
+        json.addParagraphObject(MULTIPLE_SIGNATURES).append("Multiple signatures enable different keys to " +
+        "<i>independently of each other</i> add a signature to a JSON object." + LINE_SEPARATOR +
+        "The normalization procedure is essentially the same as for simple signatures but <b>must</b> also take the following in account as well:<ul>" +
+        "<li>The signature property <b>must</b> be <code>&quot;" + JSONSignatureDecoder.SIGNATURES_JSON + "&quot;</code>.</li>" +
+        "<li>The <code>'['</code> and <code>']'</code> characters <b>must</b> be <i>included</i> in the normalized data for each signature object.</li>" +
+        "<li>Each signature requires its own normalization process. During this process the other signature objects <b>must</b> (temporarily) be removed.</li>" +
+        "<li>The <code>','</code> characters separating signature objects <b>must</b> be <i>excluded</i> from the normalized data.</li>" +
+        "<li>The order of signatures <b>must</b> be honored by all involved JSON processors.</li>" +
+        "</ul>" +
+        "Also see <a href=\"#" + JSONBaseHTML.makeLink(COUNTER_SIGNATURES) + "\">" + COUNTER_SIGNATURES + "</a>.");
+        
         json.setAppendixMode();
 
         readAsymSignature("p256keysigned.json", p256key, true, false);
@@ -331,6 +360,13 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
                                       "hs512signed.json"}) + LINE_SEPARATOR +
+        "The following is a multiple signature (" +
+        "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" +
+        MULTIPLE_SIGNATURES +
+        "</a>) using the <code>&quot;" +  p256key.keyId + "&quot;</code>" +
+        " and <code>&quot;" +  r2048key.keyId + "&quot;</code> keys:" +
+        readMultiSignature("p256+r2048keysigned.json", p256key, r2048key) +
+        LINE_SEPARATOR +
         "The certificate based signatures share a common root (here supplied in PEM ")
         .append(json.createReference(JSONBaseHTML.REF_PEM))
         .append(" format), which can be used for path validation:" +
@@ -411,34 +447,43 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "If numeric property names are used, they <b>must</b> be " +
             "<i>provided in ascending numeric order</i> and inserted <i>before</i> possible non-numeric properties.");
 
-        json.addParagraphObject("Multiple Signatures").append(
-            "Since JSON properties are single-valued, JCS does not intrinsically support multiple signings of the same object. " +
-            "Although it would be technically feasible using an array of signature objects, this would greatly complicate message normalization. " +
-            "However, there is a &quot;workaround&quot; which fits most real-world scenarios needing multiple signatures and that is using wrapping signatures. " + LINE_SEPARATOR +
-            "Original signed JSON object:" +
+        json.addParagraphObject(COUNTER_SIGNATURES).append(
+            "For counter signatures there are two entirely different solutions. " +
+            "One way dealing with counter signatures is using JCS's native " +
+            "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
+            "</a> scheme. A drawback with this method is that it doesn't support " +
+            "metadata like signing time and place etc. which often makes it more practical using an " +
+            "application-level counter signing solution like the following:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-            "&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2014-12-08T13:56:08Z&quot;,<br>" +
             "&nbsp;&nbsp;&quot;id&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-            "&nbsp;&nbsp;&quot;data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+            "&nbsp;&nbsp;&quot;object&quot;: {&quot;type&quot;: &quot;house&quot;, &quot;price&quot;: &quot;$635,000&quot;},<br>" +
+            "&nbsp;&nbsp;&quot;role&quot;: &quot;buyer&quot;,<br>" +
+            "&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2016-12-08T13:56:08Z&quot;,<br>" +
             "&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;<span style=\"font-size:15pt\">&nbsp;</span></code><i>Original signature...</i><code><br>" +
             "&nbsp;&nbsp;}<br>" +
             "}</code></div>" +
-            "Dual-signed JSON object:" +
+            "Counter signed JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-            "&nbsp;&nbsp;&quot;container&quot;:&nbsp;{<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2014-12-08T13:56:08Z&quot;,<br>" +
+            "&nbsp;&nbsp;&quot;attesting&quot;:&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&quot;id&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&quot;data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&quot;object&quot;: {&quot;type&quot;: &quot;house&quot;, &quot;price&quot;: &quot;$635,000&quot;},<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&quot;role&quot;: &quot;buyer&quot;,<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2016-12-08T13:56:08Z&quot;,<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-size:15pt\">&nbsp;</span></code><i>Original signature...</i><code><br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
             "&nbsp;&nbsp;},<br>" +
+            "&nbsp;&nbsp;&quot;role&quot;: &quot;notary&quot;,<br>" +
+            "&nbsp;&nbsp;&quot;timeStamp&quot;: &quot;2016-12-08T13:58:42Z&quot;,<br>" +
             "&nbsp;&nbsp;&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;:&nbsp;{<br>" +
-            "&nbsp;&nbsp;&nbsp;<span style=\"font-size:15pt\">&nbsp;</span></code><i>Wrapping signature...</i><code><br>" +
+            "&nbsp;&nbsp;&nbsp;<span style=\"font-size:15pt\">&nbsp;</span></code><i>Counter signature...</i><code><br>" +
             "&nbsp;&nbsp;}<br>" +
             "}</code></div>" +
-            "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
+            "For very sophisticated <i>peer based</i> counter signature schemes yet another possibility is using " +
+            "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
+            "</a> and letting JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
+            " hold application specific signature metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub-objects <a href=\"#" + 
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
@@ -474,7 +519,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          "&nbsp;&nbsp;JSONObjectReader&nbsp;reader&nbsp;=&nbsp;JSONParser.parse(json);<br>" +
          "<br>" +
          "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;and&nbsp;verify&nbsp;signature</span><br>" +
-         "&nbsp;&nbsp;JSONSignatureDecoder&nbsp;signature&nbsp;=&nbsp;reader.getSignature();<br>" +
+         "&nbsp;&nbsp;JSONSignatureDecoder&nbsp;signature&nbsp;=&nbsp;reader.getSignature(new JSONSignatureDecoder.Options());<br>" +
          "&nbsp;&nbsp;signature.verify(new&nbsp;JSONAsymKeyVerifier(publicKey));<br>" +
          "<br>" +
          "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Print&nbsp;document&nbsp;payload&nbsp;on&nbsp;the&nbsp;console</span><br>" +
@@ -535,13 +580,13 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
         json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
-        json.addDocumentHistoryLine("2017-05-15", "0.61", "Added test vectors");
+        json.addDocumentHistoryLine("2017-05-18", "0.70", "Added multiple signatures and test vectors");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
                                                  json.createReference(JSONBaseHTML.REF_OPENKEYSTORE)  + ".");
 
-        json.addProtocolTable("Top-level Property")
+        json.addProtocolTable("Top Level Property")
           .newRow()
             .newColumn()
               .addProperty (JSONSignatureDecoder.SIGNATURE_JSON)
@@ -549,9 +594,21 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
+              .setChoice (true, 2)
             .newColumn()
-              .addString("The mandatory top-level property");
-            
+              .addString("Mandatory top level property for <i>simple</i> signatures.")
+            .newRow()
+           .newColumn()
+             .addProperty(JSONSignatureDecoder.SIGNATURES_JSON)
+             .addArrayLink(JSONSignatureDecoder.SIGNATURE_JSON, 1)
+           .newColumn()
+             .setType(WEBPKI_DATA_TYPES.OBJECT)
+           .newColumn()
+           .newColumn()
+             .addString("Mandatory top level property for ")
+             .addLink(MULTIPLE_SIGNATURES)
+             .addString(".");
+           
         json.addJSONSignatureDefinitions();
 
         json.writeHTML();

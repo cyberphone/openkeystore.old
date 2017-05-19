@@ -118,7 +118,7 @@ public class AuthenticationResponseDecoder extends InputValidator {
         //////////////////////////////////////////////////////////////////////////
         // Finally, get the signature!
         //////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature();
+        signature = rd.getSignature(new JSONSignatureDecoder.Options());
         certificatePath = signature.getCertificatePath();
         signatureAlgorithm = (AsymSignatureAlgorithms) signature.getAlgorithm();
     }

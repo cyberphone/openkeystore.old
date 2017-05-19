@@ -3305,7 +3305,7 @@ public class JSONTest {
             }
             byte[] json = ow.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
             //        if (test == BAD_SIGNATURE.KeyId) System.out.println (new String(json, "UTF-8"));
-            JSONSignatureDecoder dec = JSONParser.parse(json).getSignature();
+            JSONSignatureDecoder dec = JSONParser.parse(json).getSignature(new JSONSignatureDecoder.Options());
             assertTrue("KID1", dec.getKeyId() == null ^ (test == BAD_SIGNATURE.KeyId || test == BAD_SIGNATURE.KeyId2));
             if (test == BAD_SIGNATURE.KeyId) {
                 assertTrue("KID2", dec.getKeyId().equals("MyKey"));
