@@ -17,15 +17,18 @@
 package org.webpki.testdata;
 
 import java.io.File;
+
 import java.security.KeyPair;
 import java.security.KeyStore;
+
 import java.security.cert.X509Certificate;
+
 import java.util.Vector;
 
-import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
+
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
@@ -37,6 +40,7 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.util.ArrayUtil;
 
 /*
@@ -91,7 +95,9 @@ public class Signatures {
         String keyName = symmetricKeys.getName(keyBits);
         byte[] signedData = createSignature(new JSONSymKeySigner(key, algorithm).setKeyId(keyName));
         ArrayUtil.writeFile(baseSignatures + "hs" + (key.length * 8) + "signed.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(new JSONSymKeyVerifier(key).permitKeyId(true));
+        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)).verify(new JSONSymKeyVerifier(key));
     }
 
     static String getDataToSign() throws Exception {
@@ -161,8 +167,10 @@ public class Signatures {
         ArrayUtil.writeFile(baseSignatures + keyType + "implicitkeysigned.json", signedData);
         JSONParser.parse(signedData).getSignature(
             new JSONSignatureDecoder.Options()
-                .setRequirePublicKeyInfo(false))
-                    .verify(new JSONAsymKeyVerifier(keyPair.getPublic()).permitKeyId(wantKeyId));
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(wantKeyId ? 
+     JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED : JSONSignatureDecoder.KEY_ID_OPTIONS.FORBIDDEN))
+                    .verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
      }
 
     static void certSign(String keyType) throws Exception {
