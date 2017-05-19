@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.math.BigDecimal;
@@ -29,12 +30,9 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
-import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
@@ -52,19 +50,16 @@ import javax.crypto.KeyAgreement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.KeyStoreReader;
-import org.webpki.crypto.KeyStoreSigner;
-import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONAsymKeySigner;
+import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncoder;
@@ -74,9 +69,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
-import org.webpki.json.JSONSignatureTypes;
 import org.webpki.json.JSONTypes;
-import org.webpki.json.JSONX509Verifier;
 
 import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
@@ -2295,10 +2288,15 @@ public class JSONTest {
 
     static boolean bcLoaded;
 
+    static String baseKey;
+
+    static String keyId;
+
     @BeforeClass
     public static void openFile() throws Exception {
         bcLoaded = CustomCryptoProvider.conditionalLoad(true);
         Locale.setDefault(Locale.FRANCE);  // Should create HUGE problems :-)
+        baseKey = System.clearProperty("json.keys") + File.separator;
     }
 
     @SuppressWarnings("serial")
@@ -2416,6 +2414,15 @@ public class JSONTest {
         if (m == null || !m.equals(compare_message)) {
             fail("Exception: " + m);
         }
+    }
+
+    static KeyPair readJwk(String keyType) throws Exception {
+        JSONObjectReader jwkPlus = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "privatekey.jwk"));
+        // Note: The built-in JWK decoder does not accept "kid" since it doesn't have a meaning in JCS or JEF. 
+        if ((keyId = jwkPlus.getStringConditional("kid")) != null) {
+            jwkPlus.removeProperty("kid");
+        }
+        return jwkPlus.getKeyPair();
     }
 
     void booleanValues(boolean value) throws IOException {
@@ -3218,12 +3225,153 @@ public class JSONTest {
                 .serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
         assertTrue("Single\n" + expected + "\n" + result, expected.equals(result));
     }
+    
+    JSONSignatureDecoder verifySignature(JSONObjectWriter writer, 
+                                         JSONSignatureDecoder.Options options, 
+                                         PublicKey publicKey) throws Exception {
+        JSONSignatureDecoder signature = JSONParser.parse(writer.toString()).getSignature(options);
+        signature.verify(new JSONAsymKeyVerifier(publicKey));
+        return signature;
+    }
+
+    public static class ExampleComExtBad extends JSONSignatureDecoder.Extension {
+        
+        static final String URI = "https://example.com/ext";
+
+        @Override
+        protected String getExtensionUri() {
+            return URI;
+        }
+
+        @Override
+        protected void decode(JSONObjectReader reader) throws IOException {
+        }
+    }
+
+    public static class ExampleComExtGood extends JSONSignatureDecoder.Extension {
+        
+        static final String URI = "https://example.com/ext";
+        
+        public String data;
+
+        @Override
+        protected String getExtensionUri() {
+            return URI;
+        }
+
+        @Override
+        protected void decode(JSONObjectReader reader) throws IOException {
+            data = reader.getString(URI);
+        }
+    }
+
+    public static class ExampleComExtGood2 extends JSONSignatureDecoder.Extension {
+        
+        static final String URI = "https://example.com/ext2";
+        
+        public String data;
+
+        @Override
+        protected String getExtensionUri() {
+            return URI;
+        }
+
+        @Override
+        protected void decode(JSONObjectReader reader) throws IOException {
+            data = reader.getString(URI);
+        }
+    }
 
     @Test
     public void Signatures() throws Exception {
         // This does NOT work with the SUN JCE
         if (bcLoaded) {
             DeterministicSignatureWrapper.rfc4754();
+        }
+        KeyPair keyPair = readJwk("p256");
+        JSONObjectWriter writer = new JSONObjectWriter()
+            .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
+        verifySignature(writer, new JSONSignatureDecoder.Options(), keyPair.getPublic());
+        try {
+            verifySignature(writer, 
+                            new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false), 
+                            keyPair.getPublic());
+            fail("Should not work");
+        } catch (Exception e) {
+            checkException(e, "Property \"publicKey\" was never read");
+        }
+        try {
+            verifySignature(writer, 
+                            new JSONSignatureDecoder.Options().setAlgorithmPreferences(AlgorithmPreferences.SKS), 
+                            keyPair.getPublic());
+            fail("Should not work");
+        } catch (Exception e) {
+            checkException(e, "SKS algorithm expected: ES256");
+        }
+        try {
+            verifySignature(writer, 
+                            new JSONSignatureDecoder.Options()
+                                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL), 
+                            keyPair.getPublic());
+            fail("Should not work");
+        } catch (Exception e) {
+            checkException(e, "Incompatible keyId and publicKey options - Choose one");
+        }
+        writer = new JSONObjectWriter()
+        .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null)
+            .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
+        try {
+            verifySignature(writer, new JSONSignatureDecoder.Options(), keyPair.getPublic());
+            fail("Should not work");
+        } catch (Exception e) {
+            checkException(e, "Unknown extension: https://example.com/ext");
+        }
+        try {
+            JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
+            holder.addExtension(ExampleComExtBad.class, true);
+            verifySignature(writer, 
+                            new JSONSignatureDecoder.Options()
+                                .setPermittedExtensions(holder),
+                            keyPair.getPublic());
+            fail("Should not work");
+        } catch (Exception e) {
+            checkException(e, "Property \"https://example.com/ext\" was never read");
+        }
+        JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder.addExtension(ExampleComExtGood.class, true);
+        assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
+        (verifySignature(writer, 
+                        new JSONSignatureDecoder.Options()
+                            .setPermittedExtensions(holder),
+                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder.addExtension(ExampleComExtGood.class, true);
+        holder.addExtension(ExampleComExtGood2.class, false);
+        assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
+        (verifySignature(writer, 
+                        new JSONSignatureDecoder.Options()
+                            .setPermittedExtensions(holder),
+                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder.addExtension(ExampleComExtGood2.class, false);
+        holder.addExtension(ExampleComExtGood.class, false);
+        assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
+        (verifySignature(writer, 
+                        new JSONSignatureDecoder.Options()
+                            .setPermittedExtensions(holder),
+                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+        try {
+            holder = new JSONSignatureDecoder.ExtensionHolder();
+            holder.addExtension(ExampleComExtGood2.class, true);
+            holder.addExtension(ExampleComExtGood.class, false);
+            assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
+            (verifySignature(writer, 
+                            new JSONSignatureDecoder.Options()
+                                .setPermittedExtensions(holder),
+                            keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+            fail("Shouldn't work");
+        } catch (Exception e) {
+            checkException(e, "Missing mandatory extension: https://example.com/ext2");
         }
     }
 
