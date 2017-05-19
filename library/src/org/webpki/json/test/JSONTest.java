@@ -3317,7 +3317,7 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "Incompatible keyId and publicKey options - Choose one");
         }
-        writer = new JSONObjectWriter()
+        writer = new JSONObjectWriter().setString("myData", "cool!")
         .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null)
             .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
         try {
