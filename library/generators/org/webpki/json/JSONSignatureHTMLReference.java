@@ -24,7 +24,6 @@ import java.security.KeyStore;
 
 import java.util.Vector;
 
-import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyStoreVerifier;
 
@@ -54,6 +53,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     static final String COUNTER_SIGNATURES  = "Counter Signatures";
     
     static final String SAMPLE_SIGNATURE    = "Sample Signature";
+
+    static final String SECURITY_CONSIDERATIONS = "Security Considerations";
 
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
@@ -314,6 +315,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "<li>The order of signatures <b>must</b> be honored by all involved JSON processors.</li>" +
         "</ul>" +
         "Also see <a href=\"#" + JSONBaseHTML.makeLink(COUNTER_SIGNATURES) + "\">" + COUNTER_SIGNATURES + "</a>.");
+        
+        json.addParagraphObject(SECURITY_CONSIDERATIONS ).append("This specification does (to the author's " +
+        "knowledge), not introduce additional vulnerabilities " +
+        "over what is specified for JWS " + json.createReference(JSONBaseHTML.REF_JWS) + ".");
         
         json.setAppendixMode();
 

@@ -32,6 +32,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
+
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
 
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
@@ -60,7 +61,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static final String TEST_VECTORS    = "Test Vectors";
     
     static final String SAMPLE_OBJECT   = "Sample Object";
-    
+
+    static final String SECURITY_CONSIDERATIONS = "Security Considerations";
+
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
         for (KeyAlgorithms algorithm : KeyAlgorithms.values()) {
@@ -285,6 +288,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
                 "The <i>Additional Authenticated Data</i> string is subsequently <span style=\"white-space:nowrap\">UTF-8</span> encoded " +
                 "before being applied to the encryption algorithm.");
+
+        json.addParagraphObject(SECURITY_CONSIDERATIONS ).append("This specification does (to the author's " +
+        "knowledge), not introduce additional vulnerabilities " +
+        "over what is specified for JWE " + json.createReference(JSONBaseHTML.REF_JWE) + ".");
 
         json.setAppendixMode();
 
