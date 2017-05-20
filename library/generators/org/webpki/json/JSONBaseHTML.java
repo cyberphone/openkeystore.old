@@ -1507,8 +1507,8 @@ public class JSONBaseHTML  {
                   "<i>Property</i>: <i>Arbitrary JSON data</i>. " + Types.LINE_SEPARATOR +
                   "Public extension properties are <i>preferably</i> expressed as URIs, " +
                   "while private extensions are free using any valid property name." + Types.LINE_SEPARATOR +
-                  "A conforming implementation <b>must</b> reject extensions that are not recognized " +
-                  "as well as empty <code>" +
+                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
+                  "that are not recognized as well as empty <code>" +
                   "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;</code> objects.")
                   .setNotes("Examples:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
                   "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
