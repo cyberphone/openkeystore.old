@@ -1440,8 +1440,7 @@ public class JSONBaseHTML  {
                 .newColumn()
                   .setUsage (false)
                 .newColumn()
-                  .addString("<i>Optional.</i> Object holding custom data like time-stamps, CRLs, and OCSP responses." + Types.LINE_SEPARATOR +
-                              "A conforming implementation <b>must</b> reject extensions that are not recognized.")
+                  .addString("<i>Optional.</i> Object holding custom data like time-stamps, CRLs, and OCSP responses.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.VALUE_JSON)
@@ -1504,15 +1503,21 @@ public class JSONBaseHTML  {
                   .setType(Types.WEBPKI_DATA_TYPES.ANY)
                 .newColumn()
                 .newColumn()
-                  .addString("One or more application specfic extension properties expressed as <i>URI</i>: <i>Arbitrary JSON data</i>.")
+                  .addString("One or more application specfic extension properties expressed as " +
+                  "<i>Property</i>: <i>Arbitrary JSON data</i>. " + Types.LINE_SEPARATOR +
+                  "Public extension properties are <i>preferably</i> expressed as URIs, " +
+                  "while private extensions are free using any valid property name." + Types.LINE_SEPARATOR +
+                  "A conforming implementation <b>must</b> reject extensions that are not recognized " +
+                  "as well as empty <code>" +
+                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;</code> objects.")
                   .setNotes("Examples:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
                   "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
                   "&nbsp;&nbsp;&quot;https://standards.org/pki/jcs/ocspResponse&quot;: " +
                    "&quot;DgYDVR0PAQH_BAQDAgEGMB0GA1UdDgQWBBQT...VZI1YQdQFC63ncCTQ3iTAfBgNVHSMEGDAWg&quot;<br>" +
                   "}<br><br>" +
                   "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
-                  "&nbsp;&nbsp;&quot;https://example.com/ext&quot;: &quot;foobar&quot;,<br>" +
-                  "&nbsp;&nbsp;&quot;https://example.com/otherExt&quot;: {<br>" +
+                  "&nbsp;&nbsp;&quot;myExt&quot;: &quot;foobar&quot;,<br>" +
+                  "&nbsp;&nbsp;&quot;otherExt&quot;: {<br>" +
                   "&nbsp;&nbsp;&nbsp;&nbsp;&quot;name&quot;: &quot;johndoe&quot;,<br>" +
                   "&nbsp;&nbsp;&nbsp;&nbsp;&quot;role&quot;: &quot;client&quot;<br>" +
                   "&nbsp;&nbsp;}<br>" +

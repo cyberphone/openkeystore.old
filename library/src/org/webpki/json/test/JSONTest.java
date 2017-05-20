@@ -50,10 +50,11 @@ import javax.crypto.KeyAgreement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-
+import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
 
 import org.webpki.json.JSONArrayReader;
@@ -69,6 +70,9 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
+import org.webpki.json.JSONSigner;
+import org.webpki.json.JSONSymKeySigner;
+import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 
 import org.webpki.json.encryption.AsymmetricEncryptionResult;
@@ -2289,6 +2293,10 @@ public class JSONTest {
     static boolean bcLoaded;
 
     static String baseKey;
+    
+    static String baseSignatures;
+    
+    static String baseEncryption;
 
     static String keyId;
 
@@ -2297,6 +2305,8 @@ public class JSONTest {
         bcLoaded = CustomCryptoProvider.conditionalLoad(true);
         Locale.setDefault(Locale.FRANCE);  // Should create HUGE problems :-)
         baseKey = System.clearProperty("json.keys") + File.separator;
+        baseSignatures = System.clearProperty("json.signatures") + File.separator;
+        baseEncryption = System.clearProperty("json.encryption") + File.separator;
     }
 
     @SuppressWarnings("serial")
@@ -2423,6 +2433,10 @@ public class JSONTest {
             jwkPlus.removeProperty("kid");
         }
         return jwkPlus.getKeyPair();
+    }
+
+    static JSONObjectReader readSignature(String shortName) throws Exception {
+        return JSONParser.parse(ArrayUtil.readFile(baseSignatures + shortName));
     }
 
     void booleanValues(boolean value) throws IOException {
@@ -3226,10 +3240,49 @@ public class JSONTest {
         assertTrue("Single\n" + expected + "\n" + result, expected.equals(result));
     }
     
+    void readSymSignatures(String[] encObjects) throws Exception {
+        JSONObjectReader symmetricKeys = JSONParser.parse(ArrayUtil.readFile(baseKey + "symmetrickeys.json"));
+        for (String name : encObjects) {
+            String signature = readSignature(name).toString();
+            JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
+                    new JSONSignatureDecoder.Options()
+                        .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)
+                        .setRequirePublicKeyInfo(false));
+            boolean notDone = true;
+            for (String keyProp : symmetricKeys.getProperties()) {
+                byte[] key = symmetricKeys.getBinary(keyProp);
+                if (key.length == dec.getValue().length) {
+                     dec.verify(new JSONSymKeyVerifier(key));
+                    if (!keyProp.equals(dec.getKeyId())) {
+                        throw new Exception("Sym sign");
+                    }
+                    notDone = false;
+                    dec = JSONParser.parse(new JSONObjectWriter().setString("Mydata", "cool")
+                    .setSignature(new JSONSymKeySigner(key, 
+                            (MACAlgorithms) dec.getAlgorithm())).toString())
+                    .getSignature(new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false));
+                    dec.verify(new JSONSymKeyVerifier(key));
+                    try {
+                        dec.verify(new JSONSymKeyVerifier(ArrayUtil.add(key, new byte[]{5})));
+                        fail("Must not pass");
+                    } catch (Exception e) {
+                    }
+                    break;
+                }
+            }
+            assertFalse(notDone);
+        }
+    }
+
+    JSONSignatureDecoder readSignature(JSONObjectWriter writer, 
+                                       JSONSignatureDecoder.Options options) throws Exception {
+        return JSONParser.parse(writer.toString()).getSignature(options);
+    }
+    
     JSONSignatureDecoder verifySignature(JSONObjectWriter writer, 
                                          JSONSignatureDecoder.Options options, 
                                          PublicKey publicKey) throws Exception {
-        JSONSignatureDecoder signature = JSONParser.parse(writer.toString()).getSignature(options);
+        JSONSignatureDecoder signature = readSignature(writer, options);
         signature.verify(new JSONAsymKeyVerifier(publicKey));
         return signature;
     }
@@ -3284,18 +3337,32 @@ public class JSONTest {
 
     @Test
     public void Signatures() throws Exception {
-        // This does NOT work with the SUN JCE
         if (bcLoaded) {
+            // This does NOT work with the SUN JCE
             DeterministicSignatureWrapper.rfc4754();
         }
-        KeyPair keyPair = readJwk("p256");
+        PublicKey otherp256 = JSONParser.parse(p256_jcs).getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        KeyPair p256 = readJwk("p256");
+        String keyIdP256 = keyId;
+        KeyPair p521 = readJwk("p521");
+        KeyPair r2048 = readJwk("r2048");
         JSONObjectWriter writer = new JSONObjectWriter()
-            .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
-        verifySignature(writer, new JSONSignatureDecoder.Options(), keyPair.getPublic());
+            .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
+        verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
+        try {
+            verifySignature(writer, new JSONSignatureDecoder.Options(), r2048.getPublic());
+            fail("Must not pass");
+        } catch (Exception e) {
+        }
+        try {
+            verifySignature(writer, new JSONSignatureDecoder.Options(), otherp256);
+            fail("Must not pass");
+        } catch (Exception e) {
+        }
         try {
             verifySignature(writer, 
                             new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false), 
-                            keyPair.getPublic());
+                            p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Property \"publicKey\" was never read");
@@ -3303,7 +3370,7 @@ public class JSONTest {
         try {
             verifySignature(writer, 
                             new JSONSignatureDecoder.Options().setAlgorithmPreferences(AlgorithmPreferences.SKS), 
-                            keyPair.getPublic());
+                            p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "SKS algorithm expected: ES256");
@@ -3312,16 +3379,16 @@ public class JSONTest {
             verifySignature(writer, 
                             new JSONSignatureDecoder.Options()
                                 .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL), 
-                            keyPair.getPublic());
+                            p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Incompatible keyId and publicKey options - Choose one");
         }
         writer = new JSONObjectWriter().setString("myData", "cool!")
-        .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null)
+        .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
             .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
         try {
-            verifySignature(writer, new JSONSignatureDecoder.Options(), keyPair.getPublic());
+            verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Unknown extension: https://example.com/ext");
@@ -3332,7 +3399,7 @@ public class JSONTest {
             verifySignature(writer, 
                             new JSONSignatureDecoder.Options()
                                 .setPermittedExtensions(holder),
-                            keyPair.getPublic());
+                            p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Property \"https://example.com/ext\" was never read");
@@ -3343,7 +3410,7 @@ public class JSONTest {
         (verifySignature(writer, 
                         new JSONSignatureDecoder.Options()
                             .setPermittedExtensions(holder),
-                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+                        p256.getPublic()).getExtension("https://example.com/ext"))).data));
         holder = new JSONSignatureDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
         holder.addExtension(ExampleComExtGood2.class, false);
@@ -3351,28 +3418,142 @@ public class JSONTest {
         (verifySignature(writer, 
                         new JSONSignatureDecoder.Options()
                             .setPermittedExtensions(holder),
-                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+                        p256.getPublic()).getExtension("https://example.com/ext"))).data));
         holder = new JSONSignatureDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood2.class, false);
         holder.addExtension(ExampleComExtGood.class, false);
         assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
-        (verifySignature(writer, 
-                        new JSONSignatureDecoder.Options()
-                            .setPermittedExtensions(holder),
-                        keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+            (verifySignature(writer, 
+                             new JSONSignatureDecoder.Options()
+                                 .setPermittedExtensions(holder),
+                             p256.getPublic()).getExtension("https://example.com/ext"))).data));
         try {
             holder = new JSONSignatureDecoder.ExtensionHolder();
             holder.addExtension(ExampleComExtGood2.class, true);
             holder.addExtension(ExampleComExtGood.class, false);
             assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
-            (verifySignature(writer, 
-                            new JSONSignatureDecoder.Options()
-                                .setPermittedExtensions(holder),
-                            keyPair.getPublic()).getExtension("https://example.com/ext"))).data));
+                (verifySignature(writer, 
+                                 new JSONSignatureDecoder.Options()
+                                     .setPermittedExtensions(holder),
+                                 p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
             checkException(e, "Missing mandatory extension: https://example.com/ext2");
         }
+        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder.addExtension(ExampleComExtGood.class, true);
+        writer = new JSONObjectWriter().setString("myData", "cool!")
+                .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
+        try {
+            readSignature(writer, new JSONSignatureDecoder.Options().setPermittedExtensions(holder));
+            fail("Not ok");
+        } catch (Exception e) {
+            checkException(e, "Missing mandatory extension: https://example.com/ext");
+        }
+        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder.addExtension(ExampleComExtGood.class, false);
+        readSignature(writer, new JSONSignatureDecoder.Options().setPermittedExtensions(holder));
+        try {
+            writer = new JSONObjectWriter().setString("myData", "cool!")
+                    .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
+                    .setSignatureAlgorithm(AsymSignatureAlgorithms.RSA_SHA256));
+                fail("Must not");
+        } catch (Exception e) {
+        }
+        // Imperfect naming here, this file contains a keyId but no publicKey
+        JSONObjectReader signature = readSignature("p256implicitkeysigned.json");
+        try {
+            signature.getSignature(new JSONSignatureDecoder.Options());
+            fail("Must not pass");
+        } catch (Exception e) {
+            checkException(e, "Use of \"keyId\" must be set in options");
+        }
+        JSONSignatureDecoder decoder =
+            signature.getSignature(new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+        assertTrue(keyIdP256.equals(decoder.getKeyId()));
+        decoder.verify(new JSONAsymKeyVerifier(p256.getPublic()));
+        decoder =
+            signature.getSignature(new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+        assertTrue(keyIdP256.equals(decoder.getKeyId()));
+        decoder.verify(new JSONAsymKeyVerifier(p256.getPublic()));
+        try {
+            decoder.verify(new JSONAsymKeyVerifier(otherp256));
+            fail("Must not pass");
+        } catch (Exception e) {
+        }
+        // Imperfect naming here, this file contains NO keyId or publicKey
+        signature = readSignature("p521implicitkeysigned.json");
+        decoder =
+            signature.getSignature(new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+        assertTrue(decoder.getKeyId() == null);
+        decoder.verify(new JSONAsymKeyVerifier(p521.getPublic()));
+        try {
+            decoder.verify(new JSONAsymKeyVerifier(p256.getPublic()));
+            fail("Must not pass");
+        } catch (Exception e) {
+        }
+        try {
+            decoder =
+                signature.getSignature(new JSONSignatureDecoder.Options()
+                    .setRequirePublicKeyInfo(false)
+                    .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+        } catch (Exception e) {
+            checkException(e, "Missing \"keyId\"");
+        }
+        writer = new JSONObjectWriter()
+            .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
+               .setSignatureAlgorithm(AsymSignatureAlgorithms.ECDSA_SHA512));
+        assertTrue(verifySignature(writer, 
+                                   new JSONSignatureDecoder.Options(),
+                                   p256.getPublic()).getAlgorithm() == AsymSignatureAlgorithms.ECDSA_SHA512);
+        signature = readSignature("p256+r2048keysigned.json");
+        try {
+            signature.getSignature(new JSONSignatureDecoder.Options());
+            fail("Must not pass");
+        } catch (Exception e) {
+            checkException(e, "Property \"signature\" is missing");
+        }
+        Vector<JSONSignatureDecoder> signatures = signature.getSignatures(new JSONSignatureDecoder.Options());
+        assertTrue(signatures.size() == 2);
+        signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
+        signatures.get(1).verify(new JSONAsymKeyVerifier(r2048.getPublic()));
+        Vector<JSONSigner> signers = new Vector<JSONSigner>();
+        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
+        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
+        writer = new JSONObjectWriter().setInt("value", 3)
+            .setSignatures(signers);
+        signatures = new JSONObjectReader(writer).getSignatures(new JSONSignatureDecoder.Options());
+        assertTrue(signatures.size() == 2);
+        signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
+        signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
+        signers = new Vector<JSONSigner>();
+        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null).setKeyId(""));
+        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null).setKeyId("mykey"));
+        writer = new JSONObjectWriter().setInt("value", 3)
+            .setSignatures(signers);
+        try {
+            new JSONObjectReader(writer).clone().getSignatures(new JSONSignatureDecoder.Options()
+                .setRequirePublicKeyInfo(false)
+                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+            fail("Must not pass");
+        } catch (Exception e) {
+            checkException(e, "Missing \"keyId\"");
+        }
+        signatures = new JSONObjectReader(writer).getSignatures(new JSONSignatureDecoder.Options()
+            .setRequirePublicKeyInfo(false)
+            .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+        assertTrue(signatures.size() == 2);
+        signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
+        signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
+        readSymSignatures(new String[]{"hs256signed.json",
+                                       "hs384signed.json",
+                                       "hs512signed.json"});
     }
 
     @Test

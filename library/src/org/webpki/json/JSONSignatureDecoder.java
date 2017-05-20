@@ -200,7 +200,7 @@ public class JSONSignatureDecoder implements Serializable {
     
     Options options;
     
-    LinkedHashMap<String,Extension> extensions;
+    LinkedHashMap<String,Extension> extensions = new LinkedHashMap<String,Extension>();
 
     JSONSignatureDecoder(JSONObjectReader rd,
                          JSONObjectReader signature,
@@ -242,7 +242,6 @@ public class JSONSignatureDecoder implements Serializable {
             if (extensionReader.getProperties().length == 0) {
                 throw new IOException("Empty \"" + EXTENSIONS_JSON + "\" object not allowed");
             }
-            extensions = new LinkedHashMap<String,Extension>();
             for (String name : extensionReader.getProperties()) {
                 ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
                 if (extensionEntry == null) {
@@ -258,10 +257,10 @@ public class JSONSignatureDecoder implements Serializable {
                     throw new IOException (e);
                 }
             }
-            for (String name : options.extensionHolder.extensions.keySet()) {
-                if (!extensions.containsKey(name) && options.extensionHolder.extensions.get(name).mandatory) {
-                    throw new IOException("Missing mandatory extension: " + name);
-                }
+        }
+        for (String name : options.extensionHolder.extensions.keySet()) {
+            if (!extensions.containsKey(name) && options.extensionHolder.extensions.get(name).mandatory) {
+                throw new IOException("Missing mandatory extension: " + name);
             }
         }
         signatureValue = signature.getBinary(VALUE_JSON);
