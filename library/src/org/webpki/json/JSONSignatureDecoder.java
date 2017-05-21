@@ -73,6 +73,8 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String EXTENSIONS_JSON            = "extensions";
 
+    public static final String FORMAT_JSON                = "format";       // Remote key argument
+
     public static final String ISSUER_JSON                = "issuer";
 
     public static final String KEY_ID_JSON                = "keyId";
@@ -82,6 +84,8 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String N_JSON                     = "n";            // JWK
 
     public static final String PUBLIC_KEY_JSON            = "publicKey";
+
+    public static final String REMOTE_KEY_JSON            = "remoteKey";    // Remote key
 
     public static final String SERIAL_NUMBER_JSON         = "serialNumber";
 
@@ -93,7 +97,7 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String SUBJECT_JSON               = "subject";
 
-    public static final String PEM_URL_JSON               = "pemUrl";
+    public static final String URL_JSON                   = "url";          // Remote key argument
 
     public static final String VALUE_JSON                 = "value";
 
@@ -162,6 +166,7 @@ public class JSONSignatureDecoder implements Serializable {
         boolean requirePublicKeyInfo = true;
         KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
         ExtensionHolder extensionHolder = new ExtensionHolder();
+        JSONRemoteKeys.Reader remoteKeyReader;
 
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
             this.algorithmPreferences = algorithmPreferences;
@@ -170,6 +175,11 @@ public class JSONSignatureDecoder implements Serializable {
 
         public Options setRequirePublicKeyInfo(boolean flag) {
             this.requirePublicKeyInfo = flag;
+            return this;
+        }
+
+        public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader) {
+            this.remoteKeyReader = remoteKeyReader;
             return this;
         }
 
@@ -303,16 +313,21 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     void getPublicKeyInfo(JSONObjectReader rd) throws IOException {
-        if (rd.hasProperty(CERTIFICATE_PATH_JSON)) {
-            algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString,
-                                                                   options.algorithmPreferences);
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
+                                                               options.algorithmPreferences);
+        if (options.remoteKeyReader != null) {
+            JSONObjectReader remoteKeyInfo = rd.getObject(REMOTE_KEY_JSON);
+            String url = remoteKeyInfo.getString(URL_JSON);
+            JSONRemoteKeys format = JSONRemoteKeys.getFormatFromId(remoteKeyInfo.getString(FORMAT_JSON));
+            if (format.certificatePath) {
+                certificatePath = options.remoteKeyReader.readCertificatePath(url, format);
+            } else {
+                publicKey = options.remoteKeyReader.readPublicKey(url, format);
+            }
+        } else if (rd.hasProperty(CERTIFICATE_PATH_JSON)) {
             readCertificateData(rd);
         } else if (rd.hasProperty(PUBLIC_KEY_JSON)) {
-            algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
-                                                                   options.algorithmPreferences);
             publicKey = rd.getPublicKey(options.algorithmPreferences);
-        } else if (rd.hasProperty(PEM_URL_JSON)) {
-            throw new IOException("\"" + PEM_URL_JSON + "\" not yet implemented");
         } else {
             throw new IOException("Missing key information");
         }

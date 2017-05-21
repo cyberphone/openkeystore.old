@@ -17,8 +17,8 @@
 package org.webpki.json;
 
 import java.io.File;
-import java.io.IOException;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 
 import java.util.LinkedHashMap;
@@ -1150,6 +1150,19 @@ public class JSONBaseHTML  {
         return buffer.append("</ul>").toString();
     }
 
+    static LinkedHashMap<JSONRemoteKeys,String> remoteKeyFormats = new LinkedHashMap<JSONRemoteKeys,String>();
+    
+    public static String enumerateRemoteKeyFormats() {
+        StringBuffer buffer = new StringBuffer("<ul>");
+        for (JSONRemoteKeys remoteKeys : remoteKeyFormats.keySet()) {
+            buffer.append("<li>")
+                  .append(JSONBaseHTML.codeVer(remoteKeys.toString(), 18))
+                  .append(remoteKeyFormats.get(remoteKeys))
+                  .append("</li>");
+        }
+        return buffer.append("</ul>").toString();
+    }
+
     String protocol_table_header;
     
     public StringBuffer addProtocolTableEntry(String header) throws IOException {
@@ -1340,6 +1353,19 @@ public class JSONBaseHTML  {
     }
 
     public void addJSONSignatureDefinitions () throws IOException {
+        remoteKeyFormats.put(JSONRemoteKeys.PEM_CERT_PATH,
+                "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded X.509 " + 
+                      createReference(JSONBaseHTML.REF_X509) + " certficate path");
+        remoteKeyFormats.put(JSONRemoteKeys.PEM_PUB_KEY,
+                "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded public key");
+        remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
+                "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key");
+        remoteKeyFormats.put(JSONRemoteKeys.DER_CERT,
+                "DER encoded X.509 " + createReference(JSONBaseHTML.REF_X509) + " certificate");
+        if (remoteKeyFormats.size() != JSONRemoteKeys.values().length) {
+            throw new IOException("Missing format");
+        }
+
         addSubItemTable(JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow()
             .newColumn()
@@ -1390,17 +1416,15 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Public key object.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.PEM_URL_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.PEM_URL_JSON)
+              .addProperty(JSONSignatureDecoder.REMOTE_KEY_JSON)
+              .addLink(JSONSignatureDecoder.REMOTE_KEY_JSON)
             .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.URI)
+              .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
             .newColumn()
               .addString("<i>Optional.</i> A single public key or X.509 ")
               .addString(createReference(REF_X509))
-              .addString(" certificate path stored in a PEM ")
-              .addString(createReference(REF_PEM))
-              .addString(" file accessible via an HTTP&nbsp;URL.")
+              .addString(" certificate path accessible via HTTP.")
           .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
@@ -1454,7 +1478,7 @@ public class JSONBaseHTML  {
                       createReference(REF_JWS) + " specifications.")
                        .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
-                   ", <code>" + JSONSignatureDecoder.PEM_URL_JSON + "</code>" + 
+                   ", <code>" + JSONSignatureDecoder.REMOTE_KEY_JSON + "</code>" + 
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
                    "</code> property since the key may be given by the context or through the <code>" + 
                    JSONSignatureDecoder.KEY_ID_JSON + "</code> property.");
@@ -1494,6 +1518,30 @@ public class JSONBaseHTML  {
               .addString(createReference(REF_LDAP_NAME))
               .addString(" notation.");
 
+            addSubItemTable(JSONSignatureDecoder.REMOTE_KEY_JSON)
+            .newRow()
+              .newColumn()
+                .addProperty(JSONSignatureDecoder.URL_JSON)
+                .addSymbolicValue(JSONSignatureDecoder.URL_JSON)
+              .newColumn()
+                .setType(Types.WEBPKI_DATA_TYPES.URI)
+              .newColumn()
+              .newColumn()
+                .addString("URI which can be dereferenced by an HTTPS GET operation. " +
+                      "The return data is assumed to delivered without any " +
+                        "additional encoding which means binary for DER and UTF-8 for the other formats.")
+            .newRow()
+              .newColumn()
+                .addProperty(JSONSignatureDecoder.FORMAT_JSON)
+                .addSymbolicValue(JSONSignatureDecoder.FORMAT_JSON)
+              .newColumn()
+                .setType(Types.WEBPKI_DATA_TYPES.STRING)
+              .newColumn()
+              .newColumn()
+                .addString("Currently defined format specifiers:" + 
+                        enumerateRemoteKeyFormats() +
+                        "See <a href=\"#remotekeyexample\">remote key example</a>.");
+    
             addSubItemTable(JSONSignatureDecoder.EXTENSIONS_JSON)
              .newRow()
                 .newColumn()

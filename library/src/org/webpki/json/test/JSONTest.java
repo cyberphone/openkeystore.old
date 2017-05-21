@@ -22,10 +22,8 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -33,14 +31,12 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
@@ -49,14 +45,12 @@ import javax.crypto.KeyAgreement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
@@ -69,19 +63,19 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
-
 import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.SymmetricEncryptionResult;
-
+import org.webpki.net.HTTPSWrapper;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
@@ -3317,6 +3311,32 @@ public class JSONTest {
             data = reader.getString(URI);
         }
     }
+    
+    static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
+    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwk";
+    
+    public static class WebKey implements JSONRemoteKeys.Reader {
+        
+        byte[] shoot(String url) throws IOException {
+            HTTPSWrapper wrapper = new HTTPSWrapper();
+            wrapper.makeGetRequest(url);
+            return wrapper.getData();
+        }
+
+        @Override
+        public PublicKey readPublicKey(String url, JSONRemoteKeys format) throws IOException {
+            byte[] data = shoot(url);
+            if (format == JSONRemoteKeys.JWK_PUB_KEY) {
+                return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            }
+            return null;
+        }
+
+        @Override
+        public X509Certificate[] readCertificatePath(String url, JSONRemoteKeys format) throws IOException {
+            return null;
+        }
+    }
 
     public static class ExampleComExtGood2 extends JSONSignatureDecoder.Extension {
         
@@ -3347,6 +3367,7 @@ public class JSONTest {
         KeyPair p521 = readJwk("p521");
         KeyPair r2048 = readJwk("r2048");
         JSONObjectWriter writer = new JSONObjectWriter()
+            .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
         verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
         try {
@@ -3554,6 +3575,18 @@ public class JSONTest {
         readSymSignatures(new String[]{"hs256signed.json",
                                        "hs384signed.json",
                                        "hs512signed.json"});
+
+        signature = readSignature("r2048remotekeysigned.json");
+        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+            .setRemoteKeyReader(new WebKey()));
+
+        writer = new JSONObjectWriter()
+            .setString("myData", "cool")
+            .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
+                              .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY));
+        System.out.println(writer);
+        JSONParser.parse(writer.toString()).getSignature(new JSONSignatureDecoder.Options()
+                .setRemoteKeyReader(new WebKey()));
     }
 
     @Test

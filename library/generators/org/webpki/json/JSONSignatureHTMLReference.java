@@ -167,7 +167,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         keyStore.setCertificateEntry ("mykey",
                                       CertificateUtil.getCertificateFromBlob (json.readFile1("rootca.cer")));        
         certroot = new JSONX509Verifier(new KeyStoreVerifier(keyStore));
-
+        
         json.addParagraphObject().append("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
         
@@ -365,7 +365,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readAsymSignature("r2048keysigned.json", r2048key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
-        readCertSignature("r2048certsigned.json") +
+        readCertSignature("r2048certsigned.json") + 
+        "<span id=\"remotekeyexample\">The</span> following signature object is referring to a " +
+        json.globalLinkRef(JSONSignatureDecoder.REMOTE_KEY_JSON) +
+        " which in turn should be identical to the key used in the previous RSA examples:" +
+        formatCode(readSignature("r2048remotekeysigned.json")) +
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
                                       "hs512signed.json"}) + LINE_SEPARATOR +

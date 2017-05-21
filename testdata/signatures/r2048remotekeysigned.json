@@ -1,0 +1,13 @@
+{
+  "now": "2017-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "algorithm": "RS256",
+    "remoteKey": {
+      "url": "https://cyberphone.github.io/doc/openkeystore/r2048.jwk",
+      "format": "JWK-PUB-KEY"
+    },
+    "value": "e9_0cDKRW_V20WZJlQfMtQqltdkK4RU7RRILcCZrdu1JCnnWxJjfTofTwkfw45TORN97IwmcHbkAgwUYUISqodOGv6OsaaFyiTK-2MJaPwtw5WbU7v-6q043PM1ia7iBY4Dl1Qk5DDMj_yrL-DzPQbHBW1egJKTCHBMnxa2PRnYOqTq6d6uj-VswtKUciEDS5a_OicRoJiSApZsERqGAXPe2McHfwtMWq-H1xe-hJAWT3fT0mWXRjGed_VyBkYVU0x1-a1Gpb-cAmQtHxNDcYtQrpKoj0IXLTEPRPiqoB1zP7rirL84vUpHC3cjeaFJtMRxNYEfNE_hoHG_1rBF-5Q"
+  }
+}

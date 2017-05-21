@@ -41,6 +41,10 @@ public class JSONAsymKeySigner extends JSONSigner {
     AsymKeySignerInterface signer;
 
     PublicKey publicKey;
+
+    private String url;
+
+    private JSONRemoteKeys format;
     
     /**
      * Constructor for custom crypto solutions.
@@ -92,6 +96,22 @@ public class JSONAsymKeySigner extends JSONSigner {
         return this;
     }
 
+    /**
+     * Set remote key indicator.
+     * This method <i>suppress</i> the in-line public key/certificate information.
+     * Note that private and public keys must anyway be provided during <i>signing</i>
+     * since the remote key indicator is simply generated &quot;as is&quot;. 
+     * @param url Where the key lives
+     * @param format What format the key has
+     * @return this
+     * @see org.webpki.json.JSONRemoteKeys
+     */
+    public JSONAsymKeySigner setRemoteKey(String url, JSONRemoteKeys format) {
+        this.url = url;
+        this.format = format;
+        return this;
+    }
+
     @Override
     SignatureAlgorithms getAlgorithm() {
         return algorithm;
@@ -104,6 +124,12 @@ public class JSONAsymKeySigner extends JSONSigner {
 
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
-        wr.setPublicKey(publicKey, algorithmPreferences);
+        if (url == null) {
+            wr.setPublicKey(publicKey, algorithmPreferences);
+        } else {
+            wr.setObject(JSONSignatureDecoder.REMOTE_KEY_JSON)
+                .setString(JSONSignatureDecoder.URL_JSON, url)
+                .setString(JSONSignatureDecoder.FORMAT_JSON, format.toString());
+        }
     }
 }

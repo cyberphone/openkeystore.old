@@ -17,14 +17,17 @@
 package org.webpki.testdata;
 
 import java.io.File;
+import java.io.IOException;
 
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
 
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
@@ -34,12 +37,15 @@ import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
+
+import org.webpki.net.HTTPSWrapper;
 
 import org.webpki.util.ArrayUtil;
 
@@ -53,6 +59,32 @@ public class Signatures {
     static JSONX509Verifier x509Verifier;
     static String keyId;
    
+    static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
+    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwk";
+    
+    public static class WebKey implements JSONRemoteKeys.Reader {
+        
+        byte[] shoot(String url) throws IOException {
+            HTTPSWrapper wrapper = new HTTPSWrapper();
+            wrapper.makeGetRequest(url);
+            return wrapper.getData();
+        }
+
+        @Override
+        public PublicKey readPublicKey(String url, JSONRemoteKeys format) throws IOException {
+            byte[] data = shoot(url);
+            if (format == JSONRemoteKeys.JWK_PUB_KEY) {
+                return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            }
+            return null;
+        }
+
+        @Override
+        public X509Certificate[] readCertificatePath(String url, JSONRemoteKeys format) throws IOException {
+            return null;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
             throw new Exception("Wrong number of arguments");
@@ -88,6 +120,17 @@ public class Signatures {
         symmSign(512, MACAlgorithms.HMAC_SHA512);
         
         multipleSign("p256", "r2048");
+        
+        KeyPair localKey = readJwk("r2048");
+        JSONAsymKeySigner remoteKeySigner =
+                new JSONAsymKeySigner(localKey.getPrivate(),
+                                      localKey.getPublic(),
+                                      null)
+                    .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY);
+        byte[] remoteSig = createSignature(remoteKeySigner);
+        ArrayUtil.writeFile(baseSignatures + "r2048remotekeysigned.json", remoteSig);
+        JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
+            .setRemoteKeyReader(new WebKey()));
     }
     
     static void symmSign(int keyBits, MACAlgorithms algorithm) throws Exception {

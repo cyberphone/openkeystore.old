@@ -599,7 +599,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
 
         json.addParagraphSubObject("JCS Profile").append("The JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                           "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + 
-                          JSONSignatureDecoder.PEM_URL_JSON + "</code> " +
+                          JSONSignatureDecoder.REMOTE_KEY_JSON + "</code> " +
                           "properties <b>must not</b> be featured in KeyGen2 messages.");
 
         json.addDataTypesDescription("");
