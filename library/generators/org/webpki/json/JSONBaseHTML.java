@@ -1505,8 +1505,8 @@ public class JSONBaseHTML  {
                 .newColumn()
                   .addString("One or more application specfic extension properties expressed as " +
                   "<i>Property</i>: <i>Arbitrary JSON data</i>. " + Types.LINE_SEPARATOR +
-                  "Public extension properties are <i>preferably</i> expressed as URIs, " +
-                  "while private extensions are free using any valid property name." + Types.LINE_SEPARATOR +
+                  "Extensions intended for public consumption are <i>preferably</i> expressed as URIs, " +
+                  "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
                   "that are not recognized as well as empty <code>" +
                   "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;</code> objects.")
