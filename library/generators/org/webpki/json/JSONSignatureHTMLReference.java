@@ -314,7 +314,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "<li>The <code>','</code> characters separating signature objects <b>must</b> be <i>excluded</i> from the normalized data.</li>" +
         "<li>The order of signatures <b>must</b> be honored by all involved JSON processors.</li>" +
         "</ul>" +
-        "Also see <a href=\"#" + JSONBaseHTML.makeLink(COUNTER_SIGNATURES) + "\">" + COUNTER_SIGNATURES + "</a>.");
+        "Also see <a href=\"#" + JSONBaseHTML.makeLink(COUNTER_SIGNATURES) + "\">" + COUNTER_SIGNATURES + "</a> and " +
+        "the <a href=\"#multisignaturesample\">multiple signature sample</a>.");
         
         json.addParagraphObject(SECURITY_CONSIDERATIONS ).append("This specification does (to the author's " +
         "knowledge), not introduce additional vulnerabilities " +
@@ -371,7 +372,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The following is a multiple signature (" +
         "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" +
         MULTIPLE_SIGNATURES +
-        "</a>) using the <code>&quot;" +  p256key.keyId + "&quot;</code>" +
+        "</a>) using the <code id=\"multisignaturesample\">&quot;" +  p256key.keyId + "&quot;</code>" +
         " and <code>&quot;" +  r2048key.keyId + "&quot;</code> keys:" +
         readMultiSignature("p256+r2048keysigned.json", p256key, r2048key) +
         LINE_SEPARATOR +
