@@ -97,7 +97,7 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String SUBJECT_JSON               = "subject";
 
-    public static final String URL_JSON                   = "url";          // Remote key argument
+    public static final String URI_JSON                   = "uri";          // Remote key argument
 
     public static final String VALUE_JSON                 = "value";
 
@@ -317,7 +317,7 @@ public class JSONSignatureDecoder implements Serializable {
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
             JSONObjectReader remoteKeyInfo = rd.getObject(REMOTE_KEY_JSON);
-            String url = remoteKeyInfo.getString(URL_JSON);
+            String url = remoteKeyInfo.getString(URI_JSON);
             JSONRemoteKeys format = JSONRemoteKeys.getFormatFromId(remoteKeyInfo.getString(FORMAT_JSON));
             if (format.certificatePath) {
                 certificatePath = options.remoteKeyReader.readCertificatePath(url, format);

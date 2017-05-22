@@ -3317,15 +3317,15 @@ public class JSONTest {
     
     public static class WebKey implements JSONRemoteKeys.Reader {
         
-        byte[] shoot(String url) throws IOException {
+        byte[] shoot(String uri) throws IOException {
             HTTPSWrapper wrapper = new HTTPSWrapper();
-            wrapper.makeGetRequest(url);
+            wrapper.makeGetRequest(uri);
             return wrapper.getData();
         }
 
         @Override
-        public PublicKey readPublicKey(String url, JSONRemoteKeys format) throws IOException {
-            byte[] data = shoot(url);
+        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException {
+            byte[] data = shoot(uri);
             if (format == JSONRemoteKeys.JWK_PUB_KEY) {
                 return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             }
@@ -3333,7 +3333,7 @@ public class JSONTest {
         }
 
         @Override
-        public X509Certificate[] readCertificatePath(String url, JSONRemoteKeys format) throws IOException {
+        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
             return null;
         }
     }

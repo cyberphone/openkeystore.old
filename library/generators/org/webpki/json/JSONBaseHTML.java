@@ -1355,7 +1355,9 @@ public class JSONBaseHTML  {
     public void addJSONSignatureDefinitions () throws IOException {
         remoteKeyFormats.put(JSONRemoteKeys.PEM_CERT_PATH,
                 "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded X.509 " + 
-                      createReference(JSONBaseHTML.REF_X509) + " certficate path");
+                      createReference(JSONBaseHTML.REF_X509) + " certficate path. See " +
+                      globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON,
+                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON) + ".");
         remoteKeyFormats.put(JSONRemoteKeys.PEM_PUB_KEY,
                 "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded public key");
         remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
@@ -1521,15 +1523,15 @@ public class JSONBaseHTML  {
             addSubItemTable(JSONSignatureDecoder.REMOTE_KEY_JSON)
             .newRow()
               .newColumn()
-                .addProperty(JSONSignatureDecoder.URL_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.URL_JSON)
+                .addProperty(JSONSignatureDecoder.URI_JSON)
+                .addSymbolicValue(JSONSignatureDecoder.URI_JSON)
               .newColumn()
                 .setType(Types.WEBPKI_DATA_TYPES.URI)
               .newColumn()
               .newColumn()
-                .addString("URI which can be dereferenced by an HTTPS GET operation. " +
-                      "The return data is assumed to delivered without any " +
-                        "additional encoding which means binary for DER and UTF-8 for the other formats.")
+                .addString("URI " + createReference(REF_URI) +
+                      " which <b>must</b> be <i>dereferenced</i> by an HTTPS GET operation. " +
+                      "The returned data <b>must</b> be delivered &quot;as is&quot; (stream of bytes).")
             .newRow()
               .newColumn()
                 .addProperty(JSONSignatureDecoder.FORMAT_JSON)

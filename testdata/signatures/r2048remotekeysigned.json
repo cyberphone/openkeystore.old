@@ -5,9 +5,9 @@
   "signature": {
     "algorithm": "RS256",
     "remoteKey": {
-      "url": "https://cyberphone.github.io/doc/openkeystore/r2048.jwk",
+      "uri": "https://cyberphone.github.io/doc/openkeystore/r2048.jwk",
       "format": "JWK-PUB-KEY"
     },
-    "value": "e9_0cDKRW_V20WZJlQfMtQqltdkK4RU7RRILcCZrdu1JCnnWxJjfTofTwkfw45TORN97IwmcHbkAgwUYUISqodOGv6OsaaFyiTK-2MJaPwtw5WbU7v-6q043PM1ia7iBY4Dl1Qk5DDMj_yrL-DzPQbHBW1egJKTCHBMnxa2PRnYOqTq6d6uj-VswtKUciEDS5a_OicRoJiSApZsERqGAXPe2McHfwtMWq-H1xe-hJAWT3fT0mWXRjGed_VyBkYVU0x1-a1Gpb-cAmQtHxNDcYtQrpKoj0IXLTEPRPiqoB1zP7rirL84vUpHC3cjeaFJtMRxNYEfNE_hoHG_1rBF-5Q"
+    "value": "EPIURyLoT6bi9JNvHZKgBBxdczLjt9Cw6iafkgNkTD1W6ib74Pxy0LRrUhJctTZLuNB0UGdXJR1zuCMSn6XNd7CxBkpV1jkwy6S-9C0ms-Gpa4p-MlrZdOLwGDHhYjniV_2INRiLXgZk4Vj2uUbmE700d_yTR3vWXhQjvCZuQGQQGsP2lz3wpQxIAvl7zxteQgIwBw-bmh_h5RBYFY12h5pelDseDkVZkeCFydRHSL05hgkZ_BKziMiZ1LclIrxgtg7vDj6YVPYbxqvrhJn9kjs1LC7S498p44sFCZ3BXhsGf6t8LxKLBhpuU1YqVFI4UxXi8pX3PloyQ3nZj53iSg"
   }
 }

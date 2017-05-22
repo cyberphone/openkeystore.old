@@ -42,9 +42,9 @@ public enum JSONRemoteKeys {
     
     public interface Reader {
         
-        public PublicKey readPublicKey(String url, JSONRemoteKeys format) throws IOException;
+        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException;
         
-        public X509Certificate[] readCertificatePath(String url, JSONRemoteKeys format) throws IOException;
+        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException;
     }
 
     public boolean isCertificatePath() {
