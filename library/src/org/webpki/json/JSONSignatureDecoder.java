@@ -158,6 +158,7 @@ public class JSONSignatureDecoder implements Serializable {
      * <li>keyId option.  Default: FORBIDDEN</li>
      * <li>Permitted extensions.  Default: none</li>
      * </ul>
+     * In addition, the Options class is used for defining external readers for &quot;remoteKey&quot; support.
      *
      */
     public static class Options {
@@ -178,6 +179,12 @@ public class JSONSignatureDecoder implements Serializable {
             return this;
         }
 
+        /**
+         * Define external &quot;remoteKey&quot; reader class.
+         * If set, the signature decoder assumes that there is no in-line public key or certificate information to process.   
+         * @param remoteKeyReader Interface
+         * @return this
+         */
         public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader) {
             this.remoteKeyReader = remoteKeyReader;
             return this;

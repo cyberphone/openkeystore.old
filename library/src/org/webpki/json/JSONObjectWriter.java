@@ -99,7 +99,7 @@ public class JSONObjectWriter implements Serializable {
     /**
      * Support interface for dynamic JSON generation.
      */
-    public interface JSONSetDynamic {
+    public interface Dynamic {
 
         public JSONObjectWriter set(JSONObjectWriter wr) throws IOException;
 
@@ -518,7 +518,7 @@ public class JSONObjectWriter implements Serializable {
      * @return An instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
      */
-    public JSONObjectWriter setDynamic(JSONSetDynamic jsonSetDynamic) throws IOException {
+    public JSONObjectWriter setDynamic(Dynamic jsonSetDynamic) throws IOException {
         return jsonSetDynamic.set(this);
     }
 
