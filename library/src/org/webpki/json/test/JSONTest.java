@@ -28,6 +28,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -46,9 +47,11 @@ import javax.crypto.KeyAgreement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
 import org.webpki.json.JSONArrayReader;
@@ -69,6 +72,7 @@ import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
+import org.webpki.json.JSONX509Verifier;
 import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
@@ -77,6 +81,7 @@ import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.SymmetricEncryptionResult;
 import org.webpki.net.HTTPSWrapper;
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
 
@@ -2429,6 +2434,15 @@ public class JSONTest {
         return jwkPlus.getKeyPair();
     }
 
+    static JSONX509Verifier readDerCertificate(String name) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load (null, null);
+        keyStore.setCertificateEntry ("mykey",
+                                      CertificateUtil.getCertificateFromBlob (
+                                           ArrayUtil.readFile(baseKey + name)));        
+        return new JSONX509Verifier(new KeyStoreVerifier(keyStore));
+    }
+
     static JSONObjectReader readSignature(String shortName) throws Exception {
         return JSONParser.parse(ArrayUtil.readFile(baseSignatures + shortName));
     }
@@ -3317,6 +3331,28 @@ public class JSONTest {
     
     public static class WebKey implements JSONRemoteKeys.Reader {
         
+        Vector<byte[]> getBinaryContentFromPem(byte[] pemBinary, String label, boolean multiple) throws IOException {
+            String pem = new String(pemBinary, "UTF-8");
+            Vector<byte[]> result = new Vector<byte[]>();
+            while (true) {
+                int start = pem.indexOf("-----BEGIN " + label + "-----");
+                int end = pem.indexOf("-----END " + label + "-----");
+                if (start >= 0 && end > 0 && end > start) {
+                    byte[] blob = new Base64().getBinaryFromBase64String(pem.substring(start + label.length() + 16, end));
+                    result.add(blob);
+                    pem = pem.substring(end + label.length() + 14);
+                } else {
+                    if (result.isEmpty()) {
+                        throw new IOException("No \"" + label + "\" found");
+                    }
+                    if (!multiple && result.size() > 1) {
+                        throw new IOException("Multiple \"" + label + "\" found");
+                    }
+                    return result;
+                }
+            }
+        }
+     
         byte[] shoot(String uri) throws IOException {
             HTTPSWrapper wrapper = new HTTPSWrapper();
             wrapper.makeGetRequest(uri);
@@ -3329,12 +3365,16 @@ public class JSONTest {
             if (format == JSONRemoteKeys.JWK_PUB_KEY) {
                 return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             }
-            return null;
+            throw new IOException("Not implemented");
         }
 
         @Override
         public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
-            return null;
+            byte[] data = shoot(uri);
+            if (format == JSONRemoteKeys.PEM_CERT_PATH) {
+                return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
+            }
+            throw new IOException("Not implemented");
         }
     }
 
@@ -3361,6 +3401,8 @@ public class JSONTest {
             // This does NOT work with the SUN JCE
             DeterministicSignatureWrapper.rfc4754();
         }
+        JSONX509Verifier rootCa = readDerCertificate("rootca.cer");
+        JSONX509Verifier unknownCa = readDerCertificate("unknownca.cer");
         PublicKey otherp256 = JSONParser.parse(p256_jcs).getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         KeyPair p256 = readJwk("p256");
         String keyIdP256 = keyId;
@@ -3580,13 +3622,37 @@ public class JSONTest {
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey()));
 
+        signature = readSignature("p256remotecertsigned.json");
+        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+            .setRemoteKeyReader(new WebKey()));
+        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+            .setRemoteKeyReader(new WebKey())).verify(rootCa);
+        try {
+            JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+                .setRemoteKeyReader(new WebKey())).verify(unknownCa);
+            fail("Must not pass");
+        } catch (Exception e) {
+            checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
+        }
+
         writer = new JSONObjectWriter()
             .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
                               .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY));
-        System.out.println(writer);
         JSONParser.parse(writer.toString()).getSignature(new JSONSignatureDecoder.Options()
                 .setRemoteKeyReader(new WebKey()));
+        
+        signature = readSignature("r2048certsigned.json");
+        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options());
+        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options())
+            .verify(rootCa);
+        try {
+            JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options())
+                .verify(unknownCa);
+            fail("Must not pass");
+        } catch (Exception e) {
+            checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
+        }
     }
 
     @Test

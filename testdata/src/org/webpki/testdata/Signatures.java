@@ -18,20 +18,17 @@ package org.webpki.testdata;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
-
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
@@ -44,10 +41,9 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
-
 import org.webpki.net.HTTPSWrapper;
-
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 
 /*
  * Create JCS test vectors
@@ -64,24 +60,50 @@ public class Signatures {
     
     public static class WebKey implements JSONRemoteKeys.Reader {
         
-        byte[] shoot(String url) throws IOException {
+        Vector<byte[]> getBinaryContentFromPem(byte[] pemBinary, String label, boolean multiple) throws IOException {
+            String pem = new String(pemBinary, "UTF-8");
+            Vector<byte[]> result = new Vector<byte[]>();
+            while (true) {
+                int start = pem.indexOf("-----BEGIN " + label + "-----");
+                int end = pem.indexOf("-----END " + label + "-----");
+                if (start >= 0 && end > 0 && end > start) {
+                    byte[] blob = new Base64().getBinaryFromBase64String(pem.substring(start + label.length() + 16, end));
+                    result.add(blob);
+                    pem = pem.substring(end + label.length() + 14);
+                } else {
+                    if (result.isEmpty()) {
+                        throw new IOException("No \"" + label + "\" found");
+                    }
+                    if (!multiple && result.size() > 1) {
+                        throw new IOException("Multiple \"" + label + "\" found");
+                    }
+                    return result;
+                }
+            }
+        }
+     
+        byte[] shoot(String uri) throws IOException {
             HTTPSWrapper wrapper = new HTTPSWrapper();
-            wrapper.makeGetRequest(url);
+            wrapper.makeGetRequest(uri);
             return wrapper.getData();
         }
 
         @Override
-        public PublicKey readPublicKey(String url, JSONRemoteKeys format) throws IOException {
-            byte[] data = shoot(url);
+        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException {
+            byte[] data = shoot(uri);
             if (format == JSONRemoteKeys.JWK_PUB_KEY) {
                 return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             }
-            return null;
+            throw new IOException("Not implemented");
         }
 
         @Override
-        public X509Certificate[] readCertificatePath(String url, JSONRemoteKeys format) throws IOException {
-            return null;
+        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
+            byte[] data = shoot(uri);
+            if (format == JSONRemoteKeys.PEM_CERT_PATH) {
+                return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
+            }
+            throw new IOException("Not implemented");
         }
     }
 
@@ -129,6 +151,17 @@ public class Signatures {
                     .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY);
         byte[] remoteSig = createSignature(remoteKeySigner);
         ArrayUtil.writeFile(baseSignatures + "r2048remotekeysigned.json", remoteSig);
+        JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
+            .setRemoteKeyReader(new WebKey()));
+
+        localKey = readJwk("p256");
+        remoteKeySigner =
+                new JSONAsymKeySigner(localKey.getPrivate(),
+                                      localKey.getPublic(),
+                                      null)
+                    .setRemoteKey(P256CERTPATH, JSONRemoteKeys.PEM_CERT_PATH);
+        remoteSig = createSignature(remoteKeySigner);
+        ArrayUtil.writeFile(baseSignatures + "p256remotecertsigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey()));
     }
