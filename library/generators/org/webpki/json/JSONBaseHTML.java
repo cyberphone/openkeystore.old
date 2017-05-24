@@ -1476,8 +1476,8 @@ public class JSONBaseHTML  {
             .newColumn()
             .newColumn()
               .addString("The signature data." +
-              " Note that the <i>binary</i> representation <b>must</b> follow the JWS " + 
-                      createReference(REF_JWS) + " specifications.")
+              " Note that the <i>binary</i> representation <b>must</b> follow the JWA " + 
+                      createReference(REF_JWA) + " specifications.")
                        .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
                    ", <code>" + JSONSignatureDecoder.REMOTE_KEY_JSON + "</code>" + 
@@ -1530,7 +1530,7 @@ public class JSONBaseHTML  {
               .newColumn()
               .newColumn()
                 .addString("URI " + createReference(REF_URI) +
-                      " which <b>must</b> be <i>dereferenced</i> by an HTTPS GET operation. " +
+                      " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation. " +
                       "The returned data <b>must</b> be delivered &quot;as is&quot; (stream of bytes).")
             .newRow()
               .newColumn()

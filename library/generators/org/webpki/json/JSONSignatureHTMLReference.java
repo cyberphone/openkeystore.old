@@ -373,7 +373,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
                                       "hs512signed.json"}) + LINE_SEPARATOR +
-        "The following is a multiple signature (" +
+        "The following is a multiple signature (see " +
         "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" +
         MULTIPLE_SIGNATURES +
         "</a>) using the <code id=\"multisignaturesample\">&quot;" +  p256key.keyId + "&quot;</code>" +
