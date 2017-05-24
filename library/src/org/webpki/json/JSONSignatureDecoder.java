@@ -285,20 +285,20 @@ public class JSONSignatureDecoder implements Serializable {
         //////////////////////////////////////////////////////////////////////////
         // Begin JCS normalization                                              //
         //                                                                      //
-        // 1. Make a shallow copy of the signature object property list         //
+        // 1. Make a shallow copy of the signature object                       //
         LinkedHashMap<String, JSONValue> savedProperties =
                 new LinkedHashMap<String, JSONValue>(signature.root.properties);
         //                                                                      //
-        // 2. Hide property for the serializer..                                //
+        // 2. Hide the "value" property for the serializer..                    //
         signature.root.properties.remove(VALUE_JSON);                           //
         //                                                                      //
         // 3. Serialize ("JSON.stringify()")                                    //
         normalizedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);
         //                                                                      //
-        // 4. Check for unread data                                             //
+        // 4. Check for unread (=forbidden) data                                //
         signature.checkForUnread();                                             //
         //                                                                      //
-        // 5. Restore signature property list                                   //
+        // 5. Restore the signature object                                      //
         signature.root.properties = savedProperties;
         //                                                                      //
         // End JCS normalization                                                //
@@ -363,7 +363,7 @@ public class JSONSignatureDecoder implements Serializable {
             String type = rd.getString(KTY_JSON);
             if (type.equals(RSA_PUBLIC_KEY)) {
                 publicKey = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(getCryptoBinary(rd, N_JSON),
-                        getCryptoBinary(rd, E_JSON)));
+                                                                                              getCryptoBinary(rd, E_JSON)));
             } else if (type.equals(EC_PUBLIC_KEY)) {
                 KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString(CRV_JSON), algorithmPreferences);
                 if (!ec.isECKey()) {
