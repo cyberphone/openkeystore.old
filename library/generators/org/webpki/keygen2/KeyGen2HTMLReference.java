@@ -210,17 +210,24 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                   .addString(description);
         }
     }
+    
+    static String singularis(String plural) throws IOException {
+        if (plural.endsWith("ies")) {
+            return plural.substring(0, plural.length() - 3) + "y";
+        } 
+        if (plural.endsWith("s")) {
+            return plural.substring(0, plural.length() - 1);
+        }
+        throw new IOException("Not plural");
+    }
 
     static class OptionalArrayObject implements JSONBaseHTML.Extender {
 
         String name;
-        int min;
+         int min;
         String description;
         
         OptionalArrayObject(String name, int min, String description) {
-            if (name.endsWith("s")) {
-                name = name.substring(0, name.length() - 1);
-            }
             this.name = name;
             this.min = min;
             this.description = description;
@@ -232,7 +239,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .newRow()
                 .newColumn()
                   .addProperty(name)
-                  .addArrayLink(name, min)
+                  .addArrayLink(singularis(name), min)
                 .newColumn()
                   .setType(WEBPKI_DATA_TYPES.OBJECT)
                 .newColumn()
@@ -609,7 +616,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addDataTypesDescription("");
         
         json.addProtocolTableEntry("Objects").append("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
-                           "Entries written in <i>italics</i> like <a href=\"#" + GENERATED_KEYS_JSON + "\"><i>" + GENERATED_KEYS_JSON + "</i></a> " +
+                           "Entries written in <i>italics</i> like <a href=\"#" + singularis(GENERATED_KEYS_JSON) + "\"><i>" + 
+                            singularis(GENERATED_KEYS_JSON) + "</i></a> " +
                            "represent sub objects, while the other entries such as <a href=\"#" + KeyGen2Messages.INVOCATION_REQUEST.getName()  + "\">" + KeyGen2Messages.INVOCATION_REQUEST.getName() + "</a> " +
                            "consitute of the actual messages.");
         
@@ -754,7 +762,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addPropertyLink(PRIVACY_ENABLED_JSON, KeyGen2Messages.INVOCATION_REQUEST.getName())
               .addString(" mode." + LINE_SEPARATOR +
                           "For quering ")
-              .addPropertyLink(VALUES_JSON, CLIENT_CAPABILITIES_JSON)
+              .addPropertyLink(VALUES_JSON, singularis(CLIENT_CAPABILITIES_JSON))
               .addString(" the following client attribute URIs are pre-defined:<ul>" + clientAttributes () +
                           "</ul>");
   
@@ -886,7 +894,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
             .newColumn()
               .addString(sksAsymKey(false,
-                                    ", using the <i>identical</i> curve to " +
+                                    ", using an <i>identical curve</i> to " +
                                      json.globalLinkRef(KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName(), 
                                                         SERVER_EPHEMERAL_KEY_JSON),
                                     "createProvisioningSession",
@@ -929,7 +937,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
              .newColumn()
               .addProperty(LOOKUP_SPECIFIERS_JSON)
-              .addArrayLink(LOOKUP_SPECIFIERS_JSON, 1)
+              .addArrayLink(singularis(LOOKUP_SPECIFIERS_JSON), 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -942,7 +950,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(LOOKUP_RESULTS_JSON)
-              .addArrayLink(LOOKUP_RESULTS_JSON, 1)
+              .addArrayLink(singularis(LOOKUP_RESULTS_JSON), 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1002,13 +1010,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(GENERATED_KEYS_JSON)
-              .addArrayLink(GENERATED_KEYS_JSON, 1)
+              .addArrayLink(singularis(GENERATED_KEYS_JSON), 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
             .newColumn()
               .addString("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC scheme featured in SKS, " +
-                          "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
+                          "<code>" + singularis(GENERATED_KEYS_JSON) + "</code> <b>must</b> " +
                           "<i>be encoded (by the SKS) and decoded (by the issuer) in exactly the same " +
                           "order (message wise) as they are encountered in the associated</i>  <a href=\"#" +
                            KeyGen2Messages.KEY_CREATION_REQUEST.getName() + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
@@ -1062,7 +1070,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .addString("See <code>SKS:closeProvisioningSession</code>.");
 
-        json.addSubItemTable(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)
+        json.addSubItemTable(singularis(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON))
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -1075,7 +1083,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                                    ", containing a <i>previous generation</i> key management key." + LINE_SEPARATOR +
                           "Note that <code>SKS:updateKeyManagementKey." + KEY_MANAGEMENT_KEY_JSON + "</code>" +
                           " refers to the <i>new</i> key management key specified in the object <i>immediately above</i> this " +
-              json.globalLinkRef(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON) +
+              json.globalLinkRef(singularis(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)) +
               " object",
                                     null,
                                     null))
@@ -1092,7 +1100,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                             1,
                             "<i>Optional:</i> List of the previous generation of key management keys."));
 
-        json.addSubItemTable(LOOKUP_SPECIFIERS_JSON)
+        json.addSubItemTable(singularis(LOOKUP_SPECIFIERS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1140,7 +1148,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
 
         createSearchFilter();
 
-        json.addSubItemTable(LOOKUP_RESULTS_JSON)
+        json.addSubItemTable(singularis(LOOKUP_RESULTS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1153,14 +1161,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(MATCHING_CREDENTIALS_JSON)
-              .addArrayLink(MATCHING_CREDENTIALS_JSON, 0)
+              .addArrayLink(singularis(MATCHING_CREDENTIALS_JSON), 0)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
             .newColumn()
               .addString("List of matching credentials.");
         
-        json.addSubItemTable(MATCHING_CREDENTIALS_JSON)
+        json.addSubItemTable(singularis(MATCHING_CREDENTIALS_JSON))
           .newRow()
             .newColumn()
               .addProperty(SERVER_SESSION_ID_JSON)
@@ -1205,7 +1213,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addPropertyLink(UNLOCK_KEYS_JSON, KeyGen2Messages.PROVISIONING_FINALIZATION_REQUEST.getName())
               .addString(".");
 
-        json.addSubItemTable(PUK_POLICY_SPECIFIERS_JSON)
+        json.addSubItemTable(singularis(PUK_POLICY_SPECIFIERS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1245,7 +1253,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(PIN_POLICY_SPECIFIERS_JSON)
-              .addArrayLink(PIN_POLICY_SPECIFIERS_JSON, 1)
+              .addArrayLink(singularis(PIN_POLICY_SPECIFIERS_JSON), 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1253,7 +1261,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("List of PIN policy objects to be created and controlled by this PUK policy. " +
                           "See <code>SKS:createPinPolicy</code>.");
 
-        json.addSubItemTable(PIN_POLICY_SPECIFIERS_JSON)
+        json.addSubItemTable(singularis(PIN_POLICY_SPECIFIERS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1343,7 +1351,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(KEY_ENTRY_SPECIFIERS_JSON)
-              .addArrayLink(KEY_ENTRY_SPECIFIERS_JSON, 1)
+              .addArrayLink(singularis(KEY_ENTRY_SPECIFIERS_JSON), 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1351,7 +1359,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("List of key entries to be created and controlled by this PIN policy." +
                           "<br>See <code>SKS:createKeyEntry</code>.");
 
-        json.addSubItemTable(KEY_ENTRY_SPECIFIERS_JSON)
+        json.addSubItemTable(singularis(KEY_ENTRY_SPECIFIERS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1501,7 +1509,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>.")
           .newExtensionRow(new MAC("createKeyEntry"));
 
-        json.addSubItemTable(GENERATED_KEYS_JSON)
+        json.addSubItemTable(singularis(GENERATED_KEYS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1535,7 +1543,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .addString("See <code>SKS:createKeyEntry." + ATTESTATION_JSON + "</code>.");
 
-        json.addSubItemTable(ISSUED_CREDENTIALS_JSON)
+        json.addSubItemTable(singularis(ISSUED_CREDENTIALS_JSON))
           .newRow()
             .newColumn()
               .addProperty(ID_JSON)
@@ -1616,8 +1624,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                   KeyGen2Messages.KEY_CREATION_REQUEST.getName() + "</a>.");
 
         json.addSubItemTable(new String[]{CLONE_KEY_PROTECTION_JSON,
-                                          DELETE_KEYS_JSON,
-                                          UNLOCK_KEYS_JSON,
+                                          singularis(DELETE_KEYS_JSON),
+                                          singularis(UNLOCK_KEYS_JSON),
                                           UPDATE_KEY_JSON})
           .newRow()
             .newColumn()
@@ -1655,8 +1663,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("See &quot;Target Key Reference&quot; in the SKS reference.")
           .newExtensionRow(new MAC("post* </code> methods<code>"));
         
-        json.addSubItemTable(new String[]{ENCRYPTED_EXTENSIONS_JSON,
-                                          EXTENSIONS_JSON})
+        json.addSubItemTable(new String[]{singularis(ENCRYPTED_EXTENSIONS_JSON),
+                                          singularis(EXTENSIONS_JSON)})
           .newRow()
             .newColumn()
               .addProperty(TYPE_JSON)
@@ -1677,7 +1685,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("Extension data.")
           .newExtensionRow(new MAC("addExtension"));
 
-        json.addSubItemTable(LOGOTYPES_JSON)
+        json.addSubItemTable(singularis(LOGOTYPES_JSON))
           .newRow()
             .newColumn()
               .addProperty(TYPE_JSON)
@@ -1706,7 +1714,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("Logotype image data.")
           .newExtensionRow(new MAC("addExtension"));
 
-        json.addSubItemTable(PROPERTY_BAGS_JSON)
+        json.addSubItemTable(singularis(PROPERTY_BAGS_JSON))
           .newRow()
             .newColumn()
               .addProperty(TYPE_JSON)
@@ -1719,7 +1727,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(PROPERTIES_JSON)
-              .addArrayLink(PROPERTIES_JSON, 1)
+              .addArrayLink(singularis(PROPERTIES_JSON), 1)
             .newColumn()
                .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1727,7 +1735,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("List of property values. See <code>SKS:addExtension</code>.")
           .newExtensionRow(new MAC("addExtension"));
 
-        json.addSubItemTable(PROPERTIES_JSON)
+        json.addSubItemTable(singularis(PROPERTIES_JSON))
           .newRow()
             .newColumn()
               .addProperty(NAME_JSON)
@@ -1767,7 +1775,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("Encrypted key material.  See <code>SKS:import* </code> methods<code>." + ENCRYPTED_KEY_JSON + "</code>.")
           .newExtensionRow(new MAC("import* </code>methods<code>"));
 
-        json.addSubItemTable(CLIENT_CAPABILITIES_JSON)
+        json.addSubItemTable(singularis(CLIENT_CAPABILITIES_JSON))
           .newRow()
             .newColumn()
               .addProperty(TYPE_JSON)
@@ -1805,8 +1813,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
             .newColumn()
               .addString("List of client image preferences that the issuer may use for creating suitable ")
-              .addLink(LOGOTYPES_JSON)
-              .addString(".  Known logotypes include:<ul>" + getLogotypes() + "</ul>" +
+              .addLink(singularis(LOGOTYPES_JSON))
+              .addString(" objects.  Known logotypes include:<ul>" + getLogotypes() + "</ul>" +
                           "Logotypes should not have framing borders or extra margins " +
                           "unless these are integral parts of the actual logotype image. " + 
                           "Logotypes should render nicely on light backgrounds. " +
