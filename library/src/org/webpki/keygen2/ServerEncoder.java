@@ -21,11 +21,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
 
-import org.webpki.crypto.SignerInterface;
-
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONX509Signer;
 
 abstract class ServerEncoder extends JSONEncoder {
 
@@ -45,28 +42,6 @@ abstract class ServerEncoder extends JSONEncoder {
     @Override
     final protected void writeJSONData(JSONObjectWriter wr) throws IOException {
         writeServerRequest(wr);
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional signature
-        ////////////////////////////////////////////////////////////////////////
-        if (signer == null) {
-            checkIfSignatureIsRequired();
-        } else {
-            checkIfNonceIsSpecified();
-            wr.setSignature(new JSONX509Signer(signer));
-        }
-    }
-
-    void checkIfNonceIsSpecified() throws IOException {
-    }
-
-    void checkIfSignatureIsRequired() throws IOException {
-    }
-
-    private SignerInterface signer;
-
-    public void setRequestSigner(SignerInterface signer) throws IOException {
-        this.signer = signer;
     }
 
     void setOptionalString(JSONObjectWriter wr, String name, String value) throws IOException {

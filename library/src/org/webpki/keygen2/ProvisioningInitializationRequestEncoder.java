@@ -97,15 +97,12 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
     // Constructors
 
     public ProvisioningInitializationRequestEncoder(ServerState serverState,
-                                                    String submitUrl,
                                                     int sessionLifeTime,
                                                     short sessionKeyLimit) throws IOException {
         serverState.checkState(true, ProtocolPhase.PROVISIONING_INITIALIZATION);
         this.serverState = serverState;
-        this.submitUrl = serverState.issuerUri = submitUrl;
         this.sessionLifeTime = serverState.sessionLifeTime = sessionLifeTime;
         this.sessionKeyLimit = serverState.sessionKeyLimit = sessionKeyLimit;
-        nonce = serverState.veNonce;
         serverSessionId = serverState.serverSessionId;
         serverEphemeralKey = serverState.serverEphemeralKey = serverState.generateEphemeralKey();
     }
@@ -113,13 +110,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
 
     public KeyManagementKeyUpdateHolder setKeyManagementKey(PublicKey keyManagementKey) {
         return kmkRoot = new KeyManagementKeyUpdateHolder(serverState.keyManagementKey = keyManagementKey);
-    }
-
-
-    public void setVirtualEnvironment(byte[] veData, String type, String friendlyName) {
-        virtualEnvironmentData = veData;
-        virtualEnvironmentType = type;
-        virtualEnvironmentFriendlyName = friendlyName;
     }
 
 
@@ -147,37 +137,13 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
 
     String serverSessionId;
 
-    byte[] nonce;
-
     GregorianCalendar serverTime;
 
-    String submitUrl;
-
     ECPublicKey serverEphemeralKey;
-
-    byte[] virtualEnvironmentData;
-
-    String virtualEnvironmentType;
-
-    String virtualEnvironmentFriendlyName;  // Optional, defined => Virtual environment defined
 
     int sessionLifeTime;
 
     short sessionKeyLimit;
-
-    @Override
-    void checkIfSignatureIsRequired() throws IOException {
-        if (virtualEnvironmentData != null) {
-            bad("\"" + VIRTUAL_ENVIRONMENT_JSON + "\" requires a signed request");
-        }
-    }
-
-    @Override
-    void checkIfNonceIsSpecified() throws IOException {
-        if (nonce == null) {
-            bad("Signed request needs a \"" + NONCE_JSON + "\"");
-        }
-    }
 
     @Override
     void writeServerRequest(JSONObjectWriter wr) throws IOException {
@@ -185,8 +151,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
         // Core session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
-
-        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         if (serverTime == null) {
             serverTime = new GregorianCalendar();
@@ -202,32 +166,19 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.setObject(SERVER_EPHEMERAL_KEY_JSON).setPublicKey(serverEphemeralKey, 
-                                                             AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        wr.setObject(SERVER_EPHEMERAL_KEY_JSON,
+                     JSONObjectWriter.createCorePublicKey(serverEphemeralKey, 
+                                                          AlgorithmPreferences.JOSE_ACCEPT_PREFER));
 
         ////////////////////////////////////////////////////////////////////////
         // Optional key management key
         ////////////////////////////////////////////////////////////////////////
         if (kmkRoot != null) {
-            JSONObjectWriter kmkWriter = wr.setObject(KEY_MANAGEMENT_KEY_JSON);
-            kmkWriter.setPublicKey(kmkRoot.keyManagementKey, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-            scanForUpdatedKeys(kmkWriter, kmkRoot);
+            wr.setObject(KEY_MANAGEMENT_KEY_JSON,
+                         JSONObjectWriter.createCorePublicKey(kmkRoot.keyManagementKey, 
+                                                              AlgorithmPreferences.JOSE_ACCEPT_PREFER));
+            scanForUpdatedKeys(wr, kmkRoot);
         }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional request for a virtual environment
-        ////////////////////////////////////////////////////////////////////////
-        if (virtualEnvironmentData != null) {
-            wr.setObject(VIRTUAL_ENVIRONMENT_JSON)
-                .setString(TYPE_JSON, virtualEnvironmentType)
-                .setBinary(CONFIGURATION_JSON, virtualEnvironmentData)
-                .setString(FRIENDLY_NAME_JSON, virtualEnvironmentFriendlyName);
-        }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Signed requests must have a nonce
-        ////////////////////////////////////////////////////////////////////////
-        setOptionalBinary(wr, NONCE_JSON, nonce);
     }
 
     @Override

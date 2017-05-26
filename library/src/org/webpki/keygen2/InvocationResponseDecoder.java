@@ -28,8 +28,6 @@ public class InvocationResponseDecoder extends KeyGen2Validator {
 
     private static final long serialVersionUID = 1L;
 
-    byte[] nonce;  // For VMs
-
     LinkedHashMap<String, ServerState.CapabilityBase> receivedCapabilities = new LinkedHashMap<String, ServerState.CapabilityBase>();
 
     String serverSessionId;
@@ -40,8 +38,6 @@ public class InvocationResponseDecoder extends KeyGen2Validator {
         // Session properties
         //////////////////////////////////////////////////////////////////////////
         serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
-
-        nonce = rd.getBinaryConditional(NONCE_JSON);
 
         //////////////////////////////////////////////////////////////////////////
         // Get the optional client capabilities

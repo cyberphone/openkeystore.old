@@ -40,20 +40,14 @@ public class InvocationRequestEncoder extends ServerEncoder {
 
     String serverSessionId;
 
-    String submitUrl;
-
-    String abortUrl; // Optional
-
     private ServerState serverState;
 
     // Constructors
 
     public InvocationRequestEncoder(ServerState serverState,
-                                    String submitUrl,
                                     String serverSessionId) throws IOException {
         serverState.checkState(true, ProtocolPhase.INVOCATION);
         this.serverState = serverState;
-        this.submitUrl = submitUrl;
         if (serverSessionId == null) {
             serverSessionId = Long.toHexString(new GregorianCalendar().getTimeInMillis());
             serverSessionId += Base64URL.generateURLFriendlyRandom(SecureKeyStore.MAX_LENGTH_ID_TYPE - serverSessionId.length());
@@ -65,11 +59,6 @@ public class InvocationRequestEncoder extends ServerEncoder {
         this.action = action;
     }
 
-    public void setAbortUrl(String abortUrl) {
-        this.abortUrl = abortUrl;
-    }
-
-
     @Override
     void writeServerRequest(JSONObjectWriter wr) throws IOException {
         //////////////////////////////////////////////////////////////////////////
@@ -77,11 +66,7 @@ public class InvocationRequestEncoder extends ServerEncoder {
         //////////////////////////////////////////////////////////////////////////
         wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        wr.setString(SUBMIT_URL_JSON, submitUrl);
-
         wr.setString(ACTION_JSON, action.getJSONName());
-
-        setOptionalString(wr, ABORT_URL_JSON, abortUrl);
 
         if (serverState.privacyEnabledSet) {
             wr.setBoolean(PRIVACY_ENABLED_JSON, serverState.privacyEnabled);

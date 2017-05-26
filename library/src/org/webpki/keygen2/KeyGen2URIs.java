@@ -44,9 +44,4 @@ public interface KeyGen2URIs {
         String DEVICE_PIN_SUPPORT          = "http://xmlns.webpki.org/keygen2/clientattr#device-pin-support";
     }
 
-    public interface FEATURE {
-
-        String VIRTUAL_ENVIRONMENT         = "http://xmlns.webpki.org/keygen2/feature#ve";
-
-    }
 }

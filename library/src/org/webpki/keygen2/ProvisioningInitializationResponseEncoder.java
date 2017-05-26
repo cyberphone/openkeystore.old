@@ -107,8 +107,9 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON).setPublicKey(clientEphemeralKey,
-                                                             AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        wr.setObject(CLIENT_EPHEMERAL_KEY_JSON,
+                     JSONObjectWriter.createCorePublicKey(clientEphemeralKey,
+                                                          AlgorithmPreferences.JOSE_ACCEPT_PREFER));
 
         ////////////////////////////////////////////////////////////////////////
         // Optional device certificate path

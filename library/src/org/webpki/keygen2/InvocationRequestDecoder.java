@@ -62,20 +62,6 @@ public class InvocationRequestDecoder extends ClientDecoder {
     }
 
 
-    String submitUrl;
-
-    public String getSubmitUrl() {
-        return submitUrl;
-    }
-
-
-    String abortUrl; // Optional
-
-    public String getOptionalAbortUrl() {
-        return abortUrl;
-    }
-
-
     String[] languages; // Optional
 
     public String[] getOptionalLanguageList() {
@@ -104,12 +90,6 @@ public class InvocationRequestDecoder extends ClientDecoder {
         privacyEnabled = rd.getBooleanConditional(PRIVACY_ENABLED_JSON);
 
         serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
-
-        submitUrl = getURL(rd, SUBMIT_URL_JSON);
-
-        if (rd.hasProperty(ABORT_URL_JSON)) {
-            abortUrl = getURL(rd, ABORT_URL_JSON);
-        }
 
         String[] capabilityUris = KeyGen2Validator.getURIListConditional(rd, CLIENT_CAPABILITY_QUERY_JSON);
         if (capabilityUris != null) {

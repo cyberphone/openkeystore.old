@@ -20,11 +20,9 @@ import org.webpki.sks.SecureKeyStore;
 
 public interface KeyGen2Constants {
 
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20170416";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20170513";
 
     // JSON properties
-
-    String ABORT_URL_JSON                            = "abortUrl";
 
     String ACTION_JSON                               = "action";
     
@@ -48,8 +46,6 @@ public interface KeyGen2Constants {
 
     String CLONE_KEY_PROTECTION_JSON                 = "cloneKeyProtection";
     
-    String CONFIGURATION_JSON                        = "configuration";
-
     String EXTENSION_DATA_JSON                       = SecureKeyStore.VAR_EXTENSION_DATA;
     
     String DEFERRED_ISSUANCE_JSON                    = "deferredIssuance";
@@ -170,8 +166,6 @@ public interface KeyGen2Constants {
 
     String SESSION_LIFE_TIME_JSON                    = SecureKeyStore.VAR_SESSION_LIFE_TIME;
 
-    String SUBMIT_URL_JSON                           = "submitUrl";
-
     String SUPPORTED_JSON                            = "supported";
 
     String TRUST_ANCHOR_JSON                         = "trustAnchor";
@@ -189,8 +183,6 @@ public interface KeyGen2Constants {
     String VALUE_JSON                                = SecureKeyStore.VAR_VALUE;
 
     String VALUES_JSON                               = SecureKeyStore.VAR_VALUE + "s";
-
-    String VIRTUAL_ENVIRONMENT_JSON                  = "virtualEnvironment";
 
     String WIDTH_JSON                                = "width";
 

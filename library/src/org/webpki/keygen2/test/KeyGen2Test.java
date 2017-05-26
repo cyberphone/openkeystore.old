@@ -70,7 +70,6 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyContainerTypes;
-import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -78,6 +77,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SignatureWrapper;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
@@ -203,8 +203,6 @@ public class KeyGen2Test {
 
     boolean brain_pool;
 
-    boolean virtual_environment;
-
     boolean get_client_attributes;
 
     boolean https;  // Use server-cert
@@ -212,8 +210,6 @@ public class KeyGen2Test {
     boolean ask_for_4096;
 
     boolean ask_for_exponent;
-
-    boolean set_abort_url;
 
     ExportProtection exportProtection;
 
@@ -237,22 +233,7 @@ public class KeyGen2Test {
 
     static final byte[] BAD_PIN = {0x03, 0x33, 0x03, 0x04};
 
-    static final String ABORT_URL = "http://issuer.example.com/abort";
-
     static final String INVOCATION_URL = "http://issuer.example.com/invocation";
-
-    static final String ISSUER_URL = "http://issuer.example.com/provsess";
-
-    static final String KEY_INIT_URL = "http://issuer.example.com/keyinit";
-
-    static final String FIN_PROV_URL = "http://issuer.example.com/finalize";
-
-    static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
-
-    static final String ACME_INDUSTRIES = "Acme Industries";
-
-    static final String SPECIFIC_VM = "http://platforms.extreme-vm.com/type.3";
-    static final byte[] VM_CONFIG_DATA = {0, 1, 2, 3};  // In real file probably a bit bigger...
 
     static X509Certificate server_certificate;
 
@@ -315,7 +296,6 @@ public class KeyGen2Test {
                         "\"@qualifier\": \"" + KeyGen2Messages.KEY_CREATION_REQUEST.getName() + "\",\n" +
                         "\"" + KeyGen2Constants.SERVER_SESSION_ID_JSON + "\": \"1417ace50e9IoDMto6NHlN1JWvysvZsC\",\n" +
                         "\"" + KeyGen2Constants.CLIENT_SESSION_ID_JSON + "\": \"KzyjlYG3YurWzSr2d9O9X3y_1EUsadmE\",\n" +
-                        "\"" + KeyGen2Constants.SUBMIT_URL_JSON + "\": \"http://issuer.example.com/keyinit\",\n" +
                         "\"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\": \"http://xmlns.webpki.org/sks/algorithm#key.1\",\n";
         private static JSONDecoderCache json_cache;
 
@@ -524,11 +504,6 @@ public class KeyGen2Test {
             invocation_request = (InvocationRequestDecoder) client_xml_cache.parse(json_data);
             assertTrue("Languages", invocation_request.getOptionalLanguageList() == null ^ languages);
             assertTrue("Key containers", invocation_request.getOptionalKeyContainerList() == null ^ key_container_list);
-            if (set_abort_url) {
-                assertTrue("Abort URL", invocation_request.getOptionalAbortUrl().equals(ABORT_URL));
-            } else {
-                assertTrue("Abort URL", invocation_request.getOptionalAbortUrl() == null);
-            }
             device_info = sks.getDeviceInfo();
             InvocationResponseEncoder invocation_response = new InvocationResponseEncoder(invocation_request);
             Vector<String> matches = new Vector<String>();
@@ -559,13 +534,6 @@ public class KeyGen2Test {
             if (invocation_request.getQueriedCapabilities().contains(KeyGen2URIs.LOGOTYPES.CARD)) {
                 invocation_response.addImagePreference(KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
             }
-            if (invocation_request.getQueriedCapabilities().contains(KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT)) {
-                invocation_response.addClientValues(KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT,
-                        new String[]{SPECIFIC_VM});
-                byte[] nonce = new byte[16];
-                new SecureRandom().nextBytes(nonce);
-                invocation_response.setNonce(nonce);
-            }
             return invocation_response.serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         }
 
@@ -575,15 +543,13 @@ public class KeyGen2Test {
         byte[] provSessResponse(byte[] json_data) throws IOException {
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse(json_data);
             scanForKeyManagementKeyUpdates(prov_sess_req.getKeyManagementKeyUpdateHolderRoot());
-            assertTrue("Submit URL", prov_sess_req.getSubmitUrl().equals(ISSUER_URL));
-            assertFalse("VM", virtual_environment ^ ACME_INDUSTRIES.equals(prov_sess_req.getVirtualEnvironmentFriendlyName()));
             GregorianCalendar clientTime = new GregorianCalendar();
             ProvisioningSession sess =
                     sks.createProvisioningSession(prov_sess_req.getSessionKeyAlgorithm(),
                             invocation_request.getPrivacyEnabledFlag(),
                             prov_sess_req.getServerSessionId(),
                             prov_sess_req.getServerEphemeralKey(),
-                            prov_sess_req.getSubmitUrl(), /* IssuerURI */
+                            INVOCATION_URL, /* IssuerURI */
                             prov_sess_req.getKeyManagementKey(),
                             (int) (clientTime.getTimeInMillis() / 1000),
                             prov_sess_req.getSessionLifeTime(),
@@ -618,7 +584,6 @@ public class KeyGen2Test {
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] creDiscResponse(byte[] json_data) throws IOException, GeneralSecurityException {
             cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse(json_data);
-            assertTrue("Submit URL", cre_disc_req.getSubmitUrl().equals(CRE_DISC_URL));
             CredentialDiscoveryResponseEncoder cdre = new CredentialDiscoveryResponseEncoder(cre_disc_req);
             for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cre_disc_req.getLookupSpecifiers()) {
                 CredentialDiscoveryResponseEncoder.LookupResult lr = cdre.addLookupResult(ls.getID());
@@ -653,7 +618,6 @@ public class KeyGen2Test {
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] keyCreResponse(byte[] json_data) throws IOException {
             key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse(json_data);
-            assertTrue("Submit URL", key_creation_request.getSubmitUrl().equals(KEY_INIT_URL));
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder(key_creation_request);
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors()) {
                 upd.setPIN(new String(USER_DEFINED_PIN, "UTF-8"), true);
@@ -721,7 +685,6 @@ public class KeyGen2Test {
         byte[] creFinalizeResponse(byte[] json_data) throws IOException, GeneralSecurityException {
             ProvisioningFinalizationRequestDecoder prov_final_request =
                     (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse(json_data);
-            assertTrue("Submit URL", prov_final_request.getSubmitUrl().equals(FIN_PROV_URL));
             /* 
                Note: we could have used the saved provisioning_handle but that would not
                work for certifications that are delayed.  The following code is working
@@ -869,7 +832,7 @@ public class KeyGen2Test {
             ////////////////////////////////////////////////////////////////////////////////////
             // Create the state container
             ////////////////////////////////////////////////////////////////////////////////////
-            serverState = new ServerState(serverCryptoInterface);
+            serverState = new ServerState(serverCryptoInterface, INVOCATION_URL);
             if (privacy_enabled) {
                 serverState.setPrivacyEnabled(true);
             }
@@ -887,10 +850,7 @@ public class KeyGen2Test {
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
 //            String serverSessionId = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            InvocationRequestEncoder invocation_request = new InvocationRequestEncoder(serverState, INVOCATION_URL, null);
-            if (set_abort_url) {
-                invocation_request.setAbortUrl(ABORT_URL);
-            }
+            InvocationRequestEncoder invocation_request = new InvocationRequestEncoder(serverState, null);
             if (ask_for_4096) {
                 serverState.addFeatureQuery(KeyAlgorithms.RSA4096.getAlgorithmId(AlgorithmPreferences.SKS))
                         .addFeatureQuery(KeyAlgorithms.RSA2048.getAlgorithmId(AlgorithmPreferences.SKS));
@@ -913,12 +873,6 @@ public class KeyGen2Test {
             }
             if (plain_unlock_key != null) {
                 invocation_request.setAction(Action.UNLOCK);
-            }
-            if (virtual_environment) {
-                serverState.addValuesQuery(KeyGen2URIs.FEATURE.VIRTUAL_ENVIRONMENT);
-                KeyStoreSigner signer = new KeyStoreSigner(DemoKeyStore.getExampleDotComKeyStore(), null);
-                signer.setKey(null, DemoKeyStore.getSignerPassword());
-                invocation_request.setRequestSigner(signer);
             }
             return invocation_request.serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         }
@@ -948,7 +902,7 @@ public class KeyGen2Test {
             }
 
             ProvisioningInitializationRequestEncoder prov_init_request =
-                    new ProvisioningInitializationRequestEncoder(serverState, ISSUER_URL, 10000, (short) 50);
+                    new ProvisioningInitializationRequestEncoder(serverState, 10000, (short) 50);
             if (updatable) {
                 ProvisioningInitializationRequestEncoder.KeyManagementKeyUpdateHolder kmk =
                         prov_init_request.setKeyManagementKey(server_km = serverCryptoInterface.enumerateKeyManagementKeys()[ecc_kmk ? 2 : 0]);
@@ -956,12 +910,6 @@ public class KeyGen2Test {
                     kmk.update(serverCryptoInterface.enumerateKeyManagementKeys()[1])
                             .update(update_key.server_km);
                 }
-            }
-            if (virtual_environment) {
-                prov_init_request.setVirtualEnvironment(VM_CONFIG_DATA, SPECIFIC_VM, ACME_INDUSTRIES);
-                KeyStoreSigner signer = new KeyStoreSigner(DemoKeyStore.getExampleDotComKeyStore(), null);
-                signer.setKey(null, DemoKeyStore.getSignerPassword());
-                prov_init_request.setRequestSigner(signer);
             }
             return prov_init_request.serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         }
@@ -971,7 +919,7 @@ public class KeyGen2Test {
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] creDiscRequest(byte[] json_data) throws IOException, GeneralSecurityException {
             getProvSess(server_xml_cache.parse(json_data));
-            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder(serverState, CRE_DISC_URL);
+            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder(serverState);
             cdre.addLookupDescriptor(serverCryptoInterface.enumerateKeyManagementKeys()[0]);
 
             cdre.addLookupDescriptor(serverCryptoInterface.enumerateKeyManagementKeys()[2])
@@ -1120,7 +1068,7 @@ public class KeyGen2Test {
                 }
             }
 
-            return new KeyCreationRequestEncoder(serverState, KEY_INIT_URL).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
+            return new KeyCreationRequestEncoder(serverState).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         }
 
 
@@ -1227,7 +1175,7 @@ public class KeyGen2Test {
                         plain_unlock_key.server_km);
             }
 
-            return new ProvisioningFinalizationRequestEncoder(serverState, FIN_PROV_URL).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
+            return new ProvisioningFinalizationRequestEncoder(serverState).serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1359,8 +1307,6 @@ public class KeyGen2Test {
             writeOption("Brainpool EC", brain_pool);
             writeOption("HTTPS server certificate", https);
             writeOption("TrustAnchor option", set_trust_anchor);
-            writeOption("Abort URL option", set_abort_url);
-            writeOption("Virtual Environment option", virtual_environment);
             server = new Server();
             client = new Client();
             byte[] json;
@@ -1586,7 +1532,6 @@ public class KeyGen2Test {
     public void DevicePIN() throws Exception {
         Doer doer = new Doer();
         devicePinProtection = true;
-        set_abort_url = true;
         doer.perform();
     }
 
@@ -1845,13 +1790,6 @@ public class KeyGen2Test {
         doer.perform();
         X509Certificate[] cert_path = sks.getKeyAttributes(doer.getFirstKey()).getCertificatePath();
         assertTrue("Path Length", CertificateUtil.isTrustAnchor(cert_path[cert_path.length - 1]));
-    }
-
-    @Test
-    public void VirtualEnvironment() throws Exception {
-        Doer doer = new Doer();
-        virtual_environment = true;
-        doer.perform();
     }
 
     @Test

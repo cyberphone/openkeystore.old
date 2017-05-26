@@ -78,7 +78,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
         // Get the ephemeral client key
         /////////////////////////////////////////////////////////////////////////////////////////
         clientEphemeralKey = (ECPublicKey) rd.getObject(CLIENT_EPHEMERAL_KEY_JSON)
-                .getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                .getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path

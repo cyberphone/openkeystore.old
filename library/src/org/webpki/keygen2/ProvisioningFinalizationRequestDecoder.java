@@ -449,8 +449,6 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder {
 
         clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        submitUrl = getURL(rd, SUBMIT_URL_JSON);
-
         closeSessionNonce = rd.getBinary(NONCE_JSON);
 
         closeSessionMac = KeyGen2Validator.getMac(rd);

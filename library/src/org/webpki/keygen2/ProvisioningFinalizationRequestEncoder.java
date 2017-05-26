@@ -43,15 +43,12 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String submitUrl;
-
     ServerState serverState;
 
     // Constructors
 
-    public ProvisioningFinalizationRequestEncoder(ServerState serverState, String submitUrl) throws IOException {
+    public ProvisioningFinalizationRequestEncoder(ServerState serverState) throws IOException {
         this.serverState = serverState;
-        this.submitUrl = submitUrl;
         serverState.checkState(true, serverState.currentPhase == ProtocolPhase.KEY_CREATION ?
                           ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
         serverState.currentPhase = ProtocolPhase.PROVISIONING_FINALIZATION;
@@ -193,8 +190,6 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder {
             wr.setString(SERVER_SESSION_ID_JSON, serverState.serverSessionId);
 
             wr.setString(CLIENT_SESSION_ID_JSON, serverState.clientSessionId);
-
-            wr.setString(SUBMIT_URL_JSON, submitUrl);
 
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials

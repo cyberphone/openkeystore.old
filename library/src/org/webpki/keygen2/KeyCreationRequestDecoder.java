@@ -678,8 +678,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
     private Vector<KeyObject> requestObjects = new Vector<KeyObject>();
 
-    private String submitUrl;
-
     private boolean deferredIssuance;
 
     private String serverSessionId;
@@ -693,11 +691,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
 
     public String getServerSessionId() {
         return serverSessionId;
-    }
-
-
-    public String getSubmitUrl() {
-        return submitUrl;
     }
 
 
@@ -723,8 +716,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder {
         serverSessionId = getID(rd, SERVER_SESSION_ID_JSON);
 
         clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
-
-        submitUrl = getURL(rd, SUBMIT_URL_JSON);
 
         deferredIssuance = rd.getBooleanConditional(DEFERRED_ISSUANCE_JSON);
 

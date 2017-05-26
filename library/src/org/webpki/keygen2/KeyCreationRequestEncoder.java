@@ -33,8 +33,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    String submitUrl;
-
     boolean deferredIssuance;
 
     ServerState serverState;
@@ -44,9 +42,8 @@ public class KeyCreationRequestEncoder extends ServerEncoder {
 
     // Constructors
 
-    public KeyCreationRequestEncoder(ServerState serverState, String submitUrl) throws IOException {
+    public KeyCreationRequestEncoder(ServerState serverState) throws IOException {
         this.serverState = serverState;
-        this.submitUrl = submitUrl;
         serverState.checkState(true, serverState.currentPhase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
         serverState.currentPhase = ProtocolPhase.KEY_CREATION;
     }
@@ -82,8 +79,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder {
         wr.setString(SERVER_SESSION_ID_JSON, serverState.serverSessionId);
 
         wr.setString(CLIENT_SESSION_ID_JSON, serverState.clientSessionId);
-
-        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         wr.setString(KEY_ENTRY_ALGORITHM_JSON, algorithm);
 

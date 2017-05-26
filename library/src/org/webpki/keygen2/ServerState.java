@@ -1092,8 +1092,6 @@ public class ServerState implements Serializable {
 
     byte[] savedCloseNonce;
 
-    byte[] veNonce;
-
     X509Certificate[] deviceCertificatePath;
 
     PostProvisioningTargetKey addPostOperation(String oldClientSessionId,
@@ -1195,8 +1193,9 @@ public class ServerState implements Serializable {
 
 
     // Constructor
-    public ServerState(ServerCryptoInterface serverCryptoInterface) {
+    public ServerState(ServerCryptoInterface serverCryptoInterface, String issuerUri) {
         this.serverCryptoInterface = serverCryptoInterface;
+        this.issuerUri = issuerUri;
     }
 
     ServerState addQuery(String typeUri, CAPABILITY what) throws IOException {
@@ -1248,7 +1247,6 @@ public class ServerState implements Serializable {
                 bad("Non-matching capability for URI: " + capability);
             }
         }
-        veNonce = invocationResponse.nonce;
     }
 
 

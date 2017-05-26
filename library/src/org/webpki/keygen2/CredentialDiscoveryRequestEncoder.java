@@ -47,8 +47,6 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
 
     ServerCryptoInterface serverCryptoInterface;
 
-    String submitUrl;
-
     String serverSessionId;
 
     String clientSessionId;
@@ -160,12 +158,11 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder(ServerState serverState, String submitUrl) throws IOException {
+    public CredentialDiscoveryRequestEncoder(ServerState serverState) throws IOException {
         serverState.checkState(true, ProtocolPhase.CREDENTIAL_DISCOVERY);
         clientSessionId = serverState.clientSessionId;
         serverSessionId = serverState.serverSessionId;
         serverCryptoInterface = serverState.serverCryptoInterface;
-        this.submitUrl = submitUrl;
     }
 
 
@@ -184,8 +181,6 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder {
         wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
         wr.setString(CLIENT_SESSION_ID_JSON, clientSessionId);
-
-        wr.setString(SUBMIT_URL_JSON, submitUrl);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup descriptors
