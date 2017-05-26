@@ -218,6 +218,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         String description;
         
         OptionalArrayObject(String name, int min, String description) {
+            if (name.endsWith("s")) {
+                name = name.substring(0, name.length() - 1);
+            }
             this.name = name;
             this.min = min;
             this.description = description;
@@ -455,18 +458,21 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         return s.toString();
     }
     
-    static String sksAsymKey(boolean rsaSupport, String sksMethod, String sksParameter) throws IOException {
+    static String sksAsymKey(boolean rsaSupport,
+                             String purpose,
+                             String sksMethod,
+                             String sksParameter) throws IOException {
         return new StringBuffer(rsaSupport ? "RSA or " : "")
           .append("EC key in JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
-          .append(" <code>&quot;" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "&quot;</code> format." +
-                  LINE_SEPARATOR +
-                  "See <code>SKS:")
-          .append(sksMethod)
-          .append('.')
-          .append(sksParameter)
-          .append("</code>." + LINE_SEPARATOR + 
-                  "For EC curve support see ")
+          .append(" <code>&quot;" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "&quot;</code> format")
+          .append(purpose)
+          .append(".")
+          .append(sksMethod == null ? 
+                          "" : 
+                          LINE_SEPARATOR + "See <code>SKS:" +
+                          sksMethod + "." + sksParameter + "</code>.") 
+          .append(LINE_SEPARATOR + "For EC curve support see ")
           .append(json.globalLinkRef(ELLIPTIC_CURVE_SUPPORT))
           .append('.')
           .toString();
@@ -600,14 +606,6 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                                     json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName()) + " verify that there actually is an <i>open</i> SKS provisioning session having a matching " +
                                     json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName(), SERVER_SESSION_ID_JSON) + ".");
 
-        json.addParagraphSubObject("SOP Adherance").append("The KeyGen2 proxy <b>must not</b> accept <code>SubmitURL</code> requests outside of the domain which returned the " + json.globalLinkRef (KeyGen2Messages.INVOCATION_REQUEST.getName()) +
-                                    " message, i.e. strictly following SOP (Same Origin Policy).");
-
-        json.addParagraphSubObject("JCS Profile").append("The JCS <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                          "</code>, <code>" +JSONSignatureDecoder.EXTENSIONS_JSON + "</code> and <code>" + 
-                          JSONSignatureDecoder.REMOTE_KEY_JSON + "</code> " +
-                          "properties <b>must not</b> be featured in KeyGen2 messages.");
-
         json.addDataTypesDescription("");
         
         json.addProtocolTableEntry("Objects").append("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
@@ -666,6 +664,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                                     json.createReference(JSONBaseHTML.REF_JCS) + " specifications");
         json.addDocumentHistoryLine("2015-01-12", "0.72", "Updated version to match ECDSA signature encoding change");
         json.addDocumentHistoryLine("2016-01-25", "0.73", "Added JOSE algorithm support");
+        json.addDocumentHistoryLine("2017-05-26", "0.80", "Removed unessesary bloat from the protocol");
 
         json.addParagraphObject("Author").append("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                      "of the OpenKeyStore project " +
@@ -715,10 +714,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .setUsage(false)
             .newColumn()
-              .addString("The <code>" + PRIVACY_ENABLED_JSON +
-                          "</code> flag is used to set mode during ")
+              .addString("<i>Optional</i>: The <code>&quot;" + PRIVACY_ENABLED_JSON +
+                          "&quot;</code> flag is used to set mode during ")
                .addLink(KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName())
-               .addString(".<br>See <code>SKS:createProvisioningSession." + PRIVACY_ENABLED_JSON +
+               .addString("." + LINE_SEPARATOR + "See <code>SKS:createProvisioningSession." + PRIVACY_ENABLED_JSON +
                            "</code>." + LINE_SEPARATOR + "Note: The default value is <code>false</code>.")
           .newExtensionRow(new OptionalArrayList(PREFERREDD_LANGUAGES_JSON,
                                                    "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation."))
@@ -824,6 +823,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
             .newColumn()
               .addString(sksAsymKey(false,
+                                    "",
                                     "createProvisioningSession",
                                     SERVER_EPHEMERAL_KEY_JSON))
           .newRow()
@@ -835,8 +835,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
              .newColumn()
               .setUsage(false)
              .newColumn()
-             .addString("See <code>SKS:createProvisioningSession." +
-                                              KEY_MANAGEMENT_KEY_JSON + "</code>.")
+              .addString("<i>Optional:</i> ")
+              .addString(sksAsymKey(true,
+                                    ", dedicated for key management",
+                                    "createProvisioningSession",
+                                    KEY_MANAGEMENT_KEY_JSON))
           .newExtensionRow(new OptionalArrayObject(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON,
                            1,
                            "<i>Optional:</i> List of the previous generation " +
@@ -883,6 +886,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
             .newColumn()
               .addString(sksAsymKey(false,
+                                    ", using the <i>identical</i> curve to " +
+                                     json.globalLinkRef(KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName(), 
+                                                        SERVER_EPHEMERAL_KEY_JSON),
                                     "createProvisioningSession",
                                     CLIENT_EPHEMERAL_KEY_JSON))
             .newExtensionRow(new LinkedObject(DEVICE_ID_JSON,
@@ -905,10 +911,18 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addLink(KeyGen2Messages.PROVISIONING_INITIALIZATION_REQUEST.getName())
               .addString(" object. " + LINE_SEPARATOR + 
                           "This property is mandatory for HTTPS connections.")
-          .newExtensionRow(new LinkedObject(JSONSignatureDecoder.SIGNATURE_JSON,
-                                             true,
-                                             "Symmetric key signature covering the entire response. See <code>" +
-                                             "SKS:signProvisioningSessionData</code>."));
+          .newRow()
+            .newColumn()
+              .addProperty(JSONSignatureDecoder.SIGNATURE_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.SIGNATURE_JSON)
+            .newColumn()
+              .setType(WEBPKI_DATA_TYPES.OBJECT)
+            .newColumn()
+            .newColumn()
+              .addString("JCS ")
+              .addString(json.createReference(JSONBaseHTML.REF_JCS))
+              .addString(" symmetric key signature covering the entire response." + LINE_SEPARATOR +
+                         "See <code>SKS:signProvisioningSessionData</code>.");
 
         preAmble(KeyGen2Messages.CREDENTIAL_DISCOVERY_REQUEST.getName())
           .newExtensionRow(new StandardServerClientSessionIDs())
@@ -1052,16 +1066,19 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
             .newColumn()
-              .addString("Previous generation key management key." + LINE_SEPARATOR +
+             .addString(sksAsymKey(true,
+                                   ", containing a <i>previous generation</i> key management key." + LINE_SEPARATOR +
                           "Note that <code>SKS:updateKeyManagementKey." + KEY_MANAGEMENT_KEY_JSON + "</code>" +
-                          " refers to the <i>new</i> key management key specified in the object <i>immediately above</i> (=embedding) this ")
-              .addLink(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)
-              .addString(" object.")
+                          " refers to the <i>new</i> key management key specified in the object <i>immediately above</i> this " +
+              json.globalLinkRef(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON) +
+              " object",
+                                    null,
+                                    null))
           .newRow()
             .newColumn()
               .addProperty(AUTHORIZATION_JSON)
@@ -1084,7 +1101,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.ID)
             .newColumn()
             .newColumn()
-              .addString("Each specifier <b>must</b> have a unique ID.")
+              .addString("Each specifier <b>must</b> have a unique <code>&quot;" + ID_JSON + "&quot;</code>.")
           .newRow()
             .newColumn()
               .addProperty(NONCE_JSON)
@@ -1093,7 +1110,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
-              .addString("<code>" + NONCE_JSON + "</code> data. " +
+              .addString("Property holding a <code>&quot;" + NONCE_JSON + "&quot;</code> object. " +
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.")
           .newRow()
             .newColumn()
@@ -1132,7 +1149,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.ID)
             .newColumn()
             .newColumn()
-              .addString("Each result <b>must</b> have a unique ID matching the request.")
+              .addString("Each result <b>must</b> have a unique <code>&quot;" + ID_JSON + "&quot;</code> matching the request.")
           .newRow()
             .newColumn()
               .addProperty(MATCHING_CREDENTIALS_JSON)
@@ -1168,10 +1185,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
-              .addString("Identical representation to <code>" +
+              .addString("Certificate path having identical representation to <code>&quot;" +
                           JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-                          "</code> in ")
-              .addLink(JSONSignatureDecoder.SIGNATURE_JSON)
+                          "&quot;</code> in JCS ")
+              .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".")
           .newRow()
             .newColumn()
@@ -1493,18 +1510,21 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.ID)
             .newColumn()
             .newColumn()
-              .addString("<code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
+              .addString("The <code>&quot;" + ID_JSON + "&quot;</code> property <b>must</b> match the identifier used in ")
               .addLink(KeyGen2Messages.KEY_CREATION_REQUEST.getName())
               .addString(" for a specific key.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
             .newColumn()
-              .addString("See <code>SKS:createKeyEntry." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>.")
+               .addString(sksAsymKey(true,
+                                     "",
+                                     "createKeyEntry",
+                                     JSONSignatureDecoder.PUBLIC_KEY_JSON))
           .newRow()
             .newColumn()
               .addProperty(ATTESTATION_JSON)
@@ -1524,8 +1544,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.ID)
             .newColumn()
             .newColumn()
-              .addString("See <code>SKS:setCertificatePath." + ID_JSON + "</code>")
-              .addString(".<br><code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
+              .addString("See <code>SKS:setCertificatePath." + ID_JSON + "</code>." + LINE_SEPARATOR +
+                      "The <code>&quot;" + ID_JSON + "&quot;</code> property <b>must</b> match the identifier used in ")
               .addLink(KeyGen2Messages.KEY_CREATION_REQUEST.getName())
               .addString(" for a specific key.")
           .newRow()
@@ -1536,12 +1556,12 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
-              .addString("See <code>SKS:setCertificatePath.certificate...</code>")
-              .addString(".<br>Identical representation as the <code>" +
+              .addString("Certificate path having identical representation to <code>&quot;" +
                           JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-                          "</code> in ")
-              .addLink(JSONSignatureDecoder.SIGNATURE_JSON)
-              .addString(".")
+                          "&quot;</code> in JCS ")
+              .addString(json.createReference(JSONBaseHTML.REF_JCS))
+              .addString("." + LINE_SEPARATOR +
+                         "See <code>SKS:setCertificatePath.certificate</code>.")
           .newExtensionRow(new MAC("setCertificatePath"))
           .newRow()
             .newColumn()
@@ -1830,37 +1850,12 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
-              .addString("Identical representation as the <code>" +
+              .addString("Device certificate path having identical representation to <code>&quot;" +
                           JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-                          "</code> in JCS ")
+                          "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".");
         
-        json.addSubItemTable(SERVER_EPHEMERAL_KEY_JSON)
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-            .newColumn()
-              .setType(WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn()
-            .newColumn()
-              .addString("<code>" + SERVER_EPHEMERAL_KEY_JSON + 
-                         "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
-      
-        json.addSubItemTable(CLIENT_EPHEMERAL_KEY_JSON)
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-            .newColumn()
-              .setType(WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn()
-            .newColumn()
-              .addString("<code>" + CLIENT_EPHEMERAL_KEY_JSON + 
-                         "</code> <b>must</b> be an EC key using the same curve as <code>" + 
-                         SERVER_EPHEMERAL_KEY_JSON + "</code>.");
-
         json.writeHTML();
     }
 }
