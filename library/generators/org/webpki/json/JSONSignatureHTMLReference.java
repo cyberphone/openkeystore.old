@@ -573,7 +573,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
        "Special thanks go to James&nbsp;Manger who pointed out the ECMAScript ")
        .append(json.createReference(JSONBaseHTML.REF_ES6))
        .append(" number serialization scheme as well as reviewing a related Internet draft." + LINE_SEPARATOR +
-        "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
+        "An early prototype was funded by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
         
         json.addReferenceTable();
         
