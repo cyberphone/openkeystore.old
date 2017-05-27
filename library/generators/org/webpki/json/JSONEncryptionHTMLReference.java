@@ -115,7 +115,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     .addProperty(JSONSignatureDecoder.ALGORITHM_JSON)
                     .addSymbolicValue(JSONSignatureDecoder.ALGORITHM_JSON)
                 .newColumn()
-                    .setType(Types.WEBPKI_DATA_TYPES.URI)
+                    .setType(Types.WEBPKI_DATA_TYPES.STRING)
                 .newColumn()
                 .newColumn();
     }
