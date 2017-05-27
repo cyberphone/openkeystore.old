@@ -1614,33 +1614,10 @@ public class JSONBaseHTML  {
             throw new IOException(e);
         }
         return
-          "Invocation of " + protocol_name + " relies on a generic browser extension interface according to the following " +
-          "Web&nbsp;IDL " +
-          createReference(JSONBaseHTML.REF_WEBIDL) +
-          " definition:" +
-          "<div style=\"padding:10pt 0pt 15pt 20pt\"><code>" +
-          "interface WebPKI {<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
-          "&nbsp;&nbsp;// Verify if named JSON object is supported</code><code><br>" +
-          "&nbsp;&nbsp;boolean isSupported(DOMString context, DOMString qualifier);<br>" +
-          "&nbsp;<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
-          "&nbsp;&nbsp;// Invoke with full JSON object given as a string. Returns false if object is not supported</code><code><br>" +
-          "&nbsp;&nbsp;boolean invoke(DOMString invocationObject);<br>" +
-          "};<br>" +
-          "&nbsp;<br>" +
-          "partial interface Window {<br></code><code style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">" +
-          "&nbsp;&nbsp;// This interface extends the &quot;window&quot; object</code><code><br>" +
-          "&nbsp;&nbsp;readonly attribute WebPKI webpki;<br>" +
-          "};</code></div>The JavaScript (presumably embedded in an HTML page) below shows how to use the interface:" +
-          "<div style=\"padding:10pt 0pt 15pt 20pt\"><code>" +
-          "if (!window.webpki.invoke('{&quot;</code><code style=\"color:" + JSONObjectWriter.htmlKeywordColor + "\">" + 
-          JSONDecoderCache.CONTEXT_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.htmlStringColor + "\">"+ decoder.getContext () + "</code><code>&quot;,' +<br>" +
-          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
-          "&quot;</code><code style=\"color:" + JSONObjectWriter.htmlKeywordColor + "\">" + 
-          JSONDecoderCache.QUALIFIER_JSON + "</code><code>&quot;:&quot;</code><code style=\"color:" + JSONObjectWriter.htmlStringColor + "\">" + decoder.getQualifier () + "</code><code>&quot;,' +<br>" +
-          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'" +
-          "</code><i>Other properties associated with the request object</i><code>}') {<br>" +
-          "&nbsp;&nbsp;alert('Not supported');<br>" +
-          "};</code></div>Note that properties do not have to be ordered and that whitespace between elements is ignored.";
+          "Since the interface between the Web and native applications is not (yet) standardized, the " +
+          "invocation of " + protocol_name + " relies on browser and platform specific solutions. " +
+          "For Android, &quot;Intents&quot; are currently utilized for handing over an invocation URL " +
+          "(including possible session cookies), to a local " + protocol_name + " &quot;App&quot;.";
     }
 
     public void setFavIcon(String favIcon) {
