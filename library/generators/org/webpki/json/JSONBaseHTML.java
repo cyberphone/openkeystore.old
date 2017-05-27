@@ -283,7 +283,7 @@ public class JSONBaseHTML  {
             externalWebReference ("https://cyberphone.github.io/doc/security/jef.html"));
 
         addReferenceEntry(REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V1.02, April&nbsp;2017.</span> " +
+            "<span style=\"white-space: nowrap\">V1.03, May&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/sks-api-arch.pdf"));
 
         addReferenceEntry(REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
