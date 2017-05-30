@@ -50,11 +50,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     
     static JSONBaseHTML json;
     static RowInterface row;
-    static String ECDH_PROPERTIES       = "Additional ECDH properties";
-    static String ECDH_KW_PROPERTIES    = "Additional ECDH+KW properties";
-    static String RSA_PROPERTIES        = "Additional RSA encryption properties";
-    static String JCS_PUBLIC_KEY_EC     = "Additional EC key properties";
-    static String JCS_PUBLIC_KEY_RSA    = "Additional RSA key properties";
+    static String ECDH_PROPERTIES       = "Additional ECDH Properties";
+    static String ECDH_KW_PROPERTIES    = "Additional ECDH+KW Properties";
+    static String RSA_PROPERTIES        = "Additional RSA Encryption Properties";
 
     static final String ENCRYPTED_DATA  = "encryptedData";
     
@@ -389,8 +387,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     .newColumn()
     .newColumn()
         .addString("If the <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON +
-                   "</code> property is defined, the (symmetric) encryption key is supposed to be provided " +
-                   "in-line, encrypted by a public key.")
+                   "</code> property is defined, the (symmetric) data encryption key is supposed to be provided " +
+                   "in-line, but encrypted.")
         .newRow()
         .newColumn()
           .addProperty(JSONDecryptionDecoder.IV_JSON)
@@ -419,7 +417,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
           .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                       "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
-                      "</code> are defined, the (symmetric) encryption key is assumed to known by the recipient.");
+                      "</code> are defined, the (symmetric) data encryption key is assumed to known by the recipient.");
           
         preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, true)
             .addString("Key encryption algorithm. Currently the following JWE " +
@@ -443,10 +441,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     return column;
                 }
             })
-            .addString("</ul>");
-        
-        json.addSubItemTable(ECDH_PROPERTIES)
-            .newRow()
+            .addString("</ul>")
+      .newRow()
         .newColumn()
             .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
             .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
@@ -456,7 +452,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
              .setChoice (false, 2)
         .newColumn()
             .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                   "</code> property is defined, it is supposed to identify the static EC key pair.")
+                   "</code> property is defined, it is supposed to identify the public key associated with the encrypted (or derived) key.")
         .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -465,8 +461,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
         .newColumn()
-          .addString("Static EC public key.")
-        .newRow()
+          .addString("Public key associated with the encrypted (or derived) key.")
+     .newRow(ECDH_PROPERTIES)
         .newColumn()
           .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
           .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -475,32 +471,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Ephemeral EC public key.")
-            .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                  "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                  "</code> are defined, the static EC key pair to use is assumed to known by the recipient.");
-
-        json.addSubItemTable(ECDH_KW_PROPERTIES)
-            .newRow()
-        .newColumn()
-            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
-        .newColumn()
-            .setType(Types.WEBPKI_DATA_TYPES.STRING)
-        .newColumn()
-             .setChoice (false, 2)
-        .newColumn()
-            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                   "</code> property is defined, it is supposed to identify the static EC key pair.")
-        .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
-        .newColumn()
-        .newColumn()
-          .addString("Static EC public key.")
-        .newRow()
+    .newRow(ECDH_KW_PROPERTIES)
         .newColumn()
           .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
           .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
@@ -518,32 +489,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Encrypted symmetric key.")
-            .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                  "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                  "</code> are defined, the static EC key pair to use is assumed to known by the recipient.");
-
-        json.addSubItemTable(RSA_PROPERTIES)
-            .newRow()
-        .newColumn()
-            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
-        .newColumn()
-            .setType(Types.WEBPKI_DATA_TYPES.STRING)
-        .newColumn()
-             .setChoice (false, 2)
-        .newColumn()
-            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                   "</code> property is defined, it is supposed to identify the RSA key pair.")
-        .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
-        .newColumn()
-        .newColumn()
-          .addString("RSA public key.")
-        .newRow()
+     .newRow(RSA_PROPERTIES)
         .newColumn()
           .addProperty(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
           .addSymbolicValue(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON)
@@ -554,7 +500,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .addString("Encrypted symmetric key.")
               .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
                 "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
-                "</code> are defined, the RSA key pair to use is assumed to known by the recipient.");
+                "</code> are defined, the associated key is assumed to known by the recipient.");
 
         json.AddPublicKeyDefinitions();
 

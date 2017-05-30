@@ -17,10 +17,8 @@
 package org.webpki.json;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.net.URLEncoder;
-
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -30,7 +28,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
-
+import org.webpki.json.JSONBaseHTML.ProtocolObject.Row;
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -665,6 +663,7 @@ public class JSONBaseHTML  {
             boolean set_group;
             int depth;
             String property_link;
+            String header;
             
             public class Column implements RowInterface {
                 StringBuffer column = new StringBuffer();
@@ -717,8 +716,7 @@ public class JSONBaseHTML  {
                             false);
                 }
 
-                private Column keyWord(String string, String color,
-                        boolean property) throws IOException {
+                private Column keyWord(String string, String color, boolean property) throws IOException {
                     code();
                     quote();
                     addString("<span style=\"color:");
@@ -726,8 +724,7 @@ public class JSONBaseHTML  {
                     if (property) {
                         parent.property_link = makeLink(protocols[0])
                                 + "."
-                                + (string.charAt(0) == '@' ? string
-                                        .substring(1) : string);
+                                + (string.charAt(0) == '@' ? string.substring(1) : string);
                     }
                     addString("\">");
                     addString(string);
@@ -753,8 +750,7 @@ public class JSONBaseHTML  {
                 }
 
                 public Column addProperty(String property) throws IOException {
-                    return keyWord(property,
-                            JSONObjectWriter.htmlPropertyColor, true);
+                    return keyWord(property, JSONObjectWriter.htmlPropertyColor, true);
                 }
 
                 public Column addSymbolicValue(String symbol_value)
@@ -842,8 +838,7 @@ public class JSONBaseHTML  {
                     return this;
                 }
 
-                public Column addPropertyLink(String property,
-                        String holding_object) throws IOException {
+                public Column addPropertyLink(String property, String holding_object) throws IOException {
                     link(holding_object + "." + property, property, "");
                     return this;
                 }
@@ -877,6 +872,12 @@ public class JSONBaseHTML  {
                         protocol_objects.lastElement().setNotes(notes);
                     }
                     return this;
+                }
+
+                public Row newRow(String header) {
+                    Row row = newRow();
+                    row.header = header;
+                    return row;
                 }
             }
             
@@ -917,6 +918,13 @@ public class JSONBaseHTML  {
             int i = 0;
             int supress = 0;
             for (Row row : rows) {
+                if (row.header != null) {
+                    buffer.append("<tr><th colspan=\"4\" id=\"")
+                          .append(makeLink(row.header))
+                          .append("\">")
+                          .append(row.header)
+                          .append("</th></tr>");
+                }
                 if (row.set_group) {
                     supress = row.depth;
                 }
@@ -1283,10 +1291,7 @@ public class JSONBaseHTML  {
                      JSONBaseHTML.codeVer(JSONSignatureDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
             .addLink (JCS_PUBLIC_KEY_RSA)
             .addString("</li></ul>")
-            .setNotes("This object represents a <i>subset</i> of JWK " + createReference(REF_JWK) +".");
-
-    addSubItemTable(JCS_PUBLIC_KEY_EC)
-       .newRow()
+       .newRow(JCS_PUBLIC_KEY_EC)
           .newColumn()
             .addProperty(JSONSignatureDecoder.CRV_JSON)
             .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
@@ -1324,10 +1329,8 @@ public class JSONBaseHTML  {
                       JSONSignatureDecoder.CRV_JSON + "</code> parameter.  For example, " +
                       "if the value of <code>" + JSONSignatureDecoder.CRV_JSON + "</code> is <code>" +
                       KeyAlgorithms.NIST_P_256.getAlgorithmId (AlgorithmPreferences.JOSE) +
-                      "</code>, the <i>decoded</i> argument <b>must</b> be 32 bytes.");
-
-    addSubItemTable(JCS_PUBLIC_KEY_RSA)
-      .newRow()
+                      "</code>, the <i>decoded</i> argument <b>must</b> be 32 bytes.")
+      .newRow(JCS_PUBLIC_KEY_RSA)
         .newColumn()
           .addProperty(JSONSignatureDecoder.N_JSON)
           .addSymbolicValue(JSONSignatureDecoder.N_JSON)
@@ -1348,7 +1351,8 @@ public class JSONBaseHTML  {
         .newColumn()
           .addString("RSA exponent. Also see the ")
           .addDataTypeLink (Types.WEBPKI_DATA_TYPES.CRYPTO)
-          .addString(" data type.");
+          .addString(" data type.")
+        .setNotes("This object represents a <i>subset</i> of JWK " + createReference(REF_JWK) +".");
         
     }
 
