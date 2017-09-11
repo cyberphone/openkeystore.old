@@ -54,7 +54,7 @@ public abstract class JSONDecoder implements Serializable {
         return null;
     }
 
-    public byte[] serializeJSONDecoder(JSONOutputFormats outputFormat) throws IOException {
-        return new JSONObjectWriter(root).serializeToBytes(outputFormat);
+    public JSONObjectWriter getWriter() throws IOException {
+        return new JSONObjectWriter(root);
     }
 }

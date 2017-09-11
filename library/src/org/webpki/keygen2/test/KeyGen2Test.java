@@ -1249,7 +1249,7 @@ public class KeyGen2Test {
                     "." +
                     round +
                     "\"/>&nbsp;</td></tr></table><div style=\"padding:10pt;word-break:break-all\">");
-            fos.write(xo.serializeJSONDecoder(JSONOutputFormats.PRETTY_HTML));
+            fos.write(xo.getWriter().serializeToBytes(JSONOutputFormats.PRETTY_HTML));
             writeString("</div>");
             return json_data;
         }

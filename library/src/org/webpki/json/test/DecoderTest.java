@@ -37,7 +37,7 @@ public class DecoderTest {
                     parser.setCheckForUnreadProperties(new Boolean(argc[2]));
                     parser.addToCache(argc[0]);
                     JSONDecoder doc = parser.parse(ArrayUtil.readFile(argc[1]));
-                    System.out.print(new String(doc.serializeJSONDecoder(of), "UTF-8"));
+                    System.out.print(new String(doc.getWriter().serializeToBytes(of), "UTF-8"));
                     return;
                 }
             }

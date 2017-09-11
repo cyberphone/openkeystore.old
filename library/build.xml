@@ -301,6 +301,10 @@
         flags="m">
   	    <fileset dir="${doc_dir}" includes="**/*.html"/>
   	</replaceregexp>
+  	<!-- Windows... -->
+    <fixcrlf srcdir="${doc_dir}"
+       eol="lf"
+       includes="**/*.html, **/*.js, **/*.css"/>
   	<!-- HTML Doc task for KeyGen2 -->
     <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.keygen2.KeyGen2HTMLReference"/>

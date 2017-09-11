@@ -2652,7 +2652,7 @@ public class JSONTest {
         assertTrue("Escaping", escape.escape.equals("A\n\tTAB\nN'L /\\\""));
         byte[] data = new Writer().serializeJSONDocument(JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse(data);
-        byte[] output = reader.serializeJSONDecoder(JSONOutputFormats.PRETTY_PRINT);
+        byte[] output = reader.getWriter().serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         assertTrue(ArrayUtil.compare(data, output));
     }
 
