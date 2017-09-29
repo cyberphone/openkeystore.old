@@ -18,7 +18,9 @@ package org.webpki.json;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URLEncoder;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -28,7 +30,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
-import org.webpki.json.JSONBaseHTML.ProtocolObject.Row;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -1015,7 +1017,9 @@ public class JSONBaseHTML  {
             "<!DOCTYPE html>" +
             "<html><head><title>")
          .append(subsystem_name)
-         .append("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">");
+         .append("</title>" +
+                 "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">" +
+                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         if (favIcon != null) {
             html.append("<link rel=\"icon\" href=\"")
                 .append(favIcon)
