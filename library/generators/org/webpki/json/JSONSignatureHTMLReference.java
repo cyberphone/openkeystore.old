@@ -61,9 +61,28 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String formatCode(String code) {
-        return "<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all;width:600pt\"><code>" +
-                code.replace(" ", "&nbsp;").replace("\"", "&quot;").replace("\n", "<br>") +
-                "</code></div>";
+        StringBuffer s = new StringBuffer("<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all\"><code>");
+        int lc = 0;
+        for (char c : code.toCharArray()) {
+            if (c == '\n') {
+                lc = 0;
+                s.append("<br>");
+                continue;
+            }
+            if (lc == 109) {
+                lc = 0;
+                s.append("<br>");
+            }
+            if (c == ' ') {
+                s.append("&nbsp;");
+            } else if (c == '\"') {
+                s.append("&quot;");
+            } else {
+                s.append(c);
+            }
+            lc++;
+        }
+        return s.append("</code></div>").toString();
     }
     
     static String formatCode(JSONObjectReader rd) {
