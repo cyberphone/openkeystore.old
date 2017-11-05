@@ -190,11 +190,19 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
                 if (key.length == dec.getDataEncryptionAlgorithm().getKeyLength()) {
-                    s.append(LINE_SEPARATOR + "AES key named <code>&quot;")
-                     .append(keyProp)
-                     .append("&quot;</code> here provided in Base64URL notation:")
+                    s.append(LINE_SEPARATOR + "AES key");
+                    if (dec.getKeyId() != null) {
+                        s.append(" named <code>&quot;")
+                         .append(keyProp)
+                         .append("&quot;</code>");
+                    }
+                    s.append(" here provided in Base64URL notation:")
                      .append(formatCode(symmetricKeys.getString(keyProp)))
-                     .append("Encryption object requiring the key above for decryption:")
+                     .append("Encryption object requiring the ");
+                    if (dec.getKeyId() == null) {
+                        s.append("<i>implicit</i> ");
+                    }
+                    s.append("key above for decryption:")
                      .append(formatCode(rd));
                     if (!ArrayUtil.compare(dec.getDecryptedData(key), dataToEncrypt)) {
                         throw new IOException("Sym enc");
