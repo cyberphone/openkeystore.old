@@ -149,7 +149,7 @@ public class HTTPSWrapper {
 
     private byte[] server_data;
 
-    private X509Certificate server_certificate;
+    private X509Certificate[] server_certificates;
 
     /* Variables related to sending data to server. */
     private int timeout = 0;
@@ -501,7 +501,7 @@ public class HTTPSWrapper {
         conn.connect();
 
         if (https_flag) {
-            server_certificate = (X509Certificate) (((HttpsURLConnection) conn).getServerCertificates()[0]);
+            server_certificates = (X509Certificate[]) (((HttpsURLConnection) conn).getServerCertificates());
         }
     }
 
@@ -849,12 +849,12 @@ public class HTTPSWrapper {
 
 
     /**
-     * Gets server certificate from HTTPS response.
+     * Gets server certificates from HTTPS response.
      *
-     * @return Server certificate.
+     * @return Server certificate path.
      */
-    public X509Certificate getServerCertificate() {
-        return server_certificate;
+    public X509Certificate[] getServerCertificates() {
+        return server_certificates;
     }
 
 
@@ -1198,8 +1198,8 @@ public class HTTPSWrapper {
                 CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_dump_certs = create(CmdLineArgumentGroup.GENERAL,
-                "certificate", null,
-                "Display TLS certificate",
+                "certificates", null,
+                "Display TLS certificate path",
                 CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_user_id = create(CmdLineArgumentGroup.GENERAL,
@@ -1473,7 +1473,9 @@ public class HTTPSWrapper {
             }
 
             if (CMD_dump_certs.found) {
-                System.out.println("\nCertificate:\n" + new CertificateInfo(wrap.getServerCertificate()).toString());
+                for (X509Certificate certificate : wrap.server_certificates) {
+                    System.out.println("\nCertificate:\n" + new CertificateInfo(certificate).toString());
+                }
             }
 
             if (CMD_dump_headers.found) {

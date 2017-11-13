@@ -18,9 +18,7 @@ package org.webpki.json;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.URLEncoder;
-
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -30,7 +28,6 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -1365,13 +1362,16 @@ public class JSONBaseHTML  {
                 "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded X.509 " + 
                       createReference(JSONBaseHTML.REF_X509) + " certficate path. See " +
                       globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON,
-                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON) + ".");
+                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON) +
+                      " for constraints.");
         remoteKeyFormats.put(JSONRemoteKeys.PEM_PUB_KEY,
-                "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded public key");
+                "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded public key.");
         remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
-                "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key");
+                "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key. See " +
+            "<a href=\"#" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
+            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> for constraints.");
         remoteKeyFormats.put(JSONRemoteKeys.DER_CERT,
-                "DER encoded X.509 " + createReference(JSONBaseHTML.REF_X509) + " certificate");
+                "DER encoded X.509 " + createReference(JSONBaseHTML.REF_X509) + " certificate.");
         if (remoteKeyFormats.size() != JSONRemoteKeys.values().length) {
             throw new IOException("Missing format");
         }
