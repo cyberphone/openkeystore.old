@@ -286,7 +286,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object.</li>" +
             "<li style=\"padding-top:4pt\">Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
-            "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
+            "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences within quoted strings <b>must</b> be treated as &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">As implied by ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
             " section <b>24.3.2.2</b>:<ul style=\"padding-top:2pt;padding-bottom:4pt\"><li>" +
