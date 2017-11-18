@@ -289,7 +289,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">As implied by ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
-            " section <b>24.3.2</b> NOTE 3:<ul style=\"padding-top:2pt;padding-bottom:4pt\"><li>" +
+            " section <b>24.3.2.2</b>:<ul style=\"padding-top:2pt;padding-bottom:4pt\"><li>" +
             "Unicode escape sequences (<code>\\uhhhh</code>) within quoted strings <b>must</b> be adjusted as follows: " +
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
             "it <b>must</b> be rewritten in <i>lowercase</i> hexadecimal notation unless it is one of the predefined " +

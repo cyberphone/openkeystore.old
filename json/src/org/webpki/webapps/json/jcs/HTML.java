@@ -46,7 +46,7 @@ public class HTML {
         + "  &quot;otherProperties&quot;: [2000, true]\n" + "}";
 
     static final String HTML_INIT = "<!DOCTYPE html>"
-        + "<html><head><link rel=\"shortcut icon\" href=\"favicon.ico\">"
+        + "<html><head><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\">"
         + "<meta name=\"viewport\" content=\"initial-scale=1.0\"/>"
         + "<title>JSON Signature Demo</title>"
         + "<style type=\"text/css\">html {overflow:auto} html, body {margin:0px;padding:0px;height:100%} "
