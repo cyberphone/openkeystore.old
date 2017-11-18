@@ -265,9 +265,18 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject("Normalization and Signature Validation").append(
             "Prerequisite: A JSON object in accordance with ")
           .append(json.createReference(JSONBaseHTML.REF_JSON))
-          .append(" containing a properly formatted <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub-object." + LINE_SEPARATOR +
-            "Parsing restrictions:<ul>" +
-            "<li>The original property serialization order <b>must</b> be <i>preserved</i>.</li>" +
+          .append(" containing a properly formatted <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object." + LINE_SEPARATOR +
+            "Parsing constraints:<ul>" +
+            "<li>The original property serialization order <b>must</b> be <i>preserved</i>" +
+            " as described by ECMAScript " +
+            json.createReference(JSONBaseHTML.REF_ES6) +
+            " section <b>9.1.12</b>.</li>" +
+            "<li style=\"padding-top:4pt\">JSON data of the type <code>&quot;Number&quot;</code>, <b>must</b> <i>already during " +
+            "signature creation</i> have been serialized according to ECMAScript " +
+            json.createReference(JSONBaseHTML.REF_ES6) +
+            " section <b>7.1.12.1</b> including NOTE 2 (implemented by for example V8 " +
+            json.createReference(JSONBaseHTML.REF_V8) +
+            "), in order to achieve maximum interoperability.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object." +
@@ -278,18 +287,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<li style=\"padding-top:4pt\">Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
-            "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be adjusted as follows: " +
-            "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
-            "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
-            "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
-            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character " +
-            "with the exception of <code>'&quot;'</code> and <code>'\\'</code> which always <b>must</b> be escaped as well.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON <code>Number</code> type <b>must</b> <i>already during signature creation</i> be "+
-            "serialized according to ECMAScript " +
+            "<li style=\"padding-top:4pt\">As implied by ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
-            " including the V8 " +
-            json.createReference(JSONBaseHTML.REF_V8) +
-            " option in order to achieve interoperability between different platforms and implementations.</li>" +
+            " section <b>24.3.2</b> NOTE 3:<ul style=\"padding-top:2pt;padding-bottom:4pt\"><li>" +
+            "Unicode escape sequences (<code>\\uhhhh</code>) within quoted strings <b>must</b> be adjusted as follows: " +
+            "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
+            "it <b>must</b> be rewritten in <i>lowercase</i> hexadecimal notation unless it is one of the predefined " +
+            "JSON escapes (<code>\\\"&nbsp;\\\\&nbsp;\\b&nbsp;\\f&nbsp;\\n&nbsp;\\r&nbsp;\\t</code>) " +
+            "because the latter have <i>precedence</i>. If the Unicode value is " +
+            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character.</li></ul></li>" +
             "<li style=\"padding-top:4pt\">Now the JSON object associated with the <code>" +
             JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> be " +
             "<i>recreated</i> using the actual text left after applying the previous measures." + LINE_SEPARATOR +
@@ -328,10 +334,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "<i>independently of each other</i> add a signature to a JSON object." + LINE_SEPARATOR +
         "The normalization procedure is essentially the same as for simple signatures but <b>must</b> also take the following in account as well:<ul>" +
         "<li>The signature property <b>must</b> be <code>&quot;" + JSONSignatureDecoder.SIGNATURES_JSON + "&quot;</code>.</li>" +
-        "<li>The <code>'['</code> and <code>']'</code> characters <b>must</b> be <i>included</i> in the normalized data for each signature object.</li>" +
+        "<li>The <code>'['</code> and <code>']'</code> characters <b>must</b> be <i>included</i> in the normalized data for each " +
+        "<a href=\"#" + JSONSignatureDecoder.SIGNATURE_JSON + "\">signature object</a>.</li>" +
         "<li>Each signature requires its own normalization process. During this process the other signature objects <b>must</b> (temporarily) be removed.</li>" +
         "<li>The <code>','</code> characters separating signature objects <b>must</b> be <i>excluded</i> from the normalized data.</li>" +
-        "<li>The order of signatures <b>must</b> be honored by all involved JSON processors.</li>" +
         "</ul>" +
         "Also see <a href=\"#" + JSONBaseHTML.makeLink(COUNTER_SIGNATURES) + "\">" + COUNTER_SIGNATURES + "</a> and " +
         "the <a href=\"#multisignaturesample\">multiple signature sample</a>.");
@@ -514,7 +520,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
             " holding application specific (per signature) metadata.");
 
-        json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub-objects <a href=\"#" + 
+        json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub objects <a href=\"#" + 
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
             JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "\">" +
@@ -610,6 +616,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
         json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
         json.addDocumentHistoryLine("2017-05-18", "0.70", "Added multiple signatures and test vectors");
+        json.addDocumentHistoryLine("2017-11-18", "0.71", "Added detailed references to ECMAScript " + json.createReference(JSONBaseHTML.REF_ES6));
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +

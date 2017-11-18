@@ -266,7 +266,7 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.70, May&nbsp;2017.</span> " +
+            "<span style=\"white-space: nowrap\">V0.71, November&nbsp;2017.</span> " +
             externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
 
         addReferenceEntry(REF_YASMIN,
@@ -1561,7 +1561,7 @@ public class JSONBaseHTML  {
                   .setType(Types.WEBPKI_DATA_TYPES.ANY)
                 .newColumn()
                 .newColumn()
-                  .addString("One or more application specfic extension properties expressed as " +
+                  .addString("One or more application specific extension properties expressed as " +
                   "<i>Property</i>: <i>Arbitrary JSON data</i>. " + Types.LINE_SEPARATOR +
                   "Extensions intended for public consumption are <i>preferably</i> expressed as URIs, " +
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
