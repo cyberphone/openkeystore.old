@@ -18,10 +18,13 @@ package org.webpki.testdata;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -29,6 +32,7 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
+
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
@@ -41,7 +45,9 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.net.HTTPSWrapper;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 
@@ -91,7 +97,7 @@ public class Signatures {
         @Override
         public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            return JSONParser.parse(data).getArray("keys").getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            return JSONParser.parse(data).getArray(JSONSignatureDecoder.KEYS_JSON).getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override

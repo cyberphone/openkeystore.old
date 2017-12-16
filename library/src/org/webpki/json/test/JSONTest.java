@@ -22,8 +22,10 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -32,12 +34,16 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
@@ -46,6 +52,7 @@ import javax.crypto.KeyAgreement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
@@ -53,7 +60,9 @@ import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
+
 import org.webpki.crypto.test.DeterministicSignatureWrapper;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
@@ -73,13 +82,16 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.json.encryption.AsymmetricEncryptionResult;
 import org.webpki.json.encryption.DataEncryptionAlgorithms;
 import org.webpki.json.encryption.DecryptionKeyHolder;
 import org.webpki.json.encryption.EncryptionCore;
 import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 import org.webpki.json.encryption.SymmetricEncryptionResult;
+
 import org.webpki.net.HTTPSWrapper;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
@@ -3362,7 +3374,7 @@ public class JSONTest {
         @Override
         public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            JSONArrayReader ar = JSONParser.parse(data).getArray("keys");
+            JSONArrayReader ar = JSONParser.parse(data).getArray(JSONSignatureDecoder.KEYS_JSON);
             return ar.getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 

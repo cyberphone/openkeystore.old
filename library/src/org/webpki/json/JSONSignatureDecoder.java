@@ -73,9 +73,11 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String EXTENSIONS_JSON            = "extensions";
 
-    public static final String JKU_JSON                   = "jku";         // Remote JWK set url
+    public static final String JKU_JSON                   = "jku";          // Remote JWK set url
 
     public static final String KEY_ID_JSON                = "kid";
+
+    public static final String KEYS_JSON                  = "keys";         // for JWK sets
 
     public static final String KTY_JSON                   = "kty";          // JWK
 
