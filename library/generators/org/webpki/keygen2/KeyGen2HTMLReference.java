@@ -472,7 +472,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         return new StringBuffer(rsaSupport ? "RSA or " : "")
           .append("EC key in JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
-          .append(" <code>&quot;" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "&quot;</code> format")
+          .append(" <code>&quot;" + JSONSignatureDecoder.JWK_JSON + "&quot;</code> format")
           .append(purpose)
           .append(".")
           .append(sksMethod == null ? 
@@ -1073,8 +1073,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addSubItemTable(singularis(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON))
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addProperty(JSONSignatureDecoder.JWK_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.JWK_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1142,7 +1142,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(" <code>&quot;" +JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> object using a key management key signature covering the lookup specifier. " +
-                         "Note that the <code>&quot;" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "&quot;</code> property <b>must</b> be present. " +
+                         "Note that the <code>&quot;" + JSONSignatureDecoder.JWK_JSON + "&quot;</code> property <b>must</b> be present. " +
                          "See SKS appendix &quot;Remote Key Lookup&quot; for more details." + LINE_SEPARATOR +
                          "For maximum interoperability, RSA 2048-bit or EC P-256 signature keys <i>should</i> be used with SHA256 as the <i>recommended</i> hash method.");
 
@@ -1187,14 +1187,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("<code>" + CLIENT_SESSION_ID_JSON + "</code> of matching credential.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
+              .addProperty(JSONSignatureDecoder.X5C_JSON)
               .addArrayList(SORTED_CERT_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
               .addString("Certificate path having identical representation to <code>&quot;" +
-                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X5C_JSON +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".")
@@ -1523,8 +1523,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString(" for a specific key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addProperty(JSONSignatureDecoder.JWK_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.JWK_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1532,7 +1532,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                .addString(sksAsymKey(true,
                                      "",
                                      "createKeyEntry",
-                                     JSONSignatureDecoder.PUBLIC_KEY_JSON))
+                                     JSONSignatureDecoder.JWK_JSON))
           .newRow()
             .newColumn()
               .addProperty(ATTESTATION_JSON)
@@ -1558,14 +1558,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString(" for a specific key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
+              .addProperty(JSONSignatureDecoder.X5C_JSON)
               .addArrayList(SORTED_CERT_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
               .addString("Certificate path having identical representation to <code>&quot;" +
-                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X5C_JSON +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString("." + LINE_SEPARATOR +
@@ -1582,7 +1582,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .addString("<i>Optional:</i> Flag (with the default value <code>false</code>), " +
                           "which tells if <code>" +
-                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X5C_JSON +
                           "</code> contains a user-installable trust anchor as well." + LINE_SEPARATOR +
                           "Trust anchor installation is meant to be <i>independent</i> of SKS provisioning.")
           .newExtensionRow(new LinkedObject(IMPORT_SYMMETRIC_KEY_JSON,
@@ -1852,14 +1852,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addSubItemTable(DEVICE_ID_JSON)
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
+              .addProperty(JSONSignatureDecoder.X5C_JSON)
               .addArrayList(SORTED_CERT_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
               .addString("Device certificate path having identical representation to <code>&quot;" +
-                          JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X5C_JSON +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".");
