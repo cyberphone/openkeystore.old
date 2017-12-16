@@ -326,7 +326,7 @@ public class JSONSignatureDecoder implements Serializable {
                 publicKey = options.remoteKeyReader.readPublicKey(url);
             }
         } else if (rd.hasProperty(X5C_JSON)) {
-            certificatePath = getCertificatePath(rd);
+            certificatePath = rd.getCertificatePath();
         } else if (rd.hasProperty(JWK_JSON)) {
             publicKey = rd.getPublicKey(options.algorithmPreferences);
         } else {
@@ -387,10 +387,6 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
         return certificates.toArray(new X509Certificate[0]);
-    }
-
-    static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
-        return rd.getArray(X5C_JSON).getCertificatePath();
     }
 
     void checkVerification(boolean success) throws IOException {

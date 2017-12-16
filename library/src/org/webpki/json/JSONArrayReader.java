@@ -146,7 +146,7 @@ public class JSONArrayReader implements Serializable {
         return blobs;
     }
 
-    public X509Certificate[] getCertificatePath () throws IOException {
+    public X509Certificate[] getCertificatePath() throws IOException {
         Vector<byte[]> blobs = new Vector<byte[]>();
         do {
             blobs.add(new Base64().getBinaryFromBase64String(getString()));
