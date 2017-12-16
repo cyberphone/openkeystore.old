@@ -56,7 +56,7 @@ public class Signatures {
     static String keyId;
    
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
-    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwk";
+    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
     
     public static class WebKey implements JSONRemoteKeys.Reader {
         
@@ -89,21 +89,15 @@ public class Signatures {
         }
 
         @Override
-        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException {
+        public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.JWK_PUB_KEY) {
-                return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-            }
-            throw new IOException("Not implemented");
+            return JSONParser.parse(data).getArray("keys").getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override
-        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
+        public X509Certificate[] readCertificatePath(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.PEM_CERT_PATH) {
-                return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
-            }
-            throw new IOException("Not implemented");
+            return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
         }
     }
 
@@ -253,9 +247,7 @@ public class Signatures {
         KeyPair keyPair = readJwk(keyType);
         X509Certificate[] certPath = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
                 .getJSONArrayReader().getCertificatePath();
-        byte[] signedData = 
-            createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null)
-                                .setSignatureCertificateAttributes(true));
+        byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null));
         ArrayUtil.writeFile(baseSignatures + keyType + "certsigned.json", signedData);
         JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(x509Verifier);
     }

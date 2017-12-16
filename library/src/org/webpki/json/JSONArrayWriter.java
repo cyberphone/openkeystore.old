@@ -30,6 +30,7 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.util.Base64URL;
+import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -121,9 +122,10 @@ public class JSONArrayWriter implements Serializable {
         X509Certificate lastCertificate = null;
         for (X509Certificate certificate : certificatePath) {
             try {
-                arrayWriter.setBinary(
-                        JSONSignatureDecoder.pathCheck(lastCertificate, 
-                                                       lastCertificate = certificate).getEncoded());
+                arrayWriter.setString(
+                        new Base64(false)
+                            .getBase64StringFromBinary(JSONSignatureDecoder
+                                .pathCheck(lastCertificate, lastCertificate = certificate).getEncoded()));
             } catch (GeneralSecurityException e) {
                 throw new IOException(e);
             }

@@ -63,9 +63,9 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
 
     // JSON properties
-    public static final String ALGORITHM_JSON             = "algorithm";
+    public static final String ALGORITHM_JSON             = "alg";
 
-    public static final String CERTIFICATE_PATH_JSON      = "certificatePath";
+    public static final String CERTIFICATE_PATH_JSON      = "x5c";
 
     public static final String CRV_JSON                   = "crv";          // JWK
 
@@ -73,31 +73,19 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String EXTENSIONS_JSON            = "extensions";
 
-    public static final String FORMAT_JSON                = "format";       // Remote key argument
+    public static final String JKU_JSON                   = "jku";         // Remote JWK set url
 
-    public static final String ISSUER_JSON                = "issuer";
-
-    public static final String KEY_ID_JSON                = "keyId";
+    public static final String KEY_ID_JSON                = "kid";
 
     public static final String KTY_JSON                   = "kty";          // JWK
 
     public static final String N_JSON                     = "n";            // JWK
 
-    public static final String PUBLIC_KEY_JSON            = "publicKey";
-
-    public static final String REMOTE_KEY_JSON            = "remoteKey";    // Remote key
-
-    public static final String SERIAL_NUMBER_JSON         = "serialNumber";
+    public static final String PUBLIC_KEY_JSON            = "jwk";
 
     public static final String SIGNATURE_JSON             = "signature";
 
     public static final String SIGNATURES_JSON            = "signatures";
-
-    public static final String SIGNER_CERTIFICATE_JSON    = "signerCertificate";
-
-    public static final String SUBJECT_JSON               = "subject";
-
-    public static final String URI_JSON                   = "uri";          // Remote key argument
 
     public static final String VALUE_JSON                 = "value";
 
@@ -106,6 +94,8 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String X_JSON                     = "x";            // JWK
 
     public static final String Y_JSON                     = "y";            // JWK
+    
+    public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
 
     public static abstract class Extension {
         
@@ -323,16 +313,18 @@ public class JSONSignatureDecoder implements Serializable {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
-            JSONObjectReader remoteKeyInfo = rd.getObject(REMOTE_KEY_JSON);
-            String url = remoteKeyInfo.getString(URI_JSON);
-            JSONRemoteKeys format = JSONRemoteKeys.getFormatFromId(remoteKeyInfo.getString(FORMAT_JSON));
-            if (format.certificatePath) {
-                certificatePath = options.remoteKeyReader.readCertificatePath(url, format);
+            String url = rd.getStringConditional(JKU_JSON);
+            if (url == null) {
+                url = rd.getStringConditional(X5U_JSON);
+                if (url == null) {
+                    throw new IOException("\"" + JKU_JSON + "\" or \"" + X5U_JSON + "\" expected");
+                }
+                certificatePath = options.remoteKeyReader.readCertificatePath(url);
             } else {
-                publicKey = options.remoteKeyReader.readPublicKey(url, format);
+                publicKey = options.remoteKeyReader.readPublicKey(url);
             }
         } else if (rd.hasProperty(CERTIFICATE_PATH_JSON)) {
-            readCertificateData(rd);
+            certificatePath = getCertificatePath(rd);
         } else if (rd.hasProperty(PUBLIC_KEY_JSON)) {
             publicKey = rd.getPublicKey(options.algorithmPreferences);
         } else {
@@ -396,23 +388,7 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
-        return makeCertificatePath(rd.getBinaryArray(CERTIFICATE_PATH_JSON));
-    }
-
-    void readCertificateData(JSONObjectReader rd) throws IOException {
-        certificatePath = getCertificatePath(rd);
-        if (rd.hasProperty(SIGNER_CERTIFICATE_JSON)) {
-            rd = rd.getObject(SIGNER_CERTIFICATE_JSON);
-            String issuer = rd.getString(ISSUER_JSON);
-            BigInteger serialNumber = rd.getBigInteger(SERIAL_NUMBER_JSON);
-            String subject = rd.getString(SUBJECT_JSON);
-            X509Certificate signatureCertificate = certificatePath[0];
-            if (!signatureCertificate.getIssuerX500Principal().getName().equals(issuer) ||
-                !signatureCertificate.getSerialNumber().equals(serialNumber) ||
-                !signatureCertificate.getSubjectX500Principal().getName().equals(subject)) {
-                throw new IOException("\"" + SIGNER_CERTIFICATE_JSON + "\" doesn't match actual certificate");
-            }
-        }
+        return rd.getArray(CERTIFICATE_PATH_JSON).getCertificatePath();
     }
 
     void checkVerification(boolean success) throws IOException {

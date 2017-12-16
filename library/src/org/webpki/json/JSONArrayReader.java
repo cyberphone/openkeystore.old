@@ -27,6 +27,7 @@ import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
+import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
@@ -146,6 +147,10 @@ public class JSONArrayReader implements Serializable {
     }
 
     public X509Certificate[] getCertificatePath () throws IOException {
-        return JSONSignatureDecoder.makeCertificatePath(getBinaryArray());
+        Vector<byte[]> blobs = new Vector<byte[]>();
+        do {
+            blobs.add(new Base64().getBinaryFromBase64String(getString()));
+        } while (hasMore());
+        return JSONSignatureDecoder.makeCertificatePath(blobs);
     }
 }

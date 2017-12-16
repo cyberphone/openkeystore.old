@@ -392,7 +392,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") + 
         "<span id=\"remotekeyexample\">The</span> following signature object is referring to a " +
-        json.globalLinkRef(JSONSignatureDecoder.REMOTE_KEY_JSON) +
+        json.globalLinkRef(JSONSignatureDecoder.JKU_JSON) +
         " which in turn should be identical to the key used in the previous RSA examples:" +
         formatCode(readSignature("r2048remotekeysigned.json")) +
         readSymSignature(new String[]{"hs256signed.json",
@@ -564,9 +564,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(INTEROPERABILITY).append("Since serialization of floating point numbers as specified by JCS is " +
          "(at the time of writing) not available for all platforms, you <i>may</i> for highest possible " + 
          "interoperability need to put such data in quotes.  Albeit a limitation, financial data is not natively supported by JSON either " +
-         "due to the fact that JavaScript lacks support for big decimals.  Note the handling of " +
-         "<a href=\"#" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "." + JSONSignatureDecoder.SERIAL_NUMBER_JSON +
-         "\">certificate serial numbers</a> in JCS." + LINE_SEPARATOR +
+         "due to the fact that JavaScript lacks support for big decimals." + LINE_SEPARATOR +
          "JCS compatible reference implementations are available both for server Java and Android ")
          .append(json.createReference(JSONBaseHTML.REF_OPENKEYSTORE))
          .append(". These implementations use ECMAScript number serialization when <i>creating</i> JSON data, making them compliant "+
@@ -602,21 +600,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         
         json.addReferenceTable();
         
-        json.addDocumentHistoryLine("2013-12-17", "0.3", "Initial publication in HTML5");
-        json.addDocumentHistoryLine("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
-        json.addDocumentHistoryLine("2013-12-29", "0.5", "Added the <code>" + JSONSignatureDecoder.EXTENSIONS_JSON + "</code> facility");
-        json.addDocumentHistoryLine("2014-01-21", "0.51", "Added clarification to public key parameter representation");
-        json.addDocumentHistoryLine("2014-01-26", "0.52", "Added note regarding the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + "</code> option");
-        json.addDocumentHistoryLine("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
-        json.addDocumentHistoryLine("2014-09-17", "0.54", "Changed canonicalization to normalization");
-        json.addDocumentHistoryLine("2014-09-23", "0.55", "Aligned EC parameter representation with JWS " + json.createReference(JSONBaseHTML.REF_JWS));
-        json.addDocumentHistoryLine("2014-12-08", "0.56", "Removed " + json.createReference(JSONBaseHTML.REF_XMLDSIG) + " bloat and added support for JWA " + json.createReference(JSONBaseHTML.REF_JWS) + " algorithm identifiers");
-        json.addDocumentHistoryLine("2014-12-19", "0.57", "Added an interoperability section");
-        json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
-        json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
-        json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
-        json.addDocumentHistoryLine("2017-05-18", "0.70", "Added multiple signatures and test vectors");
-        json.addDocumentHistoryLine("2017-11-18", "0.71", "Added detailed references to ECMAScript " + json.createReference(JSONBaseHTML.REF_ES6));
+        json.addDocumentHistoryLine("2017-12-16", "0.50", "Initial draft");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +

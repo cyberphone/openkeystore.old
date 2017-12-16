@@ -3,8 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "HS512",
-    "keyId": "s512bitkey",
-    "value": "Ar0obOHcCi9ry3PqEla4ltBF9Jd1y2qu_IjnznBHylG9-1WuarhUoVlDqTuwiYDtuFvjqAW_2ns55rAzG_l68Q"
+    "alg": "HS512",
+    "kid": "s512bitkey",
+    "value": "jfsFU4ANIwSga2ygW8gag89p4BQQwkjqQ8oPOuOaBis_F7wI19e6j1Rto1kmt3lz-a4SIC57QPuHOTY-QF-C1w"
   }
 }

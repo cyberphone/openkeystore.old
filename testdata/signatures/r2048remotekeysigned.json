@@ -3,11 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "RS256",
-    "remoteKey": {
-      "uri": "https://cyberphone.github.io/doc/openkeystore/r2048.jwk",
-      "format": "JWK-PUB-KEY"
-    },
-    "value": "EPIURyLoT6bi9JNvHZKgBBxdczLjt9Cw6iafkgNkTD1W6ib74Pxy0LRrUhJctTZLuNB0UGdXJR1zuCMSn6XNd7CxBkpV1jkwy6S-9C0ms-Gpa4p-MlrZdOLwGDHhYjniV_2INRiLXgZk4Vj2uUbmE700d_yTR3vWXhQjvCZuQGQQGsP2lz3wpQxIAvl7zxteQgIwBw-bmh_h5RBYFY12h5pelDseDkVZkeCFydRHSL05hgkZ_BKziMiZ1LclIrxgtg7vDj6YVPYbxqvrhJn9kjs1LC7S498p44sFCZ3BXhsGf6t8LxKLBhpuU1YqVFI4UxXi8pX3PloyQ3nZj53iSg"
+    "alg": "RS256",
+    "jku": "https://cyberphone.github.io/doc/openkeystore/r2048.jwks",
+    "value": "bYMtdH4KH9IBL9TTBWGRcTj5bgO1vkFzLrb4BfEEPfKsdZwCg347tY7OyiEFwT6cYlfe-OIGG_50YHPvHOrh5nclSsTjpEWtyiYQQBPtQYtD4Pehids_npRJWm1rYvRp-pWc6zQp6JwRw4eLeX-rIlI0oPSkbgDRa5INlLmJ8rb5HpYKiPsD-2NqG0xTc0N13bnllwZnpMDobmnfvzCrpQNa7UcFhUdfm6cvzmsZsUPQILq07s3ru-6oNvco62NyVFBmC2KfS92rzD_q9tpH_KTQ3bv-LD9mH0mne5nASe4YqqOLaCm0GzWtGIFvAQpS6uqCZ1eH6bbY3UbwmpVHiw"
   }
 }

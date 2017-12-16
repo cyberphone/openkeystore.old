@@ -3,13 +3,13 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "ES512",
-    "publicKey": {
+    "alg": "ES512",
+    "jwk": {
       "kty": "EC",
       "crv": "P-521",
       "x": "AKwELPGw-uyxNNMpqynB-71e-5GNMcLmFM0j0mbyVToRflwlWnXS-iAXxR_nOoWK426QoXlyNieyaWBQdwXrnKfj",
       "y": "AIgLgTCaxgKc461uMwFZ04qdBaVa9Wgy8VLNiHrZkKYL3Q_qmLTa9TKQgRThuCpcqlZFnhMPrPLgb3ev6rqCt0GS"
     },
-    "value": "ACv1qHEjvXXDiz5DCm0eEKntHN71k73f7R8H3bTPHQJAimQfGWW_nwnQoQz28qEpzg8ULdNDKjzy4Z7CF7HAjkQeAB2-KA4KTgWxaUO1_sWde8QNNUaqqa4yGUufncpaMquBSV2Lae48Tejelt0oBqcXCfBJUS3Z0kNz5CYgOxpMf1Ri"
+    "value": "AbSMYSrEc_lYaKI0prXnCcdGKtGvnxq3pQDKGwNQ1czBSzqIgF73wVaz9TCB1lPHHROImaTdmQ6xMXVahyj45XqoAW1OwZGkqb5z3fPug2v2u5nu7gfLqaqaJP22pgi37alTfXKPGsAkxlgM6vGtwTZnAPMaKdDeQt4xuHAIF1DREPdL"
   }
 }

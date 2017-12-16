@@ -3,7 +3,7 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "ES512",
-    "value": "AI80F7vVAmQi0noyKhOfmWf9aYYuOA4xlu4fOgQ9EcuE66J2hubfWTEpLHBbSgvvUXZUK4vSqE0cpDpYFjn3A31HADeaE7Q53wXi5SBR9dq6Z6PjbmjWLjTvp7gW53CLGPtroqSuwzisV2A2E1KBgYpaoVFOCR6umjA4-IpYEKFuClEo"
+    "alg": "ES512",
+    "value": "AaS_dVg6EJRvsRechCT4FFAEeKzXA4DSMN4fAtdOBLFAinAhw3W91-2z8_Q-Dd0TSHeE3qImHhm3OH9bRaN-YThbAYUrUv58o7JCdSOhLLfnfqy3Cg4Ed1bo2u4LSOhZle95p87BJ4ZpDKe6RQt1t8ul40__GV1SVb--7r7-Qf4UIaft"
   }
 }

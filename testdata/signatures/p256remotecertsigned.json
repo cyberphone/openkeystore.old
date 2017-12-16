@@ -3,11 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "ES256",
-    "remoteKey": {
-      "uri": "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem",
-      "format": "PEM-CERT-PATH"
-    },
-    "value": "RGR8B9leIl3XzPzIwJmcR68-IqBDKKc6CE-9CPTotRFN_Hc_CUYxEjTvb4Y7mYwPLT5zlck6j_q8nj1LWnU59Q"
+    "alg": "ES256",
+    "x5u": "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem",
+    "value": "EgMVpttACGKfKu-pE551joxOrpofvjz-y_sLXF00cw7qR5fMnc8d_hgbo0_Ak0eGcM1a7HO03Z2WA3IVHjQz5w"
   }
 }

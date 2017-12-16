@@ -3,13 +3,13 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "ES512",
-    "publicKey": {
+    "alg": "ES512",
+    "jwk": {
       "kty": "EC",
       "crv": "P-384",
       "x": "SxtEVg93j4L2bK7Q8qJDYo6xRvP3p3ptyqmQaYnZRH5Ube2T2RogGMl-HHZRTYMO",
       "y": "Zu8b16lT-c5VstC4H9WA28LvcLleE6auP-A9Dr76uu8MI5YjOGH64MJZFswOX8Vz"
     },
-    "value": "mO0Ph8oBTl37waf8SOShct3X8jVmVLx-XjjdZuLd87upJzo0Ya2XFspgwS65MLM0xtjcmrOW4juXUJV79zHfndKSqnT6VX5GyzW-EMZJylclQqyUkvNHV3Zf-iQnoJ4T"
+    "value": "TLEdeHBapz2CNM0fU5aFGcmCDNJZck0_jTqIOIvth0D-dR-6RM3V22VZXwkxTcn0Y6nZnY5fp3bVGdYvEMwsONrNKdcyQMDJ58HZhFhEBTvBqv5cYFkh_-EqxEuCG-Gr"
   }
 }

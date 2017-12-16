@@ -3,8 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "ES256",
-    "keyId": "20170101:mybank:p256",
-    "value": "nJgDRESd3-Q5b5xEykEq1uLOe4MSkxLLTylkioC4j2-KG-qkovb9diSf83nsYKX1-wySf66OJSQKxaCr7CNWQg"
+    "alg": "ES256",
+    "kid": "20170101:mybank:p256",
+    "value": "CWMja3Z-pzPqU1iBg2OcAHX5w9iBFB9NmWndLAmGKRcledhqzh7nF0oJpPj6IHq1aOrt7bZArM5-ug7acL3-FQ"
   }
 }

@@ -3360,21 +3360,16 @@ public class JSONTest {
         }
 
         @Override
-        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException {
+        public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.JWK_PUB_KEY) {
-                return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-            }
-            throw new IOException("Not implemented");
+            JSONArrayReader ar = JSONParser.parse(data).getArray("keys");
+            return ar.getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override
-        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
+        public X509Certificate[] readCertificatePath(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.PEM_CERT_PATH) {
-                return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
-            }
-            throw new IOException("Not implemented");
+            return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
         }
     }
 

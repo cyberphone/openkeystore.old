@@ -3,12 +3,12 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "algorithm": "RS256",
-    "publicKey": {
+    "alg": "RS256",
+    "jwk": {
       "kty": "RSA",
       "n": "oBq8_RJIJF9h2dm4r1kjBwv_W-G_YM-clG7GYwGWih3Y22HZnBmMn2Iqf4uXiwty9lICxrdBNcU6b79DY_GmNbA5j16dsuBIqZSq8yMtXfDpC8OS7Dy6OxjFyMZrA4IEqqjvDEmJC5aXoaBD3exECDvsRgB18jNoKyq2CDWgg22wuLz7I0B_T2tM26hPLRw8KfM8pQ1bPUcFn_nUKCrW7Wc2KIWGPwsPmL24VVctzhUWkr-nHuR_RKs2KAff0SYTpWElyEau7AqHiHAOhnPnGOxfb7r6V1AbDx-F95gSDFtoFPRWhNJDng1qHI23UD_7ONTGIK_I4I6y1rf7r26TDQ",
       "e": "AQAB"
     },
-    "value": "SKD9TahvJNN0QGYNZQT22Z8ODxnyMFQAPEhG_bvAi_xwEnaIZKK_OAYx3AYFq2dJRK2OUd2OsiLoDTg64ZmgM1WlXuTqZVISim99ySlpSE3aaisHBQxojWwBgJRNgwYcreDxARewZmWg4DlM2BtjuX6kXaoOhI5p1XBYzkSdfzrKtDQnyUrovyhpfLeWp4uyG6IQ0epI8UmCuT-rbOVPOShZYzLCG9Eqf1pxLm6q6eU17PXaenN_vFk98QHeE06WQaS8Iop2rmkyabwVQNDGIpujSSma2qnLQ0xyWdm5g5LZs2nDtv3NlLeuuEyMHZd3L56eJ74m0NX_GC4yoS4C4w"
+    "value": "DcbIo0vWtLfjDXVYJKcQgMSbLWN4q3fVTbNZvzvhe5c6J1g0JGaGnc_H242Q4wNEWUuqc9IrR0uBrtDGiDbMKNchIb-hIX00dRFUwIcVbCLvKlu7ogTHRySU0VW1F09bacDsLDdFTdKb2T70gC-51-JFNfR_Lekjiaq2OoIflEhP4aFYz0lQxkAdlLtzmtWlVHDMWtdf1SMfGCIrwg0CixDG_5oVE2qQjwVJrpmeCBxeJ9Ev_9rZY8mpWzYcvZNXzSYaR7eXGqYxthfmqoEXmxiW3CzgCicYy4yX7qSq7gAJbMoYYI9OYXeegW_uEY7jrfM9KgOsvXdCi3DCmIiOWw"
   }
 }

@@ -43,8 +43,6 @@ public class JSONX509Signer extends JSONSigner {
 
     X509Certificate[] certificatePath;
 
-    boolean outputSignatureCertificateAttributes;
-
     /**
      * Constructor for custom crypto solutions.
      * @param signer Handle to implementation
@@ -90,11 +88,6 @@ public class JSONX509Signer extends JSONSigner {
         return this;
     }
 
-    public JSONX509Signer setSignatureCertificateAttributes(boolean flag) {
-        outputSignatureCertificateAttributes = flag;
-        return this;
-    }
-
     public JSONX509Signer setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
         super.algorithmPreferences = algorithmPreferences;
         return this;
@@ -112,13 +105,6 @@ public class JSONX509Signer extends JSONSigner {
 
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
-        if (outputSignatureCertificateAttributes) {
-            X509Certificate signerCertificate = certificatePath[0];
-            wr.setObject(JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-                .setString(JSONSignatureDecoder.ISSUER_JSON, signerCertificate.getIssuerX500Principal().getName())
-                .setBigInteger(JSONSignatureDecoder.SERIAL_NUMBER_JSON, signerCertificate.getSerialNumber())
-                .setString(JSONSignatureDecoder.SUBJECT_JSON, signerCertificate.getSubjectX500Principal().getName());
-        }
         wr.setCertificatePath(certificatePath);
     }
 }

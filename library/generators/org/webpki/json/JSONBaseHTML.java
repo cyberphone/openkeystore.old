@@ -1364,14 +1364,10 @@ public class JSONBaseHTML  {
                       globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON,
                       JSONSignatureDecoder.CERTIFICATE_PATH_JSON) +
                       " for constraints.");
-        remoteKeyFormats.put(JSONRemoteKeys.PEM_PUB_KEY,
-                "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded public key.");
         remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
                 "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key. See " +
             "<a href=\"#" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> for constraints.");
-        remoteKeyFormats.put(JSONRemoteKeys.DER_CERT,
-                "DER encoded X.509 " + createReference(JSONBaseHTML.REF_X509) + " certificate.");
         if (remoteKeyFormats.size() != JSONRemoteKeys.values().length) {
             throw new IOException("Missing format");
         }
@@ -1426,8 +1422,8 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Public key object.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.REMOTE_KEY_JSON)
-              .addLink(JSONSignatureDecoder.REMOTE_KEY_JSON)
+              .addProperty(JSONSignatureDecoder.X5U_JSON)
+              .addLink(JSONSignatureDecoder.X5U_JSON)
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1447,24 +1443,6 @@ public class JSONBaseHTML  {
           .addString(createReference(REF_X509))
           .addString(" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
-      .newRow()
-        .newColumn()
-          .addProperty(JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-          .addLink (JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
-        .newColumn()
-          .setUsage (false)
-        .newColumn()
-          .addString("<i>Optional.</i> Signature certificate attribute data for usage with the <code>" +
-                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "</code> option.")
-          .addString(Types.LINE_SEPARATOR +
-                      "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON +
-                      "</code> object matches the first certificate in the <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
-                      "</code>." + Types.LINE_SEPARATOR +
-                      "Note: Due to the fact that X.500 name comparisons have turned out (in practice) to " +
-                      "be a source of non-interoperability, the <code>" + JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON + 
-                      "</code> option <i>should only be used in specific environments</i>.")
               .newRow()
                 .newColumn()
                   .addProperty(JSONSignatureDecoder.EXTENSIONS_JSON)
@@ -1488,46 +1466,13 @@ public class JSONBaseHTML  {
                       createReference(REF_JWA) + " specifications.")
                        .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
                    "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
-                   ", <code>" + JSONSignatureDecoder.REMOTE_KEY_JSON + "</code>" + 
+                   ", <code>" + JSONSignatureDecoder.X5U_JSON + "</code>" + 
                    " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
                    "</code> property since the key may be given by the context or through the <code>" + 
                    JSONSignatureDecoder.KEY_ID_JSON + "</code> property.");
 
         AddPublicKeyDefinitions();
- 
-        addSubItemTable(JSONSignatureDecoder.SIGNER_CERTIFICATE_JSON)
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.ISSUER_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.ISSUER_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.STRING)
-            .newColumn()
-            .newColumn()
-              .addString("Issuer distinguished name in LDAP ")
-              .addString(createReference(REF_LDAP_NAME))
-              .addString(" notation.")
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.SERIAL_NUMBER_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.SERIAL_NUMBER_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.BIGINT)
-            .newColumn()
-            .newColumn()
-              .addString("Certificate serial number.")
-          .newRow()
-            .newColumn()
-              .addProperty(JSONSignatureDecoder.SUBJECT_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.SUBJECT_JSON)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.STRING)
-            .newColumn()
-            .newColumn()
-              .addString("Subject distinguished name in LDAP ")
-              .addString(createReference(REF_LDAP_NAME))
-              .addString(" notation.");
-
+ /*
             addSubItemTable(JSONSignatureDecoder.REMOTE_KEY_JSON)
             .newRow()
               .newColumn()
@@ -1551,7 +1496,7 @@ public class JSONBaseHTML  {
                 .addString("Currently defined format specifiers:" + 
                         enumerateRemoteKeyFormats() +
                         "See <a href=\"#remotekeyexample\">remote key example</a>.");
-    
+*/    
             addSubItemTable(JSONSignatureDecoder.EXTENSIONS_JSON)
              .newRow()
                 .newColumn()

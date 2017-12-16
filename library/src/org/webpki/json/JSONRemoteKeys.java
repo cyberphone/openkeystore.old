@@ -27,28 +27,20 @@ import java.security.cert.X509Certificate;
  */
 public enum JSONRemoteKeys {
 
-    PEM_CERT_PATH ("PEM-CERT-PATH", true),
-    DER_CERT      ("DER-CERT",      true),
-    PEM_PUB_KEY   ("PEM-PUB-KEY",   false),
-    JWK_PUB_KEY   ("JWK-PUB-KEY",   false);
+    PEM_CERT_PATH (JSONSignatureDecoder.X5U_JSON),
+    JWK_PUB_KEY   (JSONSignatureDecoder.JKU_JSON);
 
     String jsonName;
-    boolean certificatePath;
 
-    JSONRemoteKeys(String jsonName, boolean certificatePath) {
+    JSONRemoteKeys(String jsonName) {
         this.jsonName = jsonName;
-        this.certificatePath = certificatePath;
     }
     
     public interface Reader {
         
-        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException;
+        public PublicKey readPublicKey(String uri) throws IOException;
         
-        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException;
-    }
-
-    public boolean isCertificatePath() {
-        return certificatePath;
+        public X509Certificate[] readCertificatePath(String uri) throws IOException;
     }
 
     @Override
@@ -56,12 +48,4 @@ public enum JSONRemoteKeys {
         return jsonName;
     }
 
-    public static JSONRemoteKeys getFormatFromId(String formatId) throws IOException {
-        for (JSONRemoteKeys format : JSONRemoteKeys.values()) {
-            if (formatId.equals(format.jsonName)) {
-                return format;
-            }
-        }
-        throw new IOException("No such format: " + formatId);
-    }
 }
