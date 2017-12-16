@@ -317,7 +317,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the string normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in the <code>" +
-                  JSONSignatureDecoder.ALGORITHM_JSON + "</code> property using the signature key over the " +
+                  JSONSignatureDecoder.ALG_JSON + "</code> property using the signature key over the " +
                   "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "normalized data." + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
@@ -356,7 +356,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
        " can be verified by the <i>public part</i> of the following EC key in JWK " + 
        json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
        formatCode(p256key) + LINE_SEPARATOR +
-       "The following signature object which uses a <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+       "The following signature object which uses a <code>" + JSONSignatureDecoder.KID_JSON +
        "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
         readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)
@@ -377,8 +377,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readAsymSignature("p521keysigned.json", p521key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but builds on that " +
         "the key to use is <i>implicitly known</i> since the object neither contains a <code>" +
-        JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" + 
-        JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
+        JSONSignatureDecoder.KID_JSON + "</code>, nor a <code>" + 
+        JSONSignatureDecoder.JWK_JSON + "</code> property:" +
         readAsymSignature("p521implicitkeysigned.json", p521key, new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)) +
         "The following signature object uses the same key as in the previous example but featured in " +
@@ -521,10 +521,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             " holding application specific (per signature) metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub objects <a href=\"#" + 
-            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
-            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
-            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + "\">" +
-            JSONSignatureDecoder.CERTIFICATE_PATH_JSON +
+            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.JWK_JSON + "\">" +
+            JSONSignatureDecoder.JWK_JSON + "</a> and <a href=\"#" +
+            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.X5C_JSON + "\">" +
+            JSONSignatureDecoder.X5C_JSON +
             "</a>, have been utilized in a proof-of-concept application ")
          .append(json.createReference(JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
          .append(" running on Android." + LINE_SEPARATOR +

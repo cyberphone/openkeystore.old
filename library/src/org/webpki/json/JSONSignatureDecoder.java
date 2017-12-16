@@ -63,9 +63,9 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
 
     // JSON properties
-    public static final String ALGORITHM_JSON             = "alg";
+    public static final String ALG_JSON                   = "alg";
 
-    public static final String CERTIFICATE_PATH_JSON      = "x5c";
+    public static final String X5C_JSON                   = "x5c";
 
     public static final String CRV_JSON                   = "crv";          // JWK
 
@@ -75,7 +75,7 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String JKU_JSON                   = "jku";          // Remote JWK set url
 
-    public static final String KEY_ID_JSON                = "kid";
+    public static final String KID_JSON                   = "kid";
 
     public static final String KEYS_JSON                  = "keys";         // for JWK sets
 
@@ -83,7 +83,7 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String N_JSON                     = "n";            // JWK
 
-    public static final String PUBLIC_KEY_JSON            = "jwk";
+    public static final String JWK_JSON                   = "jwk";
 
     public static final String SIGNATURE_JSON             = "signature";
 
@@ -222,14 +222,14 @@ public class JSONSignatureDecoder implements Serializable {
         if (!version.equals(SIGNATURE_VERSION_ID)) {
             throw new IOException("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
         }
-        algorithmString = signature.getString(ALGORITHM_JSON);
-        keyId = signature.getStringConditional(KEY_ID_JSON);
+        algorithmString = signature.getString(ALG_JSON);
+        keyId = signature.getStringConditional(KID_JSON);
         if (keyId == null) {
             if (options.keyIdOption == KEY_ID_OPTIONS.REQUIRED) {
-                throw new IOException("Missing \"" + KEY_ID_JSON + "\"");
+                throw new IOException("Missing \"" + KID_JSON + "\"");
             }
         } else if (options.keyIdOption == KEY_ID_OPTIONS.FORBIDDEN) {
-            throw new IOException("Use of \"" + KEY_ID_JSON + "\" must be set in options");
+            throw new IOException("Use of \"" + KID_JSON + "\" must be set in options");
         }
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(signature);
@@ -325,9 +325,9 @@ public class JSONSignatureDecoder implements Serializable {
             } else {
                 publicKey = options.remoteKeyReader.readPublicKey(url);
             }
-        } else if (rd.hasProperty(CERTIFICATE_PATH_JSON)) {
+        } else if (rd.hasProperty(X5C_JSON)) {
             certificatePath = getCertificatePath(rd);
-        } else if (rd.hasProperty(PUBLIC_KEY_JSON)) {
+        } else if (rd.hasProperty(JWK_JSON)) {
             publicKey = rd.getPublicKey(options.algorithmPreferences);
         } else {
             throw new IOException("Missing key information");
@@ -366,7 +366,7 @@ public class JSONSignatureDecoder implements Serializable {
                 ECPoint w = new ECPoint(getCurvePoint(rd, X_JSON, ec), getCurvePoint(rd, Y_JSON, ec));
                 publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ec.getECParameterSpec()));
             } else {
-                throw new IOException("Unrecognized \"" + PUBLIC_KEY_JSON + "\": " + type);
+                throw new IOException("Unrecognized \"" + JWK_JSON + "\": " + type);
             }
             return publicKey;
         } catch (GeneralSecurityException e) {
@@ -390,7 +390,7 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     static X509Certificate[] getCertificatePath(JSONObjectReader rd) throws IOException {
-        return rd.getArray(CERTIFICATE_PATH_JSON).getCertificatePath();
+        return rd.getArray(X5C_JSON).getCertificatePath();
     }
 
     void checkVerification(boolean success) throws IOException {

@@ -2632,10 +2632,10 @@ public class JSONTest {
 
     static KeyPair getKeyPairFromJwk(String jwk) throws Exception {
         JSONObjectReader rd = JSONParser.parse(jwk);
-        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString("crv"),
+        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString(JSONSignatureDecoder.CRV_JSON),
                 AlgorithmPreferences.JOSE);
         if (!ec.isECKey()) {
-            throw new IOException("\"crv\" is not an EC type");
+            throw new IOException("\"" + JSONSignatureDecoder.CRV_JSON + "\" is not an EC type");
         }
         ECPoint w = new ECPoint(getCurvePoint(rd, "x", ec), getCurvePoint(rd, "y", ec));
         PublicKey publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ec.getECParameterSpec()));
@@ -3057,7 +3057,7 @@ public class JSONTest {
 
     static final String p521_jcs =
             "{" +
-                    "  \"publicKey\": " +
+                    "  \"jwk\": " +
                     "     {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
@@ -3068,7 +3068,7 @@ public class JSONTest {
 
     static final String p521_jcs_jose =
             "{" +
-                    "  \"publicKey\": " +
+                    "  \"jwk\": " +
                     "     {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"P-521\"," +
@@ -3084,7 +3084,7 @@ public class JSONTest {
 
     static final String rsa_jcs =
             "{" +
-                    "  \"publicKey\":" +
+                    "  \"jwk\":" +
                     "    {" +
                     "      \"kty\": \"RSA\"," +
                     "      \"n\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
@@ -3103,7 +3103,7 @@ public class JSONTest {
 
     static final String p256_jcs =
             "{" +
-                    "  \"publicKey\":" +
+                    "  \"jwk\":" +
                     "    {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
@@ -3114,7 +3114,7 @@ public class JSONTest {
 
     static final String p256_jcs_bad =
             "{" +
-                    "  \"publicKey\":" +
+                    "  \"jwk\":" +
                     "    {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
@@ -3139,7 +3139,7 @@ public class JSONTest {
         byte[] spki_bin = Base64URL.decode(spki);
         JSONObjectReader or = JSONParser.parse(jcs);
         PublicKey publicKey = or.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        PublicKey public_key2 = or.getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey public_key2 = or.getObject(JSONSignatureDecoder.JWK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue("Public key", ArrayUtil.compare(publicKey.getEncoded(), spki_bin));
         assertTrue("Public key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter();
@@ -3160,7 +3160,7 @@ public class JSONTest {
         ow = new JSONObjectWriter();
         public_key2 = JSONParser.parse(ow.setPublicKey(public_key2).setInt("OK", 5).toString()).getPublicKey();
         assertTrue("Public key2+", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
-        JSONObjectReader pub_key_object = or.getObject(JSONSignatureDecoder.PUBLIC_KEY_JSON);
+        JSONObjectReader pub_key_object = or.getObject(JSONSignatureDecoder.JWK_JSON);
         boolean rsaFlag = pub_key_object.getString(JSONSignatureDecoder.KTY_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
         String key_parm = rsaFlag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary(key_parm);
@@ -3339,7 +3339,7 @@ public class JSONTest {
     }
     
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
-    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwk";
+    static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
     
     public static class WebKey implements JSONRemoteKeys.Reader {
         
@@ -3435,7 +3435,7 @@ public class JSONTest {
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Property \"publicKey\" was never read");
+            checkException(e, "Property \"" + JSONSignatureDecoder.JWK_JSON + "\" was never read");
         }
         try {
             verifySignature(writer, 
@@ -3536,7 +3536,7 @@ public class JSONTest {
             signature.getSignature(new JSONSignatureDecoder.Options());
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Use of \"keyId\" must be set in options");
+            checkException(e, "Use of \"" + JSONSignatureDecoder.KID_JSON + "\" must be set in options");
         }
         JSONSignatureDecoder decoder =
             signature.getSignature(new JSONSignatureDecoder.Options()
@@ -3574,7 +3574,7 @@ public class JSONTest {
                     .setRequirePublicKeyInfo(false)
                     .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
         } catch (Exception e) {
-            checkException(e, "Missing \"keyId\"");
+            checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
         }
         writer = new JSONObjectWriter()
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
@@ -3613,7 +3613,7 @@ public class JSONTest {
                 .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Missing \"keyId\"");
+            checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
         }
         signatures = new JSONObjectReader(writer).getSignatures(new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)

@@ -129,8 +129,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                                " For future revisions of JEF, this property would be mandatory.")
             .newRow()
                 .newColumn()
-                    .addProperty(JSONSignatureDecoder.ALGORITHM_JSON)
-                    .addSymbolicValue(JSONSignatureDecoder.ALGORITHM_JSON)
+                    .addProperty(JSONSignatureDecoder.ALG_JSON)
+                    .addSymbolicValue(JSONSignatureDecoder.ALG_JSON)
                 .newColumn()
                     .setType(Types.WEBPKI_DATA_TYPES.STRING)
                 .newColumn()
@@ -335,7 +335,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            readAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") +
            "ECDH encryption object <i>requiring the same private key</i> " +
            "as in the sample object while providing the public key information in line, " +
-           "instead of using a <code>" + JSONSignatureDecoder.KEY_ID_JSON + "</code>:" +
+           "instead of using a <code>" + JSONSignatureDecoder.KID_JSON + "</code>:" +
            readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") + LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p384key) +
@@ -353,8 +353,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            "as in the previous example but relying on that this being " +
            "<i>implicitly known</i> since the encryption object " +
            "neither contains a <code>" +
-           JSONSignatureDecoder.KEY_ID_JSON + "</code>, nor a <code>" +
-           JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code> property:" +
+           JSONSignatureDecoder.KID_JSON + "</code>, nor a <code>" +
+           JSONSignatureDecoder.JWK_JSON + "</code> property:" +
            readAsymEncryption("r2048rsa-oaep-256.implicitkey.json", r2048key) +
            "RSA encryption object <i>requiring the same private key</i> " +
            "as in the previous example while using a different set of " +
@@ -395,14 +395,14 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .addString("</ul>")
             .newRow()
         .newColumn()
-            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+            .addProperty(JSONSignatureDecoder.KID_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KID_JSON)
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
              .setChoice (false, 2)
         .newColumn()
-            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+            .addString("If the <code>" + JSONSignatureDecoder.KID_JSON +
                    "</code> property is defined, data is supposed to be encrypted by a specific named (symmetric) key.")
             .newRow()
 
@@ -442,7 +442,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn()
         .newColumn()
-          .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+          .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KID_JSON +
                       "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
                       "</code> are defined, the (symmetric) data encryption key is assumed to known by the recipient.");
           
@@ -471,19 +471,19 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             .addString("</ul>")
       .newRow()
         .newColumn()
-            .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+            .addProperty(JSONSignatureDecoder.KID_JSON)
+            .addSymbolicValue(JSONSignatureDecoder.KID_JSON)
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
              .setChoice (false, 2)
         .newColumn()
-            .addString("If the <code>" + JSONSignatureDecoder.KEY_ID_JSON +
+            .addString("If the <code>" + JSONSignatureDecoder.KID_JSON +
                    "</code> property is defined, it is supposed to identify the public key associated with the encrypted (or derived) key.")
         .newRow()
         .newColumn()
-          .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+          .addProperty(JSONSignatureDecoder.JWK_JSON)
+          .addLink (JSONSignatureDecoder.JWK_JSON)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
@@ -492,7 +492,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
      .newRow(ECDH_PROPERTIES)
         .newColumn()
           .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
-          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+          .addLink (JSONSignatureDecoder.JWK_JSON)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
@@ -501,7 +501,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     .newRow(ECDH_KW_PROPERTIES)
         .newColumn()
           .addProperty(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON)
-          .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+          .addLink (JSONSignatureDecoder.JWK_JSON)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
@@ -525,8 +525,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Encrypted symmetric key.")
-              .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KEY_ID_JSON +
-                "</code> nor <code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + 
+              .setNotes("Note that if neither <code>" + JSONSignatureDecoder.KID_JSON +
+                "</code> nor <code>" + JSONSignatureDecoder.JWK_JSON + 
                 "</code> are defined, the associated key is assumed to known by the recipient.");
 
         json.AddPublicKeyDefinitions();

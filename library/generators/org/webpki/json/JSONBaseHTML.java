@@ -1276,7 +1276,7 @@ public class JSONBaseHTML  {
     }
     
     public void AddPublicKeyDefinitions() throws IOException {
-        addSubItemTable(JSONSignatureDecoder.PUBLIC_KEY_JSON)
+        addSubItemTable(JSONSignatureDecoder.JWK_JSON)
         .newRow()
           .newColumn()
             .addProperty(JSONSignatureDecoder.KTY_JSON)
@@ -1362,12 +1362,12 @@ public class JSONBaseHTML  {
                 "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded X.509 " + 
                       createReference(JSONBaseHTML.REF_X509) + " certficate path. See " +
                       globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON,
-                      JSONSignatureDecoder.CERTIFICATE_PATH_JSON) +
+                      JSONSignatureDecoder.X5C_JSON) +
                       " for constraints.");
         remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
                 "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key. See " +
-            "<a href=\"#" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
-            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> for constraints.");
+            "<a href=\"#" + JSONSignatureDecoder.JWK_JSON + "\">" +
+            JSONSignatureDecoder.JWK_JSON + "</a> for constraints.");
         if (remoteKeyFormats.size() != JSONRemoteKeys.values().length) {
             throw new IOException("Missing format");
         }
@@ -1386,8 +1386,8 @@ public class JSONBaseHTML  {
               " For future revisions of JCS, this property would be mandatory.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.ALGORITHM_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.ALGORITHM_JSON)
+              .addProperty(JSONSignatureDecoder.ALG_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.ALG_JSON)
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
@@ -1403,8 +1403,8 @@ public class JSONBaseHTML  {
               .addString("Note: If <i>proprietary</i> signature algorithms are added, they <b>must</b> be expressed as URIs.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.KEY_ID_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.KEY_ID_JSON)
+              .addProperty(JSONSignatureDecoder.KID_JSON)
+              .addSymbolicValue(JSONSignatureDecoder.KID_JSON)
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
@@ -1413,8 +1413,8 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Application specific string identifying the signature key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addProperty(JSONSignatureDecoder.JWK_JSON)
+              .addLink (JSONSignatureDecoder.JWK_JSON)
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1433,7 +1433,7 @@ public class JSONBaseHTML  {
               .addString(" certificate path accessible via HTTP.")
           .newRow()
         .newColumn()
-          .addProperty(JSONSignatureDecoder.CERTIFICATE_PATH_JSON)
+          .addProperty(JSONSignatureDecoder.X5C_JSON)
           .addArrayList (Types.SORTED_CERT_PATH, 1)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
@@ -1465,11 +1465,11 @@ public class JSONBaseHTML  {
               " Note that the <i>binary</i> representation <b>must</b> follow the JWA " + 
                       createReference(REF_JWA) + " specifications.")
                        .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
-                   "<code>" + JSONSignatureDecoder.PUBLIC_KEY_JSON + "</code>" + 
+                   "<code>" + JSONSignatureDecoder.JWK_JSON + "</code>" + 
                    ", <code>" + JSONSignatureDecoder.X5U_JSON + "</code>" + 
-                   " or <code>" + JSONSignatureDecoder.CERTIFICATE_PATH_JSON + 
+                   " or <code>" + JSONSignatureDecoder.X5C_JSON + 
                    "</code> property since the key may be given by the context or through the <code>" + 
-                   JSONSignatureDecoder.KEY_ID_JSON + "</code> property.");
+                   JSONSignatureDecoder.KID_JSON + "</code> property.");
 
         AddPublicKeyDefinitions();
  /*

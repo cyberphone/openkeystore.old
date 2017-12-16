@@ -138,17 +138,17 @@ public class JSONDecryptionDecoder {
         // End JEF normalization                                                //
         //////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromId(rd.getString(JSONSignatureDecoder.ALGORITHM_JSON));
+                .getAlgorithmFromId(rd.getString(JSONSignatureDecoder.ALG_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(KEY_ENCRYPTION_JSON)) {
             JSONObjectReader encryptedKey = checkVersion(rd.getObject(KEY_ENCRYPTION_JSON));
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptedKey.getString(JSONSignatureDecoder.ALGORITHM_JSON));
-            if (encryptedKey.hasProperty(JSONSignatureDecoder.PUBLIC_KEY_JSON)) {
+                    .getAlgorithmFromId(encryptedKey.getString(JSONSignatureDecoder.ALG_JSON));
+            if (encryptedKey.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
                 publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
             } else {
-                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
+                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KID_JSON);
             }
             if (keyEncryptionAlgorithm.isKeyWrap()) {
                 encryptedKeyData = encryptedKey.getBinary(ENCRYPTED_KEY_JSON);
@@ -159,7 +159,7 @@ public class JSONDecryptionDecoder {
             }
         } else {
             sharedSecretMode = true;
-            keyId = rd.getStringConditional(JSONSignatureDecoder.KEY_ID_JSON);
+            keyId = rd.getStringConditional(JSONSignatureDecoder.KID_JSON);
         }
         encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
         rd.checkForUnread();

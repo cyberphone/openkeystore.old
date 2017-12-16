@@ -548,11 +548,11 @@ public class JSONObjectWriter implements Serializable {
     }
 
     private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
-        signatureWriter.setString(JSONSignatureDecoder.ALGORITHM_JSON,
+        signatureWriter.setString(JSONSignatureDecoder.ALG_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
         if (signer.keyId != null) {
             if (signer.keyId.length() > 0) {
-                signatureWriter.setString(JSONSignatureDecoder.KEY_ID_JSON, signer.keyId);
+                signatureWriter.setString(JSONSignatureDecoder.KID_JSON, signer.keyId);
             }
         } else {
             signer.writeKeyData(signatureWriter);
@@ -720,7 +720,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
-        return setObject(JSONSignatureDecoder.PUBLIC_KEY_JSON, createCorePublicKey(publicKey, algorithmPreferences));
+        return setObject(JSONSignatureDecoder.JWK_JSON, createCorePublicKey(publicKey, algorithmPreferences));
     }
 
     /**
@@ -750,7 +750,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
-        return setArray(JSONSignatureDecoder.CERTIFICATE_PATH_JSON, 
+        return setArray(JSONSignatureDecoder.X5C_JSON, 
                         JSONArrayWriter.createCoreCertificatePath(certificatePath));
     }
 
@@ -760,10 +760,10 @@ import org.webpki.json.JSONSignatureDecoder;
                                          byte[] dataEncryptionKey,
                                          JSONObjectWriter keyEncryption)
             throws IOException, GeneralSecurityException {
-        setString(JSONSignatureDecoder.ALGORITHM_JSON, dataEncryptionAlgorithm.toString());
+        setString(JSONSignatureDecoder.ALG_JSON, dataEncryptionAlgorithm.toString());
         if (keyEncryption == null) {
             if (keyId != null) {
-                setString(JSONSignatureDecoder.KEY_ID_JSON, keyId);
+                setString(JSONSignatureDecoder.KID_JSON, keyId);
             }
         } else {
             setObject(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, keyEncryption);
@@ -798,12 +798,12 @@ import org.webpki.json.JSONSignatureDecoder;
                                                           KeyEncryptionAlgorithms keyEncryptionAlgorithm)
             throws IOException, GeneralSecurityException {
         JSONObjectWriter keyEncryption =
-                new JSONObjectWriter().setString(JSONSignatureDecoder.ALGORITHM_JSON,
+                new JSONObjectWriter().setString(JSONSignatureDecoder.ALG_JSON,
                                                  keyEncryptionAlgorithm.toString());
         if (optionalKeyId == null) {
             keyEncryption.setPublicKey(keyEncryptionKey, AlgorithmPreferences.JOSE);
         } else if (optionalKeyId.length() > 0){
-            keyEncryption.setString(JSONSignatureDecoder.KEY_ID_JSON, optionalKeyId);
+            keyEncryption.setString(JSONSignatureDecoder.KID_JSON, optionalKeyId);
         }
         AsymmetricEncryptionResult asymmetricEncryptionResult =
             keyEncryptionAlgorithm.isRsa() ?
