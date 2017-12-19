@@ -18,7 +18,9 @@ package org.webpki.json;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URLEncoder;
+
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -28,6 +30,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.CryptoAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -396,27 +399,32 @@ public class JSONBaseHTML  {
 
             DOUBLE  ("double",  "<i>number</i>",                          null,
                      "64-bit IEEE floating point value"),
-                         
+
             BIGINT  ("bigint", "<i>string</i>",                           null,
                     "Base10-encoded integer with arbitrary precision"),
-                     
+
             BIGDEC  ("decimal", "<i>string</i>",                          null,
                      "Decimal type compatible with Java BigDecimal"),
-                     
+
             STRING  ("string", "<i>string</i>",                           null,
                      "Arbitrary string"),
-                     
+
             URI     ("uri",    "<i>string</i>",                           REF_URI,
                      "URI <a href=\"#Reference." + REF_URI + "\">[" + REF_URI + "]</a>"),
 
             ID      ("id",     "<i>string</i>",                           null,
-                     "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
-                     
+                     "Identifier which <b>must</b> consist of 1-32 characters, where each " +
+                     "character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
+
             BYTE_ARRAY  ("byte[]", "<i>string</i>",                       REF_BASE64,
                      "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
+            BYTE_ARRAY2  ("byte2[]", "<i>string</i>",                       REF_BASE64,
+                      "Base64-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
+
             CRYPTO  ("crypto", "<i>string</i>",                           null,
-                     "Base64URL-encoded positive integer with arbitrary precision. Note that the value <b>must not</b> contain <i>leading</i> zero-valued bytes"),
+                     "Base64URL-encoded positive integer with arbitrary precision. " +
+                     "Note that the value <b>must not</b> contain <i>leading</i> zero-valued bytes"),
                      
             TIME    ("time",   "<i>string</i>",                           null,
                      "Date-time string in ISO format <code>YYYY-MM-DDThh:mm:ss{ms}tz</code> " +
@@ -465,7 +473,7 @@ public class JSONBaseHTML  {
             }
           }
 
-        public static final String SORTED_CERT_PATH  = "Sorted Certificate Path";
+        public static final String CERTIFICATE_PATH  = "Certificate Path";
         public static final String URI_LIST          = "List of URIs";
         public static final String LINE_SEPARATOR    = "<div style=\"height:6pt;padding:0px\"></div>";
       }
@@ -1375,19 +1383,8 @@ public class JSONBaseHTML  {
         addSubItemTable(JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.VERSION_JSON)
-              .addValue (JSONSignatureDecoder.SIGNATURE_VERSION_ID)
-            .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.URI)
-            .newColumn()
-              .setUsage (false)
-            .newColumn()
-              .addString("<i>Optional.</i> Signature object version identifier." +
-              " For future revisions of JCS, this property would be mandatory.")
-          .newRow()
-            .newColumn()
               .addProperty(JSONSignatureDecoder.ALG_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.ALG_JSON)
+              .addSymbolicValue("Algorithm")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
@@ -1404,11 +1401,11 @@ public class JSONBaseHTML  {
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.KID_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.KID_JSON)
+              .addSymbolicValue("Identifier")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn()
-              .setChoice (false, 4)
+              .setChoice (false, 5)
             .newColumn()
               .addString("<i>Optional.</i> Application specific string identifying the signature key.")
           .newRow()
@@ -1422,41 +1419,45 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Public key object.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.X5U_JSON)
-              .addLink(JSONSignatureDecoder.X5U_JSON)
+              .addProperty(JSONSignatureDecoder.JKU_JSON)
+              .addSymbolicValue("URL")
             .newColumn()
-              .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
+              .setType(Types.WEBPKI_DATA_TYPES.URI)
             .newColumn()
             .newColumn()
-              .addString("<i>Optional.</i> A single public key or X.509 ")
-              .addString(createReference(REF_X509))
-              .addString(" certificate path accessible via HTTP.")
+              .addString("<i>Optional.</i> URI " + createReference(REF_URI) +
+                         " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation and " +
+                         "pointing to a JWK " + createReference(REF_JWK) +
+                         " key set holding a <i>single</i> <a href=\"#" +
+                         JSONSignatureDecoder.JWK_JSON + "\">" + JSONSignatureDecoder.JWK_JSON +
+                         "</a> object.")
           .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.X5C_JSON)
-          .addArrayList (Types.SORTED_CERT_PATH, 1)
+          .addArrayList (Types.CERTIFICATE_PATH, 1)
         .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
+          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY2)
         .newColumn()
         .newColumn()
           .addString("<i>Optional.</i> Sorted array of X.509 ")
           .addString(createReference(REF_X509))
           .addString(" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
-              .newRow()
-                .newColumn()
-                  .addProperty(JSONSignatureDecoder.EXTENSIONS_JSON)
-                  .addLink (JSONSignatureDecoder.EXTENSIONS_JSON)
-                .newColumn()
-                  .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
-                .newColumn()
-                  .setUsage (false)
-                .newColumn()
-                  .addString("<i>Optional.</i> Object holding custom data like time-stamps, CRLs, and OCSP responses.")
+          .newRow()
+            .newColumn()
+              .addProperty(JSONSignatureDecoder.X5U_JSON)
+              .addSymbolicValue("URL")
+            .newColumn()
+              .setType(Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn()
+            .newColumn()
+              .addString("<i>Optional.</i> A single public key or X.509 ")
+              .addString(createReference(REF_X509))
+              .addString(" certificate path accessible via HTTP.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.VALUE_JSON)
-              .addSymbolicValue(JSONSignatureDecoder.VALUE_JSON)
+              .addSymbolicValue("Signature")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()

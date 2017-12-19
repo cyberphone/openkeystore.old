@@ -51,11 +51,12 @@ public class JSONDecryptionDecoder {
     public static final String ENCRYPTION_VERSION_ID = "http://xmlns.webpki.org/jef/v1";
 
     public static final String KEY_ENCRYPTION_JSON   = "keyEncryption";
-    public static final String ENCRYPTED_KEY_JSON    = "encryptedKey";
-    public static final String EPHEMERAL_KEY_JSON    = "ephemeralKey";
+    public static final String ENCRYPTED_KEY_JSON    = "encrypted_key";
+    public static final String EPHEMERAL_KEY_JSON    = "epk";
+    public static final String ENC_JSON              = "enc";
     public static final String IV_JSON               = "iv";
     public static final String TAG_JSON              = "tag";
-    public static final String CIPHER_TEXT_JSON      = "cipherText";
+    public static final String CIPHER_TEXT_JSON      = "ciphertext";
 
     private PublicKey publicKey;
 
@@ -138,7 +139,7 @@ public class JSONDecryptionDecoder {
         // End JEF normalization                                                //
         //////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromId(rd.getString(JSONSignatureDecoder.ALG_JSON));
+                .getAlgorithmFromId(rd.getString(ENC_JSON));
         iv = rd.getBinary(IV_JSON);
         tag = rd.getBinary(TAG_JSON);
         if (rd.hasProperty(KEY_ENCRYPTION_JSON)) {

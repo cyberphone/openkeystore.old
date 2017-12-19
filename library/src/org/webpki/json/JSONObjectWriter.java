@@ -760,7 +760,7 @@ import org.webpki.json.JSONSignatureDecoder;
                                          byte[] dataEncryptionKey,
                                          JSONObjectWriter keyEncryption)
             throws IOException, GeneralSecurityException {
-        setString(JSONSignatureDecoder.ALG_JSON, dataEncryptionAlgorithm.toString());
+        setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.toString());
         if (keyEncryption == null) {
             if (keyId != null) {
                 setString(JSONSignatureDecoder.KID_JSON, keyId);

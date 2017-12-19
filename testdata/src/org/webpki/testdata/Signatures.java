@@ -33,10 +33,12 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
 
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
@@ -164,6 +166,16 @@ public class Signatures {
         ArrayUtil.writeFile(baseSignatures + "p256remotecertsigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey()));
+        
+        JSONObjectWriter javaScriptSignature = new JSONObjectWriter()
+            .setString("statement", "Hello Signed World!")
+            .setArray("otherProperties", 
+                      new JSONArrayWriter()
+                .setInt(2000)
+                .setBoolean(true));
+        javaScriptSignature.setSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null));
+        ArrayUtil.writeFile(baseSignatures + "p256keysigned.js",
+                            javaScriptSignature.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE));
     }
     
     static void symmSign(int keyBits, MACAlgorithms algorithm) throws Exception {

@@ -315,14 +315,14 @@
      <!-- HTML Doc task for JCS -->
      <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
-       <param name="doc.file" value="${public_doc_dir}/jcs.html"/>
+       <param name="doc.file" value="${public_doc_dir}/jose-jcs.html"/>
        <param name="file.base1" value="${testdata_dir}/keys"/>
        <param name="file.base2" value="${testdata_dir}/signatures"/>
      </antcall>
      <!-- HTML Doc task for JEF -->
      <antcall target="_java2html">
        <param name="doc.class" value="org.webpki.json.JSONEncryptionHTMLReference"/>
-       <param name="doc.file" value="${public_doc_dir}/jef.html"/>
+       <param name="doc.file" value="${public_doc_dir}/jose-jef.html"/>
        <param name="file.base1" value="${testdata_dir}/keys"/>
        <param name="file.base2" value="${testdata_dir}/encryption"/>
      </antcall>

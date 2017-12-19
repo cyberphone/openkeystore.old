@@ -60,12 +60,8 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String RSA_PUBLIC_KEY             = "RSA";
 
-    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
-
     // JSON properties
     public static final String ALG_JSON                   = "alg";
-
-    public static final String X5C_JSON                   = "x5c";
 
     public static final String CRV_JSON                   = "crv";          // JWK
 
@@ -97,6 +93,8 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String Y_JSON                     = "y";            // JWK
     
+    public static final String X5C_JSON                   = "x5c";          // Certificate path
+
     public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
 
     public static abstract class Extension {
@@ -218,10 +216,6 @@ public class JSONSignatureDecoder implements Serializable {
         if (options.requirePublicKeyInfo && options.keyIdOption != KEY_ID_OPTIONS.FORBIDDEN) {
             throw new IOException("Incompatible keyId and publicKey options - Choose one");
         }
-        String version = signature.getStringConditional(VERSION_JSON, SIGNATURE_VERSION_ID);
-        if (!version.equals(SIGNATURE_VERSION_ID)) {
-            throw new IOException("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
-        }
         algorithmString = signature.getString(ALG_JSON);
         keyId = signature.getStringConditional(KID_JSON);
         if (keyId == null) {
@@ -281,7 +275,7 @@ public class JSONSignatureDecoder implements Serializable {
         LinkedHashMap<String, JSONValue> savedProperties =
                 new LinkedHashMap<String, JSONValue>(signature.root.properties);
         //                                                                      //
-        // 2. Hide the "value" property for the serializer..                    //
+        // 2. Hide the signature value property for the serializer...           //
         signature.root.properties.remove(VALUE_JSON);                           //
         //                                                                      //
         // 3. Serialize ("JSON.stringify()")                                    //
