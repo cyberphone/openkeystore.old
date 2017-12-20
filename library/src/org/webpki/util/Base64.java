@@ -659,8 +659,8 @@ public class Base64 {
         }
         //(3)
         if (lineBreakOn) {
-            if (i % encodedCharsPerRow != 0) i += (i / encodedCharsPerRow) * 2;
-            else i += ((i - 1) / encodedCharsPerRow) * 2; //don't end with line break
+            if (i % encodedCharsPerRow != 0) i += (i / encodedCharsPerRow);
+            else i += ((i - 1) / encodedCharsPerRow); //don't end with line break
         }
         byte[] encoded = new byte[i];
         i = 0;
@@ -675,7 +675,6 @@ public class Base64 {
             rowPos += 4;
             if (rowPos >= encodedCharsPerRow) {//linked to the positioning of (3)
                 if (lineBreakOn && j != uncoded.length) {//don't end with line break
-                    encoded[i++] = (byte) '\r';
                     encoded[i++] = (byte) '\n';
                 }
                 rowPos = 0;

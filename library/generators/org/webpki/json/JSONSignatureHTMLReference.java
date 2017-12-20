@@ -149,6 +149,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         normalizedSampleSignature.deleteCharAt(i);
         normalizedSampleSignature.insert(i, sampleSignatureDecoded.getString(property));
     }
+    static String pemFile(String name) throws IOException {
+        String pem = new String(json.readFile1(name), "UTF-8");
+        return formatCode(pem.substring(0, pem.length() - 1));
+    }
     
     static String readSymSignature(String[] encObjects) throws IOException, GeneralSecurityException {
         StringBuffer s = new StringBuffer();
@@ -402,13 +406,19 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         readAsymSignature("r2048keysigned.json", r2048key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
-        readCertSignature("r2048certsigned.json") + 
+        readCertSignature("r2048certsigned.json") + LINE_SEPARATOR +
         "JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " key set for verifying the subsequent object:" +
         formatCode(json.readJson1("r2048.jwks")) +
         "<span id=\"remotekeyexample\">The</span> following signature object is referring to a " +
-        json.globalLinkRef(JSONSignatureDecoder.JKU_JSON) +
-        " which in turn should be identical to the key used in the previous RSA examples:" +
-        formatCode(readSignature("r2048remotekeysigned.json")) +
+        json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.JKU_JSON) +
+        " pointing to an object as described above:" +
+        formatCode(readSignature("r2048remotekeysigned.json")) + LINE_SEPARATOR +
+        "PEM " + json.createReference(JSONBaseHTML.REF_PEM) + " certificate path for verifying the subsequent object:" +
+        pemFile("p256certpath.pem") +
+        "<span id=\"remotecertexample\">The</span> following signature object is referring to a " +
+        json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.X5U_JSON) +
+        " pointing to an object as described above:" +
+        formatCode(readSignature("p256remotecertsigned.json")) +
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
                                       "hs512signed.json"}) + LINE_SEPARATOR +
@@ -421,10 +431,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         LINE_SEPARATOR +
         "The certificate based signatures share a common root (here supplied in PEM ")
         .append(json.createReference(JSONBaseHTML.REF_PEM))
-        .append(" format), which can be used for path validation:" +
-        formatCode(new String(json.readFile1("rootca.pem"), "UTF-8")
-                          .replace("END CERTIFICATE-----\n", 
-                                   "END CERTIFICATE-----")).replace(" 10pt ", " 0pt "));
+        .append(" format), which can be used for path validation:")
+        .append(pemFile("rootca.pem").replace(" 10pt ", " 0pt "));
 
         String jsSignature = formatCode("var signedObject = " +
                                         new String(json.readFile2("p256keysigned.js"), "utf-8") + ";");
