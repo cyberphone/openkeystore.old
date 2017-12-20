@@ -183,6 +183,26 @@
      <exec executable="keytool" failonerror="true" dir="${key.dir}">
       <arg line="-exportcert -keystore unknownca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file unknownca.cer"/>
     </exec>
+    <antcall target="_createpem">
+       <param name="cmd" value="p256certificate.p12 foo123 p256certpath.pem certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048.jwks public"/>
+    </antcall>
+	<replace file="${key.dir}/r2048.jwks">
+	   <replacefilter>
+          <replacetoken>  </replacetoken>
+          <replacevalue>    </replacevalue>
+	  </replacefilter>
+      <replacefilter>
+	      <replacetoken>{</replacetoken>
+	      <replacevalue>{&#10;  &quot;keys&quot;: [{</replacevalue>
+	  </replacefilter>
+      <replacefilter>
+	      <replacetoken>}</replacetoken>
+	      <replacevalue>  }]&#10;}</replacevalue>
+	  </replacefilter>
+	</replace>
 </target>
 
 </project>

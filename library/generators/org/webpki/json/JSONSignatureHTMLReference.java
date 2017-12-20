@@ -403,6 +403,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") + 
+        "JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " key set for verifying the subsequent object:" +
+        formatCode(json.readJson1("r2048.jwks")) +
         "<span id=\"remotekeyexample\">The</span> following signature object is referring to a " +
         json.globalLinkRef(JSONSignatureDecoder.JKU_JSON) +
         " which in turn should be identical to the key used in the previous RSA examples:" +
@@ -424,26 +426,23 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                           .replace("END CERTIFICATE-----\n", 
                                    "END CERTIFICATE-----")).replace(" 10pt ", " 0pt "));
 
+        String jsSignature = formatCode("var signedObject = " +
+                                        new String(json.readFile2("p256keysigned.js"), "utf-8") + ";");
+        beginValue = jsSignature.indexOf("{");
+        jsSignature = jsSignature.substring(0, ++beginValue) +
+                      "<br>&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Data&nbsp;to&nbsp;be&nbsp;signed</span>" +
+                      jsSignature.substring(beginValue);
+        beginValue = jsSignature.indexOf("<br>&nbsp;&nbsp;signature:");
+        jsSignature = jsSignature.substring(0, beginValue) +
+                      "<br>&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Signature</span>" +
+                      jsSignature.substring(beginValue);
+
         json.addParagraphObject(ECMASCRIPT_MODE).append("ECMAScript mode in this context refers to " +
            "the ability to sign JavaScript objects as well as using the standard JSON support for parsing and " +
            "creating signed data." + LINE_SEPARATOR + 
-           "The code snippet below shows a signed JavaScript object:" +
-           "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>var&nbsp;signedObject&nbsp;=&nbsp;{<br>" +
-           "&nbsp;&nbsp;<span style=\"color:green\">// The data</span><br>" +
-           "&nbsp;&nbsp;statement:&nbsp;&quot;Hello&nbsp;signed&nbsp;world!&quot;,<br>" +
-           "&nbsp;&nbsp;otherProperties:&nbsp;[2000,&nbsp;true],<br>" +
-           "&nbsp;&nbsp;<span style=\"color:green\">// The signature</span><br>" +
-           "&nbsp;&nbsp;signature:&nbsp;{<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;algorithm:&nbsp;&quot;ES256&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;publicKey:&nbsp;{<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kty:&nbsp;&quot;EC&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crv:&nbsp;&quot;P-256&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x:&nbsp;&quot;vlYxD4dtFJOp1_8_QUcieWCW-4KrLMmFL2rpkY1bQDs&quot;,<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y:&nbsp;&quot;fxEF70yJenP3SPHM9hv-EnvhG6nXr3_S-fDqoj-F6yM&quot;<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-           "&nbsp;&nbsp;&nbsp;&nbsp;value:&nbsp;&quot;bEkQ2Owed_oe8MbZjSTXffHOINm2fV5y7GzmGwdH9JrP6fV57tjuxLHQD-wf9eOp-zpu2U_v3RZgaobBkt9rNA&quot;<br>" +
-           "&nbsp;&nbsp;}<br>" +
-           "};</code></div>" +
+           "The code snippet below shows a signed JavaScript object:")
+        .append(jsSignature)
+        .append(
            "This signature could be verified by the following code:" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>function&nbsp;convertToUTF8(string)&nbsp;{<br>" +
             "&nbsp;&nbsp;var&nbsp;buffer&nbsp;=&nbsp;[];<br>" +
@@ -476,18 +475,22 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;JCS&nbsp;normalization</span><br>" +
             "&nbsp;&nbsp;var&nbsp;clone&nbsp;=&nbsp;Object.assign({},&nbsp;jcs.signature);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Clone&nbsp;&quot;signature&quot;&nbsp;child object</span><br>" +
             "&nbsp;&nbsp;var&nbsp;signature&nbsp;=&nbsp;decodeBase64URL(clone.value);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;signature&nbsp;value</span><br>" +
-            "&nbsp;&nbsp;delete&nbsp;jcs.signature.value;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Remove&nbsp;signature&nbsp;&quot;value&quot;&nbsp;property&nbsp;from&nbsp;signed&nbsp;object</span><br>" +
+            "&nbsp;&nbsp;delete&nbsp;jcs.signature." + JSONSignatureDecoder.VALUE_JSON +
+            ";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Remove&nbsp;signature&nbsp;value&nbsp;property&nbsp;from&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;var&nbsp;data&nbsp;=&nbsp;convertToUTF8(JSON.stringify(jcs));&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;normalized&nbsp;JSON&nbsp;string (signed data)</span><br>" +
             "&nbsp;&nbsp;jcs.signature&nbsp;=&nbsp;clone;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Restore&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;the&nbsp;actual&nbsp;crypto,&nbsp;here&nbsp;using&nbsp;W3C&nbsp;WebCrypto</span> </code>")
             .append(json.createReference(JSONBaseHTML.REF_WEB_CRYPTO))
             .append("<code><br>" +
-            "&nbsp;&nbsp;crypto.subtle.importKey('jwk',&nbsp;clone.publicKey,&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;JCS&nbsp;public&nbsp;key&nbsp;is&nbsp;a&nbsp;JWK</span><br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;name:&nbsp;'ECDSA',&nbsp;namedCurve:&nbsp;clone.publicKey.crv&nbsp;},<br>" +
+            "&nbsp;&nbsp;crypto.subtle.importKey('jwk',&nbsp;clone." + JSONSignatureDecoder.JWK_JSON +
+            ",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;JCS&nbsp;public&nbsp;key&nbsp;is&nbsp;a&nbsp;JWK</span><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;name:&nbsp;'ECDSA',&nbsp;namedCurve:&nbsp;clone." +
+            JSONSignatureDecoder.JWK_JSON +
+            ".crv&nbsp;},<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true,&nbsp;['verify']).then(function(publicKey)&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;crypto.subtle.verify({&nbsp;name:&nbsp;'ECDSA',&nbsp;hash:&nbsp;{&nbsp;name:&nbsp;'SHA-256'&nbsp;}&nbsp;},&nbsp;<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;publicKey,&nbsp;signature,&nbsp;data).then(function(result)&nbsp;{<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.debug('Success='&nbsp;+&nbsp;result);<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log('Success='&nbsp;+&nbsp;result);<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;});<br>" +
             "&nbsp;&nbsp;});<br>" +
             "}<br>" +
