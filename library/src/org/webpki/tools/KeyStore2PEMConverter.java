@@ -40,6 +40,7 @@ public class KeyStore2PEMConverter {
         if (argv.length < 4) {
             fail();
         }
+        boolean next[] = new boolean[1];
         boolean privateKey = false;
         boolean publicKey = false;
         boolean certificate = false;
@@ -65,17 +66,17 @@ public class KeyStore2PEMConverter {
             String alias = aliases.nextElement();
             if (ks.isKeyEntry(alias)) {
                 if (privateKey) {
-                    writeObject(fis, "PRIVATE KEY", ks.getKey(alias, argv[1].toCharArray()).getEncoded());
+                    writeObject(fis, "PRIVATE KEY", ks.getKey(alias, argv[1].toCharArray()).getEncoded(), next);
                 }
                 if (certificate) for (Certificate cert : ks.getCertificateChain(alias)) {
-                    writeCert(fis, cert);
+                    writeCert(fis, cert, next);
                 }
                 if (publicKey) {
-                    writeObject(fis, "PUBLIC KEY", ks.getCertificateChain(alias)[0].getPublicKey().getEncoded());
+                    writeObject(fis, "PUBLIC KEY", ks.getCertificateChain(alias)[0].getPublicKey().getEncoded(), next);
                 }
             } else if (ks.isCertificateEntry(alias)) {
                 if (trust) {
-                    writeCert(fis, ks.getCertificate(alias));
+                    writeCert(fis, ks.getCertificate(alias), next);
                 }
             } else {
                 throw new Exception("Bad KS");
@@ -83,13 +84,17 @@ public class KeyStore2PEMConverter {
         }
     }
 
-    private static void writeObject(FileOutputStream fis, String string, byte[] encoded) throws Exception {
+    private static void writeObject(FileOutputStream fis, String string, byte[] encoded, boolean next[]) throws Exception {
+        if (next[0]) {
+            fis.write((byte)'\n');
+        }
+        next[0] = true;
         fis.write(("-----BEGIN " + string + "-----\n").getBytes("UTF-8"));
         fis.write(new Base64().getBase64BinaryFromBinary(encoded));
-        fis.write(("\n-----END " + string + "-----\n\n").getBytes("UTF-8"));
+        fis.write(("\n-----END " + string + "-----\n").getBytes("UTF-8"));
     }
 
-    private static void writeCert(FileOutputStream fis, Certificate cert) throws Exception {
-        writeObject(fis, "CERTIFICATE", cert.getEncoded());
+    private static void writeCert(FileOutputStream fis, Certificate cert, boolean next[]) throws Exception {
+        writeObject(fis, "CERTIFICATE", cert.getEncoded(), next);
     }
 }

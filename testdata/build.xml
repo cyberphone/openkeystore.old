@@ -105,8 +105,8 @@
     <antcall target="_createpem">
        <param name="cmd" value="rootca.p12 foo123 rootca.pem certificate"/>
     </antcall>
-     <exec executable="keytool" failonerror="true" dir="${key.dir}">
-      <arg line="-exportcert -keystore rootca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file rootca.cer"/>
+    <exec executable="keytool" failonerror="true" dir="${key.dir}">
+       <arg line="-exportcert -keystore rootca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file rootca.cer"/>
     </exec>
     <antcall target="_createcert">
        <param name="cmd" value="-out/keyalias mykey -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore rootca.p12 -entity/ca -subject &quot;CN=Payment Network Sub CA3, C=EU&quot; -validity/start 2016-07-10T10:00:00 -validity/end 2025-07-10T09:59:59 -out/storetype PKCS12 -out/keystore subca.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_521 -sigalg RSA_SHA512 -serial 3"/>
@@ -180,8 +180,8 @@
     <antcall target="_createpem">
        <param name="cmd" value="unknownca.p12 foo123 unknownca.pem certificate"/>
     </antcall>
-     <exec executable="keytool" failonerror="true" dir="${key.dir}">
-      <arg line="-exportcert -keystore unknownca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file unknownca.cer"/>
+    <exec executable="keytool" failonerror="true" dir="${key.dir}">
+       <arg line="-exportcert -keystore unknownca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file unknownca.cer"/>
     </exec>
     <antcall target="_createpem">
        <param name="cmd" value="p256certificate.p12 foo123 p256certpath.pem certificate"/>
