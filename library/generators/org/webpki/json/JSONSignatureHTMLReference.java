@@ -19,7 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.KeyStore;
 
 import java.util.Vector;
@@ -55,6 +55,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     static final String SAMPLE_SIGNATURE    = "Sample Signature";
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
+    
+    static final String REMOTE_KEY_EXAMPLE = "remotekeyexample";
+
+    static final String REMOTE_CERT_EXAMPLE = "remotecertexample";
 
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
@@ -95,7 +99,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static class AsymKey {
         String keyId;
-        KeyPair keyPair;
+        PublicKey publicKey;
         String json;
     }
     
@@ -105,7 +109,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         asymKey.json = key.toString();
         asymKey.keyId = key.getString("kid");
         key.removeProperty("kid");
-        asymKey.keyPair = key.getKeyPair();
+        asymKey.publicKey = key.getKeyPair().getPublic();
         return asymKey;
     }
     
@@ -119,7 +123,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
         JSONSignatureDecoder verifier = rd.getSignature(options);
-        verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()));        
+        verifier.verify(new JSONAsymKeyVerifier(asymKey.publicKey));        
         return formatCode(raw);
     }
 
@@ -129,8 +133,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
         Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONSignatureDecoder.Options());
-        verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.keyPair.getPublic()));
-        verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.keyPair.getPublic()));
+        verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.publicKey));
+        verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.publicKey));
         return formatCode(raw);
     }
 
@@ -283,19 +287,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject("Signature Scope").append(
             "The scope of a signature (what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
-            "object holding the <code>" + JSONSignatureDecoder.SIGNATURE_JSON +
-            "</code> property except for the <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property (shaded area in the sample).");
+            "object holding the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON +
+            "&quot;</code> property except for the <code>&quot;" + JSONSignatureDecoder.VALUE_JSON + "&quot;</code> property (shaded area in the sample).");
 
         json.addParagraphObject("Normalization and Signature Validation").append(
             "Prerequisite: A JSON object in accordance with ")
           .append(json.createReference(JSONBaseHTML.REF_JSON))
-          .append(" containing a properly formatted <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object." + LINE_SEPARATOR +
-            "Parsing constraints:<ul>" +
-            "<li>The original property serialization order <b>must</b> be <i>preserved</i>" +
-            " as described by ECMAScript " +
-            json.createReference(JSONBaseHTML.REF_ES6) +
-            " section <b>9.1.12</b>.</li>" +
-            "<li style=\"padding-top:4pt\">JSON data of the type <code>&quot;Number&quot;</code>, <b>must</b> <i>already during " +
+          .append(" supplied as a <i>textual string</i> containing a top level <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> property." + LINE_SEPARATOR +
+            "Additional input data constraints:<ul>" +
+            "<li>JSON data of the type <code>&quot;Number&quot;</code>, <b>must</b> <i>already during " +
             "signature creation</i> have been serialized according to ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
             " section <b>7.1.12.1</b> including NOTE 2 (implemented by for example V8 " +
@@ -304,12 +304,13 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object." +
-            "</ul>The normalization steps are as follows:<ul>" +
-            "<li>The <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> property " +
-            "(including leading <i>or</i> trailing <code>','</code>) <b>must</b> be deleted from the " +
-            "<code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> sub object.</li>" +
-            "<li style=\"padding-top:4pt\">Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
+            "</ul>" +
+            "The normalization steps are as follows:<ul>" +
+            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
+            "<li style=\"padding-top:4pt\">The " + json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VALUE_JSON) + " property " +
+            "(including leading <i>or</i> trailing <code>','</code>) <b>must</b> be deleted from the " +
+            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON) + " sub object.</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences within quoted strings <b>must</b> be treated as &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">As implied by ECMAScript " +
             json.createReference(JSONBaseHTML.REF_ES6) +
@@ -319,31 +320,35 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "it <b>must</b> be rewritten in <i>lowercase</i> hexadecimal notation unless it is one of the predefined " +
             "JSON escapes (<code>\\\"&nbsp;\\\\&nbsp;\\b&nbsp;\\f&nbsp;\\n&nbsp;\\r&nbsp;\\t</code>) " +
             "because the latter have <i>precedence</i>. If the Unicode value is " +
-            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character.</li></ul></li>" +
-            "<li style=\"padding-top:4pt\">Now the JSON object associated with the <code>" +
-            JSONSignatureDecoder.SIGNATURE_JSON + "</code> <b>must</b> be " +
-            "<i>recreated</i> using the actual text left after applying the previous measures." + LINE_SEPARATOR +
+            "outside of the ASCII control character range, it <b>must</b> " +
+            "be replaced by the corresponding Unicode character.</li></ul></li></ul>" +
+            "Note: A practical consequence of this arrangement is that the original property order is <i>preserved</i>" +
+            " which also is compliant with ECMAScript JSON parsing as described in " +
+            json.createReference(JSONBaseHTML.REF_ES6) +
+            " section <b>9.1.12</b>." + LINE_SEPARATOR +
             "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a> and " +
             "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
             "\"><span style=\"white-space:nowrap\">" +
             ECMASCRIPT_MODE + "</span></a>." + LINE_SEPARATOR +
-            "</li></ul>" +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
-            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>")
+            "<div style=\"padding:4pt 0pt 15pt 20pt\"><code>")
          .append(normalizedSampleSignature)
          .append("</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the string normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> can now be calculated by running the algorithm specified in the <code>" +
-                  JSONSignatureDecoder.ALG_JSON + "</code> property using the signature key over the " +
-                  "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
-                  "normalized data." + LINE_SEPARATOR +
+            "The signature supplied in the " +
+            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VALUE_JSON) +
+            " property can now be validated by applying the algorithm specified in the " +
+            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.ALG_JSON) + 
+            " property (together with the appropriate <i>signature verification key</i>), on the " +
+            "<span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
+            "normalized textual data." + LINE_SEPARATOR +     
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference(JSONBaseHTML.REF_X509) +
             "." + LINE_SEPARATOR +
-            "The next sections cover the JCS format.");
+            "The next sections cover the specifics of the JCS format.");
         
-        json.addDataTypesDescription("JCS consists of a top-level <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property holding a composite JSON object. " + LINE_SEPARATOR);
+        json.addDataTypesDescription("JCS consists of a top-level <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> property holding a composite JSON object. " + LINE_SEPARATOR);
 
         json.addProtocolTableEntry("JCS Objects")
           .append("The following tables describe the JCS JSON structures in detail.");
@@ -369,27 +374,28 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(TEST_VECTORS).append(
        "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
        "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
-       " can be verified by the <i>public part</i> of the following EC key in JWK " + 
+       " was signed by the following EC private key in JWK " + 
        json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
        formatCode(p256key) + LINE_SEPARATOR +
-       "The following signature object which uses a <code>" + JSONSignatureDecoder.KID_JSON +
-       "</code> for identifying the public key can be verified with the <i>public part</i> of the key above:" + 
+       "The following signature object which uses a " +
+       json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.KID_JSON) +
+       " for identifying the public key can be verified with the key above:" + 
         readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)
             .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying the subsequent object:" +
+        "EC private key associated with the subsequent object:" +
         formatCode(p384key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        "The following object was signed by the key above:" +
         readAsymSignature("p384keysigned.json", p384key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
-        "EC key for verifying the subsequent object:" +
+        "EC private key associated with the subsequent object:" +
         formatCode(p521key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        "The following object was signed by the key above:" +
         readAsymSignature("p521keysigned.json", p521key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but builds on that " +
         "the key to use is <i>implicitly known</i> since the object neither contains a <code>" +
@@ -400,24 +406,24 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p521certsigned.json") + LINE_SEPARATOR +
-        "RSA key for verifying the subsequent object:" +
+        "RSA private key associated with the subsequent object:" +
         formatCode(r2048key) +
-        "The following signature object can be verified by the <i>public part</i> of the key above:" +
+        "The following object was signed by the key above:" +
         readAsymSignature("r2048keysigned.json", r2048key, new JSONSignatureDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") + LINE_SEPARATOR +
         "JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " key set for verifying the subsequent object:" +
         formatCode(json.readJson1("r2048.jwks")) +
-        "<span id=\"remotekeyexample\">The</span> following signature object is referring to a " +
+        "<span id=\"" + REMOTE_KEY_EXAMPLE + "\">The</span> following signature object is referring to a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.JKU_JSON) +
-        " pointing to an object as described above:" +
+        " property pointing to an object as described above:" +
         formatCode(readSignature("r2048remotekeysigned.json")) + LINE_SEPARATOR +
         "PEM " + json.createReference(JSONBaseHTML.REF_PEM) + " certificate path for verifying the subsequent object:" +
         pemFile("p256certpath.pem") +
-        "<span id=\"remotecertexample\">The</span> following signature object is referring to a " +
+        "<span id=\"" + REMOTE_CERT_EXAMPLE + "\">The</span> following signature object is referring to a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.X5U_JSON) +
-        " pointing to an object as described above:" +
+        " property pointing to an object as described above:" +
         formatCode(readSignature("p256remotecertsigned.json")) +
         readSymSignature(new String[]{"hs256signed.json",
                                       "hs384signed.json",
