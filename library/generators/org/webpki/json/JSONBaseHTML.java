@@ -1510,7 +1510,7 @@ public class JSONBaseHTML  {
                         enumerateRemoteKeyFormats() +
                         "See <a href=\"#remotekeyexample\">remote key example</a>.");
 */    
-            addSubItemTable(JSONSignatureDecoder.EXTENSIONS_JSON)
+            addSubItemTable(JSONSignatureDecoder.CRIT_JSON)
              .newRow()
                 .newColumn()
                   .addProperty("...")
@@ -1525,13 +1525,13 @@ public class JSONBaseHTML  {
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
                   "that are not recognized as well as empty <code>" +
-                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;</code> objects.")
+                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;</code> objects.")
                   .setNotes("Examples:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
-                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
+                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;: {<br>" +
                   "&nbsp;&nbsp;&quot;https://standards.org/pki/jcs/ocspResponse&quot;: " +
                    "&quot;DgYDVR0PAQH_BAQDAgEGMB0GA1UdDgQWBBQT...VZI1YQdQFC63ncCTQ3iTAfBgNVHSMEGDAWg&quot;<br>" +
                   "}<br><br>" +
-                  "&quot;" + JSONSignatureDecoder.EXTENSIONS_JSON + "&quot;: {<br>" +
+                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;: {<br>" +
                   "&nbsp;&nbsp;&quot;myExt&quot;: &quot;foobar&quot;,<br>" +
                   "&nbsp;&nbsp;&quot;otherExt&quot;: {<br>" +
                   "&nbsp;&nbsp;&nbsp;&nbsp;&quot;name&quot;: &quot;johndoe&quot;,<br>" +

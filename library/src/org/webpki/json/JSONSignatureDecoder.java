@@ -38,6 +38,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -67,7 +68,7 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String E_JSON                     = "e";            // JWK
 
-    public static final String EXTENSIONS_JSON            = "extensions";
+    public static final String CRIT_JSON                  = "crit";         // JWS extension
 
     public static final String JKU_JSON                   = "jku";          // Remote JWK set url
 
@@ -96,10 +97,23 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String X5C_JSON                   = "x5c";          // Certificate path
 
     public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
+    
+    static final HashSet<String> reservedWords = new HashSet<String>();
+    
+    static {
+        reservedWords.add(ALG_JSON);
+        reservedWords.add(CRIT_JSON);
+        reservedWords.add(KID_JSON);
+        reservedWords.add(JWK_JSON);
+        reservedWords.add(JKU_JSON);
+        reservedWords.add(X5C_JSON);
+        reservedWords.add(X5U_JSON);
+        reservedWords.add(VALUE_JSON);
+    }
 
     public static abstract class Extension {
         
-        protected abstract String getExtensionUri();
+        public abstract String getExtensionUri();
         
         protected abstract void decode(JSONObjectReader reader) throws IOException;
     }
@@ -240,19 +254,17 @@ public class JSONSignatureDecoder implements Serializable {
                 algorithm = MACAlgorithms.getAlgorithmFromId(algorithmString, options.algorithmPreferences);
             }
         }
-        if (signature.hasProperty(EXTENSIONS_JSON)) {
-            JSONObjectReader extensionReader = signature.getObject(EXTENSIONS_JSON);
-            if (extensionReader.getProperties().length == 0) {
-                throw new IOException("Empty \"" + EXTENSIONS_JSON + "\" object not allowed");
-            }
-            for (String name : extensionReader.getProperties()) {
+        if (signature.hasProperty(CRIT_JSON)) {
+            String[] properties = signature.getStringArray(CRIT_JSON);
+            checkExtensions(properties);
+            for (String name : properties) {
                 ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
                 if (extensionEntry == null) {
                     throw new IOException("Unknown extension: " + name);
                 }
                 try {
                     Extension extension = extensionEntry.extensionClass.newInstance();
-                    extension.decode(extensionReader);
+                    extension.decode(signature);
                     extensions.put(name, extension);
                 } catch (InstantiationException e) {
                     throw new IOException (e);
@@ -516,6 +528,17 @@ public class JSONSignatureDecoder implements Serializable {
                                                               getCryptoBinary(rd, "qi")));
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
+        }
+    }
+
+    static void checkExtensions(String[] properties) throws IOException {
+        if (properties.length == 0) {
+            throw new IOException("Empty \"" + JSONSignatureDecoder.CRIT_JSON + "\" array not allowed");
+        }
+        for (String property : properties) {
+            if (reservedWords.contains(property)) {
+                throw new IOException("Forbidden \"" + JSONSignatureDecoder.CRIT_JSON + "\" property: " + property);
+            }
         }
     }
 }

@@ -558,7 +558,11 @@ public class JSONObjectWriter implements Serializable {
             signer.writeKeyData(signatureWriter);
         }
         if (signer.extensions != null) {
-            signatureWriter.setObject(JSONSignatureDecoder.EXTENSIONS_JSON, signer.extensions); 
+            JSONArrayWriter extensions = signatureWriter.setArray(JSONSignatureDecoder.CRIT_JSON);
+            for (String property : signer.extensions.getProperties()) {
+                extensions.setString(property);
+                signatureWriter.setProperty(property, signer.extensions.getProperty(property));
+            }
         }
         signatureWriter.setBinary(JSONSignatureDecoder.VALUE_JSON,
                                   signer.signData(signer.normalizedData = 

@@ -3312,7 +3312,7 @@ public class JSONTest {
         static final String URI = "https://example.com/ext";
 
         @Override
-        protected String getExtensionUri() {
+        public String getExtensionUri() {
             return URI;
         }
 
@@ -3328,7 +3328,7 @@ public class JSONTest {
         public String data;
 
         @Override
-        protected String getExtensionUri() {
+        public String getExtensionUri() {
             return URI;
         }
 
@@ -3392,7 +3392,7 @@ public class JSONTest {
         public String data;
 
         @Override
-        protected String getExtensionUri() {
+        public String getExtensionUri() {
             return URI;
         }
 

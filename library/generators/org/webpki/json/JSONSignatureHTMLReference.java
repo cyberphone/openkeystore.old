@@ -555,7 +555,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "}</code></div>" +
             "For sophisticated <i>peer based</i> counter signature schemes another possibility is using " +
             "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
-            "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
+            "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.CRIT_JSON) +
             " holding application specific (per signature) metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS is a core element in a proof-of-concept application ")
@@ -635,7 +635,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         
         json.addDocumentHistoryLine("2013-12-17", "0.3", "Initial publication in HTML5");
         json.addDocumentHistoryLine("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
-        json.addDocumentHistoryLine("2013-12-29", "0.5", "Added the <code>" + JSONSignatureDecoder.EXTENSIONS_JSON + "</code> facility");
+        json.addDocumentHistoryLine("2013-12-29", "0.5", "Added the <code>" + JSONSignatureDecoder.CRIT_JSON + "</code> facility");
         json.addDocumentHistoryLine("2014-01-21", "0.51", "Added clarification to public key parameter representation");
         json.addDocumentHistoryLine("2014-01-26", "0.52", "Added note regarding the (now obsoleted) <code>signerCertificate</code> option");
         json.addDocumentHistoryLine("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
