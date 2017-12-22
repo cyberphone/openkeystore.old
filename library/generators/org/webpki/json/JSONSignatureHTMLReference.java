@@ -56,10 +56,6 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
     
-    static final String REMOTE_KEY_EXAMPLE = "remotekeyexample";
-
-    static final String REMOTE_CERT_EXAMPLE = "remotecertexample";
-
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
     }
@@ -225,19 +221,18 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
           .append(json.createReference(JSONBaseHTML.REF_YASMIN))
           .append(" as the primary target. " +
             "This concept was not originally considered " +
-            "due to the lack of a standardized normalization method for JSON data. " +
+            "due to the lack of a standardized canonicalization method for JSON data. " +
             "However, version 6 of ECMAScript ")
            .append(json.createReference(JSONBaseHTML.REF_ES6))
-           .append(" introduced a <i>predictable serialization</i> scheme which enables both <i>data " +
+           .append(" introduced a simple to support <i>predictable serialization</i> scheme " +
+            "enabling both <i>data " +
             "and header information to be provided in plain text</i>." + Types.LINE_SEPARATOR +
             "In order to make library support of JCS straightforward in spite of having a different structure compared to JWS ")
           .append(json.createReference(JSONBaseHTML.REF_JWS))
-          .append(", JCS supports the same algorithms ")
+          .append(", JCS uses the same properties as well as cryptographic algorithms ")
           .append(json.createReference(JSONBaseHTML.REF_JWA))
-          .append(" as well as using JWK ")
-          .append(json.createReference(JSONBaseHTML.REF_JWK))
-          .append(" for representing public key data. " + Types.LINE_SEPARATOR +
-            "Since JCS is rooted in ECMAScript" +
+          .append(". " + Types.LINE_SEPARATOR +
+            "Due to the ECMAScript heritage" +
             ", JCS may also be used for &quot;in-object&quot; JavaScript signatures, " +
              "making JCS suitable for HTML5 applications. See " +
              "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
@@ -277,8 +272,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(SAMPLE_SIGNATURE).append(
             "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:")
         .append(sampleSignature)
-        .append("The sample signature's payload consists of the properties above <code>" +
-            JSONSignatureDecoder.SIGNATURE_JSON + "</code>. " +
+        .append("The sample signature's payload consists of the properties above the <code>&quot;" +
+            JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> property. " +
             "Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample." + LINE_SEPARATOR +
             "For more examples see <a href=\"#" + JSONBaseHTML.makeLink(TEST_VECTORS) + 
                "\"><span style=\"white-space:nowrap\">" +
@@ -372,14 +367,14 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.setAppendixMode();
 
         json.addParagraphObject(TEST_VECTORS).append(
-       "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
-       "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
-       " was signed by the following EC private key in JWK " + 
-       json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-       formatCode(p256key) + LINE_SEPARATOR +
-       "The following signature object which uses a " +
-       json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.KID_JSON) +
-       " for identifying the public key can be verified with the key above:" + 
+        "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
+        "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
+        " was signed by the following EC private key in JWK " + 
+        json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
+        formatCode(p256key) + LINE_SEPARATOR +
+        "The following signature object which uses a " +
+        json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.KID_JSON) +
+        " for identifying the public key can be verified with the key above:" + 
         readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)
             .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
@@ -413,15 +408,19 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") + LINE_SEPARATOR +
-        "JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " key set for verifying the subsequent object:" +
+        "JWK " + json.createReference(JSONBaseHTML.REF_JWK) + 
+        " key set for verifying the subsequent object:" +
         formatCode(json.readJson1("r2048.jwks")) +
-        "<span id=\"" + REMOTE_KEY_EXAMPLE + "\">The</span> following signature object is referring to a " +
+        "<span id=\"" + JSONBaseHTML.REMOTE_KEY_EXAMPLE + 
+        "\">The</span> following signature object is referring to a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.JKU_JSON) +
         " property pointing to an object as described above:" +
         formatCode(readSignature("r2048remotekeysigned.json")) + LINE_SEPARATOR +
-        "PEM " + json.createReference(JSONBaseHTML.REF_PEM) + " certificate path for verifying the subsequent object:" +
+        "PEM " + json.createReference(JSONBaseHTML.REF_PEM) + 
+        " certificate path for verifying the subsequent object:" +
         pemFile("p256certpath.pem") +
-        "<span id=\"" + REMOTE_CERT_EXAMPLE + "\">The</span> following signature object is referring to a " +
+        "<span id=\"" + JSONBaseHTML.REMOTE_CERT_EXAMPLE +
+        "\">The</span> following signature object is referring to a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.X5U_JSON) +
         " property pointing to an object as described above:" +
         formatCode(readSignature("p256remotecertsigned.json")) +
@@ -511,8 +510,18 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<br>" +
             "verifySignature(signedObject);<br></code></div>" + LINE_SEPARATOR +
             "<b>Constraint when using JCS with ECMAScript</b>" + LINE_SEPARATOR +
-            "If numeric property names are used, they <b>must</b> be " +
-            "<i>provided in ascending numeric order</i> and inserted <i>before</i> possible non-numeric properties.");
+            "For JavaScript optimization reasons, ECMAScript's <code>JSON.parse()</code> "+
+            "internally <i>rearranges order of properties " +
+            "with names expressed as integers</i>, making a parsed JSON string like " +
+            "<code style=\"white-space:nowrap\">'{&quot;2&quot;:&quot;First&quot;,&quot;A&quot;:&quot;Next&quot;,&quot;1&quot;:&quot;Last&quot;}'</code>" +
+            " actually serialize as " +
+            "<code style=\"white-space:nowrap\">'{&quot;1&quot;:&quot;Last&quot;,&quot;2&quot;:&quot;First&quot;,&quot;A&quot;:&quot;Next&quot;}'</code>." +
+            LINE_SEPARATOR +
+            "Due to this fact, <i>signature creators</i> <b>must</b> (in the hopefully rather unusual case " +
+            "cross platform applications would mandate numeric property names), in an here unspecified " +
+            "way, &quot;emulate&quot; this scheme since this behavior is not intended to be " +
+            "an additional requirement to support by JSON tools in general in order to " +
+            "use this specification.");
 
         json.addParagraphObject(COUNTER_SIGNATURES).append(
             "For counter signatures there are two entirely different solutions. " +
@@ -549,12 +558,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.EXTENSIONS_JSON) +
             " holding application specific (per signature) metadata.");
 
-        json.addParagraphObject("Usage in Applications").append("JCS as well as the freestanding sub objects <a href=\"#" + 
-            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.JWK_JSON + "\">" +
-            JSONSignatureDecoder.JWK_JSON + "</a> and <a href=\"#" +
-            JSONSignatureDecoder.SIGNATURE_JSON + "." + JSONSignatureDecoder.X5C_JSON + "\">" +
-            JSONSignatureDecoder.X5C_JSON +
-            "</a>, have been utilized in a proof-of-concept application ")
+        json.addParagraphObject("Usage in Applications").append("JCS is a core element in a proof-of-concept application ")
          .append(json.createReference(JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
          .append(" running on Android." + LINE_SEPARATOR +
          "The sample code below is based on the Java reference implementation ")

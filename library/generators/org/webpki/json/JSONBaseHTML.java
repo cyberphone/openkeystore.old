@@ -115,6 +115,9 @@ public class JSONBaseHTML  {
 
     public static final String JCS_PUBLIC_KEY_EC       = "Additional EC Properties";
 
+    public static final String REMOTE_KEY_EXAMPLE      = "remotekeyexample";
+    public static final String REMOTE_CERT_EXAMPLE     = "remotecertexample";
+
     String file_name;
     String subsystem_name;
     
@@ -1430,7 +1433,9 @@ public class JSONBaseHTML  {
                          "pointing to a JWK " + createReference(REF_JWK) +
                          " key set holding a <i>single</i> <a href=\"#" +
                          JSONSignatureDecoder.JWK_JSON + "\">" + JSONSignatureDecoder.JWK_JSON +
-                         "</a> object.")
+                         "</a> object." +
+                         Types.LINE_SEPARATOR +
+                         "Also see <a href=\"#" + REMOTE_KEY_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.X5C_JSON)
@@ -1451,9 +1456,15 @@ public class JSONBaseHTML  {
               .setType(Types.WEBPKI_DATA_TYPES.URI)
             .newColumn()
             .newColumn()
-              .addString("<i>Optional.</i> A single public key or X.509 ")
-              .addString(createReference(REF_X509))
-              .addString(" certificate path accessible via HTTP.")
+              .addString("<i>Optional.</i> URI " + createReference(REF_URI) +
+                         " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation and " +
+                         "pointing to a PEM " + createReference(REF_PEM) + " file containing a " +
+                         "sorted array of X.509 ")
+          .addString(createReference(REF_X509))
+          .addString(" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+                      "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." +
+                      Types.LINE_SEPARATOR +
+                      "Also see <a href=\"#" + REMOTE_CERT_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.VALUE_JSON)
@@ -1466,11 +1477,12 @@ public class JSONBaseHTML  {
               " Note that the <i>binary</i> representation <b>must</b> follow the JWA " + 
                       createReference(REF_JWA) + " specifications.")
                        .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
-                   "<code>" + JSONSignatureDecoder.JWK_JSON + "</code>" + 
-                   ", <code>" + JSONSignatureDecoder.X5U_JSON + "</code>" + 
-                   " or <code>" + JSONSignatureDecoder.X5C_JSON + 
-                   "</code> property since the key may be given by the context or through the <code>" + 
-                   JSONSignatureDecoder.KID_JSON + "</code> property.");
+                   "<code>&quot;" + JSONSignatureDecoder.JWK_JSON + "&quot;</code>" + 
+                   ", <code>&quot;" + JSONSignatureDecoder.JKU_JSON + "&quot;</code>" + 
+                   ", <code>&quot;" + JSONSignatureDecoder.X5C_JSON + "&quot;</code>" + 
+                   ", or <code>&quot;" + JSONSignatureDecoder.X5U_JSON + 
+                   "&quot;</code> property since the key may be given by the context or through the <code>&quot;" + 
+                   JSONSignatureDecoder.KID_JSON + "&quot;</code> property.");
 
         AddPublicKeyDefinitions();
  /*
