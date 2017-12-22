@@ -86,21 +86,15 @@ public class ReadSignature {
         }
 
         @Override
-        public PublicKey readPublicKey(String uri, JSONRemoteKeys format) throws IOException {
+        public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.JWK_PUB_KEY) {
-                return JSONParser.parse(data).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-            }
-            throw new IOException("Not implemented");
+            return JSONParser.parse(data).getArray(JSONSignatureDecoder.KEYS_JSON).getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override
-        public X509Certificate[] readCertificatePath(String uri, JSONRemoteKeys format) throws IOException {
+        public X509Certificate[] readCertificatePath(String uri) throws IOException {
             byte[] data = shoot(uri);
-            if (format == JSONRemoteKeys.PEM_CERT_PATH) {
-                return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
-            }
-            throw new IOException("Not implemented");
+            return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
         }
     }
 
@@ -144,14 +138,15 @@ public class ReadSignature {
                 if (property.equals(JSONSignatureDecoder.SIGNATURE_JSON)) {
                     JSONSignatureDecoder.Options options = new JSONSignatureDecoder.Options();
                     options.setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-                    String algo = rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).getString(JSONSignatureDecoder.ALGORITHM_JSON);
+                    String algo = rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).getString(JSONSignatureDecoder.ALG_JSON);
                     for (MACAlgorithms macs : MACAlgorithms.values()) {
                         if (algo.equals(macs.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER))) {
                             options.setRequirePublicKeyInfo(false)
                                    .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED);
                         }
                     }
-                    if (rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.REMOTE_KEY_JSON)) {
+                    if (rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.JKU_JSON) ||
+                        rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.X5U_JSON)) {
                         options.setRemoteKeyReader(new WebKey());
                     }
                     JSONSignatureDecoder signature = rd.getSignature(options);

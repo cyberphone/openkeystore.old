@@ -177,7 +177,7 @@ public class HTML {
         + baseurl
         + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
-        + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jcs.html\">JCS Documentation</a></td></tr>"
+        + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jose-jcs.html\">JCS Documentation</a></td></tr>"
         + "</table></td></tr>"));
     }
 
@@ -359,13 +359,13 @@ public class HTML {
         + JSONSignatureDecoder.SIGNATURE_JSON
         + " = {};\n"
         + "    signatureObject."
-        + JSONSignatureDecoder.ALGORITHM_JSON
+        + JSONSignatureDecoder.ALG_JSON
         + " = '"
         + AsymSignatureAlgorithms.RSA_SHA256
                 .getAlgorithmId(AlgorithmPreferences.JOSE)
         + "';\n"
         + "    var publicKeyObject = signatureObject."
-        + JSONSignatureDecoder.PUBLIC_KEY_JSON
+        + JSONSignatureDecoder.JWK_JSON
         + " = {};\n"
         + "    publicKeyObject."
         + JSONSignatureDecoder.KTY_JSON
