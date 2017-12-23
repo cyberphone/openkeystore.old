@@ -1173,9 +1173,8 @@ public class JSONBaseHTML  {
         return buffer.append("</ul>").toString();
     }
 
-    static String enumerateAttributes(AbstractCollection<String> collection, boolean andFlag) {
+    static String enumerateAttributes(String[] list, boolean andFlag) {
         StringBuffer s = new StringBuffer();
-        String[] list = collection.toArray(new String[0]);
         int i = 0;
         for (String attribute : list) {
             if (i == list.length - 1) {
@@ -1495,10 +1494,10 @@ public class JSONBaseHTML  {
                   .setChoice (false, 1)
                 .newColumn()
                   .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
-                  "also featured within the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> object." +
+                  "also featured within the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> object." +
                   Types.LINE_SEPARATOR +
                   "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JCS <i>reserved words</i> " +
-                  enumerateAttributes(JSONSignatureDecoder.reservedWords, false) + ". " +
+                  enumerateAttributes(JSONSignatureDecoder.reservedWords.toArray(new String[0]), false) + ". " +
                   Types.LINE_SEPARATOR +
                   "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
                   "(unless registered with IANA), " +
@@ -1520,12 +1519,12 @@ public class JSONBaseHTML  {
               .addString("The signature data." +
               " Note that the <i>binary</i> representation <b>must</b> follow the JWA " + 
                       createReference(REF_JWA) + " specifications.")
-                       .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
-                   "<code>&quot;" + JSONSignatureDecoder.JWK_JSON + "&quot;</code>" + 
-                   ", <code>&quot;" + JSONSignatureDecoder.JKU_JSON + "&quot;</code>" + 
-                   ", <code>&quot;" + JSONSignatureDecoder.X5C_JSON + "&quot;</code>" + 
-                   " or <code>&quot;" + JSONSignatureDecoder.X5U_JSON + 
-                   "&quot;</code> property since the key may be given by the context or through the <code>&quot;" + 
+              .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
+                  enumerateAttributes(new String[]{JSONSignatureDecoder.JWK_JSON,
+                                                   JSONSignatureDecoder.JKU_JSON,
+                                                   JSONSignatureDecoder.X5C_JSON,
+                                                   JSONSignatureDecoder.X5U_JSON}, false) + 
+                   " property since the key may be given by the context or through the <code>&quot;" + 
                    JSONSignatureDecoder.KID_JSON + "&quot;</code> property.");
 
         AddPublicKeyDefinitions();

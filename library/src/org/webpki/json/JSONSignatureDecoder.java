@@ -111,6 +111,13 @@ public class JSONSignatureDecoder implements Serializable {
         reservedWords.add(X5U_JSON);
         reservedWords.add(VAL_JSON);
     }
+    
+    static final LinkedHashSet<String> topLevelReserved = new LinkedHashSet<String>();
+    
+    static {
+        topLevelReserved.add(SIGNATURE_JSON);
+        topLevelReserved.add(SIGNATURES_JSON);
+    }
 
     public static abstract class Extension {
         
@@ -173,6 +180,7 @@ public class JSONSignatureDecoder implements Serializable {
         KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
         ExtensionHolder extensionHolder = new ExtensionHolder();
         JSONRemoteKeys.Reader remoteKeyReader;
+        LinkedHashSet<String> exclusions;
 
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
             this.algorithmPreferences = algorithmPreferences;
@@ -185,7 +193,7 @@ public class JSONSignatureDecoder implements Serializable {
         }
 
         /**
-         * Define external &quot;remoteKey&quot; reader class.
+         * Define external remote key reader class.
          * If set, the signature decoder assumes that there is no in-line public key or certificate information to process.   
          * @param remoteKeyReader Interface
          * @return this
@@ -202,6 +210,11 @@ public class JSONSignatureDecoder implements Serializable {
 
         public Options setPermittedExtensions(ExtensionHolder extensionHolder) {
             this.extensionHolder = extensionHolder;
+            return this;
+        }
+
+        public Options setPermittedExclusions(String[] exclusions) throws IOException {
+            this.exclusions = checkExcluded(exclusions);
             return this;
         }
     }
@@ -261,7 +274,7 @@ public class JSONSignatureDecoder implements Serializable {
             for (String name : properties) {
                 ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
                 if (extensionEntry == null) {
-                    throw new IOException("Unknown extension: " + name);
+                    throw new IOException("Not a permitted extension: " + name);
                 }
                 try {
                     Extension extension = extensionEntry.extensionClass.newInstance();
@@ -279,10 +292,30 @@ public class JSONSignatureDecoder implements Serializable {
                 throw new IOException("Missing mandatory extension: " + name);
             }
         }
+        LinkedHashMap<String, JSONValue> saveExcluded = null;
+        if (options.exclusions == null) {
+            if (signature.hasProperty(EXCL_JSON)) {
+                throw new IOException("Missing declaration of permitted excludes");
+            }
+        } else {
+            saveExcluded = new LinkedHashMap<String, JSONValue>(rd.root.properties);
+            LinkedHashSet<String> parsedExcludes = checkExcluded(signature.getStringArray(EXCL_JSON));
+            for (String excluded : parsedExcludes.toArray(new String[0])) {
+                if (!options.exclusions.contains(excluded)) {
+                    throw new IOException("Unexpected \"" + EXCL_JSON + "\" property:" + excluded);
+                }
+                rd.root.properties.remove(excluded);
+            }
+            for (String excluded : options.exclusions.toArray(new String[0])) {
+                if (!parsedExcludes.contains(excluded)) {
+                    throw new IOException("Missing \"" + EXCL_JSON + "\" property:" + excluded);
+                }
+             }
+        }
         signatureValue = signature.getBinary(VAL_JSON);
 
         ///////////////////////////////////////////////////////////////////////////
-        // Begin JCS normalization                                               //
+        // Begin JCS core normalization                                          //
         //                                                                       //
         // 1. Make a shallow copy of the signature object                        //
         LinkedHashMap<String, JSONValue> savedProperties =                       //
@@ -291,17 +324,26 @@ public class JSONSignatureDecoder implements Serializable {
         // 2. Hide the signature value property for the serializer...            //
         signature.root.properties.remove(VAL_JSON);                              //
         //                                                                       //
-        // 3. Serialize ("JSON.stringify()")                                     //
+        // 3. Hide the optional exclude property from the serializer...          //
+        if (options.exclusions != null) {                                        //
+            signature.root.properties.remove(EXCL_JSON);                         //
+        }                                                                        //  
+        //                                                                       //
+        // 4. Serialize ("JSON.stringify()")                                     //
         normalizedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);      //
         //                                                                       //
-        // 4. Check for unread (=forbidden) data                                 //
+        // 5. Check for unread (=forbidden) data                                 //
         signature.checkForUnread();                                              //
         //                                                                       //
-        // 5. Restore the signature object                                       //
+        // 6. Restore the signature object                                       //
         signature.root.properties = savedProperties;                             //
         //                                                                       //
-        // End JCS normalization                                                 //
+        // End JCS core normalization                                            //
         ///////////////////////////////////////////////////////////////////////////
+
+        if (options.exclusions != null) {
+            rd.root.properties = saveExcluded;                             //
+        }
 
         if (options.requirePublicKeyInfo) switch (getSignatureType()) {
             case X509_CERTIFICATE:
@@ -472,7 +514,7 @@ public class JSONSignatureDecoder implements Serializable {
     }
 
     /**
-     * Simplified verify that only checks that there are no "keyId" or "extensions", and that the signature type matches.
+     * Simplified verify that only checks that there are no "kid" or "crit", and that the signature type matches.
      * Note that asymmetric key signatures are always checked for technical correctness unless
      * you have specified false for requirePublicKeyInfo.
      *
@@ -542,4 +584,20 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
     }
+
+    static LinkedHashSet<String> checkExcluded(String[] excluded) throws IOException {
+        if (excluded.length == 0) {
+            throw new IOException("Empty \"" + JSONSignatureDecoder.EXCL_JSON + "\" array not allowed");
+        }
+        LinkedHashSet<String> ex = new LinkedHashSet<String>();
+        for (String property : excluded) {
+            if (topLevelReserved.contains(property)) {
+                throw new IOException("Forbidden \"" + JSONSignatureDecoder.EXCL_JSON + "\" property: " + property);
+            }
+            if (!ex.add(property)) {
+                throw new IOException("Duplicate \"" + JSONSignatureDecoder.EXCL_JSON + "\" property: " + property);
+            }
+        }
+        return ex;
+     }
 }

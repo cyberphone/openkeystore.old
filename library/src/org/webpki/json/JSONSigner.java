@@ -30,6 +30,8 @@ public abstract class JSONSigner implements Serializable {
     private static final long serialVersionUID = 1L;
 
     JSONObjectReader extensions;
+    
+    String[] excluded;
 
     String keyId;
 
@@ -47,14 +49,26 @@ public abstract class JSONSigner implements Serializable {
     abstract void writeKeyData(JSONObjectWriter wr) throws IOException;
 
     /**
-     * Set &quot;extensions&quot; for this signature.
-     * @param extensions A JSON object holding the extension properties and associated values
+     * Set &quot;crit&quot; for this signature.
+     * @param extensions JSON object holding the extension properties and associated values
      * @return this
      * @throws IOException &nbsp;
      */
     public JSONSigner setExtensions(JSONObjectWriter extensions) throws IOException {
         this.extensions = new JSONObjectReader(extensions);
         JSONSignatureDecoder.checkExtensions(this.extensions.getProperties());
+        return this;
+    }
+
+    /**
+     * Set &quot;excl&quot; for this signature.
+     * @param excluded Array holding the names of properties that must be excluded from the signature
+     * @return this
+     * @throws IOException &nbsp;
+     */
+    public JSONSigner setExcluded(String[] excluded) throws IOException {
+        this.excluded = excluded;
+        JSONSignatureDecoder.checkExcluded(excluded);
         return this;
     }
 

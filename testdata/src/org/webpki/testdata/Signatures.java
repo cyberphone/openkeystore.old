@@ -205,6 +205,17 @@ public class Signatures {
         JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
                         .setPermittedExtensions(eh)).verify(new JSONAsymKeyVerifier(localKey.getPublic()));
 
+        JSONObjectWriter mixedData = new JSONObjectWriter()
+            .setString("mySignedData", "something")
+            .setString("myUnsignedData", "something else")
+            .setSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null)
+                .setExcluded(new String[]{"myUnsignedData"}));
+        signedData = mixedData.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+        ArrayUtil.writeFile(baseSignatures + "p256keyexclsigned.json", signedData);
+        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
+                         .setPermittedExclusions(new String[]{"myUnsignedData"}))
+                         .verify(new JSONAsymKeyVerifier(localKey.getPublic()));
+
         JSONObjectWriter javaScriptSignature = new JSONObjectWriter()
             .setString("statement", "Hello Signed World!")
             .setArray("otherProperties", 
