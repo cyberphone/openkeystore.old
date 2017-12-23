@@ -5,6 +5,6 @@
   "signature": {
     "alg": "HS384",
     "kid": "s384bitkey",
-    "value": "_q1QBjGkFFGqNT6_tkO_qZdjD8cqgI4Kj1T_Yqjw4nhTYxPk-9AaXrjiav5CrrFE"
+    "val": "_q1QBjGkFFGqNT6_tkO_qZdjD8cqgI4Kj1T_Yqjw4nhTYxPk-9AaXrjiav5CrrFE"
   }
 }

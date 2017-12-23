@@ -5,6 +5,6 @@
   "signature": {
     "alg": "HS512",
     "kid": "s512bitkey",
-    "value": "jfsFU4ANIwSga2ygW8gag89p4BQQwkjqQ8oPOuOaBis_F7wI19e6j1Rto1kmt3lz-a4SIC57QPuHOTY-QF-C1w"
+    "val": "jfsFU4ANIwSga2ygW8gag89p4BQQwkjqQ8oPOuOaBis_F7wI19e6j1Rto1kmt3lz-a4SIC57QPuHOTY-QF-C1w"
   }
 }

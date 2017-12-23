@@ -80,15 +80,13 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String N_JSON                     = "n";            // JWK
 
-    public static final String JWK_JSON                   = "jwk";
+    public static final String JWK_JSON                   = "jwk";          // Public key in JCS
 
     public static final String SIGNATURE_JSON             = "signature";
 
     public static final String SIGNATURES_JSON            = "signatures";
 
-    public static final String VALUE_JSON                 = "value";
-
-    public static final String VERSION_JSON               = "version";
+    public static final String VAL_JSON                   = "val";          // JCS specific signature value 
 
     public static final String X_JSON                     = "x";            // JWK
 
@@ -108,7 +106,7 @@ public class JSONSignatureDecoder implements Serializable {
         reservedWords.add(JKU_JSON);
         reservedWords.add(X5C_JSON);
         reservedWords.add(X5U_JSON);
-        reservedWords.add(VALUE_JSON);
+        reservedWords.add(VAL_JSON);
     }
 
     public static abstract class Extension {
@@ -278,29 +276,29 @@ public class JSONSignatureDecoder implements Serializable {
                 throw new IOException("Missing mandatory extension: " + name);
             }
         }
-        signatureValue = signature.getBinary(VALUE_JSON);
+        signatureValue = signature.getBinary(VAL_JSON);
 
-        //////////////////////////////////////////////////////////////////////////
-        // Begin JCS normalization                                              //
-        //                                                                      //
-        // 1. Make a shallow copy of the signature object                       //
-        LinkedHashMap<String, JSONValue> savedProperties =
-                new LinkedHashMap<String, JSONValue>(signature.root.properties);
-        //                                                                      //
-        // 2. Hide the signature value property for the serializer...           //
-        signature.root.properties.remove(VALUE_JSON);                           //
-        //                                                                      //
-        // 3. Serialize ("JSON.stringify()")                                    //
-        normalizedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);
-        //                                                                      //
-        // 4. Check for unread (=forbidden) data                                //
-        signature.checkForUnread();                                             //
-        //                                                                      //
-        // 5. Restore the signature object                                      //
-        signature.root.properties = savedProperties;
-        //                                                                      //
-        // End JCS normalization                                                //
-        //////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
+        // Begin JCS normalization                                               //
+        //                                                                       //
+        // 1. Make a shallow copy of the signature object                        //
+        LinkedHashMap<String, JSONValue> savedProperties =                       //
+                new LinkedHashMap<String, JSONValue>(signature.root.properties); //
+        //                                                                       //
+        // 2. Hide the signature value property for the serializer...            //
+        signature.root.properties.remove(VAL_JSON);                              //
+        //                                                                       //
+        // 3. Serialize ("JSON.stringify()")                                     //
+        normalizedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);      //
+        //                                                                       //
+        // 4. Check for unread (=forbidden) data                                 //
+        signature.checkForUnread();                                              //
+        //                                                                       //
+        // 5. Restore the signature object                                       //
+        signature.root.properties = savedProperties;                             //
+        //                                                                       //
+        // End JCS normalization                                                 //
+        ///////////////////////////////////////////////////////////////////////////
 
         if (options.requirePublicKeyInfo) switch (getSignatureType()) {
             case X509_CERTIFICATE:
@@ -351,7 +349,7 @@ public class JSONSignatureDecoder implements Serializable {
     static BigInteger getCryptoBinary(JSONObjectReader rd, String property) throws IOException {
         byte[] cryptoBinary = rd.getBinary(property);
         if (cryptoBinary[0] == 0x00) {
-            throw new IOException("Public RSA key parameter \"" + property + "\" contains leading zeroes");
+            throw new IOException("RSA key parameter \"" + property + "\" contains leading zeroes");
         }
         return new BigInteger(1, cryptoBinary);
     }

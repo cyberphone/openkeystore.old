@@ -5,6 +5,6 @@
   "signature": {
     "alg": "HS256",
     "kid": "s256bitkey",
-    "value": "CZhL5fsl-Rrp-glBFSimu04sE4GmJYEUwQQyp9vZZwU"
+    "val": "CZhL5fsl-Rrp-glBFSimu04sE4GmJYEUwQQyp9vZZwU"
   }
 }

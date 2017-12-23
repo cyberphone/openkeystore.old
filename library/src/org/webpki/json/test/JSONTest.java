@@ -3186,7 +3186,7 @@ public class JSONTest {
         } catch (Exception e) {
             assertTrue("Shouldn't have failed", must_fail);
             checkException(e, rsaFlag ?
-                    "Public RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes"
+                    "RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes"
                     :
                     "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not normalized");
         }

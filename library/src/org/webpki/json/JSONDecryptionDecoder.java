@@ -38,7 +38,7 @@ import org.webpki.json.encryption.KeyEncryptionAlgorithms;
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
 // Because the encryption system (naturally) borrows heavily from JCS         //
-// including public key structures and property naming conventions.           //
+// including using the same normalization scheme.                             //
 //                                                                            //
 // The supported algorithms are though JOSE compatible including their names. //
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,6 @@ import org.webpki.json.encryption.KeyEncryptionAlgorithms;
  * Holds parsed JEF (JSON Encryption Format) data.
  */
 public class JSONDecryptionDecoder {
-
-    public static final String ENCRYPTION_VERSION_ID = "http://xmlns.webpki.org/jef/v1";
 
     public static final String KEY_ENCRYPTION_JSON   = "keyEncryption";
     public static final String ENCRYPTED_KEY_JSON    = "encrypted_key";
@@ -80,15 +78,6 @@ public class JSONDecryptionDecoder {
 
     private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
 
-    private JSONObjectReader checkVersion(JSONObjectReader rd) throws IOException {
-        rd.clearReadFlags();
-        String version = rd.getStringConditional(JSONSignatureDecoder.VERSION_JSON, ENCRYPTION_VERSION_ID);
-        if (!version.equals(ENCRYPTION_VERSION_ID)) {
-            throw new IOException("Unknown encryption version: " + version);
-        }
-        return rd;
-    }
-
     public PublicKey getPublicKey() {
         return publicKey;
     }
@@ -117,33 +106,33 @@ public class JSONDecryptionDecoder {
     }
 
     JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
-        JSONObjectReader rd = checkVersion(encryptionObject);
-        //////////////////////////////////////////////////////////////////////////
-        // Begin JEF normalization                                              //
-        //                                                                      //
-        // 1. Make a shallow copy of the encryption object property list        //
-        LinkedHashMap<String, JSONValue> savedProperties =
-                new LinkedHashMap<String, JSONValue>(rd.root.properties);
-        //                                                                      //
-        // 2. Hide properties for the serializer..                              //
-        rd.root.properties.remove(IV_JSON);                                     //
-        rd.root.properties.remove(TAG_JSON);                                    //
-        rd.root.properties.remove(CIPHER_TEXT_JSON);                            //
-        //                                                                      //
-        // 3. Serialize ("JSON.stringify()")                                    //
-        authenticatedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);  //
-        //                                                                      //
-        // 4. Restore encryption object property list                           //
-        rd.root.properties = savedProperties;                                   //
-        //                                                                      //
-        // End JEF normalization                                                //
-        //////////////////////////////////////////////////////////////////////////
+        encryptionObject.clearReadFlags();
+        ///////////////////////////////////////////////////////////////////////////////////////
+        // Begin JEF normalization                                                           //
+        //                                                                                   //
+        // 1. Make a shallow copy of the encryption object property list                     //
+        LinkedHashMap<String, JSONValue> savedProperties =                                   //
+                new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
+        //                                                                                   //
+        // 2. Hide properties for the serializer..                                           //
+        encryptionObject.root.properties.remove(IV_JSON);                                    //
+        encryptionObject.root.properties.remove(TAG_JSON);                                   //
+        encryptionObject.root.properties.remove(CIPHER_TEXT_JSON);                           //
+        //                                                                                   //
+        // 3. Serialize ("JSON.stringify()")                                                 //
+        authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
+        //                                                                                   //
+        // 4. Restore encryption object property list                                        //
+        encryptionObject.root.properties = savedProperties;                                  //
+        //                                                                                   //
+        // End JEF normalization                                                             //
+        ///////////////////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromId(rd.getString(ENC_JSON));
-        iv = rd.getBinary(IV_JSON);
-        tag = rd.getBinary(TAG_JSON);
-        if (rd.hasProperty(KEY_ENCRYPTION_JSON)) {
-            JSONObjectReader encryptedKey = checkVersion(rd.getObject(KEY_ENCRYPTION_JSON));
+                .getAlgorithmFromId(encryptionObject.getString(ENC_JSON));
+        iv = encryptionObject.getBinary(IV_JSON);
+        tag = encryptionObject.getBinary(TAG_JSON);
+        if (encryptionObject.hasProperty(KEY_ENCRYPTION_JSON)) {
+            JSONObjectReader encryptedKey = encryptionObject.getObject(KEY_ENCRYPTION_JSON);
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
                     .getAlgorithmFromId(encryptedKey.getString(JSONSignatureDecoder.ALG_JSON));
             if (encryptedKey.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
@@ -160,10 +149,10 @@ public class JSONDecryptionDecoder {
             }
         } else {
             sharedSecretMode = true;
-            keyId = rd.getStringConditional(JSONSignatureDecoder.KID_JSON);
+            keyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
         }
-        encryptedData = rd.getBinary(CIPHER_TEXT_JSON);
-        rd.checkForUnread();
+        encryptedData = encryptionObject.getBinary(CIPHER_TEXT_JSON);
+        encryptionObject.checkForUnread();
     }
 
     private byte[] localDecrypt(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {

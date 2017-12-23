@@ -1467,7 +1467,7 @@ public class JSONBaseHTML  {
                       "Also see <a href=\"#" + REMOTE_CERT_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
             .newColumn()
-              .addProperty(JSONSignatureDecoder.VALUE_JSON)
+              .addProperty(JSONSignatureDecoder.VAL_JSON)
               .addSymbolicValue("Signature")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)

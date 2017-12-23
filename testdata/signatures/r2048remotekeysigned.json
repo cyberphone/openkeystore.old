@@ -5,6 +5,6 @@
   "signature": {
     "alg": "RS256",
     "jku": "https://cyberphone.github.io/doc/openkeystore/r2048.jwks",
-    "value": "bYMtdH4KH9IBL9TTBWGRcTj5bgO1vkFzLrb4BfEEPfKsdZwCg347tY7OyiEFwT6cYlfe-OIGG_50YHPvHOrh5nclSsTjpEWtyiYQQBPtQYtD4Pehids_npRJWm1rYvRp-pWc6zQp6JwRw4eLeX-rIlI0oPSkbgDRa5INlLmJ8rb5HpYKiPsD-2NqG0xTc0N13bnllwZnpMDobmnfvzCrpQNa7UcFhUdfm6cvzmsZsUPQILq07s3ru-6oNvco62NyVFBmC2KfS92rzD_q9tpH_KTQ3bv-LD9mH0mne5nASe4YqqOLaCm0GzWtGIFvAQpS6uqCZ1eH6bbY3UbwmpVHiw"
+    "val": "bYMtdH4KH9IBL9TTBWGRcTj5bgO1vkFzLrb4BfEEPfKsdZwCg347tY7OyiEFwT6cYlfe-OIGG_50YHPvHOrh5nclSsTjpEWtyiYQQBPtQYtD4Pehids_npRJWm1rYvRp-pWc6zQp6JwRw4eLeX-rIlI0oPSkbgDRa5INlLmJ8rb5HpYKiPsD-2NqG0xTc0N13bnllwZnpMDobmnfvzCrpQNa7UcFhUdfm6cvzmsZsUPQILq07s3ru-6oNvco62NyVFBmC2KfS92rzD_q9tpH_KTQ3bv-LD9mH0mne5nASe4YqqOLaCm0GzWtGIFvAQpS6uqCZ1eH6bbY3UbwmpVHiw"
   }
 }

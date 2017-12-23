@@ -245,7 +245,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         String sampleSignature = readAsymSignature("p256keysigned.json", p256key, new JSONSignatureDecoder.Options());
         int beginValue = sampleSignature.indexOf("},");
         sampleSignature = sampleSignature.substring(0, ++beginValue) + "<span style=\"background:#f0f0f0\">,</span>" + sampleSignature.substring(++beginValue);
-        beginValue = sampleSignature.indexOf("&quot;" + JSONSignatureDecoder.VALUE_JSON + "&quot;");
+        beginValue = sampleSignature.indexOf("&quot;" + JSONSignatureDecoder.VAL_JSON + "&quot;");
         sampleSignature = sampleSignature.substring(0, beginValue) + 
                 "<span style=\"background:#f0f0f0\">" + 
                 sampleSignature.substring(beginValue);
@@ -283,7 +283,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "The scope of a signature (what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
             "object holding the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON +
-            "&quot;</code> property except for the <code>&quot;" + JSONSignatureDecoder.VALUE_JSON + "&quot;</code> property (shaded area in the sample).");
+            "&quot;</code> property except for the <code>&quot;" + JSONSignatureDecoder.VAL_JSON + "&quot;</code> property (shaded area in the sample).");
 
         json.addParagraphObject("Normalization and Signature Validation").append(
             "Prerequisite: A JSON object in accordance with ")
@@ -303,7 +303,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "The normalization steps are as follows:<ul>" +
             "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +
             "having a value of x09, x0a, x0d or x20.</li>" +
-            "<li style=\"padding-top:4pt\">The " + json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VALUE_JSON) + " property " +
+            "<li style=\"padding-top:4pt\">The " + json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VAL_JSON) + " property " +
             "(including leading <i>or</i> trailing <code>','</code>) <b>must</b> be deleted from the " +
             json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON) + " sub object.</li>" +
             "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences within quoted strings <b>must</b> be treated as &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
@@ -332,7 +332,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the string normalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature supplied in the " +
-            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VALUE_JSON) +
+            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.VAL_JSON) +
             " property can now be validated by applying the algorithm specified in the " +
             json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.ALG_JSON) + 
             " property (together with the appropriate <i>signature verification key</i>), on the " +
@@ -488,8 +488,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;JCS&nbsp;normalization</span><br>" +
             "&nbsp;&nbsp;var&nbsp;clone&nbsp;=&nbsp;Object.assign({},&nbsp;jcs.signature);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Clone&nbsp;&quot;signature&quot;&nbsp;child object</span><br>" +
             "&nbsp;&nbsp;var&nbsp;signature&nbsp;=&nbsp;decodeBase64URL(clone.value);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;signature&nbsp;value</span><br>" +
-            "&nbsp;&nbsp;delete&nbsp;jcs.signature." + JSONSignatureDecoder.VALUE_JSON +
-            ";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Remove&nbsp;signature&nbsp;value&nbsp;property&nbsp;from&nbsp;signed&nbsp;object</span><br>" +
+            "&nbsp;&nbsp;delete&nbsp;jcs.signature." + JSONSignatureDecoder.VAL_JSON +
+            ";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+            "<span style=\"color:green\">//&nbsp;Remove&nbsp;signature&nbsp;value&nbsp;property&nbsp;from&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;var&nbsp;data&nbsp;=&nbsp;convertToUTF8(JSON.stringify(jcs));&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;normalized&nbsp;JSON&nbsp;string (signed data)</span><br>" +
             "&nbsp;&nbsp;jcs.signature&nbsp;=&nbsp;clone;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Restore&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;the&nbsp;actual&nbsp;crypto,&nbsp;here&nbsp;using&nbsp;W3C&nbsp;WebCrypto</span> </code>")
@@ -611,9 +612,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
          "clonedSignatureObject = collections.OrderedDict(signatureObject)" +
           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\"># For non-destructive signature validation</span><br>" +
-         "signatureValue = signatureObject.pop('" + JSONSignatureDecoder.VALUE_JSON + "')" +
+         "signatureValue = signatureObject.pop('" + JSONSignatureDecoder.VAL_JSON + "')" +
          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\"># In Base64URL notation</span><br>" +
+         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+         "<span style=\"color:green\"># In Base64URL notation</span><br>" +
          "normalizedSignedData = json.dumps(jsonObject,separators=(',',':'),ensure_ascii=False)" +
          "&nbsp;&nbsp;<span style=\"color:green\"># In Unicode</span><br>" +
          "jsonObject['" + JSONSignatureDecoder.SIGNATURE_JSON + "'] = clonedSignatureObject" +
@@ -643,7 +645,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2014-09-23", "0.55", "Aligned EC parameter representation with JWS " + json.createReference(JSONBaseHTML.REF_JWS));
         json.addDocumentHistoryLine("2014-12-08", "0.56", "Removed " + json.createReference(JSONBaseHTML.REF_XMLDSIG) + " bloat and added support for JWA " + json.createReference(JSONBaseHTML.REF_JWS) + " algorithm identifiers");
         json.addDocumentHistoryLine("2014-12-19", "0.57", "Added an interoperability section");
-        json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VALUE_JSON + "</code> representation");
+        json.addDocumentHistoryLine("2015-01-12", "0.58", "Added clarification to signature <code>" + JSONSignatureDecoder.VAL_JSON + "</code> representation");
         json.addDocumentHistoryLine("2016-01-11", "0.59", "Added ECMAScript compatibility mode");
         json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
         json.addDocumentHistoryLine("2017-05-18", "0.70", "Added multiple signatures and test vectors");
