@@ -38,8 +38,8 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -67,6 +67,8 @@ public class JSONSignatureDecoder implements Serializable {
     public static final String CRV_JSON                   = "crv";          // JWK
 
     public static final String E_JSON                     = "e";            // JWK
+
+    public static final String EXCL_JSON                  = "excl";         // JCS specific non-protected
 
     public static final String CRIT_JSON                  = "crit";         // JWS extension
 
@@ -96,11 +98,12 @@ public class JSONSignatureDecoder implements Serializable {
 
     public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
     
-    static final HashSet<String> reservedWords = new HashSet<String>();
+    static final LinkedHashSet<String> reservedWords = new LinkedHashSet<String>();
     
     static {
         reservedWords.add(ALG_JSON);
         reservedWords.add(CRIT_JSON);
+        reservedWords.add(EXCL_JSON);
         reservedWords.add(KID_JSON);
         reservedWords.add(JWK_JSON);
         reservedWords.add(JKU_JSON);

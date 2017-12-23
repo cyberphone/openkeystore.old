@@ -29,6 +29,7 @@ import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
+import org.webpki.json.JSONSignatureDecoder.ExtensionHolder;
 
 import org.webpki.util.ArrayUtil;
 
@@ -56,6 +57,32 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
     
+    public static class Ext1 extends JSONSignatureDecoder.Extension {
+
+        @Override
+        protected void decode(JSONObjectReader rd) throws IOException {
+            rd.getString(getExtensionUri());
+        }
+
+        @Override
+        public String getExtensionUri() {
+            return "myString";
+        }
+    }
+
+    public static class Ext2 extends JSONSignatureDecoder.Extension {
+
+        @Override
+        protected void decode(JSONObjectReader rd) throws IOException {
+            rd.getObject(getExtensionUri()).getBoolean("life-is-great");
+        }
+
+        @Override
+        public String getExtensionUri() {
+            return "https://example.com/extension";
+        }
+    }
+
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
     }
@@ -371,13 +398,22 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
         " was signed by the following EC private key in JWK " + 
         json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-        formatCode(p256key) + LINE_SEPARATOR +
+        formatCode(p256key) + 
         "The following signature object which uses a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.KID_JSON) +
         " for identifying the public key can be verified with the key above:" + 
         readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
             .setRequirePublicKeyInfo(false)
             .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
+        "<span id=\"" + JSONBaseHTML.EXTENSION_EXAMPLE +
+        "\">The following signature object uses the same key as in the previous example but also " +
+        "includes " +
+        json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.CRIT_JSON) +
+        " extensions:" + 
+        readAsymSignature("p256keyextsigned.json", p256key, new JSONSignatureDecoder.Options()
+            .setPermittedExtensions(new ExtensionHolder()
+                 .addExtension(Ext1.class, true)
+                 .addExtension(Ext2.class, true))) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p256certsigned.json") + LINE_SEPARATOR +
@@ -556,8 +592,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "}</code></div>" +
             "For sophisticated <i>peer based</i> counter signature schemes another possibility is using " +
             "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
-            "</a>, <i>optionally</i> including JCS " + json.globalLinkRef(JSONSignatureDecoder.CRIT_JSON) +
-            " holding application specific (per signature) metadata.");
+            "</a>, <i>optionally</i> including a JCS " +
+            json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.CRIT_JSON) +
+            " extension holding application specific (per signature) metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS is a core element in a proof-of-concept application ")
          .append(json.createReference(JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))

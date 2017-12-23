@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import java.net.URLEncoder;
 
+import java.util.AbstractCollection;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -117,6 +118,7 @@ public class JSONBaseHTML  {
 
     public static final String REMOTE_KEY_EXAMPLE      = "remotekeyexample";
     public static final String REMOTE_CERT_EXAMPLE     = "remotecertexample";
+    public static final String EXTENSION_EXAMPLE       = "extensionexample";
 
     String file_name;
     String subsystem_name;
@@ -477,6 +479,7 @@ public class JSONBaseHTML  {
           }
 
         public static final String CERTIFICATE_PATH  = "Certificate Path";
+        public static final String PROPERTY_LIST     = "Property List";
         public static final String URI_LIST          = "List of URIs";
         public static final String LINE_SEPARATOR    = "<div style=\"height:6pt;padding:0px\"></div>";
       }
@@ -1170,6 +1173,23 @@ public class JSONBaseHTML  {
         return buffer.append("</ul>").toString();
     }
 
+    static String enumerateAttributes(AbstractCollection<String> collection, boolean andFlag) {
+        StringBuffer s = new StringBuffer();
+        String[] list = collection.toArray(new String[0]);
+        int i = 0;
+        for (String attribute : list) {
+            if (i == list.length - 1) {
+                s.append(andFlag ? " and " : " or ");
+            } else if (i++ > 0) {
+                s.append(", ");
+            }
+            s.append("<code>&quot;")
+             .append(attribute)
+             .append("&quot;</code>");
+        }
+        return s.toString();
+    }
+
     static LinkedHashMap<JSONRemoteKeys,String> remoteKeyFormats = new LinkedHashMap<JSONRemoteKeys,String>();
     
     public static String enumerateRemoteKeyFormats() {
@@ -1291,7 +1311,7 @@ public class JSONBaseHTML  {
         .newRow()
           .newColumn()
             .addProperty(JSONSignatureDecoder.KTY_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.KTY_JSON)
+            .addSymbolicValue("Key Type")
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
@@ -1306,7 +1326,7 @@ public class JSONBaseHTML  {
        .newRow(JCS_PUBLIC_KEY_EC)
           .newColumn()
             .addProperty(JSONSignatureDecoder.CRV_JSON)
-            .addSymbolicValue(JSONSignatureDecoder.CRV_JSON)
+            .addSymbolicValue("Curve Name")
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
@@ -1317,7 +1337,7 @@ public class JSONBaseHTML  {
       .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.X_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.X_JSON)
+          .addSymbolicValue("Coordinate")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn()
@@ -1331,7 +1351,7 @@ public class JSONBaseHTML  {
       .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.Y_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.Y_JSON)
+          .addSymbolicValue("Coordinate")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
         .newColumn()
@@ -1345,7 +1365,7 @@ public class JSONBaseHTML  {
       .newRow(JCS_PUBLIC_KEY_RSA)
         .newColumn()
           .addProperty(JSONSignatureDecoder.N_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.N_JSON)
+          .addSymbolicValue("Modulus")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
         .newColumn()
@@ -1356,7 +1376,7 @@ public class JSONBaseHTML  {
       .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.E_JSON)
-          .addSymbolicValue(JSONSignatureDecoder.E_JSON)
+          .addSymbolicValue("Exponent")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
         .newColumn()
@@ -1439,7 +1459,7 @@ public class JSONBaseHTML  {
           .newRow()
         .newColumn()
           .addProperty(JSONSignatureDecoder.X5C_JSON)
-          .addArrayList (Types.CERTIFICATE_PATH, 1)
+          .addArrayList(Types.CERTIFICATE_PATH, 1)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY2)
         .newColumn()
@@ -1465,6 +1485,30 @@ public class JSONBaseHTML  {
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." +
                       Types.LINE_SEPARATOR +
                       "Also see <a href=\"#" + REMOTE_CERT_EXAMPLE + "\">test&nbsp;vector</a>.")
+             .newRow()
+                .newColumn()
+                  .addProperty(JSONSignatureDecoder.CRIT_JSON)
+                  .addArrayList(Types.PROPERTY_LIST, 1)
+                .newColumn()
+                  .setType(Types.WEBPKI_DATA_TYPES.STRING)
+                .newColumn()
+                  .setChoice (false, 1)
+                .newColumn()
+                  .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
+                  "also featured within the <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> object." +
+                  Types.LINE_SEPARATOR +
+                  "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JCS <i>reserved words</i> " +
+                  enumerateAttributes(JSONSignatureDecoder.reservedWords, false) + ". " +
+                  Types.LINE_SEPARATOR +
+                  "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
+                  "(unless registered with IANA), " +
+                  "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
+                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
+                  "that are not declared as well as empty <code>&quot;" +
+                  JSONSignatureDecoder.CRIT_JSON + "&quot;</code> objects. " +
+                  "Verifiers typically introduce additional constraints like only accepting predefined extensions." +
+                  Types.LINE_SEPARATOR +
+                  "Also see <a href=\"#" + EXTENSION_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.VAL_JSON)
@@ -1480,65 +1524,11 @@ public class JSONBaseHTML  {
                    "<code>&quot;" + JSONSignatureDecoder.JWK_JSON + "&quot;</code>" + 
                    ", <code>&quot;" + JSONSignatureDecoder.JKU_JSON + "&quot;</code>" + 
                    ", <code>&quot;" + JSONSignatureDecoder.X5C_JSON + "&quot;</code>" + 
-                   ", or <code>&quot;" + JSONSignatureDecoder.X5U_JSON + 
+                   " or <code>&quot;" + JSONSignatureDecoder.X5U_JSON + 
                    "&quot;</code> property since the key may be given by the context or through the <code>&quot;" + 
                    JSONSignatureDecoder.KID_JSON + "&quot;</code> property.");
 
         AddPublicKeyDefinitions();
- /*
-            addSubItemTable(JSONSignatureDecoder.REMOTE_KEY_JSON)
-            .newRow()
-              .newColumn()
-                .addProperty(JSONSignatureDecoder.URI_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.URI_JSON)
-              .newColumn()
-                .setType(Types.WEBPKI_DATA_TYPES.URI)
-              .newColumn()
-              .newColumn()
-                .addString("URI " + createReference(REF_URI) +
-                      " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation. " +
-                      "The returned data <b>must</b> be delivered &quot;as is&quot; (stream of bytes).")
-            .newRow()
-              .newColumn()
-                .addProperty(JSONSignatureDecoder.FORMAT_JSON)
-                .addSymbolicValue(JSONSignatureDecoder.FORMAT_JSON)
-              .newColumn()
-                .setType(Types.WEBPKI_DATA_TYPES.STRING)
-              .newColumn()
-              .newColumn()
-                .addString("Currently defined format specifiers:" + 
-                        enumerateRemoteKeyFormats() +
-                        "See <a href=\"#remotekeyexample\">remote key example</a>.");
-*/    
-            addSubItemTable(JSONSignatureDecoder.CRIT_JSON)
-             .newRow()
-                .newColumn()
-                  .addProperty("...")
-                  .addUnquotedValue("<code>...</code>")
-                .newColumn()
-                  .setType(Types.WEBPKI_DATA_TYPES.ANY)
-                .newColumn()
-                .newColumn()
-                  .addString("One or more application specific extension properties expressed as " +
-                  "<i>Property</i>: <i>Arbitrary JSON data</i>. " + Types.LINE_SEPARATOR +
-                  "Extensions intended for public consumption are <i>preferably</i> expressed as URIs, " +
-                  "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
-                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
-                  "that are not recognized as well as empty <code>" +
-                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;</code> objects.")
-                  .setNotes("Examples:<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
-                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;: {<br>" +
-                  "&nbsp;&nbsp;&quot;https://standards.org/pki/jcs/ocspResponse&quot;: " +
-                   "&quot;DgYDVR0PAQH_BAQDAgEGMB0GA1UdDgQWBBQT...VZI1YQdQFC63ncCTQ3iTAfBgNVHSMEGDAWg&quot;<br>" +
-                  "}<br><br>" +
-                  "&quot;" + JSONSignatureDecoder.CRIT_JSON + "&quot;: {<br>" +
-                  "&nbsp;&nbsp;&quot;myExt&quot;: &quot;foobar&quot;,<br>" +
-                  "&nbsp;&nbsp;&quot;otherExt&quot;: {<br>" +
-                  "&nbsp;&nbsp;&nbsp;&nbsp;&quot;name&quot;: &quot;johndoe&quot;,<br>" +
-                  "&nbsp;&nbsp;&nbsp;&nbsp;&quot;role&quot;: &quot;client&quot;<br>" +
-                  "&nbsp;&nbsp;}<br>" +
-                  "}" +
-                  "</code></div>");
     }
 
     public void addTOC() {
