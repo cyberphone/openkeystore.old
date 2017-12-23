@@ -390,7 +390,7 @@ public class HTML {
         + "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
-        + JSONSignatureDecoder.VALUE_JSON
+        + JSONSignatureDecoder.VAL_JSON
         + " = convertToBase64URL(new Uint8Array(signature));\n"
         + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
         + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"
