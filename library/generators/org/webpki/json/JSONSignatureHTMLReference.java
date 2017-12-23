@@ -412,8 +412,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         " extensions:" + 
         readAsymSignature("p256keyextsigned.json", p256key, new JSONSignatureDecoder.Options()
             .setPermittedExtensions(new ExtensionHolder()
-                 .addExtension(Ext1.class, true)
-                 .addExtension(Ext2.class, true))) +
+                .addExtension(Ext1.class, true)
+                .addExtension(Ext2.class, true))) +
+        "<span id=\"" + JSONBaseHTML.EXCLUSION_EXAMPLE +
+        "\">The following signature object uses the same key as in the previous example but also " +
+        "specifies " +
+        json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.EXCL_JSON) +
+        " properties:" + 
+        readAsymSignature("p256keyexclsigned.json", p256key, new JSONSignatureDecoder.Options()
+            .setPermittedExclusions(new String[]{"myUnsignedData"})) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p256certsigned.json") + LINE_SEPARATOR +

@@ -302,13 +302,13 @@ public class JSONSignatureDecoder implements Serializable {
             LinkedHashSet<String> parsedExcludes = checkExcluded(signature.getStringArray(EXCL_JSON));
             for (String excluded : parsedExcludes.toArray(new String[0])) {
                 if (!options.exclusions.contains(excluded)) {
-                    throw new IOException("Unexpected \"" + EXCL_JSON + "\" property:" + excluded);
+                    throw new IOException("Unexpected \"" + EXCL_JSON + "\" property: " + excluded);
                 }
                 rd.root.properties.remove(excluded);
             }
             for (String excluded : options.exclusions.toArray(new String[0])) {
                 if (!parsedExcludes.contains(excluded)) {
-                    throw new IOException("Missing \"" + EXCL_JSON + "\" property:" + excluded);
+                    throw new IOException("Missing \"" + EXCL_JSON + "\" property: " + excluded);
                 }
              }
         }

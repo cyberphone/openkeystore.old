@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import java.net.URLEncoder;
 
-import java.util.AbstractCollection;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -119,6 +118,7 @@ public class JSONBaseHTML  {
     public static final String REMOTE_KEY_EXAMPLE      = "remotekeyexample";
     public static final String REMOTE_CERT_EXAMPLE     = "remotecertexample";
     public static final String EXTENSION_EXAMPLE       = "extensionexample";
+    public static final String EXCLUSION_EXAMPLE       = "exclusionexample";
 
     String file_name;
     String subsystem_name;
