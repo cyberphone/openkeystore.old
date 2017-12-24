@@ -374,7 +374,7 @@ public class JSONSignatureDecoder implements Serializable {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
-            String url = rd.getStringConditional(options.remoteKeyType.jsonName);
+            String url = rd.getString(options.remoteKeyType.jsonName);
             if (options.remoteKeyType.certificateFlag) {
                 certificatePath = options.remoteKeyReader.readCertificatePath(url);
             } else {
