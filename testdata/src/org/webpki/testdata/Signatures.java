@@ -176,11 +176,11 @@ public class Signatures {
                 new JSONAsymKeySigner(localKey.getPrivate(),
                                       localKey.getPublic(),
                                       null)
-                    .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY);
+                    .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_KEY_SET);
         byte[] remoteSig = createSignature(remoteKeySigner);
         ArrayUtil.writeFile(baseSignatures + "r2048remotekeysigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
-            .setRemoteKeyReader(new WebKey()));
+            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
         localKey = readJwk("p256");
         remoteKeySigner =
@@ -191,7 +191,7 @@ public class Signatures {
         remoteSig = createSignature(remoteKeySigner);
         ArrayUtil.writeFile(baseSignatures + "p256remotecertsigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
-            .setRemoteKeyReader(new WebKey()));
+            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
         
         byte[] signedData = createSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null)
                    .setExtensions(new JSONObjectWriter()

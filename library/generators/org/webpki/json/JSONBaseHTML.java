@@ -1394,7 +1394,7 @@ public class JSONBaseHTML  {
                       globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON,
                       JSONSignatureDecoder.X5C_JSON) +
                       " for constraints.");
-        remoteKeyFormats.put(JSONRemoteKeys.JWK_PUB_KEY,
+        remoteKeyFormats.put(JSONRemoteKeys.JWK_KEY_SET,
                 "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key. See " +
             "<a href=\"#" + JSONSignatureDecoder.JWK_JSON + "\">" +
             JSONSignatureDecoder.JWK_JSON + "</a> for constraints.");

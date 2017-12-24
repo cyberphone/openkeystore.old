@@ -127,7 +127,7 @@ public class JSONAsymKeySigner extends JSONSigner {
         if (uri == null) {
             wr.setPublicKey(publicKey, algorithmPreferences);
         } else {
-            wr.setString(format.toString(), uri);
+            wr.setString(format.jsonName, uri);
         }
     }
 }

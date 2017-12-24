@@ -27,13 +27,15 @@ import java.security.cert.X509Certificate;
  */
 public enum JSONRemoteKeys {
 
-    PEM_CERT_PATH (JSONSignatureDecoder.X5U_JSON),
-    JWK_PUB_KEY   (JSONSignatureDecoder.JKU_JSON);
+    PEM_CERT_PATH (JSONSignatureDecoder.X5U_JSON, true),
+    JWK_KEY_SET   (JSONSignatureDecoder.JKU_JSON, false);
 
     String jsonName;
+    boolean certificateFlag;
 
-    JSONRemoteKeys(String jsonName) {
+    JSONRemoteKeys(String jsonName, boolean certificateFlag) {
         this.jsonName = jsonName;
+        this.certificateFlag = certificateFlag;
     }
     
     public interface Reader {
@@ -42,10 +44,4 @@ public enum JSONRemoteKeys {
         
         public X509Certificate[] readCertificatePath(String uri) throws IOException;
     }
-
-    @Override
-    public String toString() {
-        return jsonName;
-    }
-
 }

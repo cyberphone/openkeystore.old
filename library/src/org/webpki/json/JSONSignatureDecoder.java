@@ -186,6 +186,7 @@ public class JSONSignatureDecoder implements Serializable {
         KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
         ExtensionHolder extensionHolder = new ExtensionHolder();
         JSONRemoteKeys.Reader remoteKeyReader;
+        JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
 
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
@@ -202,10 +203,13 @@ public class JSONSignatureDecoder implements Serializable {
          * Define external remote key reader class.
          * If set, the signature decoder assumes that there is no in-line public key or certificate information to process.   
          * @param remoteKeyReader Interface
+         * @param remoteKeyType Expected type
          * @return this
          */
-        public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader) {
+        public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader,
+                                          JSONRemoteKeys remoteKeyType) {
             this.remoteKeyReader = remoteKeyReader;
+            this.remoteKeyType = remoteKeyType;
             return this;
         }
 
@@ -370,12 +374,8 @@ public class JSONSignatureDecoder implements Serializable {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
-            String url = rd.getStringConditional(JKU_JSON);
-            if (url == null) {
-                url = rd.getStringConditional(X5U_JSON);
-                if (url == null) {
-                    throw new IOException("\"" + JKU_JSON + "\" or \"" + X5U_JSON + "\" expected");
-                }
+            String url = rd.getStringConditional(options.remoteKeyType.jsonName);
+            if (options.remoteKeyType.certificateFlag) {
                 certificatePath = options.remoteKeyReader.readCertificatePath(url);
             } else {
                 publicKey = options.remoteKeyReader.readPublicKey(url);

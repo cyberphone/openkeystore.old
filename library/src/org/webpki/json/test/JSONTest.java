@@ -3627,16 +3627,16 @@ public class JSONTest {
 
         signature = readSignature("r2048remotekeysigned.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
-            .setRemoteKeyReader(new WebKey()));
+            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
         signature = readSignature("p256remotecertsigned.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
-            .setRemoteKeyReader(new WebKey()));
+            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
-            .setRemoteKeyReader(new WebKey())).verify(rootCa);
+            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(rootCa);
         try {
             JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
-                .setRemoteKeyReader(new WebKey())).verify(unknownCa);
+                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(unknownCa);
             fail("Must not pass");
         } catch (Exception e) {
             checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
@@ -3645,9 +3645,9 @@ public class JSONTest {
         writer = new JSONObjectWriter()
             .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
-                              .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_PUB_KEY));
+                              .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_KEY_SET));
         JSONParser.parse(writer.toString()).getSignature(new JSONSignatureDecoder.Options()
-                .setRemoteKeyReader(new WebKey()));
+                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
         
         signature = readSignature("r2048certsigned.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options());
