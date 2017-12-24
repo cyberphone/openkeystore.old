@@ -3461,7 +3461,7 @@ public class JSONTest {
             verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Unknown extension: https://example.com/ext");
+            checkException(e, "Not a permitted extension: https://example.com/ext");
         }
         try {
             JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
