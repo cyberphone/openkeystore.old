@@ -96,6 +96,10 @@ public class JSONSignatureDecoder implements Serializable {
     
     public static final String X5C_JSON                   = "x5c";          // Certificate path
 
+    public static final String X5T_JSON                   = "x5t";          // Certificate SHA-1 thumbprint
+
+    public static final String X5T_S256_JSON              = "x5t#s256";     // Certificate SHA-256 thumbprint
+
     public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
     
     static final LinkedHashSet<String> reservedWords = new LinkedHashSet<String>();
@@ -108,6 +112,8 @@ public class JSONSignatureDecoder implements Serializable {
         reservedWords.add(JWK_JSON);
         reservedWords.add(JKU_JSON);
         reservedWords.add(X5C_JSON);
+        reservedWords.add(X5T_JSON);
+        reservedWords.add(X5T_S256_JSON);
         reservedWords.add(X5U_JSON);
         reservedWords.add(VAL_JSON);
     }

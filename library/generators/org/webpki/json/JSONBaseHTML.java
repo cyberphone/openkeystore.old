@@ -1508,6 +1508,32 @@ public class JSONBaseHTML  {
                   "Verifiers typically introduce additional constraints like only accepting predefined extensions." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXTENSION_EXAMPLE + "\">test&nbsp;vector</a>.")
+             .newRow()
+                .newColumn()
+                  .addProperty(JSONSignatureDecoder.EXCL_JSON)
+                  .addArrayList(Types.PROPERTY_LIST, 1)
+                .newColumn()
+                  .setType(Types.WEBPKI_DATA_TYPES.STRING)
+                .newColumn()
+                  .setChoice (false, 1)
+                .newColumn()
+                  .addString("<i>Optional.</i> Array holding the names of one or more properties " +
+                  "featured on the same level as the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + 
+                  "&quot;</code> property, that <b>must</b> be <i>excluded</i> from the signature process." +
+                  Types.LINE_SEPARATOR +
+                  "Note that the <code>&quot;" + JSONSignatureDecoder.EXCL_JSON + "&quot;</code> property itself, <b>must</b> also " +
+                  "be excluded from the signature process." + 
+                  Types.LINE_SEPARATOR +
+                  "Property names that are to be excluded from the signature process " +
+                  "<b>must not</b> be <i>duplicated</i> or try to override " +
+                  enumerateAttributes(JSONSignatureDecoder.topLevelReserved.toArray(new String[0]), false) + ". " +
+                  Types.LINE_SEPARATOR +
+                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
+                  "that are not found as well as empty <code>&quot;" +
+                  JSONSignatureDecoder.EXCL_JSON + "&quot;</code> objects. " +
+                  "Verifiers typically introduce additional constraints like only accepting predefined properties." +
+                  Types.LINE_SEPARATOR +
+                  "Also see <a href=\"#" + EXCLUSION_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
             .newColumn()
               .addProperty(JSONSignatureDecoder.VAL_JSON)

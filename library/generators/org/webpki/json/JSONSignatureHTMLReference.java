@@ -57,6 +57,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
     
+    static final String ECMASCRIPT_CONSTRAINT = "ECMAScript Constraint";
+
     public static class Ext1 extends JSONSignatureDecoder.Extension {
 
         @Override
@@ -348,10 +350,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             " which also is compliant with ECMAScript JSON parsing as described in " +
             json.createReference(JSONBaseHTML.REF_ES6) +
             " section <b>9.1.12</b>." + LINE_SEPARATOR +
-            "Also see <a href=\"#" + INTEROPERABILITY + "\">" + INTEROPERABILITY + "</a> and " +
-            "<a href=\"#" + JSONBaseHTML.makeLink(ECMASCRIPT_MODE) + 
-            "\"><span style=\"white-space:nowrap\">" +
-            ECMASCRIPT_MODE + "</span></a>." + LINE_SEPARATOR +
+            "Also see " +
+            json.globalLinkRef(INTEROPERABILITY) + " and " +
+            json.globalLinkRef(ECMASCRIPT_CONSTRAINT) + "." + LINE_SEPARATOR +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
             "<div style=\"padding:4pt 0pt 15pt 20pt\"><code>")
          .append(normalizedSampleSignature)
@@ -553,6 +554,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "}<br>" +
             "<br>" +
             "verifySignature(signedObject);<br></code></div>" + LINE_SEPARATOR +
+            "<span id=\"" + JSONBaseHTML.makeLink(ECMASCRIPT_CONSTRAINT) + "\"/>" +
             "<b>Constraint when using JCS with ECMAScript</b>" + LINE_SEPARATOR +
             "For JavaScript optimization reasons, ECMAScript's <code>JSON.parse()</code> "+
             "internally <i>rearranges order of properties " +
@@ -681,10 +683,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         
         json.addDocumentHistoryLine("2013-12-17", "0.3", "Initial publication in HTML5");
         json.addDocumentHistoryLine("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
-        json.addDocumentHistoryLine("2013-12-29", "0.5", "Added the <code>" + JSONSignatureDecoder.CRIT_JSON + "</code> facility");
+        json.addDocumentHistoryLine("2013-12-29", "0.5", "Added the (now obsoleted) <code>extension</code> facility");
         json.addDocumentHistoryLine("2014-01-21", "0.51", "Added clarification to public key parameter representation");
         json.addDocumentHistoryLine("2014-01-26", "0.52", "Added note regarding the (now obsoleted) <code>signerCertificate</code> option");
-        json.addDocumentHistoryLine("2014-04-15", "0.53", "Embedded <code>bigint</code> in JS <i>string</i> making syntax fully JSON compatible");
+        json.addDocumentHistoryLine("2014-04-15", "0.53", "Embedded (the now obsoleted) <code>bigint</code> in JS <i>string</i>");
         json.addDocumentHistoryLine("2014-09-17", "0.54", "Changed canonicalization to normalization");
         json.addDocumentHistoryLine("2014-09-23", "0.55", "Aligned EC parameter representation with JWS " + json.createReference(JSONBaseHTML.REF_JWS));
         json.addDocumentHistoryLine("2014-12-08", "0.56", "Removed " + json.createReference(JSONBaseHTML.REF_XMLDSIG) + " bloat and added support for JWA " + json.createReference(JSONBaseHTML.REF_JWS) + " algorithm identifiers");
@@ -694,7 +696,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2017-04-19", "0.60", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
         json.addDocumentHistoryLine("2017-05-18", "0.70", "Added multiple signatures and test vectors");
         json.addDocumentHistoryLine("2017-11-18", "0.71", "Added detailed references to ECMAScript " + json.createReference(JSONBaseHTML.REF_ES6));
-        json.addDocumentHistoryLine("2017-12-19", "0.80", "Rewritten to reuse JWS " + json.createReference(JSONBaseHTML.REF_JWS) + " property names");
+        json.addDocumentHistoryLine("2017-12-24", "0.80", "Rewritten to reuse JWS " + json.createReference(JSONBaseHTML.REF_JWS) + " property names");
 
         json.addParagraphObject("Author").append("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore project " +
