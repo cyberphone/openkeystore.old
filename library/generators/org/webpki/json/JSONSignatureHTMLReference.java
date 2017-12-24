@@ -407,7 +407,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             .setRequirePublicKeyInfo(false)
             .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
         "<span id=\"" + JSONBaseHTML.EXTENSION_EXAMPLE +
-        "\">The following signature object uses the same key as in the previous example but also " +
+        "\">The</span> following signature object uses the same key as in the previous example but also " +
         "includes " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.CRIT_JSON) +
         " extensions:" + 
@@ -416,7 +416,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                 .addExtension(Ext1.class, true)
                 .addExtension(Ext2.class, true))) +
         "<span id=\"" + JSONBaseHTML.EXCLUSION_EXAMPLE +
-        "\">The following signature object uses the same key as in the previous example but also " +
+        "\">The</span> following signature object uses the same key as in the previous example but also " +
         "specifies " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.EXCL_JSON) +
         " properties:" + 
@@ -554,8 +554,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "}<br>" +
             "<br>" +
             "verifySignature(signedObject);<br></code></div>" + LINE_SEPARATOR +
-            "<span id=\"" + JSONBaseHTML.makeLink(ECMASCRIPT_CONSTRAINT) + "\"/>" +
-            "<b>Constraint when using JCS with ECMAScript</b>" + LINE_SEPARATOR +
+            "<span id=\"" + JSONBaseHTML.makeLink(ECMASCRIPT_CONSTRAINT) + "\">" +
+            "<b>Constraint when using JCS with ECMAScript</b></span>" + LINE_SEPARATOR +
             "For JavaScript optimization reasons, ECMAScript's <code>JSON.parse()</code> "+
             "internally <i>rearranges order of properties " +
             "with names expressed as integers</i>, making a parsed JSON string like " +
