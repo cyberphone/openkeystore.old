@@ -145,9 +145,10 @@ public class ReadSignature {
                                    .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED);
                         }
                     }
-                    if (rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.JKU_JSON) ||
-                        rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.X5U_JSON)) {
-                        options.setRemoteKeyReader(new WebKey());
+                    if (rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.JKU_JSON)) {
+                        options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET);
+                    } else if (rd.getObject(JSONSignatureDecoder.SIGNATURE_JSON).hasProperty(JSONSignatureDecoder.X5U_JSON)) {
+                        options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
                     }
                     JSONSignatureDecoder signature = rd.getSignature(options);
                     switch (signature.getSignatureType()) {

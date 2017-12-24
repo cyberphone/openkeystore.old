@@ -104,10 +104,11 @@ public class JSONAsymKeySigner extends JSONSigner {
      * @param uri Where the key lives
      * @param format What format the key has
      * @return this
+     * @throws IOException &nbsp;
      * @see org.webpki.json.JSONRemoteKeys
      */
-    public JSONAsymKeySigner setRemoteKey(String uri, JSONRemoteKeys format) {
-        this.uri = uri;
+    public JSONAsymKeySigner setRemoteKey(String uri, JSONRemoteKeys format) throws IOException {
+        this.uri = JSONSignatureDecoder.checkHttpsUrl(uri);
         this.format = format;
         return this;
     }

@@ -42,6 +42,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
+import java.util.regex.Pattern;
+
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -124,6 +126,8 @@ public class JSONSignatureDecoder implements Serializable {
         topLevelReserved.add(SIGNATURE_JSON);
         topLevelReserved.add(SIGNATURES_JSON);
     }
+
+    static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
     public static abstract class Extension {
         
@@ -374,7 +378,7 @@ public class JSONSignatureDecoder implements Serializable {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
-            String url = rd.getString(options.remoteKeyType.jsonName);
+            String url = checkHttpsUrl(rd.getString(options.remoteKeyType.jsonName));
             if (options.remoteKeyType.certificateFlag) {
                 certificatePath = options.remoteKeyReader.readCertificatePath(url);
             } else {
@@ -606,4 +610,11 @@ public class JSONSignatureDecoder implements Serializable {
         }
         return ex;
      }
+
+    static String checkHttpsUrl(String url) throws IOException {
+        if (!HTTPS_URL_PATTERN.matcher(url).matches()) {
+            throw new IOException("Invalid URL: " + url);
+        }
+        return url;
+    }
 }
