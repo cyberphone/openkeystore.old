@@ -87,7 +87,7 @@ public class RequestServlet extends HttpServlet {
         }
         try {
             verifySignature(request, response, data);
-        } catch (IOException e) {
+        } catch (Exception e) {
             HTML.errorPage(response, e.getMessage());
             return;
         }
