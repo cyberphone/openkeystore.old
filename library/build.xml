@@ -1,13 +1,14 @@
 <project name="WEBPKI.ORG library" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
-  <property name="sks.auth.gui" value="org.webpki.sks.test.DummyTrustedGUIAuthorization"/>
+  <property name="sks.implementation" value="org.webpki.sks.SKSReferenceImplementation"/>
+  <property name="sks.auth.gui" value="org.webpki.sks.DummyTrustedGUIAuthorization"/>
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
   <property name="sks.debug" value="true"/>
   <property name="sks.device" value=""/>
   <property name="src_dir" value="src"/>
   <property name="src_generators" value="generators"/>
+  <property name="src_test" value="test"/>
   <property name="dot_net_dir" value="sks-ws-dotnet"/>
   <property name="cpp_dir" value="sks-ws-cpp"/>
   <property name="temp_dir" value=".tmp"/>
@@ -188,9 +189,23 @@
        includes="**/*.java, **/*.xsd"/>
     <mkdir dir="${temp_dir}"/>
 
+    <fixcrlf srcdir="${src_test}"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.xsd"/>
+    <mkdir dir="${temp_dir}"/>
+
   	<!-- Copy all files except .java and doc-related -->
     <copy todir="${temp_dir}" preservelastmodified="true" includeEmptyDirs="false">
       <fileset dir="${src_dir}">
+        <include name="**/*"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+        <exclude name="**/doc-files/*"/>
+      </fileset>
+      <fileset dir="${src_test}">
         <include name="**/*"/>
         <exclude name="**/*.java"/>
         <exclude name="**/package.html"/>
@@ -200,7 +215,7 @@
 
     <!-- Compile non-ws java code from ${src_dir} into ${temp_dir} -->
     <javac debug="${debug}"
-    	   srcdir="${src_dir}"
+    	   srcdir="${src_dir}:${src_test}"
     	   destdir="${temp_dir}" 
            target="${javaversion}"
            source="${javaversion}"
@@ -276,7 +291,6 @@
              windowtitle="WebPKI.org Support">
       <packageset dir="${temp_dir}">
         <include name="org/**"/>
-        <exclude name="org/**/test/**"/>
         <exclude name="org/**/v8dtoa/**"/>
         <exclude name="org/**/c14n/**"/>
         <exclude name="org/**/webutil/locale/**"/>
@@ -359,7 +373,10 @@
   	<jar jarfile="${dist_dir}/${webpki-securityproxy}">
       <fileset dir="${temp_dir}">
         <include name="org/webpki/securityproxy/**"/>
-        <exclude name="org/webpki/securityproxy/test/**"/>
+        <exclude name="org/webpki/securityproxy/common/**"/>
+        <exclude name="org/webpki/securityproxy/client/**"/>
+        <exclude name="org/webpki/securityproxy/extservice/**"/>
+        <exclude name="org/webpki/securityproxy/localservice/**"/>
         <exclude name="org/webpki/securityproxy/*.png"/>
       </fileset>
     </jar>
@@ -434,7 +451,6 @@
 
     <copy todir="${temp_dir}/org/webpki" preservelastmodified="true">
       <fileset dir="${src_dir}/org/webpki">
-        <exclude name="**/test/**"/>
         <exclude name="**/infocard/**"/>
         <exclude name="**/tools/**"/>
         <exclude name="**/kg2xml/**"/>
@@ -568,11 +584,11 @@
    	  </metainf>
       <manifest>
 		<attribute name="Class-path" value="${webpki-libext} ${webpki-securityproxy}"/>
-		<attribute name="Main-Class" value="org.webpki.securityproxy.test.localservice.TestService"/>
+		<attribute name="Main-Class" value="org.webpki.securityproxy.localservice.TestService"/>
       </manifest>
       <fileset dir="${temp_dir}">
-        <include name="org/webpki/securityproxy/test/localservice/**"/>
-        <include name="org/webpki/securityproxy/test/common/**"/>
+        <include name="org/webpki/securityproxy/localservice/**"/>
+        <include name="org/webpki/securityproxy/common/**"/>
       </fileset>
     </jar>
 
@@ -582,10 +598,10 @@
    	  </metainf>
       <manifest>
 		<attribute name="Class-path" value="${webpki-libext}"/>
-		<attribute name="Main-Class" value="org.webpki.securityproxy.test.client.TestClient"/>
+		<attribute name="Main-Class" value="org.webpki.securityproxy.client.TestClient"/>
       </manifest>
       <fileset dir="${temp_dir}">
-        <include name="org/webpki/securityproxy/test/client/**"/>
+        <include name="org/webpki/securityproxy/client/**"/>
       </fileset>
     </jar>
 
@@ -593,8 +609,8 @@
 
   	<war warfile="${dist_dir}/spts-extservice.war" webxml="${spts_dir}/extservice-web.xml">
       <classes dir="${temp_dir}">
-        <include name="org/webpki/securityproxy/test/extservice/**"/>
-        <include name="org/webpki/securityproxy/test/common/**"/>
+        <include name="org/webpki/securityproxy/extservice/**"/>
+        <include name="org/webpki/securityproxy/common/**"/>
       </classes>
     </war>
 
@@ -626,21 +642,21 @@
   <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
   <target name="testkeygen2">
     <antcall target="_test">
-       <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
+       <param name="test.class" value="org.webpki.keygen2.KeyGen2Test"/>
      </antcall>
   </target>
   
   <!-- JUnit test of the SKS API -->
   <target name="testsks">
     <antcall target="_test">
-       <param name="test.class" value="org.webpki.sks.test.SKSTest"/>
+       <param name="test.class" value="org.webpki.sks.SKSTest"/>
      </antcall>
   </target>
 
   <!-- JUnit test of the JSON API.  The extra parameters for SKS/KeyGen2 are simply ignored... -->
   <target name="testjson">
     <antcall target="_test">
-       <param name="test.class" value="org.webpki.json.test.JSONTest"/>
+       <param name="test.class" value="org.webpki.json.JSONTest"/>
      </antcall>
   </target>
   
