@@ -12,6 +12,7 @@
   <property name="cpp_dir" value="sks-ws-cpp"/>
   <property name="temp_dir" value=".tmp"/>
   <property name="test_dir" value="test"/>
+  <property name="testout.dir" location="testout"/>
   <property name="dist_dir"  value="dist"/>
   <property name="bin_dir" value="bin"/>
   <property name="wsdl_dir"  value="wsdl"/>
@@ -464,6 +465,7 @@
         <include name="**/util/ArrayUtil.java"/>
         <include name="**/util/StringUtil.java"/>
         <include name="**/util/Base64URL.java"/>
+        <include name="**/util/Base64.java"/>
         <include name="**/util/HTMLEncoder.java"/>
         <include name="**/crypto/KeyStoreReader.java"/>
         <include name="**/crypto/KeyContainerTypes.java"/>
@@ -602,15 +604,14 @@
 
   <target name="_test">
   	<property name="sks.standalone" value="true"/>
-    <mkdir dir="${test_dir}"/>
-	<property name="test.dir" location="${test_dir}"/>
-    <junit fork="no" haltonfailure="yes" tempdir="${test_dir}">
+    <mkdir dir="${testout.dir}"/>
+    <junit fork="no" haltonfailure="yes" tempdir="${testout.dir}">
       <test name="${test.class}" unless="method"/>
       <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
     	<sysproperty key="sks.device" value="${sks.device}"/>
     	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
-    	<sysproperty key="test.dir" value="${test.dir}"/>
+    	<sysproperty key="testout.dir" value="${testout.dir}"/>
     	<sysproperty key="sks.standalone" value="${sks.standalone}"/>
       	<sysproperty key="sks.referenceimplementation" value="${sks.referenceimplementation}"/>
     	<sysproperty key="org.webpki.sks.ws.client.url" value="${sksws.url}"/>

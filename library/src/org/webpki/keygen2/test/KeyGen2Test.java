@@ -243,7 +243,7 @@ public class KeyGen2Test {
 
     @BeforeClass
     public static void openFile() throws Exception {
-        String dir = System.getProperty("test.dir");
+        String dir = System.getProperty("testout.dir");
         if (dir.length() > 0) {
             fos = new FileOutputStream(dir + "/keygen2.junit.run.html");
             fos.write(HTMLHeader.createHTMLHeader(false, true, "KeyGen2 JUinit test output", null).append("<body><h3>KeyGen2 JUnit Test</h3><p>").toString().getBytes("UTF-8"));

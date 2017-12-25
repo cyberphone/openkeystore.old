@@ -258,7 +258,7 @@ public class KeyGen2Test
     @BeforeClass
     public static void openFile () throws Exception
       {
-        String dir = System.getProperty ("test.dir");
+        String dir = System.getProperty ("testout.dir");
         if (dir.length () > 0)
           {
             fos = new FileOutputStream (dir + "/kg2xml.junit.run.html");
