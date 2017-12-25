@@ -432,7 +432,12 @@
       </fileset>
     </copy>
 
-    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${bin_dir}" includeAntRuntime="false"/>
+    <replaceregexp file="${temp_dir}/org/webpki/crypto/CertificateUtil.java"
+        match="\/\/ ANDROID_START.+?\/\/ ANDROID_END"
+        replace=""
+        flags="gs"/>
+
+    	<javac debug="${debug}" srcdir="${temp_dir}" destdir="${bin_dir}" includeAntRuntime="false"/>
     
     <!-- Create Android JSON java library -->
     <zip destfile="${dist_dir}/${android-json}.zip">

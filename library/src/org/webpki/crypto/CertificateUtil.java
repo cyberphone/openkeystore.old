@@ -26,12 +26,12 @@ import java.util.HashSet;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
 
+import java.security.GeneralSecurityException;
+
 // ANDROID_START
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import java.security.GeneralSecurityException;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -45,7 +45,7 @@ import org.webpki.asn1.ParseUtil;
 
 import org.webpki.asn1.cert.SubjectAltNameTypes;
 
-//ANDROID_END
+// ANDROID_END
 
 public class CertificateUtil {
 
