@@ -409,11 +409,13 @@
         <include name="**/util/ISODateTime.java"/>
         <include name="**/util/ArrayUtil.java"/>
         <include name="**/util/Base64URL.java"/>
+        <include name="**/util/Base64.java"/>
         <include name="**/crypto/VerifierInterface.java"/>
         <include name="**/crypto/SymKeyVerifierInterface.java"/>
         <include name="**/crypto/SignerInterface.java"/>
         <include name="**/crypto/AsymKeySignerInterface.java"/>
         <include name="**/crypto/SymKeySignerInterface.java"/>
+        <include name="**/crypto/CertificateUtil.java"/>
         <include name="**/crypto/CryptoAlgorithms.java"/>
         <include name="**/crypto/KeyAlgorithms.java"/>
         <include name="**/crypto/MACAlgorithms.java"/>
@@ -424,9 +426,9 @@
         <include name="**/crypto/SymSignatureAlgorithms.java"/>
         <include name="**/crypto/SignatureWrapper.java"/>
         <include name="**/crypto/DecryptionKeyHolder.java"/>
-        <include name="**/json/*"/>
-        <include name="**/json/encryption/*"/>
-        <include name="**/json/v8dtoa/*"/>
+        <include name="**/json/*.java"/>
+        <include name="**/json/encryption/*.java"/>
+        <include name="**/json/v8dtoa/*.java"/>
       </fileset>
     </copy>
 
