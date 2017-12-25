@@ -433,21 +433,6 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    static X509Certificate[] makeCertificatePath(Vector<byte[]> certificateBlobs) throws IOException {
-        X509Certificate lastCertificate = null;
-        Vector<X509Certificate> certificates = new Vector<X509Certificate>();
-        for (byte[] certificateBlob : certificateBlobs) {
-            try {
-                CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBlob));
-                certificates.add(pathCheck(lastCertificate, lastCertificate = certificate));
-            } catch (GeneralSecurityException e) {
-                throw new IOException(e);
-            }
-        }
-        return certificates.toArray(new X509Certificate[0]);
-    }
-
     void checkVerification(boolean success) throws IOException {
         if (!success) {
             String key;
@@ -544,22 +529,6 @@ public class JSONSignatureDecoder implements Serializable {
     public void verify(JSONVerifier verifier) throws IOException {
         checkRequest(verifier.signatureType);
         verifier.verify(this);
-    }
-
-    static X509Certificate pathCheck(X509Certificate child, X509Certificate parent) throws IOException {
-        if (child != null) {
-            String issuer = child.getIssuerX500Principal().getName();
-            String subject = parent.getSubjectX500Principal().getName();
-            if (!issuer.equals(subject)) {
-                throw new IOException("Path issuer order error, '" + issuer + "' versus '" + subject + "'");
-            }
-            try {
-                child.verify(parent.getPublicKey());
-            } catch (GeneralSecurityException e) {
-                throw new IOException(e);
-            }
-        }
-        return parent;
     }
 
     static PrivateKey decodePrivateKey(JSONObjectReader rd, PublicKey publicKey) throws IOException {

@@ -29,6 +29,8 @@ import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
+import org.webpki.crypto.CertificateUtil;
+
 import org.webpki.util.Base64URL;
 import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
@@ -119,13 +121,9 @@ public class JSONArrayWriter implements Serializable {
 
     static public JSONArrayWriter createCoreCertificatePath(X509Certificate[] certificatePath) throws IOException {
         JSONArrayWriter arrayWriter = new JSONArrayWriter();
-        X509Certificate lastCertificate = null;
-        for (X509Certificate certificate : certificatePath) {
+        for (X509Certificate certificate : CertificateUtil.checkCertificatePath(certificatePath)) {
             try {
-                arrayWriter.setString(
-                        new Base64(false)
-                            .getBase64StringFromBinary(JSONSignatureDecoder
-                                .pathCheck(lastCertificate, lastCertificate = certificate).getEncoded()));
+                arrayWriter.setString(new Base64(false).getBase64StringFromBinary(certificate.getEncoded()));
             } catch (GeneralSecurityException e) {
                 throw new IOException(e);
             }

@@ -35,7 +35,6 @@ import javax.security.auth.x500.X500Principal;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
-
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ASN1Sequence;
 import org.webpki.asn1.CompositeContextSpecific;
@@ -63,8 +62,8 @@ public class CertificateUtil {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(encoded));
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
@@ -149,8 +148,8 @@ public class CertificateUtil {
                 }
             }
             return certpath;
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
@@ -240,8 +239,8 @@ public class CertificateUtil {
                 return null;
             }
             return eku.toArray(new String[0]);
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
@@ -312,8 +311,8 @@ public class CertificateUtil {
     public static byte[] getCertificateSHA1(X509Certificate certificate) throws IOException {
         try {
             return HashAlgorithms.SHA1.digest(certificate.getEncoded());
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
@@ -321,11 +320,43 @@ public class CertificateUtil {
     public static byte[] getCertificateSHA256(X509Certificate certificate) throws IOException {
         try {
             return HashAlgorithms.SHA256.digest(certificate.getEncoded());
-        } catch (GeneralSecurityException gse) {
-            throw new IOException(gse);
+        } catch (GeneralSecurityException e) {
+            throw new IOException(e);
         }
     }
 
+    public static X509Certificate[] checkCertificatePath(X509Certificate[] certificatePath) throws IOException {
+        X509Certificate signedCertificate = certificatePath[0];
+        int i = 0;
+        while (++i < certificatePath.length) {
+            X509Certificate signerCertificate = certificatePath[i];
+            String issuer = signedCertificate.getIssuerX500Principal().getName();
+            String subject = signerCertificate.getSubjectX500Principal().getName();
+            if (!issuer.equals(subject)) {
+                throw new IOException("Path issuer order error, '" + issuer + "' versus '" + subject + "'");
+            }
+            try {
+                signedCertificate.verify(signerCertificate.getPublicKey());
+            } catch (GeneralSecurityException e) {
+                throw new IOException(e);
+            }
+            signedCertificate = signerCertificate;
+        }
+        return certificatePath;
+    }
+
+    public static X509Certificate[] makeCertificatePath(List<byte[]> certificateBlobs) throws IOException {
+        Vector<X509Certificate> certificates = new Vector<X509Certificate>();
+        for (byte[] certificateBlob : certificateBlobs) {
+            try {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                certificates.add((X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBlob)));
+            } catch (GeneralSecurityException e) {
+                throw new IOException(e);
+            }
+        }
+        return checkCertificatePath(certificates.toArray(new X509Certificate[0]));
+    }
 
     public static boolean isTrustAnchor(X509Certificate certificate) throws IOException {
         boolean trustAnchor = certificate.getSubjectX500Principal().equals(certificate.getIssuerX500Principal()) && certificate.getBasicConstraints() >= 0;

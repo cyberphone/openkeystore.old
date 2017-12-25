@@ -25,6 +25,7 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
@@ -50,7 +51,7 @@ public class JSONX509Signer extends JSONSigner {
      */
     public JSONX509Signer(SignerInterface signer) throws IOException {
         this.signer = signer;
-        certificatePath = signer.getCertificatePath();
+        certificatePath = CertificateUtil.checkCertificatePath(signer.getCertificatePath());
         algorithm = KeyAlgorithms.getKeyAlgorithm(certificatePath[0].getPublicKey()).getRecommendedSignatureAlgorithm();
     }
 
