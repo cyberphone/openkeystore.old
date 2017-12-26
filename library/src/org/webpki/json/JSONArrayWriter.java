@@ -70,11 +70,6 @@ public class JSONArrayWriter implements Serializable {
         return add(JSONTypes.STRING, value);
     }
 
-    public JSONArrayWriter setNumberAsText(String value) throws IOException {
-        array.add(JSONObjectWriter.setNumberAsText(value));
-        return this;
-    }
-
     public JSONArrayWriter setInt(int value) throws IOException {
         return setInt53(value);
     }

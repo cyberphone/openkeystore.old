@@ -157,27 +157,6 @@ public class JSONObjectWriter implements Serializable {
         return setProperty(name, new JSONValue(JSONTypes.STRING, value));
     }
 
-    static JSONValue setNumberAsText(String value) throws IOException {
-        JSONArrayReader ar = JSONParser.parse("[" + value + "]").getJSONArrayReader();
-        if (ar.array.size() != 1) {
-            throw new IOException("Syntax error on number: " + value);
-        }
-        ar.getDouble();
-        return ar.array.firstElement();
-    }
-
-    /**
-     * Bypass the normal number formatters.
-     * Primarily for testing.
-     * @param name Property
-     * @param value Text applied verbatim without quotes
-     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
-     * @throws IOException &nbsp;
-     */
-    public JSONObjectWriter setNumberAsText(String name, String value) throws IOException {
-        return setProperty(name, setNumberAsText(value));
-    }
-
     /**
      * Formats a number according to ES6.<p>
      * This code is emulating 7.1.12.1 of the EcmaScript V6 specification.</p>
