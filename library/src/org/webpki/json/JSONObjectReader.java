@@ -133,7 +133,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return getString(name, JSONTypes.STRING);
     }
 
-    static long parseLong(String value) throws IOException {
+    static long parseLong(JSONValue jsonValue) throws IOException {
+        String value = (String) jsonValue.value;
         if (INTEGER_PATTERN.matcher(value).matches()) {
             double number = Double.valueOf(value);
             if (Math.abs(number) > JSONObjectWriter.MAX_SAFE_INTEGER) {
@@ -146,10 +147,10 @@ public class JSONObjectReader implements Serializable, Cloneable {
         throw new IOException("Value is not an integer: " + value);
     }
 
-    static int parseInt(String value) throws IOException {
-        long longValue = parseLong(value);
+    static int parseInt(JSONValue jsonValue) throws IOException {
+        long longValue = parseLong(jsonValue);
         if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
-            throw new IOException("Java \"int\" out of range: " + value);
+            throw new IOException("Java \"int\" out of range: " + longValue);
         }
         return (int) longValue;
     }
@@ -171,7 +172,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see JSONObjectWriter#setInt(String, int)
      */
     public int getInt(String name) throws IOException {
-        return parseInt(getString(name, JSONTypes.NUMBER));
+        return parseInt(getProperty(name, JSONTypes.NUMBER));
     }
 
     /**
@@ -187,7 +188,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see #getBigInteger(String)
      */
     public long getInt53(String name) throws IOException {
-        return parseLong(getString(name, JSONTypes.NUMBER));
+        return parseLong(getProperty(name, JSONTypes.NUMBER));
     }
 
     /**

@@ -62,24 +62,28 @@ public class JSONArrayReader implements Serializable {
         }
     }
 
-    Object get(JSONTypes expectedType) throws IOException {
+    JSONValue getNextElementCore(JSONTypes expectedType) throws IOException {
         inRangeCheck();
         JSONValue value = array.elementAt(index++);
         value.readFlag = true;
         JSONTypes.compatibilityTest(expectedType, value);
-        return value.value;
+        return value;
+    }
+
+    Object getNextElement(JSONTypes expectedType) throws IOException {
+        return getNextElementCore(expectedType).value;
     }
 
     public String getString() throws IOException {
-        return (String) get(JSONTypes.STRING);
+        return (String) getNextElement(JSONTypes.STRING);
     }
 
     public int getInt() throws IOException {
-        return JSONObjectReader.parseInt((String) get(JSONTypes.NUMBER));
+        return JSONObjectReader.parseInt(getNextElementCore(JSONTypes.NUMBER));
     }
 
     public long getInt53() throws IOException {
-        return JSONObjectReader.parseLong((String) get(JSONTypes.NUMBER));
+        return JSONObjectReader.parseLong(getNextElementCore(JSONTypes.NUMBER));
     }
 
     public long getLong() throws IOException {
@@ -87,7 +91,7 @@ public class JSONArrayReader implements Serializable {
     }
 
     public double getDouble() throws IOException {
-        return Double.valueOf((String) get(JSONTypes.NUMBER));
+        return Double.valueOf((String) getNextElement(JSONTypes.NUMBER));
     }
 
     public BigInteger getBigInteger() throws IOException {
@@ -111,7 +115,7 @@ public class JSONArrayReader implements Serializable {
     }
 
     public boolean getBoolean() throws IOException {
-        return new Boolean((String) get(JSONTypes.BOOLEAN));
+        return new Boolean((String) getNextElement(JSONTypes.BOOLEAN));
     }
 
     public boolean getIfNULL() throws IOException {
@@ -124,7 +128,7 @@ public class JSONArrayReader implements Serializable {
 
     @SuppressWarnings("unchecked")
     public JSONArrayReader getArray() throws IOException {
-        return new JSONArrayReader((Vector<JSONValue>) get(JSONTypes.ARRAY));
+        return new JSONArrayReader((Vector<JSONValue>) getNextElement(JSONTypes.ARRAY));
     }
 
     public JSONTypes getElementType() throws IOException {
@@ -133,11 +137,11 @@ public class JSONArrayReader implements Serializable {
     }
 
     public JSONObjectReader getObject() throws IOException {
-        return new JSONObjectReader((JSONObject) get(JSONTypes.OBJECT));
+        return new JSONObjectReader((JSONObject) getNextElement(JSONTypes.OBJECT));
     }
 
     public void scanAway() throws IOException {
-        get(getElementType());
+        getNextElement(getElementType());
     }
 
     public Vector<byte[]> getBinaryArray() throws IOException {
