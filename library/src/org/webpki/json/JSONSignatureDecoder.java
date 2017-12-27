@@ -16,7 +16,6 @@
  */
 package org.webpki.json;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -27,7 +26,6 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.RSAPublicKey;
