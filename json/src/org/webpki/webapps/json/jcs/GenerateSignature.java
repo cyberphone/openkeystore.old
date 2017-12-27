@@ -57,12 +57,8 @@ public class GenerateSignature {
 
     ACTION action;
 
-    AlgorithmPreferences jose;
-
-    GenerateSignature(ACTION action, boolean jose) {
+    GenerateSignature(ACTION action) {
         this.action = action;
-        this.jose = jose ? AlgorithmPreferences.JOSE_ACCEPT_PREFER
-                : AlgorithmPreferences.SKS;
     }
 
     static class AsymSignatureHelper extends KeyStoreSigner implements
@@ -102,16 +98,13 @@ public class GenerateSignature {
     byte[] sign(JSONObjectWriter wr) throws IOException {
         if (action == ACTION.X509) {
             wr.setSignature(new JSONX509Signer(new AsymSignatureHelper(
-                    JCSService.clientkey_rsa).setExtendedCertPath(true))
-                    .setAlgorithmPreferences(jose));
+                    JCSService.clientkey_rsa).setExtendedCertPath(true)));
         } else if (action == ACTION.SYM) {
-            wr.setSignature(new JSONSymKeySigner(new SymmetricOperations())
-                    .setAlgorithmPreferences(jose).setKeyId(KEY_NAME));
+            wr.setSignature(new JSONSymKeySigner(new SymmetricOperations()).setKeyId(KEY_NAME));
         } else {
             wr.setSignature(new JSONAsymKeySigner(new AsymSignatureHelper(
                     action == ACTION.RSA ? JCSService.clientkey_rsa
-                            : JCSService.clientkey_ec))
-                    .setAlgorithmPreferences(jose));
+                            : JCSService.clientkey_ec)));
         }
         return wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
     }

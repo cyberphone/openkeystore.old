@@ -35,7 +35,6 @@ public class CreateServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     static final String KEY_TYPE  = "keytype";
-    static final String JOSE_FLAG = "jose";
     static final String JS_FLAG   = "js";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,7 +65,6 @@ public class CreateServlet extends HttpServlet {
         GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
         boolean jsFlag = new Boolean(request.getParameter(JS_FLAG));
         String key_type = request.getParameter(KEY_TYPE);
-        boolean jose = new Boolean(request.getParameter(JOSE_FLAG));
         for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values()) {
             if (a.toString().equals(key_type)) {
                 action = a;
@@ -76,7 +74,7 @@ public class CreateServlet extends HttpServlet {
         try {
             JSONObjectReader reader = JSONParser.parse(json_object);
             JSONObjectWriter writer = new JSONObjectWriter(reader);
-            byte[] signed_json = new GenerateSignature(action, jose)
+            byte[] signed_json = new GenerateSignature(action)
                     .sign(writer);
             RequestDispatcher rd = request
                     .getRequestDispatcher((jsFlag ? "jssignature?" : "request?")

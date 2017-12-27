@@ -457,7 +457,7 @@ public class HTML {
                         + "}")
         + "</td></tr>"
         + "<tr><td align=\"center\"><table>"
-        + "<tr><td valign=\"middle\" rowspan=\"6\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
+        + "<tr><td valign=\"middle\" rowspan=\"5\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.SYM
@@ -477,9 +477,6 @@ public class HTML {
         + "\" value=\""
         + GenerateSignature.ACTION.X509
         + "\">X.509 Certificate/Private key</td></tr>"
-        + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
-        + CreateServlet.JOSE_FLAG
-        + "\" checked value=\"true\">JOSE Algorithms</td></tr>"
         + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
         + CreateServlet.JS_FLAG
         + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td></tr>"
