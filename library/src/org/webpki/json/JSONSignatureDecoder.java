@@ -282,10 +282,13 @@ public class JSONSignatureDecoder implements Serializable {
         if (signature.hasProperty(CRIT_JSON)) {
             String[] properties = signature.getStringArray(CRIT_JSON);
             checkExtensions(properties);
+            if (options.extensionHolder.extensions.isEmpty()) {
+                throw new IOException("Use of \"" + CRIT_JSON + "\" must be set in options");
+            }
             for (String name : properties) {
                 ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
                 if (extensionEntry == null) {
-                    throw new IOException("Not a permitted extension: " + name);
+                    throw new IOException("Unexpected \"" + CRIT_JSON + "\" extension: " + name);
                 }
                 try {
                     Extension extension = extensionEntry.extensionClass.newInstance();
@@ -300,13 +303,13 @@ public class JSONSignatureDecoder implements Serializable {
         }
         for (String name : options.extensionHolder.extensions.keySet()) {
             if (!extensions.containsKey(name) && options.extensionHolder.extensions.get(name).mandatory) {
-                throw new IOException("Missing mandatory extension: " + name);
+                throw new IOException("Missing \"" + CRIT_JSON + "\" mandatory extension: " + name);
             }
         }
         LinkedHashMap<String, JSONValue> saveExcluded = null;
         if (options.exclusions == null) {
             if (signature.hasProperty(EXCL_JSON)) {
-                throw new IOException("Missing declaration of permitted excludes");
+                throw new IOException("Use of \"" + EXCL_JSON + "\" must be set in options");
             }
         } else {
             saveExcluded = new LinkedHashMap<String, JSONValue>(rd.root.properties);

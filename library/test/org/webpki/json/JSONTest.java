@@ -3449,7 +3449,7 @@ public class JSONTest {
             verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Not a permitted extension: https://example.com/ext");
+            checkException(e, "Use of \"" + JSONSignatureDecoder.CRIT_JSON + "\" must be set in options");
         }
         try {
             JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
@@ -3496,7 +3496,7 @@ public class JSONTest {
                                  p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
-            checkException(e, "Missing mandatory extension: https://example.com/ext2");
+            checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext2");
         }
         holder = new JSONSignatureDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
@@ -3506,7 +3506,7 @@ public class JSONTest {
             readSignature(writer, new JSONSignatureDecoder.Options().setPermittedExtensions(holder));
             fail("Not ok");
         } catch (Exception e) {
-            checkException(e, "Missing mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
         }
         holder = new JSONSignatureDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, false);
