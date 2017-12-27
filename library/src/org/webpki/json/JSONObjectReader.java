@@ -135,16 +135,13 @@ public class JSONObjectReader implements Serializable, Cloneable {
 
     static long parseLong(JSONValue jsonValue) throws IOException {
         String value = (String) jsonValue.value;
-        if (INTEGER_PATTERN.matcher(value).matches()) {
-            double number = Double.valueOf(value);
-            if (Math.abs(number) > JSONObjectWriter.MAX_SAFE_INTEGER) {
-                throw new IOException("Integer values must not exceeed " +
-                        JSONObjectWriter.MAX_SAFE_INTEGER +
-                        ", found: " + value);
-            }
-            return (long) number;
+        long longValue = Long.valueOf(value);
+        if (longValue > JSONObjectWriter.MAX_SAFE_INTEGER || longValue < -JSONObjectWriter.MAX_SAFE_INTEGER) {
+            throw new IOException("Integer values must not exceeed abs(" +
+                    JSONObjectWriter.MAX_SAFE_INTEGER +
+                    "), found: " + value);
         }
-        throw new IOException("Value is not an integer: " + value);
+        return longValue;
     }
 
     static int parseInt(JSONValue jsonValue) throws IOException {

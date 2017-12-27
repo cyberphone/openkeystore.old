@@ -175,14 +175,18 @@ public class JSONParser {
             throw new IOException("Missing argument");
         }
         JSONTypes type = JSONTypes.NUMBER;
-        if (!NUMBER_PATTERN.matcher(result).matches()) {
-            if (BOOLEAN_PATTERN.matcher(result).matches()) {
-                type = JSONTypes.BOOLEAN;
-            } else if (result.equals("null")) {
-                type = JSONTypes.NULL;
-            } else {
-                throw new IOException("Syntax error: " + result);
+        if (NUMBER_PATTERN.matcher(result).matches()) {
+            String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(result));
+            if (!serializedNumber.equals(result)) {
+                throw new IOException("Improperly serialized number: " + result + ", expected: " + serializedNumber);
             }
+            result = serializedNumber;
+        } else if (BOOLEAN_PATTERN.matcher(result).matches()) {
+            type = JSONTypes.BOOLEAN;
+        } else if (result.equals("null")) {
+            type = JSONTypes.NULL;
+        } else {
+            throw new IOException("Syntax error: " + result);
         }
         return new JSONValue(type, result);
     }

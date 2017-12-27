@@ -2393,7 +2393,7 @@ public class JSONTest {
     enum PARSER_ERR {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
-        EXPECTED("Expected '"),
+        EXPECTED("Improperly serialized number"),
         SYNTAX("Syntax error");
 
         String mess;
@@ -2714,10 +2714,10 @@ public class JSONTest {
         assertTrue(simpleObjectType2("0.0").getBigDecimal("name").equals(new BigDecimal("0.0")));
         assertTrue(simpleArrayType("40000000000000000").getDouble() == new Double("40000000000000000"));
         assertTrue(simpleObjectType("40000000000000000").getDouble("name") == new Double("40000000000000000"));
-        assertTrue(simpleArrayType("40000000000000000.45").getDouble() == 40000000000000000.45);
-        assertTrue(simpleObjectType("40000000000000000.45").getDouble("name") == 40000000000000000.45);
-        assertTrue(simpleArrayType("40.45e10").getDouble() == 40.45e10);
-        assertTrue(simpleObjectType("40.45e10").getDouble("name") == 40.45e10);
+        assertTrue(simpleArrayType("400000000000.45").getDouble() == 400000000000.45);
+        assertTrue(simpleObjectType("400000000000.45").getDouble("name") == 400000000000.45);
+        assertTrue(simpleArrayType("404500000000").getDouble() == 40.45e10);
+        assertTrue(simpleObjectType("404500000000").getDouble("name") == 40.45e10);
         assertTrue(simpleArrayType("   true   ").getBoolean());
         assertTrue(simpleArrayType("true").getBoolean());
         assertTrue(simpleObjectType("true").getBoolean("name"));
@@ -2780,14 +2780,13 @@ public class JSONTest {
         badArgument("+1");
         expected_error = PARSER_ERR.EXPECTED;
         badArgument("1.0 e4");
-        floatingPoint("1.0e4", 1.0e4);
-        floatingPoint("0.9999e-99", 0.9999e-99);
-        floatingPoint("1.0E+4", 10000);
-        floatingPoint("0.00000000000000000001", 1.0e-20);
-        floatingPoint("1.0e4", 1.0e4);
-        floatingPoint("-0.0", -0.0);
-        floatingPoint(".1", .1);
-        floatingPoint("1.", 1.0);
+        floatingPoint("10000", 1.0e4);
+        floatingPoint("9.999e-100", 0.9999e-99);
+        floatingPoint("10000", 10000);
+        floatingPoint("1e-20", 1.0e-20);
+        badArgument("-0.0");
+        badArgument(".1");
+        badArgument("1.");
         integerValue("+1", true);
         integerValue("-0", true);
         integerValue("01", true);
@@ -2844,7 +2843,7 @@ public class JSONTest {
             JSONParser.parse(new JSONObjectWriter().setDouble("v", value).toString()).getInt("v");
             fail("integer");
         } catch (Exception e) {
-            checkException(e, "Value is not an integer: " + value);
+            checkException(e, "For input string: \"" + value + "\"");
         }
     }
 
