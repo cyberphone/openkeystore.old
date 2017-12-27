@@ -187,11 +187,8 @@ public class JSONObjectWriter implements Serializable {
         return buffer.toString();
     }
 
-    static String es6Long2NumberConversion(long value) throws IOException {
-        if (Math.abs(value) > MAX_SAFE_INTEGER) {
-            throw new IOException("Integer values must not exceed " + MAX_SAFE_INTEGER + " for safe representation");
-        }
-        return es6JsonNumberSerialization(value);
+    static String es6JsonLongSerialization(long value) throws IOException {
+        return Long.toString(JSONObjectReader.int53Check(value));
     }
 
     /**
@@ -223,7 +220,7 @@ public class JSONObjectWriter implements Serializable {
      * @see #MAX_SAFE_INTEGER
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
-        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6Long2NumberConversion(value)));
+        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6JsonLongSerialization(value)));
     }
 
     /**

@@ -2520,13 +2520,13 @@ public class JSONTest {
             JSONParser.parse(new JSONObjectWriter().setBigInteger("v", value).toString()).getLong("v");
             assertFalse("range", mustFail);
         } catch (Exception e) {
-            checkException(e, "Java \"long\" out of range: " + value);
+            checkException(e, "Int64 value out of range: " + value);
         }
         try {
             JSONParser.parse("[\"" + value + "\"]").getJSONArrayReader().getLong();
             assertFalse("range", mustFail);
         } catch (Exception e) {
-            checkException(e, "Java \"long\" out of range: " + value);
+            checkException(e, "Int64 value out of range: " + value);
         }
     }
 
@@ -2785,6 +2785,7 @@ public class JSONTest {
         floatingPoint("10000", 10000);
         floatingPoint("1e-20", 1.0e-20);
         badArgument("-0.0");
+        expected_error = PARSER_ERR.SYNTAX;
         badArgument(".1");
         badArgument("1.");
         integerValue("+1", true);
@@ -2799,7 +2800,7 @@ public class JSONTest {
             int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER + 1);
             fail("long");
         } catch (Exception e) {
-            checkException(e, "Integer values must not exceed " + JSONObjectWriter.MAX_SAFE_INTEGER + " for safe representation");
+            checkException(e, "Int53 values must not exceeed abs(9007199254740991), found: 9007199254740992");
         }
         int53Variables(0xa885abafaba0l);
         int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER);
@@ -2852,13 +2853,13 @@ public class JSONTest {
             JSONParser.parse(new JSONObjectWriter().setInt53("v", value).toString()).getInt("v");
             assertFalse("range", mustFail);
         } catch (Exception e) {
-            checkException(e, "Java \"int\" out of range: " + value);
+            checkException(e, "Int32 value out of range: " + value);
         }
         try {
             JSONParser.parse("[" + value + "]").getJSONArrayReader().getInt();
             assertFalse("range", mustFail);
         } catch (Exception e) {
-            checkException(e, "Java \"int\" out of range: " + value);
+            checkException(e, "Int32 value out of range: " + value);
         }
     }
 

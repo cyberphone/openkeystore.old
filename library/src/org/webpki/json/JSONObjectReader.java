@@ -133,29 +133,31 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return getString(name, JSONTypes.STRING);
     }
 
-    static long parseLong(JSONValue jsonValue) throws IOException {
-        String value = (String) jsonValue.value;
-        long longValue = Long.valueOf(value);
-        if (longValue > JSONObjectWriter.MAX_SAFE_INTEGER || longValue < -JSONObjectWriter.MAX_SAFE_INTEGER) {
-            throw new IOException("Integer values must not exceeed abs(" +
+    static long int53Check(long value) throws IOException {
+        if (value > JSONObjectWriter.MAX_SAFE_INTEGER || value < -JSONObjectWriter.MAX_SAFE_INTEGER) {
+            throw new IOException("Int53 values must not exceeed abs(" +
                     JSONObjectWriter.MAX_SAFE_INTEGER +
                     "), found: " + value);
         }
-        return longValue;
+        return value;
+    }
+
+    static long parseLong(JSONValue jsonValue) throws IOException {
+        return int53Check(Long.valueOf((String) jsonValue.value));
     }
 
     static int parseInt(JSONValue jsonValue) throws IOException {
-        long longValue = parseLong(jsonValue);
-        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
-            throw new IOException("Java \"int\" out of range: " + longValue);
+        long value = parseLong(jsonValue);
+        if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE) {
+            throw new IOException("Int32 value out of range: " + value);
         }
-        return (int) longValue;
+        return (int) value;
     }
 
     static long convertBigIntegerToLong(BigInteger value) throws IOException {
         long longValue = value.longValue();
         if (BigInteger.valueOf(longValue).compareTo(value) != 0) {
-            throw new IOException("Java \"long\" out of range: " + value);
+            throw new IOException("Int64 value out of range: " + value);
         }
         return longValue;
     }

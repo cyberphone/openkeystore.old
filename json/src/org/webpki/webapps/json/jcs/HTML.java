@@ -457,35 +457,32 @@ public class HTML {
                         + "}")
         + "</td></tr>"
         + "<tr><td align=\"center\"><table>"
-        + "<tr><td valign=\"middle\" rowspan=\"7\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
+        + "<tr><td valign=\"middle\" rowspan=\"6\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.SYM
-        + "\">Symmetric key</td><td>"
+        + "\">Symmetric key</td></tr>"
         + "<tr><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.EC
-        + "\" checked>EC Key (P-256)</td><td>"
+        + "\" checked>EC Key (P-256)</td></tr>"
         + "<tr><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.RSA
-        + "\">RSA Key (2048)</td><td>"
+        + "\">RSA Key (2048)</td></tr>"
         + "<tr><td align=\"left\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.X509
-        + "\">X.509 Certificate/Private key</td><td>"
+        + "\">X.509 Certificate/Private key</td></tr>"
         + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
         + CreateServlet.JOSE_FLAG
-        + "\" checked value=\"true\">JOSE Algorithms</td><td>"
-        + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
-        + CreateServlet.ES6_FLAG
-        + "\" checked value=\"true\">Normalize data according to ES6/V8</td><td>"
+        + "\" checked value=\"true\">JOSE Algorithms</td></tr>"
         + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
         + CreateServlet.JS_FLAG
-        + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td><td>"
+        + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td></tr>"
         + "</table></td></tr>"
         + "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>"
         + "</form></table></td></tr>"));
