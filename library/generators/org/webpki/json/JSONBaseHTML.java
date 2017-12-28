@@ -1494,7 +1494,7 @@ public class JSONBaseHTML  {
                   .setChoice (false, 1)
                 .newColumn()
                   .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
-                  "also featured within the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> object." +
+                  "also featured within the <code>&quot;" + JSONSignatureDecoder.SIGNATURE_JSON + "&quot;</code> sub object." +
                   Types.LINE_SEPARATOR +
                   "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JCS <i>reserved words</i> " +
                   enumerateAttributes(JSONSignatureDecoder.reservedWords.toArray(new String[0]), false) + ". " +
@@ -1502,8 +1502,8 @@ public class JSONBaseHTML  {
                   "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
                   "(unless registered with IANA), " +
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
-                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing extensions " +
-                  "that are not declared as well as empty <code>&quot;" +
+                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
+                  "that are not found as well as empty <code>&quot;" +
                   JSONSignatureDecoder.CRIT_JSON + "&quot;</code> objects. " +
                   "Verifiers typically introduce additional constraints like only accepting predefined extensions." +
                   Types.LINE_SEPARATOR +
