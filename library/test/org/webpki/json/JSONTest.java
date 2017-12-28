@@ -2393,8 +2393,8 @@ public class JSONTest {
     enum PARSER_ERR {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
-        EXPECTED("Improperly serialized number"),
-        SYNTAX("Syntax error");
+        EXPECTED("Improperly serialized JSON number"),
+        SYNTAX("Unrecognized or malformed JSON token");
 
         String mess;
 

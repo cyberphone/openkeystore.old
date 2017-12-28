@@ -346,13 +346,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "because the latter have <i>precedence</i>. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> " +
             "be replaced by the corresponding Unicode character.</li></ul></li></ul>" +
-            "Note: A practical consequence of this arrangement is that the original property order is <i>preserved</i>" +
-            " which also is compliant with ECMAScript JSON parsing as described in " +
+            "Note: A practical consequence of this arrangement is that the original property order is <i>preserved</i>. " +
+            "This is also compliant with ECMAScript JSON serialization as described in " +
             json.createReference(JSONBaseHTML.REF_ES6) +
-            " section <b>9.1.12</b>." + LINE_SEPARATOR +
-            "Also see " +
-            json.globalLinkRef(INTEROPERABILITY) + " and " +
+            " section <b>9.1.12</b>, albeit with the minor limitation outlined in " +
             json.globalLinkRef(ECMASCRIPT_CONSTRAINT) + "." + LINE_SEPARATOR +
+            "Also see " + json.globalLinkRef(INTEROPERABILITY) + "." + LINE_SEPARATOR +
             "Applied on the sample signature, a conforming JCS normalization process should return the following JSON string:" +
             "<div style=\"padding:4pt 0pt 15pt 20pt\"><code>")
          .append(normalizedSampleSignature)
@@ -530,13 +529,16 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "<br>" +
             "function&nbsp;verifySignature(jcs)&nbsp;{<br>" +
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;JCS&nbsp;normalization</span><br>" +
-            "&nbsp;&nbsp;var&nbsp;clone&nbsp;=&nbsp;Object.assign({},&nbsp;jcs.signature);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Clone&nbsp;&quot;signature&quot;&nbsp;child object</span><br>" +
-            "&nbsp;&nbsp;var&nbsp;signature&nbsp;=&nbsp;decodeBase64URL(clone.value);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;signature&nbsp;value</span><br>" +
-            "&nbsp;&nbsp;delete&nbsp;jcs.signature." + JSONSignatureDecoder.VAL_JSON +
+            "&nbsp;&nbsp;var&nbsp;clone&nbsp;=&nbsp;Object.assign({},&nbsp;jcs." + JSONSignatureDecoder.SIGNATURE_JSON +
+            ");&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Clone&nbsp;&quot;signature&quot;&nbsp;child object</span><br>" +
+            "&nbsp;&nbsp;var&nbsp;signature&nbsp;=&nbsp;decodeBase64URL(clone." + JSONSignatureDecoder.VAL_JSON +
+            ");&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;signature&nbsp;value</span><br>" +
+            "&nbsp;&nbsp;delete&nbsp;jcs." + JSONSignatureDecoder.SIGNATURE_JSON +"." + JSONSignatureDecoder.VAL_JSON +
             ";&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
             "<span style=\"color:green\">//&nbsp;Remove&nbsp;signature&nbsp;value&nbsp;property&nbsp;from&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;var&nbsp;data&nbsp;=&nbsp;convertToUTF8(JSON.stringify(jcs));&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Get&nbsp;normalized&nbsp;JSON&nbsp;string (signed data)</span><br>" +
-            "&nbsp;&nbsp;jcs.signature&nbsp;=&nbsp;clone;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Restore&nbsp;signed&nbsp;object</span><br>" +
+            "&nbsp;&nbsp;jcs." + JSONSignatureDecoder.SIGNATURE_JSON +
+            "&nbsp;=&nbsp;clone;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Restore&nbsp;signed&nbsp;object</span><br>" +
             "&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;Perform&nbsp;the&nbsp;actual&nbsp;crypto,&nbsp;here&nbsp;using&nbsp;W3C&nbsp;WebCrypto</span> </code>")
             .append(json.createReference(JSONBaseHTML.REF_WEB_CRYPTO))
             .append("<code><br>" +
@@ -544,7 +546,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             ",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color:green\">//&nbsp;JCS&nbsp;public&nbsp;key&nbsp;is&nbsp;a&nbsp;JWK</span><br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;name:&nbsp;'ECDSA',&nbsp;namedCurve:&nbsp;clone." +
             JSONSignatureDecoder.JWK_JSON +
-            ".crv&nbsp;},<br>" +
+            "." + JSONSignatureDecoder.CRV_JSON + "&nbsp;},<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true,&nbsp;['verify']).then(function(publicKey)&nbsp;{<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;crypto.subtle.verify({&nbsp;name:&nbsp;'ECDSA',&nbsp;hash:&nbsp;{&nbsp;name:&nbsp;'SHA-256'&nbsp;}&nbsp;},&nbsp;<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;publicKey,&nbsp;signature,&nbsp;data).then(function(result)&nbsp;{<br>" +

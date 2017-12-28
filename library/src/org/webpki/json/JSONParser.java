@@ -178,7 +178,7 @@ public class JSONParser {
         if (NUMBER_PATTERN.matcher(result).matches()) {
             String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(result));
             if (!serializedNumber.equals(result)) {
-                throw new IOException("Improperly serialized number: " + result + ", expected: " + serializedNumber);
+                throw new IOException("Improperly serialized JSON number: " + result + ", expected: " + serializedNumber);
             }
             result = serializedNumber;
         } else if (BOOLEAN_PATTERN.matcher(result).matches()) {
@@ -186,7 +186,7 @@ public class JSONParser {
         } else if (result.equals("null")) {
             type = JSONTypes.NULL;
         } else {
-            throw new IOException("Syntax error: " + result);
+            throw new IOException("Unrecognized or malformed JSON token: " + result);
         }
         return new JSONValue(type, result);
     }

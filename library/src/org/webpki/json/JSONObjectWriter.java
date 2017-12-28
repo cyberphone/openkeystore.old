@@ -73,7 +73,8 @@ public class JSONObjectWriter implements Serializable {
      */
     public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
 
-    static final Pattern JS_ID_PATTERN = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
+    static final Pattern JS_ID_PATTERN    = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
+    static final Pattern JS_INDEX_PATTERN = Pattern.compile("[0-9]+");
 
     JSONObject root;
 
@@ -859,7 +860,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     @SuppressWarnings("unchecked")
-    void printOneElement(JSONValue jsonValue) {
+    void printOneElement(JSONValue jsonValue) throws IOException {
         switch (jsonValue.type) {
             case ARRAY:
                 printArray((Vector<JSONValue>) jsonValue.value);
@@ -886,11 +887,20 @@ import org.webpki.json.JSONSignatureDecoder;
         spaceOut();
     }
 
-    void printObject(JSONObject object) {
+    void printObject(JSONObject object) throws IOException {
         buffer.append('{');
         indentLine();
         boolean next = false;
+        long lastIndex = Long.MIN_VALUE;
         for (String property : object.properties.keySet()) {
+            long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
+                                                      Long.valueOf(property) : Long.MAX_VALUE;
+            if (currentIndex < lastIndex) {
+                throw new IOException("For maintaining strict ES6+ compatibility, this JSON\n" +
+                                      "implementation requires properties with numeric names\n" +
+                                      "(like \"2\":true) to be created first, and in ascending order.");
+            }
+            lastIndex = currentIndex;
             JSONValue jsonValue = object.properties.get(property);
             if (next) {
                 buffer.append(',');
@@ -905,7 +915,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     @SuppressWarnings("unchecked")
-    void printArray(Vector<JSONValue> array) {
+    void printArray(Vector<JSONValue> array) throws IOException {
         buffer.append('[');
         if (!array.isEmpty()) {
             boolean mixed = false;
@@ -980,7 +990,7 @@ import org.webpki.json.JSONSignatureDecoder;
         }
     }
 
-    void printArrayObjects(Vector<JSONValue> array) {
+    void printArrayObjects(Vector<JSONValue> array) throws IOException {
         newIndentSpace();
         boolean next = false;
         for (JSONValue value : array) {
