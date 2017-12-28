@@ -302,7 +302,7 @@
       <link offline="true" href="https://docs.oracle.com/javase/8/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="https://docs.oracle.com/javaee/7/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
-      <bottom><![CDATA[<i>2005-2016 WebPKI.org.</i>]]></bottom>
+      <bottom><![CDATA[<i>2005-2018 WebPKI.org.</i>]]></bottom>
     </javadoc>
   	<replaceregexp
         match="&lt;\!\-\-\ Generated\ by\ javadoc.+\-\-&gt;"
