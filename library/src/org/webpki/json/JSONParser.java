@@ -170,27 +170,27 @@ public class JSONParser {
             }
             tempBuffer.append(c);
         }
-        String result = tempBuffer.toString();
-        if (result.length() == 0) {
+        String token = tempBuffer.toString();
+        if (token.length() == 0) {
             throw new IOException("Missing argument");
         }
         JSONTypes type = JSONTypes.NUMBER;
-        if (NUMBER_PATTERN.matcher(result).matches()) {
-            String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(result));
-            if (!serializedNumber.equals(result)) {
+        if (NUMBER_PATTERN.matcher(token).matches()) {
+            String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(token));
+            if (!serializedNumber.equals(token)) {
                 throw new IOException("This JSON implementation mandates fully normalized \"Number\" data " +
-                                      "according to ES6+.  As a consequence " + result + 
+                                      "according to ES6+.  As a consequence " + token + 
                                       " must be expressed as " + serializedNumber);
             }
-            result = serializedNumber;
-        } else if (BOOLEAN_PATTERN.matcher(result).matches()) {
+            token = serializedNumber;
+        } else if (BOOLEAN_PATTERN.matcher(token).matches()) {
             type = JSONTypes.BOOLEAN;
-        } else if (result.equals("null")) {
+        } else if (token.equals("null")) {
             type = JSONTypes.NULL;
         } else {
-            throw new IOException("Unrecognized or malformed JSON token: " + result);
+            throw new IOException("Unrecognized or malformed JSON token: " + token);
         }
-        return new JSONValue(type, result);
+        return new JSONValue(type, token);
     }
 
     JSONValue scanQuotedString() throws IOException {
