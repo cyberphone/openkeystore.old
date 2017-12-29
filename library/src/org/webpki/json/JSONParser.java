@@ -178,7 +178,7 @@ public class JSONParser {
         if (NUMBER_PATTERN.matcher(result).matches()) {
             String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(result));
             if (!serializedNumber.equals(result)) {
-                throw new IOException("This JSON implementation mandates fully normalized \"Number\" data\n" +
+                throw new IOException("This JSON implementation mandates fully normalized \"Number\" data " +
                                       "according to ES6+.  As a consequence " + result + 
                                       " must be expressed as " + serializedNumber);
             }

@@ -896,7 +896,7 @@ import org.webpki.json.JSONSignatureDecoder;
             long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
                                                       Long.valueOf(property) : Long.MAX_VALUE;
             if (currentIndex < lastIndex) {
-                throw new IOException("For strict ES6+ compatibility, this JSON implementation requires properties\n" +
+                throw new IOException("For strict ES6+ compatibility, this JSON implementation requires properties " +
                                       "with numeric names (like \"2\":true) to be created first, and in ascending order");
             }
             lastIndex = currentIndex;
