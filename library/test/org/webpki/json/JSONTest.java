@@ -2393,7 +2393,7 @@ public class JSONTest {
     enum PARSER_ERR {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
-        EXPECTED("Improperly serialized JSON number"),
+        EXPECTED("This JSON implementation mandates fully normalized \"Number\" data according to ES6+."),
         SYNTAX("Unrecognized or malformed JSON token");
 
         String mess;
@@ -3633,7 +3633,7 @@ public class JSONTest {
         writer = new JSONObjectWriter()
             .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
-                              .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_KEY_SET));
+                              .setRemoteKey(R2048KEY));
         JSONParser.parse(writer.toString()).getSignature(new JSONSignatureDecoder.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
         

@@ -532,7 +532,11 @@ public class JSONObjectWriter implements Serializable {
                 signatureWriter.setString(JSONSignatureDecoder.KID_JSON, signer.keyId);
             }
         } else {
-            signer.writeKeyData(signatureWriter);
+            if (signer.remoteUrl == null) {
+                signer.writeKeyData(signatureWriter);
+            } else {
+                signatureWriter.setString(signer.remoteKeyFormat.jsonName, signer.remoteUrl);
+            }
         }
         if (signer.extensions != null) {
             JSONArrayWriter extensions = signatureWriter.setArray(JSONSignatureDecoder.CRIT_JSON);

@@ -176,19 +176,20 @@ public class Signatures {
                 new JSONAsymKeySigner(localKey.getPrivate(),
                                       localKey.getPublic(),
                                       null)
-                    .setRemoteKey(R2048KEY, JSONRemoteKeys.JWK_KEY_SET);
+                    .setRemoteKey(R2048KEY);
         byte[] remoteSig = createSignature(remoteKeySigner);
         ArrayUtil.writeFile(baseSignatures + "r2048remotekeysigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
         localKey = readJwk("p256");
-        remoteKeySigner =
-                new JSONAsymKeySigner(localKey.getPrivate(),
-                                      localKey.getPublic(),
-                                      null)
-                    .setRemoteKey(P256CERTPATH, JSONRemoteKeys.PEM_CERT_PATH);
-        remoteSig = createSignature(remoteKeySigner);
+        X509Certificate[] localPath = readCertificatePath("p256");
+        JSONX509Signer remoteCertSigner =
+                new JSONX509Signer(localKey.getPrivate(),
+                                   localPath,
+                                   null)
+                    .setRemoteKey(P256CERTPATH);
+        remoteSig = createSignature(remoteCertSigner);
         ArrayUtil.writeFile(baseSignatures + "p256remotecertsigned.json", remoteSig);
         JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
@@ -310,11 +311,16 @@ public class Signatures {
                     .verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
      }
 
+    static X509Certificate[] readCertificatePath(String keyType) throws IOException {
+        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
+                .getJSONArrayReader().getCertificatePath();
+    }
+
     static void certSign(String keyType) throws Exception {
         KeyPair keyPair = readJwk(keyType);
-        X509Certificate[] certPath = JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
-                .getJSONArrayReader().getCertificatePath();
-        byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), certPath, null));
+        byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), 
+                                                               readCertificatePath(keyType),
+                                                               null));
         ArrayUtil.writeFile(baseSignatures + keyType + "certsigned.json", signedData);
         JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(x509Verifier);
     }

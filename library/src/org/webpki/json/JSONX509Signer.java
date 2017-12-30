@@ -94,6 +94,21 @@ public class JSONX509Signer extends JSONSigner {
         return this;
     }
 
+    /**
+     * Set remote key (&quot;x5u&quot;) indicator.
+     * This method <i>suppress</i> the in-line certificate information.
+     * Note that private key and certificate path must anyway be provided during <i>signing</i>
+     * since the remote key indicator is simply generated &quot;as is&quot;. 
+     * @param url Where the key lives
+     * @return this
+     * @throws IOException &nbsp;
+     * @see org.webpki.json.JSONRemoteKeys
+     */
+    public JSONX509Signer setRemoteKey(String url) throws IOException {
+        setRemoteKey(url, JSONRemoteKeys.PEM_CERT_PATH);
+        return this;
+    }
+
     @Override
     SignatureAlgorithms getAlgorithm() {
         return algorithm;
