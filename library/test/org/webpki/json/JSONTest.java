@@ -3591,8 +3591,10 @@ public class JSONTest {
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
         signers = new Vector<JSONSigner>();
-        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null).setKeyId(""));
-        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null).setKeyId("mykey"));
+        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
+            .setOutputPublicKeyInfo(false));
+        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null)
+            .setOutputPublicKeyInfo(false).setKeyId("mykey"));
         writer = new JSONObjectWriter().setInt("value", 3)
             .setSignatures(signers);
         try {

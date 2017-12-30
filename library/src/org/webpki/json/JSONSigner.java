@@ -35,6 +35,8 @@ public abstract class JSONSigner implements Serializable {
 
     String keyId;
 
+    boolean outputPublicKeyInfo = true;
+
     String remoteUrl;
 
     JSONRemoteKeys remoteKeyFormat;
@@ -82,18 +84,23 @@ public abstract class JSONSigner implements Serializable {
     }
 
     /**
-     * Set &quot;keyId&quot; for this signature.
-     * Notes:<ul>
-     * <li>keyId and in-line public key/certificate data are <i>mutually exclusive</i>.</li>
-     * <li>And keyId with length zero (&quot;&quot;) is considered as a keyId
-     *  but no output is produced.  That is, this solution is to be used when
-     *  the signature key is <i>implicitly known</i> by the relying party.</li>
-     * </ul>
+     * Set optional &quot;kid&quot; for this signature.
      * @param keyId The identifier
      * @return this
      */
     public JSONSigner setKeyId(String keyId) {
         this.keyId = keyId;
+        return this;
+    }
+
+    /**
+     * Set if public key information should be provided in the signature.
+     * Note: default <code>true</code>.
+     * @param flag <code>true</code> if such information is to be provided
+     * @return this
+     */
+    public JSONSigner setOutputPublicKeyInfo(boolean flag) {
+        this.outputPublicKeyInfo = flag;
         return this;
     }
 

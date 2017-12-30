@@ -527,17 +527,22 @@ public class JSONObjectWriter implements Serializable {
     private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
         signatureWriter.setString(JSONSignatureDecoder.ALG_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
+
+        // "kid" is always optional
         if (signer.keyId != null) {
-            if (signer.keyId.length() > 0) {
-                signatureWriter.setString(JSONSignatureDecoder.KID_JSON, signer.keyId);
+            signatureWriter.setString(JSONSignatureDecoder.KID_JSON, signer.keyId);
+        }
+
+        // "jku"/"x5u" and "jwk"/"x5c" are mutually exclusive
+        if (signer.remoteUrl == null) {
+            if (signer.outputPublicKeyInfo) {
+                signer.writeKeyData(signatureWriter);
             }
         } else {
-            if (signer.remoteUrl == null) {
-                signer.writeKeyData(signatureWriter);
-            } else {
-                signatureWriter.setString(signer.remoteKeyFormat.jsonName, signer.remoteUrl);
-            }
+            signatureWriter.setString(signer.remoteKeyFormat.jsonName, signer.remoteUrl);
         }
+
+        // Optional extensions
         if (signer.extensions != null) {
             JSONArrayWriter extensions = signatureWriter.setArray(JSONSignatureDecoder.CRIT_JSON);
             for (String property : signer.extensions.getProperties()) {
@@ -545,6 +550,8 @@ public class JSONObjectWriter implements Serializable {
                 signatureWriter.setProperty(property, signer.extensions.getProperty(property));
             }
         }
+
+        // Optional excluded properties
         JSONObjectWriter signedObject = this;
         if (signer.excluded != null) {
             JSONObjectReader rd = new JSONObjectReader(this).clone();
@@ -557,6 +564,8 @@ public class JSONObjectWriter implements Serializable {
             signedObject = new JSONObjectWriter(rd);
             signatureWriter.setStringArray(JSONSignatureDecoder.EXCL_JSON, signer.excluded);
         }
+
+        // Finally, the signature itself
         signatureWriter.setBinary(JSONSignatureDecoder.VAL_JSON,
                                   signer.signData(signer.normalizedData = 
                                           signedObject.serializeToBytes(JSONOutputFormats.NORMALIZED)));
