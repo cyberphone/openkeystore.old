@@ -144,7 +144,7 @@ public class Signatures {
         baseSignatures = args[1] + File.separator;
         symmetricKeys = new SymmetricKeys(baseKey);
         
-        X509Certificate rootca = JSONParser.parse(ArrayUtil.readFile(baseKey + "rootca.jcer"))
+        X509Certificate rootca = JSONParser.parse(ArrayUtil.readFile(baseKey + "rootca.x5c"))
                 .getJSONArrayReader().getCertificatePath()[0];
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load (null, null);
@@ -316,7 +316,7 @@ public class Signatures {
      }
 
     static X509Certificate[] readCertificatePath(String keyType) throws IOException {
-        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.jcer"))
+        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
                 .getJSONArrayReader().getCertificatePath();
     }
 
