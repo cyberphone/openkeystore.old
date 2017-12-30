@@ -100,7 +100,7 @@
        <param name="cmd" value="-out/keyalias mykey -selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2015-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype PKCS12 -out/keystore rootca.p12 -out/storepass foo123 -out/keypass foo123 -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="rootca.p12 foo123 rootca.jcer certificate"/>
+       <param name="cmd" value="rootca.p12 foo123 rootca.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="rootca.p12 foo123 rootca.pem certificate"/>
@@ -127,7 +127,7 @@
        <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate.jcer certificate"/>
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.pem private"/>
@@ -139,7 +139,7 @@
        <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p256certificate.p12 foo123 p256certificate.jcer certificate"/>
+       <param name="cmd" value="p256certificate.p12 foo123 p256certificate.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.pem private"/>
@@ -151,7 +151,7 @@
        <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p384certificate.p12 foo123 p384certificate.jcer certificate"/>
+       <param name="cmd" value="p384certificate.p12 foo123 p384certificate.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.pem private"/>
@@ -163,7 +163,7 @@
        <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.jwk private keyid"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="p521certificate.p12 foo123 p521certificate.jcer certificate"/>
+       <param name="cmd" value="p521certificate.p12 foo123 p521certificate.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.pem private"/>
@@ -175,7 +175,7 @@
        <param name="cmd" value="-out/keyalias mykey -selfsigned -entity/ca -subject &quot;CN=Unknown Root, C=US&quot; -validity/start 2015-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype PKCS12 -out/keystore unknownca.p12 -out/storepass foo123 -out/keypass foo123 -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
     <antcall target="_createjwk">
-       <param name="cmd" value="unknownca.p12 foo123 unknownca.jcer certificate"/>
+       <param name="cmd" value="unknownca.p12 foo123 unknownca.x5c certificate"/>
     </antcall>
     <antcall target="_createpem">
        <param name="cmd" value="unknownca.p12 foo123 unknownca.pem certificate"/>
