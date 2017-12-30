@@ -157,8 +157,9 @@ public class Signatures {
         asymSign("p521");
         asymSign("r2048");
 
-        asymSignNoPublicKeyInfo("p256", true);
-        asymSignNoPublicKeyInfo("p521", false);
+        asymSignOptionalPublicKeyInfo("p256", true, false);
+        asymSignOptionalPublicKeyInfo("p256", true, true);
+        asymSignOptionalPublicKeyInfo("p521", false, false);
 
         certSign("p256");
         certSign("p384");
@@ -296,19 +297,19 @@ public class Signatures {
         }
      }
 
-    static void asymSignNoPublicKeyInfo(String keyType, boolean wantKeyId) throws Exception {
+    static void asymSignOptionalPublicKeyInfo(String keyType, boolean wantKeyId, boolean wantPublicKey) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         JSONSigner signer = 
                 new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null);
         if (wantKeyId) {
             signer.setKeyId(keyId);
         }
-        signer.setOutputPublicKeyInfo(false);
+        signer.setOutputPublicKeyInfo(wantPublicKey);
         byte[] signedData = createSignature(signer);
-        ArrayUtil.writeFile(baseSignatures + keyType + "implicitkeysigned.json", signedData);
+        ArrayUtil.writeFile(baseSignatures + keyType + (wantPublicKey && wantKeyId ? "mixed" : "implicit") + "keysigned.json", signedData);
         JSONParser.parse(signedData).getSignature(
             new JSONSignatureDecoder.Options()
-                .setRequirePublicKeyInfo(false)
+                .setRequirePublicKeyInfo(wantPublicKey)
                 .setKeyIdOption(wantKeyId ? 
      JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED : JSONSignatureDecoder.KEY_ID_OPTIONS.FORBIDDEN))
                     .verify(new JSONAsymKeyVerifier(keyPair.getPublic()));

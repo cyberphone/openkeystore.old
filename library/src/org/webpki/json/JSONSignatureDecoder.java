@@ -252,9 +252,6 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONObjectReader signature,
                          Options options) throws IOException {
         this.options = options;
-        if (options.requirePublicKeyInfo && options.keyIdOption != KEY_ID_OPTIONS.FORBIDDEN) {
-            throw new IOException("Incompatible keyId and publicKey options - Choose one");
-        }
         algorithmString = signature.getString(ALG_JSON);
         keyId = signature.getStringConditional(KID_JSON);
         if (keyId == null) {

@@ -3433,15 +3433,6 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "SKS algorithm expected: ES256");
         }
-        try {
-            verifySignature(writer, 
-                            new JSONSignatureDecoder.Options()
-                                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL), 
-                            p256.getPublic());
-            fail("Should not work");
-        } catch (Exception e) {
-            checkException(e, "Incompatible keyId and publicKey options - Choose one");
-        }
         writer = new JSONObjectWriter().setString("myData", "cool!")
         .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
             .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
