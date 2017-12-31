@@ -50,6 +50,7 @@ public class JSONDecryptionDecoder {
     public static final String IV_JSON               = "iv";
     public static final String TAG_JSON              = "tag";
     public static final String CIPHER_TEXT_JSON      = "ciphertext";
+    public static final String RECIPIENTS_JSON       = "recipients";
 
     private PublicKey publicKey;
 

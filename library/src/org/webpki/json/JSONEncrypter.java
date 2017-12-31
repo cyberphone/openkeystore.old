@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.PublicKey;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
@@ -33,6 +34,14 @@ public abstract class JSONEncrypter implements Serializable {
     String keyId;
 
     boolean outputPublicKeyInfo = true;
+    
+    KeyEncryptionAlgorithms keyEncryptionAlgorithm;
+
+    byte[] dataEncryptionKey;
+
+    PublicKey publicKey;
+    
+    String provider;
 
     String remoteUrl;
 
@@ -43,7 +52,30 @@ public abstract class JSONEncrypter implements Serializable {
     JSONEncrypter() {
     }
 
-    abstract void writeKeyData(JSONObjectWriter wr) throws IOException;
+    static class EncryptionHeader {
+
+        DataEncryptionAlgorithms dataEncryptionAlgorithm;
+
+        JSONObjectWriter encryptionWriter;
+
+        EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
+            this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+            encryptionWriter = new JSONObjectWriter();
+            encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.JoseName);
+        }
+
+        JSONObjectWriter finalizeEncryption() {
+            return encryptionWriter;
+        }
+
+        void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) {
+        }
+
+        void cleanRecipient(JSONObjectWriter recipient) {
+        }
+    }
+
+    abstract void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException;
 
     /**
      * Set &quot;crit&quot; for this encryption object.
@@ -81,5 +113,10 @@ public abstract class JSONEncrypter implements Serializable {
     public JSONEncrypter setOutputPublicKeyInfo(boolean flag) {
         this.outputPublicKeyInfo = flag;
         return this;
+    }
+
+    void createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                JSONObjectWriter encryptionWriter) throws IOException {
+        encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.JoseName);
     }
 }

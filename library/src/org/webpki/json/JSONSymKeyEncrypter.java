@@ -18,9 +18,6 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.MACAlgorithms;
-
 /**
  * Initiatiator object for symmetric key encryptions.
  */
@@ -28,24 +25,16 @@ public class JSONSymKeyEncrypter extends JSONEncrypter {
 
     private static final long serialVersionUID = 1L;
 
-    MACAlgorithms algorithm;
-
-    /**
+     /**
      * Constructor for JCE based solutions.
-     * @param rawKey Key
-     * @param algorithm MAC algorithm
+     * @param dataEncryptionKey Symmetric key
      * @throws IOException &nbsp;
      */
-    public JSONSymKeyEncrypter(byte[] rawKey, final MACAlgorithms algorithm) throws IOException {
-
-    }
-
-    public JSONSymKeyEncrypter setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
-        this.algorithmPreferences = algorithmPreferences;
-        return this;
+    public JSONSymKeyEncrypter(byte[] dataEncryptionKey, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws IOException {
+        this.dataEncryptionKey = dataEncryptionKey;
     }
 
     @Override
-    void writeKeyData(JSONObjectWriter wr) throws IOException {
+    void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException {
     }
 }

@@ -849,7 +849,45 @@ import org.webpki.json.JSONSignatureDecoder;
                                                   optionalKeyId,
                                                   dataEncryptionKey, null);
     }
+    
+    public static JSONObjectWriter createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                          JSONEncrypter encrypter) throws IOException {
+        JSONEncrypter.EncryptionHeader encryptionHeader = 
+                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypter);
+        JSONObjectWriter recipient = new JSONObjectWriter();
+        encryptionHeader.createRecipient(encrypter, recipient);
+        encryptionHeader.cleanRecipient(recipient);
+        for (String property : recipient.root.properties.keySet()) {
+            encryptionHeader.encryptionWriter.setProperty(property, recipient.root.properties.get(property));
+        }
+        return encryptionHeader.finalizeEncryption();
+    }
 
+    public static JSONObjectWriter createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                          Vector<JSONEncrypter> encrypters) throws IOException {
+        if (encrypters.isEmpty()) {
+            throw new IOException("Empty encrypter list");
+        }
+        JSONEncrypter.EncryptionHeader encryptionHeader = 
+                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypters.firstElement());
+        Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
+        for (JSONEncrypter encrypter : encrypters) {
+            JSONObjectWriter currentRecipient = new JSONObjectWriter();
+            encryptionHeader.createRecipient(encrypter, currentRecipient);
+            recipents.add(currentRecipient);
+        }
+        JSONArrayWriter recipientList = 
+                encryptionHeader.encryptionWriter.setArray(JSONDecryptionDecoder.RECIPIENTS_JSON);
+        for (JSONObjectWriter recipient : recipents) {
+            encryptionHeader.cleanRecipient(recipient);
+            recipientList.setObject(recipient);
+        }
+        return encryptionHeader.finalizeEncryption();
+    }    
+
+
+    ////////////////////////////////////////////////////////////////////////
+    
     void newLine() {
         if (prettyPrint) {
             buffer.append(htmlMode ? "<br>" : "\n");
