@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.security.PublicKey;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -56,22 +57,63 @@ public abstract class JSONEncrypter implements Serializable {
 
         DataEncryptionAlgorithms dataEncryptionAlgorithm;
 
+        KeyEncryptionAlgorithms keyEncryptionAlgorithm;
+
         JSONObjectWriter encryptionWriter;
+
+        JSONObjectReader extensions;
+        
+        String keyId;
 
         EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+            keyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
-            encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.JoseName);
+            if ((extensions = encrypter.extensions) != null) {
+                for (String property : extensions.getProperties()) {
+                    encryptionWriter.setProperty(property, extensions.getProperty(property));
+                }
+            }
+            keyId = encrypter.keyId;
+            encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.joseName);
+            if (keyId != null) {
+                encryptionWriter.setString(JSONSignatureDecoder.KID_JSON, keyId);
+            }
+            if (keyEncryptionAlgorithm != null) {
+                encryptionWriter.setString(JSONSignatureDecoder.ALG_JSON, keyEncryptionAlgorithm.joseName);
+            }
         }
 
-        JSONObjectWriter finalizeEncryption() {
+        JSONObjectWriter finalizeEncryption() throws IOException {
+            if (extensions != null) {
+                encryptionWriter.setStringArray(JSONSignatureDecoder.CRIT_JSON, extensions.getProperties());
+            }
             return encryptionWriter;
         }
 
-        void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) {
+        void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) throws IOException {
+            if (keyId != null && (encrypter.keyId == null || !keyId.equals(encrypter.keyId))) {
+                encryptionWriter.root.properties.remove(JSONSignatureDecoder.KID_JSON);
+                keyId = null;
+            }
+            if (encrypter.keyId != null) {
+                currentRecipient.setString(JSONSignatureDecoder.KID_JSON, encrypter.keyId);
+            }
+            if (keyEncryptionAlgorithm != encrypter.keyEncryptionAlgorithm) {
+                if (keyEncryptionAlgorithm != null) {
+                    encryptionWriter.root.properties.remove(JSONSignatureDecoder.ALG_JSON);
+                }
+                keyEncryptionAlgorithm = null;
+            }
         }
 
         void cleanRecipient(JSONObjectWriter recipient) {
+            if (keyId != null) {
+                recipient.root.properties.remove(JSONSignatureDecoder.KID_JSON);
+            }
+            if (keyEncryptionAlgorithm != null) {
+                recipient.root.properties.remove(JSONSignatureDecoder.ALG_JSON);
+            }
         }
     }
 
@@ -113,10 +155,5 @@ public abstract class JSONEncrypter implements Serializable {
     public JSONEncrypter setOutputPublicKeyInfo(boolean flag) {
         this.outputPublicKeyInfo = flag;
         return this;
-    }
-
-    void createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                JSONObjectWriter encryptionWriter) throws IOException {
-        encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.JoseName);
     }
 }

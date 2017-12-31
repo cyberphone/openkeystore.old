@@ -336,9 +336,7 @@ public class JSONSignatureDecoder implements Serializable {
         signature.root.properties.remove(VAL_JSON);                              //
         //                                                                       //
         // 3. Hide the optional exclude property from the serializer...          //
-        if (options.exclusions != null) {                                        //
-            signature.root.properties.remove(EXCL_JSON);                         //
-        }                                                                        //  
+        signature.root.properties.remove(EXCL_JSON);                             //
         //                                                                       //
         // 4. Serialize ("JSON.stringify()")                                     //
         normalizedData = rd.serializeToBytes(JSONOutputFormats.NORMALIZED);      //
