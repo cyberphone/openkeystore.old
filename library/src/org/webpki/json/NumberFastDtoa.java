@@ -28,9 +28,9 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
-package org.webpki.json.v8dtoa;
+package org.webpki.json;
 
-public class FastDtoa {
+public class NumberFastDtoa {
 
     // FastDtoa will produce at most kFastDtoaMaximalLength digits.
     static final int kFastDtoaMaximalLength = 17;
@@ -60,7 +60,7 @@ public class FastDtoa {
     // Output: returns true if the buffer is guaranteed to contain the closest
     //    representable number to the input.
     //  Modifies the generated digits in the buffer to approach (round towards) w.
-    static boolean roundWeed(FastDtoaBuilder buffer,
+    static boolean roundWeed(NumberFastDtoaBuilder buffer,
                              long distance_too_high_w,
                              long unsafe_interval,
                              long rest,
@@ -323,10 +323,10 @@ public class FastDtoa {
     // represent 'w' we can stop. Everything inside the interval low - high
     // represents w. However we have to pay attention to low, high and w's
     // imprecision.
-    static boolean digitGen(DiyFp low,
-                            DiyFp w,
-                            DiyFp high,
-                            FastDtoaBuilder buffer,
+    static boolean digitGen(NumberDiyFp low,
+                            NumberDiyFp w,
+                            NumberDiyFp high,
+                            NumberFastDtoaBuilder buffer,
                             int mk) {
         assert (low.e() == w.e() && w.e() == high.e());
         assert uint64_lte(low.f() + 1, high.f() - 1);
@@ -343,11 +343,11 @@ public class FastDtoa {
         // interval. Later we will weed out representations that lie outside the safe
         // interval and thus _might_ lie outside the correct interval.
         long unit = 1;
-        DiyFp too_low = new DiyFp(low.f() - unit, low.e());
-        DiyFp too_high = new DiyFp(high.f() + unit, high.e());
+        NumberDiyFp too_low = new NumberDiyFp(low.f() - unit, low.e());
+        NumberDiyFp too_high = new NumberDiyFp(high.f() + unit, high.e());
         // too_low and too_high are guaranteed to lie outside the interval we want the
         // generated number in.
-        DiyFp unsafe_interval = DiyFp.minus(too_high, too_low);
+        NumberDiyFp unsafe_interval = NumberDiyFp.minus(too_high, too_low);
         // We now cut the input number into two parts: the integral digits and the
         // fractionals. We will not write any decimal separator though, but adapt
         // kappa instead.
@@ -355,12 +355,12 @@ public class FastDtoa {
         // such that:   too_low < buffer * 10^kappa < too_high
         // We use too_high for the digit_generation and stop as soon as possible.
         // If we stop early we effectively round down.
-        DiyFp one = new DiyFp(1l << -w.e(), w.e());
+        NumberDiyFp one = new NumberDiyFp(1l << -w.e(), w.e());
         // Division by one is a shift.
         int integrals = (int) ((too_high.f() >>> -one.e()) & 0xffffffffL);
         // Modulo by one is an and.
         long fractionals = too_high.f() & (one.f() - 1);
-        long result = biggestPowerTen(integrals, DiyFp.kSignificandSize - (-one.e()));
+        long result = biggestPowerTen(integrals, NumberDiyFp.kSignificandSize - (-one.e()));
         int divider = (int) ((result >>> 32) & 0xffffffffL);
         int divider_exponent = (int) (result & 0xffffffffL);
         int kappa = divider_exponent + 1;
@@ -383,7 +383,7 @@ public class FastDtoa {
                 // Rounding down (by not emitting the remaining digits) yields a number
                 // that lies within the unsafe interval.
                 buffer.point = buffer.end - mk + kappa;
-                return roundWeed(buffer, DiyFp.minus(too_high, w).f(),
+                return roundWeed(buffer, NumberDiyFp.minus(too_high, w).f(),
                         unsafe_interval.f(), rest,
                         (long) divider << -one.e(), unit);
             }
@@ -418,7 +418,7 @@ public class FastDtoa {
             kappa--;
             if (fractionals < unsafe_interval.f()) {
                 buffer.point = buffer.end - mk + kappa;
-                return roundWeed(buffer, DiyFp.minus(too_high, w).f() * unit,
+                return roundWeed(buffer, NumberDiyFp.minus(too_high, w).f() * unit,
                         unsafe_interval.f(), fractionals, one.f(), unit);
             }
         }
@@ -436,23 +436,23 @@ public class FastDtoa {
     // The last digit will be closest to the actual v. That is, even if several
     // digits might correctly yield 'v' when read again, the closest will be
     // computed.
-    static boolean grisu3(double v, FastDtoaBuilder buffer) {
+    static boolean grisu3(double v, NumberFastDtoaBuilder buffer) {
         long bits = Double.doubleToLongBits(v);
-        DiyFp w = DoubleHelper.asNormalizedDiyFp(bits);
+        NumberDiyFp w = NumberDoubleHelper.asNormalizedDiyFp(bits);
         // boundary_minus and boundary_plus are the boundaries between v and its
         // closest floating-point neighbors. Any number strictly between
         // boundary_minus and boundary_plus will round to v when convert to a double.
         // Grisu3 will never output representations that lie exactly on a boundary.
-        DiyFp boundary_minus = new DiyFp(), boundary_plus = new DiyFp();
-        DoubleHelper.normalizedBoundaries(bits, boundary_minus, boundary_plus);
+        NumberDiyFp boundary_minus = new NumberDiyFp(), boundary_plus = new NumberDiyFp();
+        NumberDoubleHelper.normalizedBoundaries(bits, boundary_minus, boundary_plus);
         assert (boundary_plus.e() == w.e());
-        DiyFp ten_mk = new DiyFp();  // Cached power of ten: 10^-k
-        int mk = CachedPowers.getCachedPower(w.e() + DiyFp.kSignificandSize,
+        NumberDiyFp ten_mk = new NumberDiyFp();  // Cached power of ten: 10^-k
+        int mk = NumberCachedPowers.getCachedPower(w.e() + NumberDiyFp.kSignificandSize,
                 minimal_target_exponent, maximal_target_exponent, ten_mk);
         assert (minimal_target_exponent <= w.e() + ten_mk.e() +
-                DiyFp.kSignificandSize &&
+                NumberDiyFp.kSignificandSize &&
                 maximal_target_exponent >= w.e() + ten_mk.e() +
-                        DiyFp.kSignificandSize);
+                        NumberDiyFp.kSignificandSize);
         // Note that ten_mk is only an approximation of 10^-k. A DiyFp only contains a
         // 64 bit significand and ten_mk is thus only precise up to 64 bits.
 
@@ -462,16 +462,16 @@ public class FastDtoa {
         // In fact: scaled_w - w*10^k < 1ulp (unit in the last place) of scaled_w.
         // In other words: let f = scaled_w.f() and e = scaled_w.e(), then
         //           (f-1) * 2^e < w*10^k < (f+1) * 2^e
-        DiyFp scaled_w = DiyFp.times(w, ten_mk);
+        NumberDiyFp scaled_w = NumberDiyFp.times(w, ten_mk);
         assert (scaled_w.e() ==
-                boundary_plus.e() + ten_mk.e() + DiyFp.kSignificandSize);
+                boundary_plus.e() + ten_mk.e() + NumberDiyFp.kSignificandSize);
         // In theory it would be possible to avoid some recomputations by computing
         // the difference between w and boundary_minus/plus (a power of 2) and to
         // compute scaled_boundary_minus/plus by subtracting/adding from
         // scaled_w. However the code becomes much less readable and the speed
         // enhancements are not terriffic.
-        DiyFp scaled_boundary_minus = DiyFp.times(boundary_minus, ten_mk);
-        DiyFp scaled_boundary_plus = DiyFp.times(boundary_plus, ten_mk);
+        NumberDiyFp scaled_boundary_minus = NumberDiyFp.times(boundary_minus, ten_mk);
+        NumberDiyFp scaled_boundary_plus = NumberDiyFp.times(boundary_plus, ten_mk);
 
         // DigitGen will generate the digits of scaled_w. Therefore we have
         // v == (double) (scaled_w * 10^-mk).
@@ -484,7 +484,7 @@ public class FastDtoa {
     }
 
 
-    public static boolean dtoa(double v, FastDtoaBuilder buffer) {
+    public static boolean dtoa(double v, NumberFastDtoaBuilder buffer) {
         assert (v > 0);
         assert (!Double.isNaN(v));
         assert (!Double.isInfinite(v));
@@ -493,11 +493,11 @@ public class FastDtoa {
     }
 
     public static String numberToString(double v) {
-        FastDtoaBuilder buffer = new FastDtoaBuilder();
+        NumberFastDtoaBuilder buffer = new NumberFastDtoaBuilder();
         return numberToString(v, buffer) ? buffer.format() : null;
     }
 
-    public static boolean numberToString(double v, FastDtoaBuilder buffer) {
+    public static boolean numberToString(double v, NumberFastDtoaBuilder buffer) {
         buffer.reset();
         if (v < 0) {
             buffer.append('-');

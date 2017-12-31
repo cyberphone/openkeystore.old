@@ -29,11 +29,6 @@ import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
-import org.webpki.json.encryption.DataEncryptionAlgorithms;
-import org.webpki.json.encryption.DecryptionKeyHolder;
-import org.webpki.json.encryption.EncryptionCore;
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //

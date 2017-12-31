@@ -28,23 +28,23 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
-package org.webpki.json.v8dtoa;
+package org.webpki.json;
 
 // Helper functions for doubles.
-public class DoubleHelper {
+public class NumberDoubleHelper {
 
     static final long kSignMask = 0x8000000000000000L;
     static final long kExponentMask = 0x7FF0000000000000L;
     static final long kSignificandMask = 0x000FFFFFFFFFFFFFL;
     static final long kHiddenBit = 0x0010000000000000L;
 
-    static DiyFp asDiyFp(long d64) {
+    static NumberDiyFp asDiyFp(long d64) {
         assert (!isSpecial(d64));
-        return new DiyFp(significand(d64), exponent(d64));
+        return new NumberDiyFp(significand(d64), exponent(d64));
     }
 
     // this->Significand() must not be 0.
-    static DiyFp asNormalizedDiyFp(long d64) {
+    static NumberDiyFp asNormalizedDiyFp(long d64) {
         long f = significand(d64);
         int e = exponent(d64);
 
@@ -56,9 +56,9 @@ public class DoubleHelper {
             e--;
         }
         // Do the final shifts in one go. Don't forget the hidden bit (the '-1').
-        f <<= DiyFp.kSignificandSize - kSignificandSize - 1;
-        e -= DiyFp.kSignificandSize - kSignificandSize - 1;
-        return new DiyFp(f, e);
+        f <<= NumberDiyFp.kSignificandSize - kSignificandSize - 1;
+        e -= NumberDiyFp.kSignificandSize - kSignificandSize - 1;
+        return new NumberDiyFp(f, e);
     }
 
     static int exponent(long d64) {
@@ -108,8 +108,8 @@ public class DoubleHelper {
     // Returns the two boundaries of first argument.
     // The bigger boundary (m_plus) is normalized. The lower boundary has the same
     // exponent as m_plus.
-    static void normalizedBoundaries(long d64, DiyFp m_minus, DiyFp m_plus) {
-        DiyFp v = asDiyFp(d64);
+    static void normalizedBoundaries(long d64, NumberDiyFp m_minus, NumberDiyFp m_plus) {
+        NumberDiyFp v = asDiyFp(d64);
         boolean significand_is_zero = (v.f() == kHiddenBit);
         m_plus.setF((v.f() << 1) + 1);
         m_plus.setE(v.e() - 1);

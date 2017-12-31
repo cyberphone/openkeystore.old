@@ -14,14 +14,14 @@
  *  limitations under the License.
  *
  */
-package org.webpki.json.encryption;
+package org.webpki.json;
 
 import java.security.interfaces.ECPublicKey;
 
 /**
  * Return object for ECDH and RSA encryptions.
  */
-public class AsymmetricEncryptionResult {
+class AsymmetricEncryptionResult {
     private byte[] dataEncryptionKey;
     private byte[] encryptedKeyData;
     private ECPublicKey ephemeralKey;

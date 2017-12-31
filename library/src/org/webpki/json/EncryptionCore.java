@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.json.encryption;
+package org.webpki.json;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

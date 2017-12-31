@@ -40,14 +40,6 @@ import java.util.regex.Pattern;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 
-import org.webpki.json.encryption.AsymmetricEncryptionResult;
-import org.webpki.json.encryption.DataEncryptionAlgorithms;
-import org.webpki.json.encryption.EncryptionCore;
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-import org.webpki.json.encryption.SymmetricEncryptionResult;
-
-import org.webpki.json.v8dtoa.FastDtoa;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -179,12 +171,12 @@ public class JSONObjectWriter implements Serializable {
         // 3. Call the DtoA algorithm crunchers
         // V8 FastDtoa can't convert all numbers, so try it first but
         // fall back to old DToA in case it fails
-        String result = FastDtoa.numberToString(value);
+        String result = NumberFastDtoa.numberToString(value);
         if (result != null) {
             return result;
         }
         StringBuilder buffer = new StringBuilder();
-        DToA.JS_dtostr(buffer, DToA.DTOSTR_STANDARD, 0, value);
+        NumberDToA.JS_dtostr(buffer, NumberDToA.DTOSTR_STANDARD, 0, value);
         return buffer.toString();
     }
 

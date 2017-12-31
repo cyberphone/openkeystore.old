@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.json.encryption;
+package org.webpki.json;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;

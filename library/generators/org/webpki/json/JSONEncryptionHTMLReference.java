@@ -17,28 +17,18 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-
 import java.security.interfaces.RSAPublicKey;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
-
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-import org.webpki.json.encryption.DataEncryptionAlgorithms;
-import org.webpki.json.encryption.DecryptionKeyHolder;
-
 import org.webpki.util.ArrayUtil;
 
 /**

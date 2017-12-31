@@ -28,9 +28,9 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
-package org.webpki.json.v8dtoa;
+package org.webpki.json;
 
-public class CachedPowers {
+public class NumberCachedPowers {
 
 
     static final double kD_1_LOG2_10 = 0.30102999566398114;  //  1 / lg(10)
@@ -48,8 +48,8 @@ public class CachedPowers {
     }
 
 
-    static int getCachedPower(int e, int alpha, int gamma, DiyFp c_mk) {
-        int kQ = DiyFp.kSignificandSize;
+    static int getCachedPower(int e, int alpha, int gamma, NumberDiyFp c_mk) {
+        int kQ = NumberDiyFp.kSignificandSize;
         double k = Math.ceil((alpha - e + kQ - 1) * kD_1_LOG2_10);
         int index = (GRISU_CACHE_OFFSET + (int) k - 1) / CACHED_POWERS_SPACING + 1;
         CachedPower cachedPower = CACHED_POWERS[index];

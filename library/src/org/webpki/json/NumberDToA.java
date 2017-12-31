@@ -23,7 +23,7 @@ package org.webpki.json;
 
 import java.math.BigInteger;
 
-class DToA {
+class NumberDToA {
 
     private static char BASEDIGIT(int digit) {
         return (char) ((digit >= 10) ? 'a' - 10 + digit : '0' + digit);

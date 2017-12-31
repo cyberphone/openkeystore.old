@@ -34,9 +34,6 @@ import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
-import org.webpki.json.encryption.DataEncryptionAlgorithms;
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
-
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 

@@ -28,10 +28,9 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-import org.webpki.json.JSONSigner;
 
-import org.webpki.json.encryption.DataEncryptionAlgorithms;
-import org.webpki.json.encryption.KeyEncryptionAlgorithms;
+import org.webpki.json.DataEncryptionAlgorithms;
+import org.webpki.json.KeyEncryptionAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 
@@ -90,23 +89,6 @@ public class Encryption {
 
     static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
         coreSymmEnc(keyBits, ".encrypted.json", dataEncryptionAlgorithm, true);
-    }
-
-    static String getDataToSign() throws Exception {
-        return new String(ArrayUtil.readFile(baseEncryption + "datatobesigned.json"), 
-                          "UTF-8").replace("\r", "");
-    }
-    
-    static JSONObjectWriter parseDataToSign() throws Exception {
-        return new JSONObjectWriter(JSONParser.parse(getDataToSign()));
-    }
-
-    static byte[] createSignature(JSONSigner signer) throws Exception {
-        String signed = parseDataToSign().setSignature(signer).toString();
-        int i = signed.indexOf(",\n  \"signature\":");
-        String unsigned = getDataToSign();
-        int j = unsigned.lastIndexOf("\n}");
-        return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
     }
     
     static KeyPair readJwk(String keyType) throws Exception {

@@ -28,14 +28,14 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
-package org.webpki.json.v8dtoa;
+package org.webpki.json;
 
 // This "Do It Yourself Floating Point" class implements a floating-point number
 // with a uint64 significand and an int exponent. Normalized DiyFp numbers will
 // have the most significant bit of the significand set.
 // Multiplication and Subtraction do not normalize their results.
 // DiyFp are not designed to contain special doubles (NaN and Infinity).
-class DiyFp {
+class NumberDiyFp {
 
     private long f;
     private int e;
@@ -44,12 +44,12 @@ class DiyFp {
     static final long kUint64MSB = 0x8000000000000000L;
 
 
-    DiyFp() {
+    NumberDiyFp() {
         this.f = 0;
         this.e = 0;
     }
 
-    DiyFp(long f, int e) {
+    NumberDiyFp(long f, int e) {
         this.f = f;
         this.e = e;
     }
@@ -63,7 +63,7 @@ class DiyFp {
     // The exponents of both numbers must be the same and the significand of this
     // must be bigger than the significand of other.
     // The result will not be normalized.
-    void subtract(DiyFp other) {
+    void subtract(NumberDiyFp other) {
         assert (e == other.e);
         assert uint64_gte(f, other.f);
         f -= other.f;
@@ -72,15 +72,15 @@ class DiyFp {
     // Returns a - b.
     // The exponents of both numbers must be the same and this must be bigger
     // than other. The result will not be normalized.
-    static DiyFp minus(DiyFp a, DiyFp b) {
-        DiyFp result = new DiyFp(a.f, a.e);
+    static NumberDiyFp minus(NumberDiyFp a, NumberDiyFp b) {
+        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
         result.subtract(b);
         return result;
     }
 
 
     // this = this * other.
-    void multiply(DiyFp other) {
+    void multiply(NumberDiyFp other) {
         // Simply "emulates" a 128 bit multiplication.
         // However: the resulting number only contains 64 bits. The least
         // significant 64 bits are only used for rounding the most significant 64
@@ -104,8 +104,8 @@ class DiyFp {
     }
 
     // returns a * b;
-    static DiyFp times(DiyFp a, DiyFp b) {
-        DiyFp result = new DiyFp(a.f, a.e);
+    static NumberDiyFp times(NumberDiyFp a, NumberDiyFp b) {
+        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
         result.multiply(b);
         return result;
     }
@@ -130,8 +130,8 @@ class DiyFp {
         this.e = e;
     }
 
-    static DiyFp normalize(DiyFp a) {
-        DiyFp result = new DiyFp(a.f, a.e);
+    static NumberDiyFp normalize(NumberDiyFp a) {
+        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
         result.normalize();
         return result;
     }

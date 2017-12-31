@@ -4,14 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.webpki.json.v8dtoa;
+package org.webpki.json;
 
 import java.util.Arrays;
 
-public class FastDtoaBuilder {
+public class NumberFastDtoaBuilder {
 
     // allocate buffer for generated digits + extra notation + padding zeroes
-    final char[] chars = new char[FastDtoa.kFastDtoaMaximalLength + 8];
+    final char[] chars = new char[NumberFastDtoa.kFastDtoaMaximalLength + 8];
     int end = 0;
     int point;
     boolean formatted = false;
