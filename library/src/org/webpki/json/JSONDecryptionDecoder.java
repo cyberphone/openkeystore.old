@@ -43,7 +43,6 @@ import org.webpki.crypto.AlgorithmPreferences;
  */
 public class JSONDecryptionDecoder {
 
-    public static final String KEY_ENCRYPTION_JSON   = "keyEncryption";
     public static final String ENCRYPTED_KEY_JSON    = "encrypted_key";
     public static final String EPK_JSON              = "epk";
     public static final String ENC_JSON              = "enc";
@@ -89,7 +88,7 @@ public class JSONDecryptionDecoder {
 
     private KeyEncryptionAlgorithms keyEncryptionAlgorithm;
 
-    private byte[] encryptedKeyData;  // For RSA only
+    private byte[] encryptedKeyData;  // For RSA and ECDH+ only
 
     private byte[] encryptedData;
     
@@ -150,21 +149,19 @@ public class JSONDecryptionDecoder {
                 .getAlgorithmFromId(encryptionObject.getString(ENC_JSON));
         iv = encryptionObject.getBinary(IV_JSON);
         tag = encryptionObject.getBinary(TAG_JSON);
-        if (encryptionObject.hasProperty(KEY_ENCRYPTION_JSON)) {
-            JSONObjectReader encryptedKey = encryptionObject.getObject(KEY_ENCRYPTION_JSON);
+        keyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
+        if (encryptionObject.hasProperty(JSONSignatureDecoder.ALG_JSON)) {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptedKey.getString(JSONSignatureDecoder.ALG_JSON));
-            if (encryptedKey.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
-                publicKey = encryptedKey.getPublicKey(AlgorithmPreferences.JOSE);
-            } else {
-                keyId = encryptedKey.getStringConditional(JSONSignatureDecoder.KID_JSON);
+                    .getAlgorithmFromId(encryptionObject.getString(JSONSignatureDecoder.ALG_JSON));
+            if (encryptionObject.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
+                publicKey = encryptionObject.getPublicKey(AlgorithmPreferences.JOSE);
             }
             if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKeyData = encryptedKey.getBinary(ENCRYPTED_KEY_JSON);
+                encryptedKeyData = encryptionObject.getBinary(ENCRYPTED_KEY_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
-                        (ECPublicKey) encryptedKey.getObject(EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
+                        (ECPublicKey) encryptionObject.getObject(EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
         } else {
             sharedSecretMode = true;

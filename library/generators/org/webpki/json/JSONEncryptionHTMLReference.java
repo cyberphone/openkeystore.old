@@ -386,13 +386,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             .newRow()
 
         .newColumn()
-        .addProperty(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
-        .addLink(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON)
+        .addProperty("@@@")
+        .addLink("@@@")
     .newColumn()
         .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
     .newColumn()
     .newColumn()
-        .addString("If the <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON +
+        .addString("If the <code>" + "@@@" +
                    "</code> property is defined, the (symmetric) data encryption key is supposed to be provided " +
                    "in-line, but encrypted.")
         .newRow()
@@ -422,10 +422,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
         .newColumn()
           .addString("Encrypted data.").setNotes("Note that if neither <code>" + JSONSignatureDecoder.KID_JSON +
-                      "</code> nor <code>" + JSONDecryptionDecoder.KEY_ENCRYPTION_JSON + 
+                      "</code> nor <code>" + "@@@" + 
                       "</code> are defined, the (symmetric) data encryption key is assumed to known by the recipient.");
           
-        preAmble(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, true)
+        preAmble("@@@", true)
             .addString("Key encryption algorithm. Currently the following JWE " +
                                 json.createReference (JSONBaseHTML.REF_JWE) +
                                 " algorithms are recognized:<ul>")

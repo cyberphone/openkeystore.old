@@ -30,7 +30,7 @@ public class JSONSymKeyEncrypter extends JSONEncrypter {
      * @param dataEncryptionKey Symmetric key
      * @throws IOException &nbsp;
      */
-    public JSONSymKeyEncrypter(byte[] dataEncryptionKey, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws IOException {
+    public JSONSymKeyEncrypter(byte[] dataEncryptionKey) throws IOException {
         this.dataEncryptionKey = dataEncryptionKey;
     }
 
