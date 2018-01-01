@@ -51,6 +51,63 @@ import org.webpki.util.ArrayUtil;
 
 public final class EncryptionCore {
 
+    /**
+     * Return object for symmetric key encryptions.
+     */
+    static class SymmetricEncryptionResult {
+        private byte[] iv;
+        byte[] tag;
+        byte[] cipherText;
+
+        SymmetricEncryptionResult(byte[] iv, byte[] tag, byte[] cipherText) {
+            this.iv = iv;
+            this.tag = tag;
+            this.cipherText = cipherText;
+        }
+
+        byte[] getTag() {
+            return tag;
+        }
+
+        byte[] getIv() {
+            return iv;
+        }
+
+        byte[] getCipherText() {
+            return cipherText;
+        }
+    }
+
+    /**
+     * Return object for ECDH and RSA encryptions.
+     */
+    static class AsymmetricEncryptionResult {
+
+        private byte[] dataEncryptionKey;
+        private byte[] encryptedKeyData;
+        private ECPublicKey ephemeralKey;
+
+        AsymmetricEncryptionResult(byte[] dataEncryptionKey,
+                                   byte[] encryptedKeyData,
+                                   ECPublicKey ephemeralKey) {
+            this.dataEncryptionKey = dataEncryptionKey;
+            this.encryptedKeyData = encryptedKeyData;
+            this.ephemeralKey = ephemeralKey;
+        }
+
+        byte[] getDataEncryptionKey() {
+            return dataEncryptionKey;
+        }
+
+        byte[] getEncryptedKeyData() {
+            return encryptedKeyData;
+        }
+
+        ECPublicKey getEphemeralKey() {
+            return ephemeralKey;
+        }
+    }
+    
     private EncryptionCore() {} // Static and final class
     
     // AES CBC static
@@ -402,6 +459,43 @@ public final class EncryptionCore {
             cipher.init(Cipher.WRAP_MODE, new SecretKeySpec(derivedKey, "AES"));
             encryptedKeyData = cipher.wrap(new SecretKeySpec(contentEncryptionKey, "AES"));
             derivedKey = contentEncryptionKey;
+        }
+        return new AsymmetricEncryptionResult(derivedKey, 
+                                              encryptedKeyData,
+                                              (ECPublicKey) keyPair.getPublic());
+    }
+
+    static AsymmetricEncryptionResult rsaEncryptKey(byte[] dataEncryptionKey,
+                                                    KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                                    DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                    PublicKey publicKey) throws GeneralSecurityException {
+        return new AsymmetricEncryptionResult(dataEncryptionKey,
+                                              rsaCore(Cipher.ENCRYPT_MODE,
+                                                      publicKey,
+                                                      dataEncryptionKey,
+                                                      keyEncryptionAlgorithm),
+                                              null);
+    }
+
+    static AsymmetricEncryptionResult senderKeyAgreement(byte[] dataEncryptionKey,
+                                                         KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                         PublicKey staticKey) throws IOException, GeneralSecurityException {
+        KeyPairGenerator generator = ecProviderName == null ?
+                KeyPairGenerator.getInstance("EC") : KeyPairGenerator.getInstance("EC", ecProviderName);
+        ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJceName());
+        generator.initialize(eccgen, new SecureRandom());
+        KeyPair keyPair = generator.generateKeyPair();
+        byte[] derivedKey = coreKeyAgreement(keyEncryptionAlgorithm,
+                                             dataEncryptionAlgorithm,
+                                             (ECPublicKey) staticKey,
+                                             keyPair.getPrivate());
+        byte[] encryptedKeyData = null;
+        if (keyEncryptionAlgorithm.keyWrap) {
+            Cipher cipher = getAesCipher(AES_KEY_WRAP_JCENAME);
+            cipher.init(Cipher.WRAP_MODE, new SecretKeySpec(derivedKey, "AES"));
+            encryptedKeyData = cipher.wrap(new SecretKeySpec(dataEncryptionKey, "AES"));
+            derivedKey = dataEncryptionKey;
         }
         return new AsymmetricEncryptionResult(derivedKey, 
                                               encryptedKeyData,

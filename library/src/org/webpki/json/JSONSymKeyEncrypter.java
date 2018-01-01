@@ -35,6 +35,6 @@ public class JSONSymKeyEncrypter extends JSONEncrypter {
     }
 
     @Override
-    void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException {
+    void writeKeyData(JSONObjectWriter wr) throws IOException {
     }
 }

@@ -766,7 +766,7 @@ import org.webpki.json.JSONSignatureDecoder;
         } else {
             setObject(JSONDecryptionDecoder.KEY_ENCRYPTION_JSON, keyEncryption);
         }
-        SymmetricEncryptionResult symmetricEncryptionResult =
+        EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =
             EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
                                              dataEncryptionKey,
                                              unencryptedData,
@@ -803,7 +803,7 @@ import org.webpki.json.JSONSignatureDecoder;
         } else if (optionalKeyId.length() > 0){
             keyEncryption.setString(JSONSignatureDecoder.KID_JSON, optionalKeyId);
         }
-        AsymmetricEncryptionResult asymmetricEncryptionResult =
+        EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
             keyEncryptionAlgorithm.isRsa() ?
                 EncryptionCore.rsaEncryptKey(keyEncryptionAlgorithm,
                                              dataEncryptionAlgorithm,
@@ -813,7 +813,7 @@ import org.webpki.json.JSONSignatureDecoder;
                                                   dataEncryptionAlgorithm,
                                                   keyEncryptionKey);
         if (!keyEncryptionAlgorithm.isRsa()) {
-            keyEncryption.setObject(JSONDecryptionDecoder.EPHEMERAL_KEY_JSON,
+            keyEncryption.setObject(JSONDecryptionDecoder.EPK_JSON,
                                     createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
                                                        AlgorithmPreferences.JOSE));
         }
@@ -850,8 +850,10 @@ import org.webpki.json.JSONSignatureDecoder;
                                                   dataEncryptionKey, null);
     }
     
-    public static JSONObjectWriter createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                          JSONEncrypter encrypter) throws IOException {
+    public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
+                                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                          JSONEncrypter encrypter)
+    throws IOException, GeneralSecurityException {
         JSONEncrypter.EncryptionHeader encryptionHeader = 
                 new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypter);
         JSONObjectWriter recipient = new JSONObjectWriter();
@@ -860,11 +862,13 @@ import org.webpki.json.JSONSignatureDecoder;
         for (String property : recipient.root.properties.keySet()) {
             encryptionHeader.encryptionWriter.setProperty(property, recipient.root.properties.get(property));
         }
-        return encryptionHeader.finalizeEncryption();
+        return encryptionHeader.finalizeEncryption(unencryptedData);
     }
 
-    public static JSONObjectWriter createEncryptionObject(DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                          Vector<JSONEncrypter> encrypters) throws IOException {
+    public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
+                                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                                          Vector<JSONEncrypter> encrypters)
+    throws IOException, GeneralSecurityException {
         if (encrypters.isEmpty()) {
             throw new IOException("Empty encrypter list");
         }
@@ -872,6 +876,9 @@ import org.webpki.json.JSONSignatureDecoder;
                 new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypters.firstElement());
         Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
         for (JSONEncrypter encrypter : encrypters) {
+            if (encrypter.keyEncryptionAlgorithm == null || !encrypter.keyEncryptionAlgorithm.keyWrap) {
+                throw new IOException("Multiple encryptions only permitted for key wrapping schemes");
+            }
             JSONObjectWriter currentRecipient = new JSONObjectWriter();
             encryptionHeader.createRecipient(encrypter, currentRecipient);
             recipents.add(currentRecipient);
@@ -882,7 +889,7 @@ import org.webpki.json.JSONSignatureDecoder;
             encryptionHeader.cleanRecipient(recipient);
             recipientList.setObject(recipient);
         }
-        return encryptionHeader.finalizeEncryption();
+        return encryptionHeader.finalizeEncryption(unencryptedData);
     }    
 
 

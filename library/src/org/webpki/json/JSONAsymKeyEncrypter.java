@@ -57,7 +57,7 @@ public class JSONAsymKeyEncrypter extends JSONEncrypter {
     }
 
     @Override
-    void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException {
+    void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setPublicKey(publicKey, algorithmPreferences);
     }
 }

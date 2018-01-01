@@ -19,6 +19,8 @@ package org.webpki.json;
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.security.GeneralSecurityException;
+
 import java.security.PublicKey;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -63,10 +65,13 @@ public abstract class JSONEncrypter implements Serializable {
 
         JSONObjectReader extensions;
         
+        byte[] dataEncryptionKey;
+        
         String keyId;
 
         EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+            dataEncryptionKey = encrypter.dataEncryptionKey;
             keyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
             if ((extensions = encrypter.extensions) != null) {
@@ -81,10 +86,13 @@ public abstract class JSONEncrypter implements Serializable {
             }
             if (keyEncryptionAlgorithm != null) {
                 encryptionWriter.setString(JSONSignatureDecoder.ALG_JSON, keyEncryptionAlgorithm.joseName);
+                if (keyEncryptionAlgorithm.keyWrap) {
+                    dataEncryptionKey = EncryptionCore.generateRandom(dataEncryptionAlgorithm.keyLength);
+                }
             }
         }
 
-        void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) throws IOException {
+        void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) throws IOException, GeneralSecurityException {
             if (keyId != null && (encrypter.keyId == null || !keyId.equals(encrypter.keyId))) {
                 encryptionWriter.root.properties.remove(JSONSignatureDecoder.KID_JSON);
                 keyId = null;
@@ -100,7 +108,35 @@ public abstract class JSONEncrypter implements Serializable {
             }
             if (!(extensions == null ? "" : extensions.toString()).equals(
                     encrypter.extensions == null ? "" : encrypter.extensions.toString())) {
-                throw new IOException("If extensiones are used, they must be identical for each encryption specifier");
+                throw new IOException("Extensions must be identical for each encryption specifier");
+            }
+            if (encrypter.outputPublicKeyInfo) {
+                encrypter.writeKeyData(currentRecipient);
+            }
+            if (keyEncryptionAlgorithm != null) {
+                EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
+                        keyEncryptionAlgorithm.isRsa() ?
+                            EncryptionCore.rsaEncryptKey(dataEncryptionKey,
+                                                         keyEncryptionAlgorithm,
+                                                         dataEncryptionAlgorithm,
+                                                         encrypter.publicKey)
+                                                       :
+                            EncryptionCore.senderKeyAgreement(dataEncryptionKey,
+                                                              keyEncryptionAlgorithm,
+                                                              dataEncryptionAlgorithm,
+                                                              encrypter.publicKey);
+                dataEncryptionKey = asymmetricEncryptionResult.getDataEncryptionKey();
+                if (!keyEncryptionAlgorithm.isRsa()) {
+                    currentRecipient
+                        .setObject(JSONDecryptionDecoder.EPK_JSON,
+                                   JSONObjectWriter
+                                       .createCorePublicKey(asymmetricEncryptionResult.getEphemeralKey(),
+                                                            AlgorithmPreferences.JOSE));
+                }
+                if (keyEncryptionAlgorithm.isKeyWrap()) {
+                    currentRecipient.setBinary(JSONDecryptionDecoder.ENCRYPTED_KEY_JSON,
+                                               asymmetricEncryptionResult.getEncryptedKeyData());
+                }
             }
         }
 
@@ -113,15 +149,23 @@ public abstract class JSONEncrypter implements Serializable {
             }
         }
 
-        JSONObjectWriter finalizeEncryption() throws IOException {
+        JSONObjectWriter finalizeEncryption(byte[] unencryptedData) throws IOException, GeneralSecurityException {
             if (extensions != null) {
                 encryptionWriter.setStringArray(JSONSignatureDecoder.CRIT_JSON, extensions.getProperties());
             }
+            EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =
+                EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
+                                                 dataEncryptionKey,
+                                                 unencryptedData,
+                                                 encryptionWriter.serializeToBytes(JSONOutputFormats.NORMALIZED));
+            encryptionWriter.setBinary(JSONDecryptionDecoder.IV_JSON, symmetricEncryptionResult.getIv());
+            encryptionWriter.setBinary(JSONDecryptionDecoder.TAG_JSON, symmetricEncryptionResult.getTag());
+            encryptionWriter.setBinary(JSONDecryptionDecoder.CIPHER_TEXT_JSON, symmetricEncryptionResult.getCipherText());
             return encryptionWriter;
         }
     }
 
-    abstract void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException;
+    abstract void writeKeyData(JSONObjectWriter wr) throws IOException;
 
     /**
      * Set &quot;crit&quot; for this encryption object.

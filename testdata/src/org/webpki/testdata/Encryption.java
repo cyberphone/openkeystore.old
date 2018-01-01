@@ -17,21 +17,17 @@
 package org.webpki.testdata;
 
 import java.io.File;
-
 import java.security.KeyPair;
-
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.crypto.CustomCryptoProvider;
-
+import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-
 import org.webpki.json.DataEncryptionAlgorithms;
 import org.webpki.json.KeyEncryptionAlgorithms;
-
 import org.webpki.util.ArrayUtil;
 
 /*
@@ -61,8 +57,8 @@ public class Encryption {
 
         asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
         asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
-        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
-        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
+        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
+        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
       
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
         symmEnc(512, DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
@@ -100,11 +96,8 @@ public class Encryption {
         return jwkPlus.getKeyPair();
     }
 
-    static void coreAsymEnc(String keyType, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, String wantKeyId) throws Exception {
+    static void coreAsymEnc(String keyType, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         KeyPair keyPair = readJwk(keyType);
-        if (wantKeyId != null && wantKeyId.equals("yes")) {
-            wantKeyId = keyId;
-        }
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
             switch (dataEncryptionAlgorithm.getKeyLength()) {
@@ -123,25 +116,31 @@ public class Encryption {
             dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
+        JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
+                                                                  keyEncryptionAlgorithm,
+                                                                  null);
+        if (wantKeyId) {
+            encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
+        }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                       dataEncryptionAlgorithm, 
-                                                       keyPair.getPublic(),
-                                                       wantKeyId,
-                                                       keyEncryptionAlgorithm).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+                                                       dataEncryptionAlgorithm,
+                                                       encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
+/*
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
                  .getEncryptionObject().getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
             throw new Exception("Dec err");
         }
+*/
      }
 
     static void asymEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        coreAsymEnc(keyType, ".encrypted.json", dataEncryptionAlgorithm, null);
+        coreAsymEnc(keyType, ".encrypted.json", dataEncryptionAlgorithm, false);
     }
 
     static void asymEncNoPublicKeyInfo(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
-        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId ? "yes" : "");
+        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId);
     }
 }

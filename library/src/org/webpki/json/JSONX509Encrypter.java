@@ -60,7 +60,7 @@ public class JSONX509Encrypter extends JSONEncrypter {
     }
 
     @Override
-    void writeEncryptedKeyData(JSONObjectWriter wr) throws IOException {
+    void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setCertificatePath(certificatePath);
     }
 }

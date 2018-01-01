@@ -3693,7 +3693,7 @@ public class JSONTest {
                                                        t);
         assertTrue("pout 1", ArrayUtil.compare(p, pout));
 
-        SymmetricEncryptionResult symmetricEncryptionResult = EncryptionCore.contentEncryption(dea,
+        EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = EncryptionCore.contentEncryption(dea,
                                                                                                k,
                                                                                                p,
                                                                                                a);
@@ -3782,7 +3782,7 @@ public class JSONTest {
             byte[] plainText = jwePlainText.getBytes("UTF-8");
             for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
                 byte[] key = genRandom(dea.getKeyLength());
-                SymmetricEncryptionResult symmetricEncryptionResult = 
+                EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
                         EncryptionCore.contentEncryption(dea,
                                                          key, 
                                                          plainText, 
@@ -3940,7 +3940,7 @@ public class JSONTest {
                                                             alice.getPrivate(),
                                                             null)).equals(ECDH_RESULT_WITH_KDF));
 
-        AsymmetricEncryptionResult asymmetricEncryptionResult =
+        EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
                 EncryptionCore.senderKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                         alice.getPublic());

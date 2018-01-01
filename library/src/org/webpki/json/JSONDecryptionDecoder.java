@@ -45,8 +45,9 @@ public class JSONDecryptionDecoder {
 
     public static final String KEY_ENCRYPTION_JSON   = "keyEncryption";
     public static final String ENCRYPTED_KEY_JSON    = "encrypted_key";
-    public static final String EPHEMERAL_KEY_JSON    = "epk";
+    public static final String EPK_JSON              = "epk";
     public static final String ENC_JSON              = "enc";
+    public static final String AAD_JSON              = "aad";
     public static final String IV_JSON               = "iv";
     public static final String TAG_JSON              = "tag";
     public static final String CIPHER_TEXT_JSON      = "ciphertext";
@@ -59,8 +60,9 @@ public class JSONDecryptionDecoder {
         reservedWords.add(ENC_JSON);
         reservedWords.add(IV_JSON);
         reservedWords.add(TAG_JSON);
+        reservedWords.add(AAD_JSON);
         reservedWords.add(ENCRYPTED_KEY_JSON);
-        reservedWords.add(EPHEMERAL_KEY_JSON);
+        reservedWords.add(EPK_JSON);
         reservedWords.add(CIPHER_TEXT_JSON);
         reservedWords.add(RECIPIENTS_JSON);
         reservedWords.add(JSONSignatureDecoder.CRIT_JSON);
@@ -162,7 +164,7 @@ public class JSONDecryptionDecoder {
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
-                        (ECPublicKey) encryptedKey.getObject(EPHEMERAL_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
+                        (ECPublicKey) encryptedKey.getObject(EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
         } else {
             sharedSecretMode = true;
