@@ -84,13 +84,6 @@ public abstract class JSONEncrypter implements Serializable {
             }
         }
 
-        JSONObjectWriter finalizeEncryption() throws IOException {
-            if (extensions != null) {
-                encryptionWriter.setStringArray(JSONSignatureDecoder.CRIT_JSON, extensions.getProperties());
-            }
-            return encryptionWriter;
-        }
-
         void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient) throws IOException {
             if (keyId != null && (encrypter.keyId == null || !keyId.equals(encrypter.keyId))) {
                 encryptionWriter.root.properties.remove(JSONSignatureDecoder.KID_JSON);
@@ -105,6 +98,10 @@ public abstract class JSONEncrypter implements Serializable {
                 }
                 keyEncryptionAlgorithm = null;
             }
+            if (!(extensions == null ? "" : extensions.toString()).equals(
+                    encrypter.extensions == null ? "" : encrypter.extensions.toString())) {
+                throw new IOException("If extensiones are used, they must be identical for each encryption specifier");
+            }
         }
 
         void cleanRecipient(JSONObjectWriter recipient) {
@@ -114,6 +111,13 @@ public abstract class JSONEncrypter implements Serializable {
             if (keyEncryptionAlgorithm != null) {
                 recipient.root.properties.remove(JSONSignatureDecoder.ALG_JSON);
             }
+        }
+
+        JSONObjectWriter finalizeEncryption() throws IOException {
+            if (extensions != null) {
+                encryptionWriter.setStringArray(JSONSignatureDecoder.CRIT_JSON, extensions.getProperties());
+            }
+            return encryptionWriter;
         }
     }
 
@@ -127,7 +131,7 @@ public abstract class JSONEncrypter implements Serializable {
      */
     public JSONEncrypter setExtensions(JSONObjectWriter extensions) throws IOException {
         this.extensions = new JSONObjectReader(extensions);
-        JSONSignatureDecoder.checkExtensions(this.extensions.getProperties());
+        JSONDecryptionDecoder.checkExtensions(this.extensions.getProperties());
         return this;
     }
 

@@ -30,11 +30,11 @@ public enum DataEncryptionAlgorithms {
     JOSE_A256CBC_HS512_ALG_ID ("A256CBC-HS512", 64, EncryptionCore.AES_CBC_IV_LENGTH,
                                32,                                     "HMACSHA512", false),
     JOSE_A128GCM_ALG_ID       ("A128GCM",       16, EncryptionCore.AES_GCM_IV_LENGTH,
-                               EncryptionCore.AES_GCM_TAG_LENGTH, null,         true),
+                               EncryptionCore.AES_GCM_TAG_LENGTH,      null,         true),
     JOSE_A192GCM_ALG_ID       ("A192GCM",       24, EncryptionCore.AES_GCM_IV_LENGTH,
-                               EncryptionCore.AES_GCM_TAG_LENGTH, null,         true),
+                               EncryptionCore.AES_GCM_TAG_LENGTH,      null,         true),
     JOSE_A256GCM_ALG_ID       ("A256GCM",       32, EncryptionCore.AES_GCM_IV_LENGTH,
-                               EncryptionCore.AES_GCM_TAG_LENGTH, null,         true);
+                               EncryptionCore.AES_GCM_TAG_LENGTH,      null,         true);
 
     String joseName;
     int keyLength;

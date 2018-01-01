@@ -25,10 +25,10 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
@@ -51,6 +51,27 @@ public class JSONDecryptionDecoder {
     public static final String TAG_JSON              = "tag";
     public static final String CIPHER_TEXT_JSON      = "ciphertext";
     public static final String RECIPIENTS_JSON       = "recipients";
+
+    static final LinkedHashSet<String> reservedWords = new LinkedHashSet<String>();
+    
+    static {
+        reservedWords.add(JSONSignatureDecoder.ALG_JSON);
+        reservedWords.add(ENC_JSON);
+        reservedWords.add(IV_JSON);
+        reservedWords.add(TAG_JSON);
+        reservedWords.add(ENCRYPTED_KEY_JSON);
+        reservedWords.add(EPHEMERAL_KEY_JSON);
+        reservedWords.add(CIPHER_TEXT_JSON);
+        reservedWords.add(RECIPIENTS_JSON);
+        reservedWords.add(JSONSignatureDecoder.CRIT_JSON);
+        reservedWords.add(JSONSignatureDecoder.KID_JSON);
+        reservedWords.add(JSONSignatureDecoder.JWK_JSON);
+        reservedWords.add(JSONSignatureDecoder.JKU_JSON);
+        reservedWords.add(JSONSignatureDecoder.X5C_JSON);
+        reservedWords.add(JSONSignatureDecoder.X5T_JSON);
+        reservedWords.add(JSONSignatureDecoder.X5T_S256_JSON);
+        reservedWords.add(JSONSignatureDecoder.X5U_JSON);
+    }
 
     private PublicKey publicKey;
 
@@ -192,5 +213,16 @@ public class JSONDecryptionDecoder {
             }
         }
         throw new IOException(notFound ? "No matching key found" : "No matching key+algorithm found");
+    }
+
+    static void checkExtensions(String[] properties) throws IOException {
+        if (properties.length == 0) {
+            throw new IOException("Empty \"" + JSONSignatureDecoder.CRIT_JSON + "\" array not allowed");
+        }
+        for (String property : properties) {
+            if (reservedWords.contains(property)) {
+                throw new IOException("Forbidden \"" + JSONSignatureDecoder.CRIT_JSON + "\" property: " + property);
+            }
+        }
     }
 }
