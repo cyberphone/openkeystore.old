@@ -165,7 +165,6 @@ public class JSONDecryptionDecoder {
             }
         } else {
             sharedSecretMode = true;
-            keyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
         }
         encryptedData = encryptionObject.getBinary(CIPHER_TEXT_JSON);
         encryptionObject.checkForUnread();

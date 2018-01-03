@@ -303,26 +303,6 @@ public final class EncryptionCore {
     }
 
     /**
-     * Generate a random key and encrypt it using an RSA cipher.
-     * @param keyEncryptionAlgorithm Algorithm to use
-     * @param dataEncryptionAlgorithm The designated content encryption algorithm
-     * @param publicKey The RSA key
-     * @return A composite object including the data encryption key
-     * @throws GeneralSecurityException &nbsp;
-     */
-    public static AsymmetricEncryptionResult rsaEncryptKey(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                           PublicKey publicKey) throws GeneralSecurityException {
-        byte[] dataEncryptionKey = generateRandom(dataEncryptionAlgorithm.keyLength);
-        return new AsymmetricEncryptionResult(dataEncryptionKey,
-                                              rsaCore(Cipher.ENCRYPT_MODE,
-                                                      publicKey,
-                                                      dataEncryptionKey,
-                                                      keyEncryptionAlgorithm),
-                                              null);
-    }
-
-    /**
      * Decrypt a symmetric key using an RSA cipher.
      * @param keyEncryptionAlgorithm The algorithm to use
      * @param encryptedKey Contains a symmetric key used for encrypting the data
@@ -432,39 +412,13 @@ public final class EncryptionCore {
 
     /**
      * Perform a sender side ECDH operation.
+     * @param dataEncryptionKey Also known as CEK
      * @param keyEncryptionAlgorithm The ECDH algorithm
      * @param dataEncryptionAlgorithm The designated content encryption algorithm
-     * @param staticKey The receiver's (usually static) public key
+     * @param publicKey The receiver's (usually static) public key
      * @return A composite object including the (plain text) data encryption key
      * @throws GeneralSecurityException &nbsp;
-     * @throws IOException &nbsp;
      */
-    public static AsymmetricEncryptionResult senderKeyAgreement(KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                                                DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                                PublicKey staticKey) 
-    throws GeneralSecurityException, IOException {
-        KeyPairGenerator generator = ecProviderName == null ?
-                         KeyPairGenerator.getInstance("EC") : KeyPairGenerator.getInstance("EC", ecProviderName);
-        ECGenParameterSpec eccgen = new ECGenParameterSpec(KeyAlgorithms.getKeyAlgorithm(staticKey).getJceName());
-        generator.initialize(eccgen, new SecureRandom());
-        KeyPair keyPair = generator.generateKeyPair();
-        byte[] derivedKey = coreKeyAgreement(keyEncryptionAlgorithm,
-                                             dataEncryptionAlgorithm,
-                                             (ECPublicKey) staticKey,
-                                             keyPair.getPrivate());
-        byte[] encryptedKeyData = null;
-        if (keyEncryptionAlgorithm.keyWrap) {
-            byte[] contentEncryptionKey = generateRandom(dataEncryptionAlgorithm.keyLength);
-            Cipher cipher = getAesCipher(AES_KEY_WRAP_JCENAME);
-            cipher.init(Cipher.WRAP_MODE, new SecretKeySpec(derivedKey, "AES"));
-            encryptedKeyData = cipher.wrap(new SecretKeySpec(contentEncryptionKey, "AES"));
-            derivedKey = contentEncryptionKey;
-        }
-        return new AsymmetricEncryptionResult(derivedKey, 
-                                              encryptedKeyData,
-                                              (ECPublicKey) keyPair.getPublic());
-    }
-
     static AsymmetricEncryptionResult rsaEncryptKey(byte[] dataEncryptionKey,
                                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                                     DataEncryptionAlgorithms dataEncryptionAlgorithm,
@@ -477,6 +431,16 @@ public final class EncryptionCore {
                                               null);
     }
 
+    /**
+     * Perform a sender side ECDH operation.
+     * @param dataEncryptionKey Also known as CEK
+     * @param keyEncryptionAlgorithm The ECDH algorithm
+     * @param dataEncryptionAlgorithm The designated content encryption algorithm
+     * @param staticKey The receiver's (usually static) public key
+     * @return A composite object including the (plain text) data encryption key
+     * @throws GeneralSecurityException &nbsp;
+     * @throws IOException &nbsp;
+     */
     static AsymmetricEncryptionResult senderKeyAgreement(byte[] dataEncryptionKey,
                                                          KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,

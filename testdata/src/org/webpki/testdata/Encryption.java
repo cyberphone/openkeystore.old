@@ -27,6 +27,7 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.DataEncryptionAlgorithms;
+import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
 import org.webpki.util.ArrayUtil;
 
@@ -71,11 +72,14 @@ public class Encryption {
     static void coreSymmEnc(int keyBits, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
+        JSONSymKeyEncrypter encrypter = new JSONSymKeyEncrypter(key);
+        if (wantKeyId) {
+            encrypter.setKeyId(keyName);
+        }
         byte[] encryptedData = 
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                        dataEncryptionAlgorithm, 
-                                                        wantKeyId ? keyName : null, 
-                                                        key).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+                                                        dataEncryptionAlgorithm,
+                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
                        JSONParser.parse(encryptedData).getEncryptionObject().getDecryptedData(key))) {
@@ -127,13 +131,11 @@ public class Encryption {
                                                        dataEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
-/*
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
                  .getEncryptionObject().getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
             throw new Exception("Dec err");
         }
-*/
      }
 
     static void asymEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {

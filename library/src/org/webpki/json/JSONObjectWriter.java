@@ -766,8 +766,12 @@ import org.webpki.json.JSONSignatureDecoder;
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                           JSONEncrypter encrypter)
     throws IOException, GeneralSecurityException {
+        JSONObjectReader optionalExtensions = encrypter.extensions;
+        encrypter.extensions = null;
         JSONEncrypter.EncryptionHeader encryptionHeader = 
-                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypter);
+                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm,
+                                                   encrypter,
+                                                   optionalExtensions);
         JSONObjectWriter recipient = new JSONObjectWriter();
         encryptionHeader.createRecipient(encrypter, recipient);
         encryptionHeader.cleanRecipient(recipient);
@@ -789,13 +793,21 @@ import org.webpki.json.JSONSignatureDecoder;
      */
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                                                          Vector<JSONEncrypter> encrypters)
+                                                          Vector<JSONEncrypter> encrypters,
+                                                          JSONObjectWriter optionalExtensions)
     throws IOException, GeneralSecurityException {
         if (encrypters.isEmpty()) {
             throw new IOException("Empty encrypter list");
         }
+        JSONObjectReader globalExtensions = null;
+        if (optionalExtensions != null) {
+            globalExtensions = new JSONObjectReader(optionalExtensions);
+            JSONDecryptionDecoder.checkExtensions(globalExtensions.getProperties());
+        }
         JSONEncrypter.EncryptionHeader encryptionHeader = 
-                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm, encrypters.firstElement());
+                new JSONEncrypter.EncryptionHeader(dataEncryptionAlgorithm,
+                                                   encrypters.firstElement(),
+                                                   globalExtensions);
         Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
         for (JSONEncrypter encrypter : encrypters) {
             if (encrypter.keyEncryptionAlgorithm == null || !encrypter.keyEncryptionAlgorithm.keyWrap) {

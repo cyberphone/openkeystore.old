@@ -31,7 +31,7 @@ public class JSONX509Encrypter extends JSONEncrypter {
 
     /**
      * Constructor for JCE based solutions.
-     * @param publicKey Public key used for encrypting the key
+     * @param certificatePath Certificate path used for encrypting the key
      * @param keyEncryptionAlgorithm The algorithm used for encrypting the key
      * @param provider Optional JCE provider or null
      * @throws IOException &nbsp;

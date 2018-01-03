@@ -3941,9 +3941,10 @@ public class JSONTest {
                                                             null)).equals(ECDH_RESULT_WITH_KDF));
 
         EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
-                EncryptionCore.senderKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
-                        alice.getPublic());
+                EncryptionCore.senderKeyAgreement(null,
+                                                  KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                  DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                  alice.getPublic());
         assertTrue("Bad ECDH",
                 ArrayUtil.compare(asymmetricEncryptionResult.getDataEncryptionKey(),
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,

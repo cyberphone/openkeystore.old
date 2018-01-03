@@ -610,8 +610,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * Note: this method assumes that the current object only holds a JEF structure.</p>
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,PublicKey,String,KeyEncryptionAlgorithms)
-     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,String,byte[])
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
      */
     public JSONDecryptionDecoder getEncryptionObject() throws IOException {
         return new JSONDecryptionDecoder(this);
