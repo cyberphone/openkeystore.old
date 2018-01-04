@@ -49,28 +49,22 @@ import org.webpki.util.ArrayUtil;
  * Implements a subset of the RFC7516 (JWE) algorithms
  */
 
-public final class EncryptionCore {
+class EncryptionCore {
 
     /**
      * Return object for symmetric key encryptions.
      */
     static class SymmetricEncryptionResult {
-        private byte[] iv;
         byte[] tag;
         byte[] cipherText;
 
-        SymmetricEncryptionResult(byte[] iv, byte[] tag, byte[] cipherText) {
-            this.iv = iv;
+        SymmetricEncryptionResult(byte[] tag, byte[] cipherText) {
             this.tag = tag;
             this.cipherText = cipherText;
         }
 
         byte[] getTag() {
             return tag;
-        }
-
-        byte[] getIv() {
-            return iv;
         }
 
         byte[] getCipherText() {
@@ -245,11 +239,16 @@ public final class EncryptionCore {
                                                dataEncryptionAlgorithm);
         }
     }
-    
+ 
+    static byte[] createIv(DataEncryptionAlgorithms dataEncryptionAlgorithm) {
+        return generateRandom(dataEncryptionAlgorithm.ivLength);
+    }
+
     /**
      * Perform a symmetric key encryption.
      * @param dataEncryptionAlgorithm Algorithm to use
      * @param key Encryption key
+     * @param iv Initialization vector
      * @param plainText The data to be encrypted
      * @param authData Additional input factor for authentication
      * @return A composite object including encrypted data
@@ -257,20 +256,20 @@ public final class EncryptionCore {
      */
     public static SymmetricEncryptionResult contentEncryption(DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                               byte[] key,
+                                                              byte[] iv,
                                                               byte[] plainText,
                                                               byte[] authData) throws GeneralSecurityException {
         check(key, "key", dataEncryptionAlgorithm.keyLength, dataEncryptionAlgorithm);
-        byte[] iv = generateRandom(dataEncryptionAlgorithm.ivLength);
-         if (dataEncryptionAlgorithm.gcm) {
+        if (dataEncryptionAlgorithm.gcm) {
             byte[] cipherOutput = aesGcmCore(Cipher.ENCRYPT_MODE, key, iv, authData, plainText);
             int tagPos = cipherOutput.length - AES_GCM_TAG_LENGTH;
             byte[] cipherText = ArrayUtil.copy(cipherOutput, tagPos);
             byte[] tag = new byte[AES_GCM_TAG_LENGTH];
             System.arraycopy(cipherOutput, tagPos, tag, 0, AES_GCM_TAG_LENGTH);
-            return new SymmetricEncryptionResult(iv, tag, cipherText);
+            return new SymmetricEncryptionResult(tag, cipherText);
         }
         byte[] cipherText = aesCbcCore(Cipher.ENCRYPT_MODE, key, iv, plainText, dataEncryptionAlgorithm);
-        return new SymmetricEncryptionResult(iv, getTag(key, cipherText, iv, authData, dataEncryptionAlgorithm), cipherText);
+        return new SymmetricEncryptionResult(getTag(key, cipherText, iv, authData, dataEncryptionAlgorithm), cipherText);
     }
 
     /**

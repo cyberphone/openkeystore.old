@@ -22,8 +22,10 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -31,13 +33,19 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
 import java.security.SecureRandom;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
+
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
@@ -46,6 +54,7 @@ import javax.crypto.KeyAgreement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
@@ -54,6 +63,7 @@ import org.webpki.crypto.DeterministicSignatureWrapper;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
@@ -73,7 +83,9 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.net.HTTPSWrapper;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
@@ -3693,14 +3705,17 @@ public class JSONTest {
                                                        t);
         assertTrue("pout 1", ArrayUtil.compare(p, pout));
 
-        EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = EncryptionCore.contentEncryption(dea,
-                                                                                               k,
-                                                                                               p,
-                                                                                               a);
+        iv = EncryptionCore.createIv(dea);
+        EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
+                EncryptionCore.contentEncryption(dea,
+                                                 k,
+                                                 iv,
+                                                 p,
+                                                 a);
         pout = EncryptionCore.contentDecryption(dea,
                                                 k,
                                                 symmetricEncryptionResult.getCipherText(),
-                                                symmetricEncryptionResult.getIv(),
+                                                iv,
                                                 a,
                                                 symmetricEncryptionResult.getTag());
         assertTrue("pout 2", ArrayUtil.compare(p, pout));
@@ -3781,16 +3796,18 @@ public class JSONTest {
             byte[] plainText = jwePlainText.getBytes("UTF-8");
             for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
                 byte[] key = genRandom(dea.getKeyLength());
+                byte[] iv = EncryptionCore.createIv(dea);
                 EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
                         EncryptionCore.contentEncryption(dea,
-                                                         key, 
+                                                         key,
+                                                         iv,
                                                          plainText, 
                                                          authData);
                 if (!ArrayUtil.compare(plainText,
                                        EncryptionCore.contentDecryption(dea,
                                                                         key, 
                                                                         symmetricEncryptionResult.getCipherText(), 
-                                                                        symmetricEncryptionResult.getIv(), 
+                                                                        iv, 
                                                                         authData,
                                                                         symmetricEncryptionResult.getTag()))) {
                     fail("compare " + dea);

@@ -974,18 +974,14 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     void printArrayObjects(Vector<JSONValue> array) throws IOException {
-        newIndentSpace();
         boolean next = false;
         for (JSONValue value : array) {
             if (next) {
                 buffer.append(',');
-                newLine();
-                spaceOut();
             }
             printObject((JSONObject) value.value);
             next = true;
         }
-        newUndentSpace();
     }
 
     @SuppressWarnings("fallthrough")

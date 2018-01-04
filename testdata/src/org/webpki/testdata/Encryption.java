@@ -17,11 +17,14 @@
 package org.webpki.testdata;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPublicKey;
+import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.json.JSONAsymKeyEncrypter;
+import org.webpki.json.JSONEncrypter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -60,7 +63,27 @@ public class Encryption {
         asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
+        
+        multipleAsymEnc(new String[]{"p256", "p384"}, 
+                        ".multimpkey.json", 
+                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        true);
       
+        multipleAsymEnc(new String[]{"p256", "p384"}, 
+                        ".multexpkey.json", 
+                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        false);
+
+        multipleAsymEnc(new String[]{"p256", "p384"}, 
+                        ".multexpkey2.json", 
+                        DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
+                        false);
+
+        multipleAsymEnc(new String[]{"p256", "r2048"}, 
+                        ".multimpkey.json", 
+                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        true);
+
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
         symmEnc(512, DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
         symmEnc(128, DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
@@ -145,4 +168,54 @@ public class Encryption {
     static void asymEncNoPublicKeyInfo(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId);
     }
+
+    static void multipleAsymEnc(String[] keyTypes, String fileSuffix, 
+                                DataEncryptionAlgorithms dataEncryptionAlgorithm, 
+                                boolean wantKeyId) throws Exception {
+        Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
+        String algList = "";
+        for (String keyType : keyTypes) {
+            KeyPair keyPair = readJwk(keyType);
+            KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
+            if (keyPair.getPublic() instanceof ECPublicKey) {
+                switch (dataEncryptionAlgorithm.getKeyLength()) {
+                case 16: 
+                    keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID;
+                    break;
+                default: 
+                case 32: 
+                    keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A256KW_ALG_ID;
+                    break;
+                }
+            }
+            if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID &&
+                dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
+                keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
+            }
+            JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
+                                                                      keyEncryptionAlgorithm,
+                                                                      null);
+            if (wantKeyId) {
+                encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
+            }
+            if (algList.length() > 0) {
+                algList += "+";
+            }
+            algList += keyType + keyEncryptionAlgorithm.toString().toLowerCase();
+            encrypters.add(encrypter);
+        }
+        byte[] encryptedData =
+               JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
+                                                       dataEncryptionAlgorithm,
+                                                       encrypters,
+                                                       null).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+        ArrayUtil.writeFile(baseEncryption + algList + fileSuffix, encryptedData);
+/*
+        if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
+                 .getEncryptionObject().getDecryptedData(keyPair.getPrivate()),
+                               dataToBeEncrypted)) {
+            throw new Exception("Dec err");
+        }
+*/
+     }
 }

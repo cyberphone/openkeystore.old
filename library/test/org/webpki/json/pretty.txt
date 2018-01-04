@@ -11,16 +11,13 @@
 
 {
   "nonce": "rI2WgzLLHtQ4Z2sZWIbSvw",
-  "clientCapabilities": [
-    {
-      "type": "http://xmlns.webpki.org/keygen2/feature#ve",
-      "values": ["http://platforms.extreme-vm.com/type.3"]
-    },
-    {
-      "type": "http://xmlns.webpki.org/keygen",
-      "values": ["http://platforms"]
-    }
-  ]
+  "clientCapabilities": [{
+    "type": "http://xmlns.webpki.org/keygen2/feature#ve",
+    "values": ["http://platforms.extreme-vm.com/type.3"]
+  },{
+    "type": "http://xmlns.webpki.org/keygen",
+    "values": ["http://platforms"]
+  }]
 }
 
 {

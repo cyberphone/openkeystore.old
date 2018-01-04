@@ -123,6 +123,11 @@ public class JSONDecryptionDecoder {
         return keyEncryptionAlgorithm;
     }
 
+    private static KeyEncryptionAlgorithms getOptionalAlgorithm(JSONObjectReader reader) throws IOException {
+        return reader.hasProperty(JSONSignatureDecoder.ALG_JSON) ? 
+            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONSignatureDecoder.ALG_JSON)) : null;
+    }
+
     JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
         encryptionObject.clearReadFlags();
         ///////////////////////////////////////////////////////////////////////////////////////
@@ -132,8 +137,7 @@ public class JSONDecryptionDecoder {
         LinkedHashMap<String, JSONValue> savedProperties =                                   //
                 new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
         //                                                                                   //
-        // 2. Hide properties for the serializer..                                           //
-        encryptionObject.root.properties.remove(IV_JSON);                                    //
+        // 2. Hide these properties from the serializer..                                    //
         encryptionObject.root.properties.remove(TAG_JSON);                                   //
         encryptionObject.root.properties.remove(CIPHER_TEXT_JSON);                           //
         //                                                                                   //
@@ -150,9 +154,14 @@ public class JSONDecryptionDecoder {
         iv = encryptionObject.getBinary(IV_JSON);
         tag = encryptionObject.getBinary(TAG_JSON);
         keyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
-        if (encryptionObject.hasProperty(JSONSignatureDecoder.ALG_JSON)) {
-            keyEncryptionAlgorithm = KeyEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptionObject.getString(JSONSignatureDecoder.ALG_JSON));
+        keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
+        if (encryptionObject.hasProperty(JSONDecryptionDecoder.RECIPIENTS_JSON)) {
+            JSONArrayReader recepients = encryptionObject.getArray(RECIPIENTS_JSON);
+            do {
+                
+            } while (recepients.hasMore());
+        }
+        else if (keyEncryptionAlgorithm != null) {
             if (encryptionObject.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
                 publicKey = encryptionObject.getPublicKey(AlgorithmPreferences.JOSE);
             }
