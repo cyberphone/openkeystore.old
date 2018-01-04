@@ -36,6 +36,7 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
+import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -66,7 +67,7 @@ public class Signatures {
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
     static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
 
-    public static class Ext1 extends JSONSignatureDecoder.Extension {
+    public static class Ext1 extends JSONCryptoDecoder.Extension {
 
         @Override
         protected void decode(JSONObjectReader rd) throws IOException {
@@ -79,7 +80,7 @@ public class Signatures {
         }
     }
 
-    public static class Ext2 extends JSONSignatureDecoder.Extension {
+    public static class Ext2 extends JSONCryptoDecoder.Extension {
 
         @Override
         protected void decode(JSONObjectReader rd) throws IOException {
@@ -180,7 +181,7 @@ public class Signatures {
                     .setRemoteKey(R2048KEY);
         byte[] remoteSig = createSignature(remoteKeySigner);
         ArrayUtil.writeFile(baseSignatures + "r2048remotekeysigned.json", remoteSig);
-        JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(remoteSig).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
         localKey = readJwk("p256");
@@ -192,7 +193,7 @@ public class Signatures {
                     .setRemoteKey(P256CERTPATH);
         remoteSig = createSignature(remoteCertSigner);
         ArrayUtil.writeFile(baseSignatures + "p256remotecertsigned.json", remoteSig);
-        JSONParser.parse(remoteSig).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(remoteSig).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
         
         byte[] signedData = createSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null)
@@ -201,10 +202,10 @@ public class Signatures {
                         .setObject(new Ext2().getExtensionUri(), 
                                    new JSONObjectWriter().setBoolean("life-is-great", true))));
         ArrayUtil.writeFile(baseSignatures + "p256keyextsigned.json", signedData);
-        JSONSignatureDecoder.ExtensionHolder eh = new JSONSignatureDecoder.ExtensionHolder();
+        JSONCryptoDecoder.ExtensionHolder eh = new JSONCryptoDecoder.ExtensionHolder();
         eh.addExtension(Ext1.class, true);
         eh.addExtension(Ext2.class, true);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()
                         .setPermittedExtensions(eh)).verify(new JSONAsymKeyVerifier(localKey.getPublic()));
 
         JSONObjectWriter mixedData = new JSONObjectWriter()
@@ -214,7 +215,7 @@ public class Signatures {
                 .setExcluded(new String[]{"myUnsignedData"}));
         signedData = mixedData.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseSignatures + "p256keyexclsigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()
                          .setPermittedExclusions(new String[]{"myUnsignedData"}))
                          .verify(new JSONAsymKeyVerifier(localKey.getPublic()));
 
@@ -234,9 +235,9 @@ public class Signatures {
         String keyName = symmetricKeys.getName(keyBits);
         byte[] signedData = createSignature(new JSONSymKeySigner(key, algorithm).setKeyId(keyName));
         ArrayUtil.writeFile(baseSignatures + "hs" + (key.length * 8) + "signed.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
-                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)).verify(new JSONSymKeyVerifier(key));
+                .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)).verify(new JSONSymKeyVerifier(key));
     }
 
     static String getDataToSign() throws Exception {
@@ -277,7 +278,7 @@ public class Signatures {
         KeyPair keyPair = readJwk(keyType);
         byte[] signedData = createSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
         ArrayUtil.writeFile(baseSignatures + keyType + "keysigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
+        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()).verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
      }
 
     static void multipleSign(String keyType1, String KeyType2) throws Exception {
@@ -289,7 +290,7 @@ public class Signatures {
         byte[] signedData = createSignatures(signers);
         ArrayUtil.writeFile(baseSignatures + keyType1 + "+" + KeyType2 + "keysigned.json", signedData);
         Vector<JSONSignatureDecoder> signatures = 
-                JSONParser.parse(signedData).getSignatures(new JSONSignatureDecoder.Options());
+                JSONParser.parse(signedData).getSignatures(new JSONCryptoDecoder.Options());
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
         if (signatures.size() != 2) {
@@ -308,10 +309,10 @@ public class Signatures {
         byte[] signedData = createSignature(signer);
         ArrayUtil.writeFile(baseSignatures + keyType + (wantPublicKey && wantKeyId ? "mixed" : "implicit") + "keysigned.json", signedData);
         JSONParser.parse(signedData).getSignature(
-            new JSONSignatureDecoder.Options()
+            new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(wantPublicKey)
                 .setKeyIdOption(wantKeyId ? 
-     JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED : JSONSignatureDecoder.KEY_ID_OPTIONS.FORBIDDEN))
+                        JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED : JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN))
                     .verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
      }
 
@@ -326,6 +327,6 @@ public class Signatures {
                                                                readCertificatePath(keyType),
                                                                null));
         ArrayUtil.writeFile(baseSignatures + keyType + "certsigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONSignatureDecoder.Options()).verify(x509Verifier);
+        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()).verify(x509Verifier);
     }
 }

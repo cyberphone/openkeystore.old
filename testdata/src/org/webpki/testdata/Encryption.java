@@ -17,13 +17,17 @@
 package org.webpki.testdata;
 
 import java.io.File;
+
 import java.security.KeyPair;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
+
 import org.webpki.json.JSONAsymKeyEncrypter;
-import org.webpki.json.JSONDecryptionDecoder;
+import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONEncrypter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -32,6 +36,7 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.DataEncryptionAlgorithms;
 import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 
 /*
@@ -105,7 +110,7 @@ public class Encryption {
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
-                       JSONParser.parse(encryptedData).getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(key))) {
+                       JSONParser.parse(encryptedData).getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(key))) {
             throw new Exception("Encryption fail");
         }
     }
@@ -155,7 +160,7 @@ public class Encryption {
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(keyPair.getPrivate()),
+                 .getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
             throw new Exception("Dec err");
         }
