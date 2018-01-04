@@ -3259,8 +3259,8 @@ public class JSONTest {
         for (String name : encObjects) {
             String signature = readSignature(name).toString();
             JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
-                    new JSONSignatureDecoder.Options()
-                        .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)
+                    new JSONCryptoDecoder.Options()
+                        .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)
                         .setRequirePublicKeyInfo(false));
             boolean notDone = true;
             for (String keyProp : symmetricKeys.getProperties()) {
@@ -3274,7 +3274,7 @@ public class JSONTest {
                     dec = JSONParser.parse(new JSONObjectWriter().setString("Mydata", "cool")
                     .setSignature(new JSONSymKeySigner(key, 
                             (MACAlgorithms) dec.getAlgorithm())).toString())
-                    .getSignature(new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false));
+                    .getSignature(new JSONCryptoDecoder.Options().setRequirePublicKeyInfo(false));
                     dec.verify(new JSONSymKeyVerifier(key));
                     try {
                         dec.verify(new JSONSymKeyVerifier(ArrayUtil.add(key, new byte[]{5})));
@@ -3289,19 +3289,19 @@ public class JSONTest {
     }
 
     JSONSignatureDecoder readSignature(JSONObjectWriter writer, 
-                                       JSONSignatureDecoder.Options options) throws Exception {
+                                       JSONCryptoDecoder.Options options) throws Exception {
         return JSONParser.parse(writer.toString()).getSignature(options);
     }
     
     JSONSignatureDecoder verifySignature(JSONObjectWriter writer, 
-                                         JSONSignatureDecoder.Options options, 
+                                         JSONCryptoDecoder.Options options, 
                                          PublicKey publicKey) throws Exception {
         JSONSignatureDecoder signature = readSignature(writer, options);
         signature.verify(new JSONAsymKeyVerifier(publicKey));
         return signature;
     }
 
-    public static class ExampleComExtBad extends JSONSignatureDecoder.Extension {
+    public static class ExampleComExtBad extends JSONCryptoDecoder.Extension {
         
         static final String URI = "https://example.com/ext";
 
@@ -3315,7 +3315,7 @@ public class JSONTest {
         }
     }
 
-    public static class ExampleComExtGood extends JSONSignatureDecoder.Extension {
+    public static class ExampleComExtGood extends JSONCryptoDecoder.Extension {
         
         static final String URI = "https://example.com/ext";
         
@@ -3379,7 +3379,7 @@ public class JSONTest {
         }
     }
 
-    public static class ExampleComExtGood2 extends JSONSignatureDecoder.Extension {
+    public static class ExampleComExtGood2 extends JSONCryptoDecoder.Extension {
         
         static final String URI = "https://example.com/ext2";
         
@@ -3412,20 +3412,20 @@ public class JSONTest {
         JSONObjectWriter writer = new JSONObjectWriter()
             .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
-        verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
+        verifySignature(writer, new JSONCryptoDecoder.Options(), p256.getPublic());
         try {
-            verifySignature(writer, new JSONSignatureDecoder.Options(), r2048.getPublic());
+            verifySignature(writer, new JSONCryptoDecoder.Options(), r2048.getPublic());
             fail("Must not pass");
         } catch (Exception e) {
         }
         try {
-            verifySignature(writer, new JSONSignatureDecoder.Options(), otherp256);
+            verifySignature(writer, new JSONCryptoDecoder.Options(), otherp256);
             fail("Must not pass");
         } catch (Exception e) {
         }
         try {
             verifySignature(writer, 
-                            new JSONSignatureDecoder.Options().setRequirePublicKeyInfo(false), 
+                            new JSONCryptoDecoder.Options().setRequirePublicKeyInfo(false), 
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
@@ -3433,7 +3433,7 @@ public class JSONTest {
         }
         try {
             verifySignature(writer, 
-                            new JSONSignatureDecoder.Options().setAlgorithmPreferences(AlgorithmPreferences.SKS), 
+                            new JSONCryptoDecoder.Options().setAlgorithmPreferences(AlgorithmPreferences.SKS), 
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
@@ -3443,71 +3443,71 @@ public class JSONTest {
         .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
             .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
         try {
-            verifySignature(writer, new JSONSignatureDecoder.Options(), p256.getPublic());
+            verifySignature(writer, new JSONCryptoDecoder.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Use of \"" + JSONSignatureDecoder.CRIT_JSON + "\" must be set in options");
         }
         try {
-            JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
+            JSONCryptoDecoder.ExtensionHolder holder = new JSONCryptoDecoder.ExtensionHolder();
             holder.addExtension(ExampleComExtBad.class, true);
             verifySignature(writer, 
-                            new JSONSignatureDecoder.Options()
+                            new JSONCryptoDecoder.Options()
                                 .setPermittedExtensions(holder),
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
             checkException(e, "Property \"https://example.com/ext\" was never read");
         }
-        JSONSignatureDecoder.ExtensionHolder holder = new JSONSignatureDecoder.ExtensionHolder();
+        JSONCryptoDecoder.ExtensionHolder holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
         assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
         (verifySignature(writer, 
-                        new JSONSignatureDecoder.Options()
+                        new JSONCryptoDecoder.Options()
                             .setPermittedExtensions(holder),
                         p256.getPublic()).getExtension("https://example.com/ext"))).data));
-        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
         holder.addExtension(ExampleComExtGood2.class, false);
         assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
         (verifySignature(writer, 
-                        new JSONSignatureDecoder.Options()
+                        new JSONCryptoDecoder.Options()
                             .setPermittedExtensions(holder),
                         p256.getPublic()).getExtension("https://example.com/ext"))).data));
-        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood2.class, false);
         holder.addExtension(ExampleComExtGood.class, false);
         assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
             (verifySignature(writer, 
-                             new JSONSignatureDecoder.Options()
+                             new JSONCryptoDecoder.Options()
                                  .setPermittedExtensions(holder),
                              p256.getPublic()).getExtension("https://example.com/ext"))).data));
         try {
-            holder = new JSONSignatureDecoder.ExtensionHolder();
+            holder = new JSONCryptoDecoder.ExtensionHolder();
             holder.addExtension(ExampleComExtGood2.class, true);
             holder.addExtension(ExampleComExtGood.class, false);
             assertTrue("EXT", "foobar".equals(((ExampleComExtGood)
                 (verifySignature(writer, 
-                                 new JSONSignatureDecoder.Options()
+                                 new JSONCryptoDecoder.Options()
                                      .setPermittedExtensions(holder),
                                  p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext2");
         }
-        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
         writer = new JSONObjectWriter().setString("myData", "cool!")
                 .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
         try {
-            readSignature(writer, new JSONSignatureDecoder.Options().setPermittedExtensions(holder));
+            readSignature(writer, new JSONCryptoDecoder.Options().setPermittedExtensions(holder));
             fail("Not ok");
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
         }
-        holder = new JSONSignatureDecoder.ExtensionHolder();
+        holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, false);
-        readSignature(writer, new JSONSignatureDecoder.Options().setPermittedExtensions(holder));
+        readSignature(writer, new JSONCryptoDecoder.Options().setPermittedExtensions(holder));
         try {
             writer = new JSONObjectWriter().setString("myData", "cool!")
                     .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
@@ -3518,21 +3518,21 @@ public class JSONTest {
         // Imperfect naming here, this file contains a keyId but no publicKey
         JSONObjectReader signature = readSignature("p256implicitkeysigned.json");
         try {
-            signature.getSignature(new JSONSignatureDecoder.Options());
+            signature.getSignature(new JSONCryptoDecoder.Options());
             fail("Must not pass");
         } catch (Exception e) {
             checkException(e, "Use of \"" + JSONSignatureDecoder.KID_JSON + "\" must be set in options");
         }
         JSONSignatureDecoder decoder =
-            signature.getSignature(new JSONSignatureDecoder.Options()
+            signature.getSignature(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
-                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+                .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue(keyIdP256.equals(decoder.getKeyId()));
         decoder.verify(new JSONAsymKeyVerifier(p256.getPublic()));
         decoder =
-            signature.getSignature(new JSONSignatureDecoder.Options()
+            signature.getSignature(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
-                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+                .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED));
         assertTrue(keyIdP256.equals(decoder.getKeyId()));
         decoder.verify(new JSONAsymKeyVerifier(p256.getPublic()));
         try {
@@ -3543,9 +3543,9 @@ public class JSONTest {
         // Imperfect naming here, this file contains NO keyId or publicKey
         signature = readSignature("p521implicitkeysigned.json");
         decoder =
-            signature.getSignature(new JSONSignatureDecoder.Options()
+            signature.getSignature(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
-                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+                .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue(decoder.getKeyId() == null);
         decoder.verify(new JSONAsymKeyVerifier(p521.getPublic()));
         try {
@@ -3555,9 +3555,9 @@ public class JSONTest {
         }
         try {
             decoder =
-                signature.getSignature(new JSONSignatureDecoder.Options()
+                signature.getSignature(new JSONCryptoDecoder.Options()
                     .setRequirePublicKeyInfo(false)
-                    .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+                    .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED));
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
         }
@@ -3565,16 +3565,16 @@ public class JSONTest {
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
                .setSignatureAlgorithm(AsymSignatureAlgorithms.ECDSA_SHA512));
         assertTrue(verifySignature(writer, 
-                                   new JSONSignatureDecoder.Options(),
+                                   new JSONCryptoDecoder.Options(),
                                    p256.getPublic()).getAlgorithm() == AsymSignatureAlgorithms.ECDSA_SHA512);
         signature = readSignature("p256+r2048keysigned.json");
         try {
-            signature.getSignature(new JSONSignatureDecoder.Options());
+            signature.getSignature(new JSONCryptoDecoder.Options());
             fail("Must not pass");
         } catch (Exception e) {
             checkException(e, "Property \"signature\" is missing");
         }
-        Vector<JSONSignatureDecoder> signatures = signature.getSignatures(new JSONSignatureDecoder.Options());
+        Vector<JSONSignatureDecoder> signatures = signature.getSignatures(new JSONCryptoDecoder.Options());
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(r2048.getPublic()));
@@ -3583,7 +3583,7 @@ public class JSONTest {
         signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
         writer = new JSONObjectWriter().setInt("value", 3)
             .setSignatures(signers);
-        signatures = new JSONObjectReader(writer).getSignatures(new JSONSignatureDecoder.Options());
+        signatures = new JSONObjectReader(writer).getSignatures(new JSONCryptoDecoder.Options());
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
@@ -3595,16 +3595,16 @@ public class JSONTest {
         writer = new JSONObjectWriter().setInt("value", 3)
             .setSignatures(signers);
         try {
-            new JSONObjectReader(writer).clone().getSignatures(new JSONSignatureDecoder.Options()
+            new JSONObjectReader(writer).clone().getSignatures(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
-                .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED));
+                .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED));
             fail("Must not pass");
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
         }
-        signatures = new JSONObjectReader(writer).getSignatures(new JSONSignatureDecoder.Options()
+        signatures = new JSONObjectReader(writer).getSignatures(new JSONCryptoDecoder.Options()
             .setRequirePublicKeyInfo(false)
-            .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.OPTIONAL));
+            .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
@@ -3613,16 +3613,16 @@ public class JSONTest {
                                        "hs512signed.json"});
 
         signature = readSignature("r2048remotekeysigned.json");
-        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
         signature = readSignature("p256remotecertsigned.json");
-        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
-        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(rootCa);
         try {
-            JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
+            JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(unknownCa);
             fail("Must not pass");
         } catch (Exception e) {
@@ -3633,15 +3633,15 @@ public class JSONTest {
             .setString("myData", "cool")
             .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
                               .setRemoteKey(R2048KEY));
-        JSONParser.parse(writer.toString()).getSignature(new JSONSignatureDecoder.Options()
+        JSONParser.parse(writer.toString()).getSignature(new JSONCryptoDecoder.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
         
         signature = readSignature("r2048certsigned.json");
-        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options());
-        JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options())
+        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options());
+        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options())
             .verify(rootCa);
         try {
-            JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options())
+            JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options())
                 .verify(unknownCa);
             fail("Must not pass");
         } catch (Exception e) {
@@ -3726,7 +3726,7 @@ public class JSONTest {
                                                                 dea,
                                                                 new JSONSymKeyEncrypter(dataEncryptionKey)).toString();
         assertTrue("Symmetric",
-                JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject(new JSONDecryptionDecoder.Options())
+                JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject(new JSONCryptoDecoder.Options())
                         .getDecryptedData(dataEncryptionKey)).toString().equals(json.toString()));
     }
 
@@ -3835,7 +3835,7 @@ public class JSONTest {
                 if (!ArrayUtil.compare(plainText,
                                   JSONParser
                                       .parse(json.toString())
-                                          .getEncryptionObject(new JSONDecryptionDecoder.Options())
+                                          .getEncryptionObject(new JSONCryptoDecoder.Options())
                                               .getDecryptedData((kea.isRsa() ?
                                                       malletKeys : alice).getPrivate()))) {
                     throw new IOException("Fail on " + kea + "/" + dea);
@@ -3996,7 +3996,7 @@ public class JSONTest {
                                                                                             null)).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
-                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options())
+                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options())
                                 .getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter
@@ -4005,7 +4005,7 @@ public class JSONTest {
                                                                    new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                                             KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                                                                             null).setKeyId("bob")).toString();
-        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options());
+        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options());
         assertTrue("kid", decDec.getKeyId().equals("bob"));
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
@@ -4018,7 +4018,7 @@ public class JSONTest {
                                                                                             null)).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
-                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options())
+                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options())
                                 .getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter
@@ -4027,7 +4027,7 @@ public class JSONTest {
                                         new JSONAsymKeyEncrypter(malletKeys.getPublic(),
                                                                  KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
                                                                  null).setKeyId("mallet")).toString();
-        decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options());
+        decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options());
         assertTrue("kid", decDec.getKeyId().equals("mallet"));
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()

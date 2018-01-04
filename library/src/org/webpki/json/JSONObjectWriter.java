@@ -626,7 +626,7 @@ import org.webpki.json.JSONSignatureDecoder;
         JSONObjectReader reader = JSONParser.parse(json);
     
         // Get and verify signature
-        JSONSignatureDecoder signature = reader.getSignature(new JSONSignatureDecoder.Options());
+        JSONSignatureDecoder signature = reader.getSignature(new JSONCryptoDecoder.Options());
         signature.verify(new JSONAsymKeyVerifier(publicKey));
     
         // Print document payload on the console

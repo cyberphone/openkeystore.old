@@ -29,7 +29,6 @@ import java.security.cert.X509Certificate;
 
 import java.util.GregorianCalendar;
 import java.util.Vector;
-
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -491,9 +490,9 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return An object which can be used to verify keys etc.
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
-     * @see org.webpki.json.JSONSignatureDecoder.Options
+     * @see org.webpki.json.JSONCryptoDecoder.Options
      */
-    public JSONSignatureDecoder getSignature(JSONSignatureDecoder.Options options) throws IOException {
+    public JSONSignatureDecoder getSignature(JSONCryptoDecoder.Options options) throws IOException {
         return new JSONSignatureDecoder(this,
                                         getObject(JSONSignatureDecoder.SIGNATURE_JSON),
                                         options);
@@ -507,7 +506,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return List with signature objects
      * @throws IOException &nbsp;
      */
-    public Vector<JSONSignatureDecoder> getSignatures(JSONSignatureDecoder.Options options) throws IOException {
+    public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoDecoder.Options options) throws IOException {
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         JSONArrayReader arrayReader = getArray(JSONSignatureDecoder.SIGNATURES_JSON);
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
@@ -608,14 +607,31 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * format.<p>
      * Note: this method assumes that the current object only holds a JEF structure.</p>
+     * @param options Restrictions and requirements
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
+     * @see org.webpki.json.JSONCryptoDecoder.Options
      */
-    public JSONDecryptionDecoder getEncryptionObject(JSONDecryptionDecoder.Options options) throws IOException {
+    public JSONDecryptionDecoder getEncryptionObject(JSONCryptoDecoder.Options options) throws IOException {
         return new JSONDecryptionDecoder(this);
     }
 
+    /**
+     * Read an object in
+     * <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
+     * format intended for <i>multiple recipients</i>.<p>
+     * Note: this method assumes that the current object only holds a JEF structure.</p>
+     * @param options Global restrictions and requirements
+     * @return An object which can be used to retrieve the original (unencrypted) data 
+     * @throws IOException &nbsp;
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
+     * @see org.webpki.json.JSONCryptoDecoder.Options
+     */
+    public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoDecoder.Options options) throws IOException {
+        Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();
+        return recipients;
+    }
     /**
      * Read a certificate path in 
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>

@@ -126,47 +126,6 @@ public class JSONSignatureDecoder implements Serializable {
 
     static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
-    public static abstract class Extension {
-        
-        public abstract String getExtensionUri();
-        
-        protected abstract void decode(JSONObjectReader reader) throws IOException;
-    }
-
-    static class ExtensionEntry {
-        Class<? extends Extension> extensionClass;
-        boolean mandatory;
-    }
-
-    public static class ExtensionHolder {
-        
-        LinkedHashMap<String,ExtensionEntry> extensions = new LinkedHashMap<String,ExtensionEntry>();
-
-        public ExtensionHolder addExtension(Class<? extends Extension> extensionClass,
-                                            boolean mandatory) throws IOException {
-            try {
-                Extension extension = extensionClass.newInstance();
-                ExtensionEntry extensionEntry = new ExtensionEntry();
-                extensionEntry.extensionClass = extensionClass;
-                extensionEntry.mandatory = mandatory;
-                if ((extensions.put(extension.getExtensionUri(), extensionEntry)) != null) {
-                    throw new IOException("Duplicate extension: " + extension.getExtensionUri());
-                }
-            } catch (InstantiationException e) {
-                throw new IOException(e);
-            } catch (IllegalAccessException e) {
-                throw new IOException(e);
-            }
-            return this;
-        }
-    }
-
-    /**
-     * Parameter to Options
-     *
-     */
-    public enum KEY_ID_OPTIONS {FORBIDDEN, REQUIRED, OPTIONAL};
-
     /**
      * Signature decoding options.
      * <p>This class holds options that are checked during signature decoding.</p>
@@ -180,55 +139,7 @@ public class JSONSignatureDecoder implements Serializable {
      * In addition, the Options class is used for defining external readers for &quot;remoteKey&quot; support.
      *
      */
-    public static class Options {
-        
-        AlgorithmPreferences algorithmPreferences = AlgorithmPreferences.JOSE;
-        boolean requirePublicKeyInfo = true;
-        KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
-        ExtensionHolder extensionHolder = new ExtensionHolder();
-        JSONRemoteKeys.Reader remoteKeyReader;
-        JSONRemoteKeys remoteKeyType;
-        LinkedHashSet<String> exclusions;
 
-        public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
-            this.algorithmPreferences = algorithmPreferences;
-            return this;
-        }
-
-        public Options setRequirePublicKeyInfo(boolean flag) {
-            this.requirePublicKeyInfo = flag;
-            return this;
-        }
-
-        /**
-         * Define external remote key reader class.
-         * If set, the signature decoder assumes that there is no in-line public key or certificate information to process.   
-         * @param remoteKeyReader Interface
-         * @param remoteKeyType Expected type
-         * @return this
-         */
-        public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader,
-                                          JSONRemoteKeys remoteKeyType) {
-            this.remoteKeyReader = remoteKeyReader;
-            this.remoteKeyType = remoteKeyType;
-            return this;
-        }
-
-        public Options setKeyIdOption(KEY_ID_OPTIONS keyIdOption) {
-            this.keyIdOption = keyIdOption;
-            return this;
-        }
-
-        public Options setPermittedExtensions(ExtensionHolder extensionHolder) {
-            this.extensionHolder = extensionHolder;
-            return this;
-        }
-
-        public Options setPermittedExclusions(String[] exclusions) throws IOException {
-            this.exclusions = checkExcluded(exclusions);
-            return this;
-        }
-    }
 
     SignatureAlgorithms algorithm;
 
@@ -244,21 +155,21 @@ public class JSONSignatureDecoder implements Serializable {
 
     String keyId;
     
-    Options options;
+    JSONCryptoDecoder.Options options;
     
-    LinkedHashMap<String,Extension> extensions = new LinkedHashMap<String,Extension>();
+    LinkedHashMap<String,JSONCryptoDecoder.Extension> extensions = new LinkedHashMap<String,JSONCryptoDecoder.Extension>();
 
     JSONSignatureDecoder(JSONObjectReader rd,
                          JSONObjectReader signature,
-                         Options options) throws IOException {
+                         JSONCryptoDecoder.Options options) throws IOException {
         this.options = options;
         algorithmString = signature.getString(ALG_JSON);
         keyId = signature.getStringConditional(KID_JSON);
         if (keyId == null) {
-            if (options.keyIdOption == KEY_ID_OPTIONS.REQUIRED) {
+            if (options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED) {
                 throw new IOException("Missing \"" + KID_JSON + "\"");
             }
-        } else if (options.keyIdOption == KEY_ID_OPTIONS.FORBIDDEN) {
+        } else if (options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN) {
             throw new IOException("Use of \"" + KID_JSON + "\" must be set in options");
         }
         if (options.requirePublicKeyInfo) {
@@ -283,12 +194,12 @@ public class JSONSignatureDecoder implements Serializable {
                 throw new IOException("Use of \"" + CRIT_JSON + "\" must be set in options");
             }
             for (String name : properties) {
-                ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
+                JSONCryptoDecoder.ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
                 if (extensionEntry == null) {
                     throw new IOException("Unexpected \"" + CRIT_JSON + "\" extension: " + name);
                 }
                 try {
-                    Extension extension = extensionEntry.extensionClass.newInstance();
+                    JSONCryptoDecoder.Extension extension = extensionEntry.extensionClass.newInstance();
                     extension.decode(signature);
                     extensions.put(name, extension);
                 } catch (InstantiationException e) {
@@ -468,7 +379,7 @@ public class JSONSignatureDecoder implements Serializable {
         return algorithm;
     }
 
-    public Extension getExtension(String name) {
+    public JSONCryptoDecoder.Extension getExtension(String name) {
         return extensions.get(name);
     }
 

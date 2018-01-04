@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.webpki.crypto.VerifierInterface;
 
+import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
@@ -48,7 +49,7 @@ abstract class ClientDecoder extends InputValidator {
         // Must be a Signature otherwise something has gone wrong...
         //////////////////////////////////////////////////////////////////
         if (rd.hasProperty(JSONSignatureDecoder.SIGNATURE_JSON)) {
-            signature = rd.getSignature(new JSONSignatureDecoder.Options());
+            signature = rd.getSignature(new JSONCryptoDecoder.Options());
         }
     }
 }

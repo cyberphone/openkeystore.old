@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
 // Because the encryption system (naturally) borrows heavily from JCS         //
@@ -52,30 +53,76 @@ public class JSONDecryptionDecoder {
     public static final String CIPHER_TEXT_JSON      = "ciphertext";
     public static final String RECIPIENTS_JSON       = "recipients";
 
-    static final LinkedHashSet<String> reservedWords = new LinkedHashSet<String>();
+    static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
     
     static {
-        reservedWords.add(JSONSignatureDecoder.ALG_JSON);
-        reservedWords.add(ENC_JSON);
-        reservedWords.add(IV_JSON);
-        reservedWords.add(TAG_JSON);
-        reservedWords.add(AAD_JSON);
-        reservedWords.add(ENCRYPTED_KEY_JSON);
-        reservedWords.add(EPK_JSON);
-        reservedWords.add(CIPHER_TEXT_JSON);
-        reservedWords.add(RECIPIENTS_JSON);
-        reservedWords.add(JSONSignatureDecoder.CRIT_JSON);
-        reservedWords.add(JSONSignatureDecoder.KID_JSON);
-        reservedWords.add(JSONSignatureDecoder.JWK_JSON);
-        reservedWords.add(JSONSignatureDecoder.JKU_JSON);
-        reservedWords.add(JSONSignatureDecoder.X5C_JSON);
-        reservedWords.add(JSONSignatureDecoder.X5T_JSON);
-        reservedWords.add(JSONSignatureDecoder.X5T_S256_JSON);
-        reservedWords.add(JSONSignatureDecoder.X5U_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.ALG_JSON);
+        jefReservedWords.add(ENC_JSON);
+        jefReservedWords.add(IV_JSON);
+        jefReservedWords.add(TAG_JSON);
+        jefReservedWords.add(AAD_JSON);
+        jefReservedWords.add(ENCRYPTED_KEY_JSON);
+        jefReservedWords.add(EPK_JSON);
+        jefReservedWords.add(CIPHER_TEXT_JSON);
+        jefReservedWords.add(RECIPIENTS_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.CRIT_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.KID_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.JWK_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.JKU_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.X5C_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.X5T_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.X5T_S256_JSON);
+        jefReservedWords.add(JSONSignatureDecoder.X5U_JSON);
     }
 
-    public static class Options {
+    static class Holder {
+
+        JSONCryptoDecoder.Options options;
+
+        DataEncryptionAlgorithms dataEncryptionAlgorithm;
+
+        byte[] authenticatedData;
+        byte[] iv;
+        byte[] tag;
+        byte[] encryptedData;
         
+        KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
+        String globalKeyId;
+
+        Holder (JSONCryptoDecoder.Options options, JSONObjectReader encryptionObject, boolean multiple) throws IOException {
+            encryptionObject.clearReadFlags();
+            this.options = options;
+            if (multiple) {
+                if (encryptionObject.hasProperty(JSONSignatureDecoder.ALG_JSON)) {
+                    globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
+                }
+                globalKeyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
+            }
+            ///////////////////////////////////////////////////////////////////////////////////////
+            // Begin JEF normalization                                                           //
+            //                                                                                   //
+            // 1. Make a shallow copy of the encryption object property list                     //
+            LinkedHashMap<String, JSONValue> savedProperties =                                   //
+                    new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
+            //                                                                                   //
+            // 2. Hide these properties from the serializer..                                    //
+            encryptionObject.root.properties.remove(TAG_JSON);                                   //
+            encryptionObject.root.properties.remove(CIPHER_TEXT_JSON);                           //
+            //                                                                                   //
+            // 3. Serialize ("JSON.stringify()")                                                 //
+            authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
+            //                                                                                   //
+            // 4. Restore encryption object property list                                        //
+            encryptionObject.root.properties = savedProperties;                                  //
+            //                                                                                   //
+            // End JEF normalization                                                             //
+            ///////////////////////////////////////////////////////////////////////////////////////
+            dataEncryptionAlgorithm = DataEncryptionAlgorithms
+                    .getAlgorithmFromId(encryptionObject.getString(ENC_JSON));
+            iv = encryptionObject.getBinary(IV_JSON);
+            tag = encryptionObject.getBinary(TAG_JSON);
+            encryptedData = encryptionObject.getBinary(CIPHER_TEXT_JSON);
+        }
     }
 
     private PublicKey publicKey;
@@ -231,7 +278,7 @@ public class JSONDecryptionDecoder {
             throw new IOException("Empty \"" + JSONSignatureDecoder.CRIT_JSON + "\" array not allowed");
         }
         for (String property : properties) {
-            if (reservedWords.contains(property)) {
+            if (jefReservedWords.contains(property)) {
                 throw new IOException("Forbidden \"" + JSONSignatureDecoder.CRIT_JSON + "\" property: " + property);
             }
         }

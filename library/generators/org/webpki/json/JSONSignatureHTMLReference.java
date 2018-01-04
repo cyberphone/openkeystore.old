@@ -29,7 +29,8 @@ import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
-import org.webpki.json.JSONSignatureDecoder.ExtensionHolder;
+
+import org.webpki.json.JSONCryptoDecoder.ExtensionHolder;
 
 import org.webpki.util.ArrayUtil;
 
@@ -59,7 +60,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static final String ECMASCRIPT_CONSTRAINT = "ECMAScript Constraint";
 
-    public static class Ext1 extends JSONSignatureDecoder.Extension {
+    public static class Ext1 extends JSONCryptoDecoder.Extension {
 
         @Override
         protected void decode(JSONObjectReader rd) throws IOException {
@@ -72,7 +73,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         }
     }
 
-    public static class Ext2 extends JSONSignatureDecoder.Extension {
+    public static class Ext2 extends JSONCryptoDecoder.Extension {
 
         @Override
         protected void decode(JSONObjectReader rd) throws IOException {
@@ -144,7 +145,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static String readAsymSignature(String name, 
                                     AsymKey asymKey,
-                                    JSONSignatureDecoder.Options options) throws IOException, GeneralSecurityException {
+                                    JSONCryptoDecoder.Options options) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
         JSONSignatureDecoder verifier = rd.getSignature(options);
@@ -157,7 +158,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                                      AsymKey asymKey2) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
-        Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONSignatureDecoder.Options());
+        Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONCryptoDecoder.Options());
         verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.publicKey));
         verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.publicKey));
         return formatCode(raw);
@@ -167,7 +168,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static String readCertSignature(String name) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
-        JSONParser.parse(raw).getSignature(new JSONSignatureDecoder.Options()).verify(certroot);
+        JSONParser.parse(raw).getSignature(new JSONCryptoDecoder.Options()).verify(certroot);
         return formatCode(raw);
     }
 
@@ -189,8 +190,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         for (String name : encObjects) {
             String signature = readSignature(name);
             JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
-                    new JSONSignatureDecoder.Options()
-                        .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)
+                    new JSONCryptoDecoder.Options()
+                        .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)
                         .setRequirePublicKeyInfo(false));
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
@@ -271,7 +272,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
           .append(json.createReference(JSONBaseHTML.REF_JEF))
           .append(" which deals with JSON encryption.");
 
-        String sampleSignature = readAsymSignature("p256keysigned.json", p256key, new JSONSignatureDecoder.Options());
+        String sampleSignature = readAsymSignature("p256keysigned.json", p256key, new JSONCryptoDecoder.Options());
         int beginValue = sampleSignature.indexOf("},");
         sampleSignature = sampleSignature.substring(0, ++beginValue) + "<span style=\"background:#f0f0f0\">,</span>" + sampleSignature.substring(++beginValue);
         beginValue = sampleSignature.indexOf("&quot;" + JSONSignatureDecoder.VAL_JSON + "&quot;");
@@ -402,15 +403,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "The following signature object which uses a " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.KID_JSON) +
         " for identifying the public key can be verified with the key above:" + 
-        readAsymSignature("p256implicitkeysigned.json", p256key, new JSONSignatureDecoder.Options()
+        readAsymSignature("p256implicitkeysigned.json", p256key, new JSONCryptoDecoder.Options()
             .setRequirePublicKeyInfo(false)
-            .setKeyIdOption(JSONSignatureDecoder.KEY_ID_OPTIONS.REQUIRED)) +
+            .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)) +
         "<span id=\"" + JSONBaseHTML.EXTENSION_EXAMPLE +
         "\">The</span> following signature object uses the same key as in the previous example but also " +
         "includes " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.CRIT_JSON) +
         " extensions:" + 
-        readAsymSignature("p256keyextsigned.json", p256key, new JSONSignatureDecoder.Options()
+        readAsymSignature("p256keyextsigned.json", p256key, new JSONCryptoDecoder.Options()
             .setPermittedExtensions(new ExtensionHolder()
                 .addExtension(Ext1.class, true)
                 .addExtension(Ext2.class, true))) +
@@ -419,7 +420,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "specifies " +
         json.globalLinkRef(JSONSignatureDecoder.SIGNATURE_JSON, JSONSignatureDecoder.EXCL_JSON) +
         " properties:" + 
-        readAsymSignature("p256keyexclsigned.json", p256key, new JSONSignatureDecoder.Options()
+        readAsymSignature("p256keyexclsigned.json", p256key, new JSONCryptoDecoder.Options()
             .setPermittedExclusions(new String[]{"myUnsignedData"})) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
@@ -427,19 +428,19 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "EC private key associated with the subsequent object:" +
         formatCode(p384key) +
         "The following object was signed by the key above:" +
-        readAsymSignature("p384keysigned.json", p384key, new JSONSignatureDecoder.Options()) +
+        readAsymSignature("p384keysigned.json", p384key, new JSONCryptoDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("p384certsigned.json") + LINE_SEPARATOR +
         "EC private key associated with the subsequent object:" +
         formatCode(p521key) +
         "The following object was signed by the key above:" +
-        readAsymSignature("p521keysigned.json", p521key, new JSONSignatureDecoder.Options()) +
+        readAsymSignature("p521keysigned.json", p521key, new JSONCryptoDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but builds on that " +
         "the key to use is <i>implicitly known</i> since the object neither contains a <code>" +
         JSONSignatureDecoder.KID_JSON + "</code>, nor a <code>" + 
         JSONSignatureDecoder.JWK_JSON + "</code> property:" +
-        readAsymSignature("p521implicitkeysigned.json", p521key, new JSONSignatureDecoder.Options()
+        readAsymSignature("p521implicitkeysigned.json", p521key, new JSONCryptoDecoder.Options()
             .setRequirePublicKeyInfo(false)) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
@@ -447,7 +448,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "RSA private key associated with the subsequent object:" +
         formatCode(r2048key) +
         "The following object was signed by the key above:" +
-        readAsymSignature("r2048keysigned.json", r2048key, new JSONSignatureDecoder.Options()) +
+        readAsymSignature("r2048keysigned.json", r2048key, new JSONCryptoDecoder.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
         readCertSignature("r2048certsigned.json") + LINE_SEPARATOR +
