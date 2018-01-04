@@ -146,7 +146,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     
     static String readAsymEncryption(String name) throws IOException, GeneralSecurityException {
         JSONObjectReader rd = json.readJson2(name);
-        if (!ArrayUtil.compare(rd.getEncryptionObject().getDecryptedData(keys), dataToEncrypt)) {
+        if (!ArrayUtil.compare(rd.getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(keys), dataToEncrypt)) {
             throw new IOException(name);
         }
         return formatCode(rd);
@@ -154,7 +154,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     
     static String readAsymEncryption(String name, AsymKey asymKey) throws IOException, GeneralSecurityException {
         JSONObjectReader rd = json.readJson2(name);
-        if (!ArrayUtil.compare(rd.getEncryptionObject().getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
+        if (!ArrayUtil.compare(rd.getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
             throw new IOException(name);
         }
         return formatCode(rd);
@@ -165,7 +165,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             JSONObjectReader rd = json.readJson2(name);
-            JSONDecryptionDecoder dec = rd.getEncryptionObject();
+            JSONDecryptionDecoder dec = rd.getEncryptionObject(new JSONDecryptionDecoder.Options());
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
                 if (key.length == dec.getDataEncryptionAlgorithm().getKeyLength()) {

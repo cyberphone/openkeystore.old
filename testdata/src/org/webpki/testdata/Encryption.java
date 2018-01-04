@@ -17,13 +17,13 @@
 package org.webpki.testdata;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPublicKey;
 import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.json.JSONAsymKeyEncrypter;
+import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncrypter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -105,7 +105,7 @@ public class Encryption {
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
-                       JSONParser.parse(encryptedData).getEncryptionObject().getDecryptedData(key))) {
+                       JSONParser.parse(encryptedData).getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(key))) {
             throw new Exception("Encryption fail");
         }
     }
@@ -155,7 +155,7 @@ public class Encryption {
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject().getDecryptedData(keyPair.getPrivate()),
+                 .getEncryptionObject(new JSONDecryptionDecoder.Options()).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
             throw new Exception("Dec err");
         }
@@ -207,8 +207,7 @@ public class Encryption {
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
-                                                       encrypters,
-                                                       null).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+                                                       encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + fileSuffix, encryptedData);
 /*
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)

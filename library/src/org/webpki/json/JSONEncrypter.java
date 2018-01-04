@@ -63,21 +63,15 @@ public abstract class JSONEncrypter implements Serializable {
 
         JSONObjectWriter encryptionWriter;
 
-        JSONObjectReader globalExtensions;
-        
         byte[] dataEncryptionKey;
         
         String globalKeyId;
 
-        EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm,
-                         JSONEncrypter encrypter,
-                         JSONObjectReader globalExtensions) throws IOException {
+        EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
-            this.globalExtensions = globalExtensions;
             dataEncryptionKey = encrypter.dataEncryptionKey;
             globalKeyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
-            addExtensionProperties(globalExtensions, encryptionWriter);
             globalKeyId = encrypter.keyId;
             encryptionWriter.setString(JSONDecryptionDecoder.ENC_JSON, dataEncryptionAlgorithm.joseName);
             if (globalKeyId != null) {
@@ -88,22 +82,6 @@ public abstract class JSONEncrypter implements Serializable {
                 if (globalKeyEncryptionAlgorithm.keyWrap) {
                     dataEncryptionKey = EncryptionCore.generateRandom(dataEncryptionAlgorithm.keyLength);
                 }
-            }
-        }
-
-        private static void addExtensionProperties(JSONObjectReader extensions, 
-                                                   JSONObjectWriter writer) throws IOException {
-            if (extensions != null) {
-                for (String property : extensions.getProperties()) {
-                    writer.setProperty(property, extensions.getProperty(property));
-                }
-            }
-        }
-
-        private static void addExtensionIndicator(JSONObjectReader extensions, 
-                                                  JSONObjectWriter writer) throws IOException {
-            if (extensions != null) {
-                writer.setStringArray(JSONSignatureDecoder.CRIT_JSON, extensions.getProperties());
             }
         }
 
@@ -154,21 +132,29 @@ public abstract class JSONEncrypter implements Serializable {
                                                asymmetricEncryptionResult.getEncryptedKeyData());
                 }
             }
+
+            if (encrypter.extensions != null) {
+                currentRecipient.setStringArray(JSONSignatureDecoder.CRIT_JSON, encrypter.extensions.getProperties());
+                for (String property : encrypter.extensions.getProperties()) {
+                    currentRecipient.setProperty(property, encrypter.extensions.getProperty(property));
+                }
+            }
         }
 
         void cleanRecipient(JSONObjectWriter recipient) {
-            // All recipients have the same keyId?
+
+            // All recipients have the same keyId?  If so remove the local definition
             if (globalKeyId != null) {
                 recipient.root.properties.remove(JSONSignatureDecoder.KID_JSON);
             }
-            // All recipients use the same key encryption algorithm?
+
+            // All recipients use the same key encryption algorithm?  If so remove the local definition
             if (globalKeyEncryptionAlgorithm != null) {
                 recipient.root.properties.remove(JSONSignatureDecoder.ALG_JSON);
             }
         }
 
         JSONObjectWriter finalizeEncryption(byte[] unencryptedData) throws IOException, GeneralSecurityException {
-            addExtensionIndicator(globalExtensions, encryptionWriter);
             byte[] iv = EncryptionCore.createIv(dataEncryptionAlgorithm);
             encryptionWriter.setBinary(JSONDecryptionDecoder.IV_JSON, iv);
             EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =

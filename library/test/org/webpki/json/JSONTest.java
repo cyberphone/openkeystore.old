@@ -3726,7 +3726,7 @@ public class JSONTest {
                                                                 dea,
                                                                 new JSONSymKeyEncrypter(dataEncryptionKey)).toString();
         assertTrue("Symmetric",
-                JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject()
+                JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject(new JSONDecryptionDecoder.Options())
                         .getDecryptedData(dataEncryptionKey)).toString().equals(json.toString()));
     }
 
@@ -3835,7 +3835,7 @@ public class JSONTest {
                 if (!ArrayUtil.compare(plainText,
                                   JSONParser
                                       .parse(json.toString())
-                                          .getEncryptionObject()
+                                          .getEncryptionObject(new JSONDecryptionDecoder.Options())
                                               .getDecryptedData((kea.isRsa() ?
                                                       malletKeys : alice).getPrivate()))) {
                     throw new IOException("Fail on " + kea + "/" + dea);
@@ -3996,7 +3996,7 @@ public class JSONTest {
                                                                                             null)).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
-                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()
+                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options())
                                 .getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter
@@ -4005,7 +4005,7 @@ public class JSONTest {
                                                                    new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                                             KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                                                                             null).setKeyId("bob")).toString();
-        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject();
+        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options());
         assertTrue("kid", decDec.getKeyId().equals("bob"));
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
@@ -4018,7 +4018,7 @@ public class JSONTest {
                                                                                             null)).toString();
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString()
-                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject()
+                        .equals(JSONParser.parse(JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options())
                                 .getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter
@@ -4027,7 +4027,7 @@ public class JSONTest {
                                         new JSONAsymKeyEncrypter(malletKeys.getPublic(),
                                                                  KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
                                                                  null).setKeyId("mallet")).toString();
-        decDec = JSONParser.parse(encJson).getEncryptionObject();
+        decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONDecryptionDecoder.Options());
         assertTrue("kid", decDec.getKeyId().equals("mallet"));
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()

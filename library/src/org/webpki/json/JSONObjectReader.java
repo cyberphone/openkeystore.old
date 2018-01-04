@@ -612,7 +612,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
      */
-    public JSONDecryptionDecoder getEncryptionObject() throws IOException {
+    public JSONDecryptionDecoder getEncryptionObject(JSONDecryptionDecoder.Options options) throws IOException {
         return new JSONDecryptionDecoder(this);
     }
 

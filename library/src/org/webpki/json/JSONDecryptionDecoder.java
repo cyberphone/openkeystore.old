@@ -74,6 +74,10 @@ public class JSONDecryptionDecoder {
         reservedWords.add(JSONSignatureDecoder.X5U_JSON);
     }
 
+    public static class Options {
+        
+    }
+
     private PublicKey publicKey;
 
     private ECPublicKey ephemeralPublicKey;  // For ECHD only
