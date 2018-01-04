@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 
 import java.util.GregorianCalendar;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -494,7 +495,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      */
     public JSONSignatureDecoder getSignature(JSONCryptoDecoder.Options options) throws IOException {
         return new JSONSignatureDecoder(this,
-                                        getObject(JSONSignatureDecoder.SIGNATURE_JSON),
+                                        getObject(JSONCryptoDecoder.SIGNATURE_JSON),
                                         options);
     }
 
@@ -508,22 +509,22 @@ public class JSONObjectReader implements Serializable, Cloneable {
      */
     public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoDecoder.Options options) throws IOException {
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
-        JSONArrayReader arrayReader = getArray(JSONSignatureDecoder.SIGNATURES_JSON);
+        JSONArrayReader arrayReader = getArray(JSONCryptoDecoder.SIGNATURES_JSON);
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
         @SuppressWarnings("unchecked")
-        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONSignatureDecoder.SIGNATURES_JSON).value;
+        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONCryptoDecoder.SIGNATURES_JSON).value;
         int i = 0;
         for (JSONObjectReader signature : signatureObjects) {
             Vector<JSONObject> element = new Vector<JSONObject>();
             element.add(save.get(i++));
-            root.properties.put(JSONSignatureDecoder.SIGNATURES_JSON, 
+            root.properties.put(JSONCryptoDecoder.SIGNATURES_JSON, 
                                 new JSONValue(JSONTypes.ARRAY, element));
             signatures.add(new JSONSignatureDecoder(this, signature, options));
         }
-        root.properties.put(JSONSignatureDecoder.SIGNATURES_JSON, 
+        root.properties.put(JSONCryptoDecoder.SIGNATURES_JSON, 
                             new JSONValue(JSONTypes.ARRAY, save));
         return signatures;
     }
@@ -539,7 +540,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setPublicKey(PublicKey)
      */
     public PublicKey getPublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return getObject(JSONSignatureDecoder.JWK_JSON).getCorePublicKey(algorithmPreferences);
+        return getObject(JSONCryptoDecoder.JWK_JSON).getCorePublicKey(algorithmPreferences);
     }
 
     /**
@@ -644,7 +645,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setCertificatePath(X509Certificate[])
      */
     public X509Certificate[] getCertificatePath() throws IOException {
-        return getArray(JSONSignatureDecoder.X5C_JSON).getCertificatePath();
+        return getArray(JSONCryptoDecoder.X5C_JSON).getCertificatePath();
     }
 
     /**

@@ -517,12 +517,12 @@ public class JSONObjectWriter implements Serializable {
     }
 
     private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
-        signatureWriter.setString(JSONSignatureDecoder.ALG_JSON,
+        signatureWriter.setString(JSONCryptoDecoder.ALG_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
 
         // "kid" is always optional
         if (signer.keyId != null) {
-            signatureWriter.setString(JSONSignatureDecoder.KID_JSON, signer.keyId);
+            signatureWriter.setString(JSONCryptoDecoder.KID_JSON, signer.keyId);
         }
 
         // "jku"/"x5u" and "jwk"/"x5c" are mutually exclusive
@@ -536,7 +536,7 @@ public class JSONObjectWriter implements Serializable {
 
         // Optional extensions
         if (signer.extensions != null) {
-            JSONArrayWriter extensions = signatureWriter.setArray(JSONSignatureDecoder.CRIT_JSON);
+            JSONArrayWriter extensions = signatureWriter.setArray(JSONCryptoDecoder.CRIT_JSON);
             for (String property : signer.extensions.getProperties()) {
                 extensions.setString(property);
                 signatureWriter.setProperty(property, signer.extensions.getProperty(property));
@@ -549,16 +549,16 @@ public class JSONObjectWriter implements Serializable {
             JSONObjectReader rd = new JSONObjectReader(this).clone();
             for (String property : signer.excluded) {
                 if (!rd.hasProperty(property)) {
-                    throw new IOException("Missing \"" + JSONSignatureDecoder.EXCL_JSON + "\" property: " + property);
+                    throw new IOException("Missing \"" + JSONCryptoDecoder.EXCL_JSON + "\" property: " + property);
                 }
                 rd.removeProperty(property);
             }
             signedObject = new JSONObjectWriter(rd);
-            signatureWriter.setStringArray(JSONSignatureDecoder.EXCL_JSON, signer.excluded);
+            signatureWriter.setStringArray(JSONCryptoDecoder.EXCL_JSON, signer.excluded);
         }
 
         // Finally, the signature itself
-        signatureWriter.setBinary(JSONSignatureDecoder.VAL_JSON,
+        signatureWriter.setBinary(JSONCryptoDecoder.VAL_JSON,
                                   signer.signData(signer.normalizedData = 
                                           signedObject.serializeToBytes(JSONOutputFormats.NORMALIZED)));
     }
@@ -635,7 +635,7 @@ import org.webpki.json.JSONSignatureDecoder;
 </pre>
     */
     public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
-        coreSign(signer, setObject(JSONSignatureDecoder.SIGNATURE_JSON));
+        coreSign(signer, setObject(JSONCryptoDecoder.SIGNATURE_JSON));
         return this;
     }
     
@@ -652,14 +652,14 @@ import org.webpki.json.JSONSignatureDecoder;
         if (signers.isEmpty()) {
             throw new IOException("Empty signer list");
         }
-        setArray(JSONSignatureDecoder.SIGNATURES_JSON);
+        setArray(JSONCryptoDecoder.SIGNATURES_JSON);
         Vector<JSONObject> signatures = new Vector<JSONObject>();
         for (JSONSigner signer : signers) {
-            setupForRewrite(JSONSignatureDecoder.SIGNATURES_JSON);
-            coreSign(signer, setArray(JSONSignatureDecoder.SIGNATURES_JSON).setObject());
-            signatures.addAll((Vector<JSONObject>) root.properties.get(JSONSignatureDecoder.SIGNATURES_JSON).value);
+            setupForRewrite(JSONCryptoDecoder.SIGNATURES_JSON);
+            coreSign(signer, setArray(JSONCryptoDecoder.SIGNATURES_JSON).setObject());
+            signatures.addAll((Vector<JSONObject>) root.properties.get(JSONCryptoDecoder.SIGNATURES_JSON).value);
         }
-        root.properties.put(JSONSignatureDecoder.SIGNATURES_JSON, new JSONValue(JSONTypes.ARRAY, signatures));
+        root.properties.put(JSONCryptoDecoder.SIGNATURES_JSON, new JSONValue(JSONTypes.ARRAY, signatures));
         return this;
     }
 
@@ -687,16 +687,16 @@ import org.webpki.json.JSONSignatureDecoder;
         JSONObjectWriter corePublicKey = new JSONObjectWriter();
         KeyAlgorithms keyAlg = KeyAlgorithms.getKeyAlgorithm(publicKey);
         if (keyAlg.isRSAKey()) {
-            corePublicKey.setString(JSONSignatureDecoder.KTY_JSON, JSONSignatureDecoder.RSA_PUBLIC_KEY);
+            corePublicKey.setString(JSONCryptoDecoder.KTY_JSON, JSONCryptoDecoder.RSA_PUBLIC_KEY);
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
-            corePublicKey.setCryptoBinary(rsaPublicKey.getModulus(), JSONSignatureDecoder.N_JSON);
-            corePublicKey.setCryptoBinary(rsaPublicKey.getPublicExponent(), JSONSignatureDecoder.E_JSON);
+            corePublicKey.setCryptoBinary(rsaPublicKey.getModulus(), JSONCryptoDecoder.N_JSON);
+            corePublicKey.setCryptoBinary(rsaPublicKey.getPublicExponent(), JSONCryptoDecoder.E_JSON);
         } else {
-            corePublicKey.setString(JSONSignatureDecoder.KTY_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY);
-            corePublicKey.setString(JSONSignatureDecoder.CRV_JSON, keyAlg.getAlgorithmId(algorithmPreferences));
+            corePublicKey.setString(JSONCryptoDecoder.KTY_JSON, JSONCryptoDecoder.EC_PUBLIC_KEY);
+            corePublicKey.setString(JSONCryptoDecoder.CRV_JSON, keyAlg.getAlgorithmId(algorithmPreferences));
             ECPoint ecPoint = ((ECPublicKey) publicKey).getW();
-            corePublicKey.setCurvePoint(ecPoint.getAffineX(), JSONSignatureDecoder.X_JSON, keyAlg);
-            corePublicKey.setCurvePoint(ecPoint.getAffineY(), JSONSignatureDecoder.Y_JSON, keyAlg);
+            corePublicKey.setCurvePoint(ecPoint.getAffineX(), JSONCryptoDecoder.X_JSON, keyAlg);
+            corePublicKey.setCurvePoint(ecPoint.getAffineY(), JSONCryptoDecoder.Y_JSON, keyAlg);
         }
         return corePublicKey;
     }
@@ -718,7 +718,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
-        return setObject(JSONSignatureDecoder.JWK_JSON, createCorePublicKey(publicKey, algorithmPreferences));
+        return setObject(JSONCryptoDecoder.JWK_JSON, createCorePublicKey(publicKey, algorithmPreferences));
     }
 
     /**
@@ -748,7 +748,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
-        return setArray(JSONSignatureDecoder.X5C_JSON, 
+        return setArray(JSONCryptoDecoder.X5C_JSON, 
                         JSONArrayWriter.createCoreCertificatePath(certificatePath));
     }
 
@@ -806,7 +806,7 @@ import org.webpki.json.JSONSignatureDecoder;
             recipents.add(currentRecipient);
         }
         JSONArrayWriter recipientList = 
-                encryptionHeader.encryptionWriter.setArray(JSONDecryptionDecoder.RECIPIENTS_JSON);
+                encryptionHeader.encryptionWriter.setArray(JSONCryptoDecoder.RECIPIENTS_JSON);
         for (JSONObjectWriter recipient : recipents) {
             encryptionHeader.cleanRecipient(recipient);
             recipientList.setObject(recipient);

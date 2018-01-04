@@ -25,7 +25,6 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -43,37 +42,6 @@ import org.webpki.crypto.AlgorithmPreferences;
  * Holds parsed JEF (JSON Encryption Format) data.
  */
 public class JSONDecryptionDecoder {
-
-    public static final String ENCRYPTED_KEY_JSON    = "encrypted_key";
-    public static final String EPK_JSON              = "epk";
-    public static final String ENC_JSON              = "enc";
-    public static final String AAD_JSON              = "aad";
-    public static final String IV_JSON               = "iv";
-    public static final String TAG_JSON              = "tag";
-    public static final String CIPHER_TEXT_JSON      = "ciphertext";
-    public static final String RECIPIENTS_JSON       = "recipients";
-
-    static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
-    
-    static {
-        jefReservedWords.add(JSONSignatureDecoder.ALG_JSON);
-        jefReservedWords.add(ENC_JSON);
-        jefReservedWords.add(IV_JSON);
-        jefReservedWords.add(TAG_JSON);
-        jefReservedWords.add(AAD_JSON);
-        jefReservedWords.add(ENCRYPTED_KEY_JSON);
-        jefReservedWords.add(EPK_JSON);
-        jefReservedWords.add(CIPHER_TEXT_JSON);
-        jefReservedWords.add(RECIPIENTS_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.CRIT_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.KID_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.JWK_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.JKU_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.X5C_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.X5T_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.X5T_S256_JSON);
-        jefReservedWords.add(JSONSignatureDecoder.X5U_JSON);
-    }
 
     static class Holder {
 
@@ -93,10 +61,10 @@ public class JSONDecryptionDecoder {
             encryptionObject.clearReadFlags();
             this.options = options;
             if (multiple) {
-                if (encryptionObject.hasProperty(JSONSignatureDecoder.ALG_JSON)) {
+                if (encryptionObject.hasProperty(JSONCryptoDecoder.ALG_JSON)) {
                     globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
                 }
-                globalKeyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
+                globalKeyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
             }
             ///////////////////////////////////////////////////////////////////////////////////////
             // Begin JEF normalization                                                           //
@@ -106,8 +74,8 @@ public class JSONDecryptionDecoder {
                     new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
             //                                                                                   //
             // 2. Hide these properties from the serializer..                                    //
-            encryptionObject.root.properties.remove(TAG_JSON);                                   //
-            encryptionObject.root.properties.remove(CIPHER_TEXT_JSON);                           //
+            encryptionObject.root.properties.remove(JSONCryptoDecoder.TAG_JSON);                 //
+            encryptionObject.root.properties.remove(JSONCryptoDecoder.CIPHER_TEXT_JSON);         //
             //                                                                                   //
             // 3. Serialize ("JSON.stringify()")                                                 //
             authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
@@ -118,10 +86,10 @@ public class JSONDecryptionDecoder {
             // End JEF normalization                                                             //
             ///////////////////////////////////////////////////////////////////////////////////////
             dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptionObject.getString(ENC_JSON));
-            iv = encryptionObject.getBinary(IV_JSON);
-            tag = encryptionObject.getBinary(TAG_JSON);
-            encryptedData = encryptionObject.getBinary(CIPHER_TEXT_JSON);
+                    .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
+            iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
+            tag = encryptionObject.getBinary(JSONCryptoDecoder.TAG_JSON);
+            encryptedData = encryptionObject.getBinary(JSONCryptoDecoder.CIPHER_TEXT_JSON);
         }
     }
 
@@ -175,8 +143,8 @@ public class JSONDecryptionDecoder {
     }
 
     private static KeyEncryptionAlgorithms getOptionalAlgorithm(JSONObjectReader reader) throws IOException {
-        return reader.hasProperty(JSONSignatureDecoder.ALG_JSON) ? 
-            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONSignatureDecoder.ALG_JSON)) : null;
+        return reader.hasProperty(JSONCryptoDecoder.ALG_JSON) ? 
+            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoDecoder.ALG_JSON)) : null;
     }
 
     JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
@@ -189,8 +157,8 @@ public class JSONDecryptionDecoder {
                 new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
         //                                                                                   //
         // 2. Hide these properties from the serializer..                                    //
-        encryptionObject.root.properties.remove(TAG_JSON);                                   //
-        encryptionObject.root.properties.remove(CIPHER_TEXT_JSON);                           //
+        encryptionObject.root.properties.remove(JSONCryptoDecoder.TAG_JSON);                 //
+        encryptionObject.root.properties.remove(JSONCryptoDecoder.CIPHER_TEXT_JSON);         //
         //                                                                                   //
         // 3. Serialize ("JSON.stringify()")                                                 //
         authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
@@ -201,32 +169,32 @@ public class JSONDecryptionDecoder {
         // End JEF normalization                                                             //
         ///////////////////////////////////////////////////////////////////////////////////////
         dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromId(encryptionObject.getString(ENC_JSON));
-        iv = encryptionObject.getBinary(IV_JSON);
-        tag = encryptionObject.getBinary(TAG_JSON);
-        keyId = encryptionObject.getStringConditional(JSONSignatureDecoder.KID_JSON);
+                .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
+        iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
+        tag = encryptionObject.getBinary(JSONCryptoDecoder.TAG_JSON);
+        keyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
         keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-        if (encryptionObject.hasProperty(JSONDecryptionDecoder.RECIPIENTS_JSON)) {
-            JSONArrayReader recepients = encryptionObject.getArray(RECIPIENTS_JSON);
+        if (encryptionObject.hasProperty(JSONCryptoDecoder.RECIPIENTS_JSON)) {
+            JSONArrayReader recepients = encryptionObject.getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
             do {
                 
             } while (recepients.hasMore());
         }
         else if (keyEncryptionAlgorithm != null) {
-            if (encryptionObject.hasProperty(JSONSignatureDecoder.JWK_JSON)) {
+            if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
                 publicKey = encryptionObject.getPublicKey(AlgorithmPreferences.JOSE);
             }
             if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKeyData = encryptionObject.getBinary(ENCRYPTED_KEY_JSON);
+                encryptedKeyData = encryptionObject.getBinary(JSONCryptoDecoder.ENCRYPTED_KEY_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
-                        (ECPublicKey) encryptionObject.getObject(EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
+                        (ECPublicKey) encryptionObject.getObject(JSONCryptoDecoder.EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
             }
         } else {
             sharedSecretMode = true;
         }
-        encryptedData = encryptionObject.getBinary(CIPHER_TEXT_JSON);
+        encryptedData = encryptionObject.getBinary(JSONCryptoDecoder.CIPHER_TEXT_JSON);
         encryptionObject.checkForUnread();
     }
 
@@ -275,11 +243,11 @@ public class JSONDecryptionDecoder {
 
     static void checkExtensions(String[] properties) throws IOException {
         if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONSignatureDecoder.CRIT_JSON + "\" array not allowed");
+            throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
         }
         for (String property : properties) {
-            if (jefReservedWords.contains(property)) {
-                throw new IOException("Forbidden \"" + JSONSignatureDecoder.CRIT_JSON + "\" property: " + property);
+            if (JSONCryptoDecoder.jefReservedWords.contains(property)) {
+                throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
             }
         }
     }

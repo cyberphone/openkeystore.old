@@ -36,53 +36,91 @@ public class JSONCryptoDecoder implements Serializable {
     private JSONCryptoDecoder() {}
 
     // Arguments
-    public static final String EC_PUBLIC_KEY              = "EC";
+    public static final String EC_PUBLIC_KEY           = "EC";
 
-    public static final String RSA_PUBLIC_KEY             = "RSA";
+    public static final String RSA_PUBLIC_KEY          = "RSA";
 
     // JSON properties
-    public static final String ALG_JSON                   = "alg";
+    public static final String ALG_JSON                = "alg";
 
-    public static final String CRV_JSON                   = "crv";          // JWK
+    public static final String CRV_JSON                = "crv";            // JWK
 
-    public static final String E_JSON                     = "e";            // JWK
+    public static final String E_JSON                  = "e";              // JWK
 
-    public static final String EXCL_JSON                  = "excl";         // JCS specific non-protected
+    public static final String EXCL_JSON               = "excl";           // JCS specific non-protected
 
-    public static final String CRIT_JSON                  = "crit";         // JWS extension
+    public static final String CRIT_JSON               = "crit";           // JWS extension
 
-    public static final String JKU_JSON                   = "jku";          // Remote JWK set url
+    public static final String JKU_JSON                = "jku";            // Remote JWK set url
 
-    public static final String KID_JSON                   = "kid";
+    public static final String KID_JSON                = "kid";
 
-    public static final String KEYS_JSON                  = "keys";         // for JWK sets
+    public static final String KEYS_JSON               = "keys";           // for JWK sets
 
-    public static final String KTY_JSON                   = "kty";          // JWK
+    public static final String KTY_JSON                = "kty";            // JWK
 
-    public static final String N_JSON                     = "n";            // JWK
+    public static final String N_JSON                  = "n";              // JWK
 
-    public static final String JWK_JSON                   = "jwk";          // Public key holder
+    public static final String JWK_JSON                = "jwk";            // Public key holder
 
-    public static final String SIGNATURE_JSON             = "signature";    // JCS - Single signatures
+    public static final String SIGNATURE_JSON          = "signature";      // JCS - Single signatures
 
-    public static final String SIGNATURES_JSON            = "signatures";   // JCS - Multiple signatures
+    public static final String SIGNATURES_JSON         = "signatures";     // JCS - Multiple signatures
 
-    public static final String VAL_JSON                   = "val";          // JCS specific signature value 
+    public static final String VAL_JSON                = "val";            // JCS specific signature value 
 
-    public static final String X_JSON                     = "x";            // JWK
+    public static final String X_JSON                  = "x";              // JWK
 
-    public static final String Y_JSON                     = "y";            // JWK
+    public static final String Y_JSON                  = "y";              // JWK
     
-    public static final String X5C_JSON                   = "x5c";          // Certificate path
+    public static final String X5C_JSON                = "x5c";            // Certificate path
 
-    public static final String X5T_JSON                   = "x5t";          // Certificate SHA-1 thumbprint
+    public static final String X5T_JSON                = "x5t";            // Certificate SHA-1 thumbprint
 
-    public static final String X5T_S256_JSON              = "x5t#s256";     // Certificate SHA-256 thumbprint
+    public static final String X5T_S256_JSON           = "x5t#s256";       // Certificate SHA-256 thumbprint
 
-    public static final String X5U_JSON                   = "x5u";          // PEM certificate path on URL
+    public static final String X5U_JSON                = "x5u";            // PEM certificate path on URL
     
+    public static final String ENCRYPTED_KEY_JSON      = "encrypted_key";
+
+    public static final String EPK_JSON                = "epk";
+
+    public static final String ENC_JSON                = "enc";
+
+    public static final String AAD_JSON                = "aad";
+
+    public static final String IV_JSON                 = "iv";
+
+    public static final String TAG_JSON                = "tag";
+
+    public static final String CIPHER_TEXT_JSON        = "ciphertext";
+
+    public static final String RECIPIENTS_JSON         = "recipients";
+
+    static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
+
+    static {
+        jefReservedWords.add(ALG_JSON);
+        jefReservedWords.add(ENC_JSON);
+        jefReservedWords.add(IV_JSON);
+        jefReservedWords.add(TAG_JSON);
+        jefReservedWords.add(AAD_JSON);
+        jefReservedWords.add(ENCRYPTED_KEY_JSON);
+        jefReservedWords.add(EPK_JSON);
+        jefReservedWords.add(CIPHER_TEXT_JSON);
+        jefReservedWords.add(RECIPIENTS_JSON);
+        jefReservedWords.add(CRIT_JSON);
+        jefReservedWords.add(KID_JSON);
+        jefReservedWords.add(JWK_JSON);
+        jefReservedWords.add(JKU_JSON);
+        jefReservedWords.add(X5C_JSON);
+        jefReservedWords.add(X5T_JSON);
+        jefReservedWords.add(X5T_S256_JSON);
+        jefReservedWords.add(X5U_JSON);
+    }
+
     static final LinkedHashSet<String> jcsReservedWords = new LinkedHashSet<String>();
-    
+
     static {
         jcsReservedWords.add(ALG_JSON);
         jcsReservedWords.add(CRIT_JSON);
@@ -96,9 +134,9 @@ public class JSONCryptoDecoder implements Serializable {
         jcsReservedWords.add(X5U_JSON);
         jcsReservedWords.add(VAL_JSON);
     }
-    
+
     static final LinkedHashSet<String> topLevelReserved = new LinkedHashSet<String>();
-    
+
     static {
         topLevelReserved.add(SIGNATURE_JSON);
         topLevelReserved.add(SIGNATURES_JSON);

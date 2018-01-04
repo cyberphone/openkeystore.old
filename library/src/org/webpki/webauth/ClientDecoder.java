@@ -48,7 +48,7 @@ abstract class ClientDecoder extends InputValidator {
         //////////////////////////////////////////////////////////////////
         // Must be a Signature otherwise something has gone wrong...
         //////////////////////////////////////////////////////////////////
-        if (rd.hasProperty(JSONSignatureDecoder.SIGNATURE_JSON)) {
+        if (rd.hasProperty(JSONCryptoDecoder.SIGNATURE_JSON)) {
             signature = rd.getSignature(new JSONCryptoDecoder.Options());
         }
     }

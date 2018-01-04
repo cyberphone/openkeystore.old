@@ -126,7 +126,7 @@ public class Signatures {
         @Override
         public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            return JSONParser.parse(data).getArray(JSONSignatureDecoder.KEYS_JSON).getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            return JSONParser.parse(data).getArray(JSONCryptoDecoder.KEYS_JSON).getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
         @Override

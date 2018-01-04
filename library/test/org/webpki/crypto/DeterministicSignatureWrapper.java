@@ -32,6 +32,7 @@ import java.security.interfaces.RSAKey;
 
 import java.security.spec.ECParameterSpec;
 
+import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
@@ -162,11 +163,11 @@ public class DeterministicSignatureWrapper {
     
     public static void rfc4754() throws Exception {
         JSONObjectWriter jwk = new JSONObjectWriter()
-            .setString(JSONSignatureDecoder.KTY_JSON, JSONSignatureDecoder.EC_PUBLIC_KEY)
-            .setString(JSONSignatureDecoder.CRV_JSON,"P-256")
+            .setString(JSONCryptoDecoder.KTY_JSON, JSONCryptoDecoder.EC_PUBLIC_KEY)
+            .setString(JSONCryptoDecoder.CRV_JSON,"P-256")
             .setBinary("d", DebugFormatter.getByteArrayFromHex(PRIVATE_KEY))
-            .setBinary(JSONSignatureDecoder.X_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_X))
-            .setBinary(JSONSignatureDecoder.Y_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_Y));
+            .setBinary(JSONCryptoDecoder.X_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_X))
+            .setBinary(JSONCryptoDecoder.Y_JSON, DebugFormatter.getByteArrayFromHex(PUBLIC_Y));
         KeyPair keyPair = JSONParser.parse(jwk.toString()).getKeyPair();
         byte[] signature = new DeterministicSignatureWrapper(AsymSignatureAlgorithms.ECDSA_SHA256,
                                                              keyPair.getPrivate())

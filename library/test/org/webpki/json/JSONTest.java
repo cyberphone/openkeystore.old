@@ -2626,10 +2626,10 @@ public class JSONTest {
 
     static KeyPair getKeyPairFromJwk(String jwk) throws Exception {
         JSONObjectReader rd = JSONParser.parse(jwk);
-        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString(JSONSignatureDecoder.CRV_JSON),
+        KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromId(rd.getString(JSONCryptoDecoder.CRV_JSON),
                 AlgorithmPreferences.JOSE);
         if (!ec.isECKey()) {
-            throw new IOException("\"" + JSONSignatureDecoder.CRV_JSON + "\" is not an EC type");
+            throw new IOException("\"" + JSONCryptoDecoder.CRV_JSON + "\" is not an EC type");
         }
         ECPoint w = new ECPoint(getCurvePoint(rd, "x", ec), getCurvePoint(rd, "y", ec));
         PublicKey publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ec.getECParameterSpec()));
@@ -3133,7 +3133,7 @@ public class JSONTest {
         byte[] spki_bin = Base64URL.decode(spki);
         JSONObjectReader or = JSONParser.parse(jcs);
         PublicKey publicKey = or.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        PublicKey public_key2 = or.getObject(JSONSignatureDecoder.JWK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey public_key2 = or.getObject(JSONCryptoDecoder.JWK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue("Public key", ArrayUtil.compare(publicKey.getEncoded(), spki_bin));
         assertTrue("Public key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter();
@@ -3154,9 +3154,9 @@ public class JSONTest {
         ow = new JSONObjectWriter();
         public_key2 = JSONParser.parse(ow.setPublicKey(public_key2).setInt("OK", 5).toString()).getPublicKey();
         assertTrue("Public key2+", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
-        JSONObjectReader pub_key_object = or.getObject(JSONSignatureDecoder.JWK_JSON);
-        boolean rsaFlag = pub_key_object.getString(JSONSignatureDecoder.KTY_JSON).equals(JSONSignatureDecoder.RSA_PUBLIC_KEY);
-        String key_parm = rsaFlag ? JSONSignatureDecoder.N_JSON : JSONSignatureDecoder.Y_JSON;
+        JSONObjectReader pub_key_object = or.getObject(JSONCryptoDecoder.JWK_JSON);
+        boolean rsaFlag = pub_key_object.getString(JSONCryptoDecoder.KTY_JSON).equals(JSONCryptoDecoder.RSA_PUBLIC_KEY);
+        String key_parm = rsaFlag ? JSONCryptoDecoder.N_JSON : JSONCryptoDecoder.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary(key_parm);
         boolean must_fail = true;
         if (rsaFlag) {
@@ -3180,9 +3180,9 @@ public class JSONTest {
         } catch (Exception e) {
             assertTrue("Shouldn't have failed", must_fail);
             checkException(e, rsaFlag ?
-                    "RSA key parameter \"" + JSONSignatureDecoder.N_JSON + "\" contains leading zeroes"
+                    "RSA key parameter \"" + JSONCryptoDecoder.N_JSON + "\" contains leading zeroes"
                     :
-                    "Public EC key parameter \"" + JSONSignatureDecoder.Y_JSON + "\" is not normalized");
+                    "Public EC key parameter \"" + JSONCryptoDecoder.Y_JSON + "\" is not normalized");
         }
     }
 
@@ -3368,7 +3368,7 @@ public class JSONTest {
         @Override
         public PublicKey readPublicKey(String uri) throws IOException {
             byte[] data = shoot(uri);
-            JSONArrayReader ar = JSONParser.parse(data).getArray(JSONSignatureDecoder.KEYS_JSON);
+            JSONArrayReader ar = JSONParser.parse(data).getArray(JSONCryptoDecoder.KEYS_JSON);
             return ar.getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         }
 
@@ -3429,7 +3429,7 @@ public class JSONTest {
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Property \"" + JSONSignatureDecoder.JWK_JSON + "\" was never read");
+            checkException(e, "Property \"" + JSONCryptoDecoder.JWK_JSON + "\" was never read");
         }
         try {
             verifySignature(writer, 
@@ -3446,7 +3446,7 @@ public class JSONTest {
             verifySignature(writer, new JSONCryptoDecoder.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Use of \"" + JSONSignatureDecoder.CRIT_JSON + "\" must be set in options");
+            checkException(e, "Use of \"" + JSONCryptoDecoder.CRIT_JSON + "\" must be set in options");
         }
         try {
             JSONCryptoDecoder.ExtensionHolder holder = new JSONCryptoDecoder.ExtensionHolder();
@@ -3493,7 +3493,7 @@ public class JSONTest {
                                  p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext2");
+            checkException(e, "Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext2");
         }
         holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
@@ -3503,7 +3503,7 @@ public class JSONTest {
             readSignature(writer, new JSONCryptoDecoder.Options().setPermittedExtensions(holder));
             fail("Not ok");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONSignatureDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
         }
         holder = new JSONCryptoDecoder.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, false);
@@ -3521,7 +3521,7 @@ public class JSONTest {
             signature.getSignature(new JSONCryptoDecoder.Options());
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Use of \"" + JSONSignatureDecoder.KID_JSON + "\" must be set in options");
+            checkException(e, "Use of \"" + JSONCryptoDecoder.KID_JSON + "\" must be set in options");
         }
         JSONSignatureDecoder decoder =
             signature.getSignature(new JSONCryptoDecoder.Options()
@@ -3559,7 +3559,7 @@ public class JSONTest {
                     .setRequirePublicKeyInfo(false)
                     .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED));
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
+            checkException(e, "Missing \"" + JSONCryptoDecoder.KID_JSON + "\"");
         }
         writer = new JSONObjectWriter()
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
@@ -3600,7 +3600,7 @@ public class JSONTest {
                 .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED));
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONSignatureDecoder.KID_JSON + "\"");
+            checkException(e, "Missing \"" + JSONCryptoDecoder.KID_JSON + "\"");
         }
         signatures = new JSONObjectReader(writer).getSignatures(new JSONCryptoDecoder.Options()
             .setRequirePublicKeyInfo(false)
