@@ -615,7 +615,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public JSONDecryptionDecoder getEncryptionObject(JSONCryptoDecoder.Options options) throws IOException {
-        return new JSONDecryptionDecoder(this);
+        JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, false);
+        return new JSONDecryptionDecoder(holder, this, true);
     }
 
     /**
@@ -630,9 +631,17 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoDecoder.Options options) throws IOException {
+        JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, true);
+        JSONArrayReader recipientObjects = getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
         Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();
+        do {
+            recipients.add(new JSONDecryptionDecoder(holder, 
+                                                     recipientObjects.getObject(),
+                                                     !recipientObjects.hasMore()));
+        } while (recipientObjects.hasMore());
         return recipients;
     }
+
     /**
      * Read a certificate path in 
      * <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>

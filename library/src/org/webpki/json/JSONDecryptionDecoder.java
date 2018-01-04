@@ -29,7 +29,6 @@ import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
 // Because the encryption system (naturally) borrows heavily from JCS         //
@@ -97,23 +96,15 @@ public class JSONDecryptionDecoder {
 
     private ECPublicKey ephemeralPublicKey;  // For ECHD only
 
-    private DataEncryptionAlgorithms dataEncryptionAlgorithm;
-
-    private byte[] iv;
-
-    private byte[] tag;
-
     private String keyId;
 
     private KeyEncryptionAlgorithms keyEncryptionAlgorithm;
 
     private byte[] encryptedKeyData;  // For RSA and ECDH+ only
 
-    private byte[] encryptedData;
-    
     private boolean sharedSecretMode;
 
-    private byte[] authenticatedData;  // This implementation uses "encryptedKey" which is similar to JWE's protected header
+    private Holder holder;
 
     public PublicKey getPublicKey() {
         return publicKey;
@@ -135,7 +126,7 @@ public class JSONDecryptionDecoder {
     }
 
     public DataEncryptionAlgorithms getDataEncryptionAlgorithm() {
-        return dataEncryptionAlgorithm;
+        return holder.dataEncryptionAlgorithm;
     }
 
     public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
@@ -147,40 +138,23 @@ public class JSONDecryptionDecoder {
             KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoDecoder.ALG_JSON)) : null;
     }
 
-    JSONDecryptionDecoder(JSONObjectReader encryptionObject) throws IOException {
-        encryptionObject.clearReadFlags();
-        ///////////////////////////////////////////////////////////////////////////////////////
-        // Begin JEF normalization                                                           //
-        //                                                                                   //
-        // 1. Make a shallow copy of the encryption object property list                     //
-        LinkedHashMap<String, JSONValue> savedProperties =                                   //
-                new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
-        //                                                                                   //
-        // 2. Hide these properties from the serializer..                                    //
-        encryptionObject.root.properties.remove(JSONCryptoDecoder.TAG_JSON);                 //
-        encryptionObject.root.properties.remove(JSONCryptoDecoder.CIPHER_TEXT_JSON);         //
-        //                                                                                   //
-        // 3. Serialize ("JSON.stringify()")                                                 //
-        authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
-        //                                                                                   //
-        // 4. Restore encryption object property list                                        //
-        encryptionObject.root.properties = savedProperties;                                  //
-        //                                                                                   //
-        // End JEF normalization                                                             //
-        ///////////////////////////////////////////////////////////////////////////////////////
-        dataEncryptionAlgorithm = DataEncryptionAlgorithms
-                .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
-        iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
-        tag = encryptionObject.getBinary(JSONCryptoDecoder.TAG_JSON);
+    JSONDecryptionDecoder(Holder holder, 
+                          JSONObjectReader encryptionObject,
+                          boolean last) throws IOException {
+        this.holder = holder;
+
         keyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
-        keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-        if (encryptionObject.hasProperty(JSONCryptoDecoder.RECIPIENTS_JSON)) {
-            JSONArrayReader recepients = encryptionObject.getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
-            do {
-                
-            } while (recepients.hasMore());
+        if (holder.globalKeyId != null && keyId != null) {
+            throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
         }
-        else if (keyEncryptionAlgorithm != null) {
+
+        keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
+        if (keyEncryptionAlgorithm == null) {
+            keyEncryptionAlgorithm = holder.globalKeyEncryptionAlgorithm;
+        } else if (holder.globalKeyEncryptionAlgorithm != null) {
+            throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.ALG_JSON + "\" not allowed");
+        }
+        if (keyEncryptionAlgorithm != null) {
             if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
                 publicKey = encryptionObject.getPublicKey(AlgorithmPreferences.JOSE);
             }
@@ -194,17 +168,18 @@ public class JSONDecryptionDecoder {
         } else {
             sharedSecretMode = true;
         }
-        encryptedData = encryptionObject.getBinary(JSONCryptoDecoder.CIPHER_TEXT_JSON);
-        encryptionObject.checkForUnread();
+        if (last) {
+            encryptionObject.checkForUnread();
+        }
     }
 
     private byte[] localDecrypt(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
-        return EncryptionCore.contentDecryption(dataEncryptionAlgorithm,
+        return EncryptionCore.contentDecryption(holder.dataEncryptionAlgorithm,
                                                 dataDecryptionKey,
-                                                encryptedData,
-                                                iv,
-                                                authenticatedData,
-                                                tag);
+                                                holder.encryptedData,
+                                                holder.iv,
+                                                holder.authenticatedData,
+                                                holder.tag);
     }
 
     public byte[] getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
@@ -220,7 +195,7 @@ public class JSONDecryptionDecoder {
                                              privateKey)
                                                            :
                 EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
-                                                    dataEncryptionAlgorithm,
+                                                    holder.dataEncryptionAlgorithm,
                                                     ephemeralPublicKey,
                                                     privateKey,
                                                     encryptedKeyData));

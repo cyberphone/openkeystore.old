@@ -26,8 +26,10 @@ import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 
+import org.webpki.json.DecryptionKeyHolder;
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncrypter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -177,6 +179,7 @@ public class Encryption {
     static void multipleAsymEnc(String[] keyTypes, String fileSuffix, 
                                 DataEncryptionAlgorithms dataEncryptionAlgorithm, 
                                 boolean wantKeyId) throws Exception {
+        Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
         Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
         String algList = "";
         for (String keyType : keyTypes) {
@@ -197,6 +200,10 @@ public class Encryption {
                 dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
             }
+            decryptionKeys.add(new DecryptionKeyHolder(keyPair.getPublic(),
+                                                       keyPair.getPrivate(),
+                                                       keyEncryptionAlgorithm,
+                                                       keyId));
             JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
                                                                       keyEncryptionAlgorithm,
                                                                       null);
@@ -214,12 +221,12 @@ public class Encryption {
                                                        dataEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + fileSuffix, encryptedData);
-/*
-        if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject().getDecryptedData(keyPair.getPrivate()),
-                               dataToBeEncrypted)) {
-            throw new Exception("Dec err");
+        for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
+                 .getEncryptionObjects(new JSONCryptoDecoder.Options())) {
+            if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {
+                throw new Exception("Dec err");
+            }
         }
-*/
+
      }
 }
