@@ -227,7 +227,7 @@ public class HTML {
     public static void webCryptoPage(HttpServletResponse response)
             throws IOException, ServletException {
         StringBuffer html = new StringBuffer(
-                "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><style> "
+                "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
         + "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "
         + "</style></head>\n"
         + "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\""
