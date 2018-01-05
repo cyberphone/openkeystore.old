@@ -30,11 +30,12 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 
 ////////////////////////////////////////////////////////////////////////////////
-// JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
-// Because the encryption system (naturally) borrows heavily from JCS         //
-// including using the normalization scheme.                                  //
+// JEF is effectively a "remake" of a subset of JWE.  Why a remake?  Because  //
+// the encryption system (naturally) borrows heavily from JCS including clear //
+// text header information and using the ES6+ based normalization scheme for  //
+// creating authenticated data.                                               //
 //                                                                            //
-// The supported algorithms are though JOSE compatible including their names. //
+// The supported algorithms and attributes are though fully JOSE compatible.  //
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -49,21 +50,22 @@ public class JSONDecryptionDecoder {
 
         JSONCryptoDecoder.Options options;
 
-        DataEncryptionAlgorithms dataEncryptionAlgorithm;
-
         byte[] authenticatedData;
         byte[] iv;
         byte[] tag;
         byte[] encryptedData;
         
+        DataEncryptionAlgorithms dataEncryptionAlgorithm;
         KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
         String globalKeyId;
+        JSONObjectReader globalEncryptionObject;
 
         Holder (JSONCryptoDecoder.Options options, 
                 JSONObjectReader encryptionObject,
                 boolean multiple) throws IOException {
             encryptionObject.clearReadFlags();
             this.options = options;
+            this.globalEncryptionObject = encryptionObject;
             if (multiple) {
                 /////////////////////////////////////////////////////////////////////////////
                 // For encryption objects with multiple recipients we allow global
@@ -163,9 +165,9 @@ public class JSONDecryptionDecoder {
 
     /**
      * Decodes a single encryption element.
-     * @param holder
-     * @param encryptionObject
-     * @param last
+     * @param holder Global data
+     * @param encryptionObject JSON input data
+     * @param last <code>true</code> if this is the final encryption object
      * @throws IOException
      */
     JSONDecryptionDecoder(Holder holder, 
@@ -173,11 +175,13 @@ public class JSONDecryptionDecoder {
                           boolean last) throws IOException {
         this.holder = holder;
 
+        // Collect keyId if such are permitted
         keyId = holder.options.getKeyId(encryptionObject);
         if (holder.globalKeyId != null && keyId != null) {
             throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
         }
 
+        // Are we using a key encryption scheme?
         keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
         if (keyEncryptionAlgorithm == null) {
             keyEncryptionAlgorithm = holder.globalKeyEncryptionAlgorithm;
@@ -218,10 +222,12 @@ public class JSONDecryptionDecoder {
             }
         }
 
+        // An encryption object may also hold "crit" data
         holder.options.getExtensions(encryptionObject, extensions);
 
         if (last) {
-            encryptionObject.checkForUnread();
+            // The MUST NOT be any unknown elements inside of a JEF object
+            holder.globalEncryptionObject.checkForUnread();
         }
     }
 
