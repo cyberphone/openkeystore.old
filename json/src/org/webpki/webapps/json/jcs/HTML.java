@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
-import org.webpki.json.JSONSignatureDecoder;
+import org.webpki.json.JSONCryptoDecoder;
 
 public class HTML {
     static final String SIGNUP_BGND_COLOR = "#F4FFF1";
@@ -350,37 +350,37 @@ public class HTML {
         + "      return;\n"
         + "    }\n"
         + "    if (jsonObject."
-        + JSONSignatureDecoder.SIGNATURE_JSON
+        + JSONCryptoDecoder.SIGNATURE_JSON
         + ") {\n"
         + "      bad('sign.res', 'Object is already signed');\n"
         + "      return;\n"
         + "    }\n"
         + "    var signatureObject = jsonObject."
-        + JSONSignatureDecoder.SIGNATURE_JSON
+        + JSONCryptoDecoder.SIGNATURE_JSON
         + " = {};\n"
         + "    signatureObject."
-        + JSONSignatureDecoder.ALG_JSON
+        + JSONCryptoDecoder.ALG_JSON
         + " = '"
         + AsymSignatureAlgorithms.RSA_SHA256
                 .getAlgorithmId(AlgorithmPreferences.JOSE)
         + "';\n"
         + "    var publicKeyObject = signatureObject."
-        + JSONSignatureDecoder.JWK_JSON
+        + JSONCryptoDecoder.JWK_JSON
         + " = {};\n"
         + "    publicKeyObject."
-        + JSONSignatureDecoder.KTY_JSON
+        + JSONCryptoDecoder.KTY_JSON
         + " = '"
-        + JSONSignatureDecoder.RSA_PUBLIC_KEY
+        + JSONCryptoDecoder.RSA_PUBLIC_KEY
         + "';\n"
         + "    publicKeyObject."
-        + JSONSignatureDecoder.N_JSON
+        + JSONCryptoDecoder.N_JSON
         + " = publicKeyInJWKFormat."
-        + JSONSignatureDecoder.N_JSON
+        + JSONCryptoDecoder.N_JSON
         + ";\n"
         + "    publicKeyObject."
-        + JSONSignatureDecoder.E_JSON
+        + JSONCryptoDecoder.E_JSON
         + " = publicKeyInJWKFormat."
-        + JSONSignatureDecoder.E_JSON
+        + JSONCryptoDecoder.E_JSON
         + ";\n"
         + "  } catch (err) {\n"
         + "    bad('sign.res', 'JSON error: ' + err.toString());\n"
@@ -390,7 +390,7 @@ public class HTML {
         + "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
-        + JSONSignatureDecoder.VAL_JSON
+        + JSONCryptoDecoder.VAL_JSON
         + " = convertToBase64URL(new Uint8Array(signature));\n"
         + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
         + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"

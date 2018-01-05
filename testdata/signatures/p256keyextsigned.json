@@ -1,5 +1,5 @@
 {
-  "now": "2017-04-16T11:23:06Z",
+  "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
@@ -7,14 +7,14 @@
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
-      "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
+      "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
+      "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
     },
     "crit": ["myString","https://example.com/extension"],
     "myString": "something",
     "https://example.com/extension": {
       "life-is-great": true
     },
-    "val": "SmKzHca1dOtqCViqc9xSffOhYk2HwdG23-qmDTAcwE3_D0egs-QbYd3lSvL3WYJJyD6j9169UIT_bROQKMyrPQ"
+    "val": "xUJ_kADN3gh_YNMK0todWRVBnQa3hDlIKIY86rRA4bw1BSkox5tsNYxyXZ4VzWF4RGmVow96X9KY7i0CufLIOg"
   }
 }

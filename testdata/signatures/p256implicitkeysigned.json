@@ -1,10 +1,10 @@
 {
-  "now": "2017-04-16T11:23:06Z",
+  "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "ES256",
-    "kid": "20170101:mybank:p256",
-    "val": "3VJUDX88cJYbnT5Se79Z-hlMnONvzh6vV71UCqsYL3l_jKK2jmm_ob1rWgsBSXsDnVnAyYvPpLXKCSaCblU_Bg"
+    "kid": "20180101:mybank:p256",
+    "val": "OjHWjZUA_6tU2PmrTEHC_2QJIkbYrOZJLlJGNpHlo8evQdTZ2XMgxS7s8uOoRe1qojd2EKtttpghk0KJRvS6ew"
   }
 }

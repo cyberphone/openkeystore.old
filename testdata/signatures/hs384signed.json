@@ -1,10 +1,10 @@
 {
-  "now": "2017-04-16T11:23:06Z",
+  "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "HS384",
     "kid": "s384bitkey",
-    "val": "_q1QBjGkFFGqNT6_tkO_qZdjD8cqgI4Kj1T_Yqjw4nhTYxPk-9AaXrjiav5CrrFE"
+    "val": "hE-Vqu_qlfhkq0tH4Xjv2_fOClRlNC4GWdtmJSC8I0WVljyBCKcnu9MqUcHGwujr"
   }
 }

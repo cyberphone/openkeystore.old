@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PublicKey;
 
-import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;

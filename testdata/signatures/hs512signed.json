@@ -1,10 +1,10 @@
 {
-  "now": "2017-04-16T11:23:06Z",
+  "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "HS512",
     "kid": "s512bitkey",
-    "val": "jfsFU4ANIwSga2ygW8gag89p4BQQwkjqQ8oPOuOaBis_F7wI19e6j1Rto1kmt3lz-a4SIC57QPuHOTY-QF-C1w"
+    "val": "ETayG40t5DxtYkwYf_eUBG-Yd5xZ2uR7y93-0jc2G_7HyWyggRh2rme1n7KRJkOXJESpjVhcFKqG_WNP87-UTg"
   }
 }

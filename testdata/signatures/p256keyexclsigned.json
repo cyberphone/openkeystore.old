@@ -6,10 +6,10 @@
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
-      "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
+      "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
+      "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
     },
     "excl": ["myUnsignedData"],
-    "val": "nVnZtJUdUktFRdDLEchfx-rUG7pfoA-tUl4ajmuHfSscGazDrxUIGagfI4atfe7j-jhirzZ9t50qSvLudpo2pw"
+    "val": "mjmbl9GjkGFwCgdvnx6zM_X0cYrxFm2EEdJ6s_DB3caiRfIj5hE5F4d_2dNkyE4ZqVrKUUKnE27oN2pW0IVlSw"
   }
 }
