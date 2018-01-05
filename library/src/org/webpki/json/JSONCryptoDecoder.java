@@ -318,4 +318,11 @@ public class JSONCryptoDecoder implements Serializable {
             checkOneExtension(property, encryptionMode);
         }
     }
+
+    static String checkHttpsUrl(String url) throws IOException {
+        if (!HTTPS_URL_PATTERN.matcher(url).matches()) {
+            throw new IOException("Invalid URL: " + url);
+        }
+        return url;
+    }
 }

@@ -3330,6 +3330,11 @@ public class JSONTest {
         protected void decode(JSONObjectReader reader) throws IOException {
             data = reader.getString(URI);
         }
+
+        @Override
+        public String toString() {
+            return data;
+        }
     }
     
     public static class EncryptionExtForbidden extends JSONCryptoDecoder.Extension {
@@ -4060,6 +4065,25 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: enc");
         }
+
+        encJson = JSONObjectWriter
+                    .createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),
+                                                                       DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                                       new JSONAsymKeyEncrypter(bob.getPublic(),
+                                                                                                KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                                                                null)
+                            .setExtensions(new JSONObjectWriter()
+                                 .setString(new ExampleComExtGood().getExtensionUri(), "hi"))).toString();
+        extensionHolder = new JSONCryptoDecoder.ExtensionHolder();
+        extensionHolder.addExtension(ExampleComExtGood.class, false);
+        decDec = JSONParser.parse(encJson)
+                .getEncryptionObject(new JSONCryptoDecoder.Options()
+                    .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL)
+                    .setPermittedExtensions(extensionHolder));
+        assertTrue("ext", decDec.extensions.get(new ExampleComExtGood().getExtensionUri()).toString().equals("hi"));
+        assertTrue("Bad JOSE ECDH",
+                unEncJson.toString()
+                        .equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
 
         encJson = JSONObjectWriter
                 .createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),

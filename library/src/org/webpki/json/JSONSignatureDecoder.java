@@ -165,7 +165,7 @@ public class JSONSignatureDecoder implements Serializable {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
         if (options.remoteKeyReader != null) {
-            String url = checkHttpsUrl(rd.getString(options.remoteKeyType.jsonName));
+            String url = JSONCryptoDecoder.checkHttpsUrl(rd.getString(options.remoteKeyType.jsonName));
             if (options.remoteKeyType.certificateFlag) {
                 certificatePath = options.remoteKeyReader.readCertificatePath(url);
             } else {
@@ -357,12 +357,5 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
         return ex;
-     }
-
-    static String checkHttpsUrl(String url) throws IOException {
-        if (!JSONCryptoDecoder.HTTPS_URL_PATTERN.matcher(url).matches()) {
-            throw new IOException("Invalid URL: " + url);
-        }
-        return url;
     }
 }

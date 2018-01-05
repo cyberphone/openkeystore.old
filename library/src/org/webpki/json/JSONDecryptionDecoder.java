@@ -22,6 +22,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 import java.util.LinkedHashMap;
@@ -105,6 +107,8 @@ public class JSONDecryptionDecoder {
     LinkedHashMap<String,JSONCryptoDecoder.Extension> extensions = new LinkedHashMap<String,JSONCryptoDecoder.Extension>();
 
     private PublicKey publicKey;
+    
+    private X509Certificate[] certificatePath;
 
     private ECPublicKey ephemeralPublicKey;  // For ECHD only
 
@@ -120,6 +124,10 @@ public class JSONDecryptionDecoder {
 
     public PublicKey getPublicKey() {
         return publicKey;
+    }
+
+    public X509Certificate[] getCertificatePath() {
+        return certificatePath;
     }
 
     public boolean isSharedSecret() {
@@ -177,9 +185,25 @@ public class JSONDecryptionDecoder {
         if (keyEncryptionAlgorithm == null) {
             sharedSecretMode = true;
         } else {
-            if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
-                publicKey = encryptionObject.getPublicKey(holder.options.algorithmPreferences);
+            // We are apparently into a two level encryption scheme
+            if (holder.options.requirePublicKeyInfo) {
+                if (holder.options.remoteKeyReader != null) {
+                    String url = JSONCryptoDecoder.checkHttpsUrl(
+                            encryptionObject.getString(holder.options.remoteKeyType.jsonName));
+                    if (holder.options.remoteKeyType.certificateFlag) {
+                        certificatePath = holder.options.remoteKeyReader.readCertificatePath(url);
+                    } else {
+                        publicKey = holder.options.remoteKeyReader.readPublicKey(url);
+                    }
+                } else if (encryptionObject.hasProperty(JSONCryptoDecoder.X5C_JSON)) {
+                    certificatePath = encryptionObject.getCertificatePath();
+                } else if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
+                    publicKey = encryptionObject.getPublicKey(holder.options.algorithmPreferences);
+                } else {
+                    throw new IOException("Missing key information");
+                }
             }
+
             if (keyEncryptionAlgorithm.isKeyWrap()) {
                 encryptedKeyData = encryptionObject.getBinary(JSONCryptoDecoder.ENCRYPTED_KEY_JSON);
             }

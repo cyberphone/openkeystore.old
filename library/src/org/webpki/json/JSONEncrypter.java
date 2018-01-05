@@ -184,7 +184,7 @@ public abstract class JSONEncrypter implements Serializable {
     }
 
     void setRemoteKey(String url, JSONRemoteKeys format) throws IOException {
-        this.remoteUrl = JSONSignatureDecoder.checkHttpsUrl(url);
+        this.remoteUrl = JSONCryptoDecoder.checkHttpsUrl(url);
         this.remoteKeyFormat = format;
     }
 
