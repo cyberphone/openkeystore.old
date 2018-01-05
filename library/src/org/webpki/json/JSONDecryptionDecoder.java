@@ -72,7 +72,10 @@ public class JSONDecryptionDecoder {
                 if (encryptionObject.hasProperty(JSONCryptoDecoder.ALG_JSON)) {
                     globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
                 }
-                globalKeyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
+                globalKeyId = options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN ?
+                    options.getKeyId(encryptionObject) 
+                        : 
+                    encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////
