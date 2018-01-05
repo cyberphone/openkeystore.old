@@ -3332,6 +3332,23 @@ public class JSONTest {
         }
     }
     
+    public static class EncryptionExtForbidden extends JSONCryptoDecoder.Extension {
+        
+        static final String URI = JSONCryptoDecoder.ENC_JSON;
+        
+        public String data;
+
+        @Override
+        public String getExtensionUri() {
+            return URI;
+        }
+
+        @Override
+        protected void decode(JSONObjectReader reader) throws IOException {
+            data = reader.getString(URI);
+        }
+    }
+
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
     static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
     
@@ -4012,6 +4029,37 @@ public class JSONTest {
         assertTrue("kid", decDec.getKeyId().equals("bob"));
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
+
+        JSONCryptoDecoder.ExtensionHolder extensionHolder = new JSONCryptoDecoder.ExtensionHolder();
+        extensionHolder.addExtension(ExampleComExtGood.class, false);
+        decDec = JSONParser.parse(encJson)
+                     .getEncryptionObject(new JSONCryptoDecoder.Options()
+                         .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL)
+                         .setPermittedExtensions(extensionHolder));
+
+        try {
+            extensionHolder = new JSONCryptoDecoder.ExtensionHolder();
+            extensionHolder.addExtension(ExampleComExtGood.class, true);
+            decDec = JSONParser.parse(encJson)
+                         .getEncryptionObject(new JSONCryptoDecoder.Options()
+                             .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL)
+                             .setPermittedExtensions(extensionHolder));
+            fail("Shouldn't");
+        } catch (Exception e) {
+            checkException(e, "Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
+        }
+
+        try {
+            extensionHolder = new JSONCryptoDecoder.ExtensionHolder();
+            extensionHolder.addExtension(EncryptionExtForbidden.class, false);
+            decDec = JSONParser.parse(encJson)
+                         .getEncryptionObject(new JSONCryptoDecoder.Options()
+                             .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL)
+                             .setPermittedExtensions(extensionHolder));
+            fail("Shouldn't");
+        } catch (Exception e) {
+            checkException(e, "Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: enc");
+        }
 
         encJson = JSONObjectWriter
                 .createEncryptionObject(unEncJson.serializeToBytes(JSONOutputFormats.NORMALIZED),

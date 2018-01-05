@@ -256,6 +256,9 @@ public class JSONCryptoDecoder implements Serializable {
                     throw new IOException("\"setPermittedExclusions()\" is not applicable to encryption");
                 }
             }
+            for (String extension : extensionHolder.extensions.keySet()) {
+                checkOneExtension(extension, flag);
+            }
         }
 
         String getKeyId(JSONObjectReader reader) throws IOException {
@@ -301,14 +304,18 @@ public class JSONCryptoDecoder implements Serializable {
         }
     }
 
+    private static void checkOneExtension(String property, boolean encryptionMode) throws IOException {
+        if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
+            throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
+        }
+    }
+
     static void checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
         if (properties.length == 0) {
             throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
         }
         for (String property : properties) {
-            if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
-                throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
-            }
+            checkOneExtension(property, encryptionMode);
         }
     }
 }

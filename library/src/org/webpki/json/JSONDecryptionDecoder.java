@@ -102,6 +102,8 @@ public class JSONDecryptionDecoder {
         }
     }
 
+    LinkedHashMap<String,JSONCryptoDecoder.Extension> extensions = new LinkedHashMap<String,JSONCryptoDecoder.Extension>();
+
     private PublicKey publicKey;
 
     private ECPublicKey ephemeralPublicKey;  // For ECHD only
@@ -188,6 +190,8 @@ public class JSONDecryptionDecoder {
                                 .getCorePublicKey(holder.options.algorithmPreferences);
             }
         }
+
+        holder.options.getExtensions(encryptionObject, extensions);
 
         if (last) {
             encryptionObject.checkForUnread();
