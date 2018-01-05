@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.testdata;
+package org.webpki.json;
 
 import java.io.IOException;
 

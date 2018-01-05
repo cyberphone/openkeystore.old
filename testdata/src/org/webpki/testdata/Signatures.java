@@ -30,6 +30,9 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
 
+import org.webpki.json.Extension1;
+import org.webpki.json.Extension2;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;

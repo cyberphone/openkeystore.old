@@ -82,10 +82,7 @@ import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 
-import org.webpki.net.HTTPSWrapper;
-
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
 
