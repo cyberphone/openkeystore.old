@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2017 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2018 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -66,32 +66,6 @@ public class Signatures {
    
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
     static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
-
-    public static class Ext1 extends JSONCryptoDecoder.Extension {
-
-        @Override
-        protected void decode(JSONObjectReader rd) throws IOException {
-            rd.getString(getExtensionUri());
-        }
-
-        @Override
-        public String getExtensionUri() {
-            return "myString";
-        }
-    }
-
-    public static class Ext2 extends JSONCryptoDecoder.Extension {
-
-        @Override
-        protected void decode(JSONObjectReader rd) throws IOException {
-            rd.getObject(getExtensionUri()).getBoolean("life-is-great");
-        }
-
-        @Override
-        public String getExtensionUri() {
-            return "https://example.com/extension";
-        }
-    }
 
     public static class WebKey implements JSONRemoteKeys.Reader {
         
@@ -198,13 +172,13 @@ public class Signatures {
         
         byte[] signedData = createSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null)
                    .setExtensions(new JSONObjectWriter()
-                        .setString(new Ext1().getExtensionUri(), "something")
-                        .setObject(new Ext2().getExtensionUri(), 
+                        .setString(new Extension1().getExtensionUri(), "something")
+                        .setObject(new Extension2().getExtensionUri(), 
                                    new JSONObjectWriter().setBoolean("life-is-great", true))));
         ArrayUtil.writeFile(baseSignatures + "p256keyextsigned.json", signedData);
         JSONCryptoDecoder.ExtensionHolder eh = new JSONCryptoDecoder.ExtensionHolder();
-        eh.addExtension(Ext1.class, true);
-        eh.addExtension(Ext2.class, true);
+        eh.addExtension(Extension1.class, true);
+        eh.addExtension(Extension2.class, true);
         JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()
                         .setPermittedExtensions(eh)).verify(new JSONAsymKeyVerifier(localKey.getPublic()));
 
