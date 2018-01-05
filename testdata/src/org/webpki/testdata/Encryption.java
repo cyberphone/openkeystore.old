@@ -20,6 +20,8 @@ import java.io.File;
 
 import java.security.KeyPair;
 
+import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Vector;
@@ -28,6 +30,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.DecryptionKeyHolder;
 import org.webpki.json.JSONAsymKeyEncrypter;
+import org.webpki.json.JSONX509Encrypter;
 import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncrypter;
@@ -71,6 +74,9 @@ public class Encryption {
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
         
+        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
+        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
+        
         multipleAsymEnc(new String[]{"p256", "p384"}, 
                         ".multimpkey.json", 
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
@@ -98,7 +104,46 @@ public class Encryption {
 
         coreSymmEnc(256, ".implicitkey.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
     }
-    
+
+    static void certEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
+        X509Certificate[] certPath = 
+            JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
+                .getJSONArrayReader().getCertificatePath();
+        KeyPair keyPair = readJwk(keyType);
+        KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
+        if (keyPair.getPublic() instanceof ECPublicKey) {
+            switch (dataEncryptionAlgorithm.getKeyLength()) {
+            case 16: 
+                keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID;
+                break;
+            case 32: 
+                keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A256KW_ALG_ID;
+                break;
+            default: 
+                keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID;
+                break;
+            }
+        }
+        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID &&
+            dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
+            keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
+        }
+        JSONX509Encrypter encrypter = new JSONX509Encrypter(certPath,
+                                                            keyEncryptionAlgorithm,
+                                                            null);
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        byte[] encryptedData =
+               JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
+                                                       dataEncryptionAlgorithm,
+                                                       encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+        ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + ".certenc.json", encryptedData);
+        if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
+                 .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
+                               dataToBeEncrypted)) {
+            throw new Exception("Dec err");
+        }
+    }
+
     static void coreSymmEnc(int keyBits, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
@@ -157,7 +202,9 @@ public class Encryption {
                                                                   null);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         if (wantKeyId) {
-            encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
+            encrypter.setKeyId(keyId);
+            encrypter.setOutputPublicKeyInfo(false);
+            options.setRequirePublicKeyInfo(false);
             options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
         }
         byte[] encryptedData =
@@ -223,6 +270,7 @@ public class Encryption {
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         if (wantKeyId) {
             options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            options.setRequirePublicKeyInfo(false);
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
