@@ -36,8 +36,6 @@ import java.security.PublicKey;
 
 import java.security.SecureRandom;
 
-import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 
 import java.security.spec.ECPoint;
@@ -3357,49 +3355,6 @@ public class JSONTest {
     static final String P256CERTPATH = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
     static final String R2048KEY     = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
     
-    public static class WebKey implements JSONRemoteKeys.Reader {
-        
-        Vector<byte[]> getBinaryContentFromPem(byte[] pemBinary, String label, boolean multiple) throws IOException {
-            String pem = new String(pemBinary, "UTF-8");
-            Vector<byte[]> result = new Vector<byte[]>();
-            while (true) {
-                int start = pem.indexOf("-----BEGIN " + label + "-----");
-                int end = pem.indexOf("-----END " + label + "-----");
-                if (start >= 0 && end > 0 && end > start) {
-                    byte[] blob = new Base64().getBinaryFromBase64String(pem.substring(start + label.length() + 16, end));
-                    result.add(blob);
-                    pem = pem.substring(end + label.length() + 14);
-                } else {
-                    if (result.isEmpty()) {
-                        throw new IOException("No \"" + label + "\" found");
-                    }
-                    if (!multiple && result.size() > 1) {
-                        throw new IOException("Multiple \"" + label + "\" found");
-                    }
-                    return result;
-                }
-            }
-        }
-     
-        byte[] shoot(String uri) throws IOException {
-            HTTPSWrapper wrapper = new HTTPSWrapper();
-            wrapper.makeGetRequest(uri);
-            return wrapper.getData();
-        }
-
-        @Override
-        public PublicKey readPublicKey(String uri) throws IOException {
-            byte[] data = shoot(uri);
-            JSONArrayReader ar = JSONParser.parse(data).getArray(JSONCryptoDecoder.KEYS_JSON);
-            return ar.getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        }
-
-        @Override
-        public X509Certificate[] readCertificatePath(String uri) throws IOException {
-            byte[] data = shoot(uri);
-            return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
-        }
-    }
 
     public static class ExampleComExtGood2 extends JSONCryptoDecoder.Extension {
         
