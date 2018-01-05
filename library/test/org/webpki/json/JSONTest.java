@@ -4005,7 +4005,10 @@ public class JSONTest {
                                                                    new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                                             KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
                                                                                             null).setKeyId("bob")).toString();
-        JSONDecryptionDecoder decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options());
+        JSONDecryptionDecoder decDec =
+                JSONParser.parse(encJson)
+                    .getEncryptionObject(new JSONCryptoDecoder.Options()
+                        .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue("kid", decDec.getKeyId().equals("bob"));
         assertTrue("Bad JOSE ECDH",
                 unEncJson.toString().equals(JSONParser.parse(decDec.getDecryptedData(decryptionKeys)).toString()));
@@ -4027,7 +4030,8 @@ public class JSONTest {
                                         new JSONAsymKeyEncrypter(malletKeys.getPublic(),
                                                                  KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
                                                                  null).setKeyId("mallet")).toString();
-        decDec = JSONParser.parse(encJson).getEncryptionObject(new JSONCryptoDecoder.Options());
+        decDec = JSONParser.parse(encJson)
+                .getEncryptionObject(new JSONCryptoDecoder.Options().setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue("kid", decDec.getKeyId().equals("mallet"));
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()

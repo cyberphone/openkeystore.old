@@ -76,14 +76,7 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONCryptoDecoder.Options options) throws IOException {
         this.options = options;
         algorithmString = signature.getString(JSONCryptoDecoder.ALG_JSON);
-        keyId = signature.getStringConditional(JSONCryptoDecoder.KID_JSON);
-        if (keyId == null) {
-            if (options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED) {
-                throw new IOException("Missing \"" + JSONCryptoDecoder.KID_JSON + "\"");
-            }
-        } else if (options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN) {
-            throw new IOException("Use of \"" + JSONCryptoDecoder.KID_JSON + "\" must be set in options");
-        }
+        keyId = options.getKeyId(signature);
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(signature);
         } else {
@@ -99,33 +92,9 @@ public class JSONSignatureDecoder implements Serializable {
                 algorithm = MACAlgorithms.getAlgorithmFromId(algorithmString, options.algorithmPreferences);
             }
         }
-        if (signature.hasProperty(JSONCryptoDecoder.CRIT_JSON)) {
-            String[] properties = signature.getStringArray(JSONCryptoDecoder.CRIT_JSON);
-            checkExtensions(properties);
-            if (options.extensionHolder.extensions.isEmpty()) {
-                throw new IOException("Use of \"" + JSONCryptoDecoder.CRIT_JSON + "\" must be set in options");
-            }
-            for (String name : properties) {
-                JSONCryptoDecoder.ExtensionEntry extensionEntry = options.extensionHolder.extensions.get(name);
-                if (extensionEntry == null) {
-                    throw new IOException("Unexpected \"" + JSONCryptoDecoder.CRIT_JSON + "\" extension: " + name);
-                }
-                try {
-                    JSONCryptoDecoder.Extension extension = extensionEntry.extensionClass.newInstance();
-                    extension.decode(signature);
-                    extensions.put(name, extension);
-                } catch (InstantiationException e) {
-                    throw new IOException (e);
-                } catch (IllegalAccessException e) {
-                    throw new IOException (e);
-                }
-            }
-        }
-        for (String name : options.extensionHolder.extensions.keySet()) {
-            if (!extensions.containsKey(name) && options.extensionHolder.extensions.get(name).mandatory) {
-                throw new IOException("Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: " + name);
-            }
-        }
+
+        options.getExtensions(signature, extensions);
+
         LinkedHashMap<String, JSONValue> saveExcluded = null;
         if (options.exclusions == null) {
             if (signature.hasProperty(JSONCryptoDecoder.EXCL_JSON)) {
@@ -371,17 +340,6 @@ public class JSONSignatureDecoder implements Serializable {
                                                               getCryptoBinary(rd, "qi")));
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
-        }
-    }
-
-    static void checkExtensions(String[] properties) throws IOException {
-        if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
-        }
-        for (String property : properties) {
-            if (JSONCryptoDecoder.jcsReservedWords.contains(property)) {
-                throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
-            }
         }
     }
 

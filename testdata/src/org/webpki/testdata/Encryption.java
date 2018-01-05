@@ -103,8 +103,10 @@ public class Encryption {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
         JSONSymKeyEncrypter encrypter = new JSONSymKeyEncrypter(key);
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         if (wantKeyId) {
             encrypter.setKeyId(keyName);
+            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
         }
         byte[] encryptedData = 
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
@@ -112,7 +114,7 @@ public class Encryption {
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
-                       JSONParser.parse(encryptedData).getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(key))) {
+                       JSONParser.parse(encryptedData).getEncryptionObject(options).getDecryptedData(key))) {
             throw new Exception("Encryption fail");
         }
     }
@@ -153,8 +155,10 @@ public class Encryption {
         JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
                                                                   keyEncryptionAlgorithm,
                                                                   null);
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         if (wantKeyId) {
             encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
+            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
@@ -162,7 +166,7 @@ public class Encryption {
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(keyPair.getPrivate()),
+                 .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
             throw new Exception("Dec err");
         }
@@ -216,13 +220,17 @@ public class Encryption {
             algList += keyType + keyEncryptionAlgorithm.toString().toLowerCase();
             encrypters.add(encrypter);
         }
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        if (wantKeyId) {
+            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+        }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + fileSuffix, encryptedData);
         for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
-                 .getEncryptionObjects(new JSONCryptoDecoder.Options())) {
+                 .getEncryptionObjects(options)) {
             if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {
                 throw new Exception("Dec err");
             }

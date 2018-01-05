@@ -62,7 +62,7 @@ public abstract class JSONSigner implements Serializable {
      */
     public JSONSigner setExtensions(JSONObjectWriter extensions) throws IOException {
         this.extensions = new JSONObjectReader(extensions);
-        JSONSignatureDecoder.checkExtensions(this.extensions.getProperties());
+        JSONCryptoDecoder.checkExtensions(this.extensions.getProperties(), false);
         return this;
     }
 

@@ -494,6 +494,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public JSONSignatureDecoder getSignature(JSONCryptoDecoder.Options options) throws IOException {
+        options.encryptionMode(false);
         return new JSONSignatureDecoder(this,
                                         getObject(JSONCryptoDecoder.SIGNATURE_JSON),
                                         options);
@@ -508,6 +509,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @throws IOException &nbsp;
      */
     public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoDecoder.Options options) throws IOException {
+        options.encryptionMode(false);
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         JSONArrayReader arrayReader = getArray(JSONCryptoDecoder.SIGNATURES_JSON);
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
@@ -615,6 +617,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public JSONDecryptionDecoder getEncryptionObject(JSONCryptoDecoder.Options options) throws IOException {
+        options.encryptionMode(true);
         JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, false);
         return new JSONDecryptionDecoder(holder, this, true);
     }
@@ -631,6 +634,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoDecoder.Options options) throws IOException {
+        options.encryptionMode(true);
         JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, true);
         JSONArrayReader recipientObjects = getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
         Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();

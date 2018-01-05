@@ -208,8 +208,8 @@ public class JSONCryptoDecoder implements Serializable {
         JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
         
-        boolean encryptionOptions;
-
+        boolean encryptionMode;
+        
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
             this.algorithmPreferences = algorithmPreferences;
             return this;
@@ -247,6 +247,68 @@ public class JSONCryptoDecoder implements Serializable {
         public Options setPermittedExclusions(String[] exclusions) throws IOException {
             this.exclusions = JSONSignatureDecoder.checkExcluded(exclusions);
             return this;
+        }
+
+        void encryptionMode(boolean flag) throws IOException {
+            encryptionMode = flag;
+            if (flag) {
+                if (exclusions != null) {
+                    throw new IOException("\"setPermittedExclusions()\" is not applicable to encryption");
+                }
+            }
+        }
+
+        String getKeyId(JSONObjectReader reader) throws IOException {
+            String keyId = reader.getStringConditional(JSONCryptoDecoder.KID_JSON);
+            if (keyId == null) {
+                if (keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED) {
+                    throw new IOException("Missing \"" + JSONCryptoDecoder.KID_JSON + "\"");
+                }
+            } else if (keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN) {
+                throw new IOException("Use of \"" + JSONCryptoDecoder.KID_JSON + "\" must be set in options");
+            }
+            return keyId;
+        }
+
+        void getExtensions(JSONObjectReader reader, LinkedHashMap<String, Extension> extensions) throws IOException {
+            if (reader.hasProperty(JSONCryptoDecoder.CRIT_JSON)) {
+                String[] properties = reader.getStringArray(JSONCryptoDecoder.CRIT_JSON);
+                checkExtensions(properties, encryptionMode);
+                if (extensionHolder.extensions.isEmpty()) {
+                    throw new IOException("Use of \"" + JSONCryptoDecoder.CRIT_JSON + "\" must be set in options");
+                }
+                for (String name : properties) {
+                    JSONCryptoDecoder.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
+                    if (extensionEntry == null) {
+                        throw new IOException("Unexpected \"" + JSONCryptoDecoder.CRIT_JSON + "\" extension: " + name);
+                    }
+                    try {
+                        JSONCryptoDecoder.Extension extension = extensionEntry.extensionClass.newInstance();
+                        extension.decode(reader);
+                        extensions.put(name, extension);
+                    } catch (InstantiationException e) {
+                        throw new IOException (e);
+                    } catch (IllegalAccessException e) {
+                        throw new IOException (e);
+                    }
+                }
+            }
+            for (String name : extensionHolder.extensions.keySet()) {
+                if (!extensions.containsKey(name) && extensionHolder.extensions.get(name).mandatory) {
+                    throw new IOException("Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: " + name);
+                }
+            }
+        }
+    }
+
+    static void checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
+        if (properties.length == 0) {
+            throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
+        }
+        for (String property : properties) {
+            if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
+                throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
+            }
         }
     }
 }

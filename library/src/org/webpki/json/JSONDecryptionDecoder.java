@@ -27,12 +27,10 @@ import java.security.interfaces.ECPublicKey;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import org.webpki.crypto.AlgorithmPreferences;
-
 ////////////////////////////////////////////////////////////////////////////////
 // JEF is effectively a "remake" of a subset of JWE.  Why a remake?           //
 // Because the encryption system (naturally) borrows heavily from JCS         //
-// including using the same normalization scheme.                             //
+// including using the normalization scheme.                                  //
 //                                                                            //
 // The supported algorithms are though JOSE compatible including their names. //
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +40,9 @@ import org.webpki.crypto.AlgorithmPreferences;
  */
 public class JSONDecryptionDecoder {
 
+    /**
+     * Decodes and hold all global data and options.
+     */
     static class Holder {
 
         JSONCryptoDecoder.Options options;
@@ -56,15 +57,22 @@ public class JSONDecryptionDecoder {
         KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
         String globalKeyId;
 
-        Holder (JSONCryptoDecoder.Options options, JSONObjectReader encryptionObject, boolean multiple) throws IOException {
+        Holder (JSONCryptoDecoder.Options options, 
+                JSONObjectReader encryptionObject,
+                boolean multiple) throws IOException {
             encryptionObject.clearReadFlags();
             this.options = options;
             if (multiple) {
+                /////////////////////////////////////////////////////////////////////////////
+                // For encryption objects with multiple recipients we allow global
+                // "alg" and "kid".  Note: mixing local and global is not permitted
+                /////////////////////////////////////////////////////////////////////////////
                 if (encryptionObject.hasProperty(JSONCryptoDecoder.ALG_JSON)) {
                     globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
                 }
                 globalKeyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
             }
+
             ///////////////////////////////////////////////////////////////////////////////////////
             // Begin JEF normalization                                                           //
             //                                                                                   //
@@ -84,6 +92,8 @@ public class JSONDecryptionDecoder {
             //                                                                                   //
             // End JEF normalization                                                             //
             ///////////////////////////////////////////////////////////////////////////////////////
+
+            // Collect mandatory elements
             dataEncryptionAlgorithm = DataEncryptionAlgorithms
                     .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
             iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
@@ -138,12 +148,19 @@ public class JSONDecryptionDecoder {
             KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoDecoder.ALG_JSON)) : null;
     }
 
+    /**
+     * Decodes a single encryption element.
+     * @param holder
+     * @param encryptionObject
+     * @param last
+     * @throws IOException
+     */
     JSONDecryptionDecoder(Holder holder, 
                           JSONObjectReader encryptionObject,
                           boolean last) throws IOException {
         this.holder = holder;
 
-        keyId = encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
+        keyId = holder.options.getKeyId(encryptionObject);
         if (holder.globalKeyId != null && keyId != null) {
             throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
         }
@@ -154,20 +171,24 @@ public class JSONDecryptionDecoder {
         } else if (holder.globalKeyEncryptionAlgorithm != null) {
             throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.ALG_JSON + "\" not allowed");
         }
-        if (keyEncryptionAlgorithm != null) {
+
+        if (keyEncryptionAlgorithm == null) {
+            sharedSecretMode = true;
+        } else {
             if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
-                publicKey = encryptionObject.getPublicKey(AlgorithmPreferences.JOSE);
+                publicKey = encryptionObject.getPublicKey(holder.options.algorithmPreferences);
             }
             if (keyEncryptionAlgorithm.isKeyWrap()) {
                 encryptedKeyData = encryptionObject.getBinary(JSONCryptoDecoder.ENCRYPTED_KEY_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
-                        (ECPublicKey) encryptionObject.getObject(JSONCryptoDecoder.EPK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE);
+                        (ECPublicKey) encryptionObject
+                            .getObject(JSONCryptoDecoder.EPK_JSON)
+                                .getCorePublicKey(holder.options.algorithmPreferences);
             }
-        } else {
-            sharedSecretMode = true;
         }
+
         if (last) {
             encryptionObject.checkForUnread();
         }
@@ -202,7 +223,7 @@ public class JSONDecryptionDecoder {
     }
 
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
-            throws IOException, GeneralSecurityException {
+    throws IOException, GeneralSecurityException {
         boolean notFound = true;
         for (DecryptionKeyHolder decryptionKey : decryptionKeys) {
             if ((decryptionKey.getKeyId() != null && decryptionKey.getKeyId().equals(keyId)) || 
@@ -214,16 +235,5 @@ public class JSONDecryptionDecoder {
             }
         }
         throw new IOException(notFound ? "No matching key found" : "No matching key+algorithm found");
-    }
-
-    static void checkExtensions(String[] properties) throws IOException {
-        if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
-        }
-        for (String property : properties) {
-            if (JSONCryptoDecoder.jefReservedWords.contains(property)) {
-                throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
-            }
-        }
     }
 }

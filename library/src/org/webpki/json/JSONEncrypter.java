@@ -179,7 +179,7 @@ public abstract class JSONEncrypter implements Serializable {
      */
     public JSONEncrypter setExtensions(JSONObjectWriter extensions) throws IOException {
         this.extensions = new JSONObjectReader(extensions);
-        JSONDecryptionDecoder.checkExtensions(this.extensions.getProperties());
+        JSONCryptoDecoder.checkExtensions(this.extensions.getProperties(), true);
         return this;
     }
 
