@@ -17,6 +17,7 @@
 package org.webpki.testdata;
 
 import java.io.File;
+import java.io.IOException;
 
 import java.security.KeyPair;
 
@@ -30,6 +31,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.DecryptionKeyHolder;
 import org.webpki.json.JSONAsymKeyEncrypter;
+import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONX509Encrypter;
 import org.webpki.json.JSONCryptoDecoder;
 import org.webpki.json.JSONDecryptionDecoder;
@@ -41,6 +43,8 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.DataEncryptionAlgorithms;
 import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
+
+import org.webpki.json.WebKey;
 
 import org.webpki.util.ArrayUtil;
 
@@ -74,26 +78,28 @@ public class Encryption {
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
         asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
         
-        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
-        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
+        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, null);
+        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, null);
+        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, Signatures.P256CERTPATH);
+        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, Signatures.R2048CERTPATH);
         
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        ".multimpkey.json", 
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
       
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        ".multexpkey.json", 
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         false);
 
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        ".multexpkey2.json", 
                         DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
                         false);
 
         multipleAsymEnc(new String[]{"p256", "r2048"}, 
-                        ".multimpkey.json", 
+                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        true);
+
+        multipleAsymEnc(new String[]{"p256", "p256"}, 
                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
 
@@ -105,10 +111,12 @@ public class Encryption {
         coreSymmEnc(256, ".implicitkey.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
     }
 
-    static void certEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        X509Certificate[] certPath = 
-            JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
-                .getJSONArrayReader().getCertificatePath();
+    static X509Certificate[] getCertificatePath(String keyType) throws IOException {
+        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
+                    .getJSONArrayReader().getCertificatePath();
+    }
+
+    static void certEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm, String remoteUrl) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
@@ -128,14 +136,20 @@ public class Encryption {
             dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
-        JSONX509Encrypter encrypter = new JSONX509Encrypter(certPath,
+        JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        String fileName = ".certenc.json";
+        if (remoteUrl != null) {
+            fileName = ".remotecertenc.json";
+            encrypter.setRemoteKey(remoteUrl);
+            options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
+        }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + ".certenc.json", encryptedData);
+        ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileName, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
                  .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
@@ -225,13 +239,17 @@ public class Encryption {
         coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId);
     }
 
-    static void multipleAsymEnc(String[] keyTypes, String fileSuffix, 
+    static void multipleAsymEnc(String[] keyTypes, 
                                 DataEncryptionAlgorithms dataEncryptionAlgorithm, 
                                 boolean wantKeyId) throws Exception {
         Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
         Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
         String algList = "";
+        String globalKeyId = keyTypes[0];
         for (String keyType : keyTypes) {
+            if (!keyType.equals(globalKeyId)) {
+                globalKeyId = null;
+            }
             KeyPair keyPair = readJwk(keyType);
             KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
             if (keyPair.getPublic() instanceof ECPublicKey) {
@@ -265,7 +283,12 @@ public class Encryption {
             encrypters.add(encrypter);
         }
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        String fileName = ".multexpkey.json"; 
         if (wantKeyId) {
+            fileName = ".multimpkey.json"; 
+            if (globalKeyId != null) {
+                fileName = ".multglobimpkey.json";
+            }
             options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
         }
@@ -273,7 +296,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + algList + fileSuffix, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + algList + fileName, encryptedData);
         for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
                  .getEncryptionObjects(options)) {
             if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {

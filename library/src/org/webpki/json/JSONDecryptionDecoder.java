@@ -176,9 +176,14 @@ public class JSONDecryptionDecoder {
         this.holder = holder;
 
         // Collect keyId if such are permitted
-        keyId = holder.options.getKeyId(encryptionObject);
-        if (holder.globalKeyId != null && keyId != null) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
+        if (holder.globalKeyId == null) {
+            keyId = holder.options.getKeyId(encryptionObject);
+        } else {
+            // Special case: Multiple encryption objects and a global keyId
+            if (encryptionObject.hasProperty(JSONCryptoDecoder.KID_JSON)) {
+                throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
+            }
+            keyId = holder.globalKeyId;
         }
 
         // Are we using a key encryption scheme?
