@@ -29,7 +29,6 @@ import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 
-import org.webpki.json.DecryptionKeyHolder;
 // Std
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONRemoteKeys;
@@ -266,7 +265,8 @@ public class Encryption {
     static void multipleAsymEnc(String[] keyTypes, 
                                 DataEncryptionAlgorithms dataEncryptionAlgorithm, 
                                 boolean wantKeyId) throws Exception {
-        Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
+        Vector<JSONDecryptionDecoder.DecryptionKeyHolder> decryptionKeys =
+                new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
         Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
         String algList = "";
         String globalKeyId = keyTypes[0];
@@ -291,10 +291,10 @@ public class Encryption {
                 dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
             }
-            decryptionKeys.add(new DecryptionKeyHolder(keyPair.getPublic(),
-                                                       keyPair.getPrivate(),
-                                                       keyEncryptionAlgorithm,
-                                                       keyId));
+            decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(keyPair.getPublic(),
+                                                                             keyPair.getPrivate(),
+                                                                             keyEncryptionAlgorithm,
+                                                                             keyId));
             JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
                                                                       keyEncryptionAlgorithm);
             if (wantKeyId) {
