@@ -102,9 +102,17 @@ public abstract class JSONEncrypter implements Serializable {
                 encryptionWriter.root.properties.remove(JSONCryptoDecoder.KID_JSON);
                 globalKeyId = null;
             }
-            if (encrypter.outputPublicKeyInfo) {
-                encrypter.writeKeyData(currentRecipient);
+
+            // "jku"/"x5u" and "jwk"/"x5c" are mutually exclusive
+            if (encrypter.remoteUrl == null) {
+                if (encrypter.outputPublicKeyInfo) {
+                    encrypter.writeKeyData(currentRecipient);
+                }
+            } else {
+                currentRecipient.setString(encrypter.remoteKeyFormat.jsonName, encrypter.remoteUrl);
             }
+
+            // The encrypted key part
             if (encrypter.keyEncryptionAlgorithm != null) {
                 EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
                         encrypter.keyEncryptionAlgorithm.isRsa() ?

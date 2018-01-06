@@ -186,6 +186,9 @@
     <antcall target="_createpem">
        <param name="cmd" value="p256certificate.p12 foo123 p256certpath.pem certificate"/>
     </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="r2048certificate.p12 foo123 r2048certpath.pem certificate"/>
+    </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="r2048certificate.p12 foo123 r2048.jwks public"/>
     </antcall>
