@@ -35,11 +35,9 @@ public class JSONAsymKeyEncrypter extends JSONEncrypter {
      * @throws IOException &nbsp;
      */
     public JSONAsymKeyEncrypter(PublicKey publicKey,
-                                KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                String provider) throws IOException {
+                                KeyEncryptionAlgorithms keyEncryptionAlgorithm) throws IOException {
         this.publicKey = publicKey;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
-        this.provider = provider;
     }
 
     /**

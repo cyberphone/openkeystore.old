@@ -44,8 +44,6 @@ public abstract class JSONEncrypter implements Serializable {
 
     PublicKey publicKey;
     
-    String provider;
-
     String remoteUrl;
 
     JSONRemoteKeys remoteKeyFormat;

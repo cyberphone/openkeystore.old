@@ -129,8 +129,7 @@ public class Encryption {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
         JSONX509Encrypter encrypter = new JSONX509Encrypter(certPath,
-                                                            keyEncryptionAlgorithm,
-                                                            null);
+                                                            keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
@@ -198,8 +197,7 @@ public class Encryption {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
         JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
-                                                                  keyEncryptionAlgorithm,
-                                                                  null);
+                                                                  keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         if (wantKeyId) {
             encrypter.setKeyId(keyId);
@@ -256,8 +254,7 @@ public class Encryption {
                                                        keyEncryptionAlgorithm,
                                                        keyId));
             JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
-                                                                      keyEncryptionAlgorithm,
-                                                                      null);
+                                                                      keyEncryptionAlgorithm);
             if (wantKeyId) {
                 encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
             }
