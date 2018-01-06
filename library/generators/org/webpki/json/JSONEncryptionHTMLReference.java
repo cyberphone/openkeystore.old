@@ -151,16 +151,30 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String readAsymEncryption(String name) throws IOException, GeneralSecurityException {
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         JSONObjectReader rd = json.readJson2(name);
-        if (!ArrayUtil.compare(rd.getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(keys), dataToEncrypt)) {
+        if (rd.hasProperty(JSONCryptoDecoder.KID_JSON)) {
+            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+        }
+        if (!rd.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
+            options.setRequirePublicKeyInfo(false);
+        }
+        if (!ArrayUtil.compare(rd.getEncryptionObject(options).getDecryptedData(keys), dataToEncrypt)) {
             throw new IOException(name);
         }
         return formatCode(rd);
     }
     
     static String readAsymEncryption(String name, AsymKey asymKey) throws IOException, GeneralSecurityException {
+        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         JSONObjectReader rd = json.readJson2(name);
-        if (!ArrayUtil.compare(rd.getEncryptionObject(new JSONCryptoDecoder.Options()).getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
+        if (rd.hasProperty(JSONCryptoDecoder.KID_JSON)) {
+            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+        }
+        if (!rd.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
+            options.setRequirePublicKeyInfo(false);
+        }
+        if (!ArrayUtil.compare(rd.getEncryptionObject(options).getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
             throw new IOException(name);
         }
         return formatCode(rd);
@@ -171,7 +185,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             JSONObjectReader rd = json.readJson2(name);
-            JSONDecryptionDecoder dec = rd.getEncryptionObject(new JSONCryptoDecoder.Options());
+            JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+            if (rd.hasProperty(JSONCryptoDecoder.KID_JSON)) {
+                options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            }
+            JSONDecryptionDecoder dec = rd.getEncryptionObject(options);
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
                 if (key.length == dec.getDataEncryptionAlgorithm().getKeyLength()) {
