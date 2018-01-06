@@ -122,7 +122,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 .newColumn();
     }
     
-    static Vector<DecryptionKeyHolder> keys = new Vector<DecryptionKeyHolder>();
+    static Vector<JSONDecryptionDecoder.DecryptionKeyHolder> keys =
+            new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
     
     static byte[] dataToEncrypt;
 
@@ -141,10 +142,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymKey.keyPair = key.getKeyPair();
         for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
             if (kea.isRsa() == asymKey.keyPair.getPublic() instanceof RSAPublicKey) {
-                keys.add(new DecryptionKeyHolder(asymKey.keyPair.getPublic(),
-                                                 asymKey.keyPair.getPrivate(),
-                                                 kea,
-                                                 asymKey.keyId));
+                keys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(asymKey.keyPair.getPublic(),
+                                                                       asymKey.keyPair.getPrivate(),
+                                                                       kea,
+                                                                       asymKey.keyId));
             }
         }
         return asymKey;

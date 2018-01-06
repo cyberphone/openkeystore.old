@@ -30,7 +30,7 @@
 
 package org.webpki.json;
 
-public class NumberCachedPowers {
+class NumberCachedPowers {
 
 
     static final double kD_1_LOG2_10 = 0.30102999566398114;  //  1 / lg(10)

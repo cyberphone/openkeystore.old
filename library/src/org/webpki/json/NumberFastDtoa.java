@@ -30,7 +30,7 @@
 
 package org.webpki.json;
 
-public class NumberFastDtoa {
+class NumberFastDtoa {
 
     // FastDtoa will produce at most kFastDtoaMaximalLength digits.
     static final int kFastDtoaMaximalLength = 17;

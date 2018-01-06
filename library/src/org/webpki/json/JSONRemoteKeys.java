@@ -23,7 +23,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 /**
- * Enum and interface to &quot;remoteKey&quot;.
+ * Enum and interface to "jku" and "x5u";.
  */
 public enum JSONRemoteKeys {
 
@@ -38,6 +38,9 @@ public enum JSONRemoteKeys {
         this.certificateFlag = certificateFlag;
     }
     
+    /**
+     * For reading "jku" and "x5u" data
+     */
     public interface Reader {
         
         public PublicKey readPublicKey(String uri) throws IOException;

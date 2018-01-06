@@ -3945,19 +3945,20 @@ public class JSONTest {
         KeyPairGenerator mallet = KeyPairGenerator.getInstance("RSA");
         mallet.initialize(2048);
         KeyPair malletKeys = mallet.generateKeyPair();
-        Vector<DecryptionKeyHolder> decryptionKeys = new Vector<DecryptionKeyHolder>();
-        decryptionKeys.add(new DecryptionKeyHolder(alice.getPublic(), 
-                                                   alice.getPrivate(),
-                                                   KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                                   "alice"));
-        decryptionKeys.add(new DecryptionKeyHolder(bob.getPublic(),
-                                                   bob.getPrivate(),
-                                                   KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                                   "bob"));
-        decryptionKeys.add(new DecryptionKeyHolder(malletKeys.getPublic(),
-                                                   malletKeys.getPrivate(),
-                                                   KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
-                                                   "mallet"));
+        Vector<JSONDecryptionDecoder.DecryptionKeyHolder> decryptionKeys =
+                new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
+        decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(alice.getPublic(), 
+                                                                         alice.getPrivate(),
+                                                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                                         "alice"));
+        decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(bob.getPublic(),
+                                                                         bob.getPrivate(),
+                                                                         KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
+                                                                         "bob"));
+        decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(malletKeys.getPublic(),
+                                                                         malletKeys.getPrivate(),
+                                                                         KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID,
+                                                                         "mallet"));
 
         JSONObjectReader unEncJson = JSONParser.parse("{\"hi\":\"\\u20ac\\u00e5\\u00f6k\"}");
         String encJson = 

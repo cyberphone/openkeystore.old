@@ -144,6 +144,9 @@ public class JSONCryptoDecoder implements Serializable {
 
     static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
+    /**
+     * For building "crit" decoders
+     */
     public static abstract class Extension {
         
         public abstract String getExtensionUri();
@@ -156,6 +159,10 @@ public class JSONCryptoDecoder implements Serializable {
         boolean mandatory;
     }
 
+    /**
+     * Holds list of supported "crit" extension decoders.
+     *
+     */
     public static class ExtensionHolder {
         
         LinkedHashMap<String,ExtensionEntry> extensions = new LinkedHashMap<String,ExtensionEntry>();

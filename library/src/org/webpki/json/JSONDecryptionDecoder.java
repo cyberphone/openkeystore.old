@@ -299,4 +299,46 @@ public class JSONDecryptionDecoder {
         }
         throw new IOException(notFound ? "No matching key found" : "No matching key+algorithm found");
     }
+
+    /**
+     *  JEF (JSON Encryption Format) support.
+     *  This class can be used for automatically selecting the proper asymmetric private key
+     *  to use for decryption among a set of possible keys.
+     */
+    public static class DecryptionKeyHolder {
+
+        PublicKey publicKey;
+
+        PrivateKey privateKey;
+        
+        String optionalKeyId;
+
+        KeyEncryptionAlgorithms keyEncryptionAlgorithm;
+
+        public PublicKey getPublicKey() {
+            return publicKey;
+        }
+
+        public PrivateKey getPrivateKey() {
+            return privateKey;
+        }
+
+        public String getKeyId() {
+            return optionalKeyId;
+        }
+
+        public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
+            return keyEncryptionAlgorithm;
+        }
+
+        public DecryptionKeyHolder(PublicKey publicKey, 
+                                   PrivateKey privateKey,
+                                   KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                   String optionalKeyId) {
+            this.publicKey = publicKey;
+            this.privateKey = privateKey;
+            this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+            this.optionalKeyId = optionalKeyId;
+        }
+    }
 }

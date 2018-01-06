@@ -8,7 +8,7 @@ package org.webpki.json;
 
 import java.util.Arrays;
 
-public class NumberFastDtoaBuilder {
+class NumberFastDtoaBuilder {
 
     // allocate buffer for generated digits + extra notation + padding zeroes
     final char[] chars = new char[NumberFastDtoa.kFastDtoaMaximalLength + 8];
