@@ -44,9 +44,9 @@ public class JSONAsymKeyEncrypter extends JSONEncrypter {
 
     /**
      * Set remote key (&quot;jku&quot;) indicator.
-     * This method <i>suppress</i> the in-line public key information.
+     * This method <i>suppresses</i> the in-line public key information.
      * Note that the public key must anyway be provided during <i>encryption</i>. 
-     * @param url Where the key lives
+     * @param url Where the key (JWK key set) resides
      * @return this
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONRemoteKeys

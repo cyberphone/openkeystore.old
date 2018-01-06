@@ -46,10 +46,10 @@ public class JSONX509Encrypter extends JSONEncrypter {
     }
 
     /**
-     * Set remote key (&quot;jku&quot;) indicator.
-     * This method <i>suppress</i> the in-line public key information.
-     * Note that the public key must anyway be provided during <i>encryption</i>. 
-     * @param url Where the key lives
+     * Set remote key (&quot;x5u&quot;) indicator.
+     * This method <i>suppresses</i> the in-line certificate data.
+     * Note that the certificate path must anyway be provided during <i>encryption</i>. 
+     * @param url Where the (PEM) certificate path resides
      * @return this
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONRemoteKeys
