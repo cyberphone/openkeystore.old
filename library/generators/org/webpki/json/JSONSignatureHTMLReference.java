@@ -60,32 +60,6 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static final String ECMASCRIPT_CONSTRAINT = "ECMAScript Constraint";
 
-    public static class Ext1 extends JSONCryptoDecoder.Extension {
-
-        @Override
-        protected void decode(JSONObjectReader rd) throws IOException {
-            rd.getString(getExtensionUri());
-        }
-
-        @Override
-        public String getExtensionUri() {
-            return "myString";
-        }
-    }
-
-    public static class Ext2 extends JSONCryptoDecoder.Extension {
-
-        @Override
-        protected void decode(JSONObjectReader rd) throws IOException {
-            rd.getObject(getExtensionUri()).getBoolean("life-is-great");
-        }
-
-        @Override
-        public String getExtensionUri() {
-            return "https://example.com/extension";
-        }
-    }
-
     static JSONObjectReader readJSON(String name) throws IOException {
         return JSONParser.parse(ArrayUtil.getByteArrayFromInputStream(JSONEncryptionHTMLReference.class.getResourceAsStream(name)));
     }
@@ -413,8 +387,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         " extensions:" + 
         readAsymSignature("p256keyextsigned.json", p256key, new JSONCryptoDecoder.Options()
             .setPermittedExtensions(new ExtensionHolder()
-                .addExtension(Ext1.class, true)
-                .addExtension(Ext2.class, true))) +
+                .addExtension(Extension1.class, true)
+                .addExtension(Extension2.class, true))) +
         "<span id=\"" + JSONBaseHTML.EXCLUSION_EXAMPLE +
         "\">The</span> following signature object uses the same key as in the previous example but also " +
         "specifies " +

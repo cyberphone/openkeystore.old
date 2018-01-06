@@ -685,7 +685,7 @@
     
     <!-- Compile all -->
     <javac debug="${debug}"
-           srcdir="${src_dir}:${src_generators}"
+           srcdir="${src_dir}:${src_generators}:${test_dir}"
            destdir="${temp_dir}" 
            classpathref="compile.classpath"
            includeAntRuntime="false">
