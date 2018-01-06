@@ -21,83 +21,32 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.PublicKey;
-
-import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 
-import java.util.Vector;
-
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CertificateInfo;
-import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONCryptoDecoder;
-import org.webpki.json.JSONParser;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 
-import org.webpki.net.HTTPSWrapper;
+import org.webpki.json.WebKey;  // from "test" actually
 
-import org.webpki.util.Base64;
 import org.webpki.util.DebugFormatter;
 
 /**
  * Simple signature verify program
  */
 public class ReadSignature {
-
-    public static class WebKey implements JSONRemoteKeys.Reader {
-        
-        Vector<byte[]> getBinaryContentFromPem(byte[] pemBinary, String label, boolean multiple) throws IOException {
-            String pem = new String(pemBinary, "UTF-8");
-            Vector<byte[]> result = new Vector<byte[]>();
-            while (true) {
-                int start = pem.indexOf("-----BEGIN " + label + "-----");
-                int end = pem.indexOf("-----END " + label + "-----");
-                if (start >= 0 && end > 0 && end > start) {
-                    byte[] blob = new Base64().getBinaryFromBase64String(pem.substring(start + label.length() + 16, end));
-                    result.add(blob);
-                    pem = pem.substring(end + label.length() + 14);
-                } else {
-                    if (result.isEmpty()) {
-                        throw new IOException("No \"" + label + "\" found");
-                    }
-                    if (!multiple && result.size() > 1) {
-                        throw new IOException("Multiple \"" + label + "\" found");
-                    }
-                    return result;
-                }
-            }
-        }
-     
-        byte[] shoot(String uri) throws IOException {
-            HTTPSWrapper wrapper = new HTTPSWrapper();
-            wrapper.makeGetRequest(uri);
-            return wrapper.getData();
-        }
-
-        @Override
-        public PublicKey readPublicKey(String uri) throws IOException {
-            byte[] data = shoot(uri);
-            return JSONParser.parse(data).getArray(JSONCryptoDecoder.KEYS_JSON).getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        }
-
-        @Override
-        public X509Certificate[] readCertificatePath(String uri) throws IOException {
-            byte[] data = shoot(uri);
-            return CertificateUtil.getSortedPathFromBlobs(getBinaryContentFromPem(data, "CERTIFICATE", true));
-        }
-    }
 
     private StringBuffer result = new StringBuffer();
 
