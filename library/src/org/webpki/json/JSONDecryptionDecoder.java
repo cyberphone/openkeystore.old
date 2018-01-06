@@ -245,11 +245,25 @@ public class JSONDecryptionDecoder {
                                                 holder.tag);
     }
 
+    /**
+     * Decrypt data based on a specific symmetric key.
+     * @param dataDecryptionKey Symmetric key
+     * @return Decrypted data
+     * @throws IOException &nbsp;
+     * @throws GeneralSecurityException &nbsp;
+     */
     public byte[] getDecryptedData(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
         require(false);
         return localDecrypt(dataDecryptionKey);
     }
 
+    /**
+     * Decrypt data based on a specific private key.
+     * @param privateKey The private key
+     * @return Decrypted data
+     * @throws IOException &nbsp;
+     * @throws GeneralSecurityException &nbsp;
+     */
     public byte[] getDecryptedData(PrivateKey privateKey) throws IOException, GeneralSecurityException {
         require(true);
         return localDecrypt(keyEncryptionAlgorithm.isRsa() ?
@@ -264,6 +278,13 @@ public class JSONDecryptionDecoder {
                                                     encryptedKeyData));
     }
 
+    /**
+     * Decrypt data based on a collection of possible [private] keys.
+     * @param decryptionKeys Collection
+     * @return Decrypted data
+     * @throws IOException &nbsp;
+     * @throws GeneralSecurityException &nbsp;
+     */
     public byte[] getDecryptedData(Vector<DecryptionKeyHolder> decryptionKeys)
     throws IOException, GeneralSecurityException {
         boolean notFound = true;
