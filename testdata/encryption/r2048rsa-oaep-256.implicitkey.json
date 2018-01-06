@@ -1,10 +1,9 @@
 {
-  "algorithm": "A256GCM",
-  "keyEncryption": {
-    "algorithm": "RSA-OAEP-256",
-    "encryptedKey": "JZKCedhn0csNMGrfQ7knY4bv14HWnbwUmZGH2EgaPpHBs2wadf_q4s0fXWlntP_B2ejQyXaDnUFZbfdSidGzg5PoGaXlnutGtazzgaF1FqDRtfovip9DGqq0OIB_rZZsyFtVQp1CVWLpv68cFJ1RUbyynNcw2aJlLAIJpTjzfzAIuxNooesJU-RBWRMUJGOIdfhgFWCtrlfse05ueeOdsXyi_CL7zudOStkLADa0Je2OQ6OgDLOMahXgWpgN-t9y0w3wI5QuQaF9MjoJoMgNSl9-5U6NuPS4r8EitBFaRGjEY-p81C3odBvXmSA61JKL3g5rpY2HFduKFl-Yfvlkew"
-  },
-  "iv": "cHShIa38494NwxJn",
-  "tag": "DLyMu-HaS5-ltDOLJgODmQ",
-  "cipherText": "8XKYBvNSkYvKv3CzwQIQGvCRS_kDAA"
+  "enc": "A256GCM",
+  "kid": "20180101:mybank:r2048",
+  "alg": "RSA-OAEP-256",
+  "encrypted_key": "TVtRWiT8TCHyle1ZhvOgNdI4zRimttgVLVGXEDpXlD3Dw5l7VkjE-wp2mJa2Mvy8CyoyD4xlKSK_KssxxjxVRYghzF5iftsL7Qb72b3zMYI7fz8DBdX8NenkDZ9WnVHkncch0ZldLP7kPBftlQYdTuPg610Fym_e1GH4ckM2p35WcPVR-qCYNGiYj-l79eKbqvnPmJT18pgOFhNpjbunLVPG3y2W4xGWUUPq8g18rzmrL1wuTUngw6LDFf3Z11jtuYI5MgGfiL0rjchVG8vsMTaNTbtPZmktx7u_6hcpzIygV89kYQ4BK7lvgPplGqRVxmFZ5UMLpmF5r5umZIlBwA",
+  "iv": "oT--SzaZIrxe-sEl",
+  "tag": "LwOC5HVTFzfHirsomRHkqQ",
+  "ciphertext": "T7Go20SpmPTmZL0S3OQ0tXkhxaUs9A"
 }

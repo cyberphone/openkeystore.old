@@ -1,17 +1,15 @@
 {
-  "algorithm": "A128GCM",
-  "keyEncryption": {
-    "algorithm": "ECDH-ES+A128KW",
-    "keyId": "20170101:mybank:p256",
-    "ephemeralKey": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "O7hnNi_2as62VYv_kaxKf624qhjMrW8_4cY9GomkbDQ",
-      "y": "MwcmwdGKabRlWRRDXooradgmmh01t2p6q_0iMcy-9_M"
-    },
-    "encryptedKey": "9oJgtGF0G6F_8RMId0zDYDoh8l6dFEu7"
+  "enc": "A128GCM",
+  "kid": "20180101:mybank:p256",
+  "alg": "ECDH-ES+A128KW",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "yvCcyL3zouwOOxfBvzli8VkeUuipddCg1nX2IuFo5OU",
+    "y": "JaIBoWrAB0R-ES7cVfSsyT9YeLM-eFaw_LysO9UTIUM"
   },
-  "iv": "CWatej6VY9HlSA_x",
-  "tag": "Cnc0c3ZIHgxxQMVKeD-T1Q",
-  "cipherText": "a8hnGiJBFIcOI5Bp_sNsFoZq8975lA"
+  "encrypted_key": "T2DpC015VsqAo0N0NzHDLD5vtI__c7Js",
+  "iv": "peubFH7aAPmicbtP",
+  "tag": "htl9dHiLy6s8Z5TkEQH5uA",
+  "ciphertext": "n7Z_QvycKUc82o4-1OzmdZCsG8jBaw"
 }

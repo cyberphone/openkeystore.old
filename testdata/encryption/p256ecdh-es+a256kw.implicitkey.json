@@ -1,17 +1,15 @@
 {
-  "algorithm": "A128CBC-HS256",
-  "keyEncryption": {
-    "algorithm": "ECDH-ES+A256KW",
-    "keyId": "20170101:mybank:p256",
-    "ephemeralKey": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "TuQcAR59JcagARFQpzeLoiLjI2eOb8WNJt0EV7gSC2o",
-      "y": "bi9yMtUkg22ZGqvAQYkNSBIdWOqS1ulpVEAX8nr-wKE"
-    },
-    "encryptedKey": "MO5XPHkU01oMrY2uKDDOne-ldGRLm_fYtKCFLzJ_ettv2b0eiDPbBw"
+  "enc": "A128CBC-HS256",
+  "kid": "20180101:mybank:p256",
+  "alg": "ECDH-ES+A256KW",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "JswQAyVxeMqbBS4hM-sfEFr4Qc4gplgyeIpFM1TgmBA",
+    "y": "yq80p8AL6wWjyfS9rk7289db3ehn894fJZPj7abO5pQ"
   },
-  "iv": "r0A0EHO03fYdb47D8SDPYg",
-  "tag": "17qFCA8E5y9ufRIQHrcphw",
-  "cipherText": "H3tCjvQ-fSQpwO969RUStN1wrOoAFkqiiufhE-kO57Q"
+  "encrypted_key": "T-jgW4PAXIkwooaBkdWh7SMVZIFFdyXAiTaW86iYLvaXBTTAyxRK0Q",
+  "iv": "Z6kbBXWPdPaNlNlDlrX4XA",
+  "tag": "gMkoKPe4OuT91L3o73j1-A",
+  "ciphertext": "txKyOarSByvoWkUrr2yYTf4mhwiuA4mLujtfODe-yiI"
 }

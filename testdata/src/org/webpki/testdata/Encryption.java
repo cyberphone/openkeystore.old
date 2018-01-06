@@ -30,6 +30,7 @@ import java.util.Vector;
 import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.DecryptionKeyHolder;
+// Std
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONX509Encrypter;
@@ -43,8 +44,10 @@ import org.webpki.json.JSONParser;
 import org.webpki.json.DataEncryptionAlgorithms;
 import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
-
+// Test
 import org.webpki.json.WebKey;
+import org.webpki.json.Extension1;
+import org.webpki.json.Extension2;
 
 import org.webpki.util.ArrayUtil;
 
@@ -109,6 +112,18 @@ public class Encryption {
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
 
         coreSymmEnc(256, ".implicitkey.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        
+        coreAsymEnc("p256", 
+                    ".critkey.json",
+                    DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
+                    false,
+                    new JSONCryptoDecoder.ExtensionHolder()
+                        .addExtension(Extension1.class, true)
+                        .addExtension(Extension2.class, true),
+                    new JSONObjectWriter()
+                        .setString(new Extension1().getExtensionUri(), "something")
+                        .setObject(new Extension2().getExtensionUri(), 
+                            new JSONObjectWriter().setBoolean("life-is-great", true)));
     }
 
     static X509Certificate[] getCertificatePath(String keyType) throws IOException {
@@ -190,7 +205,12 @@ public class Encryption {
         return jwkPlus.getKeyPair();
     }
 
-    static void coreAsymEnc(String keyType, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
+    static void coreAsymEnc(String keyType, 
+                            String fileSuffix,
+                            DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                            boolean wantKeyId,
+                            JSONCryptoDecoder.ExtensionHolder extensionHolder,
+                            JSONObjectWriter extensions) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
@@ -213,6 +233,10 @@ public class Encryption {
         JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
                                                                   keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        if (extensionHolder != null) {
+            options.setPermittedExtensions(extensionHolder);
+            encrypter.setExtensions(extensions);
+        }
         if (wantKeyId) {
             encrypter.setKeyId(keyId);
             encrypter.setOutputPublicKeyInfo(false);
@@ -232,11 +256,11 @@ public class Encryption {
      }
 
     static void asymEnc(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        coreAsymEnc(keyType, ".encrypted.json", dataEncryptionAlgorithm, false);
+        coreAsymEnc(keyType, ".encrypted.json", dataEncryptionAlgorithm, false, null, null);
     }
 
     static void asymEncNoPublicKeyInfo(String keyType, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
-        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId);
+        coreAsymEnc(keyType, ".implicitkey.json", dataEncryptionAlgorithm, wantKeyId, null, null);
     }
 
     static void multipleAsymEnc(String[] keyTypes, 

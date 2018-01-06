@@ -1,0 +1,21 @@
+{
+  "enc": "A128CBC-HS256",
+  "recipients": [{
+    "alg": "ECDH-ES+A256KW",
+    "kid": "20180101:mybank:p256",
+    "epk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "kHx-aev_mZxvsfj-XR7YxvuOeoBbPx8ppwqVcIQgcWY",
+      "y": "CqUW6RDr3ZKvEJqDBYIrEYUhRhKtY96t0ATtc2FpX9o"
+    },
+    "encrypted_key": "5tFiSAxVOwjiw9zcm1CptlWEqYWLFJK_yoUDWgFERkOmuVu5zl4NbA"
+  },{
+    "alg": "RSA-OAEP-256",
+    "kid": "20180101:mybank:r2048",
+    "encrypted_key": "TvhlRYI7LWWqXtf3ZEN7QErrGVfRRmHE-62mNpqD8WgrCSYtwZMRZPLw5o1Yt3iRY4aJKTVhnh0UkI54vluOAz61UKQz1r1lOgZRXOdMzdIeXaHlZOz08CzjaV8LCRkg3Em2chwHWF5hL9Y1nRBvkC4RaQ3Qb3YOAbWnYPs5nlG-mYrBRsU0ev6vASjBi_yuRFn6GyzGDJIPXuUCIktXeIr39aayvntnArsjUd9Sb-eEUW7A33HmOHHqlRPLh94d2Mk2Icry21Abk9rwXxc9k9Lv0eqJO5AtHNXXg5uh01mOrcwjTyRFUevfeMWWaDqYJfkcF11YHmhVENDOEOwQzw"
+  }],
+  "iv": "0voZfw9-9JzNmg1qDrTL0Q",
+  "tag": "u7B2zDLO4OP-aRV_getBlg",
+  "ciphertext": "I8k5qbHPvVeGcSSeERuRTymbj3ViLlXS5Mdm2ROtBxI"
+}

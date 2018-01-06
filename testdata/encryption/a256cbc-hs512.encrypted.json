@@ -1,7 +1,7 @@
 {
-  "algorithm": "A256CBC-HS512",
-  "keyId": "s512bitkey",
-  "iv": "jUBuGiVcmxD68ONGz9suWw",
-  "tag": "jbqFh6534qsruUZ5qrbHBBmSnGpuk3mXKbVwjeKqIAg",
-  "cipherText": "zPlhvc3l99RVq0iTvE6IKkyQwoMwSCRYK4yXPwiGTGg"
+  "enc": "A256CBC-HS512",
+  "kid": "s512bitkey",
+  "iv": "Dv5PO_y7r0wM44m7G862nA",
+  "tag": "3QV0fXB9CvxrMYi2w4DbMuplkfjj_xJPjJSo4tRXJJU",
+  "ciphertext": "oys3atq2fHEzgVsV63H0nrN0TEh5tWi9xvhhB90D3xo"
 }
