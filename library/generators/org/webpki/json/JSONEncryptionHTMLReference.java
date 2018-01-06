@@ -236,7 +236,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         JSONObjectReader ecdhEncryption = json.readJson2("p256ecdh-es+a256kw.implicitkey.json");
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONCryptoDecoder.TAG_JSON);
-        authData.removeProperty(JSONCryptoDecoder.IV_JSON);
         authData.removeProperty(JSONCryptoDecoder.CIPHER_TEXT_JSON);
         String formattedAuthData = authData.serializeToString(JSONOutputFormats.NORMALIZED);
         for (int l = formattedAuthData.length(), j = 0, i = 0; i < l; i++) {
@@ -301,8 +300,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 "used by the symmetric ciphers. " +
                 "This difference is due to the way encryption meta-data is formatted. " +
                 "The process for creating <i>Additional Authenticated Data</i> is as follows:<ul>" +
-                "<li>The <i>top level</i> properties <code>" + JSONCryptoDecoder.IV_JSON + "</code>, " +
-                "<code>" + JSONCryptoDecoder.TAG_JSON + "</code>, and <code>" + 
+                "<li>The <i>top level</i> properties " +
+                "<code>" + JSONCryptoDecoder.TAG_JSON + "</code> and <code>" + 
                 JSONCryptoDecoder.CIPHER_TEXT_JSON +
                 "</code> (including leading <i>or</i> trailing <code>','</code> characters) " +
                 "<b>must</b> " + "be deleted from the JEF object.</li>" +
