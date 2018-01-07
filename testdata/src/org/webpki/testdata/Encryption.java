@@ -160,7 +160,7 @@ public class Encryption {
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
         String fileName = ".x5c.json";
         if (remoteUrl != null) {
-            fileName = ".remote-x5u.json";
+            fileName = ".x5u.json";
             encrypter.setRemoteKey(remoteUrl);
             options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
         }
@@ -269,7 +269,7 @@ public class Encryption {
                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
                         String remoteUrl) throws Exception {
         coreAsymEnc(keyType,
-                    remoteUrl == null ? ".jwk.json" : ".remote-jku.json",
+                    remoteUrl == null ? ".jwk.json" : ".jku.json",
                     dataEncryptionAlgorithm,
                     false,
                     true,
