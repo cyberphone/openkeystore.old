@@ -298,6 +298,8 @@ public class Encryption {
                 new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
         Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
         String algList = "";
+        KeyEncryptionAlgorithms algCheck = null;
+        boolean first = true;
         String globalKeyId = keyTypes[0];
         for (String keyType : keyTypes) {
             if (!keyType.equals(globalKeyId)) {
@@ -320,6 +322,14 @@ public class Encryption {
                 dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
             }
+            if (first) {
+                algCheck = keyEncryptionAlgorithm;
+            } else {
+                if (algCheck != keyEncryptionAlgorithm) {
+                    algCheck = null;
+                }
+            }
+            first = false;
             decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(keyPair.getPublic(),
                                                                              keyPair.getPrivate(),
                                                                              keyEncryptionAlgorithm,
@@ -336,11 +346,13 @@ public class Encryption {
             encrypters.add(encrypter);
         }
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        String fileName = ".multexpkey.json"; 
+        String fileName = algCheck == null ? ".mult-jwk.json" : ".mult-glob+alg-jwk.json"; 
         if (wantKeyId) {
-            fileName = ".multimpkey.json"; 
+            fileName = ".mult-kid.json"; 
             if (globalKeyId != null) {
-                fileName = ".multglobimpkey.json";
+                fileName = algCheck == null ? ".mult-glob+kid.json" : ".mult-glob+alg+kid.json";
+            } else if (algCheck != null) {
+                fileName = ".mult-glob+alg-kid.json";
             }
             options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
