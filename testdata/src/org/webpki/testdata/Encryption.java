@@ -321,12 +321,16 @@ public class Encryption {
                                                        dataEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + fileName, encryptedData);
+        int q = 0;
         for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
                  .getEncryptionObjects(options)) {
+            q++;
             if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {
                 throw new Exception("Dec err");
             }
         }
-
+        if (q != keyTypes.length) {
+            throw new IOException("Wrong number of recipients");
+        }
      }
 }
