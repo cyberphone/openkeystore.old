@@ -17,20 +17,26 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -118,9 +124,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 .newColumn();
     }
     
-    static Vector<JSONDecryptionDecoder.DecryptionKeyHolder> keys =
-            new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
-    
     static byte[] dataToEncrypt;
     
     static Vector<AsymKey> asymmertricKeys = new Vector<AsymKey>();
@@ -139,14 +142,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymKey.keyId = key.getString("kid");
         key.removeProperty("kid");
         asymKey.keyPair = key.getKeyPair();
-        for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
-            if (kea.isRsa() == asymKey.keyPair.getPublic() instanceof RSAPublicKey) {
-                keys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(asymKey.keyPair.getPublic(),
-                                                                       asymKey.keyPair.getPrivate(),
-                                                                       kea,
-                                                                       asymKey.keyId));
-            }
-        }
         asymKey.certPath = json.readJson1(keyType + "certificate.x5c").getJSONArrayReader().getCertificatePath();
         return asymKey;
     }
@@ -219,46 +214,28 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                         }
                     }
                 }
+                if (validationKey == null) {
+                    for (AsymKey localKey : asymmertricKeys) {
+                        if (decoder.getKeyEncryptionAlgorithm().isRsa() ==
+                            (localKey.keyPair.getPublic() instanceof RSAPublicKey)) {
+                            validationKey = localKey;
+                            break;
+                        }
+                    }
+                }
                 System.out.println(fileName + " found=" + (validationKey != null));
+                if (!ArrayUtil.compare(decoder.getDecryptedData(validationKey.keyPair.getPrivate()), dataToEncrypt)) {
+                    throw new IOException(fileName);
+                }
             }
         } catch (Exception e) {
             throw new IOException("Failed on file " + fileName + ", " + e.getMessage());
         }
-        return encryptedObject.toString();
+        return formatCode(encryptedObject.toString());
     }
  
     static X509Certificate[] readCertPath(String name) throws IOException {
         return json.readJson1(name + "certificate.x5c").getJSONArrayReader().getCertificatePath();
-    }
-
-    static String readAsymEncryption(String name) throws IOException, GeneralSecurityException {
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        JSONObjectReader rd = json.readJson2(name);
-        if (rd.hasProperty(JSONCryptoDecoder.KID_JSON)) {
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
-        }
-        if (!rd.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
-            options.setRequirePublicKeyInfo(false);
-        }
-        if (!ArrayUtil.compare(rd.getEncryptionObject(options).getDecryptedData(keys), dataToEncrypt)) {
-            throw new IOException(name);
-        }
-        return formatCode(rd);
-    }
-    
-    static String readAsymEncryption(String name, AsymKey asymKey) throws IOException, GeneralSecurityException {
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        JSONObjectReader rd = json.readJson2(name);
-        if (rd.hasProperty(JSONCryptoDecoder.KID_JSON)) {
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
-        }
-        if (!rd.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
-            options.setRequirePublicKeyInfo(false);
-        }
-        if (!ArrayUtil.compare(rd.getEncryptionObject(options).getDecryptedData(asymKey.keyPair.getPrivate()), dataToEncrypt)) {
-            throw new IOException(name);
-        }
-        return formatCode(rd);
     }
 
     static String aesCrypto(String[] encObjects) throws IOException, GeneralSecurityException {
@@ -318,7 +295,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
         validateAsymEncryption("p256ecdh-es+a128kw.kid.json");
         validateAsymEncryption("p256ecdh-es+a256kw.certenc.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.critkey.json");
+        validateAsymEncryption("p256ecdh-es+a256kw.critkeyenc.json");
         validateAsymEncryption("p256ecdh-es+a256kw.encrypted.json");
         validateAsymEncryption("p256ecdh-es+a256kw.kid.json");
         validateAsymEncryption("p256ecdh-es+a256kw.remotecertenc.json");
@@ -333,6 +310,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         validateAsymEncryption("r2048rsa-oaep-256.kid.json");
         validateAsymEncryption("r2048rsa-oaep-256.remotecertenc.json");
         validateAsymEncryption("r2048rsa-oaep.kid.json");
+        validateAsymEncryption("r2048rsa-oaep-256.implicitkey.json");
+        validateAsymEncryption("p256ecdh-es+a128kw.implicitkey.json");
 
         JSONObjectReader ecdhEncryption = json.readJson2("p256ecdh-es+a256kw.kid.json");
         JSONObjectReader authData = ecdhEncryption.clone();
@@ -436,34 +415,54 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            "ECDH encryption object <i>requiring the same private key</i> " +
            "as in the sample object while using a different set of " +
            "algorithms both for key encryption and content encryption:" +
-           readAsymEncryption("p256ecdh-es+a128kw.kid.json") +
+           validateAsymEncryption("p256ecdh-es+a128kw.kid.json") +
            "ECDH encryption object <i>requiring the same private key</i> " +
            "as in the sample object while providing the public key information in line, " +
            "instead of using a <code>" + JSONCryptoDecoder.KID_JSON + "</code>:" +
-           readAsymEncryption("p256ecdh-es+a256kw.encrypted.json") + LINE_SEPARATOR +
+           validateAsymEncryption("p256ecdh-es+a256kw.encrypted.json") + 
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object but assuming it is known through the <i>context</i>:" +
+           validateAsymEncryption("p256ecdh-es+a128kw.implicitkey.json") + 
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while providing the key information " +
+           "through an in-line certificate path:" +
+           validateAsymEncryption("p256ecdh-es+a256kw.certenc.json") + 
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while providing the key information " +
+           "through an <i>external</i> certificate path:" +
+           validateAsymEncryption("p256ecdh-es+a256kw.remotecertenc.json") + 
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while providing the key information " +
+           "through an <i>external</i> public key:" +
+           validateAsymEncryption("p256ecdh-es+a256kw.remotekeyenc.json") + 
+           "ECDH encryption object <i>requiring the same private key</i> " +
+           "as in the sample object while providing the key information " +
+           "in line.  In addition, this object declares <code>" +
+           JSONCryptoDecoder.CRIT_JSON + "</code> extensions:" +
+           validateAsymEncryption("p256ecdh-es+a256kw.critkeyenc.json") + LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p384key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
-           readAsymEncryption("p384ecdh-es.encrypted.json") + LINE_SEPARATOR +
+           validateAsymEncryption("p384ecdh-es.encrypted.json") + LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p521key) +
            "ECDH encryption object <i>requiring the private key above</i>:" +
-           readAsymEncryption("p521ecdh-es+a128kw.encrypted.json") + LINE_SEPARATOR +
+           validateAsymEncryption("p521ecdh-es+a128kw.encrypted.json") + LINE_SEPARATOR +
            "RSA private key for decrypting the subsequent object:" +
            formatCode(r2048key) +
            "RSA encryption object <i>requiring the private key above</i>:" +
-           readAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
+           validateAsymEncryption("r2048rsa-oaep-256.encrypted.json") +
            "RSA encryption object <i>requiring the same private key</i> " +
            "as in the previous example but relying on that this being " +
            "<i>implicitly known</i> since the encryption object " +
            "neither contains a <code>" +
            JSONCryptoDecoder.KID_JSON + "</code>, nor a <code>" +
            JSONCryptoDecoder.JWK_JSON + "</code> property:" +
-           readAsymEncryption("r2048rsa-oaep-256.kid.json", r2048key) +
+           validateAsymEncryption("r2048rsa-oaep-256.kid.json") +
            "RSA encryption object <i>requiring the same private key</i> " +
            "as in the previous example while using a different set of " +
            "algorithms both for key encryption and content encryption:" +
-           readAsymEncryption("r2048rsa-oaep.kid.json", r2048key) +
+           validateAsymEncryption("r2048rsa-oaep.kid.json") +
            aesCrypto(new String[]{"a128gcm.encrypted.json",
                                   "a128cbc-hs256.encrypted.json",
                                   "a256gcm.implicitkey.json",
