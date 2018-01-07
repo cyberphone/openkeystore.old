@@ -113,10 +113,10 @@ public class Encryption {
         symmEnc(128, DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
 
-        coreSymmEnc(256, ".implicitkey.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        coreSymmEnc(256, ".implicit.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
         coreAsymEnc("p256", 
-                    ".critkeyenc.json",
+                    ".crit-jwk.json",
                     DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
@@ -158,9 +158,9 @@ public class Encryption {
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        String fileName = ".certenc.json";
+        String fileName = ".x5c.json";
         if (remoteUrl != null) {
-            fileName = ".remotecertenc.json";
+            fileName = ".remote-x5u.json";
             encrypter.setRemoteKey(remoteUrl);
             options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
         }
@@ -197,7 +197,7 @@ public class Encryption {
     }
 
     static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        coreSymmEnc(keyBits, ".encrypted.json", dataEncryptionAlgorithm, true);
+        coreSymmEnc(keyBits, ".kid.json", dataEncryptionAlgorithm, true);
     }
     
     static KeyPair readJwk(String keyType) throws Exception {
@@ -269,7 +269,7 @@ public class Encryption {
                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
                         String remoteUrl) throws Exception {
         coreAsymEnc(keyType,
-                    remoteUrl == null ? ".encrypted.json" : ".remotekeyenc.json",
+                    remoteUrl == null ? ".jwk.json" : ".remote-jku.json",
                     dataEncryptionAlgorithm,
                     false,
                     true,
@@ -282,7 +282,7 @@ public class Encryption {
                                        DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                        boolean wantKeyId) throws Exception {
         coreAsymEnc(keyType, 
-                    wantKeyId ? ".kid.json" : ".implicitkey.json",
+                    wantKeyId ? ".kid.json" : ".implicit.json",
                     dataEncryptionAlgorithm,
                     wantKeyId,
                     false,

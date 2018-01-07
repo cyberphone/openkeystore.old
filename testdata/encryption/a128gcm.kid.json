@@ -1,0 +1,7 @@
+{
+  "enc": "A128GCM",
+  "kid": "s128bitkey",
+  "iv": "69_rNknQnUM2RRUC",
+  "tag": "409TGzqftxLUiq-79l_UOA",
+  "ciphertext": "QbXfrHnrRVPHh924BGXlMIWASphcoQ"
+}

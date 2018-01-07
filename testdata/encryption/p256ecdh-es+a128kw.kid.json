@@ -5,11 +5,11 @@
   "epk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "yvCcyL3zouwOOxfBvzli8VkeUuipddCg1nX2IuFo5OU",
-    "y": "JaIBoWrAB0R-ES7cVfSsyT9YeLM-eFaw_LysO9UTIUM"
+    "x": "IR8iyGB6hJfYlsVvOpcL0THM036S3pg6Du-hSKhfFDs",
+    "y": "mfDQlj6IT4_gGupka4OArQrDb1AUjVhageHWYWRf4Vg"
   },
-  "encrypted_key": "T2DpC015VsqAo0N0NzHDLD5vtI__c7Js",
-  "iv": "peubFH7aAPmicbtP",
-  "tag": "htl9dHiLy6s8Z5TkEQH5uA",
-  "ciphertext": "n7Z_QvycKUc82o4-1OzmdZCsG8jBaw"
+  "encrypted_key": "8-hEhV5gGfB346Y2AZUa0M9-5Edsgtna",
+  "iv": "D1mj0T2ZceYHY81N",
+  "tag": "MeL1Expo6YQzXtZwtil91Q",
+  "ciphertext": "CXpfssKVbluKPn-wReNgI95Aj-EPww"
 }

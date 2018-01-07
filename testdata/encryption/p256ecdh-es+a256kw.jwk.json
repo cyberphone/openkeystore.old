@@ -1,0 +1,20 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
+    "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
+  },
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "fB7cSXzgzU19Q2JwFDibZS_gcDM1QRiEDZUFvWlHRQA",
+    "y": "B_HFFZwFZeh0AHsyFFHLdi4vddTuRpuQ_CxY4xu8h38"
+  },
+  "encrypted_key": "rtWnBzCWSt4Bs8Ox-x6kVFgahrNQvewafvRdkfKY7qJ-UxewyCcr-A",
+  "iv": "oH6jy9zl2qEh0cXW2D76YQ",
+  "tag": "PRo7Tq43ehPbPqzsPiqz8w",
+  "ciphertext": "U6PhMh9JWRxrgOU1yfgctlacl8nVAl-RMjGB1sDtmf0"
+}

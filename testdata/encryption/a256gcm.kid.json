@@ -1,0 +1,7 @@
+{
+  "enc": "A256GCM",
+  "kid": "s256bitkey",
+  "iv": "qQ6sFkkA1k9vXniU",
+  "tag": "702wPPcMM83baFsidosM-w",
+  "ciphertext": "hhxef38IPyDnZgincyAYOxVAqJLNWA"
+}
