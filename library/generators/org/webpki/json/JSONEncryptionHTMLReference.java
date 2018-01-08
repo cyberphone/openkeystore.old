@@ -46,11 +46,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static String ECDH_KW_PROPERTIES    = "Additional ECDH+KW Properties";
     static String RSA_PROPERTIES        = "Additional RSA Encryption Properties";
 
-    static final String ENCRYPTED_DATA  = "encryptedData";
+    static final String ENCRYPTED_DATA  = "Encryption Object";
     
     static final String TEST_VECTORS    = "Test Vectors";
     
     static final String SAMPLE_OBJECT   = "Sample Object";
+    
+    static final String KEY_ENCRYPTION  = "Key Encryption";
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
 
@@ -106,18 +108,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         return formatCode(asymKey.json);
     }
 
-    static Column preAmble(String qualifier, boolean subItem) throws IOException {
-        return (subItem ? json.addSubItemTable(qualifier) : json.addProtocolTable(qualifier))
-            .newRow()
-                .newColumn()
-                    .addProperty(JSONCryptoDecoder.ALG_JSON)
-                    .addSymbolicValue(JSONCryptoDecoder.ALG_JSON)
-                .newColumn()
-                    .setType(Types.WEBPKI_DATA_TYPES.STRING)
-                .newColumn()
-                .newColumn();
-    }
-    
     static byte[] dataToEncrypt;
     
     static Vector<AsymKey> asymmertricKeys = new Vector<AsymKey>();
@@ -286,26 +276,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymmertricKeys.add(p384key);
         asymmertricKeys.add(p521key);
         asymmertricKeys.add(r2048key);
-
-        validateAsymEncryption("p256#ecdh-es+a128kw@kid.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw@x5c.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw@crit@jwk.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw@jwk.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw@kid.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw@x5u.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json");
-        validateAsymEncryption("p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json");
-        validateAsymEncryption("p384#ecdh-es@jwk.json");
-        validateAsymEncryption("p521#ecdh-es+a128kw@jwk.json");
-        validateAsymEncryption("r2048#rsa-oaep-256@x5c.json");
-        validateAsymEncryption("r2048#rsa-oaep-256@jwk.json");
-        validateAsymEncryption("r2048#rsa-oaep-256@kid.json");
-        validateAsymEncryption("r2048#rsa-oaep-256@x5u.json");
-        validateAsymEncryption("r2048#rsa-oaep@kid.json");
-        validateAsymEncryption("r2048#rsa-oaep-256@imp.json");
-        validateAsymEncryption("p256#ecdh-es+a128kw@imp.json");
 
         JSONObjectReader ecdhEncryption = json.readJson2("p256#ecdh-es+a256kw@kid.json");
         JSONObjectReader authData = ecdhEncryption.clone();
@@ -505,7 +475,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                                                  "of the OpenKeyStore " +
                                                  json.createReference(JSONBaseHTML.REF_OPENKEYSTORE) + " project .");
 
-    preAmble(ENCRYPTED_DATA, false)
+        json.addProtocolTable(ENCRYPTED_DATA)
+                .newRow()
+                    .newColumn()
+                        .addProperty(JSONCryptoDecoder.ENC_JSON)
+                        .addSymbolicValue("Algorithm")
+                    .newColumn()
+                        .setType(Types.WEBPKI_DATA_TYPES.STRING)
+                    .newColumn()
+                    .newColumn()
         .addString("Data encryption algorithm. Currently the following JWE " +
             json.createReference(JSONBaseHTML.REF_JWE) +
             " algorithms are recognized:<ul>")
@@ -523,27 +501,54 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .addString("</ul>")
             .newRow()
         .newColumn()
+            .addProperty(JSONCryptoDecoder.ALG_JSON)
+            .addSymbolicValue(JSONCryptoDecoder.ALG_JSON)
+        .newColumn()
+            .setType(Types.WEBPKI_DATA_TYPES.STRING)
+        .newColumn()
+             .setChoice (false, 1)
+        .newColumn()
+            .addString("<i>Optional</i>.  For key encryption schemes only. See " +
+        json.globalLinkRef(KEY_ENCRYPTION, JSONCryptoDecoder.ALG_JSON) +
+                   ".")
+            .newRow()
+        .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)
             .addSymbolicValue(JSONCryptoDecoder.KID_JSON)
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
-             .setChoice (false, 2)
+             .setChoice (false, 1)
         .newColumn()
             .addString("If the <code>" + JSONCryptoDecoder.KID_JSON +
                    "</code> property is defined, data is supposed to be encrypted by a specific named (symmetric) key.")
-            .newRow()
+       .newRow()
 
         .newColumn()
-        .addProperty("@@@")
-        .addLink("@@@")
+        .addProperty("...")
+        .addLink(KEY_ENCRYPTION)
+    .newColumn()
+        .setType(Types.WEBPKI_DATA_TYPES.SPECIAL)
+    .newColumn()
+             .setChoice (false, 2)
+    .newColumn()
+        .addString("If a key encryption scheme <i>for a single recipient</i> is used, the " +
+                   "applicable properties from " +
+                json.globalLinkRef(KEY_ENCRYPTION) +
+                    " <b>must</b> be <i>copied</i> into the top level object as " +
+                "illustrated by the " +
+                    json.globalLinkRef(SAMPLE_OBJECT) + ".")
+       .newRow()
+
+        .newColumn()
+        .addProperty(JSONCryptoDecoder.RECIPIENTS_JSON)
+        .addArrayLink(KEY_ENCRYPTION, 1)
     .newColumn()
         .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
     .newColumn()
     .newColumn()
-        .addString("If the <code>" + "@@@" +
-                   "</code> property is defined, the (symmetric) data encryption key is supposed to be provided " +
-                   "in-line, but encrypted.")
+        .addString("If this property is defined, one or more recipients, each providede "+
+                   "with a suitable key encryption object.")
         .newRow()
         .newColumn()
           .addProperty(JSONCryptoDecoder.IV_JSON)
@@ -574,7 +579,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                       "</code> nor <code>" + "@@@" + 
                       "</code> are defined, the (symmetric) data encryption key is assumed to known by the recipient.");
           
-        preAmble("@@@", true)
+             json.addSubItemTable(KEY_ENCRYPTION)
+                .newRow()
+                    .newColumn()
+                        .addProperty(JSONCryptoDecoder.ALG_JSON)
+                        .addSymbolicValue("Algorithm")
+                    .newColumn()
+                        .setType(Types.WEBPKI_DATA_TYPES.STRING)
+                    .newColumn()
+             .setChoice (false, 1)
+                    .newColumn()
             .addString("Key encryption algorithm. Currently the following JWE " +
                                 json.createReference (JSONBaseHTML.REF_JWE) +
                                 " algorithms are recognized:<ul>")
@@ -604,7 +618,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
-             .setChoice (false, 2)
+             .setChoice (false, 1)
         .newColumn()
             .addString("If the <code>" + JSONCryptoDecoder.KID_JSON +
                    "</code> property is defined, it is supposed to identify the public key associated with the encrypted (or derived) key.")
@@ -615,6 +629,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
+             .setChoice (false, 1)
         .newColumn()
           .addString("Public key associated with the encrypted (or derived) key.")
      .newRow(ECDH_PROPERTIES)

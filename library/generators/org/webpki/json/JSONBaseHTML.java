@@ -437,7 +437,10 @@ public class JSONBaseHTML  {
                      "<code>tz</code> is either <code>'Z'</code> or <code>&#x00b1;hh:mm</code>."),
                      
             OBJECT  ("object", "<code>{}</code>",                         null,
-                     "JSON object");
+                     "JSON object"),
+
+            SPECIAL ("n/a", "",                                           null,
+                    "Special construct, see documentation.");
 
             String data_type;
             String json;
@@ -804,7 +807,9 @@ public class JSONBaseHTML  {
                     if (type.getRef() != null) {
                         createReference(type.getRef());
                     }
-                    type.setUsed();
+                    if (type != Types.WEBPKI_DATA_TYPES.SPECIAL) {
+                        type.setUsed();
+                    }
                     column.append(type.getDataType());
                     return this;
                 }
