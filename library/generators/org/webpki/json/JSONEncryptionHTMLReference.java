@@ -406,34 +406,34 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             " can be decrypted by the <i>private</i> part of the following EC key in JWK " + 
            json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
            formatCode(p256key) +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while using a different set of " +
                            "algorithms both for key encryption and content encryption:" ,
                    "p256#ecdh-es+a128kw@kid.json") +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the public key information in line, " +
                            "instead of using a <code>" + JSONCryptoDecoder.KID_JSON + "</code>:",
                    "p256#ecdh-es+a256kw@jwk.json") + 
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object but assuming it is known through the <i>context</i>:",
                    "p256#ecdh-es+a128kw@imp.json") + 
-           validateAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
+           showAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an in-line certificate path:",
                    "p256#ecdh-es+a256kw@x5c.json") + 
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "through an <i>external</i> certificate path:",
                    "p256#ecdh-es+a256kw@x5u.json") + 
-           validateAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
+           showAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an <i>external</i> public key:",
                    "p256#ecdh-es+a256kw@jku.json") + 
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "in line.  In addition, this object declares <code>" +
@@ -442,22 +442,22 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p384key) +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p384#ecdh-es@jwk.json") + 
            LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p521key) +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p521#ecdh-es+a128kw@jwk.json") + 
            LINE_SEPARATOR +
            "RSA private key for decrypting the subsequent object:" +
            formatCode(r2048key) +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "RSA encryption object <i>requiring the private key above</i>:",
                    "r2048#rsa-oaep-256@jwk.json") +
-            validateAsymEncryption(
+            showAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example but relying on that this being " +
                            "<i>implicitly known</i> since the encryption object " +
@@ -465,24 +465,24 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            JSONCryptoDecoder.KID_JSON + "</code>, nor a <code>" +
                            JSONCryptoDecoder.JWK_JSON + "</code> property:",
                     "r2048#rsa-oaep-256@imp.json") +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example while using a different set of " +
                            "algorithms both for key encryption and content encryption:",
                     "r2048#rsa-oaep@kid.json") + 
            LINE_SEPARATOR +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                    "as in the previous examples:",
                    "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json") +
            LINE_SEPARATOR +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> property:",
                    "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json") +
            LINE_SEPARATOR +
-           validateAsymEncryption(
+           showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> and <code>" +
@@ -662,9 +662,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.writeHTML();
       }
 
-    private static String validateAsymEncryption(String text, String encryptionFile) throws IOException {
-        return "<b id=\"" + JSONBaseHTML.makeLink(encryptionFile) + "\">" + encryptionFile +
-                "</b>" + LINE_SEPARATOR + text + validateAsymEncryption(encryptionFile);
+    static String showAsymEncryption(String text, String encryptionFile) throws IOException {
+        String link = JSONBaseHTML.makeLink(encryptionFile);
+        return "<div style=\"cursor:pointer;font-weight:bold;padding:10pt 0 7pt 0\" onclick=\"document.location.href='#" +
+               link + "'\" id=\"" + link + 
+               "\">" + encryptionFile + "</div>" +
+               text + 
+               validateAsymEncryption(encryptionFile);
     }
 
 }
