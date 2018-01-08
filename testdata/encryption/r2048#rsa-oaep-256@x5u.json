@@ -1,0 +1,9 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "RSA-OAEP-256",
+  "x5u": "https://cyberphone.github.io/doc/openkeystore/r2048certpath.pem",
+  "encrypted_key": "KbNj603dJ3ugUWMKc51UOV35erLsOPH5mJdUPY5LGS6uoElFudkX_toBO7FXpce7m0gmZNtfzd0_BnBZnWweczzeRIVP4E2Z7BtCQ9iuJZRuJH4FLfqQRT7N692hQot3IgehTh7AgTwauMbMgkV0lxSkLtKe36w_XJn8wqh-zX5V8Luy7r_EySEv3Eb8QSznrfeUhH3Q3br7-Y0j1x7L671942HNZOP5yc-9XCnJUzRiDFFAkDa6dRl7tR3aJIcn-gzrpTQAbk8YH0HxxdjUkh4V9YA6vdhuG8Dn64MKZ7QXI2vKMfySDijPtyElgZiCHfbXAccJQrPK7VtaPQiSoA",
+  "iv": "Jr63IIVtT2xmjEJ5qpj6hg",
+  "tag": "sISBl3gJLoxuaIcO8wfieg",
+  "ciphertext": "rvfX8L1fc6WhVtWpHuO9PYxv1ra82FEO8sDGUcF8Fq4"
+}

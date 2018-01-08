@@ -1,0 +1,9 @@
+{
+  "enc": "A256GCM",
+  "kid": "20180101:mybank:r2048",
+  "alg": "RSA-OAEP-256",
+  "encrypted_key": "OkDAVmjjUGOnIEq25P_1DRANsj5WW0KRSm47wa3rR1jZSC25shWRS_iyJ6Q-S_yzhX5FK03KYx3e0-WovVawsie6ZWA971NQ34U-oz6B-isRX0I3Ty93n6FyVf0zF2VTxu9RCQr_9vrTZPxtZ2HIOIeK_krxhO2lY5kOvyg1KIK0qjdRV7Ytx9H_Z5I9nkrJEigTY15ombrO1C_rXx9gKLQXLsAL7_BI80yxt9H-gANDUZgAlERmelVZGXug5Pyp_3CBmnekW56QovKn_tY9AP2DNvUcfw79M-OUZ2XVzIcn3xnlrw03bj5TZvZFp1ROHZk16F1QD0qUX6AuzKGM0Q",
+  "iv": "_wdLNaao4k1vwJhf",
+  "tag": "nKPKBNj9TlLGjL4hqWaUGg",
+  "ciphertext": "BaYz7K8WgdtybaOeNsKV1ctPYrIMng"
+}

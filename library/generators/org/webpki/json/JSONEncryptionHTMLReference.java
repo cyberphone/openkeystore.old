@@ -287,27 +287,27 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymmertricKeys.add(p521key);
         asymmertricKeys.add(r2048key);
 
-        validateAsymEncryption("p256ecdh-es+a128kw.kid.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.x5c.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.crit-jwk.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.jwk.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.kid.json");
-        validateAsymEncryption("p256ecdh-es+a256kw.x5u.json");
-        validateAsymEncryption("p256ecdh-es+a256kw+p256ecdh-es+a256kw.mult-glob+alg+kid.json");
-        validateAsymEncryption("p256ecdh-es+a256kw+p384ecdh-es+a256kw.mult-glob+alg-jwk.json");
-        validateAsymEncryption("p256ecdh-es+a256kw+p384ecdh-es+a256kw.mult-glob+alg-kid.json");
-        validateAsymEncryption("p256ecdh-es+a256kw+r2048rsa-oaep-256.mult-kid.json");
-        validateAsymEncryption("p384ecdh-es.jwk.json");
-        validateAsymEncryption("p521ecdh-es+a128kw.jwk.json");
-        validateAsymEncryption("r2048rsa-oaep-256.x5c.json");
-        validateAsymEncryption("r2048rsa-oaep-256.jwk.json");
-        validateAsymEncryption("r2048rsa-oaep-256.kid.json");
-        validateAsymEncryption("r2048rsa-oaep-256.x5u.json");
-        validateAsymEncryption("r2048rsa-oaep.kid.json");
-        validateAsymEncryption("r2048rsa-oaep-256.implicit.json");
-        validateAsymEncryption("p256ecdh-es+a128kw.implicit.json");
+        validateAsymEncryption("p256#ecdh-es+a128kw@kid.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw@x5c.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw@crit@jwk.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw@jwk.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw@kid.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw@x5u.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json");
+        validateAsymEncryption("p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json");
+        validateAsymEncryption("p384#ecdh-es@jwk.json");
+        validateAsymEncryption("p521#ecdh-es+a128kw@jwk.json");
+        validateAsymEncryption("r2048#rsa-oaep-256@x5c.json");
+        validateAsymEncryption("r2048#rsa-oaep-256@jwk.json");
+        validateAsymEncryption("r2048#rsa-oaep-256@kid.json");
+        validateAsymEncryption("r2048#rsa-oaep-256@x5u.json");
+        validateAsymEncryption("r2048#rsa-oaep@kid.json");
+        validateAsymEncryption("r2048#rsa-oaep-256@imp.json");
+        validateAsymEncryption("p256#ecdh-es+a128kw@imp.json");
 
-        JSONObjectReader ecdhEncryption = json.readJson2("p256ecdh-es+a256kw.kid.json");
+        JSONObjectReader ecdhEncryption = json.readJson2("p256#ecdh-es+a256kw@kid.json");
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONCryptoDecoder.TAG_JSON);
         authData.removeProperty(JSONCryptoDecoder.CIPHER_TEXT_JSON);
@@ -410,53 +410,53 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while using a different set of " +
                            "algorithms both for key encryption and content encryption:" ,
-                   "p256ecdh-es+a128kw.kid.json") +
+                   "p256#ecdh-es+a128kw@kid.json") +
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the public key information in line, " +
                            "instead of using a <code>" + JSONCryptoDecoder.KID_JSON + "</code>:",
-                   "p256ecdh-es+a256kw.jwk.json") + 
+                   "p256#ecdh-es+a256kw@jwk.json") + 
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object but assuming it is known through the <i>context</i>:",
-                   "p256ecdh-es+a128kw.implicit.json") + 
+                   "p256#ecdh-es+a128kw@imp.json") + 
            validateAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an in-line certificate path:",
-                   "p256ecdh-es+a256kw.x5c.json") + 
+                   "p256#ecdh-es+a256kw@x5c.json") + 
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "through an <i>external</i> certificate path:",
-                   "p256ecdh-es+a256kw.x5u.json") + 
+                   "p256#ecdh-es+a256kw@x5u.json") + 
            validateAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an <i>external</i> public key:",
-                   "p256ecdh-es+a256kw.jku.json") + 
+                   "p256#ecdh-es+a256kw@jku.json") + 
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "in line.  In addition, this object declares <code>" +
                            JSONCryptoDecoder.CRIT_JSON + "</code> extensions:",
-                    "p256ecdh-es+a256kw.crit-jwk.json") + 
+                    "p256#ecdh-es+a256kw@crit@jwk.json") + 
            LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p384key) +
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p384ecdh-es.jwk.json") + 
+                   "p384#ecdh-es@jwk.json") + 
            LINE_SEPARATOR +
            "EC private key for decrypting the subsequent object:" +
            formatCode(p521key) +
            validateAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p521ecdh-es+a128kw.jwk.json") + 
+                   "p521#ecdh-es+a128kw@jwk.json") + 
            LINE_SEPARATOR +
            "RSA private key for decrypting the subsequent object:" +
            formatCode(r2048key) +
            validateAsymEncryption(
                    "RSA encryption object <i>requiring the private key above</i>:",
-                   "r2048rsa-oaep-256.jwk.json") +
+                   "r2048#rsa-oaep-256@jwk.json") +
             validateAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example but relying on that this being " +
@@ -464,35 +464,35 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "neither contains a <code>" +
                            JSONCryptoDecoder.KID_JSON + "</code>, nor a <code>" +
                            JSONCryptoDecoder.JWK_JSON + "</code> property:",
-                    "r2048rsa-oaep-256.implicit.json") +
+                    "r2048#rsa-oaep-256@imp.json") +
            validateAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example while using a different set of " +
                            "algorithms both for key encryption and content encryption:",
-                    "r2048rsa-oaep.kid.json") + 
+                    "r2048#rsa-oaep@kid.json") + 
            LINE_SEPARATOR +
            validateAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                    "as in the previous examples:",
-                   "p256ecdh-es+a256kw+r2048rsa-oaep-256.mult-kid.json") +
+                   "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json") +
            LINE_SEPARATOR +
            validateAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> property:",
-                   "p256ecdh-es+a256kw+p384ecdh-es+a256kw.mult-glob+alg-jwk.json") +
+                   "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json") +
            LINE_SEPARATOR +
            validateAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> and <code>" +
                            JSONCryptoDecoder.KID_JSON + "</code> properties:",
-                   "p256ecdh-es+a256kw+p256ecdh-es+a256kw.mult-glob+alg+kid.json") +
-           aesCrypto(new String[]{"a128gcm.kid.json",
-                                  "a128cbc-hs256.kid.json",
-                                  "a256gcm.implicit.json",
-                                  "a256gcm.kid.json",
-                                  "a256cbc-hs512.kid.json"}));
+                   "p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json") +
+           aesCrypto(new String[]{"a128gcm@kid.json",
+                                  "a128cbc-hs256@kid.json",
+                                  "a256gcm@imp.json",
+                                  "a256gcm@kid.json",
+                                  "a256cbc-hs512@kid.json"}));
 
         json.addReferenceTable();
         
@@ -663,7 +663,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
       }
 
     private static String validateAsymEncryption(String text, String encryptionFile) throws IOException {
-        return "<b>" + encryptionFile + "</code></b>" + LINE_SEPARATOR + text + validateAsymEncryption(encryptionFile);
+        return "<b id=\"" + JSONBaseHTML.makeLink(encryptionFile) + "\">" + encryptionFile +
+                "</b>" + LINE_SEPARATOR + text + validateAsymEncryption(encryptionFile);
     }
 
 }

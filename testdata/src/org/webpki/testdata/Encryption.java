@@ -113,10 +113,10 @@ public class Encryption {
         symmEnc(128, DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
         symmEnc(256, DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
 
-        coreSymmEnc(256, ".implicit.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        coreSymmEnc(256, "imp.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
         coreAsymEnc("p256", 
-                    ".crit-jwk.json",
+                    "crit@jwk.json",
                     DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
@@ -158,9 +158,9 @@ public class Encryption {
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        String fileName = ".x5c.json";
+        String fileName = "x5c.json";
         if (remoteUrl != null) {
-            fileName = ".x5u.json";
+            fileName = "x5u.json";
             encrypter.setRemoteKey(remoteUrl);
             options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
         }
@@ -168,7 +168,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileName, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileName, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
                  .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
@@ -189,7 +189,7 @@ public class Encryption {
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                         dataEncryptionAlgorithm,
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
                        JSONParser.parse(encryptedData).getEncryptionObject(options).getDecryptedData(key))) {
             throw new Exception("Encryption fail");
@@ -197,7 +197,7 @@ public class Encryption {
     }
 
     static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        coreSymmEnc(keyBits, ".kid.json", dataEncryptionAlgorithm, true);
+        coreSymmEnc(keyBits, "kid.json", dataEncryptionAlgorithm, true);
     }
     
     static KeyPair readJwk(String keyType) throws Exception {
@@ -257,7 +257,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + keyType + keyEncryptionAlgorithm.toString().toLowerCase() + fileSuffix, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
                  .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
                                dataToBeEncrypted)) {
@@ -269,7 +269,7 @@ public class Encryption {
                         DataEncryptionAlgorithms dataEncryptionAlgorithm,
                         String remoteUrl) throws Exception {
         coreAsymEnc(keyType,
-                    remoteUrl == null ? ".jwk.json" : ".jku.json",
+                    remoteUrl == null ? "jwk.json" : "jku.json",
                     dataEncryptionAlgorithm,
                     false,
                     true,
@@ -282,7 +282,7 @@ public class Encryption {
                                        DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                        boolean wantKeyId) throws Exception {
         coreAsymEnc(keyType, 
-                    wantKeyId ? ".kid.json" : ".implicit.json",
+                    wantKeyId ? "kid.json" : "imp.json",
                     dataEncryptionAlgorithm,
                     wantKeyId,
                     false,
@@ -340,19 +340,19 @@ public class Encryption {
                 encrypter.setKeyId(keyId).setOutputPublicKeyInfo(false);
             }
             if (algList.length() > 0) {
-                algList += "+";
+                algList += ",";
             }
-            algList += keyType + keyEncryptionAlgorithm.toString().toLowerCase();
+            algList += keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase();
             encrypters.add(encrypter);
         }
         JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
-        String fileName = algCheck == null ? ".mult-jwk.json" : ".mult-glob+alg-jwk.json"; 
+        String fileName = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
         if (wantKeyId) {
-            fileName = ".mult-kid.json"; 
+            fileName = "mult-kid.json"; 
             if (globalKeyId != null) {
-                fileName = algCheck == null ? ".mult-glob+kid.json" : ".mult-glob+alg+kid.json";
+                fileName = algCheck == null ? "mult-glob+kid.json" : "mult-glob+alg+kid.json";
             } else if (algCheck != null) {
-                fileName = ".mult-glob+alg-kid.json";
+                fileName = "mult-glob+alg-kid.json";
             }
             options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
@@ -361,7 +361,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        dataEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + algList + fileName, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + algList + '@' + fileName, encryptedData);
         int q = 0;
         for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
                  .getEncryptionObjects(options)) {

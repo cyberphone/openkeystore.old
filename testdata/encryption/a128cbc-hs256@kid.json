@@ -1,0 +1,7 @@
+{
+  "enc": "A128CBC-HS256",
+  "kid": "s256bitkey",
+  "iv": "BimMPaOAlXtZb7V2HFebVA",
+  "tag": "hLASNnihikcFf5jfTlgxaA",
+  "ciphertext": "U0oxUt2A4sPv-PdnTO_1Qafl86O0gQn_6q1dfmeCckA"
+}

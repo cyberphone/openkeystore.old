@@ -1,0 +1,15 @@
+{
+  "enc": "A128GCM",
+  "kid": "20180101:mybank:p256",
+  "alg": "ECDH-ES+A128KW",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "oVvB7tM-OM_lPCzRVG3dF7ysQ7Km9Ejuw6iiGifXtAY",
+    "y": "qYC4xENFE0hexEJ9JEa5ooHmnALvAoyKS0WUyxkoGeE"
+  },
+  "encrypted_key": "PFBou-YlQRVypvsPE5AkPFei0iSz7YAf",
+  "iv": "oLcxxSJZ11SDjh51",
+  "tag": "1FPy-oS8o2R4i8-QOAlruQ",
+  "ciphertext": "BBMvBeRYky7Gnjo7TOBQcheCXSoqgw"
+}

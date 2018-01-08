@@ -1,0 +1,14 @@
+{
+  "enc": "A128GCM",
+  "alg": "ECDH-ES+A128KW",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "VML2CgRCmn4zeyLO6oj__Yc1kzDbWMAzi5eXcHPozI4",
+    "y": "9esWo3omdOBllEOJf0KAajlkBhjuMMJaOawE_81ULw4"
+  },
+  "encrypted_key": "OpWg2e6tCJxYPST8aEoWfTkr2q-DBrOL",
+  "iv": "pW3_2tLxxHelPCMw",
+  "tag": "VoScQUurTQGQPJvgsQr7Ng",
+  "ciphertext": "AvOqVaAnUwvYQITJqvrFIjGfvxlsUA"
+}
