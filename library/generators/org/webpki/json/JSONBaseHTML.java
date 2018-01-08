@@ -1193,6 +1193,10 @@ public class JSONBaseHTML  {
         }
         return s.toString();
     }
+    
+    static String referToTestVector(String name) throws IOException {
+        return "Also see the <a href=\"#" + makeLink(name) + "\">" + name + "</a> test vector.";
+    }
 
     static LinkedHashMap<JSONRemoteKeys,String> remoteKeyFormats = new LinkedHashMap<JSONRemoteKeys,String>();
     
@@ -1508,7 +1512,7 @@ public class JSONBaseHTML  {
                   "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
                   "(unless registered with IANA), " +
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
-                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
+                  "A conforming JCS implementation <b>must</b> <i>reject</i> signatures listing properties " +
                   "that are not found as well as empty <code>&quot;" +
                   JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
                   "Verifiers typically introduce additional constraints like only accepting predefined extensions." +
