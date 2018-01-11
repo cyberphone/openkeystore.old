@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import java.security.GeneralSecurityException;
-
 import java.security.PublicKey;
+
+import java.util.LinkedHashSet;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
@@ -62,6 +63,8 @@ public abstract class JSONEncrypter implements Serializable {
         JSONObjectWriter encryptionWriter;
 
         byte[] dataEncryptionKey;
+        
+        LinkedHashSet<String> foundExtensions = new LinkedHashSet<String>();
         
         String globalKeyId;
 
@@ -140,8 +143,8 @@ public abstract class JSONEncrypter implements Serializable {
             }
 
             if (encrypter.extensions != null) {
-                currentRecipient.setStringArray(JSONCryptoDecoder.CRIT_JSON, encrypter.extensions.getProperties());
                 for (String property : encrypter.extensions.getProperties()) {
+                    foundExtensions.add(property);
                     currentRecipient.setProperty(property, encrypter.extensions.getProperty(property));
                 }
             }
@@ -161,6 +164,10 @@ public abstract class JSONEncrypter implements Serializable {
         }
 
         JSONObjectWriter finalizeEncryption(byte[] unencryptedData) throws IOException, GeneralSecurityException {
+            if (!foundExtensions.isEmpty()) {
+                encryptionWriter.setStringArray(JSONCryptoDecoder.CRIT_JSON,
+                                                foundExtensions.toArray(new String[0]));
+            }
             byte[] iv = EncryptionCore.createIv(dataEncryptionAlgorithm);
             encryptionWriter.setBinary(JSONCryptoDecoder.IV_JSON, iv);
             EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =

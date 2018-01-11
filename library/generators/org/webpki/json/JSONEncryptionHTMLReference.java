@@ -552,6 +552,34 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "with a suitable " +
                    json.globalLinkRef(KEY_ENCRYPTION) +
                    " object.")
+       .newRow()
+        .newColumn()
+        .addProperty(JSONCryptoDecoder.CRIT_JSON)
+          .addArrayList(Types.PROPERTY_LIST, 1)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.STRING)
+        .newColumn()
+          .setChoice (false, 1)
+        .newColumn()
+          .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
+          "featured in the " +
+                  json.globalLinkRef(KEY_ENCRYPTION) +
+          " object (or the top level object " +
+          "for the case there is no <code>&quot;" + JSONCryptoDecoder.RECIPIENTS_JSON + 
+          "&quot;</code> element)." +
+          Types.LINE_SEPARATOR +
+          "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JEF <i>reserved words</i> " +
+          JSONBaseHTML.enumerateAttributes(JSONCryptoDecoder.jefReservedWords.toArray(new String[0]), false) + ". " +
+          Types.LINE_SEPARATOR +
+          "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
+          "(unless registered with IANA), " +
+          "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
+          "A conforming JEF implementation <b>must</b> <i>reject</i> encryption objects listing properties " +
+          "that are not found as well as empty <code>&quot;" +
+          JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
+          "Receivers typically introduce additional constraints like only accepting predefined extensions." +
+          Types.LINE_SEPARATOR +
+          JSONBaseHTML.referToTestVector(CRIT_TEST_VECTOR))
         .newRow()
         .newColumn()
           .addProperty(JSONCryptoDecoder.IV_JSON)
@@ -635,32 +663,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
              .setChoice (false, 1)
         .newColumn()
           .addString("Public key associated with the encrypted (or derived) key.")
-       .newRow()
-        .newColumn()
-        .addProperty(JSONCryptoDecoder.CRIT_JSON)
-          .addArrayList(Types.PROPERTY_LIST, 1)
-        .newColumn()
-          .setType(Types.WEBPKI_DATA_TYPES.STRING)
-        .newColumn()
-          .setChoice (false, 1)
-        .newColumn()
-          .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
-          "also featured within the key encrytion object itself (or the top level object " +
-          "for the case there is no <code>&quot;" + JSONCryptoDecoder.RECIPIENTS_JSON + 
-          "&quot;</code> element)." +
-          Types.LINE_SEPARATOR +
-          "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JEF <i>reserved words</i> " +
-          JSONBaseHTML.enumerateAttributes(JSONCryptoDecoder.jefReservedWords.toArray(new String[0]), false) + ". " +
-          Types.LINE_SEPARATOR +
-          "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
-          "(unless registered with IANA), " +
-          "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
-          "A conforming JEF implementation <b>must</b> <i>reject</i> encryption objects listing properties " +
-          "that are not found as well as empty <code>&quot;" +
-          JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
-          "Receivers typically introduce additional constraints like only accepting predefined extensions." +
-          Types.LINE_SEPARATOR +
-          JSONBaseHTML.referToTestVector(CRIT_TEST_VECTOR))
      .newRow(ECDH_PROPERTIES)
         .newColumn()
           .addProperty(JSONCryptoDecoder.EPK_JSON)
