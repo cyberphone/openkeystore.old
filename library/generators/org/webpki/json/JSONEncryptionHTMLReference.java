@@ -17,20 +17,27 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
+
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -57,6 +64,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
  
     static final String CRIT_TEST_VECTOR = "p256#ecdh-es+a256kw@crit@jwk.json";
+    static final String SAMPLE_TEST_VECTOR = "p256#ecdh-es+a256kw@kid.json";
 
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
@@ -112,18 +120,19 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
     static byte[] dataToEncrypt;
     
-    static Vector<AsymKey> asymmertricKeys = new Vector<AsymKey>();
+    static Vector<AsymKey> asymmetricKeys = new Vector<AsymKey>();
 
     static class AsymKey {
         String keyId;
         KeyPair keyPair;
         X509Certificate[] certPath;
+        String fileName;
         String json;
     }
     
     static AsymKey readAsymKey(String keyType) throws IOException {
         AsymKey asymKey = new AsymKey();
-        JSONObjectReader key = json.readJson1(keyType + "privatekey.jwk");
+        JSONObjectReader key = json.readJson1(asymKey.fileName = keyType + "privatekey.jwk");
         asymKey.json = key.toString();
         asymKey.keyId = key.getString("kid");
         key.removeProperty("kid");
@@ -175,7 +184,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 String keyId = decoder.getKeyId();
                 AsymKey validationKey = null;
                 if (keyId != null) {
-                    for (AsymKey localKey : asymmertricKeys) {
+                    for (AsymKey localKey : asymmetricKeys) {
                         if (keyId.equals(localKey.keyId)) {
                             validationKey = localKey;
                             break;
@@ -184,7 +193,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 }
                 PublicKey publicKey = decoder.getPublicKey();
                 if (publicKey != null) {
-                    for (AsymKey localKey : asymmertricKeys) {
+                    for (AsymKey localKey : asymmetricKeys) {
                         if (publicKey.equals(localKey.keyPair.getPublic())) {
                             validationKey = localKey;
                             break;
@@ -193,7 +202,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 }
                 X509Certificate[] certPath = decoder.getCertificatePath();
                 if (certPath != null) {
-                    for (AsymKey localKey : asymmertricKeys) {
+                    for (AsymKey localKey : asymmetricKeys) {
                         if (certPath[0].equals(localKey.certPath[0])) {
                             validationKey = localKey;
                             break;
@@ -201,7 +210,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     }
                 }
                 if (validationKey == null) {
-                    for (AsymKey localKey : asymmertricKeys) {
+                    for (AsymKey localKey : asymmetricKeys) {
                         if (decoder.getKeyEncryptionAlgorithm().isRsa() ==
                             (localKey.keyPair.getPublic() instanceof RSAPublicKey)) {
                             validationKey = localKey;
@@ -217,7 +226,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         } catch (Exception e) {
             throw new IOException("Failed on file " + fileName + ", " + e.getMessage());
         }
-        return formatCode(encryptedObject.toString());
+        return encryptedObject.toString();
     }
  
     static X509Certificate[] readCertPath(String name) throws IOException {
@@ -245,12 +254,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     }
                     s.append(" here provided in Base64URL notation:")
                      .append(formatCode(symmetricKeys.getString(keyProp)))
-                     .append("Encryption object requiring the ");
-                    if (dec.getKeyId() == null) {
-                        s.append("<i>implicit</i> ");
-                    }
-                    s.append("key above for decryption:")
-                     .append(formatCode(rd));
+                     .append(showTextAndCode("Encryption object requiring the " +
+                        (dec.getKeyId() == null ? "<i>implicit</i> " : "") + 
+                        "key above for decryption:", name, rd.toString()));
                     if (!ArrayUtil.compare(dec.getDecryptedData(key), dataToEncrypt)) {
                         throw new IOException("Sym enc");
                     }
@@ -274,12 +280,12 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         AsymKey p384key = readAsymKey("p384");
         AsymKey p521key = readAsymKey("p521");
         AsymKey r2048key = readAsymKey("r2048");
-        asymmertricKeys.add(p256key);
-        asymmertricKeys.add(p384key);
-        asymmertricKeys.add(p521key);
-        asymmertricKeys.add(r2048key);
+        asymmetricKeys.add(p256key);
+        asymmetricKeys.add(p384key);
+        asymmetricKeys.add(p521key);
+        asymmetricKeys.add(r2048key);
 
-        JSONObjectReader ecdhEncryption = json.readJson2("p256#ecdh-es+a256kw@kid.json");
+        JSONObjectReader ecdhEncryption = json.readJson2(SAMPLE_TEST_VECTOR);
         JSONObjectReader authData = ecdhEncryption.clone();
         authData.removeProperty(JSONCryptoDecoder.TAG_JSON);
         authData.removeProperty(JSONCryptoDecoder.CIPHER_TEXT_JSON);
@@ -373,11 +379,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             "of a JEF implementation." + LINE_SEPARATOR + 
            "All encryption tests encrypt the string below (after first having converted it to UTF-8):" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + new String(dataToEncrypt, "UTF-8") +
-           "&quot;</code></div>" + LINE_SEPARATOR +
-           "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
-            " can be decrypted by the <i>private</i> part of the following EC key in JWK " + 
-           json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
-           formatCode(p256key) +
+           "&quot;</code></div>" +
+           showPrivateKey(
+               "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + 
+               SAMPLE_OBJECT + "</a>" +
+               " (available in the file <b>" +
+               SAMPLE_TEST_VECTOR + 
+               "</b>), can be decrypted by the <i>private</i> part of the "+
+               "following EC key in JWK " + 
+               json.createReference(JSONBaseHTML.REF_JWK) + " format:", 
+               p256key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while using a different set of " +
@@ -411,21 +422,21 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "in line.  In addition, this object declares <code>" +
                            JSONCryptoDecoder.CRIT_JSON + "</code> extensions:",
                     CRIT_TEST_VECTOR) + 
-           LINE_SEPARATOR +
-           "EC private key for decrypting the subsequent object:" +
-           formatCode(p384key) +
+           showPrivateKey(
+                   "EC private key for decrypting the subsequent object:",
+                    p384key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p384#ecdh-es@jwk.json") + 
-           LINE_SEPARATOR +
-           "EC private key for decrypting the subsequent object:" +
-           formatCode(p521key) +
+           showPrivateKey(
+                   "EC private key for decrypting the subsequent object:",
+                    p521key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p521#ecdh-es+a128kw@jwk.json") + 
-           LINE_SEPARATOR +
-           "RSA private key for decrypting the subsequent object:" +
-           formatCode(r2048key) +
+           showPrivateKey(
+                   "RSA private key for decrypting the subsequent object:",
+                   r2048key) +
            showAsymEncryption(
                    "RSA encryption object <i>requiring the private key above</i>:",
                    "r2048#rsa-oaep-256@jwk.json") +
@@ -442,18 +453,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "as in the previous example while using a different set of " +
                            "algorithms both for key encryption and content encryption:",
                     "r2048#rsa-oaep@kid.json") + 
-           LINE_SEPARATOR +
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                    "as in the previous examples:",
                    "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json") +
-           LINE_SEPARATOR +
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> property:",
                    "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json") +
-           LINE_SEPARATOR +
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using <i>global</i> <code>" +
@@ -706,15 +714,23 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.AddPublicKeyDefinitions();
 
         json.writeHTML();
-      }
+    }
 
-    static String showAsymEncryption(String text, String encryptionFile) throws IOException {
-        String link = JSONBaseHTML.makeLink(encryptionFile);
+    static String showTextAndCode(String text, String fileName, String code) throws IOException {
+        String link = JSONBaseHTML.makeLink(fileName);
         return "<div style=\"cursor:pointer;font-weight:bold;padding:10pt 0 7pt 0\" onclick=\"document.location.href='#" +
                link + "'\" id=\"" + link + 
-               "\">" + encryptionFile + "</div>" +
+               "\">" + fileName + "</div>" +
                text + 
-               validateAsymEncryption(encryptionFile);
+               formatCode(code);
+    }
+
+    static String showPrivateKey(String text, AsymKey asymKey) throws IOException {
+        return showTextAndCode(text, asymKey.fileName, asymKey.json);
+    }
+
+    static String showAsymEncryption(String text, String encryptionFile) throws IOException {
+        return showTextAndCode(text, encryptionFile, validateAsymEncryption(encryptionFile));
     }
 
 }
