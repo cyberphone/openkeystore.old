@@ -23,6 +23,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Vector;
 
+import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
@@ -211,10 +212,7 @@ public class Signatures {
     }
 
     static void asymSign(String keyType) throws Exception {
-        KeyPair keyPair = readJwk(keyType);
-        byte[] signedData = createSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null));
-        ArrayUtil.writeFile(baseSignatures + keyType + "keysigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()).verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
+        asymSignOptionalPublicKeyInfo(keyType, false, true);
      }
 
     static void multipleSign(String keyType1, String KeyType2) throws Exception {
@@ -224,7 +222,6 @@ public class Signatures {
         signers.add(new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null));
         signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
         byte[] signedData = createSignatures(signers);
-        ArrayUtil.writeFile(baseSignatures + keyType1 + "+" + KeyType2 + "keysigned.json", signedData);
         Vector<JSONSignatureDecoder> signatures = 
                 JSONParser.parse(signedData).getSignatures(new JSONCryptoDecoder.Options());
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
@@ -232,7 +229,18 @@ public class Signatures {
         if (signatures.size() != 2) {
             throw new Exception("Wrong multi");
         }
+        ArrayUtil.writeFile(baseSignatures + keyType1 + '#' + getAlgorithm(signatures.get(0)) + ","
+                                           + KeyType2 + '#' + getAlgorithm(signatures.get(1))
+                                           + "@jwk.json", signedData);
      }
+    
+    static String keyIndicator(boolean wantKeyId, boolean wantPublicKey) {
+        return (wantKeyId ? (wantPublicKey ? "jwk+kid" : "kid") : wantPublicKey ? "jwk" : "imp") + ".json";
+    }
+    
+    static String getAlgorithm(JSONSignatureDecoder decoder) throws IOException {
+        return decoder.getAlgorithm().getAlgorithmId(AlgorithmPreferences.JOSE).toLowerCase();
+    }
 
     static void asymSignOptionalPublicKeyInfo(String keyType, boolean wantKeyId, boolean wantPublicKey) throws Exception {
         KeyPair keyPair = readJwk(keyType);
@@ -243,13 +251,14 @@ public class Signatures {
         }
         signer.setOutputPublicKeyInfo(wantPublicKey);
         byte[] signedData = createSignature(signer);
-        ArrayUtil.writeFile(baseSignatures + keyType + (wantPublicKey && wantKeyId ? "mixed" : "implicit") + "keysigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(
-            new JSONCryptoDecoder.Options()
-                .setRequirePublicKeyInfo(wantPublicKey)
-                .setKeyIdOption(wantKeyId ? 
-                        JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED : JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN))
-                    .verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
+        JSONSignatureDecoder decoder = 
+            JSONParser.parse(signedData).getSignature(
+                new JSONCryptoDecoder.Options()
+                    .setRequirePublicKeyInfo(wantPublicKey)
+                    .setKeyIdOption(wantKeyId ? 
+                            JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED : JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN));
+        decoder.verify(new JSONAsymKeyVerifier(keyPair.getPublic()));
+        ArrayUtil.writeFile(baseSignatures + keyType + '#' + getAlgorithm(decoder) + '@' +  keyIndicator(wantKeyId, wantPublicKey), signedData);
      }
 
     static X509Certificate[] readCertificatePath(String keyType) throws IOException {
@@ -262,7 +271,10 @@ public class Signatures {
         byte[] signedData = createSignature(new JSONX509Signer(keyPair.getPrivate(), 
                                                                readCertificatePath(keyType),
                                                                null));
-        ArrayUtil.writeFile(baseSignatures + keyType + "certsigned.json", signedData);
-        JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options()).verify(x509Verifier);
+        JSONSignatureDecoder decoder = 
+                JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options());
+        decoder.verify(x509Verifier);
+        String alg = decoder.getAlgorithm().getAlgorithmId(AlgorithmPreferences.JOSE);
+        ArrayUtil.writeFile(baseSignatures + keyType + '#' + alg + "@x5c.json", signedData);
     }
 }

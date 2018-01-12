@@ -3260,7 +3260,7 @@ public class JSONTest {
             boolean notDone = true;
             for (String keyProp : symmetricKeys.getProperties()) {
                 byte[] key = symmetricKeys.getBinary(keyProp);
-                if (key.length == dec.getValue().length) {
+                if (key.length == dec.getSignatureValue().length) {
                      dec.verify(new JSONSymKeyVerifier(key));
                     if (!keyProp.equals(dec.getKeyId())) {
                         throw new Exception("Sym sign");

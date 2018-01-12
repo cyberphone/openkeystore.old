@@ -16,37 +16,41 @@
  */
 package org.webpki.testdata;
 
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONParser;
+import java.io.IOException;
+
+import java.util.LinkedHashMap;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /*
  * Holder if symmetric keys
  */
 public class SymmetricKeys {
-    public byte[] s128bitkey;
-    public byte[] s256bitkey;
-    public byte[] s384bitkey;
-    public byte[] s512bitkey;
+
+    private LinkedHashMap<Integer,byte[]> keys = new LinkedHashMap<Integer,byte[]>();
     
-    JSONObjectReader symmetricKeys;
+    private String keyBase;
   
     SymmetricKeys(String keyBase) throws Exception {
-        symmetricKeys = JSONParser.parse(ArrayUtil.readFile(keyBase + "symmetrickeys.json"));
-        s128bitkey = getValue(128);
-        s256bitkey = getValue(256);
-        s384bitkey = getValue(384);
-        s512bitkey = getValue(512);
-        symmetricKeys.checkForUnread();
+        this.keyBase = keyBase;
+        init(128);
+        init(256);
+        init(384);
+        init(512);
     }
-    
+
+    private void init(int i) throws IOException {
+        keys.put(i,        
+                 DebugFormatter.getByteArrayFromHex(new String(ArrayUtil.readFile(keyBase + getName(i) + ".hex"), "utf-8")));
+    }
+
     String getName(int i) {
-        return "s" + i + "bitkey";
+        return "a" + i + "bitkey";
     }
-    
+
     byte[] getValue(int i) throws Exception {
-        byte[] key = symmetricKeys.getBinary(getName(i));
+        byte[] key = keys.get(i);
         if (key.length * 8 != i) {
             throw new Exception("Bad sym key:" + key.length);
         }

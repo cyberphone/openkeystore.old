@@ -1515,7 +1515,7 @@ public class JSONBaseHTML  {
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures listing properties " +
                   "that are not found as well as empty <code>&quot;" +
                   JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
-                  "Verifiers typically introduce additional constraints like only accepting predefined extensions." +
+                  "Verifiers are <i>recommended</i> introducing additional constraints like only accepting predefined extensions." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXTENSION_EXAMPLE + "\">test&nbsp;vector</a>.")
              .newRow()
@@ -1541,7 +1541,7 @@ public class JSONBaseHTML  {
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
                   "that are not found as well as empty <code>&quot;" +
                   JSONCryptoDecoder.EXCL_JSON + "&quot;</code> objects. " +
-                  "Verifiers typically introduce additional constraints like only accepting predefined properties." +
+                  "Verifiers are <i>recommended</i> introducing additional constraints like only accepting predefined properties." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXCLUSION_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()

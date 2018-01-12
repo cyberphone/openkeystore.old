@@ -19,8 +19,10 @@ package org.webpki.json;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
+import java.security.KeyPair;
 import java.security.KeyStore;
+
+import java.security.cert.X509Certificate;
 
 import java.util.Vector;
 
@@ -29,10 +31,10 @@ import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
-
 import org.webpki.json.JSONCryptoDecoder.ExtensionHolder;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /**
  * Create an HTML description of the JSON Clear-text Signature system.
@@ -94,23 +96,45 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     }
 
     static String formatCode(AsymKey asymKey) {
-        return formatCode(asymKey.json);
+        return formatCode(asymKey.text);
     }
     
-    static class AsymKey {
+    static Vector<AsymKey> asymmetricKeys = new Vector<AsymKey>();
+
+    static Vector<SymKey> symmetricKeys = new Vector<SymKey>();
+
+    static class CoreKey {
         String keyId;
-        PublicKey publicKey;
-        String json;
+        String fileName;
+        String text;
     }
     
-    static AsymKey readAsymKey(String name) throws IOException {
+    static class AsymKey extends CoreKey {
+        KeyPair keyPair;
+        X509Certificate[] certPath;
+    }
+    
+    static class SymKey extends CoreKey {
+        byte[] keyValue;
+    }
+    
+    static AsymKey readAsymKey(String keyType) throws IOException {
         AsymKey asymKey = new AsymKey();
-        JSONObjectReader key = json.readJson1(name);
-        asymKey.json = key.toString();
+        JSONObjectReader key = json.readJson1(asymKey.fileName = keyType + "privatekey.jwk");
+        asymKey.text = key.toString();
         asymKey.keyId = key.getString("kid");
         key.removeProperty("kid");
-        asymKey.publicKey = key.getKeyPair().getPublic();
+        asymKey.keyPair = key.getKeyPair();
+        asymKey.certPath = json.readJson1(keyType + "certificate.x5c").getJSONArrayReader().getCertificatePath();
         return asymKey;
+    }
+
+    static SymKey readSymKey(String keyName) throws IOException {
+        SymKey symKey = new SymKey();
+        symKey.text = new String(json.readFile1(symKey.fileName = keyName + ".hex"), "utf-8");
+        symKey.keyValue = DebugFormatter.getByteArrayFromHex(symKey.text);
+        symKey.keyId = keyName;
+        return symKey;
     }
     
     static String readSignature(String name) throws IOException {
@@ -123,7 +147,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
         JSONSignatureDecoder verifier = rd.getSignature(options);
-        verifier.verify(new JSONAsymKeyVerifier(asymKey.publicKey));        
+        verifier.verify(new JSONAsymKeyVerifier(asymKey.keyPair.getPublic()));        
         return formatCode(raw);
     }
 
@@ -133,8 +157,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
         Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONCryptoDecoder.Options());
-        verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.publicKey));
-        verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.publicKey));
+        verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.keyPair.getPublic()));
+        verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.keyPair.getPublic()));
         return formatCode(raw);
     }
 
@@ -160,28 +184,31 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     
     static String readSymSignature(String[] encObjects) throws IOException, GeneralSecurityException {
         StringBuffer s = new StringBuffer();
-        JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             String signature = readSignature(name);
             JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
                     new JSONCryptoDecoder.Options()
                         .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)
                         .setRequirePublicKeyInfo(false));
-            for (String keyProp : symmetricKeys.getProperties()) {
-                byte[] key = symmetricKeys.getBinary(keyProp);
-                if (key.length == dec.getValue().length) {
+            for (SymKey symKey : symmetricKeys) {
+                byte[] key = symKey.keyValue;
+                if (key.length == dec.getSignatureValue().length) {
                     s.append(LINE_SEPARATOR + "HMAC key named <code>&quot;")
-                     .append(keyProp)
-                     .append("&quot;</code> here provided in Base64URL notation:")
-                     .append(formatCode(symmetricKeys.getString(keyProp)))
+                     .append(symKey.keyId)
+                     .append("&quot;</code> here provided in hexadecimal notation:")
+                     .append(formatCode(symKey.text))
                      .append("Signature object requiring the key above for validation:")
                      .append(formatCode(signature));
                     dec.verify(new JSONSymKeyVerifier(key));
-                    if (!keyProp.equals(dec.getKeyId())) {
+                    if (!symKey.keyId.equals(dec.getKeyId())) {
                         throw new IOException("Sym sign");
                     }
+                    signature = null;
                     break;
                 }
+            }
+            if (signature != null) {
+                throw new IOException("No key for:\n" + signature);
             }
         }
         return s.toString();
@@ -192,10 +219,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         
         json.setFavIcon("../webpkiorg.png");
 
-        AsymKey p256key = readAsymKey("p256privatekey.jwk");
-        AsymKey p384key = readAsymKey("p384privatekey.jwk");
-        AsymKey p521key = readAsymKey("p521privatekey.jwk");
-        AsymKey r2048key = readAsymKey("r2048privatekey.jwk");
+        AsymKey p256key = readAsymKey("p256");
+        AsymKey p384key = readAsymKey("p384");
+        AsymKey p521key = readAsymKey("p521");
+        AsymKey r2048key = readAsymKey("r2048");
+        
+        symmetricKeys.add(readSymKey("s128bitkey"));
+        symmetricKeys.add(readSymKey("s256bitkey"));
+        symmetricKeys.add(readSymKey("s384bitkey"));
+        symmetricKeys.add(readSymKey("s512bitkey"));
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load (null, null);

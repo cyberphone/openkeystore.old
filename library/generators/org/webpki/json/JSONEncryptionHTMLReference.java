@@ -17,20 +17,26 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.RSAPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
@@ -57,8 +63,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
  
-    static final String CRIT_TEST_VECTOR = "p256#ecdh-es+a256kw@crit@jwk.json";
+    static final String CRIT_TEST_VECTOR   = "p256#ecdh-es+a256kw@crit@jwk.json";
     static final String SAMPLE_TEST_VECTOR = "p256#ecdh-es+a256kw@kid.json";
+    static final String MULT_TEST_VECTOR =   "";
 
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
@@ -295,10 +302,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymmetricKeys.add(p521key);
         asymmetricKeys.add(r2048key);
         
-        symmetricKeys.add(readSymKey("s128bitkey"));
-        symmetricKeys.add(readSymKey("s256bitkey"));
-        symmetricKeys.add(readSymKey("s384bitkey"));
-        symmetricKeys.add(readSymKey("s512bitkey"));
+        symmetricKeys.add(readSymKey("a128bitkey"));
+        symmetricKeys.add(readSymKey("a256bitkey"));
+        symmetricKeys.add(readSymKey("a384bitkey"));
+        symmetricKeys.add(readSymKey("a512bitkey"));
 
         JSONObjectReader ecdhEncryption = json.readJson2(SAMPLE_TEST_VECTOR);
         JSONObjectReader authData = ecdhEncryption.clone();
@@ -476,7 +483,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> property:",
-                   "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-jwk.json") +
+                   "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json") +
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using <i>global</i> <code>" +
@@ -600,7 +607,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           "A conforming JEF implementation <b>must</b> <i>reject</i> encryption objects listing properties " +
           "that are not found as well as empty <code>&quot;" +
           JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
-          "Receivers typically introduce additional constraints like only accepting predefined extensions." +
+          "Receivers are <i>recommended</i> introducing additional constraints like only accepting predefined extensions." +
           Types.LINE_SEPARATOR +
           JSONBaseHTML.referToTestVector(CRIT_TEST_VECTOR))
         .newRow()

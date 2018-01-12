@@ -255,7 +255,7 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    public byte[] getValue() {
+    public byte[] getSignatureValue() {
         return signatureValue;
     }
 
