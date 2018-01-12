@@ -189,7 +189,7 @@ public class Encryption {
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                         dataEncryptionAlgorithm,
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + dataEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + 'a' + keyBits + '#' + dataEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
                        JSONParser.parse(encryptedData).getEncryptionObject(options).getDecryptedData(key))) {
             throw new Exception("Encryption fail");

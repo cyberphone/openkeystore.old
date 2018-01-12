@@ -1,7 +1,0 @@
-{
-  "enc": "A256CBC-HS512",
-  "kid": "s512bitkey",
-  "iv": "7DxmK-urYRg42QvxFW29nA",
-  "tag": "a44a8QQ_J62bV3IOFf7wwnlmc1JeESp_39IhJSemKz8",
-  "ciphertext": "QhWmBpzGRxwQTvY8f83W12jfJ2kT5ff2I7czkZJWh5o"
-}
