@@ -17,28 +17,22 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.RSAPublicKey;
-
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.CustomCryptoProvider;
-
 import org.webpki.crypto.KeyAlgorithms;
-
 import org.webpki.json.JSONBaseHTML.Extender;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /**
  * Create an HTML description of JEF (JSON Encryption Format).
@@ -115,32 +109,49 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     }
 
     static String formatCode(AsymKey asymKey) {
-        return formatCode(asymKey.json);
+        return formatCode(asymKey.text);
     }
 
     static byte[] dataToEncrypt;
     
+    static class CoreKey {
+        String keyId;
+        String fileName;
+        String text;
+    }
+    
     static Vector<AsymKey> asymmetricKeys = new Vector<AsymKey>();
 
-    static class AsymKey {
-        String keyId;
+    static Vector<SymKey> symmetricKeys = new Vector<SymKey>();
+
+    static class AsymKey extends CoreKey {
         KeyPair keyPair;
         X509Certificate[] certPath;
-        String fileName;
-        String json;
+    }
+    
+    static class SymKey extends CoreKey {
+        byte[] keyValue;
     }
     
     static AsymKey readAsymKey(String keyType) throws IOException {
         AsymKey asymKey = new AsymKey();
         JSONObjectReader key = json.readJson1(asymKey.fileName = keyType + "privatekey.jwk");
-        asymKey.json = key.toString();
+        asymKey.text = key.toString();
         asymKey.keyId = key.getString("kid");
         key.removeProperty("kid");
         asymKey.keyPair = key.getKeyPair();
         asymKey.certPath = json.readJson1(keyType + "certificate.x5c").getJSONArrayReader().getCertificatePath();
         return asymKey;
     }
-    
+
+    static SymKey readSymKey(String keyName) throws IOException {
+        SymKey symKey = new SymKey();
+        symKey.text = new String(json.readFile1(symKey.fileName = keyName + ".hex"), "utf-8");
+        symKey.keyValue = DebugFormatter.getByteArrayFromHex(symKey.text);
+        symKey.keyId = keyName;
+        return symKey;
+    }
+
     static void scanObject(JSONObjectReader recipient, JSONCryptoDecoder.Options options) throws IOException {
         if (recipient.hasProperty(JSONCryptoDecoder.KID_JSON) && 
             options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN) {
@@ -235,7 +246,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
     static String aesCrypto(String[] encObjects) throws IOException, GeneralSecurityException {
         StringBuffer s = new StringBuffer();
-        JSONObjectReader symmetricKeys = json.readJson1("symmetrickeys.json");
         for (String name : encObjects) {
             JSONObjectReader rd = json.readJson2(name);
             JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
@@ -243,17 +253,17 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
             }
             JSONDecryptionDecoder dec = rd.getEncryptionObject(options);
-            for (String keyProp : symmetricKeys.getProperties()) {
-                byte[] key = symmetricKeys.getBinary(keyProp);
+            for (SymKey symKey : symmetricKeys) {
+                byte[] key = symKey.keyValue;
                 if (key.length == dec.getDataEncryptionAlgorithm().getKeyLength()) {
                     s.append(LINE_SEPARATOR + "AES key");
                     if (dec.getKeyId() != null) {
                         s.append(" named <code>&quot;")
-                         .append(keyProp)
+                         .append(symKey.keyId)
                          .append("&quot;</code>");
                     }
-                    s.append(" here provided in Base64URL notation:")
-                     .append(formatCode(symmetricKeys.getString(keyProp)))
+                    s.append(" here provided in hexadecimal notation:")
+                     .append(formatCode(symKey.text))
                      .append(showTextAndCode("Encryption object requiring the " +
                         (dec.getKeyId() == null ? "<i>implicit</i> " : "") + 
                         "key above for decryption:", name, rd.toString()));
@@ -284,6 +294,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         asymmetricKeys.add(p384key);
         asymmetricKeys.add(p521key);
         asymmetricKeys.add(r2048key);
+        
+        symmetricKeys.add(readSymKey("s128bitkey"));
+        symmetricKeys.add(readSymKey("s256bitkey"));
+        symmetricKeys.add(readSymKey("s384bitkey"));
+        symmetricKeys.add(readSymKey("s512bitkey"));
 
         JSONObjectReader ecdhEncryption = json.readJson2(SAMPLE_TEST_VECTOR);
         JSONObjectReader authData = ecdhEncryption.clone();
@@ -291,7 +306,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         authData.removeProperty(JSONCryptoDecoder.CIPHER_TEXT_JSON);
         String formattedAuthData = authData.serializeToString(JSONOutputFormats.NORMALIZED);
         for (int l = formattedAuthData.length(), j = 0, i = 0; i < l; i++) {
-            if (i % 120 == 0 && i > 0) {
+            if (i % 111 == 0 && i > 0) {
                 formattedAuthData = formattedAuthData.substring(0, i + j) + 
                         "<br>" + formattedAuthData.substring(i + j);
                 j += 4;
@@ -380,7 +395,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            "All encryption tests encrypt the string below (after first having converted it to UTF-8):" +
            "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>&quot;" + new String(dataToEncrypt, "UTF-8") +
            "&quot;</code></div>" +
-           showPrivateKey(
+           showKey(
                "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + 
                SAMPLE_OBJECT + "</a>" +
                " (available in the file <b>" +
@@ -422,19 +437,19 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "in line.  In addition, this object declares <code>" +
                            JSONCryptoDecoder.CRIT_JSON + "</code> extensions:",
                     CRIT_TEST_VECTOR) + 
-           showPrivateKey(
+           showKey(
                    "EC private key for decrypting the subsequent object:",
                     p384key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p384#ecdh-es@jwk.json") + 
-           showPrivateKey(
+           showKey(
                    "EC private key for decrypting the subsequent object:",
                     p521key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
                    "p521#ecdh-es+a128kw@jwk.json") + 
-           showPrivateKey(
+           showKey(
                    "RSA private key for decrypting the subsequent object:",
                    r2048key) +
            showAsymEncryption(
@@ -725,8 +740,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                formatCode(code);
     }
 
-    static String showPrivateKey(String text, AsymKey asymKey) throws IOException {
-        return showTextAndCode(text, asymKey.fileName, asymKey.json);
+    static String showKey(String text, CoreKey key) throws IOException {
+        return showTextAndCode(text, key.fileName, key.text);
     }
 
     static String showAsymEncryption(String text, String encryptionFile) throws IOException {

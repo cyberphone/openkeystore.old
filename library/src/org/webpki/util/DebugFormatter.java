@@ -31,9 +31,9 @@ public class DebugFormatter {
 
     private void hex(int i) {
         if (i < 10) {
-            put((char) (i + 48));
+            put((char) (i + '0'));
         } else {
-            put((char) (i + 55));
+            put((char) (i + 'a' - 10));
         }
     }
 
