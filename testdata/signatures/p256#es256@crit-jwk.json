@@ -10,6 +10,11 @@
       "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
       "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
     },
-    "val": "QAfJb-ZaQtLU5g1wr9-_S4R_XK7uWTDTn_XsBSgw_bjBQeOGqX0OcmOKmUPKLHompJADX0GER6YimdOxgFVwFQ"
+    "crit": ["myString","https://example.com/extension"],
+    "myString": "something",
+    "https://example.com/extension": {
+      "life-is-great": true
+    },
+    "val": "7lvzb2OHNhqf6a4LbSPy1vz3RWIkw8tMpIq98yWdzC3dENBIuXODvGX0VWj2QqcxnI4n-JaCJ7tetGxY_xvTow"
   }
 }

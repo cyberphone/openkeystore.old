@@ -490,11 +490,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            JSONCryptoDecoder.ALG_JSON + "</code> and <code>" +
                            JSONCryptoDecoder.KID_JSON + "</code> properties:",
                    "p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json") +
-           aesCrypto(new String[]{"a128gcm@kid.json",
-                                  "a128cbc-hs256@kid.json",
-                                  "a256gcm@imp.json",
-                                  "a256gcm@kid.json",
-                                  "a256cbc-hs512@kid.json"}));
+           aesCrypto(new String[]{"a128#a128gcm@kid.json",
+                                  "a256#a128cbc-hs256@kid.json",
+                                  "a256#a256gcm@imp.json",
+                                  "a256#a256gcm@kid.json",
+                                  "a512#a256cbc-hs512@kid.json"}));
 
         json.addReferenceTable();
         

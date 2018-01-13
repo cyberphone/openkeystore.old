@@ -1,0 +1,9 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "ES512",
+    "val": "FXYxtePMK3j2WLREJ0aNVRIoUMf6y-IV64PzIf4B62QxBOARLj2zRkZeffFIkZd9Yn4fO8rXqqVxio6PRNEnwq11JpNdLU3BhM6yT6yCIIySFrdh5hYWUq1_lGovS7mf"
+  }
+}

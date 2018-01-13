@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "RS256",
+    "kid": "20180101:mybank:r2048",
+    "val": "WsE7kEbAeO3P9VYuMD86tD_NkboMsWpzcbUtlLSMmgKic2HXhCymiJzqvi9vx0ciEFRueZ4Cz5BtptlKiVwFuqX84k5wqGsWKpdtGtfR1WC0nuOh-L2efr6TyYKbvHFsJn05e_usQn6Fi7xrmxOBempnGgx0erNuThvsDOG8y6P5RCS13CVIlRK0IgAWmOJ3g13GM6Tfx0SeMaogREKFazIFlWvvwgFvoHk5lVxiVonmhUvlsYQMB2u4KoeAkpuJy-RbxFH2yj7eBWw6mQZ45VibCIdgdvteGEnCo5WWTfebaYsNer__SPAAnyYZpF2CROZASF9hJg1KC2s8Eak_Ww"
+  }
+}

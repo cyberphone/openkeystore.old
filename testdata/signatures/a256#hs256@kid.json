@@ -4,7 +4,7 @@
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "HS256",
-    "kid": "s256bitkey",
-    "val": "4_wQStI-D96k3DHJTysf33Aj-kZRsm_x07GpjZ1hT9M"
+    "kid": "a256bitkey",
+    "val": "xMRm1aOmKLu3smdx3QL8HGXaslfXE8NnTSAt3rGV_s0"
   }
 }

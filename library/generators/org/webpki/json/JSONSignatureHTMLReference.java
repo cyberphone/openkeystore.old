@@ -224,10 +224,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         AsymKey p521key = readAsymKey("p521");
         AsymKey r2048key = readAsymKey("r2048");
         
-        symmetricKeys.add(readSymKey("s128bitkey"));
-        symmetricKeys.add(readSymKey("s256bitkey"));
-        symmetricKeys.add(readSymKey("s384bitkey"));
-        symmetricKeys.add(readSymKey("s512bitkey"));
+        symmetricKeys.add(readSymKey("a128bitkey"));
+        symmetricKeys.add(readSymKey("a256bitkey"));
+        symmetricKeys.add(readSymKey("a384bitkey"));
+        symmetricKeys.add(readSymKey("a512bitkey"));
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load (null, null);

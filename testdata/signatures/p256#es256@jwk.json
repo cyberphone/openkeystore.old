@@ -4,13 +4,12 @@
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "ES256",
-    "kid": "20180101:mybank:p256",
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
       "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
       "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
     },
-    "val": "5stHVDoJX8jo81xYFEfHi4n3gVvYLod6fiCEBS4ZyQS2C7A44fphFDvWYA-WxZ2zF85RihMJrudefuxibBi-Kg"
+    "val": "yb1D9Skhcg9sE2yUmSy6nE4yNXjl1JlIjdVfI5mITEkYRnjilEhcEN6WFnmphHKRw7jGb1AnXysIUmB0WpB57A"
   }
 }
