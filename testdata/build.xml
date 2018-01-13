@@ -83,7 +83,31 @@
     	  failonerror="true">
         <arg line="${cmd}"/>
     </java>
-  </target>
+   </target>
+	
+   <target name="_createjwks">
+    <java fork="yes"
+          classname="org.webpki.tools.KeyStore2JWKConverter"
+     	  classpathref="lib.classpath"
+    	  dir="${key.dir}"
+    	  failonerror="true">
+        <arg line="${keyprefix}certificate.p12 foo123 ${keyprefix}.jwks public"/>
+    </java>
+	<replace file="${key.dir}/${keyprefix}.jwks">
+	   <replacefilter>
+          <replacetoken>  </replacetoken>
+          <replacevalue>    </replacevalue>
+	  </replacefilter>
+      <replacefilter>
+	      <replacetoken>{</replacetoken>
+	      <replacevalue>{&#10;  &quot;keys&quot;: [{</replacevalue>
+	  </replacefilter>
+      <replacefilter>
+	      <replacetoken>}</replacetoken>
+	      <replacevalue>  }]&#10;}</replacevalue>
+	  </replacefilter>
+	</replace>
+   </target>
 
    <target name="_createpem">
     <java fork="yes"
@@ -93,9 +117,9 @@
     	  failonerror="true">
         <arg line="${cmd}"/>
     </java>
-  </target>
+   </target>
 
-<target name="createcerts">
+   <target name="createcerts">
     <antcall target="_createcert">
        <param name="cmd" value="-out/keyalias mykey -selfsigned -entity/ca -subject &quot;CN=Payment Network Root CA1, C=US&quot; -validity/start 2015-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype PKCS12 -out/keystore rootca.p12 -out/storepass foo123 -out/keypass foo123 -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
@@ -189,40 +213,18 @@
     <antcall target="_createpem">
        <param name="cmd" value="r2048certificate.p12 foo123 r2048certpath.pem certificate"/>
     </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048.jwks public"/>
+    <antcall target="_createjwks">
+       <param name="keyprefix" value="r2048"/>
     </antcall>
-	<replace file="${key.dir}/r2048.jwks">
-	   <replacefilter>
-          <replacetoken>  </replacetoken>
-          <replacevalue>    </replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>{</replacetoken>
-	      <replacevalue>{&#10;  &quot;keys&quot;: [{</replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>}</replacetoken>
-	      <replacevalue>  }]&#10;}</replacevalue>
-	  </replacefilter>
-	</replace>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p256certificate.p12 foo123 p256.jwks public"/>
+    <antcall target="_createjwks">
+       <param name="keyprefix" value="p256"/>
     </antcall>
-	<replace file="${key.dir}/p256.jwks">
-	   <replacefilter>
-          <replacetoken>  </replacetoken>
-          <replacevalue>    </replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>{</replacetoken>
-	      <replacevalue>{&#10;  &quot;keys&quot;: [{</replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>}</replacetoken>
-	      <replacevalue>  }]&#10;}</replacevalue>
-	  </replacefilter>
-	</replace>
-</target>
+    <antcall target="_createjwks">
+       <param name="keyprefix" value="p384"/>
+    </antcall>
+    <antcall target="_createjwks">
+       <param name="keyprefix" value="p521"/>
+    </antcall>
+  </target>
 
 </project>
