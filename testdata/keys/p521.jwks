@@ -1,0 +1,8 @@
+{
+  "keys": [{
+    "kty": "EC",
+    "crv": "P-521",
+    "x": "AHcFoYOXWxXJjMYDCOXQUuMyHdm3kbWnBe0EIJKV63eSDdT483-YDq_g1Z3p1UXrZRHOCu1asl6bdrSyI6Z2q68-",
+    "y": "ACYPUxf3_6AN8LNvaSOKXnSc1Cl9EBGkYfHLwtIONfMyjcWqcGnfHvzuKvBeCjLSiyJb57afyKlxpodxlRDV6PGG"
+  }]
+}
