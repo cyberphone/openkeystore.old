@@ -64,10 +64,7 @@ public class Signatures {
     static JSONX509Verifier x509Verifier;
     static String keyId;
    
-    static final String P256CERTPATH  = "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem";
-    static final String R2048CERTPATH = "https://cyberphone.github.io/doc/openkeystore/r2048certpath.pem";
-    static final String P256KEY       = "https://cyberphone.github.io/doc/openkeystore/p256.jwks";
-    static final String R2048KEY      = "https://cyberphone.github.io/doc/openkeystore/r2048.jwks";
+    static final String REMOTE_PATH  = "https://cyberphone.github.io/doc/openkeystore/";
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
@@ -92,6 +89,8 @@ public class Signatures {
             asymSignOptionalPublicKeyInfo(key, false, true);
             certSign(key);
             asymJavaScriptSignature(key);
+            remoteCertSign(key);
+            remoteKeySign(key);
         }
       
         for (int i = 0; i < 2; i++) {
@@ -102,12 +101,6 @@ public class Signatures {
         
         multipleSign("p256", "r2048");
         
-        remoteKeySign("r2048", Signatures.R2048KEY);
-        remoteKeySign("p256", Signatures.P256KEY);
-        
-        remoteCertSign("r2048", Signatures.R2048CERTPATH);
-        remoteCertSign("p256", Signatures.P256CERTPATH);
-
         asymSignCore("p256", false, true, true, false); 
         asymSignCore("p256", false, true, false, true);
     }
@@ -131,7 +124,8 @@ public class Signatures {
         return keyType + '#';
     }
 
-    static void remoteCertSign(String keyType, String remoteUrl) throws Exception {
+    static void remoteCertSign(String keyType) throws Exception {
+        String remoteUrl = REMOTE_PATH + keyType + "certpath.pem";
         KeyPair localKey = readJwk(keyType);
         X509Certificate[] localPath = readCertificatePath(keyType);
         JSONX509Signer remoteCertSigner =
@@ -147,7 +141,8 @@ public class Signatures {
                             "@x5u.json", remoteSig);
     }
 
-    static void remoteKeySign(String keyType, String remoteUrl) throws Exception {
+    static void remoteKeySign(String keyType) throws Exception {
+        String remoteUrl = REMOTE_PATH + keyType + ".jwks";
         KeyPair localKey = readJwk(keyType);
         JSONAsymKeySigner remoteKeySigner =
                 new JSONAsymKeySigner(localKey.getPrivate(),
