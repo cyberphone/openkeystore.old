@@ -85,14 +85,10 @@
     </java>
    </target>
 	
-   <target name="_createjwks">
-    <java fork="yes"
-          classname="org.webpki.tools.KeyStore2JWKConverter"
-     	  classpathref="lib.classpath"
-    	  dir="${key.dir}"
-    	  failonerror="true">
-        <arg line="${keyprefix}certificate.p12 foo123 ${keyprefix}.jwks public"/>
-    </java>
+   <target name="_create.jwks.x5c.pemcertpath">
+    <antcall target="_createjwk">
+   	  <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}.jwks public"/>
+    </antcall>
 	<replace file="${key.dir}/${keyprefix}.jwks">
 	   <replacefilter>
           <replacetoken>  </replacetoken>
@@ -107,6 +103,21 @@
 	      <replacevalue>  }]&#10;}</replacevalue>
 	  </replacefilter>
 	</replace>
+    <antcall target="_createpem">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certpath.pem certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certificate.x5c certificate"/>
+    </antcall>
+    <antcall target="_createjwk">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}privatekey.jwk private keyid"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}privatekey.pem private"/>
+    </antcall>
+    <antcall target="_createpem">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certificate-key.pem private certificate"/>
+    </antcall>
    </target>
 
    <target name="_createpem">
@@ -147,54 +158,6 @@
     <antcall target="_createcert">
        <param name="cmd" value="-out/keyalias 20180101:mybank:r2048 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=mybank.com, serialNumber=4501, C=FR&quot; -validity/start 2017-01-01T00:00:00 -validity/end 2022-07-10T09:59:59 -out/storetype PKCS12 -out/keystore r2048certificate.p12 -out/storepass foo123 -out/keypass foo123 -keysize 2048 -sigalg ECDSA_SHA512"/>
     </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.jwk private keyid"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate.x5c certificate"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048privatekey.pem private"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048certificate-key.pem private certificate"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.jwk private keyid"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p256certificate.p12 foo123 p256certificate.x5c certificate"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p256certificate.p12 foo123 p256privatekey.pem private"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p256certificate.p12 foo123 p256certificate-key.pem private certificate"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.jwk private keyid"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p384certificate.p12 foo123 p384certificate.x5c certificate"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p384certificate.p12 foo123 p384privatekey.pem private"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p384certificate.p12 foo123 p384certificate-key.pem private certificate"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.jwk private keyid"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="p521certificate.p12 foo123 p521certificate.x5c certificate"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p521certificate.p12 foo123 p521privatekey.pem private"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="p521certificate.p12 foo123 p521certificate-key.pem private certificate"/>
-    </antcall>
     <antcall target="_createcert">
        <param name="cmd" value="-out/keyalias mykey -selfsigned -entity/ca -subject &quot;CN=Unknown Root, C=US&quot; -validity/start 2015-07-10T10:00:00 -validity/end 2030-07-10T09:59:59 -out/storetype PKCS12 -out/keystore unknownca.p12 -out/storepass foo123 -out/keypass foo123 -keysize 4096 -sigalg RSA_SHA512 -serial 1"/>
     </antcall>
@@ -207,22 +170,16 @@
     <exec executable="keytool" failonerror="true" dir="${key.dir}">
        <arg line="-exportcert -keystore unknownca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file unknownca.cer"/>
     </exec>
-    <antcall target="_createpem">
-       <param name="cmd" value="p256certificate.p12 foo123 p256certpath.pem certificate"/>
-    </antcall>
-    <antcall target="_createpem">
-       <param name="cmd" value="r2048certificate.p12 foo123 r2048certpath.pem certificate"/>
-    </antcall>
-    <antcall target="_createjwks">
+    <antcall target="_create.jwks.x5c.pemcertpath">
        <param name="keyprefix" value="r2048"/>
     </antcall>
-    <antcall target="_createjwks">
+    <antcall target="_create.jwks.x5c.pemcertpath">
        <param name="keyprefix" value="p256"/>
     </antcall>
-    <antcall target="_createjwks">
+    <antcall target="_create.jwks.x5c.pemcertpath">
        <param name="keyprefix" value="p384"/>
     </antcall>
-    <antcall target="_createjwks">
+    <antcall target="_create.jwks.x5c.pemcertpath">
        <param name="keyprefix" value="p521"/>
     </antcall>
   </target>
