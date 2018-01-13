@@ -14,10 +14,9 @@
  *  limitations under the License.
  *
  */
-package org.webpki.testdata;
+package org.webpki.json;
 
 import java.io.IOException;
-
 import java.util.LinkedHashMap;
 
 import org.webpki.util.ArrayUtil;
@@ -32,7 +31,7 @@ public class SymmetricKeys {
     
     private String keyBase;
   
-    SymmetricKeys(String keyBase) throws Exception {
+    public SymmetricKeys(String keyBase) throws IOException {
         this.keyBase = keyBase;
         init(128);
         init(256);
@@ -45,14 +44,17 @@ public class SymmetricKeys {
                  DebugFormatter.getByteArrayFromHex(new String(ArrayUtil.readFile(keyBase + getName(i) + ".hex"), "utf-8")));
     }
 
-    String getName(int i) {
+    public String getName(int i) throws IOException {
         return "a" + i + "bitkey";
     }
 
-    byte[] getValue(int i) throws Exception {
+    public byte[] getValue(int i) throws IOException {
         byte[] key = keys.get(i);
+        if (key == null){
+            throw new IOException("No such key: " + i);
+        }
         if (key.length * 8 != i) {
-            throw new Exception("Bad sym key:" + key.length);
+            throw new IOException("Bad sym key:" + key.length);
         }
         return key;
     }

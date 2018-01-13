@@ -45,6 +45,7 @@ import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
 // Test
 import org.webpki.json.WebKey;
+import org.webpki.json.SymmetricKeys;
 import org.webpki.json.Extension1;
 import org.webpki.json.Extension2;
 import org.webpki.util.ArrayUtil;

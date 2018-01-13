@@ -2299,6 +2299,8 @@ public class JSONTest {
     static String baseEncryption;
 
     static String keyId;
+    
+    static SymmetricKeys symmetricKeys;
 
     @BeforeClass
     public static void openFile() throws Exception {
@@ -2307,6 +2309,7 @@ public class JSONTest {
         baseKey = System.clearProperty("json.keys") + File.separator;
         baseSignatures = System.clearProperty("json.signatures") + File.separator;
         baseEncryption = System.clearProperty("json.encryption") + File.separator;
+        symmetricKeys = new SymmetricKeys(baseKey);
     }
 
     @SuppressWarnings("serial")
@@ -3250,36 +3253,25 @@ public class JSONTest {
     }
     
     void readSymSignatures(String[] encObjects) throws Exception {
-        JSONObjectReader symmetricKeys = JSONParser.parse(ArrayUtil.readFile(baseKey + "symmetrickeys.json"));
         for (String name : encObjects) {
             String signature = readSignature(name).toString();
             JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
                     new JSONCryptoDecoder.Options()
                         .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED)
                         .setRequirePublicKeyInfo(false));
-            boolean notDone = true;
-            for (String keyProp : symmetricKeys.getProperties()) {
-                byte[] key = symmetricKeys.getBinary(keyProp);
-                if (key.length == dec.getSignatureValue().length) {
-                     dec.verify(new JSONSymKeyVerifier(key));
-                    if (!keyProp.equals(dec.getKeyId())) {
-                        throw new Exception("Sym sign");
-                    }
-                    notDone = false;
-                    dec = JSONParser.parse(new JSONObjectWriter().setString("Mydata", "cool")
-                    .setSignature(new JSONSymKeySigner(key, 
-                            (MACAlgorithms) dec.getAlgorithm())).toString())
-                    .getSignature(new JSONCryptoDecoder.Options().setRequirePublicKeyInfo(false));
-                    dec.verify(new JSONSymKeyVerifier(key));
-                    try {
-                        dec.verify(new JSONSymKeyVerifier(ArrayUtil.add(key, new byte[]{5})));
-                        fail("Must not pass");
-                    } catch (Exception e) {
-                    }
-                    break;
-                }
+            int keyBits = dec.getSignatureValue().length * 8;
+            byte[] key = symmetricKeys.getValue(keyBits);
+            dec.verify(new JSONSymKeyVerifier(key));
+            dec = JSONParser.parse(new JSONObjectWriter().setString("Mydata", "cool")
+            .setSignature(new JSONSymKeySigner(key, 
+                    (MACAlgorithms) dec.getAlgorithm())).toString())
+            .getSignature(new JSONCryptoDecoder.Options().setRequirePublicKeyInfo(false));
+            dec.verify(new JSONSymKeyVerifier(key));
+            try {
+                dec.verify(new JSONSymKeyVerifier(ArrayUtil.add(key, new byte[]{5})));
+                fail("Must not pass");
+            } catch (Exception e) {
             }
-            assertFalse(notDone);
         }
     }
 
@@ -3489,8 +3481,7 @@ public class JSONTest {
                 fail("Must not");
         } catch (Exception e) {
         }
-        // Imperfect naming here, this file contains a keyId but no publicKey
-        JSONObjectReader signature = readSignature("p256implicitkeysigned.json");
+        JSONObjectReader signature = readSignature("p256#es256@kid.json");
         try {
             signature.getSignature(new JSONCryptoDecoder.Options());
             fail("Must not pass");
@@ -3515,7 +3506,7 @@ public class JSONTest {
         } catch (Exception e) {
         }
         // Imperfect naming here, this file contains NO keyId or publicKey
-        signature = readSignature("p521implicitkeysigned.json");
+        signature = readSignature("p521#es512@imp.json");
         decoder =
             signature.getSignature(new JSONCryptoDecoder.Options()
                 .setRequirePublicKeyInfo(false)
@@ -3541,7 +3532,7 @@ public class JSONTest {
         assertTrue(verifySignature(writer, 
                                    new JSONCryptoDecoder.Options(),
                                    p256.getPublic()).getAlgorithm() == AsymSignatureAlgorithms.ECDSA_SHA512);
-        signature = readSignature("p256+r2048keysigned.json");
+        signature = readSignature("p256#es256,r2048#rs256@mult-jwk.json");
         try {
             signature.getSignature(new JSONCryptoDecoder.Options());
             fail("Must not pass");
@@ -3582,15 +3573,15 @@ public class JSONTest {
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
-        readSymSignatures(new String[]{"hs256signed.json",
-                                       "hs384signed.json",
-                                       "hs512signed.json"});
+        readSymSignatures(new String[]{"a256#hs256@kid.json",
+                                       "a384#hs384@kid.json",
+                                       "a512#hs512@kid.json"});
 
-        signature = readSignature("r2048remotekeysigned.json");
+        signature = readSignature("r2048#rs256@jku.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
 
-        signature = readSignature("p256remotecertsigned.json");
+        signature = readSignature("p256#es256@x5u.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
             .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options()
@@ -3610,7 +3601,7 @@ public class JSONTest {
         JSONParser.parse(writer.toString()).getSignature(new JSONCryptoDecoder.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
         
-        signature = readSignature("r2048certsigned.json");
+        signature = readSignature("r2048#rs256@x5c.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options());
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoDecoder.Options())
             .verify(rootCa);

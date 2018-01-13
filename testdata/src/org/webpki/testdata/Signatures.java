@@ -48,7 +48,8 @@ import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
-
+// Test
+import org.webpki.json.SymmetricKeys;
 import org.webpki.json.WebKey;
 
 import org.webpki.util.ArrayUtil;
