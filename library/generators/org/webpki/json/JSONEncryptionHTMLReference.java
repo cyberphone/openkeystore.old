@@ -49,9 +49,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     
     static JSONBaseHTML json;
     static RowInterface row;
-    static String ECDH_PROPERTIES       = "Additional ECDH Properties";
-    static String ECDH_KW_PROPERTIES    = "Additional ECDH+KW Properties";
-    static String RSA_PROPERTIES        = "Additional RSA Encryption Properties";
+
+    static final String ECDH_PROPERTIES       = "Additional ECDH Properties";
+    static final String ECDH_KW_PROPERTIES    = "Additional ECDH+KW Properties";
+    static final String RSA_PROPERTIES        = "Additional RSA Encryption Properties";
 
     static final String ENCRYPTION_OBJECT  = "Encryption Object";
     
@@ -65,7 +66,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
  
     static final String CRIT_TEST_VECTOR   = "p256#ecdh-es+a256kw@crit@jwk.json";
     static final String SAMPLE_TEST_VECTOR = "p256#ecdh-es+a256kw@kid.json";
-    static final String MULT_TEST_VECTOR =   "";
+    static final String MULT_TEST_VECTOR =   "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json";
 
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
@@ -405,7 +406,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            showKey(
                "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + 
                SAMPLE_OBJECT + "</a>" +
-               " (available in the file <b>" +
+               " (available in file <b>" +
                SAMPLE_TEST_VECTOR + 
                "</b>), can be decrypted by the <i>private</i> part of the "+
                "following EC key in JWK " + 
@@ -478,7 +479,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                    "as in the previous examples:",
-                   "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json") +
+                   MULT_TEST_VECTOR) +
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
@@ -534,7 +535,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.ALG_JSON)
-            .addSymbolicValue(JSONCryptoDecoder.ALG_JSON)
+            .addSymbolicValue("Algorithm")
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
@@ -546,14 +547,15 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)
-            .addSymbolicValue(JSONCryptoDecoder.KID_JSON)
+            .addSymbolicValue("Key Identifier")
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
              .setChoice (false, 1)
         .newColumn()
-            .addString("If the <code>" + JSONCryptoDecoder.KID_JSON +
-                   "</code> property is defined, data is supposed to be encrypted by a specific named (symmetric) key.")
+            .addString("<i>Optional</i>.  See " +
+                    json.globalLinkRef(KEY_ENCRYPTION, JSONCryptoDecoder.KID_JSON) +
+                    ".")
        .newRow()
 
         .newColumn()
@@ -581,7 +583,9 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .addString("If this property is defined, one or more recipients <b>must</b> each be provided "+
                    "with a suitable " +
                    json.globalLinkRef(KEY_ENCRYPTION) +
-                   " object.")
+                   " object."+ 
+                   Types.LINE_SEPARATOR +
+                   JSONBaseHTML.referToTestVector(MULT_TEST_VECTOR))
        .newRow()
         .newColumn()
         .addProperty(JSONCryptoDecoder.CRIT_JSON)
@@ -675,7 +679,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
       .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)
-            .addSymbolicValue(JSONCryptoDecoder.KID_JSON)
+           .addSymbolicValue("Key Identifier")
         .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
         .newColumn()
