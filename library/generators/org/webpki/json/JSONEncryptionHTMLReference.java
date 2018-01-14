@@ -50,23 +50,29 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static JSONBaseHTML json;
     static RowInterface row;
 
-    static final String ECDH_PROPERTIES       = "Additional ECDH Properties";
-    static final String ECDH_KW_PROPERTIES    = "Additional ECDH+KW Properties";
-    static final String RSA_PROPERTIES        = "Additional RSA Encryption Properties";
+    static final String ECDH_PROPERTIES      = "Additional ECDH Properties";
+    static final String ECDH_KW_PROPERTIES   = "Additional ECDH+KW Properties";
+    static final String RSA_PROPERTIES       = "Additional RSA Encryption Properties";
 
-    static final String ENCRYPTION_OBJECT  = "Encryption Object";
+    static final String ENCRYPTION_OBJECT    = "Encryption Object";
     
-    static final String TEST_VECTORS    = "Test Vectors";
+    static final String TEST_VECTORS         = "Test Vectors";
     
-    static final String SAMPLE_OBJECT   = "Sample Object";
+    static final String SAMPLE_OBJECT        = "Sample Object";
     
-    static final String KEY_ENCRYPTION  = "Key Encryption";
+    static final String KEY_ENCRYPTION       = "Key Encryption";
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
  
-    static final String CRIT_TEST_VECTOR   = "p256#ecdh-es+a256kw@crit@jwk.json";
-    static final String SAMPLE_TEST_VECTOR = "p256#ecdh-es+a256kw@kid.json";
-    static final String MULT_TEST_VECTOR =   "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json";
+    static final String CRIT_TEST_VECTOR     = "p256#ecdh-es+a256kw@crit@jwk.json";
+    static final String SAMPLE_TEST_VECTOR   = "p256#ecdh-es+a256kw@kid.json";
+    static final String MULT_TEST_VECTOR     = "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json";
+    static final String GLOB_ALG_TEST_VECTOR = "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json";
+    static final String GLOB_KID_TEST_VECTOR = "p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json";
+    static final String JWK_TEST_VECTOR      = "p256#ecdh-es+a256kw@jwk.json";
+    static final String JKU_TEST_VECTOR      = "p256#ecdh-es+a256kw@jku.json";
+    static final String X5C_TEST_VECTOR      = "p256#ecdh-es+a256kw@x5c.json";
+    static final String X5U_TEST_VECTOR      = "p256#ecdh-es+a256kw@x5u.json";
 
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
@@ -421,7 +427,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the public key information in line, " +
                            "instead of using a <code>" + JSONCryptoDecoder.KID_JSON + "</code>:",
-                   "p256#ecdh-es+a256kw@jwk.json") + 
+                    JWK_TEST_VECTOR) + 
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object but assuming it is known through the <i>context</i>:",
@@ -439,6 +445,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "as in the sample object while providing the key information " +
                    "through an <i>external</i> public key:",
                    "p256#ecdh-es+a256kw@jku.json") + 
+           showKeySet (
+                   "JWK " + json.createReference(JSONBaseHTML.REF_JWK) +
+                   " key set associated with the preceeding encryption object:", 
+                   "p256") +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
@@ -484,13 +494,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> property:",
-                   "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json") +
+                   GLOB_ALG_TEST_VECTOR) +
            showAsymEncryption(
-                   "Multiple recipient encryption object <i>requiring the same private keys</i> " +
+                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                            "as in the previous examples as well as using <i>global</i> <code>" +
                            JSONCryptoDecoder.ALG_JSON + "</code> and <code>" +
                            JSONCryptoDecoder.KID_JSON + "</code> properties:",
-                   "p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json") +
+                     GLOB_KID_TEST_VECTOR) +
            aesCrypto(new String[]{"a128#a128gcm@kid.json",
                                   "a256#a128cbc-hs256@kid.json",
                                   "a256#a256gcm@imp.json",
@@ -675,7 +685,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     return column;
                 }
             })
-            .addString("</ul>")
+            .addString("</ul>" +
+                    JSONBaseHTML.referToTestVector(GLOB_ALG_TEST_VECTOR))
       .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)
@@ -686,7 +697,10 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
              .setChoice (false, 1)
         .newColumn()
             .addString("If the <code>" + JSONCryptoDecoder.KID_JSON +
-                   "</code> property is defined, it is supposed to identify the public key associated with the encrypted (or derived) key.")
+                   "</code> property is defined, it is supposed to identify the " +
+                    "public key associated with the encrypted (or derived) key." +
+                    Types.LINE_SEPARATOR +
+                    JSONBaseHTML.referToTestVector(GLOB_KID_TEST_VECTOR))
         .newRow()
         .newColumn()
           .addProperty(JSONCryptoDecoder.JWK_JSON)
@@ -694,9 +708,58 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
         .newColumn()
-             .setChoice (false, 1)
+             .setChoice (false, 4)
         .newColumn()
-          .addString("Public key associated with the encrypted (or derived) key.")
+          .addString("<i>Optional.</i> Public key associated with the encrypted (or derived) key." +
+                    Types.LINE_SEPARATOR +
+                    JSONBaseHTML.referToTestVector(JWK_TEST_VECTOR))
+          .newRow()
+            .newColumn()
+              .addProperty(JSONCryptoDecoder.JKU_JSON)
+              .addSymbolicValue("URL")
+            .newColumn()
+              .setType(Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn()
+            .newColumn()
+              .addString("<i>Optional.</i> URI " + json.createReference(JSONBaseHTML.REF_URI) +
+                         " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation and " +
+                         "pointing to a JWK " + json.createReference(JSONBaseHTML.REF_JWK) +
+                         " key set holding a <i>single</i> <a href=\"#" +
+                         JSONCryptoDecoder.JWK_JSON + "\">" + JSONCryptoDecoder.JWK_JSON +
+                         "</a> object." +
+                         Types.LINE_SEPARATOR +
+                         JSONBaseHTML.referToTestVector(JKU_TEST_VECTOR))
+          .newRow()
+        .newColumn()
+          .addProperty(JSONCryptoDecoder.X5C_JSON)
+          .addArrayList(Types.CERTIFICATE_PATH, 1)
+        .newColumn()
+          .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY2)
+        .newColumn()
+        .newColumn()
+          .addString("<i>Optional.</i> Sorted array of X.509 ")
+          .addString(json.createReference(JSONBaseHTML.REF_X509))
+          .addString(" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">encryption certificate</i>. " +
+                      "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." +
+                    Types.LINE_SEPARATOR +
+                    JSONBaseHTML.referToTestVector(X5C_TEST_VECTOR))
+          .newRow()
+            .newColumn()
+              .addProperty(JSONCryptoDecoder.X5U_JSON)
+              .addSymbolicValue("URL")
+            .newColumn()
+              .setType(Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn()
+            .newColumn()
+              .addString("<i>Optional.</i> URI " + json.createReference(JSONBaseHTML.REF_URI) +
+                         " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation and " +
+                         "pointing to a PEM " + json.createReference(JSONBaseHTML.REF_PEM) + " file containing a " +
+                         "sorted array of X.509 ")
+          .addString(json.createReference(JSONBaseHTML.REF_X509))
+          .addString(" certificates, where the <i>first</i> element <b>must</b> contain the <i style=\"white-space:nowrap\">encryption certificate</i>. " +
+                      "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." +
+                      Types.LINE_SEPARATOR +
+                      JSONBaseHTML.referToTestVector(X5U_TEST_VECTOR))
      .newRow(ECDH_PROPERTIES)
         .newColumn()
           .addProperty(JSONCryptoDecoder.EPK_JSON)
@@ -749,6 +812,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                "\">" + fileName + "</div>" +
                text + 
                formatCode(code);
+    }
+
+    static String showKeySet(String text, String keyType) throws IOException {
+        String fileName = keyType + ".jwks";
+        JSONObjectReader keySet = json.readJson1(fileName);
+        String code = keySet.toString();
+        JSONArrayReader keys = keySet.getArray("keys");
+        keys.getObject().getCorePublicKey(AlgorithmPreferences.JOSE);
+        keySet.checkForUnread();
+        return showTextAndCode(text, fileName, code);
     }
 
     static String showKey(String text, CoreKey key) throws IOException {
