@@ -470,7 +470,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                              String sksMethod,
                              String sksParameter) throws IOException {
         return new StringBuffer(rsaSupport ? "RSA or " : "")
-          .append("EC key in JCS ")
+          .append("EC public key in JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
           .append(" <code>&quot;" + JSONCryptoDecoder.JWK_JSON + "&quot;</code> format")
           .append(purpose)
@@ -1190,7 +1190,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addProperty(JSONCryptoDecoder.X5C_JSON)
               .addArrayList(CERTIFICATE_PATH, 1)
             .newColumn()
-              .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
+              .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY2)
             .newColumn()
             .newColumn()
               .addString("Certificate path having identical representation to <code>&quot;" +
