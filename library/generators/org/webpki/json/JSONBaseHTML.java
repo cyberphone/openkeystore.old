@@ -274,8 +274,8 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JCS,
             "A. Rundgren, \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.71, November&nbsp;2017.</span> " +
-            externalWebReference ("https://cyberphone.github.io/doc/security/jcs.html"));
+            "<span style=\"white-space: nowrap\">V0.80, January&nbsp;2018.</span> " +
+            externalWebReference ("https://cyberphone.github.io/doc/security/jose-jcs.html"));
 
         addReferenceEntry(REF_YASMIN,
                 "A. Rundgren, \"YASMIN - Yet Another jSon Message notatIoN\", Work in progress, " +
@@ -284,8 +284,8 @@ public class JSONBaseHTML  {
 
         addReferenceEntry(REF_JEF,
             "A. Rundgren, \"JEF - JSON Encryption Format\", Work in progress, " +
-            "<span style=\"white-space: nowrap\">V0.51, May&nbsp;2017.</span> " +
-            externalWebReference ("https://cyberphone.github.io/doc/security/jef.html"));
+            "<span style=\"white-space: nowrap\">V0.60, January&nbsp;2018.</span> " +
+            externalWebReference ("https://cyberphone.github.io/doc/security/jose-jef.html"));
 
         addReferenceEntry(REF_SKS, "A. Rundgren, \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             "<span style=\"white-space: nowrap\">V1.03, May&nbsp;2017.</span> " +

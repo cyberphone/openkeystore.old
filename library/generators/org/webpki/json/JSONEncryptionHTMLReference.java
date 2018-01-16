@@ -513,6 +513,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         json.addDocumentHistoryLine("2017-04-19", "0.4", "Changed public keys to use JWK " + json.createReference(JSONBaseHTML.REF_JWK) + " format");
         json.addDocumentHistoryLine("2017-04-25", "0.5", "Added KW and GCM algorithms");
         json.addDocumentHistoryLine("2017-05-15", "0.51", "Added test vectors and missing RSA-OAEP algorithm");
+        json.addDocumentHistoryLine("2018-01-15", "0.60", "Rewritten to reuse JWE " + json.createReference(JSONBaseHTML.REF_JWE) + " property names");
 
         json.addParagraphObject("Author").append("JEF was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                  "of the OpenKeyStore " +

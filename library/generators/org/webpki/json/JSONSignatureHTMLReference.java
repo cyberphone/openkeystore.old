@@ -56,7 +56,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
     static final String COUNTER_SIGNATURES  = "Counter Signatures";
     
-    static final String SAMPLE_SIGNATURE    = "Sample Signature";
+    static final String SAMPLE_OBJECT       = "Sample Object";
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
     
@@ -307,7 +307,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                                                  .getObject(JSONCryptoDecoder.JWK_JSON));
         updateNormalization(normalizedSampleSignature, "y", sampleSignatureDecoded);
         
-        json.addParagraphObject(SAMPLE_SIGNATURE).append(
+        json.addParagraphObject(SAMPLE_OBJECT).append(
             "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:")
         .append(sampleSignature)
         .append("The sample signature's payload consists of the properties above the <code>&quot;" +
@@ -404,7 +404,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
 
         json.addParagraphObject(TEST_VECTORS).append(
         "This section holds test data which can be used to verify the correctness of a JCS implementation." + LINE_SEPARATOR +
-        "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_SIGNATURE) + "\">" + SAMPLE_SIGNATURE + "</a>" +
+        "The <a href=\"#" + JSONBaseHTML.makeLink(SAMPLE_OBJECT) + "\">" + SAMPLE_OBJECT + "</a>" +
         " was signed by the following EC private key in JWK " + 
         json.createReference(JSONBaseHTML.REF_JWK) + " format:" +
         formatCode(p256key) + 
