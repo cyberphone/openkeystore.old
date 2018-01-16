@@ -71,8 +71,11 @@ public class Encryption {
         dataToBeEncrypted = ArrayUtil.readFile(baseEncryption + "datatobeencrypted.txt");
 
         asymEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
+        asymEnc("p256", DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
         asymEnc("p384", DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
+        asymEnc("p384", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
         asymEnc("p521", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
+        asymEnc("p521", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
         asymEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         asymEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
         asymEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);

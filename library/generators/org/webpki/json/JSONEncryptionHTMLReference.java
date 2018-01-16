@@ -414,8 +414,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                SAMPLE_OBJECT + "</a>" +
                " (available in file <b>" +
                SAMPLE_TEST_VECTOR + 
-               "</b>), can be decrypted by the <i>private</i> part of the "+
-               "following EC key in JWK " + 
+               "</b>), can be decrypted by the following EC private key, here expressed in the JWK " + 
                json.createReference(JSONBaseHTML.REF_JWK) + " format:", 
                p256key) +
            showAsymEncryption(
@@ -460,13 +459,13 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     p384key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p384#ecdh-es@jwk.json") + 
+                   "p384#ecdh-es+a256kw@jwk.json") + 
            showKey(
                    "EC private key for decrypting the subsequent object:",
                     p521key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p521#ecdh-es+a128kw@jwk.json") + 
+                   "p521#ecdh-es+a256kw@jwk.json") + 
            showKey(
                    "RSA private key for decrypting the subsequent object:",
                    r2048key) +
