@@ -3612,6 +3612,9 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
         }
+        writer = new JSONObjectWriter().setString("myData", "cool!")
+                .setSignature("attestSignature", new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
+        JSONParser.parse(writer.toString()).getSignature("attestSignature", new JSONCryptoDecoder.Options());
     }
 
     @Test

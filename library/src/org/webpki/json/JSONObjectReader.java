@@ -494,9 +494,13 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoDecoder.Options
      */
     public JSONSignatureDecoder getSignature(JSONCryptoDecoder.Options options) throws IOException {
+        return getSignature(JSONCryptoDecoder.SIGNATURE_JSON, options);
+    }
+
+    public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoDecoder.Options options) throws IOException {
         options.encryptionMode(false);
         return new JSONSignatureDecoder(this,
-                                        getObject(JSONCryptoDecoder.SIGNATURE_JSON),
+                                        getObject(signatureLabel),
                                         options);
     }
 

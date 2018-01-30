@@ -635,10 +635,13 @@ import org.webpki.json.JSONSignatureDecoder;
 </pre>
     */
     public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
-        coreSign(signer, setObject(JSONCryptoDecoder.SIGNATURE_JSON));
-        return this;
+        return setSignature(JSONCryptoDecoder.SIGNATURE_JSON, signer);
     }
     
+    public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
+        coreSign(signer, setObject(signatureLabel));
+        return this;
+    }
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * <code>"signatures"</code> [] object.<p>
