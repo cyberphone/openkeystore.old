@@ -3664,7 +3664,7 @@ public class JSONTest {
                     byte[] a,
                     byte[] e,
                     byte[] t,
-                    DataEncryptionAlgorithms dea) throws Exception {
+                    ContentEncryptionAlgorithms dea) throws Exception {
         byte[] pout = EncryptionCore.contentDecryption(dea,
                                                        k,
                                                        e,
@@ -3704,7 +3704,7 @@ public class JSONTest {
             String a,
             String e,
             String t,
-            DataEncryptionAlgorithms dea) throws Exception {
+            ContentEncryptionAlgorithms dea) throws Exception {
         aesCbcHmac(DebugFormatter.getByteArrayFromHex(k),
                    DebugFormatter.getByteArrayFromHex(p),
                    DebugFormatter.getByteArrayFromHex(iv),
@@ -3724,8 +3724,8 @@ public class JSONTest {
                     .removeProperty("use").getKeyPair();
         KeyPair ephemeralKey = test.getObject("encrypting_key").getObject("epk").getKeyPair();
          byte[] iv = test.getObject("generated").getBinary("iv");
-        DataEncryptionAlgorithms dataEncryptionAlgorithm = 
-                DataEncryptionAlgorithms.getAlgorithmFromId(test.getObject("input").getString("enc"));
+        ContentEncryptionAlgorithms contentEncryptionAlgorithm = 
+                ContentEncryptionAlgorithms.getAlgorithmFromId(test.getObject("input").getString("enc"));
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = 
                 KeyEncryptionAlgorithms.getAlgorithmFromId(test.getObject("input").getString("alg"));
         byte[] cek = test.getObject(keyEncryptionAlgorithm.isKeyWrap() ?
@@ -3733,7 +3733,7 @@ public class JSONTest {
         byte[] kek = keyEncryptionAlgorithm.isKeyWrap() ?
                 test.getObject("encrypting_key").getBinary("encrypted_key") : null;
         byte[] cek2 = EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm, 
-                                            dataEncryptionAlgorithm,
+                                            contentEncryptionAlgorithm,
                                             (ECPublicKey)ephemeralKey.getPublic(),
                                             staticKey.getPrivate(),
                                             kek);
@@ -3744,7 +3744,7 @@ public class JSONTest {
         byte[] cipherText = test.getObject("output").getObject("json").getBinary("ciphertext");
         byte[] authData = test.getObject("encrypting_content").getString("protected_b64u").getBytes("UTF-8");
         byte[] tag = test.getObject("encrypting_content").getBinary("tag");
-        byte[] res = EncryptionCore.contentDecryption(dataEncryptionAlgorithm, 
+        byte[] res = EncryptionCore.contentDecryption(contentEncryptionAlgorithm, 
                                                       cek, cipherText, iv, authData, tag);
 
         if (!ArrayUtil.compare(res, plainText)) {
@@ -3762,7 +3762,7 @@ public class JSONTest {
         byte[] authData = genRandom(20);
         for (int i = 0; i < 10; i++) {
             byte[] plainText = jwePlainText.getBytes("UTF-8");
-            for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+            for (ContentEncryptionAlgorithms dea : ContentEncryptionAlgorithms.values()) {
                 byte[] key = genRandom(dea.getKeyLength());
                 byte[] iv = EncryptionCore.createIv(dea);
                 EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
@@ -3791,7 +3791,7 @@ public class JSONTest {
         KeyPair alice = JSONParser.parse(aliceKey).getKeyPair();
         byte[] plainText = jwePlainText.getBytes("UTF-8");
         for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
-            for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+            for (ContentEncryptionAlgorithms dea : ContentEncryptionAlgorithms.values()) {
                 JSONObjectWriter json = 
                     JSONObjectWriter
                         .createEncryptionObject(plainText,
@@ -3873,7 +3873,7 @@ public class JSONTest {
                    a128,
                    e128,
                    t128,
-                   DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
+                   ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
 
       String k256 = "000102030405060708090a0b0c0d0e0f" +
                     "101112131415161718191a1b1c1d1e1f" +
@@ -3905,7 +3905,7 @@ public class JSONTest {
                    a256,
                    e256,
                    t256,
-                   DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
+                   ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
         
         randomSymmetricEncryption();
         
@@ -3919,7 +3919,7 @@ public class JSONTest {
         assertTrue("Bad ECDH",
                 Base64URL.encode(
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                                            DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                            ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                             (ECPublicKey) bob.getPublic(),
                                                             alice.getPrivate(),
                                                             null)).equals(ECDH_RESULT_WITH_KDF));
@@ -3927,12 +3927,12 @@ public class JSONTest {
         EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
                 EncryptionCore.senderKeyAgreement(null,
                                                   KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                                  DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                  ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                   alice.getPublic());
         assertTrue("Bad ECDH",
                 ArrayUtil.compare(asymmetricEncryptionResult.getDataEncryptionKey(),
                         EncryptionCore.receiverKeyAgreement(KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID,
-                                                            DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                                            ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                                             asymmetricEncryptionResult.getEphemeralKey(),
                                                             alice.getPrivate(),
                                                             null)));
@@ -3959,7 +3959,7 @@ public class JSONTest {
             JSONObjectWriter
                 .createEncryptionObject(unEncJson
                         .serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                          DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                          ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                           new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                    KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID)).toString();
         assertTrue("Bad JOSE ECDH",
@@ -3970,7 +3970,7 @@ public class JSONTest {
         encJson = JSONObjectWriter
                 .createEncryptionObject(unEncJson
                         .serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                          DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                          ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                           new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                    KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID).setKeyId("bob")).toString();
         JSONDecryptionDecoder decDec =
@@ -4015,7 +4015,7 @@ public class JSONTest {
         encJson = JSONObjectWriter
                     .createEncryptionObject(unEncJson
                             .serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                              DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                              ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                               new JSONAsymKeyEncrypter(bob.getPublic(),
                                                                        KeyEncryptionAlgorithms.JOSE_ECDH_ES_ALG_ID)
                             .setExtensions(new JSONObjectWriter()
@@ -4034,7 +4034,7 @@ public class JSONTest {
         encJson = JSONObjectWriter
                 .createEncryptionObject(unEncJson
                         .serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                          DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                          ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                           new JSONAsymKeyEncrypter(malletKeys.getPublic(),
                                                                    KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID)).toString();
         assertTrue("Bad JOSE ECDH",
@@ -4045,7 +4045,7 @@ public class JSONTest {
         encJson = JSONObjectWriter
                 .createEncryptionObject(unEncJson
                         .serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
+                                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID,
                                         new JSONAsymKeyEncrypter(malletKeys.getPublic(),
                                                                  KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID).setKeyId("mallet")).toString();
         decDec = JSONParser.parse(encJson)

@@ -19,9 +19,9 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * JEF (JSON Encryption Format) data encryption algorithms.
+ * Cleartext JWE content encryption algorithms.
  */
-public enum DataEncryptionAlgorithms {
+public enum ContentEncryptionAlgorithms {
 
     JOSE_A128CBC_HS256_ALG_ID ("A128CBC-HS256", 32, EncryptionCore.AES_CBC_IV_LENGTH, 
                                16,                                     "HMACSHA256", false),
@@ -43,12 +43,12 @@ public enum DataEncryptionAlgorithms {
     String jceNameOfTagHmac;
     boolean gcm;
 
-    DataEncryptionAlgorithms(String joseName,
-                             int keyLength,
-                             int ivLength,
-                             int tagLength,
-                             String jceNameOfTagHmac, 
-                             boolean gcm) {
+    ContentEncryptionAlgorithms(String joseName,
+                                int keyLength,
+                                int ivLength,
+                                int tagLength,
+                                String jceNameOfTagHmac, 
+                                boolean gcm) {
         this.joseName = joseName;
         this.keyLength = keyLength;
         this.ivLength = ivLength;
@@ -74,8 +74,8 @@ public enum DataEncryptionAlgorithms {
         return tagLength;
     }
     
-    public static DataEncryptionAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
-        for (DataEncryptionAlgorithms algorithm : DataEncryptionAlgorithms.values()) {
+    public static ContentEncryptionAlgorithms getAlgorithmFromId(String algorithmId) throws IOException {
+        for (ContentEncryptionAlgorithms algorithm : ContentEncryptionAlgorithms.values()) {
             if (algorithmId.equals(algorithm.joseName)) {
                 return algorithm;
             }

@@ -40,7 +40,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-import org.webpki.json.DataEncryptionAlgorithms;
+import org.webpki.json.ContentEncryptionAlgorithms;
 import org.webpki.json.JSONSymKeyEncrypter;
 import org.webpki.json.KeyEncryptionAlgorithms;
 // Test
@@ -70,58 +70,58 @@ public class Encryption {
         symmetricKeys = new SymmetricKeys(baseKey);
         dataToBeEncrypted = ArrayUtil.readFile(baseEncryption + "datatobeencrypted.txt");
 
-        asymEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
-        asymEnc("p256", DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
-        asymEnc("p384", DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
-        asymEnc("p384", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
-        asymEnc("p521", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
-        asymEnc("p521", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
-        asymEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
-        asymEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
-        asymEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
+        asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
+        asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
+        asymEnc("p384", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
+        asymEnc("p384", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
+        asymEnc("p521", ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
+        asymEnc("p521", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
+        asymEnc("r2048", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
+        asymEnc("r2048", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
 
-        asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
-        asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
-        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
-        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
-        asymEncNoPublicKeyInfo("p256", DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
-        asymEncNoPublicKeyInfo("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        asymEncNoPublicKeyInfo("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
+        asymEncNoPublicKeyInfo("p256", ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
+        asymEncNoPublicKeyInfo("r2048", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, true);
+        asymEncNoPublicKeyInfo("r2048", ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, true);
+        asymEncNoPublicKeyInfo("p256", ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID, false);
+        asymEncNoPublicKeyInfo("r2048", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
-        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
-        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
-        certEnc("p256", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
-        certEnc("r2048", DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
+        certEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
+        certEnc("r2048", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        certEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
+        certEnc("r2048", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, true);
         
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                         DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                         ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
       
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         false);
 
         multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
+                        ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
                         false);
 
         multipleAsymEnc(new String[]{"p256", "r2048"}, 
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
 
         multipleAsymEnc(new String[]{"p256", "p256"}, 
-                        DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
 
-        symmEnc(256, DataEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
-        symmEnc(512, DataEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
-        symmEnc(128, DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
-        symmEnc(256, DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
+        symmEnc(256, ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
+        symmEnc(512, ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
+        symmEnc(128, ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID);
+        symmEnc(256, ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID);
 
-        coreSymmEnc(256, "imp.json", DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
+        coreSymmEnc(256, "imp.json", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
         coreAsymEnc("p256", 
                     "crit@jwk.json",
-                    DataEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
+                    ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
                     new JSONCryptoDecoder.ExtensionHolder()
@@ -140,12 +140,12 @@ public class Encryption {
     }
 
     static void certEnc(String keyType, 
-                        DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                        ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                         boolean remote) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
-            switch (dataEncryptionAlgorithm.getKeyLength()) {
+            switch (contentEncryptionAlgorithm.getKeyLength()) {
             case 16: 
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID;
                 break;
@@ -158,7 +158,7 @@ public class Encryption {
             }
         }
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID &&
-            dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
+            contentEncryptionAlgorithm == ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
@@ -172,7 +172,7 @@ public class Encryption {
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                       dataEncryptionAlgorithm,
+                                                       contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileName, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
@@ -182,7 +182,7 @@ public class Encryption {
         }
     }
 
-    static void coreSymmEnc(int keyBits, String fileSuffix, DataEncryptionAlgorithms dataEncryptionAlgorithm, boolean wantKeyId) throws Exception {
+    static void coreSymmEnc(int keyBits, String fileSuffix, ContentEncryptionAlgorithms contentEncryptionAlgorithm, boolean wantKeyId) throws Exception {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
         JSONSymKeyEncrypter encrypter = new JSONSymKeyEncrypter(key);
@@ -193,17 +193,17 @@ public class Encryption {
         }
         byte[] encryptedData = 
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                        dataEncryptionAlgorithm,
+                                                        contentEncryptionAlgorithm,
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + 'a' + keyBits + '#' + dataEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
+        ArrayUtil.writeFile(baseEncryption + 'a' + keyBits + '#' + contentEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(dataToBeEncrypted,
                        JSONParser.parse(encryptedData).getEncryptionObject(options).getDecryptedData(key))) {
             throw new Exception("Encryption fail");
         }
     }
 
-    static void symmEnc(int keyBits, DataEncryptionAlgorithms dataEncryptionAlgorithm) throws Exception {
-        coreSymmEnc(keyBits, "kid.json", dataEncryptionAlgorithm, true);
+    static void symmEnc(int keyBits, ContentEncryptionAlgorithms contentEncryptionAlgorithm) throws Exception {
+        coreSymmEnc(keyBits, "kid.json", contentEncryptionAlgorithm, true);
     }
     
     static KeyPair readJwk(String keyType) throws Exception {
@@ -217,7 +217,7 @@ public class Encryption {
 
     static void coreAsymEnc(String keyType, 
                             String fileSuffix,
-                            DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                            ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                             boolean wantKeyId,
                             boolean wantPublicKey,
                             JSONCryptoDecoder.ExtensionHolder extensionHolder,
@@ -226,7 +226,7 @@ public class Encryption {
         KeyPair keyPair = readJwk(keyType);
         KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
         if (keyPair.getPublic() instanceof ECPublicKey) {
-            switch (dataEncryptionAlgorithm.getKeyLength()) {
+            switch (contentEncryptionAlgorithm.getKeyLength()) {
             case 16: 
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID;
                 break;
@@ -239,7 +239,7 @@ public class Encryption {
             }
         }
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID &&
-            dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
+            contentEncryptionAlgorithm == ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
             keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
         }
         JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
@@ -261,7 +261,7 @@ public class Encryption {
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                       dataEncryptionAlgorithm,
+                                                       contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
         if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
@@ -272,11 +272,11 @@ public class Encryption {
      }
 
     static void asymEnc(String keyType, 
-                        DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                        ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                         boolean remote) throws Exception {
         coreAsymEnc(keyType,
                     remote ? "jku.json" : "jwk.json",
-                    dataEncryptionAlgorithm,
+                    contentEncryptionAlgorithm,
                     false,
                     true,
                     null,
@@ -285,11 +285,11 @@ public class Encryption {
     }
 
     static void asymEncNoPublicKeyInfo(String keyType,
-                                       DataEncryptionAlgorithms dataEncryptionAlgorithm,
+                                       ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                                        boolean wantKeyId) throws Exception {
         coreAsymEnc(keyType, 
                     wantKeyId ? "kid.json" : "imp.json",
-                    dataEncryptionAlgorithm,
+                    contentEncryptionAlgorithm,
                     wantKeyId,
                     false,
                     null,
@@ -298,7 +298,7 @@ public class Encryption {
     }
 
     static void multipleAsymEnc(String[] keyTypes, 
-                                DataEncryptionAlgorithms dataEncryptionAlgorithm, 
+                                ContentEncryptionAlgorithms contentEncryptionAlgorithm, 
                                 boolean wantKeyId) throws Exception {
         Vector<JSONDecryptionDecoder.DecryptionKeyHolder> decryptionKeys =
                 new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
@@ -314,7 +314,7 @@ public class Encryption {
             KeyPair keyPair = readJwk(keyType);
             KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
             if (keyPair.getPublic() instanceof ECPublicKey) {
-                switch (dataEncryptionAlgorithm.getKeyLength()) {
+                switch (contentEncryptionAlgorithm.getKeyLength()) {
                 case 16: 
                     keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID;
                     break;
@@ -325,7 +325,7 @@ public class Encryption {
                 }
             }
             if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID &&
-                dataEncryptionAlgorithm == DataEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
+                contentEncryptionAlgorithm == ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
             }
             if (first) {
@@ -365,7 +365,7 @@ public class Encryption {
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                       dataEncryptionAlgorithm,
+                                                       contentEncryptionAlgorithm,
                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + '@' + fileName, encryptedData);
         int q = 0;

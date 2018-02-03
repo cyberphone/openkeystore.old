@@ -533,7 +533,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newExtensionRow(new Extender() {
             @Override
             public Column execute(Column column) throws IOException {
-                for (DataEncryptionAlgorithms dea : DataEncryptionAlgorithms.values()) {
+                for (ContentEncryptionAlgorithms dea : ContentEncryptionAlgorithms.values()) {
                     column.addString("<li><code>")
                           .addString(dea.toString())
                           .addString("</code></li>");

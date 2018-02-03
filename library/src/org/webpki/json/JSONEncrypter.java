@@ -56,7 +56,7 @@ public abstract class JSONEncrypter implements Serializable {
 
     static class EncryptionHeader {
 
-        DataEncryptionAlgorithms dataEncryptionAlgorithm;
+        ContentEncryptionAlgorithms contentEncryptionAlgorithm;
 
         KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
 
@@ -68,20 +68,20 @@ public abstract class JSONEncrypter implements Serializable {
         
         String globalKeyId;
 
-        EncryptionHeader(DataEncryptionAlgorithms dataEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
-            this.dataEncryptionAlgorithm = dataEncryptionAlgorithm;
+        EncryptionHeader(ContentEncryptionAlgorithms contentEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
+            this.contentEncryptionAlgorithm = contentEncryptionAlgorithm;
             dataEncryptionKey = encrypter.dataEncryptionKey;
             globalKeyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
             globalKeyId = encrypter.keyId;
-            encryptionWriter.setString(JSONCryptoDecoder.ENC_JSON, dataEncryptionAlgorithm.joseName);
+            encryptionWriter.setString(JSONCryptoDecoder.ENC_JSON, contentEncryptionAlgorithm.joseName);
             if (globalKeyId != null) {
                 encryptionWriter.setString(JSONCryptoDecoder.KID_JSON, globalKeyId);
             }
             if (globalKeyEncryptionAlgorithm != null) {
                 encryptionWriter.setString(JSONCryptoDecoder.ALG_JSON, globalKeyEncryptionAlgorithm.joseName);
                 if (globalKeyEncryptionAlgorithm.keyWrap) {
-                    dataEncryptionKey = EncryptionCore.generateRandom(dataEncryptionAlgorithm.keyLength);
+                    dataEncryptionKey = EncryptionCore.generateRandom(contentEncryptionAlgorithm.keyLength);
                 }
             }
         }
@@ -121,12 +121,12 @@ public abstract class JSONEncrypter implements Serializable {
                         encrypter.keyEncryptionAlgorithm.isRsa() ?
                             EncryptionCore.rsaEncryptKey(dataEncryptionKey,
                                                          encrypter.keyEncryptionAlgorithm,
-                                                         dataEncryptionAlgorithm,
+                                                         contentEncryptionAlgorithm,
                                                          encrypter.publicKey)
                                                        :
                             EncryptionCore.senderKeyAgreement(dataEncryptionKey,
                                                               encrypter.keyEncryptionAlgorithm,
-                                                              dataEncryptionAlgorithm,
+                                                              contentEncryptionAlgorithm,
                                                               encrypter.publicKey);
                 dataEncryptionKey = asymmetricEncryptionResult.getDataEncryptionKey();
                 if (!encrypter.keyEncryptionAlgorithm.isRsa()) {
@@ -168,10 +168,10 @@ public abstract class JSONEncrypter implements Serializable {
                 encryptionWriter.setStringArray(JSONCryptoDecoder.CRIT_JSON,
                                                 foundExtensions.toArray(new String[0]));
             }
-            byte[] iv = EncryptionCore.createIv(dataEncryptionAlgorithm);
+            byte[] iv = EncryptionCore.createIv(contentEncryptionAlgorithm);
             encryptionWriter.setBinary(JSONCryptoDecoder.IV_JSON, iv);
             EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =
-                EncryptionCore.contentEncryption(dataEncryptionAlgorithm,
+                EncryptionCore.contentEncryption(contentEncryptionAlgorithm,
                                                  dataEncryptionKey,
                                                  iv,
                                                  unencryptedData,

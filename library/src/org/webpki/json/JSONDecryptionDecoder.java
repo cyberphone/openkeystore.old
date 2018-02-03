@@ -55,7 +55,7 @@ public class JSONDecryptionDecoder {
         byte[] tag;
         byte[] encryptedData;
         
-        DataEncryptionAlgorithms dataEncryptionAlgorithm;
+        ContentEncryptionAlgorithms contentEncryptionAlgorithm;
         KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
         String globalKeyId;
         JSONObjectReader globalEncryptionObject;
@@ -71,9 +71,7 @@ public class JSONDecryptionDecoder {
                 // For encryption objects with multiple recipients we allow global
                 // "alg" and "kid".  Note: mixing local and global is not permitted
                 /////////////////////////////////////////////////////////////////////////////
-                if (encryptionObject.hasProperty(JSONCryptoDecoder.ALG_JSON)) {
-                    globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-                }
+                globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
                 globalKeyId = options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN ?
                     options.getKeyId(encryptionObject) 
                         : 
@@ -101,7 +99,7 @@ public class JSONDecryptionDecoder {
             ///////////////////////////////////////////////////////////////////////////////////////
 
             // Collect mandatory elements
-            dataEncryptionAlgorithm = DataEncryptionAlgorithms
+            contentEncryptionAlgorithm = ContentEncryptionAlgorithms
                     .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
             iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
             tag = encryptionObject.getBinary(JSONCryptoDecoder.TAG_JSON);
@@ -150,8 +148,8 @@ public class JSONDecryptionDecoder {
         return keyId;
     }
 
-    public DataEncryptionAlgorithms getDataEncryptionAlgorithm() {
-        return holder.dataEncryptionAlgorithm;
+    public ContentEncryptionAlgorithms getDataEncryptionAlgorithm() {
+        return holder.contentEncryptionAlgorithm;
     }
 
     public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
@@ -237,7 +235,7 @@ public class JSONDecryptionDecoder {
     }
 
     private byte[] localDecrypt(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
-        return EncryptionCore.contentDecryption(holder.dataEncryptionAlgorithm,
+        return EncryptionCore.contentDecryption(holder.contentEncryptionAlgorithm,
                                                 dataDecryptionKey,
                                                 holder.encryptedData,
                                                 holder.iv,
@@ -272,7 +270,7 @@ public class JSONDecryptionDecoder {
                                              privateKey)
                                                            :
                 EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
-                                                    holder.dataEncryptionAlgorithm,
+                                                    holder.contentEncryptionAlgorithm,
                                                     ephemeralPublicKey,
                                                     privateKey,
                                                     encryptedKeyData));
