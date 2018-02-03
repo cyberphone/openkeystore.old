@@ -5,6 +5,6 @@
   "signature": {
     "alg": "ES512",
     "jku": "https://cyberphone.github.io/doc/openkeystore/p521.jwks",
-    "val": "AQt3jElO1rkwmcD8WDzbFWyP3RccBpOJ1tgWkAIoMZNW5UuBhpwfcxBRFPNSKLbk1MQXVFiNQHfJOS5FFGNDcQ1WAZTXO7FWfD3frUuf4vHZ0Ohbesm7bAisMfD274wHxSa6Z_IjceWKFdNJcDLWfjy0B_CUGjWVKTkuA7sMw12z2ON6"
+    "val": "AJM_n9V-pMAH4z67Xbl4ygCccHM9zUoXV9O8Fq0o7EOmjSXyzM_tWzrWSjlyZZfKHWDcLF7RBNkbvbpgb_l-lKiWAFjF3HTpJPqObAP6sHs9fpqmoauweyk-OtjWUdpDObECGy5KW_MD_cOEfASsHQPeR4ToHf3MSA_Q8i8zWI8UtOZ5"
   }
 }

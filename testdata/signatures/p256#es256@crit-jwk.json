@@ -7,14 +7,14 @@
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
-      "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
+      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
     "crit": ["myString","https://example.com/extension"],
     "myString": "something",
     "https://example.com/extension": {
       "life-is-great": true
     },
-    "val": "7lvzb2OHNhqf6a4LbSPy1vz3RWIkw8tMpIq98yWdzC3dENBIuXODvGX0VWj2QqcxnI4n-JaCJ7tetGxY_xvTow"
+    "val": "6Jk041obwaZijpmPDfZ9SE-DLEkOtiLKt5JD3P6dFkBOrnuHixGwNlta-tv6dt5g6rUdDeuSaxLLQA5wpvVSYw"
   }
 }

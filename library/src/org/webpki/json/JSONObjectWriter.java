@@ -759,7 +759,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * encrypted object.
      * @param unencryptedData Data to be encrypted
-     * @param contentEncryptionAlgorithm Data encryption algorithm
+     * @param contentEncryptionAlgorithm Content encryption algorithm
      * @param encrypter Holds keys etc.
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
@@ -784,7 +784,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * encrypted object fo multiple recipients.
      * @param unencryptedData Data to be encrypted
-     * @param contentEncryptionAlgorithm Data encryption algorithm
+     * @param contentEncryptionAlgorithm Content encryption algorithm
      * @param encrypters Holds keys etc.
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;

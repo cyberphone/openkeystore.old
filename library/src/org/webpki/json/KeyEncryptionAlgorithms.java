@@ -19,10 +19,11 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * JEF (JSON Encryption Format) key encryption algorithms.
+ * Cleartext JWE algorithms.
  */
 public enum KeyEncryptionAlgorithms {
 
+    JOSE_DIRECT_ALG_ID         ("dir",            null,                                    false, false, 0),
     JOSE_ECDH_ES_ALG_ID        ("ECDH-ES",        "ECDH",                                  false, false, -1),
     JOSE_ECDH_ES_A128KW_ALG_ID ("ECDH-ES+A128KW", "ECDH",                                  false, true,  16),
     JOSE_ECDH_ES_A192KW_ALG_ID ("ECDH-ES+A192KW", "ECDH",                                  false, true,  24),

@@ -6,9 +6,9 @@
     jwk: {
       kty: "EC",
       crv: "P-256",
-      x: "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
-      y: "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
+      x: "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      y: "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    val: "G8QUvhIp4R0EnQ925Xzwncx4ZSsyJW3m7Zl8n48wU8_WsdouGEJ7JA17DYya7bz0Z6c_o1ib8bhci4lmx43uKg"
+    val: "PXyPZN_MbNnizyPibI5W9xit8cdMQIknO3umhgGX1g_UB8PXlBoHCWbHkcJEnpp9QmMF1QjUa4laOIHqeBk2oQ"
   }
 }

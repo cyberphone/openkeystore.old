@@ -6,9 +6,9 @@
     jwk: {
       kty: "EC",
       crv: "P-384",
-      x: "DEovk9Q6-wrqhJdvKMckyq-7-OXutKHKps2TJReDtGZcnDF6xFR2S6tYOx6hio7F",
-      y: "JetBCPykRVagaEbICpwem2f5jezmgXKVTcs4N3w--WO3-PezfQdmA1ehjR46HRfW"
+      x: "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      y: "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
     },
-    val: "YlgzNGouNoOmds1FIXAdVaE1mck0qP0k0z_Imm0wYPCOf_jRiXQxkoP7REhfcrLSWmygR9pJXKi-7OSf_XCO_4F3VbgyzXQ8cIq4Dui7atftBrc3k-ppbNLV8V2bfkYD"
+    val: "OVsgoyBF7Jj7dxglOywR7SD2jRvnfBYsedlZuKBqakXRxuLKAnky_L9Tfvm9KxZoIbHf0JHo0w2aC4jq0nRPO2G7onVd4Sh-oBJROdHNsdNo_ConuWbsuzRGICe0XlTQ"
   }
 }

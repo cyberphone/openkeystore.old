@@ -1,15 +1,15 @@
 {
   "enc": "A128CBC-HS256",
-  "kid": "20180101:mybank:p256",
   "alg": "ECDH-ES+A256KW",
+  "kid": "example.com:p256",
   "epk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "6C_MVFly_-mNn-kM3cKw2s6arHSNkZhikpBAvTZDVt8",
-    "y": "q6YtlRBQ8BErATiL_zP-x8xOgBPjF29-zSBDYNpvOrk"
+    "x": "Fyzfe-04AJLJUObu2DVgL6PTmEckU2CNeDDpoMsGPto",
+    "y": "k3bd9ccy6r7Lnd5o116_BD9sawwKGJDYUw7vhOTR6Rc"
   },
-  "encrypted_key": "Vl_CVnvojvm7XCgPcXbg9nmMZwJyU6PGfowOiqm4lqNuhcZy-IlODQ",
-  "iv": "edUdELKOtzsU7Rag2kf1yA",
-  "tag": "-4GgP2rKR8lQzUrdfwV6vA",
-  "ciphertext": "rr4mO-FH2kAkbqGif9j67X-JY50A2cPFHNi2FYiahVM"
+  "encrypted_key": "WIezNZ2eebtGoe0u13S8ye5dOHIF41iqRGXq2NdpQTulOdB0aQp3IQ",
+  "iv": "vZoQqmLylkXhOeinqWa6og",
+  "tag": "7SLHaUp1xzjOCVhek-meaA",
+  "ciphertext": "jgNLUWMWyhfxMm-addN13GqQcbM_q6xcxRir0oW-WxA"
 }

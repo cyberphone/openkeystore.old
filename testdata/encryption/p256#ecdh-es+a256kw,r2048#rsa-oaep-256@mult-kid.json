@@ -2,20 +2,20 @@
   "enc": "A128CBC-HS256",
   "recipients": [{
     "alg": "ECDH-ES+A256KW",
-    "kid": "20180101:mybank:p256",
+    "kid": "example.com:p256",
     "epk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "R_kINQLWdtAn2xNiii9QP5m7XxgqohJHT_rdzIY7QFE",
-      "y": "JV5rE-NIqCIIza_k2W07hKsLZIx0VkN4XCvPe_sxQYw"
+      "x": "mlutwAq1MYJ34p_YQ4xUIbJo69uCMgBy-1FbtZqpLOo",
+      "y": "bbtLDF4DcBC4Orp1ec1KOKG98qHpElNn-2WVgerw4d8"
     },
-    "encrypted_key": "k4MPy_1YqoRq8iho7UrU914qwGfqPRvJs-yzxw_c0l2PGmF8gFYvTg"
+    "encrypted_key": "_l77AYk8smTCUTJ0xvIQF6doS-ie8ymYZD9dAmxGqv3fBIyo3hP2ew"
   },{
     "alg": "RSA-OAEP-256",
-    "kid": "20180101:mybank:r2048",
-    "encrypted_key": "RbTOM_fJz1w2-UPLNdIlmQPcDciluAEWbry9LaDr3GKIOEu3LBLOBg8csAsdIUexpFYgpr0wWhJZvoSQysH9BgWaIORfesJUoH0tnn8h8SH3x85tYaf2W5LV0tfIOS0zZnHegmd7NjhAUsqE6Zz3eiffxmANuYLhTjZjms231PVVOcqKzo43s4Djw8fqnQNcgPrTqCWviuMZcab8spEw7abD6pmn0YcteF3HR2XlDHeorXqZB8VmgcfJ1gQeboxYH7snzzKBkv0lI2EIbOiD7wUK7b4WlL_7m2aV0NFODu8mEszkCwUSDXXRDkP1tWWvAOLm5-21JfeVYp7_aUEGRg"
+    "kid": "example.com:r2048",
+    "encrypted_key": "Zsko_l7U-KVveoW7EHYMZmbymBCelWqhz4ekWteBjyQVPJ88qipsbBZOI7ZkMfyrj0Qw52iGz74ICu0YCwsBlU43c9AGd7y4fqrXja72C0MEPeCVQs2rfnNH1t6W0uP5aoI3vifc9vfcv97XT0cPSoQ3Uki92HXKDPhfIPPr_hiAVeQ1X95aCwd2pZW5rAmDAmiJm3hi4S3F1VS7uhcjO0BwFNjelxYIoay4bjbkLf1yuV4BCKgurzVoa2y3DgF_-HfzYnD-mhIxECeqBb-bYz8Nla9ok8wbE0bnhRkVzTC2AtN8cWyaLjlWtpMKHeogKES2U2eqiManGYN09Ye-5A"
   }],
-  "iv": "KF0_QfOSWDsOQjRNFvRiUw",
-  "tag": "l73jjNZn2gnl17E09E4QvQ",
-  "ciphertext": "IM-aY9ljNkgKLkvk7rl7biXOAgJDr90kUodpPDzzcwU"
+  "iv": "wHjVNRueK1i4oqueyqYjSA",
+  "tag": "9f54qUxWRCZe5PaRYMtaMw",
+  "ciphertext": "j5Hblyg1g7imFEoUl4isivOkdzvJBWZaB4sSrfFusoU"
 }

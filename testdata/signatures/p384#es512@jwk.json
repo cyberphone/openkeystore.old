@@ -7,9 +7,9 @@
     "jwk": {
       "kty": "EC",
       "crv": "P-384",
-      "x": "DEovk9Q6-wrqhJdvKMckyq-7-OXutKHKps2TJReDtGZcnDF6xFR2S6tYOx6hio7F",
-      "y": "JetBCPykRVagaEbICpwem2f5jezmgXKVTcs4N3w--WO3-PezfQdmA1ehjR46HRfW"
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
     },
-    "val": "EwoJ97FoFfEKzsAif0i_RCb_tlhOigKlItkCz-6sJRf56Jqj52o0CN8mgqBelSij3S6yXhVaOrtkfo_ZYuha9uqNSTXEWpTPYw5PW3z3STa_iPO0NTc8ycEHxtZ9JrIp"
+    "val": "qF6Y71-Qg6wNh0wX4vyQGAlZfggTqnujKT7_kP6y9s7xrpjtvvjQAL8tiru7dnFFpjZAdad-epeTYW4iByXbf6paZJsv26y4vbhK5UEEq4ZXsnFlUQ-etAIbuSlcS5Tg"
   }
 }

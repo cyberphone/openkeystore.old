@@ -192,7 +192,7 @@ public class JSONDecryptionDecoder {
             throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.ALG_JSON + "\" not allowed");
         }
 
-        if (keyEncryptionAlgorithm == null) {
+        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
             sharedSecretMode = true;
         } else {
             // We are apparently into a two level encryption scheme

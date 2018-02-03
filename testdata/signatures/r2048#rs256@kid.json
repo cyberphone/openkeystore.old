@@ -4,7 +4,7 @@
   "numbers": [1e+30,4.5,6],
   "signature": {
     "alg": "RS256",
-    "kid": "20180101:mybank:r2048",
-    "val": "WsE7kEbAeO3P9VYuMD86tD_NkboMsWpzcbUtlLSMmgKic2HXhCymiJzqvi9vx0ciEFRueZ4Cz5BtptlKiVwFuqX84k5wqGsWKpdtGtfR1WC0nuOh-L2efr6TyYKbvHFsJn05e_usQn6Fi7xrmxOBempnGgx0erNuThvsDOG8y6P5RCS13CVIlRK0IgAWmOJ3g13GM6Tfx0SeMaogREKFazIFlWvvwgFvoHk5lVxiVonmhUvlsYQMB2u4KoeAkpuJy-RbxFH2yj7eBWw6mQZ45VibCIdgdvteGEnCo5WWTfebaYsNer__SPAAnyYZpF2CROZASF9hJg1KC2s8Eak_Ww"
+    "kid": "example.com:r2048",
+    "val": "Mtqlw2PPUoZSO4DAHNzZ9gk_Kz8HsK3fE1jux6jFVrrhwSZiRaW6vx6Mf4JzzDyBm8wYi2ChJkhxOcGoRmjV5LqDy84UjQDKCzj1uVNtGRJ2AArBtTBot5PI5XhEI_v_bK05HqAZ1BJHI76dE5ye6Ca1fELygYysTddLQnzjEOxPxgcvPCMPt5ZW4OJFtXleBEGYFsxBuMsnAUJVCT1o4KTmRLIMnBNqXydbIzbGG7ONZ4TOHSCcdoAi4ymtzAMP0jMQcL_QJS1AUw0AH-unYuem4woL2FZHvO93mks_9P7j8Jh-4dVossP0JcUIpiT8fc63y27b4YfMT5pseJfNTQ"
   }
 }

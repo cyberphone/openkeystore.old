@@ -3664,8 +3664,8 @@ public class JSONTest {
                     byte[] a,
                     byte[] e,
                     byte[] t,
-                    ContentEncryptionAlgorithms dea) throws Exception {
-        byte[] pout = EncryptionCore.contentDecryption(dea,
+                    ContentEncryptionAlgorithms enc) throws Exception {
+        byte[] pout = EncryptionCore.contentDecryption(enc,
                                                        k,
                                                        e,
                                                        iv,
@@ -3673,14 +3673,14 @@ public class JSONTest {
                                                        t);
         assertTrue("pout 1", ArrayUtil.compare(p, pout));
 
-        iv = EncryptionCore.createIv(dea);
+        iv = EncryptionCore.createIv(enc);
         EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
-                EncryptionCore.contentEncryption(dea,
+                EncryptionCore.contentEncryption(enc,
                                                  k,
                                                  iv,
                                                  p,
                                                  a);
-        pout = EncryptionCore.contentDecryption(dea,
+        pout = EncryptionCore.contentDecryption(enc,
                                                 k,
                                                 symmetricEncryptionResult.getCipherText(),
                                                 iv,
@@ -3688,14 +3688,14 @@ public class JSONTest {
                                                 symmetricEncryptionResult.getTag());
         assertTrue("pout 2", ArrayUtil.compare(p, pout));
 
-        byte[] dataEncryptionKey = genRandom(dea.getKeyLength());
+        byte[] contentEncryptionKey = genRandom(enc.getKeyLength());
         JSONObjectReader json = JSONParser.parse("{\"data\":\"hello!\"}");
         String encrec = JSONObjectWriter.createEncryptionObject(json.serializeToBytes(JSONOutputFormats.NORMALIZED),
-                                                                dea,
-                                                                new JSONSymKeyEncrypter(dataEncryptionKey)).toString();
+                                                                enc,
+                                                                new JSONSymKeyEncrypter(contentEncryptionKey)).toString();
         assertTrue("Symmetric",
                 JSONParser.parse(JSONParser.parse(encrec).getEncryptionObject(new JSONCryptoDecoder.Options())
-                        .getDecryptedData(dataEncryptionKey)).toString().equals(json.toString()));
+                        .getDecryptedData(contentEncryptionKey)).toString().equals(json.toString()));
     }
 
     void aesCbcHmac(String k,
@@ -3704,14 +3704,14 @@ public class JSONTest {
             String a,
             String e,
             String t,
-            ContentEncryptionAlgorithms dea) throws Exception {
+            ContentEncryptionAlgorithms enc) throws Exception {
         aesCbcHmac(DebugFormatter.getByteArrayFromHex(k),
                    DebugFormatter.getByteArrayFromHex(p),
                    DebugFormatter.getByteArrayFromHex(iv),
                    DebugFormatter.getByteArrayFromHex(a),
                    DebugFormatter.getByteArrayFromHex(e),
                    DebugFormatter.getByteArrayFromHex(t),
-                   dea);
+                   enc);
     }
     
     void joseCookBook(String resource) throws Exception {
@@ -3762,23 +3762,23 @@ public class JSONTest {
         byte[] authData = genRandom(20);
         for (int i = 0; i < 10; i++) {
             byte[] plainText = jwePlainText.getBytes("UTF-8");
-            for (ContentEncryptionAlgorithms dea : ContentEncryptionAlgorithms.values()) {
-                byte[] key = genRandom(dea.getKeyLength());
-                byte[] iv = EncryptionCore.createIv(dea);
+            for (ContentEncryptionAlgorithms enc : ContentEncryptionAlgorithms.values()) {
+                byte[] key = genRandom(enc.getKeyLength());
+                byte[] iv = EncryptionCore.createIv(enc);
                 EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult = 
-                        EncryptionCore.contentEncryption(dea,
+                        EncryptionCore.contentEncryption(enc,
                                                          key,
                                                          iv,
                                                          plainText, 
                                                          authData);
                 if (!ArrayUtil.compare(plainText,
-                                       EncryptionCore.contentDecryption(dea,
+                                       EncryptionCore.contentDecryption(enc,
                                                                         key, 
                                                                         symmetricEncryptionResult.getCipherText(), 
                                                                         iv, 
                                                                         authData,
                                                                         symmetricEncryptionResult.getTag()))) {
-                    fail("compare " + dea);
+                    fail("compare " + enc);
                 }
             }
         }
@@ -3791,11 +3791,14 @@ public class JSONTest {
         KeyPair alice = JSONParser.parse(aliceKey).getKeyPair();
         byte[] plainText = jwePlainText.getBytes("UTF-8");
         for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
-            for (ContentEncryptionAlgorithms dea : ContentEncryptionAlgorithms.values()) {
+            if (kea == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
+                continue;
+            }
+            for (ContentEncryptionAlgorithms enc : ContentEncryptionAlgorithms.values()) {
                 JSONObjectWriter json = 
                     JSONObjectWriter
                         .createEncryptionObject(plainText,
-                                                dea,
+                                                enc,
                                                 new JSONAsymKeyEncrypter((kea.isRsa() ?
                                                                            malletKeys : alice).getPublic(),
                                                                          kea));
@@ -3805,7 +3808,7 @@ public class JSONTest {
                                           .getEncryptionObject(new JSONCryptoDecoder.Options())
                                               .getDecryptedData((kea.isRsa() ?
                                                       malletKeys : alice).getPrivate()))) {
-                    throw new IOException("Fail on " + kea + "/" + dea);
+                    throw new IOException("Fail on " + kea + "/" + enc);
                 }
             }
         }

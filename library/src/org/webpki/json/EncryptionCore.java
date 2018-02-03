@@ -77,20 +77,20 @@ class EncryptionCore {
      */
     static class AsymmetricEncryptionResult {
 
-        private byte[] dataEncryptionKey;
+        private byte[] contentEncryptionKey;
         private byte[] encryptedKeyData;
         private ECPublicKey ephemeralKey;
 
-        AsymmetricEncryptionResult(byte[] dataEncryptionKey,
+        AsymmetricEncryptionResult(byte[] contentEncryptionKey,
                                    byte[] encryptedKeyData,
                                    ECPublicKey ephemeralKey) {
-            this.dataEncryptionKey = dataEncryptionKey;
+            this.contentEncryptionKey = contentEncryptionKey;
             this.encryptedKeyData = encryptedKeyData;
             this.ephemeralKey = ephemeralKey;
         }
 
         byte[] getDataEncryptionKey() {
-            return dataEncryptionKey;
+            return contentEncryptionKey;
         }
 
         byte[] getEncryptedKeyData() {
@@ -411,28 +411,28 @@ class EncryptionCore {
 
     /**
      * Perform a sender side ECDH operation.
-     * @param dataEncryptionKey Also known as CEK
+     * @param contentEncryptionKey Also known as CEK
      * @param keyEncryptionAlgorithm The ECDH algorithm
      * @param contentEncryptionAlgorithm The designated content encryption algorithm
      * @param publicKey The receiver's (usually static) public key
      * @return A composite object including the (plain text) data encryption key
      * @throws GeneralSecurityException &nbsp;
      */
-    static AsymmetricEncryptionResult rsaEncryptKey(byte[] dataEncryptionKey,
+    static AsymmetricEncryptionResult rsaEncryptKey(byte[] contentEncryptionKey,
                                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                                     ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                                                     PublicKey publicKey) throws GeneralSecurityException {
-        return new AsymmetricEncryptionResult(dataEncryptionKey,
+        return new AsymmetricEncryptionResult(contentEncryptionKey,
                                               rsaCore(Cipher.ENCRYPT_MODE,
                                                       publicKey,
-                                                      dataEncryptionKey,
+                                                      contentEncryptionKey,
                                                       keyEncryptionAlgorithm),
                                               null);
     }
 
     /**
      * Perform a sender side ECDH operation.
-     * @param dataEncryptionKey Also known as CEK
+     * @param contentEncryptionKey Also known as CEK
      * @param keyEncryptionAlgorithm The ECDH algorithm
      * @param contentEncryptionAlgorithm The designated content encryption algorithm
      * @param staticKey The receiver's (usually static) public key
@@ -440,7 +440,7 @@ class EncryptionCore {
      * @throws GeneralSecurityException &nbsp;
      * @throws IOException &nbsp;
      */
-    static AsymmetricEncryptionResult senderKeyAgreement(byte[] dataEncryptionKey,
+    static AsymmetricEncryptionResult senderKeyAgreement(byte[] contentEncryptionKey,
                                                          KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                                          ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                                                          PublicKey staticKey) throws IOException, GeneralSecurityException {
@@ -457,8 +457,8 @@ class EncryptionCore {
         if (keyEncryptionAlgorithm.keyWrap) {
             Cipher cipher = getAesCipher(AES_KEY_WRAP_JCENAME);
             cipher.init(Cipher.WRAP_MODE, new SecretKeySpec(derivedKey, "AES"));
-            encryptedKeyData = cipher.wrap(new SecretKeySpec(dataEncryptionKey, "AES"));
-            derivedKey = dataEncryptionKey;
+            encryptedKeyData = cipher.wrap(new SecretKeySpec(contentEncryptionKey, "AES"));
+            derivedKey = contentEncryptionKey;
         }
         return new AsymmetricEncryptionResult(derivedKey, 
                                               encryptedKeyData,

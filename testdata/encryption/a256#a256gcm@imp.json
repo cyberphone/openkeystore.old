@@ -1,6 +1,7 @@
 {
   "enc": "A256GCM",
-  "iv": "ZIx8-PFLINxnC6v6",
-  "tag": "aNSS-LAwcRWq-QG0re9MsQ",
-  "ciphertext": "rFUx98I4PSkmTT2eUT7npHUWpy9yaA"
+  "alg": "dir",
+  "iv": "ScB3yOodqE2AkJJL",
+  "tag": "IuXo9AO9stffWrv6Be9kyQ",
+  "ciphertext": "mNYScGDEQz2kJEqqcwp36qvLXIuvvw"
 }

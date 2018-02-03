@@ -4,22 +4,22 @@
   "jwk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "2zlYOKuQmOswt_xo_XhizgABDn8w2qUlte5ALXYpTWM",
-    "y": "wcezP2ejoD6hwPrWNYPTPSteTmWKxMR8V04ryixmXLA"
+    "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+    "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
   },
   "epk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "d17BwGPjdzo3SvgtJMqujUyc_qoUG2n1jQIiLyW3vnw",
-    "y": "PQ4nDbz5gVuc43GUJOVKbcR-hP7C1TnuUAb2dYWnS0A"
+    "x": "WWvQBx7sPSStUr9LVP5pK403TDV7hsX-l_IM49gzOkU",
+    "y": "3ZpwWMeJ7w9oRyrsHAxo0l3pQ_hnRbgNPvWCIuPv7PI"
   },
-  "encrypted_key": "XybbZbbeBnD5JP9gBPedgbu6atSlFJlc7GpAxOq6kMwO7WCpExupCg",
+  "encrypted_key": "8KkhQgV_e_1-WFy3f3OiiFm1ssqYLJmmYcs__mCKDGLsOHQ_UDRgSA",
   "myString": "something",
   "https://example.com/extension": {
     "life-is-great": true
   },
   "crit": ["myString","https://example.com/extension"],
-  "iv": "75mT1iDBqFhDw2TH",
-  "tag": "J5T8-rLb_ScVsbczAHfrsA",
-  "ciphertext": "mciolxGBTDE3VFnCqxaXt7x2lqLzHw"
+  "iv": "CnmTX4_0FqyMci3o",
+  "tag": "o28fgqRMkal45ejwvyHbXw",
+  "ciphertext": "GZfuNxxaaatTBPh-EnhxA_pt_lmLtQ"
 }

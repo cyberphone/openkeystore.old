@@ -27,11 +27,12 @@ public class JSONSymKeyEncrypter extends JSONEncrypter {
 
      /**
      * Constructor for JCE based solutions.
-     * @param dataEncryptionKey Symmetric key
+     * @param contentEncryptionKey Symmetric key
      * @throws IOException &nbsp;
      */
-    public JSONSymKeyEncrypter(byte[] dataEncryptionKey) throws IOException {
-        this.dataEncryptionKey = dataEncryptionKey;
+    public JSONSymKeyEncrypter(byte[] contentEncryptionKey) throws IOException {
+        this.contentEncryptionKey = contentEncryptionKey;
+        this.keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID;
     }
 
     @Override
