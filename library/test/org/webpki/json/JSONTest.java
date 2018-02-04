@@ -3830,6 +3830,17 @@ public class JSONTest {
         }
     }
     
+    void encryptionFieldErrors(String fileName, String keyType, String exceptionString) throws Exception {
+        try {
+            JSONDecryptionDecoder dec = readEncryption(fileName).getEncryptionObject(new JSONCryptoDecoder.Options());
+            KeyPair keyPair = readJwk(keyType);
+            dec.getDecryptedData(keyPair.getPrivate());
+            fail("Should'n work: " + fileName);
+        } catch (Exception e) {
+            checkException(e, exceptionString);
+        }
+    }
+
     @Test
     public void Encryption() throws Exception {
 
@@ -4112,6 +4123,26 @@ public class JSONTest {
         variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoDecoder.ALG_JSON + "\": A256GCM");
         variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoDecoder.ENC_JSON + "\": RSA-OAEP-256");
         variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoDecoder.ENC_JSON + "\" is missing");
+
+        encryptionFieldErrors("err-bad-ciphertext.json",
+                              "p256",
+                              "Authentication error on algorithm: A256CBC-HS512");
+
+        encryptionFieldErrors("err-bad-tag.json",
+                              "p256",
+                              "Incorrect parameter \"" + JSONCryptoDecoder.TAG_JSON + "\" length (22) for A256CBC-HS512");
+
+        encryptionFieldErrors("err-bad-iv.json",
+                              "p256",
+                              "Incorrect parameter \"" + JSONCryptoDecoder.IV_JSON + "\" length (12) for A256CBC-HS512");
+
+        encryptionFieldErrors("err-bad-key1.json",
+                              "p256",
+                              "checksum failed");
+
+        encryptionFieldErrors("err-bad-key2.json",
+                              "p256",
+                              "Incorrect parameter \"key\" length (32) for A256CBC-HS512");
 
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());
