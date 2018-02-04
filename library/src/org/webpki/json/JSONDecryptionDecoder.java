@@ -191,6 +191,9 @@ public class JSONDecryptionDecoder {
         } else if (holder.globalKeyEncryptionAlgorithm != null) {
             throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.ALG_JSON + "\" not allowed");
         }
+        if (keyEncryptionAlgorithm == null) {
+            throw new IOException("Missing \"" + JSONCryptoDecoder.ALG_JSON  + "\"");
+        }
 
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
             sharedSecretMode = true;

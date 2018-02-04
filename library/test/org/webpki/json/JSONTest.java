@@ -2451,6 +2451,10 @@ public class JSONTest {
         return JSONParser.parse(ArrayUtil.readFile(baseSignatures + shortName));
     }
 
+    static JSONObjectReader readEncryption(String shortName) throws Exception {
+        return JSONParser.parse(ArrayUtil.readFile(baseEncryption + shortName));
+    }
+
     void booleanValues(boolean value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setBoolean(value);
@@ -3591,7 +3595,7 @@ public class JSONTest {
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(unknownCa);
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
+            checkException(e, "Unknown CA: CN=Trust Network Root CA1,C=US");
         }
 
         writer = new JSONObjectWriter()
@@ -3610,7 +3614,7 @@ public class JSONTest {
                 .verify(unknownCa);
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
+            checkException(e, "Unknown CA: CN=Trust Network Root CA1,C=US");
         }
         writer = new JSONObjectWriter().setString("myData", "cool!")
                 .setSignature("attestSignature", new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
@@ -3714,10 +3718,8 @@ public class JSONTest {
                    enc);
     }
     
-    void joseCookBook(String resource) throws Exception {
-        JSONObjectReader test = JSONParser.
-                parse(ArrayUtil.getByteArrayFromInputStream(this.getClass()
-                        .getResourceAsStream(resource)));
+    void joseCookBook(String name) throws Exception {
+        JSONObjectReader test = readEncryption(name);
         KeyPair staticKey = test.getObject("input")
             .getObject("key")
                 .removeProperty("kid")
@@ -3813,7 +3815,7 @@ public class JSONTest {
             }
         }
     }
-
+    
     @Test
     public void Encryption() throws Exception {
 
@@ -4058,7 +4060,39 @@ public class JSONTest {
                 unEncJson.toString()
                     .equals(JSONParser.parse(decDec.getDecryptedData(malletKeys.getPrivate())).toString()));
 
-KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+        for (int i = 1; i < 5; i++) {
+            try {
+                JSONObjectReader enc = readEncryption("err-missing-alg" + i + ".json");
+                if (enc.hasProperty(JSONCryptoDecoder.RECIPIENTS_JSON)) {
+                    enc.getEncryptionObjects(new JSONCryptoDecoder.Options());
+                } else {
+                    enc.getEncryptionObject(new JSONCryptoDecoder.Options());
+                }
+                fail("didn't fail");
+            } catch (Exception e) {
+                checkException(e, "Missing \"alg\"");
+            }
+        }
+
+        for (int i = 1; i < 3; i++) {
+            JSONObjectReader enc = readEncryption("err-glob-alg" + i + ".json");
+            try {
+                enc.getEncryptionObject(new JSONCryptoDecoder.Options());
+                fail("didn't fail");
+            } catch (Exception e) {
+                checkException(e, "Please use \"getEncryptionObjects()\" for multiple encryption objects");
+            }
+            try {
+                enc.getEncryptionObjects(new JSONCryptoDecoder.Options());
+                fail("didn't fail");
+            } catch (Exception e) {
+                checkException(e, "Mixing global/local \"alg\" not allowed");
+            }
+        }
+
+        readEncryption("err-wrong-alg1.json").getEncryptionObject(new JSONCryptoDecoder.Options());
+
+        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());
         keyAgreement.doPhase(bob.getPublic(), true);
         assertTrue("Bad ECDH", Base64URL.encode(keyAgreement.generateSecret()).equals(ECDH_RESULT_WITHOUT_KDF));
