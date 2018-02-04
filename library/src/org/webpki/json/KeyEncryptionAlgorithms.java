@@ -64,6 +64,6 @@ public enum KeyEncryptionAlgorithms {
                 return algorithm;
             }
         }
-        throw new IOException("No such algorithm: " + algorithmId);
+        throw new IOException("Unexpected argument to \"" + JSONCryptoDecoder.ALG_JSON + "\": " + algorithmId);
     }
 }

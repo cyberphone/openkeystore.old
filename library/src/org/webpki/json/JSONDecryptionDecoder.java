@@ -342,4 +342,10 @@ public class JSONDecryptionDecoder {
             this.optionalKeyId = optionalKeyId;
         }
     }
+
+    static void keyWrapCheck(KeyEncryptionAlgorithms keyEncryptionAlgorithm) throws IOException {
+        if (!keyEncryptionAlgorithm.keyWrap) {
+            throw new IOException("Multiple encryptions only permitted for key wrapping schemes");
+        }
+    }
 }

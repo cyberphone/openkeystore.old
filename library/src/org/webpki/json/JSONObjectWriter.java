@@ -790,9 +790,9 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      * @throws GeneralSecurityException &nbsp;
      */
-    public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
-                                                          ContentEncryptionAlgorithms contentEncryptionAlgorithm,
-                                                          Vector<JSONEncrypter> encrypters)
+    public static JSONObjectWriter createEncryptionObjects(byte[] unencryptedData,
+                                                           ContentEncryptionAlgorithms contentEncryptionAlgorithm,
+                                                           Vector<JSONEncrypter> encrypters)
     throws IOException, GeneralSecurityException {
         if (encrypters.isEmpty()) {
             throw new IOException("Empty encrypter list");
@@ -801,9 +801,7 @@ import org.webpki.json.JSONSignatureDecoder;
                 new JSONEncrypter.EncryptionHeader(contentEncryptionAlgorithm, encrypters.firstElement());
         Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
         for (JSONEncrypter encrypter : encrypters) {
-            if (encrypter.keyEncryptionAlgorithm == null || !encrypter.keyEncryptionAlgorithm.keyWrap) {
-                throw new IOException("Multiple encryptions only permitted for key wrapping schemes");
-            }
+            JSONDecryptionDecoder.keyWrapCheck(encrypter.keyEncryptionAlgorithm);
             JSONObjectWriter currentRecipient = new JSONObjectWriter();
             encryptionHeader.createRecipient(encrypter, currentRecipient);
             recipents.add(currentRecipient);

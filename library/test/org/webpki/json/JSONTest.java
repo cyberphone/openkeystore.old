@@ -3816,6 +3816,20 @@ public class JSONTest {
         }
     }
     
+    void variousEncryptionErrors(String fileName, String exceptionString) throws Exception {
+        JSONObjectReader enc = readEncryption(fileName);
+        try {
+            if (enc.hasProperty(JSONCryptoDecoder.RECIPIENTS_JSON)) {
+                enc.getEncryptionObjects(new JSONCryptoDecoder.Options());
+            } else {
+                enc.getEncryptionObject(new JSONCryptoDecoder.Options());
+            }
+            fail("Should'n work: " + fileName);
+        } catch (Exception e) {
+            checkException(e, exceptionString);
+        }
+    }
+    
     @Test
     public void Encryption() throws Exception {
 
@@ -4090,7 +4104,14 @@ public class JSONTest {
             }
         }
 
-        readEncryption("err-wrong-alg1.json").getEncryptionObject(new JSONCryptoDecoder.Options());
+        variousEncryptionErrors("err-wrong-alg1.json", "Property \"" + JSONCryptoDecoder.ENCRYPTED_KEY_JSON + "\" is missing");
+        variousEncryptionErrors("err-wrong-alg2.json", "Property \"" + JSONCryptoDecoder.N_JSON + "\" is missing");
+        variousEncryptionErrors("err-wrong-alg3.json", "Property \"" + JSONCryptoDecoder.EPK_JSON + "\" is missing");
+        variousEncryptionErrors("err-wrong-alg4.json", "Property \"" + JSONCryptoDecoder.ENCRYPTED_KEY_JSON + "\" was never read");
+        variousEncryptionErrors("err-wrong-alg5.json", "Multiple encryptions only permitted for key wrapping schemes");
+        variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoDecoder.ALG_JSON + "\": A256GCM");
+        variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoDecoder.ENC_JSON + "\": RSA-OAEP-256");
+        variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoDecoder.ENC_JSON + "\" is missing");
 
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());

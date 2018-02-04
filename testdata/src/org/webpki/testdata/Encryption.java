@@ -364,9 +364,9 @@ public class Encryption {
             options.setRequirePublicKeyInfo(false);
         }
         byte[] encryptedData =
-               JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
-                                                       contentEncryptionAlgorithm,
-                                                       encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
+               JSONObjectWriter.createEncryptionObjects(dataToBeEncrypted, 
+                                                        contentEncryptionAlgorithm,
+                                                        encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         ArrayUtil.writeFile(baseEncryption + algList + '@' + fileName, encryptedData);
         int q = 0;
         for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)

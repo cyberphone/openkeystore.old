@@ -646,9 +646,11 @@ public class JSONObjectReader implements Serializable, Cloneable {
         JSONArrayReader recipientObjects = getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
         Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();
         do {
-            recipients.add(new JSONDecryptionDecoder(holder, 
-                                                     recipientObjects.getObject(),
-                                                     !recipientObjects.hasMore()));
+            JSONDecryptionDecoder decoder = new JSONDecryptionDecoder(holder, 
+                                                                      recipientObjects.getObject(),
+                                                                      !recipientObjects.hasMore());
+            JSONDecryptionDecoder.keyWrapCheck(decoder.getKeyEncryptionAlgorithm());
+            recipients.add(decoder);
         } while (recipientObjects.hasMore());
         return recipients;
     }
