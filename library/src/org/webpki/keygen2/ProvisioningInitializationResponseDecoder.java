@@ -25,7 +25,7 @@ import java.security.interfaces.ECPublicKey;
 
 import org.webpki.crypto.AlgorithmPreferences;
 
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -90,7 +90,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the mandatory provisioning session data signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature(new JSONCryptoDecoder.Options().setRequirePublicKeyInfo(false));
+        signature = rd.getSignature(new JSONCryptoHelper.Options().setRequirePublicKeyInfo(false));
     }
 
     @Override

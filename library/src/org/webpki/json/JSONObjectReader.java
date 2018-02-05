@@ -491,13 +491,13 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return An object which can be used to verify keys etc.
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
-     * @see org.webpki.json.JSONCryptoDecoder.Options
+     * @see org.webpki.json.JSONCryptoHelper.Options
      */
-    public JSONSignatureDecoder getSignature(JSONCryptoDecoder.Options options) throws IOException {
-        return getSignature(JSONCryptoDecoder.SIGNATURE_JSON, options);
+    public JSONSignatureDecoder getSignature(JSONCryptoHelper.Options options) throws IOException {
+        return getSignature(JSONCryptoHelper.SIGNATURE_JSON, options);
     }
 
-    public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoDecoder.Options options) throws IOException {
+    public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(false);
         return new JSONSignatureDecoder(this,
                                         getObject(signatureLabel),
@@ -512,25 +512,25 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return List with signature objects
      * @throws IOException &nbsp;
      */
-    public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoDecoder.Options options) throws IOException {
+    public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(false);
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
-        JSONArrayReader arrayReader = getArray(JSONCryptoDecoder.SIGNATURES_JSON);
+        JSONArrayReader arrayReader = getArray(JSONCryptoHelper.SIGNATURES_JSON);
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
         @SuppressWarnings("unchecked")
-        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONCryptoDecoder.SIGNATURES_JSON).value;
+        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONCryptoHelper.SIGNATURES_JSON).value;
         int i = 0;
         for (JSONObjectReader signature : signatureObjects) {
             Vector<JSONObject> element = new Vector<JSONObject>();
             element.add(save.get(i++));
-            root.properties.put(JSONCryptoDecoder.SIGNATURES_JSON, 
+            root.properties.put(JSONCryptoHelper.SIGNATURES_JSON, 
                                 new JSONValue(JSONTypes.ARRAY, element));
             signatures.add(new JSONSignatureDecoder(this, signature, options));
         }
-        root.properties.put(JSONCryptoDecoder.SIGNATURES_JSON, 
+        root.properties.put(JSONCryptoHelper.SIGNATURES_JSON, 
                             new JSONValue(JSONTypes.ARRAY, save));
         return signatures;
     }
@@ -546,7 +546,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setPublicKey(PublicKey)
      */
     public PublicKey getPublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return getObject(JSONCryptoDecoder.JWK_JSON).getCorePublicKey(algorithmPreferences);
+        return getObject(JSONCryptoHelper.JWK_JSON).getCorePublicKey(algorithmPreferences);
     }
 
     /**
@@ -618,11 +618,11 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],ContentEncryptionAlgorithms,JSONEncrypter)
-     * @see org.webpki.json.JSONCryptoDecoder.Options
+     * @see org.webpki.json.JSONCryptoHelper.Options
      */
-    public JSONDecryptionDecoder getEncryptionObject(JSONCryptoDecoder.Options options) throws IOException {
+    public JSONDecryptionDecoder getEncryptionObject(JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(true);
-        if (hasProperty(JSONCryptoDecoder.RECIPIENTS_JSON)) {
+        if (hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
             throw new IOException("Please use \"getEncryptionObjects()\" for multiple encryption objects");
         }
         JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, false);
@@ -638,12 +638,12 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
      * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],ContentEncryptionAlgorithms,JSONEncrypter)
-     * @see org.webpki.json.JSONCryptoDecoder.Options
+     * @see org.webpki.json.JSONCryptoHelper.Options
      */
-    public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoDecoder.Options options) throws IOException {
+    public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(true);
         JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, true);
-        JSONArrayReader recipientObjects = getArray(JSONCryptoDecoder.RECIPIENTS_JSON);
+        JSONArrayReader recipientObjects = getArray(JSONCryptoHelper.RECIPIENTS_JSON);
         Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();
         do {
             JSONDecryptionDecoder decoder = new JSONDecryptionDecoder(holder, 
@@ -667,7 +667,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setCertificatePath(X509Certificate[])
      */
     public X509Certificate[] getCertificatePath() throws IOException {
-        return getArray(JSONCryptoDecoder.X5C_JSON).getCertificatePath();
+        return getArray(JSONCryptoHelper.X5C_JSON).getCertificatePath();
     }
 
     /**

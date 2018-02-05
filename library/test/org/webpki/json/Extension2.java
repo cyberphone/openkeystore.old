@@ -18,10 +18,10 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 
-public class Extension2 extends JSONCryptoDecoder.Extension {
+public class Extension2 extends JSONCryptoHelper.Extension {
 
     @Override
     protected void decode(JSONObjectReader rd) throws IOException {

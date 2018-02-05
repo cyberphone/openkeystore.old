@@ -48,7 +48,7 @@ public class JSONDecryptionDecoder {
      */
     static class Holder {
 
-        JSONCryptoDecoder.Options options;
+        JSONCryptoHelper.Options options;
 
         byte[] authenticatedData;
         byte[] iv;
@@ -60,7 +60,7 @@ public class JSONDecryptionDecoder {
         String globalKeyId;
         JSONObjectReader globalEncryptionObject;
 
-        Holder (JSONCryptoDecoder.Options options, 
+        Holder (JSONCryptoHelper.Options options, 
                 JSONObjectReader encryptionObject,
                 boolean multiple) throws IOException {
             encryptionObject.clearReadFlags();
@@ -72,10 +72,10 @@ public class JSONDecryptionDecoder {
                 // "alg" and "kid".  Note: mixing local and global is not permitted
                 /////////////////////////////////////////////////////////////////////////////
                 globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-                globalKeyId = options.keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN ?
+                globalKeyId = options.keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.FORBIDDEN ?
                     options.getKeyId(encryptionObject) 
                         : 
-                    encryptionObject.getStringConditional(JSONCryptoDecoder.KID_JSON);
+                    encryptionObject.getStringConditional(JSONCryptoHelper.KID_JSON);
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////
@@ -86,8 +86,8 @@ public class JSONDecryptionDecoder {
                     new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
             //                                                                                   //
             // 2. Hide these properties from the serializer..                                    //
-            encryptionObject.root.properties.remove(JSONCryptoDecoder.TAG_JSON);                 //
-            encryptionObject.root.properties.remove(JSONCryptoDecoder.CIPHER_TEXT_JSON);         //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                 //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);         //
             //                                                                                   //
             // 3. Serialize ("JSON.stringify()")                                                 //
             authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
@@ -100,14 +100,14 @@ public class JSONDecryptionDecoder {
 
             // Collect mandatory elements
             contentEncryptionAlgorithm = ContentEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptionObject.getString(JSONCryptoDecoder.ENC_JSON));
-            iv = encryptionObject.getBinary(JSONCryptoDecoder.IV_JSON);
-            tag = encryptionObject.getBinary(JSONCryptoDecoder.TAG_JSON);
-            encryptedData = encryptionObject.getBinary(JSONCryptoDecoder.CIPHER_TEXT_JSON);
+                    .getAlgorithmFromId(encryptionObject.getString(JSONCryptoHelper.ENC_JSON));
+            iv = encryptionObject.getBinary(JSONCryptoHelper.IV_JSON);
+            tag = encryptionObject.getBinary(JSONCryptoHelper.TAG_JSON);
+            encryptedData = encryptionObject.getBinary(JSONCryptoHelper.CIPHER_TEXT_JSON);
         }
     }
 
-    LinkedHashMap<String,JSONCryptoDecoder.Extension> extensions = new LinkedHashMap<String,JSONCryptoDecoder.Extension>();
+    LinkedHashMap<String,JSONCryptoHelper.Extension> extensions = new LinkedHashMap<String,JSONCryptoHelper.Extension>();
 
     private PublicKey publicKey;
     
@@ -157,8 +157,8 @@ public class JSONDecryptionDecoder {
     }
 
     private static KeyEncryptionAlgorithms getOptionalAlgorithm(JSONObjectReader reader) throws IOException {
-        return reader.hasProperty(JSONCryptoDecoder.ALG_JSON) ? 
-            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoDecoder.ALG_JSON)) : null;
+        return reader.hasProperty(JSONCryptoHelper.ALG_JSON) ? 
+            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoHelper.ALG_JSON)) : null;
     }
 
     /**
@@ -178,8 +178,8 @@ public class JSONDecryptionDecoder {
             keyId = holder.options.getKeyId(encryptionObject);
         } else {
             // Special case: Multiple encryption objects and a global keyId
-            if (encryptionObject.hasProperty(JSONCryptoDecoder.KID_JSON)) {
-                throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.KID_JSON + "\" not allowed");
+            if (encryptionObject.hasProperty(JSONCryptoHelper.KID_JSON)) {
+                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.KID_JSON + "\" not allowed");
             }
             keyId = holder.globalKeyId;
         }
@@ -189,10 +189,10 @@ public class JSONDecryptionDecoder {
         if (keyEncryptionAlgorithm == null) {
             keyEncryptionAlgorithm = holder.globalKeyEncryptionAlgorithm;
         } else if (holder.globalKeyEncryptionAlgorithm != null) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoDecoder.ALG_JSON + "\" not allowed");
+            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALG_JSON + "\" not allowed");
         }
         if (keyEncryptionAlgorithm == null) {
-            throw new IOException("Missing \"" + JSONCryptoDecoder.ALG_JSON  + "\"");
+            throw new IOException("Missing \"" + JSONCryptoHelper.ALG_JSON  + "\"");
         }
 
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
@@ -201,16 +201,16 @@ public class JSONDecryptionDecoder {
             // We are apparently into a two level encryption scheme
             if (holder.options.requirePublicKeyInfo) {
                 if (holder.options.remoteKeyReader != null) {
-                    String url = JSONCryptoDecoder.checkHttpsUrl(
+                    String url = JSONCryptoHelper.checkHttpsUrl(
                             encryptionObject.getString(holder.options.remoteKeyType.jsonName));
                     if (holder.options.remoteKeyType.certificateFlag) {
                         certificatePath = holder.options.remoteKeyReader.readCertificatePath(url);
                     } else {
                         publicKey = holder.options.remoteKeyReader.readPublicKey(url);
                     }
-                } else if (encryptionObject.hasProperty(JSONCryptoDecoder.X5C_JSON)) {
+                } else if (encryptionObject.hasProperty(JSONCryptoHelper.X5C_JSON)) {
                     certificatePath = encryptionObject.getCertificatePath();
-                } else if (encryptionObject.hasProperty(JSONCryptoDecoder.JWK_JSON)) {
+                } else if (encryptionObject.hasProperty(JSONCryptoHelper.JWK_JSON)) {
                     publicKey = encryptionObject.getPublicKey(holder.options.algorithmPreferences);
                 } else {
                     throw new IOException("Missing key information");
@@ -218,12 +218,12 @@ public class JSONDecryptionDecoder {
             }
 
             if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKeyData = encryptionObject.getBinary(JSONCryptoDecoder.ENCRYPTED_KEY_JSON);
+                encryptedKeyData = encryptionObject.getBinary(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
                         (ECPublicKey) encryptionObject
-                            .getObject(JSONCryptoDecoder.EPK_JSON)
+                            .getObject(JSONCryptoHelper.EPK_JSON)
                                 .getCorePublicKey(holder.options.algorithmPreferences);
             }
         }

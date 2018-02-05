@@ -36,7 +36,7 @@ import org.webpki.json.Extension2;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
@@ -115,7 +115,7 @@ public class Signatures {
                 .setBoolean(true));
         javaScriptSignature.setSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null));
         JSONSignatureDecoder decoder = new JSONObjectReader(javaScriptSignature)
-            .getSignature(new JSONCryptoDecoder.Options());
+            .getSignature(new JSONCryptoHelper.Options());
         ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jwk.js",
                             javaScriptSignature.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE));
     }
@@ -135,7 +135,7 @@ public class Signatures {
                     .setRemoteKey(remoteUrl);
         byte[] remoteSig = createSignature(remoteCertSigner);
         JSONSignatureDecoder decoder = 
-            JSONParser.parse(remoteSig).getSignature(new JSONCryptoDecoder.Options()
+            JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
         ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) +
                             "@x5u.json", remoteSig);
@@ -151,7 +151,7 @@ public class Signatures {
                     .setRemoteKey(remoteUrl);
         byte[] remoteSig = createSignature(remoteKeySigner);
         JSONSignatureDecoder decoder =
-            JSONParser.parse(remoteSig).getSignature(new JSONCryptoDecoder.Options()
+            JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
         ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) +
                             "@jku.json", remoteSig);
@@ -165,10 +165,10 @@ public class Signatures {
             signer.setKeyId(keyName);
         }
         byte[] signedData = createSignature(signer);
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         options.setRequirePublicKeyInfo(false);
         if (wantKeyId) {
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
         }
         JSONSignatureDecoder decoder = 
                 JSONParser.parse(signedData).getSignature(options);
@@ -219,7 +219,7 @@ public class Signatures {
         signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
         byte[] signedData = createSignatures(signers);
         Vector<JSONSignatureDecoder> signatures = 
-                JSONParser.parse(signedData).getSignatures(new JSONCryptoDecoder.Options());
+                JSONParser.parse(signedData).getSignatures(new JSONCryptoHelper.Options());
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
         if (signatures.size() != 2) {
@@ -269,12 +269,12 @@ public class Signatures {
         } else {
             signedData = createSignature(signer);
         }
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         options.setRequirePublicKeyInfo(wantPublicKey);
         options.setKeyIdOption(wantKeyId ? 
-                 JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED : JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN);
+                 JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED : JSONCryptoHelper.KEY_ID_OPTIONS.FORBIDDEN);
         if (wantExtensions) {
-            JSONCryptoDecoder.ExtensionHolder eh = new JSONCryptoDecoder.ExtensionHolder();
+            JSONCryptoHelper.ExtensionHolder eh = new JSONCryptoHelper.ExtensionHolder();
             eh.addExtension(Extension1.class, true);
             eh.addExtension(Extension2.class, true);
             options.setPermittedExtensions(eh);
@@ -304,7 +304,7 @@ public class Signatures {
                                                                readCertificatePath(keyType),
                                                                null));
         JSONSignatureDecoder decoder = 
-                JSONParser.parse(signedData).getSignature(new JSONCryptoDecoder.Options());
+                JSONParser.parse(signedData).getSignature(new JSONCryptoHelper.Options());
         decoder.verify(x509Verifier);
         ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5c.json", signedData);
     }

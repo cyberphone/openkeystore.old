@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 
 public class HTML {
     static final String SIGNUP_BGND_COLOR = "#F4FFF1";
@@ -350,37 +350,37 @@ public class HTML {
         + "      return;\n"
         + "    }\n"
         + "    if (jsonObject."
-        + JSONCryptoDecoder.SIGNATURE_JSON
+        + JSONCryptoHelper.SIGNATURE_JSON
         + ") {\n"
         + "      bad('sign.res', 'Object is already signed');\n"
         + "      return;\n"
         + "    }\n"
         + "    var signatureObject = jsonObject."
-        + JSONCryptoDecoder.SIGNATURE_JSON
+        + JSONCryptoHelper.SIGNATURE_JSON
         + " = {};\n"
         + "    signatureObject."
-        + JSONCryptoDecoder.ALG_JSON
+        + JSONCryptoHelper.ALG_JSON
         + " = '"
         + AsymSignatureAlgorithms.RSA_SHA256
                 .getAlgorithmId(AlgorithmPreferences.JOSE)
         + "';\n"
         + "    var publicKeyObject = signatureObject."
-        + JSONCryptoDecoder.JWK_JSON
+        + JSONCryptoHelper.JWK_JSON
         + " = {};\n"
         + "    publicKeyObject."
-        + JSONCryptoDecoder.KTY_JSON
+        + JSONCryptoHelper.KTY_JSON
         + " = '"
-        + JSONCryptoDecoder.RSA_PUBLIC_KEY
+        + JSONCryptoHelper.RSA_PUBLIC_KEY
         + "';\n"
         + "    publicKeyObject."
-        + JSONCryptoDecoder.N_JSON
+        + JSONCryptoHelper.N_JSON
         + " = publicKeyInJWKFormat."
-        + JSONCryptoDecoder.N_JSON
+        + JSONCryptoHelper.N_JSON
         + ";\n"
         + "    publicKeyObject."
-        + JSONCryptoDecoder.E_JSON
+        + JSONCryptoHelper.E_JSON
         + " = publicKeyInJWKFormat."
-        + JSONCryptoDecoder.E_JSON
+        + JSONCryptoHelper.E_JSON
         + ";\n"
         + "  } catch (err) {\n"
         + "    bad('sign.res', 'JSON error: ' + err.toString());\n"
@@ -390,7 +390,7 @@ public class HTML {
         + "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
-        + JSONCryptoDecoder.VAL_JSON
+        + JSONCryptoHelper.VAL_JSON
         + " = convertToBase64URL(new Uint8Array(signature));\n"
         + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
         + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"

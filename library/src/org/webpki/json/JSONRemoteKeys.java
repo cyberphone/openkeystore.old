@@ -27,8 +27,8 @@ import java.security.cert.X509Certificate;
  */
 public enum JSONRemoteKeys {
 
-    PEM_CERT_PATH (JSONCryptoDecoder.X5U_JSON, true),
-    JWK_KEY_SET   (JSONCryptoDecoder.JKU_JSON, false);
+    PEM_CERT_PATH (JSONCryptoHelper.X5U_JSON, true),
+    JWK_KEY_SET   (JSONCryptoHelper.JKU_JSON, false);
 
     String jsonName;
     boolean certificateFlag;

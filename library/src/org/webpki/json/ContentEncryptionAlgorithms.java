@@ -80,6 +80,6 @@ public enum ContentEncryptionAlgorithms {
                 return algorithm;
             }
         }
-        throw new IOException("Unexpected argument to \"" + JSONCryptoDecoder.ENC_JSON + "\": " + algorithmId);
+        throw new IOException("Unexpected argument to \"" + JSONCryptoHelper.ENC_JSON + "\": " + algorithmId);
     }
 }

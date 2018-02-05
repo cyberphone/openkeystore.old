@@ -33,7 +33,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONX509Encrypter;
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONDecryptionDecoder;
 import org.webpki.json.JSONEncrypter;
 import org.webpki.json.JSONObjectReader;
@@ -124,7 +124,7 @@ public class Encryption {
                     ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
-                    new JSONCryptoDecoder.ExtensionHolder()
+                    new JSONCryptoHelper.ExtensionHolder()
                         .addExtension(Extension1.class, true)
                         .addExtension(Extension2.class, true),
                     new JSONObjectWriter()
@@ -163,7 +163,7 @@ public class Encryption {
         }
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         String fileName = "x5c.json";
         if (remote) {
             fileName = "x5u.json";
@@ -186,10 +186,10 @@ public class Encryption {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
         JSONSymKeyEncrypter encrypter = new JSONSymKeyEncrypter(key);
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         if (wantKeyId) {
             encrypter.setKeyId(keyName);
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
         }
         byte[] encryptedData = 
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
@@ -220,7 +220,7 @@ public class Encryption {
                             ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                             boolean wantKeyId,
                             boolean wantPublicKey,
-                            JSONCryptoDecoder.ExtensionHolder extensionHolder,
+                            JSONCryptoHelper.ExtensionHolder extensionHolder,
                             JSONObjectWriter extensions,
                             boolean remote) throws Exception {
         KeyPair keyPair = readJwk(keyType);
@@ -244,7 +244,7 @@ public class Encryption {
         }
         JSONAsymKeyEncrypter encrypter = new JSONAsymKeyEncrypter(keyPair.getPublic(),
                                                                   keyEncryptionAlgorithm);
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         if (extensionHolder != null) {
             options.setPermittedExtensions(extensionHolder);
             encrypter.setExtensions(extensions);
@@ -257,7 +257,7 @@ public class Encryption {
         options.setRequirePublicKeyInfo(wantPublicKey);
         if (wantKeyId) {
             encrypter.setKeyId(keyId);
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
         }
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
@@ -351,7 +351,7 @@ public class Encryption {
             algList += keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase();
             encrypters.add(encrypter);
         }
-        JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         String fileName = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
         if (wantKeyId) {
             fileName = "mult-kid.json"; 
@@ -360,7 +360,7 @@ public class Encryption {
             } else if (algCheck != null) {
                 fileName = "mult-glob+alg-kid.json";
             }
-            options.setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+            options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
         }
         byte[] encryptedData =

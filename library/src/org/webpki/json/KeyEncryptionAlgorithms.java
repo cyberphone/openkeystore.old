@@ -64,6 +64,6 @@ public enum KeyEncryptionAlgorithms {
                 return algorithm;
             }
         }
-        throw new IOException("Unexpected argument to \"" + JSONCryptoDecoder.ALG_JSON + "\": " + algorithmId);
+        throw new IOException("Unexpected argument to \"" + JSONCryptoHelper.ALG_JSON + "\": " + algorithmId);
     }
 }

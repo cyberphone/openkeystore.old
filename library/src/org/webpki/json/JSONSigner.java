@@ -62,7 +62,7 @@ public abstract class JSONSigner implements Serializable {
      */
     public JSONSigner setExtensions(JSONObjectWriter extensions) throws IOException {
         this.extensions = new JSONObjectReader(extensions);
-        JSONCryptoDecoder.checkExtensions(this.extensions.getProperties(), false);
+        JSONCryptoHelper.checkExtensions(this.extensions.getProperties(), false);
         return this;
     }
 
@@ -79,7 +79,7 @@ public abstract class JSONSigner implements Serializable {
     }
 
     void setRemoteKey(String url, JSONRemoteKeys format) throws IOException {
-        this.remoteUrl = JSONCryptoDecoder.checkHttpsUrl(url);
+        this.remoteUrl = JSONCryptoHelper.checkHttpsUrl(url);
         this.remoteKeyFormat = format;
     }
 

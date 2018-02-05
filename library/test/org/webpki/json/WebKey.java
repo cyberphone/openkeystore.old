@@ -64,7 +64,7 @@ public class WebKey implements JSONRemoteKeys.Reader {
     @Override
     public PublicKey readPublicKey(String uri) throws IOException {
         byte[] data = shoot(uri);
-        JSONArrayReader ar = JSONParser.parse(data).getArray(JSONCryptoDecoder.KEYS_JSON);
+        JSONArrayReader ar = JSONParser.parse(data).getArray(JSONCryptoHelper.KEYS_JSON);
         PublicKey publicKey = ar.getObject().getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         if (ar.hasMore()) {
             throw new IOException("JWK key sets must in this implementation only hold a single JWK");

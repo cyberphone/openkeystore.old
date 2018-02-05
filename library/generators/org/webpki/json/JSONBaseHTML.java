@@ -1315,25 +1315,25 @@ public class JSONBaseHTML  {
     }
     
     public void AddPublicKeyDefinitions() throws IOException {
-        addSubItemTable(JSONCryptoDecoder.JWK_JSON)
+        addSubItemTable(JSONCryptoHelper.JWK_JSON)
         .newRow()
           .newColumn()
-            .addProperty(JSONCryptoDecoder.KTY_JSON)
+            .addProperty(JSONCryptoHelper.KTY_JSON)
             .addSymbolicValue("Key Type")
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
           .newColumn()
           .newColumn()
             .addString("Key type indicator.  Currently the following types are recognized:<ul>" +
-                    "<li>" + JSONBaseHTML.codeVer(JSONCryptoDecoder.EC_PUBLIC_KEY, 6) + "See: ")
+                    "<li>" + JSONBaseHTML.codeVer(JSONCryptoHelper.EC_PUBLIC_KEY, 6) + "See: ")
                     .addLink (JCS_PUBLIC_KEY_EC)
             .addString("</li><li>" + 
-                     JSONBaseHTML.codeVer(JSONCryptoDecoder.RSA_PUBLIC_KEY, 6) + "See: ")
+                     JSONBaseHTML.codeVer(JSONCryptoHelper.RSA_PUBLIC_KEY, 6) + "See: ")
             .addLink (JCS_PUBLIC_KEY_RSA)
             .addString("</li></ul>")
        .newRow(JCS_PUBLIC_KEY_EC)
           .newColumn()
-            .addProperty(JSONCryptoDecoder.CRV_JSON)
+            .addProperty(JSONCryptoHelper.CRV_JSON)
             .addSymbolicValue("Curve Name")
           .newColumn()
             .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1344,7 +1344,7 @@ public class JSONBaseHTML  {
             .addString("Note: If <i>proprietary</i> curve names are added, they <b>must</b> be expressed as URIs.")
       .newRow()
         .newColumn()
-          .addProperty(JSONCryptoDecoder.X_JSON)
+          .addProperty(JSONCryptoHelper.X_JSON)
           .addSymbolicValue("Coordinate")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
@@ -1352,13 +1352,13 @@ public class JSONBaseHTML  {
         .newColumn()
           .addString("EC curve point X. The length of this field <b>must</b> " +
                       "be the full size of a coordinate for the curve specified in the <code>" + 
-                      JSONCryptoDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                      "if the value of <code>" + JSONCryptoDecoder.CRV_JSON + "</code> is <code>" +
+                      JSONCryptoHelper.CRV_JSON + "</code> parameter.  For example, " +
+                      "if the value of <code>" + JSONCryptoHelper.CRV_JSON + "</code> is <code>" +
                       KeyAlgorithms.NIST_P_521.getAlgorithmId (AlgorithmPreferences.JOSE) +
                       "</code>, the <i>decoded</i> argument <b>must</b> be 66 bytes.")
       .newRow()
         .newColumn()
-          .addProperty(JSONCryptoDecoder.Y_JSON)
+          .addProperty(JSONCryptoHelper.Y_JSON)
           .addSymbolicValue("Coordinate")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
@@ -1366,13 +1366,13 @@ public class JSONBaseHTML  {
         .newColumn()
           .addString("EC curve point Y. The length of this field <b>must</b> " +
                       "be the full size of a coordinate for the curve specified in the <code>" + 
-                      JSONCryptoDecoder.CRV_JSON + "</code> parameter.  For example, " +
-                      "if the value of <code>" + JSONCryptoDecoder.CRV_JSON + "</code> is <code>" +
+                      JSONCryptoHelper.CRV_JSON + "</code> parameter.  For example, " +
+                      "if the value of <code>" + JSONCryptoHelper.CRV_JSON + "</code> is <code>" +
                       KeyAlgorithms.NIST_P_256.getAlgorithmId (AlgorithmPreferences.JOSE) +
                       "</code>, the <i>decoded</i> argument <b>must</b> be 32 bytes.")
       .newRow(JCS_PUBLIC_KEY_RSA)
         .newColumn()
-          .addProperty(JSONCryptoDecoder.N_JSON)
+          .addProperty(JSONCryptoHelper.N_JSON)
           .addSymbolicValue("Modulus")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
@@ -1383,7 +1383,7 @@ public class JSONBaseHTML  {
           .addString(" data type.")
       .newRow()
         .newColumn()
-          .addProperty(JSONCryptoDecoder.E_JSON)
+          .addProperty(JSONCryptoHelper.E_JSON)
           .addSymbolicValue("Exponent")
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.CRYPTO)
@@ -1400,21 +1400,21 @@ public class JSONBaseHTML  {
         remoteKeyFormats.put(JSONRemoteKeys.PEM_CERT_PATH,
                 "PEM " + createReference(JSONBaseHTML.REF_PEM) + " encoded X.509 " + 
                       createReference(JSONBaseHTML.REF_X509) + " certficate path. See " +
-                      globalLinkRef(JSONCryptoDecoder.SIGNATURE_JSON,
-                      JSONCryptoDecoder.X5C_JSON) +
+                      globalLinkRef(JSONCryptoHelper.SIGNATURE_JSON,
+                      JSONCryptoHelper.X5C_JSON) +
                       " for constraints.");
         remoteKeyFormats.put(JSONRemoteKeys.JWK_KEY_SET,
                 "JWK " + createReference(JSONBaseHTML.REF_JWK) + " encoded public key. See " +
-            "<a href=\"#" + JSONCryptoDecoder.JWK_JSON + "\">" +
-            JSONCryptoDecoder.JWK_JSON + "</a> for constraints.");
+            "<a href=\"#" + JSONCryptoHelper.JWK_JSON + "\">" +
+            JSONCryptoHelper.JWK_JSON + "</a> for constraints.");
         if (remoteKeyFormats.size() != JSONRemoteKeys.values().length) {
             throw new IOException("Missing format");
         }
 
-        addSubItemTable(JSONCryptoDecoder.SIGNATURE_JSON)
+        addSubItemTable(JSONCryptoHelper.SIGNATURE_JSON)
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.ALG_JSON)
+              .addProperty(JSONCryptoHelper.ALG_JSON)
               .addSymbolicValue("Algorithm")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1431,7 +1431,7 @@ public class JSONBaseHTML  {
               .addString("Note: If <i>proprietary</i> signature algorithms are added, they <b>must</b> be expressed as URIs.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.KID_JSON)
+              .addProperty(JSONCryptoHelper.KID_JSON)
               .addSymbolicValue("Identifier")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1441,8 +1441,8 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Application specific string identifying the signature key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.JWK_JSON)
-              .addLink (JSONCryptoDecoder.JWK_JSON)
+              .addProperty(JSONCryptoHelper.JWK_JSON)
+              .addLink (JSONCryptoHelper.JWK_JSON)
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1451,7 +1451,7 @@ public class JSONBaseHTML  {
               .addString("<i>Optional.</i> Public key object.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.JKU_JSON)
+              .addProperty(JSONCryptoHelper.JKU_JSON)
               .addSymbolicValue("URL")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.URI)
@@ -1461,13 +1461,13 @@ public class JSONBaseHTML  {
                          " which <b>must</b> be <i>dereferencable</i> by an HTTPS GET operation and " +
                          "pointing to a JWK " + createReference(REF_JWK) +
                          " key set holding a <i>single</i> <a href=\"#" +
-                         JSONCryptoDecoder.JWK_JSON + "\">" + JSONCryptoDecoder.JWK_JSON +
+                         JSONCryptoHelper.JWK_JSON + "\">" + JSONCryptoHelper.JWK_JSON +
                          "</a> object." +
                          Types.LINE_SEPARATOR +
                          "Also see <a href=\"#" + REMOTE_KEY_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
         .newColumn()
-          .addProperty(JSONCryptoDecoder.X5C_JSON)
+          .addProperty(JSONCryptoHelper.X5C_JSON)
           .addArrayList(Types.CERTIFICATE_PATH, 1)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY2)
@@ -1479,7 +1479,7 @@ public class JSONBaseHTML  {
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.X5U_JSON)
+              .addProperty(JSONCryptoHelper.X5U_JSON)
               .addSymbolicValue("URL")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.URI)
@@ -1496,7 +1496,7 @@ public class JSONBaseHTML  {
                       "Also see <a href=\"#" + REMOTE_CERT_EXAMPLE + "\">test&nbsp;vector</a>.")
              .newRow()
                 .newColumn()
-                  .addProperty(JSONCryptoDecoder.CRIT_JSON)
+                  .addProperty(JSONCryptoHelper.CRIT_JSON)
                   .addArrayList(Types.PROPERTY_LIST, 1)
                 .newColumn()
                   .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1504,23 +1504,23 @@ public class JSONBaseHTML  {
                   .setChoice (false, 1)
                 .newColumn()
                   .addString("<i>Optional.</i> Array holding the names of one or more application specific extension properties " +
-                  "also featured within the <code>&quot;" + JSONCryptoDecoder.SIGNATURE_JSON + "&quot;</code> sub object." +
+                  "also featured within the <code>&quot;" + JSONCryptoHelper.SIGNATURE_JSON + "&quot;</code> sub object." +
                   Types.LINE_SEPARATOR +
                   "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JCS <i>reserved words</i> " +
-                  enumerateAttributes(JSONCryptoDecoder.jcsReservedWords.toArray(new String[0]), false) + ". " +
+                  enumerateAttributes(JSONCryptoHelper.jcsReservedWords.toArray(new String[0]), false) + ". " +
                   Types.LINE_SEPARATOR +
                   "Extensions intended for public consumption are <i>preferably</i> expressed as URIs " +
                   "(unless registered with IANA), " +
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures listing properties " +
                   "that are not found as well as empty <code>&quot;" +
-                  JSONCryptoDecoder.CRIT_JSON + "&quot;</code> objects. " +
+                  JSONCryptoHelper.CRIT_JSON + "&quot;</code> objects. " +
                   "Verifiers are <i>recommended</i> introducing additional constraints like only accepting predefined extensions." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXTENSION_EXAMPLE + "\">test&nbsp;vector</a>.")
              .newRow()
                 .newColumn()
-                  .addProperty(JSONCryptoDecoder.EXCL_JSON)
+                  .addProperty(JSONCryptoHelper.EXCL_JSON)
                   .addArrayList(Types.PROPERTY_LIST, 1)
                 .newColumn()
                   .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1528,25 +1528,25 @@ public class JSONBaseHTML  {
                   .setChoice (false, 1)
                 .newColumn()
                   .addString("<i>Optional.</i> Array holding the names of one or more properties " +
-                  "featured on the same level as the <code>&quot;" + JSONCryptoDecoder.SIGNATURE_JSON + 
+                  "featured on the same level as the <code>&quot;" + JSONCryptoHelper.SIGNATURE_JSON + 
                   "&quot;</code> property, that <b>must</b> be <i>excluded</i> from the signature process." +
                   Types.LINE_SEPARATOR +
-                  "Note that the <code>&quot;" + JSONCryptoDecoder.EXCL_JSON + "&quot;</code> property itself, <b>must</b> also " +
+                  "Note that the <code>&quot;" + JSONCryptoHelper.EXCL_JSON + "&quot;</code> property itself, <b>must</b> also " +
                   "be excluded from the signature process." + 
                   Types.LINE_SEPARATOR +
                   "Property names that are to be excluded from the signature process " +
                   "<b>must not</b> be <i>duplicated</i> or try to override " +
-                  enumerateAttributes(JSONCryptoDecoder.topLevelReserved.toArray(new String[0]), false) + ". " +
+                  enumerateAttributes(JSONCryptoHelper.topLevelReserved.toArray(new String[0]), false) + ". " +
                   Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
                   "that are not found as well as empty <code>&quot;" +
-                  JSONCryptoDecoder.EXCL_JSON + "&quot;</code> objects. " +
+                  JSONCryptoHelper.EXCL_JSON + "&quot;</code> objects. " +
                   "Verifiers are <i>recommended</i> introducing additional constraints like only accepting predefined properties." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXCLUSION_EXAMPLE + "\">test&nbsp;vector</a>.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoDecoder.VAL_JSON)
+              .addProperty(JSONCryptoHelper.VAL_JSON)
               .addSymbolicValue("Signature")
             .newColumn()
               .setType(Types.WEBPKI_DATA_TYPES.BYTE_ARRAY)
@@ -1556,12 +1556,12 @@ public class JSONBaseHTML  {
               " Note that the <i>binary</i> representation <b>must</b> follow the JWA " + 
                       createReference(REF_JWA) + " specifications.")
               .setNotes ("Note that asymmetric key signatures are <i>not required</i> providing an associated " +
-                  enumerateAttributes(new String[]{JSONCryptoDecoder.JWK_JSON,
-                                                   JSONCryptoDecoder.JKU_JSON,
-                                                   JSONCryptoDecoder.X5C_JSON,
-                                                   JSONCryptoDecoder.X5U_JSON}, false) + 
+                  enumerateAttributes(new String[]{JSONCryptoHelper.JWK_JSON,
+                                                   JSONCryptoHelper.JKU_JSON,
+                                                   JSONCryptoHelper.X5C_JSON,
+                                                   JSONCryptoHelper.X5U_JSON}, false) + 
                    " property since the key may be given by the context or through the <code>&quot;" + 
-                   JSONCryptoDecoder.KID_JSON + "&quot;</code> property.");
+                   JSONCryptoHelper.KID_JSON + "&quot;</code> property.");
 
         AddPublicKeyDefinitions();
     }

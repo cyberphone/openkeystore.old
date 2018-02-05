@@ -29,7 +29,7 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -82,7 +82,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder {
                     appUsage = AppUsage.getAppUsageFromString(search.getString(APP_USAGE_JSON));
                 }
             }
-            JSONSignatureDecoder signature = rd.getSignature(new JSONCryptoDecoder.Options());
+            JSONSignatureDecoder signature = rd.getSignature(new JSONCryptoHelper.Options());
             keyManagementKey = signature.getPublicKey();
             if (((AsymSignatureAlgorithms) signature.getAlgorithm()).getDigestAlgorithm() != HashAlgorithms.SHA256) {
                 throw new IOException("Lookup signature must use SHA256");

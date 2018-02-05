@@ -27,13 +27,13 @@ import java.util.regex.Pattern;
 import org.webpki.crypto.AlgorithmPreferences;
 
 /**
- * Common crypto decoder classes for JEF and JCS.
+ * Common crypto support for Cleartext JWS and JWE.
  */
-public class JSONCryptoDecoder implements Serializable {
+public class JSONCryptoHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private JSONCryptoDecoder() {}
+    private JSONCryptoHelper() {}
 
     // Arguments
     public static final String EC_PUBLIC_KEY           = "EC";
@@ -269,31 +269,31 @@ public class JSONCryptoDecoder implements Serializable {
         }
 
         String getKeyId(JSONObjectReader reader) throws IOException {
-            String keyId = reader.getStringConditional(JSONCryptoDecoder.KID_JSON);
+            String keyId = reader.getStringConditional(JSONCryptoHelper.KID_JSON);
             if (keyId == null) {
-                if (keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED) {
-                    throw new IOException("Missing \"" + JSONCryptoDecoder.KID_JSON + "\"");
+                if (keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED) {
+                    throw new IOException("Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
                 }
-            } else if (keyIdOption == JSONCryptoDecoder.KEY_ID_OPTIONS.FORBIDDEN) {
-                throw new IOException("Use of \"" + JSONCryptoDecoder.KID_JSON + "\" must be set in options");
+            } else if (keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.FORBIDDEN) {
+                throw new IOException("Use of \"" + JSONCryptoHelper.KID_JSON + "\" must be set in options");
             }
             return keyId;
         }
 
         void getExtensions(JSONObjectReader reader, LinkedHashMap<String, Extension> extensions) throws IOException {
-            if (reader.hasProperty(JSONCryptoDecoder.CRIT_JSON)) {
-                String[] properties = reader.getStringArray(JSONCryptoDecoder.CRIT_JSON);
+            if (reader.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
+                String[] properties = reader.getStringArray(JSONCryptoHelper.CRIT_JSON);
                 checkExtensions(properties, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
-                    throw new IOException("Use of \"" + JSONCryptoDecoder.CRIT_JSON + "\" must be set in options");
+                    throw new IOException("Use of \"" + JSONCryptoHelper.CRIT_JSON + "\" must be set in options");
                 }
                 for (String name : properties) {
-                    JSONCryptoDecoder.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
+                    JSONCryptoHelper.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
                     if (extensionEntry == null) {
-                        throw new IOException("Unexpected \"" + JSONCryptoDecoder.CRIT_JSON + "\" extension: " + name);
+                        throw new IOException("Unexpected \"" + JSONCryptoHelper.CRIT_JSON + "\" extension: " + name);
                     }
                     try {
-                        JSONCryptoDecoder.Extension extension = extensionEntry.extensionClass.newInstance();
+                        JSONCryptoHelper.Extension extension = extensionEntry.extensionClass.newInstance();
                         extension.decode(reader);
                         extensions.put(name, extension);
                     } catch (InstantiationException e) {
@@ -305,7 +305,7 @@ public class JSONCryptoDecoder implements Serializable {
             }
             for (String name : extensionHolder.extensions.keySet()) {
                 if (!extensions.containsKey(name) && extensionHolder.extensions.get(name).mandatory) {
-                    throw new IOException("Missing \"" + JSONCryptoDecoder.CRIT_JSON + "\" mandatory extension: " + name);
+                    throw new IOException("Missing \"" + JSONCryptoHelper.CRIT_JSON + "\" mandatory extension: " + name);
                 }
             }
         }
@@ -313,13 +313,13 @@ public class JSONCryptoDecoder implements Serializable {
 
     private static void checkOneExtension(String property, boolean encryptionMode) throws IOException {
         if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
-            throw new IOException("Forbidden \"" + JSONCryptoDecoder.CRIT_JSON + "\" property: " + property);
+            throw new IOException("Forbidden \"" + JSONCryptoHelper.CRIT_JSON + "\" property: " + property);
         }
     }
 
     static void checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
         if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoDecoder.CRIT_JSON + "\" array not allowed");
+            throw new IOException("Empty \"" + JSONCryptoHelper.CRIT_JSON + "\" array not allowed");
         }
         for (String property : properties) {
             checkOneExtension(property, encryptionMode);

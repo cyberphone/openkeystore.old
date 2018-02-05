@@ -32,7 +32,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONObjectReader;
@@ -85,19 +85,19 @@ public class ReadSignature {
         for (String property : rd.getProperties()) {
             switch (rd.getPropertyType(property)) {
             case OBJECT:
-                if (property.equals(JSONCryptoDecoder.SIGNATURE_JSON)) {
-                    JSONCryptoDecoder.Options options = new JSONCryptoDecoder.Options();
+                if (property.equals(JSONCryptoHelper.SIGNATURE_JSON)) {
+                    JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
                     options.setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-                    String algo = rd.getObject(JSONCryptoDecoder.SIGNATURE_JSON).getString(JSONCryptoDecoder.ALG_JSON);
+                    String algo = rd.getObject(JSONCryptoHelper.SIGNATURE_JSON).getString(JSONCryptoHelper.ALG_JSON);
                     for (MACAlgorithms macs : MACAlgorithms.values()) {
                         if (algo.equals(macs.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER))) {
                             options.setRequirePublicKeyInfo(false)
-                                   .setKeyIdOption(JSONCryptoDecoder.KEY_ID_OPTIONS.REQUIRED);
+                                   .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
                         }
                     }
-                    if (rd.getObject(JSONCryptoDecoder.SIGNATURE_JSON).hasProperty(JSONCryptoDecoder.JKU_JSON)) {
+                    if (rd.getObject(JSONCryptoHelper.SIGNATURE_JSON).hasProperty(JSONCryptoHelper.JKU_JSON)) {
                         options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET);
-                    } else if (rd.getObject(JSONCryptoDecoder.SIGNATURE_JSON).hasProperty(JSONCryptoDecoder.X5U_JSON)) {
+                    } else if (rd.getObject(JSONCryptoHelper.SIGNATURE_JSON).hasProperty(JSONCryptoHelper.X5U_JSON)) {
                         options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
                     }
                     JSONSignatureDecoder signature = rd.getSignature(options);

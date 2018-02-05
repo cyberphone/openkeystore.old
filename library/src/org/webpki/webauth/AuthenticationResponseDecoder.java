@@ -27,7 +27,7 @@ import java.security.cert.X509Certificate;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
-import org.webpki.json.JSONCryptoDecoder;
+import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
@@ -119,7 +119,7 @@ public class AuthenticationResponseDecoder extends InputValidator {
         //////////////////////////////////////////////////////////////////////////
         // Finally, get the signature!
         //////////////////////////////////////////////////////////////////////////
-        signature = rd.getSignature(new JSONCryptoDecoder.Options());
+        signature = rd.getSignature(new JSONCryptoHelper.Options());
         certificatePath = signature.getCertificatePath();
         signatureAlgorithm = (AsymSignatureAlgorithms) signature.getAlgorithm();
     }
