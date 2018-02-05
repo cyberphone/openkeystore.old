@@ -551,9 +551,16 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
              .setChoice (false, 1)
         .newColumn()
-            .addString("<i>Optional</i>.  For key encryption schemes only. See " +
+            .addString("<i>Optional</i>. See " +
         json.globalLinkRef(KEY_ENCRYPTION, JSONCryptoDecoder.ALG_JSON) +
-                   ".")
+                   "." + Types.LINE_SEPARATOR +
+                   "Note: There <b>must</b> always be an <code>&quot;" + JSONCryptoDecoder.ALG_JSON +
+                   "&quot;</code> identifier present. " +
+                   "However, for <i>multiple</i> encryptions schemes <code>&quot;" + JSONCryptoDecoder.ALG_JSON +
+                   "&quot;</code> can either be provided at the top level (=shared), " +
+                   "or be suppled individually (local level) for each encryption object, not both." +
+                   Types.LINE_SEPARATOR +
+                   JSONBaseHTML.referToTestVector(GLOB_ALG_TEST_VECTOR))
             .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)
@@ -672,21 +679,25 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 public Column execute(Column column) throws IOException {
                     for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
                         column.addString(new StringBuffer("<li>")
-                                               .append(JSONBaseHTML.codeVer(kea.toString(), 16))
-                                               .append("See: ").toString());
-                        String link = ECDH_PROPERTIES;
-                        if (kea.isRsa()) {
-                            link = RSA_PROPERTIES;
-                        } else if (kea.isKeyWrap()) {
-                            link = ECDH_KW_PROPERTIES;
+                                               .append(JSONBaseHTML.codeVer(kea.toString(), 16)).toString());
+                        if (kea.jceName == null) {
+                            column.addString("Direct mode" + Types.LINE_SEPARATOR);
+                        } else {
+                            column.addString("See: ");
+                            String link = ECDH_PROPERTIES;
+                            if (kea.isRsa()) {
+                                link = RSA_PROPERTIES;
+                            } else if (kea.isKeyWrap()) {
+                                link = ECDH_KW_PROPERTIES;
+                            }
+                            column.addLink(link);
                         }
-                        column.addLink(link).addString("</li>");
+                        column.addString("</li>");
                     }
                     return column;
                 }
             })
-            .addString("</ul>" +
-                    JSONBaseHTML.referToTestVector(GLOB_ALG_TEST_VECTOR))
+            .addString("</ul>")
       .newRow()
         .newColumn()
             .addProperty(JSONCryptoDecoder.KID_JSON)

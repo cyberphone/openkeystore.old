@@ -334,9 +334,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             " section <b>7.1.12.1</b> including NOTE 2 (implemented by for example V8 " +
             json.createReference(JSONBaseHTML.REF_V8) +
             "), in order to achieve maximum interoperability.</li>" +
-            "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
-            "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + JSONCryptoDecoder.SIGNATURE_JSON + "</code> sub object." +
+            "<li style=\"padding-top:4pt\">There <b>must not</b> be any not here defined properties inside of the <code>" + 
+            JSONCryptoDecoder.SIGNATURE_JSON + "</code> sub object.</li>" +
             "</ul>" +
             "The normalization steps are as follows:<ul>" +
             "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings " +

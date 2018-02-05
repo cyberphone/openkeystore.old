@@ -90,9 +90,6 @@ public class JSONParser {
     String scanProperty() throws IOException {
         scanFor(DOUBLE_QUOTE);
         String property = (String) scanQuotedString().value;
-        if (property.length() == 0) {
-            throw new IOException("Empty property");
-        }
         scanFor(COLON_CHARACTER);
         return property;
     }
