@@ -33,7 +33,6 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-
 import java.security.SecureRandom;
 
 import java.security.interfaces.ECPublicKey;
@@ -41,7 +40,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
-
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.GregorianCalendar;
@@ -4123,6 +4121,8 @@ public class JSONTest {
         variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALG_JSON + "\": A256GCM");
         variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ENC_JSON + "\": RSA-OAEP-256");
         variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoHelper.ENC_JSON + "\" is missing");
+
+        variousEncryptionErrors("err-bad-id.json", "Missing key information");
 
         encryptionFieldErrors("err-bad-ciphertext.json",
                               "p256",

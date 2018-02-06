@@ -68,7 +68,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     static final String SAMPLE_TEST_VECTOR   = "p256#ecdh-es+a256kw@kid.json";
     static final String MULT_TEST_VECTOR     = "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json";
     static final String GLOB_ALG_TEST_VECTOR = "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json";
-    static final String GLOB_KID_TEST_VECTOR = "p256#ecdh-es+a256kw,p256#ecdh-es+a256kw@mult-glob+alg+kid.json";
     static final String JWK_TEST_VECTOR      = "p256#ecdh-es+a256kw@jwk.json";
     static final String JKU_TEST_VECTOR      = "p256#ecdh-es+a256kw@jku.json";
     static final String X5C_TEST_VECTOR      = "p256#ecdh-es+a256kw@x5c.json";
@@ -494,12 +493,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoHelper.ALG_JSON + "</code> property:",
                    GLOB_ALG_TEST_VECTOR) +
-           showAsymEncryption(
-                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
-                           "as in the previous examples as well as using <i>global</i> <code>" +
-                           JSONCryptoHelper.ALG_JSON + "</code> and <code>" +
-                           JSONCryptoHelper.KID_JSON + "</code> properties:",
-                     GLOB_KID_TEST_VECTOR) +
            aesCrypto(new String[]{"a128#a128gcm@kid.json",
                                   "a256#a128cbc-hs256@kid.json",
                                   "a256#a256gcm@imp.json",
@@ -561,18 +554,6 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "or be suppled individually (local level) for each encryption object, not both." +
                    Types.LINE_SEPARATOR +
                    JSONBaseHTML.referToTestVector(GLOB_ALG_TEST_VECTOR))
-            .newRow()
-        .newColumn()
-            .addProperty(JSONCryptoHelper.KID_JSON)
-            .addSymbolicValue("Key Identifier")
-        .newColumn()
-            .setType(Types.WEBPKI_DATA_TYPES.STRING)
-        .newColumn()
-             .setChoice (false, 1)
-        .newColumn()
-            .addString("<i>Optional</i>.  See " +
-                    json.globalLinkRef(KEY_ENCRYPTION, JSONCryptoHelper.KID_JSON) +
-                    ".")
        .newRow()
 
         .newColumn()
@@ -709,9 +690,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         .newColumn()
             .addString("If the <code>" + JSONCryptoHelper.KID_JSON +
                    "</code> property is defined, it is supposed to identify the " +
-                    "public key associated with the encrypted (or derived) key." +
-                    Types.LINE_SEPARATOR +
-                    JSONBaseHTML.referToTestVector(GLOB_KID_TEST_VECTOR))
+                    "public key associated with the encrypted (or derived) key.")
         .newRow()
         .newColumn()
           .addProperty(JSONCryptoHelper.JWK_JSON)
