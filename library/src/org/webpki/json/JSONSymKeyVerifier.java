@@ -24,7 +24,7 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import org.webpki.util.ArrayUtil;
 
 /**
- * Initiatiator object for symmetric key signature verifiers.
+ * Initiator object for symmetric key signature verifiers.
  */
 public class JSONSymKeyVerifier extends JSONVerifier {
 

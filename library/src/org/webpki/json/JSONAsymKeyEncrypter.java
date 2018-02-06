@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 
 /**
- * Initiatiator object for asymmetric key encryptions.
+ * Initiator object for asymmetric key encryptions.
  */
 public class JSONAsymKeyEncrypter extends JSONEncrypter {
 

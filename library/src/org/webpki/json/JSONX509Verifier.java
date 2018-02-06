@@ -21,7 +21,7 @@ import java.io.IOException;
 import org.webpki.crypto.VerifierInterface;
 
 /**
- * Initiatiator object for X.509 signature verifiers.
+ * Initiator object for X.509 signature verifiers.
  */
 public class JSONX509Verifier extends JSONVerifier {
 

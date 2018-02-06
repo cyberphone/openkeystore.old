@@ -54,7 +54,7 @@ public abstract class JSONEncrypter implements Serializable {
     JSONEncrypter() {
     }
 
-    static class EncryptionHeader {
+    static class Header {
 
         ContentEncryptionAlgorithms contentEncryptionAlgorithm;
 
@@ -68,18 +68,16 @@ public abstract class JSONEncrypter implements Serializable {
         
         String globalKeyId;
 
-        EncryptionHeader(ContentEncryptionAlgorithms contentEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
+        Header(ContentEncryptionAlgorithms contentEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.contentEncryptionAlgorithm = contentEncryptionAlgorithm;
             contentEncryptionKey = encrypter.contentEncryptionKey;
             globalKeyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
             globalKeyId = encrypter.keyId;
             encryptionWriter.setString(JSONCryptoHelper.ENC_JSON, contentEncryptionAlgorithm.joseName);
-            if (globalKeyEncryptionAlgorithm != null) {
-                encryptionWriter.setString(JSONCryptoHelper.ALG_JSON, globalKeyEncryptionAlgorithm.joseName);
-                if (globalKeyEncryptionAlgorithm.keyWrap) {
-                    contentEncryptionKey = EncryptionCore.generateRandom(contentEncryptionAlgorithm.keyLength);
-                }
+            encryptionWriter.setString(JSONCryptoHelper.ALG_JSON, globalKeyEncryptionAlgorithm.joseName);
+            if (globalKeyEncryptionAlgorithm.keyWrap) {
+                contentEncryptionKey = EncryptionCore.generateRandom(contentEncryptionAlgorithm.keyLength);
             }
             if (globalKeyId != null) {
                 encryptionWriter.setString(JSONCryptoHelper.KID_JSON, globalKeyId);

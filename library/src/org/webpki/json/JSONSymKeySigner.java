@@ -24,7 +24,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
 /**
- * Initiatiator object for symmetric key signatures.
+ * Initiator object for symmetric key signatures.
  */
 public class JSONSymKeySigner extends JSONSigner {
 

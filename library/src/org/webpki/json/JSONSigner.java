@@ -48,6 +48,20 @@ public abstract class JSONSigner implements Serializable {
     JSONSigner() {
     }
 
+    static class Header {
+
+        String globalAlgorithm;
+        String globalKeyId;
+
+        void scanSigner(JSONSigner signer) {
+            if (signer.keyId == null) {
+                globalKeyId = null;
+            } else {
+                
+            }
+        }
+    }
+
     abstract SignatureAlgorithms getAlgorithm();
 
     abstract byte[] signData(byte[] data) throws IOException;

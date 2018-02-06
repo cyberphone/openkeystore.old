@@ -19,7 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * Initiatiator object for symmetric key encryptions.
+ * Initiator object for symmetric key encryptions.
  */
 public class JSONSymKeyEncrypter extends JSONEncrypter {
 

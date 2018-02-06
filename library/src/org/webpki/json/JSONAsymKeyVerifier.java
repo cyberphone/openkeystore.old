@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 
 /**
- * Initiatiator object for asymmetric key signature verifiers.
+ * Initiator object for asymmetric key signature verifiers.
  */
 public class JSONAsymKeyVerifier extends JSONVerifier {
 

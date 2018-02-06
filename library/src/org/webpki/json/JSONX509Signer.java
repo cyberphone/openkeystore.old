@@ -32,7 +32,7 @@ import org.webpki.crypto.SignatureWrapper;
 import org.webpki.crypto.SignerInterface;
 
 /**
- * Initiatiator object for X.509 signatures.
+ * Initiator object for X.509 signatures.
  */
 public class JSONX509Signer extends JSONSigner {
 

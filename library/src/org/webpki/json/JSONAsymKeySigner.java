@@ -30,7 +30,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
 
 /**
- * Initiatiator object for asymmetric key signatures.
+ * Initiator object for asymmetric key signatures.
  */
 public class JSONAsymKeySigner extends JSONSigner {
 

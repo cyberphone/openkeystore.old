@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 /**
- * Initiatiator object for certificate based encryptions.
+ * Initiator object for certificate based encryptions.
  */
 public class JSONX509Encrypter extends JSONEncrypter {
 

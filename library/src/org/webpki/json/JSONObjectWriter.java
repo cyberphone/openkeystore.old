@@ -650,8 +650,12 @@ import org.webpki.json.JSONSignatureDecoder;
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException In case there a problem with keys etc.
      */
-    @SuppressWarnings("unchecked") 
     public JSONObjectWriter setSignatures(Vector<JSONSigner> signers) throws IOException {
+        return setSignatures(JSONCryptoHelper.SIGNATURE_JSON, signers);
+    }
+
+    @SuppressWarnings("unchecked") 
+    public JSONObjectWriter setSignatures(String signatureLabel, Vector<JSONSigner> signers) throws IOException {
         if (signers.isEmpty()) {
             throw new IOException("Empty signer list");
         }
@@ -769,15 +773,15 @@ import org.webpki.json.JSONSignatureDecoder;
                                                           ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                                                           JSONEncrypter encrypter)
     throws IOException, GeneralSecurityException {
-        JSONEncrypter.EncryptionHeader encryptionHeader = 
-                new JSONEncrypter.EncryptionHeader(contentEncryptionAlgorithm, encrypter);
+        JSONEncrypter.Header header = 
+                new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypter);
         JSONObjectWriter recipient = new JSONObjectWriter();
-        encryptionHeader.createRecipient(encrypter, recipient);
-        encryptionHeader.cleanRecipient(recipient);
+        header.createRecipient(encrypter, recipient);
+        header.cleanRecipient(recipient);
         for (String property : recipient.root.properties.keySet()) {
-            encryptionHeader.encryptionWriter.setProperty(property, recipient.root.properties.get(property));
+            header.encryptionWriter.setProperty(property, recipient.root.properties.get(property));
         }
-        return encryptionHeader.finalizeEncryption(unencryptedData);
+        return header.finalizeEncryption(unencryptedData);
     }
 
     /**
@@ -797,22 +801,22 @@ import org.webpki.json.JSONSignatureDecoder;
         if (encrypters.isEmpty()) {
             throw new IOException("Empty encrypter list");
         }
-        JSONEncrypter.EncryptionHeader encryptionHeader = 
-                new JSONEncrypter.EncryptionHeader(contentEncryptionAlgorithm, encrypters.firstElement());
+        JSONEncrypter.Header header = 
+                new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypters.firstElement());
         Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
         for (JSONEncrypter encrypter : encrypters) {
             JSONDecryptionDecoder.keyWrapCheck(encrypter.keyEncryptionAlgorithm);
             JSONObjectWriter currentRecipient = new JSONObjectWriter();
-            encryptionHeader.createRecipient(encrypter, currentRecipient);
+            header.createRecipient(encrypter, currentRecipient);
             recipents.add(currentRecipient);
         }
         JSONArrayWriter recipientList = 
-                encryptionHeader.encryptionWriter.setArray(JSONCryptoHelper.RECIPIENTS_JSON);
+                header.encryptionWriter.setArray(JSONCryptoHelper.RECIPIENTS_JSON);
         for (JSONObjectWriter recipient : recipents) {
-            encryptionHeader.cleanRecipient(recipient);
+            header.cleanRecipient(recipient);
             recipientList.setObject(recipient);
         }
-        return encryptionHeader.finalizeEncryption(unencryptedData);
+        return header.finalizeEncryption(unencryptedData);
     }    
 
 
