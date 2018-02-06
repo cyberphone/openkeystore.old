@@ -306,11 +306,7 @@ public class Encryption {
         String algList = "";
         KeyEncryptionAlgorithms algCheck = null;
         boolean first = true;
-        String globalKeyId = keyTypes[0];
         for (String keyType : keyTypes) {
-            if (!keyType.equals(globalKeyId)) {
-                globalKeyId = null;
-            }
             KeyPair keyPair = readJwk(keyType);
             KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
             if (keyPair.getPublic() instanceof ECPublicKey) {
@@ -355,9 +351,7 @@ public class Encryption {
         String fileName = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
         if (wantKeyId) {
             fileName = "mult-kid.json"; 
-            if (globalKeyId != null) {
-                fileName = algCheck == null ? "mult-glob+kid.json" : "mult-glob+alg+kid.json";
-            } else if (algCheck != null) {
+            if (algCheck != null) {
                 fileName = "mult-glob+alg-kid.json";
             }
             options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);

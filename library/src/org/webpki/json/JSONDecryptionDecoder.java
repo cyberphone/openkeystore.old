@@ -57,7 +57,6 @@ public class JSONDecryptionDecoder {
         
         ContentEncryptionAlgorithms contentEncryptionAlgorithm;
         KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
-        String globalKeyId;
         JSONObjectReader globalEncryptionObject;
 
         Holder (JSONCryptoHelper.Options options, 
@@ -68,14 +67,10 @@ public class JSONDecryptionDecoder {
             this.globalEncryptionObject = encryptionObject;
             if (multiple) {
                 /////////////////////////////////////////////////////////////////////////////
-                // For encryption objects with multiple recipients we allow global
-                // "alg" and "kid".  Note: mixing local and global is not permitted
+                // For encryption objects with multiple recipients we allow a global "alg"
+                // Note: mixing local and global is not permitted
                 /////////////////////////////////////////////////////////////////////////////
                 globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-                globalKeyId = options.keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.FORBIDDEN ?
-                    options.getKeyId(encryptionObject) 
-                        : 
-                    encryptionObject.getStringConditional(JSONCryptoHelper.KID_JSON);
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////
@@ -174,15 +169,7 @@ public class JSONDecryptionDecoder {
         this.holder = holder;
 
         // Collect keyId if such are permitted
-        if (holder.globalKeyId == null) {
-            keyId = holder.options.getKeyId(encryptionObject);
-        } else {
-            // Special case: Multiple encryption objects and a global keyId
-            if (encryptionObject.hasProperty(JSONCryptoHelper.KID_JSON)) {
-                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.KID_JSON + "\" not allowed");
-            }
-            keyId = holder.globalKeyId;
-        }
+        keyId = holder.options.getKeyId(encryptionObject);
 
         // Are we using a key encryption scheme?
         keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);

@@ -639,6 +639,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
+        JSONSigner.Header header = new JSONSigner.Header(signer);
         coreSign(signer, setObject(signatureLabel));
         return this;
     }

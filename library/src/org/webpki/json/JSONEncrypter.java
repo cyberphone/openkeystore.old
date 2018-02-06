@@ -66,21 +66,15 @@ public abstract class JSONEncrypter implements Serializable {
         
         LinkedHashSet<String> foundExtensions = new LinkedHashSet<String>();
         
-        String globalKeyId;
-
         Header(ContentEncryptionAlgorithms contentEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.contentEncryptionAlgorithm = contentEncryptionAlgorithm;
             contentEncryptionKey = encrypter.contentEncryptionKey;
             globalKeyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
-            globalKeyId = encrypter.keyId;
             encryptionWriter.setString(JSONCryptoHelper.ENC_JSON, contentEncryptionAlgorithm.joseName);
             encryptionWriter.setString(JSONCryptoHelper.ALG_JSON, globalKeyEncryptionAlgorithm.joseName);
             if (globalKeyEncryptionAlgorithm.keyWrap) {
                 contentEncryptionKey = EncryptionCore.generateRandom(contentEncryptionAlgorithm.keyLength);
-            }
-            if (globalKeyId != null) {
-                encryptionWriter.setString(JSONCryptoHelper.KID_JSON, globalKeyId);
             }
         }
 
@@ -94,11 +88,6 @@ public abstract class JSONEncrypter implements Serializable {
             }
             if (encrypter.keyId != null) {
                 currentRecipient.setString(JSONCryptoHelper.KID_JSON, encrypter.keyId);
-            }
-            // Does any of the recipients have a different keyId? 
-            if (globalKeyId != null && (encrypter.keyId == null || !globalKeyId.equals(encrypter.keyId))) {
-                encryptionWriter.root.properties.remove(JSONCryptoHelper.KID_JSON);
-                globalKeyId = null;
             }
 
             // "jku"/"x5u" and "jwk"/"x5c" are mutually exclusive
@@ -146,11 +135,6 @@ public abstract class JSONEncrypter implements Serializable {
         }
 
         void cleanRecipient(JSONObjectWriter recipient) {
-
-            // All recipients have the same keyId?  If so remove the local definition
-            if (globalKeyId != null) {
-                recipient.root.properties.remove(JSONCryptoHelper.KID_JSON);
-            }
 
             // All recipients use the same key encryption algorithm?  If so remove the local definition
             if (globalKeyEncryptionAlgorithm != null) {
