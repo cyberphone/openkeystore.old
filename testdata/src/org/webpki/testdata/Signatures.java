@@ -153,21 +153,27 @@ public class Signatures {
         return reader.toString();
     }
     
-    static boolean optionalUpdate(String fileName, byte[] updatedSignature, boolean cleanFlag) throws IOException {
+    static void optionalUpdate(String fileName, byte[] updatedSignature, boolean cleanFlag) throws IOException {
+        boolean changed = true;
         try {
             if (cleanFlag) {
                 if (cleanSignature(ArrayUtil.readFile(fileName)).equals(cleanSignature(updatedSignature))) {
-                    return false;
+                    return;
                 }
             } else {
                 if (ArrayUtil.compare(ArrayUtil.readFile(fileName), updatedSignature)) {
-                    return false;
+                    return;
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            // New I guess.
+            changed = false;
+        }
         ArrayUtil.writeFile(fileName, updatedSignature);
-        System.out.println("WARNING '" + fileName + "' was UPDATED");
-        return true;
+        if (changed) {
+            System.out.println("WARNING '" + fileName + "' was UPDATED");
+        }
+        return;
     }
 
     static void remoteCertSign(String keyType) throws Exception {
