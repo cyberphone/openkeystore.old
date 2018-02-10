@@ -57,6 +57,7 @@ public class WebKey implements JSONRemoteKeys.Reader {
  
     byte[] shoot(String uri) throws IOException {
         HTTPSWrapper wrapper = new HTTPSWrapper();
+        wrapper.setRequireSuccess(true);
         wrapper.makeGetRequest(uri);
         return wrapper.getData();
     }

@@ -31,8 +31,7 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
 
-import org.webpki.json.Extension1;
-import org.webpki.json.Extension2;
+import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -49,10 +48,13 @@ import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONX509Signer;
 import org.webpki.json.JSONX509Verifier;
 // Test
+import org.webpki.json.Extension1;
+import org.webpki.json.Extension2;
 import org.webpki.json.SymmetricKeys;
 import org.webpki.json.WebKey;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /*
  * Create JCS test vectors
@@ -105,6 +107,13 @@ public class Signatures {
         asymSignCore("p256", false, true, false, true);
     }
 
+    static String cleanJavaScriptSignature(byte[] signature) throws IOException {
+        String text = new String(signature, "utf-8");
+        int i = text.indexOf(" " + JSONCryptoHelper.VAL_JSON + ": \"");
+        int j = text.indexOf('"', i + 10);
+        return text.substring(0, i) + text.substring(j);
+    }
+
     static void asymJavaScriptSignature(String keyType) throws Exception {
         KeyPair localKey = readJwk(keyType);
         JSONObjectWriter javaScriptSignature = new JSONObjectWriter()
@@ -116,12 +125,49 @@ public class Signatures {
         javaScriptSignature.setSignature(new JSONAsymKeySigner(localKey.getPrivate(), localKey.getPublic(), null));
         JSONSignatureDecoder decoder = new JSONObjectReader(javaScriptSignature)
             .getSignature(new JSONCryptoHelper.Options());
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jwk.js",
-                            javaScriptSignature.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE));
+        byte[] signatureData = javaScriptSignature.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE);
+        String fileName = baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jwk.js";
+        try {
+            if (cleanJavaScriptSignature(signatureData).equals(cleanJavaScriptSignature(ArrayUtil.readFile(fileName)))) {
+                return;
+            }
+        } catch (Exception e) {}
+        ArrayUtil.writeFile(fileName, signatureData);
+        System.out.println("WARNING '" + fileName + "' was UPDATED");
     }
 
     static String prefix(String keyType) {
         return keyType + '#';
+    }
+    
+    static String cleanSignature(byte[] signature) throws IOException {
+        JSONObjectReader reader = JSONParser.parse(signature);
+        if (reader.hasProperty(JSONCryptoHelper.SIGNATURES_JSON)) {
+            JSONArrayReader array = reader.getArray(JSONCryptoHelper.SIGNATURES_JSON);
+            while (array.hasMore()) {
+                array.getObject().removeProperty(JSONCryptoHelper.VAL_JSON);
+            }
+        } else {
+            reader.getObject(JSONCryptoHelper.SIGNATURE_JSON).removeProperty(JSONCryptoHelper.VAL_JSON);
+        }
+        return reader.toString();
+    }
+    
+    static boolean optionalUpdate(String fileName, byte[] updatedSignature, boolean cleanFlag) throws IOException {
+        try {
+            if (cleanFlag) {
+                if (cleanSignature(ArrayUtil.readFile(fileName)).equals(cleanSignature(updatedSignature))) {
+                    return false;
+                }
+            } else {
+                if (ArrayUtil.compare(ArrayUtil.readFile(fileName), updatedSignature)) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {}
+        ArrayUtil.writeFile(fileName, updatedSignature);
+        System.out.println("WARNING '" + fileName + "' was UPDATED");
+        return true;
     }
 
     static void remoteCertSign(String keyType) throws Exception {
@@ -137,8 +183,7 @@ public class Signatures {
         JSONSignatureDecoder decoder = 
             JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) +
-                            "@x5u.json", remoteSig);
+        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5u.json", remoteSig, true);
     }
 
     static void remoteKeySign(String keyType) throws Exception {
@@ -153,8 +198,7 @@ public class Signatures {
         JSONSignatureDecoder decoder =
             JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
                 .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) +
-                            "@jku.json", remoteSig);
+        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jku.json", remoteSig, true);
     }
 
     static void symmSign(int keyBits, MACAlgorithms algorithm, boolean wantKeyId) throws Exception {
@@ -173,8 +217,8 @@ public class Signatures {
         JSONSignatureDecoder decoder = 
                 JSONParser.parse(signedData).getSignature(options);
         decoder.verify(new JSONSymKeyVerifier(key));
-        ArrayUtil.writeFile(baseSignatures + prefix("a" + keyBits) + 
-                getAlgorithm(decoder) + '@' + keyIndicator(wantKeyId, false), signedData);
+        optionalUpdate(baseSignatures + prefix("a" + keyBits) + 
+                getAlgorithm(decoder) + '@' + keyIndicator(wantKeyId, false), signedData, false);
     }
 
     static String getDataToSign() throws Exception {
@@ -225,9 +269,11 @@ public class Signatures {
         if (signatures.size() != 2) {
             throw new Exception("Wrong multi");
         }
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType1) + getAlgorithm(signatures.get(0)) + ","
-                                           + prefix(keyType2) + getAlgorithm(signatures.get(1))
-                                           + "@mult-jwk.json", signedData);
+        optionalUpdate(baseSignatures + prefix(keyType1) + getAlgorithm(signatures.get(0)) + ","
+                                      + prefix(keyType2) + getAlgorithm(signatures.get(1))
+                                      + "@mult-jwk.json",
+                       signedData,
+                       true);
      }
     
     static String keyIndicator(boolean wantKeyId, boolean wantPublicKey) {
@@ -285,8 +331,8 @@ public class Signatures {
         String addedFeature = wantExtensions ? "crit-" : (wantExclusions ? "excl-" : "");
         JSONSignatureDecoder decoder = 
             JSONParser.parse(signedData).getSignature(options);
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + '@' +  
-                addedFeature + keyIndicator(wantKeyId, wantPublicKey), signedData);
+        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + '@' +  
+                addedFeature + keyIndicator(wantKeyId, wantPublicKey), signedData, true);
      }
 
     static void asymSignOptionalPublicKeyInfo(String keyType, boolean wantKeyId, boolean wantPublicKey) throws Exception {
@@ -306,6 +352,6 @@ public class Signatures {
         JSONSignatureDecoder decoder = 
                 JSONParser.parse(signedData).getSignature(new JSONCryptoHelper.Options());
         decoder.verify(x509Verifier);
-        ArrayUtil.writeFile(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5c.json", signedData);
+        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5c.json", signedData, true);
     }
 }
