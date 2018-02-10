@@ -114,6 +114,16 @@ public class JSONArrayWriter implements Serializable {
         return setString(Base64URL.encode(value));
     }
 
+    public JSONArrayWriter setSignature (JSONSigner signer) throws IOException {
+        JSONObjectWriter signatureObject = setObject();
+        JSONObjectWriter.createHeaderPart(signer, signatureObject);
+        // Finally, the signature itself
+        signatureObject.setBinary(JSONCryptoHelper.VAL_JSON,
+                                  signer.signData(signer.normalizedData = 
+                                          this.serializeToBytes(JSONOutputFormats.NORMALIZED)));
+        return this;
+    }
+
     static public JSONArrayWriter createCoreCertificatePath(X509Certificate[] certificatePath) throws IOException {
         JSONArrayWriter arrayWriter = new JSONArrayWriter();
         for (X509Certificate certificate : CertificateUtil.checkCertificatePath(certificatePath)) {

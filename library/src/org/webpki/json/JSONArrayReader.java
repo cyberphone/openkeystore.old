@@ -159,4 +159,16 @@ public class JSONArrayReader implements Serializable {
         } while (hasMore());
         return CertificateUtil.makeCertificatePath(blobs);
     }
+
+    public JSONSignatureDecoder getSignature(JSONCryptoHelper.Options options) throws IOException {
+        options.encryptionMode(false);
+        JSONObject dummy = new JSONObject();
+        dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
+        options.signedArray = new JSONObjectReader(dummy);
+        JSONValue value = array.lastElement();
+        JSONTypes.compatibilityTest(JSONTypes.OBJECT, value);
+        return new JSONSignatureDecoder(null,
+                                        new JSONObjectReader((JSONObject) value.value),
+                                        options);
+    }
 }

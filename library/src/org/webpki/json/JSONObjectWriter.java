@@ -516,7 +516,7 @@ public class JSONObjectWriter implements Serializable {
         setBinary(name, cryptoBinary);
     }
 
-    private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
+    static void createHeaderPart(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
         signatureWriter.setString(JSONCryptoHelper.ALG_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
 
@@ -542,6 +542,12 @@ public class JSONObjectWriter implements Serializable {
                 signatureWriter.setProperty(property, signer.extensions.getProperty(property));
             }
         }
+    }
+
+    private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
+
+        // Algorithm, keys, and crit
+        createHeaderPart(signer, signatureWriter);
 
         // Optional excluded properties
         JSONObjectWriter signedObject = this;

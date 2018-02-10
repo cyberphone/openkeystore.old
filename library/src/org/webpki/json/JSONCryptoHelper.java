@@ -215,6 +215,8 @@ public class JSONCryptoHelper implements Serializable {
         JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
         
+        JSONObjectReader signedArray;
+        
         boolean encryptionMode;
         
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {

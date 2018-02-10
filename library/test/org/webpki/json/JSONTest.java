@@ -3617,6 +3617,12 @@ public class JSONTest {
         writer = new JSONObjectWriter().setString("myData", "cool!")
                 .setSignature("attestSignature", new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
         JSONParser.parse(writer.toString()).getSignature("attestSignature", new JSONCryptoHelper.Options());
+        JSONArrayWriter arraySignature = new JSONArrayWriter();
+
+        arraySignature.setString("Hi there!")
+                      .setInt(2003)
+                      .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
+        JSONParser.parse(arraySignature.toString()).getJSONArrayReader().getSignature(new JSONCryptoHelper.Options());
     }
 
     @Test
