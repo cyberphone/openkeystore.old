@@ -56,6 +56,14 @@ public class JSONArrayReader implements Serializable {
         return index < array.size();
     }
 
+    public boolean isLastElement() {
+        return index == array.size() - 1;
+    }
+
+    public int size() {
+        return array.size();
+    }
+
     void inRangeCheck() throws IOException {
         if (!hasMore()) {
             throw new IOException("Trying to read past of array limit: " + index);
@@ -165,10 +173,10 @@ public class JSONArrayReader implements Serializable {
         JSONObject dummy = new JSONObject();
         dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
         options.signedArray = new JSONObjectReader(dummy);
-        JSONValue value = array.lastElement();
-        JSONTypes.compatibilityTest(JSONTypes.OBJECT, value);
-        return new JSONSignatureDecoder(null,
-                                        new JSONObjectReader((JSONObject) value.value),
-                                        options);
+        int save = index;
+        index = array.size() - 1;
+        JSONObjectReader signature = getObject();
+        index = save;
+        return new JSONSignatureDecoder(null, signature, options);
     }
 }

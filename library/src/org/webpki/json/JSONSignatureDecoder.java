@@ -96,27 +96,28 @@ public class JSONSignatureDecoder implements Serializable {
         options.getExtensions(signature, extensions);
 
         LinkedHashMap<String, JSONValue> saveExcluded = null;
-        if (rd != null) {
-            if (options.exclusions == null) {
-                if (signature.hasProperty(JSONCryptoHelper.EXCL_JSON)) {
-                    throw new IOException("Use of \"" + JSONCryptoHelper.EXCL_JSON + "\" must be set in options");
-                }
-            } else {
-                saveExcluded = new LinkedHashMap<String, JSONValue>(rd.root.properties);
-                LinkedHashSet<String> parsedExcludes = checkExcluded(signature.getStringArray(JSONCryptoHelper.EXCL_JSON));
-                for (String excluded : parsedExcludes.toArray(new String[0])) {
-                    if (!options.exclusions.contains(excluded)) {
-                        throw new IOException("Unexpected \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + excluded);
-                    }
-                    rd.root.properties.remove(excluded);
-                }
-                for (String excluded : options.exclusions.toArray(new String[0])) {
-                    if (!parsedExcludes.contains(excluded)) {
-                        throw new IOException("Missing \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + excluded);
-                    }
-                 }
+
+        // Note: the following section will not execute for array signatures
+        if (options.exclusions == null) {
+            if (signature.hasProperty(JSONCryptoHelper.EXCL_JSON)) {
+                throw new IOException("Use of \"" + JSONCryptoHelper.EXCL_JSON + "\" must be set in options");
             }
+        } else {
+            saveExcluded = new LinkedHashMap<String, JSONValue>(rd.root.properties);
+            LinkedHashSet<String> parsedExcludes = checkExcluded(signature.getStringArray(JSONCryptoHelper.EXCL_JSON));
+            for (String excluded : parsedExcludes.toArray(new String[0])) {
+                if (!options.exclusions.contains(excluded)) {
+                    throw new IOException("Unexpected \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + excluded);
+                }
+                rd.root.properties.remove(excluded);
+            }
+            for (String excluded : options.exclusions.toArray(new String[0])) {
+                if (!parsedExcludes.contains(excluded)) {
+                    throw new IOException("Missing \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + excluded);
+                }
+             }
         }
+
         signatureValue = signature.getBinary(JSONCryptoHelper.VAL_JSON);
 
         ///////////////////////////////////////////////////////////////////////////
