@@ -54,7 +54,6 @@ import org.webpki.json.SymmetricKeys;
 import org.webpki.json.WebKey;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.DebugFormatter;
 
 /*
  * Create JCS test vectors
@@ -102,6 +101,7 @@ public class Signatures {
         }
         
         multipleSign("p256", "r2048");
+        multipleSign("p256", "p384");
         
         asymSignCore("p256", false, true, true, false); 
         asymSignCore("p256", false, true, false, true);

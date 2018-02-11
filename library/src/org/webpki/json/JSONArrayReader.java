@@ -172,11 +172,10 @@ public class JSONArrayReader implements Serializable {
         options.encryptionMode(false);
         JSONObject dummy = new JSONObject();
         dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
-        options.signedArray = new JSONObjectReader(dummy);
         int save = index;
         index = array.size() - 1;
         JSONObjectReader signature = getObject();
         index = save;
-        return new JSONSignatureDecoder(null, signature, options);
+        return new JSONSignatureDecoder(new JSONObjectReader(dummy), signature, options);
     }
 }

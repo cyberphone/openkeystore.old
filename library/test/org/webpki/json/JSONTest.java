@@ -3622,7 +3622,16 @@ public class JSONTest {
         arraySignature.setString("Hi there!")
                       .setInt(2003)
                       .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
-        JSONParser.parse(arraySignature.toString()).getJSONArrayReader().getSignature(new JSONCryptoHelper.Options());
+        JSONArrayReader arrayReader = JSONParser.parse(arraySignature.toString()).getJSONArrayReader();
+        assertTrue("size", arrayReader.size() == 3);
+        arrayReader.getSignature(new JSONCryptoHelper.Options());
+        arrayReader = JSONParser.parse(arraySignature.toString()).getJSONArrayReader();
+        while (arrayReader.hasMore()) {
+            if (arrayReader.isLastElement()) {
+                arrayReader.getSignature(new JSONCryptoHelper.Options());
+            }
+            arrayReader.scanAway();
+        }
     }
 
     @Test
