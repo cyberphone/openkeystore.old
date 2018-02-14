@@ -63,7 +63,9 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String JWK_JSON                = "jwk";            // Public key holder
 
-    public static final String SIGNATURE_JSON          = "signature";      // JCS - Single signatures
+    public static final String SIGNATURE_JSON          = "signature";      // JWS - Default label
+
+    public static final String SIGNERS_JSON            = "signers";        // JWS - Multiple signers
 
     public static final String SIGNATURES_JSON         = "signatures";     // JCS - Multiple signatures
 
