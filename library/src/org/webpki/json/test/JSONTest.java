@@ -3617,7 +3617,7 @@ public class JSONTest {
         readSymSignatures(new String[]{"hs256signed.json",
                                        "hs384signed.json",
                                        "hs512signed.json"});
-
+/*
         signature = readSignature("r2048remotekeysigned.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONSignatureDecoder.Options()
             .setRemoteKeyReader(new WebKey()));
@@ -3653,6 +3653,7 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "Unknown CA: CN=Payment Network Root CA1,C=US");
         }
+*/
     }
 
     @Test
