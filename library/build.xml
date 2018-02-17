@@ -19,9 +19,7 @@
   <property name="wsdl_dir"  value="wsdl"/>
   <property name="spts_dir"  value="securityproxy-test"/>
   <property name="ext.jar"  value="../resources/third-party-jars"/>
-  <property name="public_doc_dir"  location="../../doc/security"/>
   <property name="testdata_dir" location="../testdata"/>
-  <property name="doc_dir"  location="../../doc/openkeystore/javaapi"/>
   <property name="webpki-android" value="webpki.android"/>
   <property name="android-json" value="webpki.android.json"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar"/>
@@ -258,9 +256,22 @@
   	<antcall target="_build_sks_ws_for_dotnet"/>
   </target>
 
+  <target name="_setdoc_dir" unless="github.doc.present">
+  	<echo message="Local docs"/>
+    <mkdir dir="${public_doc_dir}"/>
+    <mkdir dir="${doc_dir}"/>
+  </target>
+
   <target name="doc">
     <fail message="JAVA_HOME must be set to environment!" unless="env.JAVA_HOME"/>
 
+  	<condition property="doc_root" value="../../" else="">
+      <isset property="github.doc.present"/>
+  	</condition>
+    <property name="public_doc_dir"  location="${doc_root}doc/security"/>
+    <property name="doc_dir"  location="${doc_root}doc/openkeystore/javaapi"/>
+  	<antcall target="_setdoc_dir"/>
+  	
   	<!-- Create temp directory -->
     <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
