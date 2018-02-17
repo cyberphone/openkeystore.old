@@ -265,6 +265,7 @@
   <target name="doc">
     <fail message="JAVA_HOME must be set to environment!" unless="env.JAVA_HOME"/>
 
+  	<available file="../../../github.repositories/doc/openkeystore/javaapi" type="dir" property="github.doc.present"/>
   	<condition property="doc_root" value="../../" else="">
       <isset property="github.doc.present"/>
   	</condition>
