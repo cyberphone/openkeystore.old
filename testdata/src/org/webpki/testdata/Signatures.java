@@ -140,15 +140,16 @@ public class Signatures {
         return keyType + '#';
     }
     
-    static String cleanSignature(byte[] signature) throws IOException {
-        JSONObjectReader reader = JSONParser.parse(signature);
-        if (reader.hasProperty(JSONCryptoHelper.SIGNATURES_JSON)) {
-            JSONArrayReader array = reader.getArray(JSONCryptoHelper.SIGNATURES_JSON);
+    static String cleanSignature(byte[] signedData) throws IOException {
+        JSONObjectReader reader = JSONParser.parse(signedData);
+        JSONObjectReader signature = reader.getObject(JSONCryptoHelper.SIGNATURE_JSON);
+        if (signature.hasProperty(JSONCryptoHelper.SIGNERS_JSON)) {
+            JSONArrayReader array = signature.getArray(JSONCryptoHelper.SIGNERS_JSON);
             while (array.hasMore()) {
                 array.getObject().removeProperty(JSONCryptoHelper.VAL_JSON);
             }
         } else {
-            reader.getObject(JSONCryptoHelper.SIGNATURE_JSON).removeProperty(JSONCryptoHelper.VAL_JSON);
+            signature.removeProperty(JSONCryptoHelper.VAL_JSON);
         }
         return reader.toString();
     }
@@ -245,8 +246,12 @@ public class Signatures {
     }
     
     static byte[] createSignatures(Vector<JSONSigner> signers) throws Exception {
-        String signed = parseDataToSign().setSignatures(signers).toString();
-        int i = signed.indexOf(",\n  \"signatures\":");
+        JSONObjectWriter dataToSign = parseDataToSign();
+        for (JSONSigner signer : signers) {
+            dataToSign.setMultiSignature(new JSONSigner.MultiSignatureHeader(), signer);
+        }
+        String signed = dataToSign.toString();
+        int i = signed.indexOf(",\n  \"signature\":");
         String unsigned = getDataToSign();
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
@@ -269,7 +274,7 @@ public class Signatures {
         signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
         byte[] signedData = createSignatures(signers);
         Vector<JSONSignatureDecoder> signatures = 
-                JSONParser.parse(signedData).getSignatures(new JSONCryptoHelper.Options());
+                JSONParser.parse(signedData).getMultiSignature(new JSONCryptoHelper.Options());
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
         if (signatures.size() != 2) {

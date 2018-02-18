@@ -158,7 +158,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                                      AsymKey asymKey2) throws IOException, GeneralSecurityException {
         String raw = readSignature(name);
         JSONObjectReader rd = JSONParser.parse(raw);
-        Vector<JSONSignatureDecoder> verifiers = rd.getSignatures(new JSONCryptoHelper.Options());
+        Vector<JSONSignatureDecoder> verifiers = rd.getMultiSignature(new JSONCryptoHelper.Options());
         verifiers.get(0).verify(new JSONAsymKeyVerifier(asymKey1.keyPair.getPublic()));
         verifiers.get(1).verify(new JSONAsymKeyVerifier(asymKey2.keyPair.getPublic()));
         return formatCode(raw);
@@ -387,7 +387,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         json.addParagraphObject(MULTIPLE_SIGNATURES).append("Multiple signatures enable different keys to " +
         "<i>independently of each other</i> add a signature to a JSON object." + LINE_SEPARATOR +
         "The normalization procedure is essentially the same as for simple signatures but <b>must</b> also take the following in account as well:<ul>" +
-        "<li>The signature property <b>must</b> be <code>&quot;" + JSONCryptoHelper.SIGNATURES_JSON + "&quot;</code>.</li>" +
+        "<li>The signature property <b>must</b> be <code>&quot;" + JSONCryptoHelper.SIGNATURE_JSON + "&quot;</code>.</li>" +
         "<li>The <code>'['</code> and <code>']'</code> characters <b>must</b> be <i>included</i> in the normalized data for each " +
         "<a href=\"#" + JSONCryptoHelper.SIGNATURE_JSON + "\">signature object</a>.</li>" +
         "<li>Each signature requires its own normalization process. During this process the other signature objects <b>must</b> (temporarily) be removed.</li>" +
@@ -726,7 +726,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
               .addString("Mandatory top level property for <i>simple</i> signatures.")
             .newRow()
            .newColumn()
-             .addProperty(JSONCryptoHelper.SIGNATURES_JSON)
+             .addProperty(JSONCryptoHelper.SIGNATURE_JSON)
              .addArrayLink(JSONCryptoHelper.SIGNATURE_JSON, 1)
            .newColumn()
              .setType(WEBPKI_DATA_TYPES.OBJECT)

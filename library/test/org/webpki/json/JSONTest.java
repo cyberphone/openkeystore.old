@@ -3528,6 +3528,7 @@ public class JSONTest {
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
         }
+        Vector<JSONSignatureDecoder> signatures;
         writer = new JSONObjectWriter()
             .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
                .setSignatureAlgorithm(AsymSignatureAlgorithms.ECDSA_SHA512));
@@ -3539,37 +3540,34 @@ public class JSONTest {
             signature.getSignature(new JSONCryptoHelper.Options());
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Property \"signature\" is missing");
+            checkException(e, "Use \"getMultiSignature()\" for this object");
         }
-        Vector<JSONSignatureDecoder> signatures = signature.getSignatures(new JSONCryptoHelper.Options());
+        signatures = signature.getMultiSignature(new JSONCryptoHelper.Options());
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(r2048.getPublic()));
-        Vector<JSONSigner> signers = new Vector<JSONSigner>();
-        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null));
-        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
+        JSONSigner.MultiSignatureHeader msh = new JSONSigner.MultiSignatureHeader();
         writer = new JSONObjectWriter().setInt("value", 3)
-            .setSignatures(signers);
-        signatures = new JSONObjectReader(writer).getSignatures(new JSONCryptoHelper.Options());
+            .setMultiSignature(msh, new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null))
+            .setMultiSignature(msh, new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
+        signatures = new JSONObjectReader(writer).getMultiSignature(new JSONCryptoHelper.Options());
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
-        signers = new Vector<JSONSigner>();
-        signers.add(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
-            .setOutputPublicKeyInfo(false));
-        signers.add(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null)
-            .setOutputPublicKeyInfo(false).setKeyId("mykey"));
         writer = new JSONObjectWriter().setInt("value", 3)
-            .setSignatures(signers);
+            .setMultiSignature(msh, new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
+                .setOutputPublicKeyInfo(false))
+            .setMultiSignature(msh, new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null)
+                .setOutputPublicKeyInfo(false).setKeyId("mykey"));
         try {
-            new JSONObjectReader(writer).clone().getSignatures(new JSONCryptoHelper.Options()
+            new JSONObjectReader(writer).clone().getMultiSignature(new JSONCryptoHelper.Options()
                 .setRequirePublicKeyInfo(false)
                 .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED));
             fail("Must not pass");
         } catch (Exception e) {
             checkException(e, "Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
         }
-        signatures = new JSONObjectReader(writer).getSignatures(new JSONCryptoHelper.Options()
+        signatures = new JSONObjectReader(writer).getMultiSignature(new JSONCryptoHelper.Options()
             .setRequirePublicKeyInfo(false)
             .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.OPTIONAL));
         assertTrue(signatures.size() == 2);

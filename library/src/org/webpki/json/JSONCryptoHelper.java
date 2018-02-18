@@ -67,8 +67,6 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String SIGNERS_JSON            = "signers";        // JWS - Multiple signers
 
-    public static final String SIGNATURES_JSON         = "signatures";     // JCS - Multiple signatures
-
     public static final String VAL_JSON                = "val";            // JCS specific signature value 
 
     public static final String X_JSON                  = "x";              // JWK
@@ -141,7 +139,6 @@ public class JSONCryptoHelper implements Serializable {
 
     static {
         topLevelReserved.add(SIGNATURE_JSON);
-        topLevelReserved.add(SIGNATURES_JSON);
     }
 
     static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");

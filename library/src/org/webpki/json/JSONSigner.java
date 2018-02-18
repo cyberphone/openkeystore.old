@@ -48,22 +48,18 @@ public abstract class JSONSigner implements Serializable {
     JSONSigner() {
     }
 
-    static class Header {
-        
-        SignatureAlgorithms globalAlgorithm;
-        String globalKeyId;
+    public static class MultiSignatureHeader {
 
-        Header(JSONSigner signer) {
-            globalAlgorithm = signer.getAlgorithm();
-            globalKeyId = signer.keyId;
+        boolean multi = true;
+
+        boolean localAlgorithm = true;
+
+        MultiSignatureHeader(boolean multi) {
+            this.multi = multi;
         }
-
-        void scanSigner(JSONSigner signer) {
-            if (signer.keyId == null) {
-                globalKeyId = null;
-            } else {
-                
-            }
+        
+        public MultiSignatureHeader() {
+            
         }
     }
 

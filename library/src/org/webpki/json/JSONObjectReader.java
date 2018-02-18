@@ -18,22 +18,16 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.KeyPair;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.util.GregorianCalendar;
 import java.util.Vector;
-
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
-
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
@@ -499,9 +493,11 @@ public class JSONObjectReader implements Serializable, Cloneable {
 
     public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(false);
-        return new JSONSignatureDecoder(this,
-                                        getObject(signatureLabel),
-                                        options);
+        JSONObjectReader signatureObject = getObject(signatureLabel);
+        if (signatureObject.hasProperty(JSONCryptoHelper.SIGNERS_JSON)) {
+            throw new IOException("Use \"getMultiSignature()\" for this object");
+        }
+        return new JSONSignatureDecoder(this, signatureObject, options);
     }
 
     /**
@@ -512,26 +508,27 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return List with signature objects
      * @throws IOException &nbsp;
      */
-    public Vector<JSONSignatureDecoder> getSignatures(JSONCryptoHelper.Options options) throws IOException {
+    public Vector<JSONSignatureDecoder> getMultiSignature(JSONCryptoHelper.Options options) throws IOException {
+        return getMultiSignature(JSONCryptoHelper.SIGNATURE_JSON, options);
+    }
+    
+    public Vector<JSONSignatureDecoder> getMultiSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(false);
+        JSONObjectReader reader = getObject(signatureLabel);
+        JSONArrayReader arrayReader = reader.getArray(JSONCryptoHelper.SIGNERS_JSON);
+        @SuppressWarnings("unchecked")
+        Vector<JSONValue> save = (Vector<JSONValue>) arrayReader.array.clone();
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
-        JSONArrayReader arrayReader = getArray(JSONCryptoHelper.SIGNATURES_JSON);
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
-        @SuppressWarnings("unchecked")
-        Vector<JSONObject> save = (Vector<JSONObject>)root.properties.get(JSONCryptoHelper.SIGNATURES_JSON).value;
-        int i = 0;
         for (JSONObjectReader signature : signatureObjects) {
-            Vector<JSONObject> element = new Vector<JSONObject>();
-            element.add(save.get(i++));
-            root.properties.put(JSONCryptoHelper.SIGNATURES_JSON, 
-                                new JSONValue(JSONTypes.ARRAY, element));
+            arrayReader.array.clear();
+            arrayReader.array.add(new JSONValue(JSONTypes.OBJECT, signature.root));
             signatures.add(new JSONSignatureDecoder(this, signature, options));
         }
-        root.properties.put(JSONCryptoHelper.SIGNATURES_JSON, 
-                            new JSONValue(JSONTypes.ARRAY, save));
+        arrayReader.array = save;
         return signatures;
     }
 

@@ -2,22 +2,24 @@
   "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
-  "signatures": [{
-    "alg": "ES256",
-    "jwk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
-    },
-    "val": "_TOYWast5ifqG7ghOkEObfNNLfwNPH0d2LeIOGjyebo5qd0U25Gbh1NPgEcP4-1Np46bODb4P8aEIJDSTkd_rg"
-  },{
-    "alg": "RS256",
-    "jwk": {
-      "kty": "RSA",
-      "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
-      "e": "AQAB"
-    },
-    "val": "d5OTvUTy1qrNevTicY0UNMgsN-ZLuioFsJY_2PcUG0ld9jZF7UKFRfKqVCqChAGiedN1YHYqcacAUzI0boDzAjjUG98i6NvhQuSR10ToeCcKD9wJWb_NlbYf8dvDffOq-n93gz-yJL3k1yw0tqMbR2laGQmz3WQNYyVfysX8R1pUrBYj0UJd7AOMAyb57ezQLp6O89y0Doekr7oqFpi59c6X1cBq5nYJoamySAQgb0PqzjYx2sIDroqx4ljGhq__WV4mKb-kFNK8D2XCAIs7YsihTEBeGxW_BU34-Jt2b2uPsjBnt26CBqtb8SzMfREbHSQ6t7ANw_2tSaiCD1bZnQ"
-  }]
+  "signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "val": "_6abpgZgskI9bj2NhXZ3myFIQX_iTvc-k_MWilQjZssz1ouiSWtdRwg4VhnqXT_5YPznlqgQ8HMDyj3NdUouHQ"
+    },{
+      "alg": "RS256",
+      "jwk": {
+        "kty": "RSA",
+        "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+        "e": "AQAB"
+      },
+      "val": "V5we6wZmRXSHwW98fr-noGWdXrbvOwENW-e8kxE-2BNR_7TvyXsJhemfoDpzgw0FbI2gCKVf94TK3pUTNMdgQq0pvMymRd0wMPGUV1tLYJEixP92IU0DEFmGy_0TFWQctKOce_UI2yku6ZFZP_B8yrt7RSW6dYQ_42C3-pS83ys-gsFmsN_rUzrxOx_RjlaxbPEgp1P1ZCnBpq627FVW7rmwyiRekf1MyWJPwp2E0RhiYxevZD3y5V4s4NRMH-mvCFwhXhmqVYTQtMScytC47VOTSdrpjOc26lPkDk1CQIxz5nC803ZdfKM_EElMaol0l_78MPZJz6mOk_tsV_9XZQ"
+    }]
+  }
 }

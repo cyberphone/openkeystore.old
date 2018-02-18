@@ -18,28 +18,21 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import java.security.spec.ECPoint;
-
 import java.util.GregorianCalendar;
 import java.util.Vector;
-
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
-
+import org.webpki.json.JSONSigner.MultiSignatureHeader;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -516,7 +509,10 @@ public class JSONObjectWriter implements Serializable {
         setBinary(name, cryptoBinary);
     }
 
-    static void createHeaderPart(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
+    static void createHeaderPart(JSONSigner signer,
+                                 JSONObjectWriter signatureWriter,
+                                 MultiSignatureHeader multiSignatureHeader) throws IOException {
+        if (multiSignatureHeader.localAlgorithm)
         signatureWriter.setString(JSONCryptoHelper.ALG_JSON,
                 signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
 
@@ -544,10 +540,12 @@ public class JSONObjectWriter implements Serializable {
         }
     }
 
-    private void coreSign(JSONSigner signer, JSONObjectWriter signatureWriter) throws IOException {
+    private void coreSign(JSONSigner signer, 
+                          JSONObjectWriter signatureWriter,
+                          MultiSignatureHeader multiSignatureHeader) throws IOException {
 
         // Algorithm, keys, and crit
-        createHeaderPart(signer, signatureWriter);
+        createHeaderPart(signer, signatureWriter, multiSignatureHeader);
 
         // Optional excluded properties
         JSONObjectWriter signedObject = this;
@@ -645,8 +643,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
-        JSONSigner.Header header = new JSONSigner.Header(signer);
-        coreSign(signer, setObject(signatureLabel));
+        coreSign(signer, setObject(signatureLabel), new JSONSigner.MultiSignatureHeader());
         return this;
     }
     /**
@@ -657,23 +654,31 @@ import org.webpki.json.JSONSignatureDecoder;
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException In case there a problem with keys etc.
      */
-    public JSONObjectWriter setSignatures(Vector<JSONSigner> signers) throws IOException {
-        return setSignatures(JSONCryptoHelper.SIGNATURE_JSON, signers);
+    public JSONObjectWriter setMultiSignature(JSONSigner.MultiSignatureHeader multiSignatureHeader, 
+                                              JSONSigner signer) throws IOException {
+        return setMultiSignature(JSONCryptoHelper.SIGNATURE_JSON, multiSignatureHeader, signer);
     }
 
-    @SuppressWarnings("unchecked") 
-    public JSONObjectWriter setSignatures(String signatureLabel, Vector<JSONSigner> signers) throws IOException {
-        if (signers.isEmpty()) {
-            throw new IOException("Empty signer list");
+    public JSONObjectWriter setMultiSignature(String signatureLabel,
+                                              JSONSigner.MultiSignatureHeader multiSignatureHeader,
+                                              JSONSigner signer) throws IOException {
+        JSONObjectReader reader = new JSONObjectReader(root);
+        Vector<JSONObject> oldSignatures = new Vector<JSONObject>();
+        if (reader.hasProperty(signatureLabel)) {
+            JSONObjectReader globalSignatureObject = reader.getObject(signatureLabel);
+            JSONArrayReader signatureArray = globalSignatureObject.getArray(JSONCryptoHelper.SIGNERS_JSON);
+            do {
+                oldSignatures.add(signatureArray.getObject().root);
+            } while (signatureArray.hasMore());
+            setupForRewrite(signatureLabel);
         }
-        setArray(JSONCryptoHelper.SIGNATURES_JSON);
-        Vector<JSONObject> signatures = new Vector<JSONObject>();
-        for (JSONSigner signer : signers) {
-            setupForRewrite(JSONCryptoHelper.SIGNATURES_JSON);
-            coreSign(signer, setArray(JSONCryptoHelper.SIGNATURES_JSON).setObject());
-            signatures.addAll((Vector<JSONObject>) root.properties.get(JSONCryptoHelper.SIGNATURES_JSON).value);
+        JSONObjectWriter globalSignatureObject = setObject(signatureLabel);
+        JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
+        coreSign(signer, signatureArray.setObject(), multiSignatureHeader);
+        int q = oldSignatures.size();
+        while (--q >= 0) {
+            signatureArray.array.insertElementAt(new JSONValue(JSONTypes.OBJECT, oldSignatures.get(q)), 0);
         }
-        root.properties.put(JSONCryptoHelper.SIGNATURES_JSON, new JSONValue(JSONTypes.ARRAY, signatures));
         return this;
     }
 

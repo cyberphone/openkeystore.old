@@ -2,23 +2,25 @@
   "now": "2018-04-16T11:23:06Z",
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
-  "signatures": [{
-    "alg": "ES256",
-    "jwk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
-    },
-    "val": "7yH9OT-JrTkz9olm1kc1qO_CSwVFaswe0xd547BvV24BYMTMoIZeeNGBcgyrOMyvCQoSZ5I8YFTbC6Y7Pv98yw"
-  },{
-    "alg": "ES512",
-    "jwk": {
-      "kty": "EC",
-      "crv": "P-384",
-      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
-      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
-    },
-    "val": "ujkqZg9pWUzyNZCBL7zFIR-0V7-w6pqCtY0YGRbPsDM7gvun44atwHKpvR6uKWBIY3bIjU-Y0sKhSSrm_mvWOqwfspWtvcsueJyzjf8dxhFQjFF_Vcn_xvKTuF6IgX2Y"
-  }]
+  "signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "val": "1VE04F96VsqUcggO0ghLj2A40FFzdzcJssahMTQS-BKU5wRrjhcOfhMvAgs38xR9tJwGmtwZgQ-fxBKLW2pkog"
+    },{
+      "alg": "ES512",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "val": "OawQG_JsCmrPpdla52S_MFAA3I3mXPigAhhDizXjM3meBAVybAxj-pUBd2MdVbp5fVwUIigBwI0mFAolKfAjaiEh3r7wu7aJ2GbvSPOt8W2X1dXab48uNGBST1pR4LDq"
+    }]
+  }
 }

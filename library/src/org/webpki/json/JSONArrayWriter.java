@@ -116,7 +116,7 @@ public class JSONArrayWriter implements Serializable {
 
     public JSONArrayWriter setSignature (JSONSigner signer) throws IOException {
         JSONObjectWriter signatureObject = setObject();
-        JSONObjectWriter.createHeaderPart(signer, signatureObject);
+        JSONObjectWriter.createHeaderPart(signer, signatureObject, new JSONSigner.MultiSignatureHeader());
         // Finally, the signature itself
         signatureObject.setBinary(JSONCryptoHelper.VAL_JSON,
                                   signer.signData(signer.normalizedData = 
