@@ -135,7 +135,7 @@ public class JSONSignatureDecoder implements Serializable {
         signatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
         //                                                                             //
         // 3. Hide the optional exclude property from the serializer...                //
-        signatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
+        signatureObject.root.properties.remove(JSONCryptoHelper.EXCL_JSON);          //
         //                                                                             //
         // 4. Serialize ("JSON.stringify()")                                           //
         normalizedData = signedData.serializeToBytes(JSONOutputFormats.NORMALIZED);    //

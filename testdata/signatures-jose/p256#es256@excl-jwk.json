@@ -1,0 +1,15 @@
+{
+  "mySignedData": "something",
+  "myUnsignedData": "something else",
+  "__cleartext_signature": {
+    "alg": "ES256",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+    },
+    "excl": ["myUnsignedData"],
+    "signature": "H0-njIUKslhe8JKUDmOwebTatyL5ZN9S2wd_gJ9wR0cUz2apvnTpyUFYD-A9llGRyx4XzWY_ge7oD3S0Pb7ArQ"
+  }
+}

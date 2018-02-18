@@ -109,13 +109,13 @@ public class Signatures {
         multipleSign("p256", "p384");
 
         asymSignCore("p256", false, true, true, false); 
-   //     asymSignCore("p256", false, true, false, true);
+        asymSignCore("p256", false, true, false, true);
     }
 
     static String cleanJavaScriptSignature(byte[] signature) throws IOException {
         String text = new String(signature, "utf-8");
         int i = text.indexOf(" " + JSONCryptoHelper._getValueLabel() + ": \"");
-        int j = text.indexOf('"', i + 10);
+        int j = text.indexOf('"', i + JSONCryptoHelper._getValueLabel().length() + 4);
         return text.substring(0, i) + text.substring(j);
     }
 
