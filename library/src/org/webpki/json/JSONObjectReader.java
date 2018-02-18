@@ -488,7 +488,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoHelper.Options
      */
     public JSONSignatureDecoder getSignature(JSONCryptoHelper.Options options) throws IOException {
-        return getSignature(JSONCryptoHelper.SIGNATURE_JSON, options);
+        return getSignature(JSONCryptoHelper._defaultSignatureLabel, options);
     }
 
     public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
@@ -509,7 +509,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @throws IOException &nbsp;
      */
     public Vector<JSONSignatureDecoder> getMultiSignature(JSONCryptoHelper.Options options) throws IOException {
-        return getMultiSignature(JSONCryptoHelper.SIGNATURE_JSON, options);
+        return getMultiSignature(JSONCryptoHelper._defaultSignatureLabel, options);
     }
     
     public Vector<JSONSignatureDecoder> getMultiSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {

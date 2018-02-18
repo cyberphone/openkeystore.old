@@ -1,0 +1,15 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+    },
+    "signature": "CmMc-jN2oufY5t8NT88by5b0DWzTf1dfr2n92KsalE0wUaHBJT8KUJu7dRcQMZmofpLESsJMMl44X2MhDq2GejrUPwzvj_jVGP6JdhWQ8-NoUqFsQ1085Yz1GsW3tM7M"
+  }
+}

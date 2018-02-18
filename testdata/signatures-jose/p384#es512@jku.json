@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "jku": "https://cyberphone.github.io/doc/openkeystore/p384.jwks",
+    "signature": "v_2UH4c34Wk7_Kz3zZ6TW3UoCATOJJ9o9W0g-dB0xYxqZk-ewFzFbi-lbQ1w_L5P6LQZQY8693gOeWScj0BiLgqCgGe8JTBz0zqZJLl6-iqN7FIQ0eqHJFJKoBrFhIhS"
+  }
+}

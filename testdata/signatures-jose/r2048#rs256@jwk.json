@@ -1,0 +1,14 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "RS256",
+    "jwk": {
+      "kty": "RSA",
+      "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+      "e": "AQAB"
+    },
+    "signature": "SrIGvTS6nMOyMXyZOWQ3GHUAAXiY4lIpPWkcn1CuhbKVC-RN_cVEdomEemLwl4qeIyRD6oLUrLkpa1JUbUKyq-DzapSfP0KfiZ8MDMHnbnQ7OSGpdEHelCC8zd-VojQNk_l1FR733EI3hLhfVD362SCBZ79p-zB0O1E6-dyVqApfTO5Kr513sZUxQU4uNErqog6lnQRffAwKvsDsTySpOWfQ6mzWTby2O6_ZQ4np3LDaxoz-zu4a0wAIBrImcSa5kEGU2Pa2_3nkeC5KOQLBSwP5AmQn6GLwreONF_YeVqke0-oeoy3d8AeBKl_GDwIdKq3_0JDYueLpzGXGpm990w"
+  }
+}

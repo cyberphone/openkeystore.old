@@ -122,7 +122,7 @@ public class JSONSignatureDecoder implements Serializable {
              }
         }
 
-        signatureValue = signatureObject.getBinary(JSONCryptoHelper.VAL_JSON);
+        signatureValue = signatureObject.getBinary(JSONCryptoHelper._valueLabel);
 
         /////////////////////////////////////////////////////////////////////////////////
         // Begin JCS core normalization                                                //
@@ -132,10 +132,10 @@ public class JSONSignatureDecoder implements Serializable {
                 new LinkedHashMap<String, JSONValue>(signatureObject.root.properties); //
         //                                                                             //
         // 2. Hide the signature value property for the serializer...                  //
-        signatureObject.root.properties.remove(JSONCryptoHelper.VAL_JSON);             //
+        signatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
         //                                                                             //
         // 3. Hide the optional exclude property from the serializer...                //
-        signatureObject.root.properties.remove(JSONCryptoHelper.EXCL_JSON);            //
+        signatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
         //                                                                             //
         // 4. Serialize ("JSON.stringify()")                                           //
         normalizedData = signedData.serializeToBytes(JSONOutputFormats.NORMALIZED);    //

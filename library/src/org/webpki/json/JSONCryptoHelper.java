@@ -142,6 +142,24 @@ public class JSONCryptoHelper implements Serializable {
     }
 
     static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+    
+    static String _defaultSignatureLabel = SIGNATURE_JSON;
+    static String _valueLabel            = VAL_JSON;
+    
+    public static void _setMode(boolean joseFlag) {
+        if (joseFlag) {
+            _defaultSignatureLabel = "__cleartext_signature";
+            _valueLabel            = "signature";
+        }
+    }
+    
+    public static String _getDefaultSignatureLabel() {
+        return _defaultSignatureLabel;
+    }
+
+    public static String _getValueLabel() {
+        return _valueLabel;
+    }
 
     /**
      * For building "crit" decoders

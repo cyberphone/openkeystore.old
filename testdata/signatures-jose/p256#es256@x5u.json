@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES256",
+    "x5u": "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem",
+    "signature": "R8AJnrsTxYjZfj51uz95wloSCNBvr6QeUPfa-M72J9oRHANvmPG7XZQHVntbzRgMVc-WFzCnIyledIX8jY7-Zg"
+  }
+}

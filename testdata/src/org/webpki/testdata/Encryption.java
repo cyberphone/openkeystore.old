@@ -57,19 +57,23 @@ import org.webpki.util.ArrayUtil;
 public class Encryption {
     static String baseKey;
     static String baseEncryption;
+    static String baseData;
     static SymmetricKeys symmetricKeys;
     static String keyId;
     static byte[] dataToBeEncrypted;
+    static boolean joseMode;
    
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length != 4) {
             throw new Exception("Wrong number of arguments");
         }
         CustomCryptoProvider.forcedLoad(true);
         baseKey = args[0] + File.separator;
-        baseEncryption = args[1] + File.separator;
+        baseData = args[1] + File.separator;
+        baseEncryption = args[2] + File.separator;
+        joseMode = Boolean.valueOf(args[3]);
         symmetricKeys = new SymmetricKeys(baseKey);
-        dataToBeEncrypted = ArrayUtil.readFile(baseEncryption + "datatobeencrypted.txt");
+        dataToBeEncrypted = ArrayUtil.readFile(baseData + "datatobeencrypted.txt");
 
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);

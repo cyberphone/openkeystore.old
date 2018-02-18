@@ -1,0 +1,25 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "signature": "RNVdjbCD3rdJNuMxlWI8UZGxfRzTjFA5xc5-R1ysSsn8jMdGQnTkOWftqfKpySz8WuOAUi3bxdSMp4FxYI9c9w"
+    },{
+      "alg": "RS256",
+      "jwk": {
+        "kty": "RSA",
+        "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+        "e": "AQAB"
+      },
+      "signature": "JcdhAZrOw7ziqJ1wvV2PmslANHMXpMICcrnkaTHcLkN5zxKqW_b3KvILCCDULzhLbQL3I7Evt5cfXF917DQNBNPuWI46AmUMAnGT8JoMtxVY2LmDA8qVZNeVsbxHWhQ_A5MLlxkvFXCquMMeVUJ1U7gA0gFbh2X77Uj4IJOBkJobPaC3kKJDiz78kn3FErG9LAzIEsw-OwbwyPGN6t1N-kdLtE9VN_4bgu3YWcS7nDZB0oju1ia_TINwa1l1MFBG61MCuD93ISZML4qn9dRqaQEjMh3NAhqh6pV-U9QrchaMnqH4ZmQHsLs1Gq9Rt6Biv9NohfZ72s_iR_QU7spL8g"
+    }]
+  }
+}

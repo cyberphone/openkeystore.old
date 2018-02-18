@@ -56,24 +56,29 @@ import org.webpki.json.WebKey;
 import org.webpki.util.ArrayUtil;
 
 /*
- * Create JCS test vectors
+ * Create JCS/JWS test vectors
  */
 public class Signatures {
     static String baseKey;
+    static String baseData;
     static String baseSignatures;
     static SymmetricKeys symmetricKeys;
     static JSONX509Verifier x509Verifier;
     static String keyId;
+    static boolean joseMode;
    
     static final String REMOTE_PATH  = "https://cyberphone.github.io/doc/openkeystore/";
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length != 4) {
             throw new Exception("Wrong number of arguments");
         }
         CustomCryptoProvider.forcedLoad(true);
         baseKey = args[0] + File.separator;
-        baseSignatures = args[1] + File.separator;
+        baseData = args[1] + File.separator;
+        baseSignatures = args[2] + File.separator;
+        joseMode = Boolean.valueOf(args[3]);
+        JSONCryptoHelper._setMode(joseMode);
         symmetricKeys = new SymmetricKeys(baseKey);
         
         X509Certificate rootca = JSONParser.parse(ArrayUtil.readFile(baseKey + "rootca.x5c"))
@@ -102,14 +107,14 @@ public class Signatures {
         
         multipleSign("p256", "r2048");
         multipleSign("p256", "p384");
-        
+
         asymSignCore("p256", false, true, true, false); 
-        asymSignCore("p256", false, true, false, true);
+   //     asymSignCore("p256", false, true, false, true);
     }
 
     static String cleanJavaScriptSignature(byte[] signature) throws IOException {
         String text = new String(signature, "utf-8");
-        int i = text.indexOf(" " + JSONCryptoHelper.VAL_JSON + ": \"");
+        int i = text.indexOf(" " + JSONCryptoHelper._getValueLabel() + ": \"");
         int j = text.indexOf('"', i + 10);
         return text.substring(0, i) + text.substring(j);
     }
@@ -127,13 +132,18 @@ public class Signatures {
             .getSignature(new JSONCryptoHelper.Options());
         byte[] signatureData = javaScriptSignature.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE);
         String fileName = baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jwk.js";
+        boolean changed = true;
         try {
             if (cleanJavaScriptSignature(signatureData).equals(cleanJavaScriptSignature(ArrayUtil.readFile(fileName)))) {
                 return;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            changed = false;  // New
+        }
         ArrayUtil.writeFile(fileName, signatureData);
-        System.out.println("WARNING '" + fileName + "' was UPDATED");
+        if (changed) {
+            System.out.println("WARNING '" + fileName + "' was UPDATED");
+        }
     }
 
     static String prefix(String keyType) {
@@ -142,14 +152,14 @@ public class Signatures {
     
     static String cleanSignature(byte[] signedData) throws IOException {
         JSONObjectReader reader = JSONParser.parse(signedData);
-        JSONObjectReader signature = reader.getObject(JSONCryptoHelper.SIGNATURE_JSON);
+        JSONObjectReader signature = reader.getObject(JSONCryptoHelper._getDefaultSignatureLabel());
         if (signature.hasProperty(JSONCryptoHelper.SIGNERS_JSON)) {
             JSONArrayReader array = signature.getArray(JSONCryptoHelper.SIGNERS_JSON);
             while (array.hasMore()) {
-                array.getObject().removeProperty(JSONCryptoHelper.VAL_JSON);
+                array.getObject().removeProperty(JSONCryptoHelper._getValueLabel());
             }
         } else {
-            signature.removeProperty(JSONCryptoHelper.VAL_JSON);
+            signature.removeProperty(JSONCryptoHelper._getValueLabel());
         }
         return reader.toString();
     }
@@ -229,7 +239,7 @@ public class Signatures {
     }
 
     static String getDataToSign() throws Exception {
-        return new String(ArrayUtil.readFile(baseSignatures + "datatobesigned.json"), 
+        return new String(ArrayUtil.readFile(baseData + "datatobesigned.json"), 
                           "UTF-8").replace("\r", "");
     }
     
@@ -239,7 +249,7 @@ public class Signatures {
 
     static byte[] createSignature(JSONSigner signer) throws Exception {
         String signed = parseDataToSign().setSignature(signer).toString();
-        int i = signed.indexOf(",\n  \"signature\":");
+        int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
         String unsigned = getDataToSign();
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
@@ -251,7 +261,7 @@ public class Signatures {
             dataToSign.setMultiSignature(new JSONSigner.MultiSignatureHeader(), signer);
         }
         String signed = dataToSign.toString();
-        int i = signed.indexOf(",\n  \"signature\":");
+        int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
         String unsigned = getDataToSign();
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");

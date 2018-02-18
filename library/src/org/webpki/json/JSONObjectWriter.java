@@ -562,7 +562,7 @@ public class JSONObjectWriter implements Serializable {
         }
 
         // Finally, the signature itself
-        signatureWriter.setBinary(JSONCryptoHelper.VAL_JSON,
+        signatureWriter.setBinary(JSONCryptoHelper._valueLabel,
                                   signer.signData(signer.normalizedData = 
                                           signedObject.serializeToBytes(JSONOutputFormats.NORMALIZED)));
     }
@@ -639,7 +639,7 @@ import org.webpki.json.JSONSignatureDecoder;
 </pre>
     */
     public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
-        return setSignature(JSONCryptoHelper.SIGNATURE_JSON, signer);
+        return setSignature(JSONCryptoHelper._defaultSignatureLabel, signer);
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
@@ -656,7 +656,7 @@ import org.webpki.json.JSONSignatureDecoder;
      */
     public JSONObjectWriter setMultiSignature(JSONSigner.MultiSignatureHeader multiSignatureHeader, 
                                               JSONSigner signer) throws IOException {
-        return setMultiSignature(JSONCryptoHelper.SIGNATURE_JSON, multiSignatureHeader, signer);
+        return setMultiSignature(JSONCryptoHelper._defaultSignatureLabel, multiSignatureHeader, signer);
     }
 
     public JSONObjectWriter setMultiSignature(String signatureLabel,

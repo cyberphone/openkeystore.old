@@ -118,7 +118,7 @@ public class JSONArrayWriter implements Serializable {
         JSONObjectWriter signatureObject = setObject();
         JSONObjectWriter.createHeaderPart(signer, signatureObject, new JSONSigner.MultiSignatureHeader());
         // Finally, the signature itself
-        signatureObject.setBinary(JSONCryptoHelper.VAL_JSON,
+        signatureObject.setBinary(JSONCryptoHelper._valueLabel,
                                   signer.signData(signer.normalizedData = 
                                           this.serializeToBytes(JSONOutputFormats.NORMALIZED)));
         return this;

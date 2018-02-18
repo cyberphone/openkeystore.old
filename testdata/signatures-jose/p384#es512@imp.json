@@ -1,0 +1,9 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "signature": "43ohVpjO7oN1lGdF0J9P-xQkse_WNOFkQUjQgUa89UwSIMolbACRdwutj6x9lXcfZFp4TPApqe2QnqPtuajv8oNVEl8NQp3DMdiIqU3B10Pf0K6071owbY8WiDqhCdZW"
+  }
+}

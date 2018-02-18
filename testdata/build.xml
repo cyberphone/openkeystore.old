@@ -3,8 +3,15 @@
   <property name="key.dir" location="keys"/>
   <property name="temp.dir" location=".tmp"/>
   <property name="keyBase" location="keys"/>
-  <property name="signatureBase" location="signatures"/>
-  <property name="encryptionBase" location="encryption"/>
+  <property name="dataBase" location="data"/>
+  <condition property="joseMode" value="true" else="false">
+	  <isset property="jose"/>
+  </condition>
+  <condition property="joseFile" value="-jose" else="">
+	  <isset property="jose"/>
+  </condition>
+  <property name="signatureBase" location="signatures${joseFile}"/>
+  <property name="encryptionBase" location="encryption${joseFile}"/>
 
   <path id="lib.classpath">
     <fileset dir="../library/dist">
@@ -16,7 +23,7 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help createcerts signatures encryption"/>
+    <echo message="Targets: help createcerts signatures [-Djose=0] encryption [-Djose=0]"/>
   </target>
 	
   <target name="_compile">
@@ -37,6 +44,7 @@
 
   <target name="signatures" depends="_compile">
   	<!-- Run target -->
+ 	<mkdir dir="${signatureBase}"/>
     <java fork="yes"
           classname="org.webpki.testdata.Signatures"
     	  dir="${temp.dir}"
@@ -46,12 +54,15 @@
        	    <path refid="lib.classpath"/>
     	</classpath>
         <arg value="${keyBase}"/>
+        <arg value="${dataBase}"/>
         <arg value="${signatureBase}"/>
+        <arg value="${joseMode}"/>
     </java>
   </target>
 
   <target name="encryption" depends="_compile">
   	<!-- Run target -->
+  	<mkdir dir="${encryptionBase}"/>
     <java fork="yes"
           classname="org.webpki.testdata.Encryption"
     	  dir="${temp.dir}"
@@ -61,7 +72,9 @@
        	    <path refid="lib.classpath"/>
     	</classpath>
         <arg value="${keyBase}"/>
+        <arg value="${dataBase}"/>
         <arg value="${encryptionBase}"/>
+        <arg value="${joseMode}"/>
     </java>
   </target>
 

@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "jku": "https://cyberphone.github.io/doc/openkeystore/p521.jwks",
+    "signature": "ADKzP7OXR4cYieUrdtthLCNoV25CZfv7QNuuEpWm3B-naEBiEnv3ZKyLexl4GTzCppwTp_oVOhc_Bdd-tGsrb55YAOtmxxBEwizI0DXuJ_FegSL5s1Ti2I8QX8KekZmTjekDqprI6NVRsueg0yokwLkrIizSGQqn6nk66CWDx9qr9QrU"
+  }
+}

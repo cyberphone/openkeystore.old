@@ -1,0 +1,20 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES256",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+    },
+    "crit": ["myString","https://example.com/extension"],
+    "myString": "something",
+    "https://example.com/extension": {
+      "life-is-great": true
+    },
+    "signature": "cb1GtmQr2WJF5Lpk1IiKmXDhvyBZfdTK7jI9FqrsgPjlasqNvE3bTAEh-UxMm5iayrvHMDMlek4W4ciui_hKTg"
+  }
+}
