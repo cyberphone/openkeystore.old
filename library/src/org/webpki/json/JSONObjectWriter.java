@@ -512,9 +512,10 @@ public class JSONObjectWriter implements Serializable {
     static void createHeaderPart(JSONSigner signer,
                                  JSONObjectWriter signatureWriter,
                                  MultiSignatureHeader multiSignatureHeader) throws IOException {
-        if (multiSignatureHeader.localAlgorithm)
-        signatureWriter.setString(JSONCryptoHelper.ALG_JSON,
-                signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
+        if (multiSignatureHeader.globalAlgorithm == null) {
+            signatureWriter.setString(JSONCryptoHelper.ALG_JSON,
+                                      signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
+        }
 
         // "kid" is always optional
         if (signer.keyId != null) {
@@ -673,6 +674,13 @@ import org.webpki.json.JSONSignatureDecoder;
             setupForRewrite(signatureLabel);
         }
         JSONObjectWriter globalSignatureObject = setObject(signatureLabel);
+        if (multiSignatureHeader.globalAlgorithm != null) {
+            signer.setGlobalAlgorithm(multiSignatureHeader.globalAlgorithm);
+            globalSignatureObject.setString(JSONCryptoHelper.ALG_JSON,
+                                            multiSignatureHeader
+                                                .globalAlgorithm
+                                                    .getAlgorithmId(multiSignatureHeader.algorithmPreferences));
+        }
         JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
         coreSign(signer, signatureArray.setObject(), multiSignatureHeader);
         int q = oldSignatures.size();

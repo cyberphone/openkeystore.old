@@ -52,7 +52,8 @@ public abstract class JSONSigner implements Serializable {
 
         boolean multi = true;
 
-        boolean localAlgorithm = true;
+        SignatureAlgorithms globalAlgorithm;
+        AlgorithmPreferences algorithmPreferences;
 
         MultiSignatureHeader(boolean multi) {
             this.multi = multi;
@@ -61,9 +62,18 @@ public abstract class JSONSigner implements Serializable {
         public MultiSignatureHeader() {
             
         }
+        
+        public MultiSignatureHeader setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm,
+                                                       AlgorithmPreferences algorithmPreferences) throws IOException {
+            this.globalAlgorithm = signatureAlgorithm;
+            this.algorithmPreferences = algorithmPreferences;
+            return this;
+        }
     }
 
     abstract SignatureAlgorithms getAlgorithm();
+    
+    abstract void setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm);
 
     abstract byte[] signData(byte[] data) throws IOException;
 

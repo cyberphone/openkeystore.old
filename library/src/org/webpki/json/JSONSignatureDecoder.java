@@ -75,7 +75,10 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONObjectReader signatureObject,
                          JSONCryptoHelper.Options options) throws IOException {
         this.options = options;
-        algorithmString = signatureObject.getString(JSONCryptoHelper.ALG_JSON);
+        algorithmString = options.globalSignatureAlgorithm == null ?
+                    signatureObject.getString(JSONCryptoHelper.ALG_JSON)
+                                                                   :
+                    options.globalSignatureAlgorithm.getAlgorithmId(options.algorithmPreferences);
         keyId = options.getKeyId(signatureObject);
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(signatureObject);
@@ -356,9 +359,6 @@ public class JSONSignatureDecoder implements Serializable {
         }
         LinkedHashSet<String> ex = new LinkedHashSet<String>();
         for (String property : excluded) {
-            if (JSONCryptoHelper.topLevelReserved.contains(property)) {
-                throw new IOException("Forbidden \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + property);
-            }
             if (!ex.add(property)) {
                 throw new IOException("Duplicate \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + property);
             }

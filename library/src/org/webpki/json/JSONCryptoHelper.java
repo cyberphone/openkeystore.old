@@ -21,10 +21,10 @@ import java.io.Serializable;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.SignatureAlgorithms;
 
 /**
  * Common crypto support for Cleartext JWS and JWE.
@@ -135,12 +135,6 @@ public class JSONCryptoHelper implements Serializable {
         jcsReservedWords.add(VAL_JSON);
     }
 
-    static final LinkedHashSet<String> topLevelReserved = new LinkedHashSet<String>();
-
-    static {
-        topLevelReserved.add(SIGNATURE_JSON);
-    }
-
     static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
     
     static String _defaultSignatureLabel = SIGNATURE_JSON;
@@ -232,10 +226,17 @@ public class JSONCryptoHelper implements Serializable {
         JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
         
+        SignatureAlgorithms globalSignatureAlgorithm;
+        
         boolean encryptionMode;
         
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
             this.algorithmPreferences = algorithmPreferences;
+            return this;
+        }
+
+        public Options setGlobalSignatureAlgorithm(SignatureAlgorithms globalSignatureAlgorithm) {
+            this.globalSignatureAlgorithm = globalSignatureAlgorithm;
             return this;
         }
 

@@ -27,6 +27,7 @@ import java.security.cert.X509Certificate;
 import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
@@ -105,8 +106,9 @@ public class Signatures {
             symmSign(512, MACAlgorithms.HMAC_SHA512, i == 0);
         }
         
-        multipleSign("p256", "r2048");
-        multipleSign("p256", "p384");
+        multipleSign("p256", "r2048", null);
+        multipleSign("p256", "p384", null);
+        multipleSign("p256", "p384", AsymSignatureAlgorithms.ECDSA_SHA512);
 
         asymSignCore("p256", false, true, true, false); 
         asymSignCore("p256", false, true, false, true);
@@ -255,10 +257,11 @@ public class Signatures {
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
     }
     
-    static byte[] createSignatures(Vector<JSONSigner> signers) throws Exception {
+    static byte[] createSignatures(Vector<JSONSigner> signers,
+                                   JSONSigner.MultiSignatureHeader multiSignatureHeader) throws Exception {
         JSONObjectWriter dataToSign = parseDataToSign();
         for (JSONSigner signer : signers) {
-            dataToSign.setMultiSignature(new JSONSigner.MultiSignatureHeader(), signer);
+            dataToSign.setMultiSignature(multiSignatureHeader, signer);
         }
         String signed = dataToSign.toString();
         int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
@@ -276,15 +279,22 @@ public class Signatures {
         return jwkPlus.getKeyPair();
     }
 
-    static void multipleSign(String keyType1, String keyType2) throws Exception {
+    static void multipleSign(String keyType1, String keyType2, AsymSignatureAlgorithms globalAlgorithm) throws Exception {
         KeyPair keyPair1 = readJwk(keyType1);
         KeyPair keyPair2 = readJwk(keyType2);
         Vector<JSONSigner> signers = new Vector<JSONSigner>();
         signers.add(new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null));
         signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
-        byte[] signedData = createSignatures(signers);
-        Vector<JSONSignatureDecoder> signatures = 
-                JSONParser.parse(signedData).getMultiSignature(new JSONCryptoHelper.Options());
+        JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader();
+        String fileExt = "";
+        if (globalAlgorithm != null) {
+            multiSignatureHeader.setGlobalAlgorithm(globalAlgorithm, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+            fileExt = "-glob+alg";
+        }
+        byte[] signedData = createSignatures(signers, multiSignatureHeader);
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
+        options.setGlobalSignatureAlgorithm(globalAlgorithm);
+        Vector<JSONSignatureDecoder> signatures = JSONParser.parse(signedData).getMultiSignature(options);
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
         if (signatures.size() != 2) {
@@ -292,7 +302,7 @@ public class Signatures {
         }
         optionalUpdate(baseSignatures + prefix(keyType1) + getAlgorithm(signatures.get(0)) + ","
                                       + prefix(keyType2) + getAlgorithm(signatures.get(1))
-                                      + "@mult-jwk.json",
+                                      + "@mult" + fileExt + "-jwk.json",
                        signedData,
                        true);
      }

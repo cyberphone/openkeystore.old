@@ -1535,8 +1535,7 @@ public class JSONBaseHTML  {
                   "be excluded from the signature process." + 
                   Types.LINE_SEPARATOR +
                   "Property names that are to be excluded from the signature process " +
-                  "<b>must not</b> be <i>duplicated</i> or try to override " +
-                  enumerateAttributes(JSONCryptoHelper.topLevelReserved.toArray(new String[0]), false) + ". " +
+                  "<b>must not</b> be <i>duplicated</i> or override the signature object label. " +
                   Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures containing listed properties " +
                   "that are not found as well as empty <code>&quot;" +

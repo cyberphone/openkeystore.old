@@ -123,4 +123,9 @@ public class JSONX509Signer extends JSONSigner {
     void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setCertificatePath(certificatePath);
     }
+
+    @Override
+    void setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm) {
+        algorithm = (AsymSignatureAlgorithms)signatureAlgorithm;   
+    }
 }
