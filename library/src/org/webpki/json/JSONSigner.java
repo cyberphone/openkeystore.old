@@ -54,13 +54,15 @@ public abstract class JSONSigner implements Serializable {
 
         SignatureAlgorithms globalAlgorithm;
         AlgorithmPreferences algorithmPreferences;
+        
+        JSONCryptoHelper.Options optionalFormatVerifier;
 
         MultiSignatureHeader(boolean multi) {
             this.multi = multi;
         }
         
-        public MultiSignatureHeader() {
-            
+        public MultiSignatureHeader(JSONCryptoHelper.Options optionalFormatVerifier) {
+            this.optionalFormatVerifier = optionalFormatVerifier;
         }
         
         public MultiSignatureHeader setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm,

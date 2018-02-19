@@ -516,10 +516,11 @@ public class JSONObjectReader implements Serializable, Cloneable {
         options.encryptionMode(false);
         JSONObjectReader reader = getObject(signatureLabel);
         JSONArrayReader arrayReader = reader.getArray(JSONCryptoHelper.SIGNERS_JSON);
-        @SuppressWarnings("unchecked")
-        Vector<JSONValue> save = (Vector<JSONValue>) arrayReader.array.clone();
+        Vector<JSONValue> save = new Vector<JSONValue>();
+        save.addAll(arrayReader.array);
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
+        options.globalSignatureAlgorithm = reader.getStringConditional(JSONCryptoHelper.ALG_JSON);
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
@@ -528,7 +529,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
             arrayReader.array.add(new JSONValue(JSONTypes.OBJECT, signature.root));
             signatures.add(new JSONSignatureDecoder(this, signature, options));
         }
-        arrayReader.array = save;
+        arrayReader.array.clear();
+        arrayReader.array.addAll(save);
         return signatures;
     }
 

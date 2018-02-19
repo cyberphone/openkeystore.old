@@ -76,9 +76,7 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONCryptoHelper.Options options) throws IOException {
         this.options = options;
         algorithmString = options.globalSignatureAlgorithm == null ?
-                    signatureObject.getString(JSONCryptoHelper.ALG_JSON)
-                                                                   :
-                    options.globalSignatureAlgorithm.getAlgorithmId(options.algorithmPreferences);
+              signatureObject.getString(JSONCryptoHelper.ALG_JSON) : options.globalSignatureAlgorithm;
         keyId = options.getKeyId(signatureObject);
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(signatureObject);

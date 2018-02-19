@@ -226,17 +226,12 @@ public class JSONCryptoHelper implements Serializable {
         JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
         
-        SignatureAlgorithms globalSignatureAlgorithm;
+        String globalSignatureAlgorithm;
         
         boolean encryptionMode;
         
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
             this.algorithmPreferences = algorithmPreferences;
-            return this;
-        }
-
-        public Options setGlobalSignatureAlgorithm(SignatureAlgorithms globalSignatureAlgorithm) {
-            this.globalSignatureAlgorithm = globalSignatureAlgorithm;
             return this;
         }
 

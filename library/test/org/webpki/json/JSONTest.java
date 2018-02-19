@@ -3546,7 +3546,7 @@ public class JSONTest {
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(r2048.getPublic()));
-        JSONSigner.MultiSignatureHeader msh = new JSONSigner.MultiSignatureHeader();
+        JSONSigner.MultiSignatureHeader msh = new JSONSigner.MultiSignatureHeader(null);
         writer = new JSONObjectWriter().setInt("value", 3)
             .setMultiSignature(msh, new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null))
             .setMultiSignature(msh, new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));

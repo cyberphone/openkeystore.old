@@ -644,7 +644,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
-        coreSign(signer, setObject(signatureLabel), new JSONSigner.MultiSignatureHeader());
+        coreSign(signer, setObject(signatureLabel), new JSONSigner.MultiSignatureHeader(null));
         return this;
     }
     /**
@@ -686,6 +686,9 @@ import org.webpki.json.JSONSignatureDecoder;
         int q = oldSignatures.size();
         while (--q >= 0) {
             signatureArray.array.insertElementAt(new JSONValue(JSONTypes.OBJECT, oldSignatures.get(q)), 0);
+        }
+        if (multiSignatureHeader.optionalFormatVerifier != null) {
+            new JSONObjectReader(root).getMultiSignature(signatureLabel, multiSignatureHeader.optionalFormatVerifier);
         }
         return this;
     }

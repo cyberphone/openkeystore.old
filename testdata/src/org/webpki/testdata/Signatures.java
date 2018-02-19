@@ -285,15 +285,14 @@ public class Signatures {
         Vector<JSONSigner> signers = new Vector<JSONSigner>();
         signers.add(new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null));
         signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
-        JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader();
+        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
+        JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader(options);
         String fileExt = "";
         if (globalAlgorithm != null) {
             multiSignatureHeader.setGlobalAlgorithm(globalAlgorithm, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             fileExt = "-glob+alg";
         }
         byte[] signedData = createSignatures(signers, multiSignatureHeader);
-        JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
-        options.setGlobalSignatureAlgorithm(globalAlgorithm);
         Vector<JSONSignatureDecoder> signatures = JSONParser.parse(signedData).getMultiSignature(options);
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
