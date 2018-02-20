@@ -69,6 +69,14 @@ public class Signatures {
     static boolean joseMode;
    
     static final String REMOTE_PATH  = "https://cyberphone.github.io/doc/openkeystore/";
+    
+    static final String[] UNSIGNED_DATA = new String[]{"myUnsignedData"};
+    
+    static JSONObjectWriter getMixedData() throws IOException {
+        return new JSONObjectWriter()
+            .setString("mySignedData", "something")
+            .setString("myUnsignedData", "something else");
+    }
 
     public static void main(String[] args) throws Exception {
         if (args.length != 4) {
@@ -260,10 +268,14 @@ public class Signatures {
     }
     
     static byte[] createSignatures(Vector<JSONSigner> signers,
-                                   JSONSigner.MultiSignatureHeader multiSignatureHeader) throws Exception {
-        JSONObjectWriter dataToSign = parseDataToSign();
+                                   JSONSigner.MultiSignatureHeader multiSignatureHeader,
+                                   boolean excl) throws Exception {
+        JSONObjectWriter dataToSign = excl ? getMixedData() : parseDataToSign();
         for (JSONSigner signer : signers) {
             dataToSign.setMultiSignature(multiSignatureHeader, signer);
+        }
+        if (excl) {
+            return dataToSign.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         }
         String signed = dataToSign.toString();
         int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
@@ -313,8 +325,8 @@ public class Signatures {
             fileExt = "-glob+alg";
         }
         if (excl) {
-            multiSignatureHeader.setExcluded(new String[]{"numbers"});
-            options.setPermittedExclusions(new String[]{"numbers"});
+            multiSignatureHeader.setExcluded(UNSIGNED_DATA);
+            options.setPermittedExclusions(UNSIGNED_DATA);
             fileExt += "-excl";
         }
         if (crit) {
@@ -322,7 +334,7 @@ public class Signatures {
             multiSignatureHeader.setExtensions(extensionHolder);
             options.setPermittedExtensions(extensionHolder);
         }
-        byte[] signedData = createSignatures(signers, multiSignatureHeader);
+        byte[] signedData = createSignatures(signers, multiSignatureHeader, excl);
         Vector<JSONSignatureDecoder> signatures = JSONParser.parse(signedData).getMultiSignature(options);
         signatures.get(0).verify(new JSONAsymKeyVerifier(keyPair1.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(keyPair2.getPublic()));
@@ -365,11 +377,8 @@ public class Signatures {
         }
         byte[] signedData;
         if (wantExclusions) {
-            signer.setExcluded(new String[]{"myUnsignedData"});
-            JSONObjectWriter mixedData = new JSONObjectWriter()
-                .setString("mySignedData", "something")
-                .setString("myUnsignedData", "something else")
-                .setSignature(signer);
+            signer.setExcluded(UNSIGNED_DATA);
+            JSONObjectWriter mixedData = getMixedData().setSignature(signer);
             signedData = mixedData.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
 
         } else {
@@ -386,7 +395,7 @@ public class Signatures {
             options.setPermittedExtensions(eh);
         }
         if (wantExclusions) {
-            options.setPermittedExclusions(new String[]{"myUnsignedData"});
+            options.setPermittedExclusions(UNSIGNED_DATA);
         }
         String addedFeature = wantExtensions ? "crit-" : (wantExclusions ? "excl-" : "");
         JSONSignatureDecoder decoder = 

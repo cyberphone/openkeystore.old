@@ -1,7 +1,7 @@
 {
   "mySignedData": "something",
   "myUnsignedData": "something else",
-  "signature": {
+  "__cleartext_signature": {
     "excl": ["myUnsignedData"],
     "signers": [{
       "alg": "ES256",
@@ -11,7 +11,7 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "wWWOfNS1yN957KRMi6fQ4sVHr55Sd48L9tuWrHpVBsmvN6bMcgCtxbevpJTiAve-GAgDqx0Nys6Picnrf7GF8Q"
+      "signature": "W91yxbjB59wEkxe2ieZILqYLMJYGp0lQTsfETaribEwPiI5FPnt46NIv03a30i_rcIZYU_xuLBxAd8u_gETZWw"
     },{
       "alg": "ES512",
       "jwk": {
@@ -20,7 +20,7 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "val": "VUa5CXEoIHGD01StX1VSxakrWEGFmwJ5E7QEwXK21PBHH1YNAMz4WaWH7vv92YG4KIS4B8QMsh-xOfp9CgEqUnjwqhEsYZ2MSgsx2WKHP8Zq29fH1-eC4eXGwJOkfs1O"
+      "signature": "xoxi4mCMKKL0NpA4QqrEOJAp9WK3o0AcRj2GZKoy3nt1hUtK5Wuid4NWKrCZ0rxgRCGjbTn7Y2MHuMk8Vx4nZ2lMK7OBQtKMMBf_zbm0WKSASfsoB_ucMvLvqfCA7tYY"
     }]
   }
 }
