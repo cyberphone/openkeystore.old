@@ -18,7 +18,6 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.regex.Pattern;
@@ -195,6 +194,10 @@ public class JSONCryptoHelper implements Serializable {
             }
             return this;
         }
+        
+        String[] getPropertyList() {
+            return extensions.keySet().toArray(new String[0]);
+        }
     }
 
     /**
@@ -293,9 +296,9 @@ public class JSONCryptoHelper implements Serializable {
             return keyId;
         }
 
-        void getExtensions(JSONObjectReader reader, LinkedHashMap<String, Extension> extensions) throws IOException {
-            if (reader.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
-                String[] properties = reader.getStringArray(JSONCryptoHelper.CRIT_JSON);
+        void getExtensions(JSONObjectReader innerObject, JSONObjectReader outerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
+            if (outerObject.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
+                String[] properties = outerObject.getStringArray(JSONCryptoHelper.CRIT_JSON);
                 checkExtensions(properties, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
                     throw new IOException("Use of \"" + JSONCryptoHelper.CRIT_JSON + "\" must be set in options");
@@ -307,7 +310,7 @@ public class JSONCryptoHelper implements Serializable {
                     }
                     try {
                         JSONCryptoHelper.Extension extension = extensionEntry.extensionClass.newInstance();
-                        extension.decode(reader);
+                        extension.decode(innerObject);
                         extensions.put(name, extension);
                     } catch (InstantiationException e) {
                         throw new IOException (e);

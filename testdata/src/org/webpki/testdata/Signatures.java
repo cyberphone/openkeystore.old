@@ -110,6 +110,7 @@ public class Signatures {
         multipleSign("p256", "p384", false, false, null);
         multipleSign("p256", "p384", false, false, AsymSignatureAlgorithms.ECDSA_SHA512);
         multipleSign("p256", "p384", false, true, null);
+        multipleSign("p256", "p384", true, false, null);
 
         asymSignCore("p256", false, true, true, false); 
         asymSignCore("p256", false, true, false, true);
@@ -285,8 +286,25 @@ public class Signatures {
         KeyPair keyPair1 = readJwk(keyType1);
         KeyPair keyPair2 = readJwk(keyType2);
         Vector<JSONSigner> signers = new Vector<JSONSigner>();
-        signers.add(new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null));
-        signers.add(new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null));
+        JSONAsymKeySigner signer = new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null);
+        if (crit) {
+            signer.setExtensions(new JSONObjectWriter()
+            .setString(new Extension1().getExtensionUri(), "some data")
+            .setObject(new Extension2().getExtensionUri(), 
+                       new JSONObjectWriter().setBoolean("life-is-great", true)));
+        }
+        signers.add(signer);
+        signer = new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null); 
+        if (crit) {
+            signer.setExtensions(new JSONObjectWriter()
+            .setString(new Extension1().getExtensionUri(), "other data")
+            .setObject(new Extension2().getExtensionUri(), 
+                       new JSONObjectWriter().setBoolean("life-is-great", true)));
+        }
+        signers.add(signer);
+        JSONCryptoHelper.ExtensionHolder extensionHolder = new JSONCryptoHelper.ExtensionHolder()
+            .addExtension(Extension1.class, true)
+            .addExtension(Extension2.class, false);
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader(options);
         String fileExt = "";
@@ -301,6 +319,8 @@ public class Signatures {
         }
         if (crit) {
             fileExt += "-crit";
+            multiSignatureHeader.setExtensions(extensionHolder);
+            options.setPermittedExtensions(extensionHolder);
         }
         byte[] signedData = createSignatures(signers, multiSignatureHeader);
         Vector<JSONSignatureDecoder> signatures = JSONParser.parse(signedData).getMultiSignature(options);

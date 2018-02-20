@@ -533,9 +533,14 @@ public class JSONObjectWriter implements Serializable {
 
         // Optional extensions
         if (signer.extensions != null) {
-            JSONArrayWriter extensions = signatureWriter.setArray(JSONCryptoHelper.CRIT_JSON);
+            JSONArrayWriter extensions = null;
+            if (!multiSignatureHeader.multi) {
+                extensions = signatureWriter.setArray(JSONCryptoHelper.CRIT_JSON);
+            }
             for (String property : signer.extensions.getProperties()) {
-                extensions.setString(property);
+                if (!multiSignatureHeader.multi) {
+                    extensions.setString(property);
+                }
                 signatureWriter.setProperty(property, signer.extensions.getProperty(property));
             }
         }
@@ -687,6 +692,10 @@ import org.webpki.json.JSONSignatureDecoder;
         if (multiSignatureHeader.excluded != null) {
             signer.setExcluded(multiSignatureHeader.excluded);
             globalSignatureObject.setupForRewrite(JSONCryptoHelper.EXCL_JSON);
+        }
+        if (multiSignatureHeader.OptionalExtensions != null) {
+            globalSignatureObject.setStringArray(JSONCryptoHelper.CRIT_JSON,
+                                                 multiSignatureHeader.OptionalExtensions.getPropertyList());
         }
         JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
         coreSign(signer, signatureArray.setObject(), multiSignatureHeader);

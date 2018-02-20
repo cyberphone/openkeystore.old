@@ -58,6 +58,8 @@ public abstract class JSONSigner implements Serializable {
         JSONCryptoHelper.Options optionalFormatVerifier;
         
         String[] excluded;
+        
+        JSONCryptoHelper.ExtensionHolder OptionalExtensions;
 
         public MultiSignatureHeader(JSONCryptoHelper.Options optionalFormatVerifier) {
             this.optionalFormatVerifier = optionalFormatVerifier;
@@ -73,6 +75,12 @@ public abstract class JSONSigner implements Serializable {
         public MultiSignatureHeader setExcluded(String[] excluded) throws IOException {
             this.excluded = excluded;
             JSONSignatureDecoder.checkExcluded(excluded);
+            return this;
+        }
+
+        public MultiSignatureHeader setExtensions(JSONCryptoHelper.ExtensionHolder extensionHolder) throws IOException {
+            this.OptionalExtensions = extensionHolder;
+            JSONCryptoHelper.checkExtensions(extensionHolder.getPropertyList(), false);
             return this;
         }
     }
