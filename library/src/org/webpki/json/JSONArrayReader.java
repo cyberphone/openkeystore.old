@@ -176,6 +176,6 @@ public class JSONArrayReader implements Serializable {
         index = array.size() - 1;
         JSONObjectReader signature = getObject();
         index = save;
-        return new JSONSignatureDecoder(new JSONObjectReader(dummy), signature, options);
+        return new JSONSignatureDecoder(new JSONObjectReader(dummy), signature, signature, options);
     }
 }

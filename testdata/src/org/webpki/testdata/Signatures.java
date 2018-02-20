@@ -106,9 +106,10 @@ public class Signatures {
             symmSign(512, MACAlgorithms.HMAC_SHA512, i == 0);
         }
         
-        multipleSign("p256", "r2048", null);
-        multipleSign("p256", "p384", null);
-        multipleSign("p256", "p384", AsymSignatureAlgorithms.ECDSA_SHA512);
+        multipleSign("p256", "r2048", false, false, null);
+        multipleSign("p256", "p384", false, false, null);
+        multipleSign("p256", "p384", false, false, AsymSignatureAlgorithms.ECDSA_SHA512);
+        multipleSign("p256", "p384", false, true, null);
 
         asymSignCore("p256", false, true, true, false); 
         asymSignCore("p256", false, true, false, true);
@@ -279,7 +280,8 @@ public class Signatures {
         return jwkPlus.getKeyPair();
     }
 
-    static void multipleSign(String keyType1, String keyType2, AsymSignatureAlgorithms globalAlgorithm) throws Exception {
+    static void multipleSign(String keyType1, String keyType2, 
+                             boolean crit, boolean excl, AsymSignatureAlgorithms globalAlgorithm) throws Exception {
         KeyPair keyPair1 = readJwk(keyType1);
         KeyPair keyPair2 = readJwk(keyType2);
         Vector<JSONSigner> signers = new Vector<JSONSigner>();
@@ -291,6 +293,14 @@ public class Signatures {
         if (globalAlgorithm != null) {
             multiSignatureHeader.setGlobalAlgorithm(globalAlgorithm, AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             fileExt = "-glob+alg";
+        }
+        if (excl) {
+            multiSignatureHeader.setExcluded(new String[]{"numbers"});
+            options.setPermittedExclusions(new String[]{"numbers"});
+            fileExt += "-excl";
+        }
+        if (crit) {
+            fileExt += "-crit";
         }
         byte[] signedData = createSignatures(signers, multiSignatureHeader);
         Vector<JSONSignatureDecoder> signatures = JSONParser.parse(signedData).getMultiSignature(options);

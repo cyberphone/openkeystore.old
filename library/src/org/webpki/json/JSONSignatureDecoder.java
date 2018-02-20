@@ -72,14 +72,15 @@ public class JSONSignatureDecoder implements Serializable {
     LinkedHashMap<String,JSONCryptoHelper.Extension> extensions = new LinkedHashMap<String,JSONCryptoHelper.Extension>();
 
     JSONSignatureDecoder(JSONObjectReader signedData,
-                         JSONObjectReader signatureObject,
+                         JSONObjectReader innerSignatureObject,
+                         JSONObjectReader outerSignatureObject,
                          JSONCryptoHelper.Options options) throws IOException {
         this.options = options;
         algorithmString = options.globalSignatureAlgorithm == null ?
-              signatureObject.getString(JSONCryptoHelper.ALG_JSON) : options.globalSignatureAlgorithm;
-        keyId = options.getKeyId(signatureObject);
+              innerSignatureObject.getString(JSONCryptoHelper.ALG_JSON) : options.globalSignatureAlgorithm;
+        keyId = options.getKeyId(innerSignatureObject);
         if (options.requirePublicKeyInfo) {
-            getPublicKeyInfo(signatureObject);
+            getPublicKeyInfo(innerSignatureObject);
         } else {
             for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values()) {
                 if (algorithmString.equals(alg.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER)) ||
@@ -94,20 +95,21 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
 
-        options.getExtensions(signatureObject, extensions);
+        options.getExtensions(innerSignatureObject, extensions);
 
         LinkedHashMap<String, JSONValue> saveExcluded = null;
+        JSONValue saveExcludeArray = null;
 
         // Note: the following section will not execute for array signatures
         if (options.exclusions == null) {
-            if (signatureObject.hasProperty(JSONCryptoHelper.EXCL_JSON)) {
+            if (outerSignatureObject.hasProperty(JSONCryptoHelper.EXCL_JSON)) {
                 throw new IOException("Use of \"" + JSONCryptoHelper.EXCL_JSON +
                                       "\" must be set in options");
             }
         } else {
             saveExcluded = new LinkedHashMap<String, JSONValue>(signedData.root.properties);
             LinkedHashSet<String> parsedExcludes = 
-                    checkExcluded(signatureObject.getStringArray(JSONCryptoHelper.EXCL_JSON));
+                    checkExcluded(outerSignatureObject.getStringArray(JSONCryptoHelper.EXCL_JSON));
             for (String excluded : parsedExcludes.toArray(new String[0])) {
                 if (!options.exclusions.contains(excluded)) {
                     throw new IOException("Unexpected \"" + JSONCryptoHelper.EXCL_JSON + 
@@ -120,39 +122,40 @@ public class JSONSignatureDecoder implements Serializable {
                     throw new IOException("Missing \"" + JSONCryptoHelper.EXCL_JSON +
                                           "\" property: " + excluded);
                 }
-             }
+            }
+            // Hide the exclude property from the serializer...
+            saveExcludeArray = outerSignatureObject.root.properties.get(JSONCryptoHelper.EXCL_JSON);
+            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCL_JSON, null);
         }
 
-        signatureValue = signatureObject.getBinary(JSONCryptoHelper._valueLabel);
+        signatureValue = innerSignatureObject.getBinary(JSONCryptoHelper._valueLabel);
 
-        /////////////////////////////////////////////////////////////////////////////////
-        // Begin JCS core normalization                                                //
-        //                                                                             //
-        // 1. Make a shallow copy of the signature object                              //
-        LinkedHashMap<String, JSONValue> savedProperties =                             //
-                new LinkedHashMap<String, JSONValue>(signatureObject.root.properties); //
-        //                                                                             //
-        // 2. Hide the signature value property for the serializer...                  //
-        signatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
-        //                                                                             //
-        // 3. Hide the optional exclude property from the serializer...                //
-        signatureObject.root.properties.remove(JSONCryptoHelper.EXCL_JSON);          //
-        //                                                                             //
-        // 4. Serialize ("JSON.stringify()")                                           //
-        normalizedData = signedData.serializeToBytes(JSONOutputFormats.NORMALIZED);    //
-        //                                                                             //
-        // 5. Check for unread (=forbidden) data                                       //
-        signatureObject.checkForUnread();                                              //
-        //                                                                             //
-        // 6. Restore the signature object                                             //
-        signatureObject.root.properties = savedProperties;                             //
-        //                                                                             //
-        // End JCS core normalization                                                  //
-        /////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Begin JCS core normalization                                                     //
+        //                                                                                  //
+        // 1. Make a shallow copy of the signature object                                   //
+        LinkedHashMap<String, JSONValue> savedProperties =                                  //
+                new LinkedHashMap<String, JSONValue>(innerSignatureObject.root.properties); //
+        //                                                                                  //
+        // 2. Hide the signature value property for the serializer...                       //
+        innerSignatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
+        //                                                                                  //
+        // 3. Serialize ("JSON.stringify()")                                                //
+        normalizedData = signedData.serializeToBytes(JSONOutputFormats.NORMALIZED);         //
+        //                                                                                  //
+        // 4. Restore the signature object                                                  //
+        innerSignatureObject.root.properties = savedProperties;                             //
+        //                                                                                  //
+        // End JCS core normalization                                                       //
+        //////////////////////////////////////////////////////////////////////////////////////
 
         if (options.exclusions != null) {
             signedData.root.properties = saveExcluded;
+            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCL_JSON, saveExcludeArray);
         }
+
+        // Check for unread (=forbidden) data                                            //
+        innerSignatureObject.checkForUnread();                                              //
 
         if (options.requirePublicKeyInfo) switch (getSignatureType()) {
             case X509_CERTIFICATE:

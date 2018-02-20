@@ -50,17 +50,15 @@ public abstract class JSONSigner implements Serializable {
 
     public static class MultiSignatureHeader {
 
-        boolean multi = true;
+        boolean multi = false;
 
         SignatureAlgorithms globalAlgorithm;
         AlgorithmPreferences algorithmPreferences;
         
         JSONCryptoHelper.Options optionalFormatVerifier;
-
-        MultiSignatureHeader(boolean multi) {
-            this.multi = multi;
-        }
         
+        String[] excluded;
+
         public MultiSignatureHeader(JSONCryptoHelper.Options optionalFormatVerifier) {
             this.optionalFormatVerifier = optionalFormatVerifier;
         }
@@ -69,6 +67,12 @@ public abstract class JSONSigner implements Serializable {
                                                        AlgorithmPreferences algorithmPreferences) throws IOException {
             this.globalAlgorithm = signatureAlgorithm;
             this.algorithmPreferences = algorithmPreferences;
+            return this;
+        }
+
+        public MultiSignatureHeader setExcluded(String[] excluded) throws IOException {
+            this.excluded = excluded;
+            JSONSignatureDecoder.checkExcluded(excluded);
             return this;
         }
     }

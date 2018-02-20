@@ -559,7 +559,9 @@ public class JSONObjectWriter implements Serializable {
                 rd.removeProperty(property);
             }
             signedObject = new JSONObjectWriter(rd);
-            signatureWriter.setStringArray(JSONCryptoHelper.EXCL_JSON, signer.excluded);
+            if (!multiSignatureHeader.multi) {
+                signatureWriter.setStringArray(JSONCryptoHelper.EXCL_JSON, signer.excluded);
+            }
         }
 
         // Finally, the signature itself
@@ -663,6 +665,7 @@ import org.webpki.json.JSONSignatureDecoder;
     public JSONObjectWriter setMultiSignature(String signatureLabel,
                                               JSONSigner.MultiSignatureHeader multiSignatureHeader,
                                               JSONSigner signer) throws IOException {
+        multiSignatureHeader.multi = true;
         JSONObjectReader reader = new JSONObjectReader(root);
         Vector<JSONObject> oldSignatures = new Vector<JSONObject>();
         if (reader.hasProperty(signatureLabel)) {
@@ -681,11 +684,18 @@ import org.webpki.json.JSONSignatureDecoder;
                                                 .globalAlgorithm
                                                     .getAlgorithmId(multiSignatureHeader.algorithmPreferences));
         }
+        if (multiSignatureHeader.excluded != null) {
+            signer.setExcluded(multiSignatureHeader.excluded);
+            globalSignatureObject.setupForRewrite(JSONCryptoHelper.EXCL_JSON);
+        }
         JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
         coreSign(signer, signatureArray.setObject(), multiSignatureHeader);
         int q = oldSignatures.size();
         while (--q >= 0) {
             signatureArray.array.insertElementAt(new JSONValue(JSONTypes.OBJECT, oldSignatures.get(q)), 0);
+        }
+        if (multiSignatureHeader.excluded != null) {
+             globalSignatureObject.setStringArray(JSONCryptoHelper.EXCL_JSON, multiSignatureHeader.excluded);
         }
         if (multiSignatureHeader.optionalFormatVerifier != null) {
             new JSONObjectReader(root).getMultiSignature(signatureLabel, multiSignatureHeader.optionalFormatVerifier);
@@ -901,6 +911,9 @@ import org.webpki.json.JSONSignatureDecoder;
             }
             lastIndex = currentIndex;
             JSONValue jsonValue = object.properties.get(property);
+            if (jsonValue == null) {
+                continue;
+            }
             if (next) {
                 buffer.append(',');
             }

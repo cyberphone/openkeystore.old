@@ -497,7 +497,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
         if (signatureObject.hasProperty(JSONCryptoHelper.SIGNERS_JSON)) {
             throw new IOException("Use \"getMultiSignature()\" for this object");
         }
-        return new JSONSignatureDecoder(this, signatureObject, options);
+        return new JSONSignatureDecoder(this, signatureObject, signatureObject, options);
     }
 
     /**
@@ -514,20 +514,20 @@ public class JSONObjectReader implements Serializable, Cloneable {
     
     public Vector<JSONSignatureDecoder> getMultiSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(false);
-        JSONObjectReader reader = getObject(signatureLabel);
-        JSONArrayReader arrayReader = reader.getArray(JSONCryptoHelper.SIGNERS_JSON);
+        JSONObjectReader outerSignatureObject = getObject(signatureLabel);
+        JSONArrayReader arrayReader = outerSignatureObject.getArray(JSONCryptoHelper.SIGNERS_JSON);
         @SuppressWarnings("unchecked")
         Vector<JSONValue> save = (Vector<JSONValue>) arrayReader.array.clone();
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
-        options.globalSignatureAlgorithm = reader.getStringConditional(JSONCryptoHelper.ALG_JSON);
+        options.globalSignatureAlgorithm = outerSignatureObject.getStringConditional(JSONCryptoHelper.ALG_JSON);
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
-        for (JSONObjectReader signature : signatureObjects) {
+        for (JSONObjectReader innerSignatureObject : signatureObjects) {
             arrayReader.array.clear();
-            arrayReader.array.add(new JSONValue(JSONTypes.OBJECT, signature.root));
-            signatures.add(new JSONSignatureDecoder(this, signature, options));
+            arrayReader.array.add(new JSONValue(JSONTypes.OBJECT, innerSignatureObject.root));
+            signatures.add(new JSONSignatureDecoder(this, innerSignatureObject, outerSignatureObject, options));
         }
         arrayReader.array.clear();
         arrayReader.array.addAll(save);
