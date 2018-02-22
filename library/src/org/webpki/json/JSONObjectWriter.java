@@ -532,13 +532,14 @@ public class JSONObjectWriter implements Serializable {
         }
 
         // Optional extensions
+        boolean localExtension = !multiSignatureHeader.multi || multiSignatureHeader.OptionalExtensions == null;
         if (signer.extensions != null) {
             JSONArrayWriter extensions = null;
-            if (!multiSignatureHeader.multi) {
+            if (localExtension) {
                 extensions = signatureWriter.setArray(JSONCryptoHelper.CRIT_JSON);
             }
             for (String property : signer.extensions.getProperties()) {
-                if (!multiSignatureHeader.multi) {
+                if (localExtension) {
                     extensions.setString(property);
                 }
                 signatureWriter.setProperty(property, signer.extensions.getProperty(property));

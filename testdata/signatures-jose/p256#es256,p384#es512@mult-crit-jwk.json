@@ -3,7 +3,6 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
-    "crit": ["myString","https://example.com/extension"],
     "signers": [{
       "alg": "ES256",
       "jwk": {
@@ -12,11 +11,11 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "myString": "some data",
+      "crit": ["https://example.com/extension"],
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "signature": "rJUW8xr6_UgyqA_JIc519PLSM0q9kO4D-bLyBeBu-0z8wn46wEaUJCq5vvElPbgHuO7ACKQmrSm74k_FZrZBCw"
+      "signature": "DIMTXPg9KiH2IVx3e77d_mmIJihyF7_ojjD-HNLuEpFHl9S40lKVO9pWsvJtq5b-5qeUOh6zswAxEkLHWcqmTQ"
     },{
       "alg": "ES512",
       "jwk": {
@@ -25,11 +24,9 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
+      "crit": ["myString"],
       "myString": "other data",
-      "https://example.com/extension": {
-        "life-is-great": true
-      },
-      "signature": "T6MMaUABjJ10Q63IVbnIylmuA1QYAS1iLfkgxBPczJSLMPHz8TQ8z4xA-Lc0T7VU83XhnybMLRfEsu5QmXqtkQo3obqcGRJm0ucOb1ixlN8NRUy15w_IcW111-wX1oxY"
+      "signature": "ErCeFgmC1UDFqgn-O-q27cviw1c6Mkw6_ztyaMZFu9Lev1RpqCamCsdTg5DGNwDURY3wJTs3q41O4SF0qygoeBLOfNDdIbvrTw8tLCcgN0bVQ-kgxmIGbh3u6wZAWJne"
     }]
   }
 }

@@ -521,6 +521,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
         options.globalSignatureAlgorithm = outerSignatureObject.getStringConditional(JSONCryptoHelper.ALG_JSON);
+        options.globalExtensions = outerSignatureObject.getStringArrayConditional(JSONCryptoHelper.CRIT_JSON);
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());

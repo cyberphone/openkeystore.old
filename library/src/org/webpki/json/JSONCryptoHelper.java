@@ -18,12 +18,13 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.SignatureAlgorithms;
 
 /**
  * Common crypto support for Cleartext JWS and JWE.
@@ -230,6 +231,7 @@ public class JSONCryptoHelper implements Serializable {
         LinkedHashSet<String> exclusions;
         
         String globalSignatureAlgorithm;
+        String[] globalExtensions;
         
         boolean encryptionMode;
         
@@ -296,14 +298,19 @@ public class JSONCryptoHelper implements Serializable {
             return keyId;
         }
 
-        void getExtensions(JSONObjectReader innerObject, JSONObjectReader outerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
-            if (outerObject.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
-                String[] properties = outerObject.getStringArray(JSONCryptoHelper.CRIT_JSON);
-                checkExtensions(properties, encryptionMode);
+        void getExtensions(JSONObjectReader innerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
+            String[] extensionList = globalExtensions;
+            if (extensionList == null) {
+                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.CRIT_JSON);
+            } else if (innerObject.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
+                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.CRIT_JSON + "\" not allowed");
+            }
+            if (extensionList != null) {
+                checkExtensions(extensionList, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
                     throw new IOException("Use of \"" + JSONCryptoHelper.CRIT_JSON + "\" must be set in options");
                 }
-                for (String name : properties) {
+                for (String name : extensionList) {
                     JSONCryptoHelper.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
                     if (extensionEntry == null) {
                         throw new IOException("Unexpected \"" + JSONCryptoHelper.CRIT_JSON + "\" extension: " + name);

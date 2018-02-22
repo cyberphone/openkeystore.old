@@ -99,7 +99,7 @@ public class Signatures {
 
        
         for (String key : new String[]{"p256", "p384", "p521", "r2048"}) {
-            asymSignOptionalPublicKeyInfo(key, true, false);
+            asymSignOptionalPublicKeyInfo(key, true,  false);
             asymSignOptionalPublicKeyInfo(key, false, false);
             asymSignOptionalPublicKeyInfo(key, false, true);
             certSign(key);
@@ -114,13 +114,14 @@ public class Signatures {
             symmSign(512, MACAlgorithms.HMAC_SHA512, i == 0);
         }
         
-        multipleSign("p256", "r2048", false, false, null);
-        multipleSign("p256", "p384", false, false, null);
-        multipleSign("p256", "p384", false, false, AsymSignatureAlgorithms.ECDSA_SHA512);
-        multipleSign("p256", "p384", false, true, null);
-        multipleSign("p256", "p384", true, false, null);
+        multipleSign("p256", "r2048", MULTI_CRIT.NONE,   false, null);
+        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, null);
+        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, AsymSignatureAlgorithms.ECDSA_SHA512);
+        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   true,  null);
+        multipleSign("p256", "p384",  MULTI_CRIT.GLOBAL, false, null);
+        multipleSign("p256", "p384",  MULTI_CRIT.LOCAL,  false, null);
 
-        asymSignCore("p256", false, true, true, false); 
+        asymSignCore("p256", false, true, true,  false); 
         asymSignCore("p256", false, true, false, true);
     }
 
@@ -292,31 +293,39 @@ public class Signatures {
         }
         return jwkPlus.getKeyPair();
     }
+    
+    enum MULTI_CRIT {NONE, GLOBAL, LOCAL}; 
 
     static void multipleSign(String keyType1, String keyType2, 
-                             boolean crit, boolean excl, AsymSignatureAlgorithms globalAlgorithm) throws Exception {
+                             MULTI_CRIT crit, boolean excl, AsymSignatureAlgorithms globalAlgorithm) throws Exception {
         KeyPair keyPair1 = readJwk(keyType1);
         KeyPair keyPair2 = readJwk(keyType2);
         Vector<JSONSigner> signers = new Vector<JSONSigner>();
         JSONAsymKeySigner signer = new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null);
-        if (crit) {
+        boolean global = crit == MULTI_CRIT.GLOBAL;
+        if (crit != MULTI_CRIT.NONE) {
             signer.setExtensions(new JSONObjectWriter()
-            .setString(new Extension1().getExtensionUri(), "some data")
-            .setObject(new Extension2().getExtensionUri(), 
-                       new JSONObjectWriter().setBoolean("life-is-great", true)));
+                .setDynamic((wr) -> {
+                    return global ? wr.setString(new Extension1().getExtensionUri(), "some data") : wr;
+                })
+                .setObject(new Extension2().getExtensionUri(), 
+                           new JSONObjectWriter().setBoolean("life-is-great", true)));
         }
         signers.add(signer);
         signer = new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null); 
-        if (crit) {
+        if (crit != MULTI_CRIT.NONE) {
             signer.setExtensions(new JSONObjectWriter()
-            .setString(new Extension1().getExtensionUri(), "other data")
-            .setObject(new Extension2().getExtensionUri(), 
-                       new JSONObjectWriter().setBoolean("life-is-great", true)));
+                .setString(new Extension1().getExtensionUri(), "other data")
+                .setDynamic((wr) -> {
+                    return global ? 
+                        wr.setObject(new Extension2().getExtensionUri(), 
+                            new JSONObjectWriter().setBoolean("life-is-great", true)) : wr;
+                }));
         }
         signers.add(signer);
         JSONCryptoHelper.ExtensionHolder extensionHolder = new JSONCryptoHelper.ExtensionHolder()
-            .addExtension(Extension1.class, true)
-            .addExtension(Extension2.class, false);
+            .addExtension(Extension1.class, global)
+            .addExtension(Extension2.class, global);
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader(options);
         String fileExt = "";
@@ -329,9 +338,12 @@ public class Signatures {
             options.setPermittedExclusions(UNSIGNED_DATA);
             fileExt += "-excl";
         }
-        if (crit) {
-            fileExt += "-crit";
+        if (crit == MULTI_CRIT.GLOBAL) {
+            fileExt += "-glob+crit";
             multiSignatureHeader.setExtensions(extensionHolder);
+            options.setPermittedExtensions(extensionHolder);
+        } else if (crit == MULTI_CRIT.LOCAL) {
+            fileExt += "-crit";
             options.setPermittedExtensions(extensionHolder);
         }
         byte[] signedData = createSignatures(signers, multiSignatureHeader, excl);

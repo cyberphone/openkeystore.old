@@ -216,7 +216,7 @@ public class JSONDecryptionDecoder {
         }
 
         // An encryption object may also hold "crit" data
-        holder.options.getExtensions(encryptionObject, encryptionObject, extensions);
+        holder.options.getExtensions(encryptionObject, extensions);
 
         if (last) {
             // The MUST NOT be any unknown elements inside of a JEF object

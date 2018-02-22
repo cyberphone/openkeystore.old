@@ -47,7 +47,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
 
 /**
- * Decoder for JCS signatures.
+ * Decoder for Cleartext JWS signatures.
  */
 public class JSONSignatureDecoder implements Serializable {
 
@@ -76,8 +76,12 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONObjectReader outerSignatureObject,
                          JSONCryptoHelper.Options options) throws IOException {
         this.options = options;
-        algorithmString = options.globalSignatureAlgorithm == null ?
-              innerSignatureObject.getString(JSONCryptoHelper.ALG_JSON) : options.globalSignatureAlgorithm;
+        algorithmString = options.globalSignatureAlgorithm;
+        if (algorithmString == null) {
+            algorithmString = innerSignatureObject.getString(JSONCryptoHelper.ALG_JSON);
+        } else if (innerSignatureObject.hasProperty(JSONCryptoHelper.ALG_JSON)) {
+            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALG_JSON + "\" not allowed");
+        }
         keyId = options.getKeyId(innerSignatureObject);
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(innerSignatureObject);
@@ -95,7 +99,7 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
 
-        options.getExtensions(innerSignatureObject, outerSignatureObject, extensions);
+        options.getExtensions(innerSignatureObject, extensions);
 
         LinkedHashMap<String, JSONValue> saveExcluded = null;
         JSONValue saveExcludeArray = null;
