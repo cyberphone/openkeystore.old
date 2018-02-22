@@ -3,7 +3,7 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "crit": ["myString","https://example.com/extension"],
+    "crit": ["otherExt","https://example.com/extension"],
     "signers": [{
       "alg": "ES256",
       "jwk": {
@@ -12,11 +12,11 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "myString": "some data",
+      "otherExt": "Other Data",
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "1YulrTet2h4rk8h4lIPfrBOqKPKHnURzlhP9oRTA_PNW3OqBVauVCf9VXIl36imYBNR34fUvah26mB5aQwrYwA"
+      "val": "Pwc4pMtfirJqIK9huJMPTGV2Ko6nllgzt7aUKazKktkWp0fbtKvtLCX0WgTweoLZCGGrXW8ub7kd0f9_EK_Hlw"
     },{
       "alg": "ES512",
       "jwk": {
@@ -25,11 +25,11 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "myString": "other data",
+      "otherExt": "Other Data",
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "deSmtcCw_pYvyvf246B0hGk6A-3kS5X_xTb4nJpVlzleEtUlz1bnu-N8CNsKRAL6gNm8gSS8kT6Ovk5q_Pn6BqIyRMJQLn210iqB7q9eBQfgAxF0tRA42lzPu12E5sTW"
+      "val": "9rURyeLobHvHJB1qJbGO4oVggUoZSw-QDhzy2cP1rzSTHxOHeX5fR0xzkKyBbFDc-cUXKD5vmVkLT-E1s_WVS8Pt2DmOWDnTZsHyJYC0D4zZfBI9snn7s7H__iIKm8Su"
     }]
   }
 }

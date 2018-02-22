@@ -30,6 +30,6 @@ public class Extension1 extends JSONCryptoHelper.Extension {
 
     @Override
     public String getExtensionUri() {
-        return "myString";
+        return "otherExt";
     }
 }

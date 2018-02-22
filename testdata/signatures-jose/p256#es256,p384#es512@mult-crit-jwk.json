@@ -15,7 +15,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "signature": "DIMTXPg9KiH2IVx3e77d_mmIJihyF7_ojjD-HNLuEpFHl9S40lKVO9pWsvJtq5b-5qeUOh6zswAxEkLHWcqmTQ"
+      "signature": "0cH7nxg7eRKlae45cZvAR7q2qRbIzSrhJcb4LnYjj7ofX65XV3RRfFg0csTpaxJ1mVutToWPJezoM0GkW1UtyQ"
     },{
       "alg": "ES512",
       "jwk": {
@@ -24,9 +24,9 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "crit": ["myString"],
-      "myString": "other data",
-      "signature": "ErCeFgmC1UDFqgn-O-q27cviw1c6Mkw6_ztyaMZFu9Lev1RpqCamCsdTg5DGNwDURY3wJTs3q41O4SF0qygoeBLOfNDdIbvrTw8tLCcgN0bVQ-kgxmIGbh3u6wZAWJne"
+      "crit": ["otherExt"],
+      "otherExt": "Other Data",
+      "signature": "pskyjRpSely4lIDG-OqCjQtQuLtOsZNLXYFWBpVOlz0HemnL2D5FIhBVhknCUDwiozQWDnHj5j5JqK8CleRtGp0akMJUF0DOdeQ1uWAa3PHmQV_2T_zFLfFS-CntQ8Lo"
     }]
   }
 }

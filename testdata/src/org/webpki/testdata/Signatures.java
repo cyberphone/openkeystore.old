@@ -78,6 +78,17 @@ public class Signatures {
             .setString("myUnsignedData", "something else");
     }
 
+    static JSONObjectWriter getExtensionData(boolean ext1, boolean ext2) throws IOException {
+        return new JSONObjectWriter()
+            .setDynamic((wr) -> {
+                return ext1 ? wr.setString(new Extension1().getExtensionUri(), "Other Data") : wr;
+            })
+            .setDynamic((wr) -> {
+                return ext2 ? wr.setObject(new Extension2().getExtensionUri(), 
+                                           new JSONObjectWriter().setBoolean("life-is-great", true)) : wr;
+            });
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length != 4) {
             throw new Exception("Wrong number of arguments");
@@ -304,23 +315,12 @@ public class Signatures {
         JSONAsymKeySigner signer = new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null);
         boolean global = crit == MULTI_CRIT.GLOBAL;
         if (crit != MULTI_CRIT.NONE) {
-            signer.setExtensions(new JSONObjectWriter()
-                .setDynamic((wr) -> {
-                    return global ? wr.setString(new Extension1().getExtensionUri(), "some data") : wr;
-                })
-                .setObject(new Extension2().getExtensionUri(), 
-                           new JSONObjectWriter().setBoolean("life-is-great", true)));
+            signer.setExtensions(getExtensionData(global, true));
         }
         signers.add(signer);
         signer = new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null); 
         if (crit != MULTI_CRIT.NONE) {
-            signer.setExtensions(new JSONObjectWriter()
-                .setString(new Extension1().getExtensionUri(), "other data")
-                .setDynamic((wr) -> {
-                    return global ? 
-                        wr.setObject(new Extension2().getExtensionUri(), 
-                            new JSONObjectWriter().setBoolean("life-is-great", true)) : wr;
-                }));
+            signer.setExtensions(getExtensionData(true, global));
         }
         signers.add(signer);
         JSONCryptoHelper.ExtensionHolder extensionHolder = new JSONCryptoHelper.ExtensionHolder()
@@ -381,11 +381,7 @@ public class Signatures {
         }
         signer.setOutputPublicKeyInfo(wantPublicKey);
         if (wantExtensions) {
-            signer.setExtensions(new JSONObjectWriter()
-                  .setString(new Extension1().getExtensionUri(), "something")
-                  .setObject(new Extension2().getExtensionUri(), 
-                             new JSONObjectWriter().setBoolean("life-is-great", true)));
-
+            signer.setExtensions(getExtensionData(true, true));
         }
         byte[] signedData;
         if (wantExclusions) {
