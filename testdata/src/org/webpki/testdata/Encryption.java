@@ -29,6 +29,8 @@ import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONArrayWriter;
 // Std
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONRemoteKeys;
@@ -62,7 +64,63 @@ public class Encryption {
     static String keyId;
     static byte[] dataToBeEncrypted;
     static boolean joseMode;
-   
+    
+    public interface Decrypt {
+        public byte[] decrypt(JSONObjectReader reader) throws Exception;
+    }
+
+    static JSONObjectReader cleanInner(JSONObjectReader inner) throws Exception {
+        if (inner.hasProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON)) {
+            inner.removeProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
+        }
+        if (inner.hasProperty(JSONCryptoHelper.EPK_JSON)) {
+            inner.removeProperty(JSONCryptoHelper.EPK_JSON);
+        }
+        return inner;
+    }
+
+    static String cleanEncryption(JSONObjectReader encryptedData) throws Exception {
+        encryptedData.removeProperty(JSONCryptoHelper.IV_JSON);
+        encryptedData.removeProperty(JSONCryptoHelper.TAG_JSON);
+        encryptedData.removeProperty(JSONCryptoHelper.CIPHER_TEXT_JSON);
+        if (encryptedData.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
+            JSONArrayWriter save = new JSONArrayWriter();
+            JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.RECIPIENTS_JSON);
+            do {
+                save.setObject(new JSONObjectWriter(cleanInner(recipients.getObject())));
+            } while (recipients.hasMore());
+            new JSONObjectWriter(encryptedData).setupForRewrite(JSONCryptoHelper.RECIPIENTS_JSON);
+            new JSONObjectWriter(encryptedData).setArray(JSONCryptoHelper.RECIPIENTS_JSON, save);
+        } else {
+            cleanInner(encryptedData);
+        }
+        return encryptedData.toString();
+    }
+
+    static void optionalUpdate(String baseName, byte[] encryptedData, Decrypt decrypter) throws Exception {
+        String fileName = baseEncryption + baseName;
+        JSONObjectReader newEncryptedData = JSONParser.parse(encryptedData);
+        if (!ArrayUtil.compare(decrypter.decrypt(newEncryptedData), dataToBeEncrypted)) {
+            throw new IOException("Decrypt err:" + baseName);
+        }
+        boolean changed = true;
+        try {
+            JSONObjectReader oldEncryptedData = JSONParser.parse(ArrayUtil.readFile(fileName));
+            if (ArrayUtil.compare(decrypter.decrypt(oldEncryptedData), dataToBeEncrypted)) {
+                // All good but are the new and old effectively the same?
+                if (cleanEncryption(newEncryptedData).equals(cleanEncryption(oldEncryptedData))) {
+                    return;  // Yes, don't rewrite.
+                }
+            }
+        } catch (Exception  e) {
+            changed = false;  // New I guess
+        }
+        if (changed) {
+            System.out.println("UPDATED: " + baseName);
+        }
+        ArrayUtil.writeFile(fileName, encryptedData);
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length != 4) {
             throw new Exception("Wrong number of arguments");
@@ -101,10 +159,6 @@ public class Encryption {
                          ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
       
-        multipleAsymEnc(new String[]{"p256", "p384"}, 
-                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
-                        false);
-
         multipleAsymEnc(new String[]{"p256", "p384"}, 
                         ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
                         false);
@@ -169,9 +223,9 @@ public class Encryption {
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
-        String fileName = "x5c.json";
+        String fileSuffix = "x5c.json";
         if (remote) {
-            fileName = "x5u.json";
+            fileSuffix = "x5u.json";
             encrypter.setRemoteKey(Signatures.REMOTE_PATH + keyType + "certpath.pem");
             options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
         }
@@ -179,12 +233,16 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileName, encryptedData);
-        if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
-                               dataToBeEncrypted)) {
-            throw new Exception("Dec err");
-        }
+        optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+                       encryptedData,
+                       new Decrypt() {
+        
+                           @Override
+                           public byte[] decrypt(JSONObjectReader reader) throws Exception {
+                               return reader.getEncryptionObject(options).getDecryptedData(keyPair.getPrivate());
+                           }
+            
+                       });
     }
 
     static void coreSymmEnc(int keyBits, String fileSuffix, ContentEncryptionAlgorithms contentEncryptionAlgorithm, boolean wantKeyId) throws Exception {
@@ -200,11 +258,16 @@ public class Encryption {
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                         contentEncryptionAlgorithm,
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + 'a' + keyBits + '#' + contentEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
-        if (!ArrayUtil.compare(dataToBeEncrypted,
-                       JSONParser.parse(encryptedData).getEncryptionObject(options).getDecryptedData(key))) {
-            throw new Exception("Encryption fail");
-        }
+        optionalUpdate("a" + keyBits + "#" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+                       encryptedData,
+                       new Decrypt() {
+         
+                           @Override
+                           public byte[] decrypt(JSONObjectReader reader) throws Exception {
+                               return reader.getEncryptionObject(options).getDecryptedData(key);
+                           }
+             
+                       });
     }
 
     static void symmEnc(int keyBits, ContentEncryptionAlgorithms contentEncryptionAlgorithm) throws Exception {
@@ -268,12 +331,16 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase() + '@' + fileSuffix, encryptedData);
-        if (!ArrayUtil.compare(JSONParser.parse(encryptedData)
-                 .getEncryptionObject(options).getDecryptedData(keyPair.getPrivate()),
-                               dataToBeEncrypted)) {
-            throw new Exception("Dec err");
-        }
+        optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+                       encryptedData,
+                       new Decrypt() {
+          
+                           @Override
+                           public byte[] decrypt(JSONObjectReader reader) throws Exception {
+                               return reader.getEncryptionObject(options).getDecryptedData(keyPair.getPrivate());
+                           }
+              
+                       });
      }
 
     static void asymEnc(String keyType, 
@@ -349,15 +416,15 @@ public class Encryption {
             if (algList.length() > 0) {
                 algList += ",";
             }
-            algList += keyType + '#' + keyEncryptionAlgorithm.toString().toLowerCase();
+            algList += keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase();
             encrypters.add(encrypter);
         }
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
-        String fileName = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
+        String fileSuffix = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
         if (wantKeyId) {
-            fileName = "mult-kid.json"; 
+            fileSuffix = "mult-kid.json"; 
             if (algCheck != null) {
-                fileName = "mult-glob+alg-kid.json";
+                fileSuffix = "mult-glob+alg-kid.json";
             }
             options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
@@ -366,10 +433,11 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObjects(dataToBeEncrypted, 
                                                         contentEncryptionAlgorithm,
                                                         encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        ArrayUtil.writeFile(baseEncryption + algList + '@' + fileName, encryptedData);
+        String baseName = algList + "@" + fileSuffix;
+        String fileName = baseEncryption + baseName;
         int q = 0;
-        for (JSONDecryptionDecoder decoder : JSONParser.parse(encryptedData)
-                 .getEncryptionObjects(options)) {
+        JSONObjectReader newEncryptedData = JSONParser.parse(encryptedData);
+        for (JSONDecryptionDecoder decoder : newEncryptedData.getEncryptionObjects(options)) {
             q++;
             if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {
                 throw new Exception("Dec err");
@@ -378,5 +446,33 @@ public class Encryption {
         if (q != keyTypes.length) {
             throw new IOException("Wrong number of recipients");
         }
-     }
+        boolean changed = true;
+        options = new JSONCryptoHelper.Options();
+        if (wantKeyId) {
+            options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
+            options.setRequirePublicKeyInfo(false);
+        }
+        try {
+            JSONObjectReader oldEncryptedData = JSONParser.parse(ArrayUtil.readFile(fileName));
+            boolean allOk = true;
+            for (JSONDecryptionDecoder decoder : oldEncryptedData.getEncryptionObjects(options)) {
+                if (!ArrayUtil.compare(decoder.getDecryptedData(decryptionKeys), dataToBeEncrypted)) {
+                    allOk = false;
+                    break;
+                }
+            }
+            if (allOk) {
+                // All good but are the new and old effectively the same?
+                if (cleanEncryption(newEncryptedData).equals(cleanEncryption(oldEncryptedData))) {
+                    return;  // Yes, don't rewrite.
+                }
+            }
+        } catch (Exception  e) {
+            changed = false;  // New I guess
+        }
+        if (changed) {
+            System.out.println("UPDATED: " + baseName);
+        }
+        ArrayUtil.writeFile(fileName, encryptedData);
+    }
 }
