@@ -1,0 +1,25 @@
+{
+  "enc": "A256GCM",
+  "alg": "ECDH-ES+A256KW",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+    "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+  },
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "9kj9IOoxwkycGt-R8Q_bKHmYV7Iz7ElmdOkk7uaFjwI",
+    "y": "lqDV9QI37r1kU1KZ0TL8hIOEI6nHVqmyVxCh4Kh4VfU"
+  },
+  "encrypted_key": "VaBx2O8yKkuiWonHJgaBDRLwrXQDC9woRDwPy1sZft18YHLEQDxueg",
+  "otherExt": "something",
+  "https://example.com/extension": {
+    "life-is-great": true
+  },
+  "crit": ["otherExt","https://example.com/extension"],
+  "iv": "h_Hn1lhScEvoQQH9",
+  "tag": "bTjDbwu8TvRoyR5v7LSphg",
+  "ciphertext": "0XFJVQngUqFXM4f62uYvp4ph5kspWg"
+}

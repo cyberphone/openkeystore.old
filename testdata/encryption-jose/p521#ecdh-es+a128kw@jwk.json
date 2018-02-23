@@ -1,0 +1,20 @@
+{
+  "enc": "A128GCM",
+  "alg": "ECDH-ES+A128KW",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-521",
+    "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
+    "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
+  },
+  "epk": {
+    "kty": "EC",
+    "crv": "P-521",
+    "x": "AHGxVsqzjlEf_v_hxWxmr1aO_kKXeZ2Dav2LEuOaIEYGgvHh8awpfWKTNqKcbyr8n4yehUDMJ6DdVn4euSXj-GXS",
+    "y": "ALJmHFZuEz3NkrqLXLTSU6Ks7mkf8wLx5e3Ef0A8CpPDEl0dJO5ZUPPtS5eO3WeVW2i07pq7ZoYQ7UB5Ej3DZNiS"
+  },
+  "encrypted_key": "h_H8vPUXj1E4He-zpLuP-6pT2YaGWnbc",
+  "iv": "W7Btg2JaUqybLtzi",
+  "tag": "x0lac3TuW3pWccZcKDVaUw",
+  "ciphertext": "rFqMXb-CAM8g1CAvP4L3ZkTGo42_4Q"
+}

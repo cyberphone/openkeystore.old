@@ -1,0 +1,13 @@
+{
+  "enc": "A256GCM",
+  "alg": "RSA-OAEP-256",
+  "jwk": {
+    "kty": "RSA",
+    "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+    "e": "AQAB"
+  },
+  "encrypted_key": "MhK0LrvtmfoT98fMRShLXVH_Q-xDiRWq4SrgtNeyFpzEhCDVi2D9Bmg2fAJC6vKuDzmGiyqTuo_nosLOC10EdpDmBF7m-zteFCTtOM6WHFY8DwyCOyM4YmN3E0i-UVL5un66710muqYjDbA2s4rTCZm_8a38wMtP910ZYq0EKWjrByIDO9CklWbnfIvZWOI2sKz0hfJDvs84v4ooEeV9AiuFVNjVL2DBO7NJw5nH6FQEIUKVdXNpk3HIiPpAx9nKPPfXkH-uUl0LH3XVlLLzzvKcf5JMZ0TEJgDY-0eFJj1JzrlUmVppLCtFczv6Iap9_aF259AngY2fgis-GvCrzg",
+  "iv": "C9Q9jGpL3-d30v4w",
+  "tag": "2eEJNtElSfgedwqYJfeZ9w",
+  "ciphertext": "Ow7n2hBbUgN_EzgsMUqCMnywx_koXA"
+}
