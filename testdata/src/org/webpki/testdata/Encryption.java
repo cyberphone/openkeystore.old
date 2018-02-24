@@ -29,9 +29,8 @@ import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
 
+//Std
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONArrayWriter;
-// Std
 import org.webpki.json.JSONAsymKeyEncrypter;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONX509Encrypter;
@@ -69,28 +68,24 @@ public class Encryption {
         public byte[] decrypt(JSONObjectReader reader) throws Exception;
     }
 
-    static JSONObjectReader cleanInner(JSONObjectReader inner) throws Exception {
+    static void cleanInner(JSONObjectReader inner) throws Exception {
         if (inner.hasProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON)) {
             inner.removeProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
         }
         if (inner.hasProperty(JSONCryptoHelper.EPK_JSON)) {
             inner.removeProperty(JSONCryptoHelper.EPK_JSON);
         }
-        return inner;
-    }
+     }
 
     static String cleanEncryption(JSONObjectReader encryptedData) throws Exception {
         encryptedData.removeProperty(JSONCryptoHelper.IV_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.TAG_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.CIPHER_TEXT_JSON);
         if (encryptedData.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
-            JSONArrayWriter save = new JSONArrayWriter();
             JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.RECIPIENTS_JSON);
             do {
-                save.setObject(new JSONObjectWriter(cleanInner(recipients.getObject())));
+                cleanInner(recipients.getObject());
             } while (recipients.hasMore());
-            new JSONObjectWriter(encryptedData).setupForRewrite(JSONCryptoHelper.RECIPIENTS_JSON);
-            new JSONObjectWriter(encryptedData).setArray(JSONCryptoHelper.RECIPIENTS_JSON, save);
         } else {
             cleanInner(encryptedData);
         }
@@ -160,6 +155,10 @@ public class Encryption {
                         true);
       
         multipleAsymEnc(new String[]{"p256", "p384"}, 
+                        ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
+                        false);
+
+        multipleAsymEnc(new String[]{"p256", "p384"}, 
                         ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, 
                         false);
 
@@ -179,7 +178,7 @@ public class Encryption {
         coreSymmEnc(256, "imp.json", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
         coreAsymEnc("p256", 
-                    "crit@jwk.json",
+                    "crit-jwk.json",
                     ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
@@ -233,7 +232,8 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+        optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + 
+                           "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
                        new Decrypt() {
         
@@ -258,7 +258,7 @@ public class Encryption {
                 JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                         contentEncryptionAlgorithm,
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        optionalUpdate("a" + keyBits + "#" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+        optionalUpdate("a" + keyBits + "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
                        new Decrypt() {
          
@@ -331,7 +331,8 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        contentEncryptionAlgorithm,
                                                        encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
+        optionalUpdate(keyType + "#" +  keyEncryptionAlgorithm.toString().toLowerCase() + 
+                           "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
                        new Decrypt() {
           
@@ -433,7 +434,7 @@ public class Encryption {
                JSONObjectWriter.createEncryptionObjects(dataToBeEncrypted, 
                                                         contentEncryptionAlgorithm,
                                                         encrypters).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
-        String baseName = algList + "@" + fileSuffix;
+        String baseName = algList + "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix;
         String fileName = baseEncryption + baseName;
         int q = 0;
         JSONObjectReader newEncryptedData = JSONParser.parse(encryptedData);

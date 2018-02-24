@@ -1,0 +1,26 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "recipients": [{
+    "kid": "example.com:p256",
+    "epk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "vupJmYShY_LXwhfePN6-Q8HXPorf9fbvG77xP5cd0qw",
+      "y": "A_vWfrvc6vR1S6Id8pV9SOYv3VF-HUQaxOe_vT9oc5M"
+    },
+    "encrypted_key": "gJy2FRL725k4IMBE_eQhKmormuFpVRYG-75-l9i3ovLQaraIpTL84Q"
+  },{
+    "kid": "example.com:p384",
+    "epk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "oPkHNB9d3NEI6gjcDVcQXwNQtlAmWIfOLlgKWjZoCGnKeVhpCKWzXLRPoc3Q8TA8",
+      "y": "c4rmOe-t0ejs1kEtTqAi4yHpEHKwq07IWSe2kdqw9JmZDvPTwTbwtS0UWxKvVzV1"
+    },
+    "encrypted_key": "HYXEwlrAKOnGk7lDgjC-GiPkUjmZsKCYjhQBVvEsyWwPrr1bGiGFgA"
+  }],
+  "iv": "J4DCwO9MOrQ8tFZqOzlsFQ",
+  "tag": "vn8SnxQSmn0_5VldatrSRA",
+  "ciphertext": "6Nh8a3zgorI4aARD1TVMu60ibOxCFohjqzhtWfUHDzQ"
+}

@@ -1,9 +1,0 @@
-{
-  "enc": "A256GCM",
-  "alg": "RSA-OAEP-256",
-  "jku": "https://cyberphone.github.io/doc/openkeystore/r2048.jwks",
-  "encrypted_key": "OyRnzZWyZ9BRmWRP3H2c8-tUYFI8p9evMjDFfmc4znW3C2a1O5TuIPdz2yeepThHNnK1k4m4jCiwqYMFI_1xB0DjmMNmSkuKf5yR2tL7ElXNmYjjLZ5Nex5iEIG4vLeS6a0upxmUSpjwZLUbX51L9O2WtnBzotBRXN5zhk2dp2Z2JKoa1r_JOLZKv8Edb8ZktbK5WMgqVRd7b_lIX_asglp_wY6mBZrX-Y3rSIyOC7LMupvV1d8POaLG3SfnA_Y4QmxpFJZLyvSulpjqeUbY3xAni237CzY9c_SiwfzSdCR1zA_WM6k5KNdecmGwSSdnId7TnP0ooVf3X1kiBJeBsA",
-  "iv": "KzD9eR8ODdEDfkgN",
-  "tag": "ksmVh48kYnc4301jgcwPrQ",
-  "ciphertext": "532wm8jomsXOP-PH_ATLu-zfzrvH_g"
-}
