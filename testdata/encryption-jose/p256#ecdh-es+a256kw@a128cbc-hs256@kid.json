@@ -1,0 +1,15 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "kid": "example.com:p256",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "kuUDnNijtt6pWyIbKPWN6cM9W8pPRWPj85BJ5TFWyxU",
+    "y": "1QqjqwSZSEOYIm55fxtzqKreh9cZyzzWR7LLTnhyXJM"
+  },
+  "encrypted_key": "rcXxHPcw3r-0s62RbF19BkR19qX6AxX66QSE1ox3hxj9TNqgqnVedQ",
+  "iv": "6tZQSbbYAMn1qqLEXiWk9g",
+  "tag": "PN-zZwoHWC35a3vW7zWrNw",
+  "ciphertext": "cr3ZNcuO7hRWCGEyixCa4xKuOuJhxbLsIzVxHiIeJUQ"
+}

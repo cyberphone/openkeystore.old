@@ -1,0 +1,15 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "x5u": "https://cyberphone.github.io/doc/openkeystore/p256certpath.pem",
+  "epk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "DNOlukdqZ1rDTUnRYDbxjTkfetlVJXneTgkUo-sk_9Y",
+    "y": "euNnGw3GL3rpZRpkZyqwXg2rypTXT577vEnJHS91GPU"
+  },
+  "encrypted_key": "YXVUHApgGTQgLYF1sOWL6RaHZ4VQ7TcReQ_JOpPN1heTFERaW1Diqw",
+  "iv": "C5kyCvFqVVERPwDyZKx-5A",
+  "tag": "WqcpKqiYBQFsnMfRyv1ANg",
+  "ciphertext": "a9H2tt-_LuN1nRSYTSg8NF9r_If1rqIdw9o2fhz4Eww"
+}

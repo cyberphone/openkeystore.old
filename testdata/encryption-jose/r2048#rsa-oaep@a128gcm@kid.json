@@ -1,0 +1,9 @@
+{
+  "enc": "A128GCM",
+  "alg": "RSA-OAEP",
+  "kid": "example.com:r2048",
+  "encrypted_key": "FqFxHI6aR_7d-ryd9NmchD-KtiiSQCJLoMRiJu1cD3mayUOKlN6V-Fl_eBm5gq1iE51w-vuF2Plsxfdqcdl7HgvGf1t4Yo5gZad1odxeZOHtqgTYOuKzgNZhk43PGP879h8konQz9ME8vTRKvWAZDMFfjxOExaSrn-W9PFAyzo5OlPMArerqXn2IkuPQA6dRZiHKqcm1Zj1UwOtCgOMmr0TlCMXRsMs0vaNP88CTWGNXhwPS4V_fN3LJRjnVZihEUXn4XseKGOwbB4puifqFu9E7_WNwA-JR6NgePAZ8G0f7331ebmvPv5_Dp6b4nphgdJEWuAee0mR20k568DbUKw",
+  "iv": "dngaUEmqR6Y1icqF",
+  "tag": "cNeCsvovEVpfPztJSfc1vA",
+  "ciphertext": "LAwQTiq6tO3xc4WqC0hJWBNH0BbvXw"
+}

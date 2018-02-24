@@ -1,8 +1,0 @@
-{
-  "enc": "A256GCM",
-  "alg": "RSA-OAEP-256",
-  "encrypted_key": "HFGtPB4DXuZcoWq_QiybFo2SiRiBhq2XP_dqXeuo4y6X3O3or1k6TZHcntkWeDX23uKgRuxMM75bKjSMemRbDMeNfInyaA-_zP3da0HiIMMVzkz8CdihrVA-NbOifmgqbvOo6Hp8To-IiK13_y66qljXtb4xHYmpNIaWrSwuk9_X8FM6VSCJmX-iBm2ccrvAouu9pBGVF-AmzHOAhN7BY2zasHaMl_9m_1BeG1S1ukZM0DKiBIh9vSWJlkkMkO_4Krd_aQjS2_LCwL-sMDr1fi_355s0VLp8h_dLqp1JclRNIZ8SsXbU7StHGqZoMCmFbB4m9HX9s0irxNVvek8alQ",
-  "iv": "cnYd6VqNtwFaZXib",
-  "tag": "tVHAjJJkI06udbrfd1Q09Q",
-  "ciphertext": "8fL2b7ExMvD3G3P2dNdstsAm3PDGYw"
-}
