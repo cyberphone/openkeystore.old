@@ -245,10 +245,10 @@ public abstract class BaseASN1Object implements ASN1Constants {
      */
     public abstract boolean deepCompare(BaseASN1Object o);
 
-    public abstract boolean diff(BaseASN1Object o, StringBuffer s, String prefix);
+    public abstract boolean diff(BaseASN1Object o, StringBuilder s, String prefix);
 
     public String diff(BaseASN1Object o) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         diff(o, s, "");
         return s.toString();
     }
@@ -302,7 +302,7 @@ public abstract class BaseASN1Object implements ASN1Constants {
         }
         decoder.extractfromoctetstrings = extractfromoctetstrings;
         decoder.bytenumbers = bytenumbers;
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         toString(s, "");
         return s.toString();
     }
@@ -326,7 +326,7 @@ public abstract class BaseASN1Object implements ASN1Constants {
         return off;
     }
 
-    void hexData(StringBuffer s, byte[] value) {
+    void hexData(StringBuilder s, byte[] value) {
         if (value.length <= 16) {
             s.append(',');
             String hex = DebugFormatter.getHexString(value);
@@ -352,10 +352,10 @@ public abstract class BaseASN1Object implements ASN1Constants {
     }
 
 
-    abstract void toString(StringBuffer s, String prefix);
+    abstract void toString(StringBuilder s, String prefix);
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         toString(s, "");
         return s.toString();
     }

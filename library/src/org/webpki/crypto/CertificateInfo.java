@@ -85,14 +85,14 @@ public class CertificateInfo {
     }
 
 
-    private void Conditional(StringBuffer sb, String prefix, String attribute) {
+    private void Conditional(StringBuilder sb, String prefix, String attribute) {
         if (attribute != null) {
             sb.append("      " + prefix + ": " + attribute + "\n");
         }
     }
 
     private String getFormattedSubject() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (subjectDn != null) {
             Conditional(sb, "Name", getSubjectCommonName());
             Conditional(sb, "SerialNumber", getSubjectSerialNumber());
@@ -108,7 +108,7 @@ public class CertificateInfo {
         if (DNString == null) {
             return null;
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean notfirst = false;
         int i = 0;
         while ((i = DNString.indexOf(tag, i)) >= 0) {

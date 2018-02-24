@@ -188,7 +188,7 @@ public class ArrayUtil {
         if (maxLength == -1 || startOffset + maxLength > value.length) {
             maxLength = value.length - startOffset;
         }
-        StringBuffer r = new StringBuffer(maxLength * (separator == -1 ? 2 : 3));
+        StringBuilder r = new StringBuilder(maxLength * (separator == -1 ? 2 : 3));
         for (int i = 0; i < maxLength; i++) {
             if (i > 0 && separator != 0) {
                 r.append(separator);

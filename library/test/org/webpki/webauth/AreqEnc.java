@@ -34,7 +34,7 @@ import org.webpki.webauth.AuthenticationRequestEncoder;
 import org.webpki.webauth.AuthenticationResponseDecoder;
 
 public class AreqEnc {
-    static StringBuffer info_string;
+    static StringBuilder info_string;
 
     static int info_lengthp2;
 
@@ -46,7 +46,7 @@ public class AreqEnc {
     }
 
     static void printInfo(String info) {
-        info_string = new StringBuffer("\n\n");
+        info_string = new StringBuilder("\n\n");
         info_lengthp2 = info.length() + 4;
         printHeader();
         info_string.append("= ").append(info).append(" =\n");

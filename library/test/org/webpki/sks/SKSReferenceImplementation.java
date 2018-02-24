@@ -2705,7 +2705,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] random = new byte[MAX_LENGTH_ID_TYPE];
         new SecureRandom().nextBytes(random);
-        StringBuffer clientSessionIdBuffer = new StringBuffer();
+        StringBuilder clientSessionIdBuffer = new StringBuilder();
         for (byte b : random) {
             clientSessionIdBuffer.append(BASE64_URL[b & 0x3F]);
         }

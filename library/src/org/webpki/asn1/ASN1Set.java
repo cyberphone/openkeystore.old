@@ -37,7 +37,7 @@ public final class ASN1Set extends Composite {
         super(decoder);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("SET");
         compositeString(s, prefix);
     }

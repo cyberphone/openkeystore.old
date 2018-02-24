@@ -73,10 +73,10 @@ public class WSCreator extends XMLObjectWrapper {
 
     String getLicense(boolean jdoc) {
         if (license_text == null) return "";
-        StringBuffer out = new StringBuffer();
+        StringBuilder out = new StringBuilder();
         int i = 0;
         boolean first = true;
-        StringBuffer res = new StringBuffer();
+        StringBuilder res = new StringBuilder();
         while (i < license_text.length()) {
             char c = license_text.charAt(i++);
             if (c == '\r') continue;
@@ -87,7 +87,7 @@ public class WSCreator extends XMLObjectWrapper {
                     first = false;
                 }
                 out.append(res);
-                res = new StringBuffer();
+                res = new StringBuilder();
             }
         }
         if (jdoc) {
@@ -404,7 +404,7 @@ public class WSCreator extends XMLObjectWrapper {
 
         String nName(boolean external) {
             if (external) {
-                StringBuffer s = new StringBuffer();
+                StringBuilder s = new StringBuilder();
                 boolean upperit = true;
                 for (int i = 0; i < name.length(); i++) {
                     char c = (upperit ? name.toUpperCase() : name).charAt(i);
@@ -416,7 +416,7 @@ public class WSCreator extends XMLObjectWrapper {
                     }
                 }
                 if (s.toString().toLowerCase().indexOf(getXMLName().toLowerCase()) == 0) {
-                    s = new StringBuffer(getXMLName()).append(s.toString().substring(getXMLName().length()));
+                    s = new StringBuilder(getXMLName()).append(s.toString().substring(getXMLName().length()));
                 }
                 return s.toString();
             }
@@ -486,7 +486,7 @@ public class WSCreator extends XMLObjectWrapper {
         }
 
         public void writeNetTypedList(boolean actual) throws IOException {
-            StringBuffer spaces = new StringBuffer(",\n");
+            StringBuilder spaces = new StringBuilder(",\n");
             for (int i = 0; i < position; i++) {
                 spaces.append(' ');
             }
@@ -805,7 +805,7 @@ public class WSCreator extends XMLObjectWrapper {
         }
 
         for (Method meth : methods) {
-            StringBuffer method_name = new StringBuffer();
+            StringBuilder method_name = new StringBuilder();
             int lspace = (HEADER.length() - meth.name.length() - 2) / 2;
             while (lspace-- > 0) method_name.append(' ');
             method_name.append(meth.name);
@@ -1329,7 +1329,7 @@ public class WSCreator extends XMLObjectWrapper {
                         "            {\n");
                 indent += 4;
             }
-            StringBuffer added_indent = new StringBuffer();
+            StringBuilder added_indent = new StringBuilder();
             for (int q = 0; q < indent; q++) {
                 added_indent.append(' ');
             }
@@ -1343,7 +1343,7 @@ public class WSCreator extends XMLObjectWrapper {
             }
             write(file, "base.Channel." + meth.name + "(new " + meth.getNetWrapper(true) + "(");
             next = false;
-            StringBuffer spaces = new StringBuffer(",\n");
+            StringBuilder spaces = new StringBuilder(",\n");
             for (int i = 0; i < position; i++) {
                 spaces.append(' ');
             }

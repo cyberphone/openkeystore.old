@@ -41,7 +41,7 @@ public abstract class XMLViewerServlet extends HttpServlet {
 
     private void bug(String msg, HttpServletResponse response) throws IOException, ServletException {
         setHTMLMode(response);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append("<html><head><title>Error</title></head>" +
                 "<body style=\"" + base + "\">" + msg + "</body></html>");
         response.getOutputStream().print(s.toString());
@@ -93,7 +93,7 @@ public abstract class XMLViewerServlet extends HttpServlet {
         byte[] data = getData(S, request);
 
         setHTMLMode(response);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
                 "<html><head>" +
                 "<title>XML Object: " + M + "</title><style type=\"text/css\">\n" +

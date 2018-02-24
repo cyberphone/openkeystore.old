@@ -798,7 +798,7 @@ public class Base64 {
             byte[] output = null;
             byte[] input = ArrayUtil.readFile(args[1]);
             if (args[0].startsWith("dec")) {
-                StringBuffer string = new StringBuffer();
+                StringBuilder string = new StringBuilder();
                 for (byte b : input) {
                     if (b > ' ') {
                         string.append((char) b);

@@ -62,7 +62,7 @@ public abstract class Binary extends Simple {
         super(decoder);
     }
 
-    public boolean diff(BaseASN1Object o, StringBuffer s, String prefix) {
+    public boolean diff(BaseASN1Object o, StringBuilder s, String prefix) {
         if (!sameType(o) || !ArrayUtil.compare(value, ((Binary) o).value)) {
             s.append(prefix).append("<-------    ");//.append('\n');
             toString(s, prefix);
@@ -97,11 +97,11 @@ public abstract class Binary extends Simple {
         return false;
     }
 
-    void extractableStringData(StringBuffer s, String prefix) {
+    void extractableStringData(StringBuilder s, String prefix) {
         if (decoder.extractfromoctetstrings && (value[0] == 0x30 ||
                 (this instanceof ASN1OctetString && (value[0] == 0x03 || value[0] == 0x04)))) {
             try {
-                StringBuffer enc = new StringBuffer();
+                StringBuilder enc = new StringBuilder();
                 DerDecoder dd = new DerDecoder(value);
                 dd.extractfromoctetstrings = decoder.extractfromoctetstrings;
                 dd.bytenumbers = decoder.bytenumbers;

@@ -140,7 +140,7 @@ public class JSONBaseHTML  {
         boolean italic;
 
         public String getPrefix() {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (prefix_on) {
                 if (appendix) {
                     buffer.append("Appendix ").append(
@@ -206,7 +206,7 @@ public class JSONBaseHTML  {
                 + "</span></a>";
     }
 
-    StringBuffer external_styles = new StringBuffer();
+    StringBuilder external_styles = new StringBuilder();
 
     String fileReaderBase1;
     String fileReaderBase2;
@@ -515,7 +515,7 @@ public class JSONBaseHTML  {
 
         @Override
         String getHTML () throws IOException {
-            StringBuffer buffer = new StringBuffer("<table class=\"tftable\" style=\"margin-top:10pt\">" +
+            StringBuilder buffer = new StringBuilder("<table class=\"tftable\" style=\"margin-top:10pt\">" +
                       "<tr><th>Type</th><th>Mapping</th><th>Description</th></tr>");
             for (Types.WEBPKI_DATA_TYPES type : Types.WEBPKI_DATA_TYPES.values()) {
                 if (type.isUsed()) {
@@ -541,7 +541,7 @@ public class JSONBaseHTML  {
 
         @Override
         String getHTML() throws IOException {
-            return new StringBuffer(
+            return new StringBuilder(
                     "<div style=\"padding:0\">JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#Notation\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
                     "Properties may either be <i>mandatory</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
                     (arrays_found? "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR : "") +
@@ -555,7 +555,7 @@ public class JSONBaseHTML  {
     }
 
     class Paragraph extends Content {
-        StringBuffer local_html;
+        StringBuilder local_html;
        
         Paragraph() {
             super();
@@ -574,7 +574,7 @@ public class JSONBaseHTML  {
 
         @Override
         String getHTML() throws IOException {
-            StringBuffer buffer = new StringBuffer("<table class=\"tftable\" style=\"width:" + PAGE_WIDTH + "\">");
+            StringBuilder buffer = new StringBuilder("<table class=\"tftable\" style=\"width:" + PAGE_WIDTH + "\">");
             for (ProtocolObject protocol_object : protocol_objects) {
                 buffer.append(protocol_object.getObjectHTML());
             }
@@ -589,7 +589,7 @@ public class JSONBaseHTML  {
 
         @Override
         String getHTML() throws IOException {
-            StringBuffer buffer = new StringBuffer("<table class=\"tftable\" style=\"width:600pt\"><tr><th>Reference</th><th>Description</th></tr>");
+            StringBuilder buffer = new StringBuilder("<table class=\"tftable\" style=\"width:600pt\"><tr><th>Reference</th><th>Description</th></tr>");
             for (String reference : new TreeSet<String>(references.keySet()).toArray (new String[0])) {
                 Reference r = references.get (reference);
                 if (r.referenced) {
@@ -614,7 +614,7 @@ public class JSONBaseHTML  {
 
         @Override
         String getHTML () throws IOException {
-            StringBuffer buffer = new StringBuffer("<div><span style=\"font-size:" + 
+            StringBuilder buffer = new StringBuilder("<div><span style=\"font-size:" + 
                 CHAPTER_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
                 "Table of Contents</span>" +
                 "<table style=\"margin-left:20pt;margin-top:5pt\">");
@@ -643,7 +643,7 @@ public class JSONBaseHTML  {
     }
 
     public static String codeVer(String string, int width) {
-        StringBuffer s = new StringBuffer("<code>").append(string);
+        StringBuilder s = new StringBuilder("<code>").append(string);
         int i = string.length();
         while (i++ <= width) {
             s.append("&nbsp;");
@@ -690,7 +690,7 @@ public class JSONBaseHTML  {
             String header;
             
             public class Column implements RowInterface {
-                StringBuffer column = new StringBuffer();
+                StringBuilder column = new StringBuilder();
                 Row parent;
                 
                 Column (Row parent) {
@@ -923,7 +923,7 @@ public class JSONBaseHTML  {
         }
 
         String getObjectHTML() throws IOException {
-            StringBuffer buffer = new StringBuffer(
+            StringBuilder buffer = new StringBuilder(
                     "<tr><td colspan=\"4\" style=\"border-width:0px;font-size:"
                             + SECTION_FONT_SIZE
                             + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica;background-color:white\">");
@@ -1016,7 +1016,7 @@ public class JSONBaseHTML  {
     
     Vector<Content> division_objects = new Vector<Content> ();
     
-    StringBuffer html;
+    StringBuilder html;
     int local_toc_sec;
 
     public String getHTML () throws IOException {
@@ -1037,7 +1037,7 @@ public class JSONBaseHTML  {
             }
         }
         
-        html = new StringBuffer(
+        html = new StringBuilder(
             "<!DOCTYPE html>" +
             "<html><head><title>")
          .append(subsystem_name)
@@ -1085,21 +1085,21 @@ public class JSONBaseHTML  {
         return new ProtocolObject(sub_items, false);
     }
 
-    public StringBuffer addParagraphObject() throws IOException {
+    public StringBuilder addParagraphObject() throws IOException {
         return addParagraphObject(null);
     }
 
-    public StringBuffer addParagraphObject(String header) throws IOException {
+    public StringBuilder addParagraphObject(String header) throws IOException {
         return addParagraphObject(header, true);
     }
 
-    public StringBuffer addParagraphSubObject(String header) throws IOException {
+    public StringBuilder addParagraphSubObject(String header) throws IOException {
         return addParagraphObject(header, false);
     }
 
-    StringBuffer addParagraphObject(String header, boolean top_level) throws IOException {
+    StringBuilder addParagraphObject(String header, boolean top_level) throws IOException {
         Paragraph p = new Paragraph();
-        StringBuffer buffer = new StringBuffer("<div style=\"width:" + PAGE_WIDTH + "\">");
+        StringBuilder buffer = new StringBuilder("<div style=\"width:" + PAGE_WIDTH + "\">");
         if (header != null) {
             if (top_level) {
                 curr_toc_seq++;
@@ -1136,7 +1136,7 @@ public class JSONBaseHTML  {
     }
 
     public static String makeLink (String header) throws IOException {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (char c : header.toCharArray()) {
             if (URLEncoder.encode(new String(new char[]{c}), "UTF-8").charAt(0) != c) {
                 c = '_';
@@ -1154,7 +1154,7 @@ public class JSONBaseHTML  {
     }
 
     public static String enumerateStandardAlgorithms (CryptoAlgorithms[] algorithms, boolean symmetric, boolean filter) throws IOException {
-        StringBuffer buffer = new StringBuffer("<ul>");
+        StringBuilder buffer = new StringBuilder("<ul>");
         for (CryptoAlgorithms algorithm : algorithms) {
             if (algorithm.isDeprecated()) {
                 continue;
@@ -1174,7 +1174,7 @@ public class JSONBaseHTML  {
     }
 
     public static String enumerateJOSEAlgorithms(CryptoAlgorithms[] algorithms) throws IOException {
-        StringBuffer buffer = new StringBuffer("<ul>");
+        StringBuilder buffer = new StringBuilder("<ul>");
         for (CryptoAlgorithms algorithm : algorithms) {
             String joseName = algorithm.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
             if (!joseName.contains (":")) {
@@ -1187,7 +1187,7 @@ public class JSONBaseHTML  {
     }
 
     static String enumerateAttributes(String[] list, boolean andFlag) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         int i = 0;
         for (String attribute : list) {
             if (i == list.length - 1) {
@@ -1209,7 +1209,7 @@ public class JSONBaseHTML  {
     static LinkedHashMap<JSONRemoteKeys,String> remoteKeyFormats = new LinkedHashMap<JSONRemoteKeys,String>();
     
     public static String enumerateRemoteKeyFormats() {
-        StringBuffer buffer = new StringBuffer("<ul>");
+        StringBuilder buffer = new StringBuilder("<ul>");
         for (JSONRemoteKeys remoteKeys : remoteKeyFormats.keySet()) {
             buffer.append("<li>")
                   .append(JSONBaseHTML.codeVer(remoteKeys.toString(), 18))
@@ -1221,8 +1221,8 @@ public class JSONBaseHTML  {
 
     String protocol_table_header;
     
-    public StringBuffer addProtocolTableEntry(String header) throws IOException {
-        StringBuffer buffer = addParagraphObject(protocol_table_header = header);
+    public StringBuilder addProtocolTableEntry(String header) throws IOException {
+        StringBuilder buffer = addParagraphObject(protocol_table_header = header);
         new ProtocolTable ();
         return buffer;
     }
@@ -1233,7 +1233,7 @@ public class JSONBaseHTML  {
     }
 
     public void renderProtocolSteps (@SuppressWarnings("rawtypes") Class parent,
-                                    StringBuffer buffer, ProtocolStep[] protocol_steps) throws IOException {
+                                    StringBuilder buffer, ProtocolStep[] protocol_steps) throws IOException {
         JSONObjectWriter.htmlIndent = 2;
         buffer.append("<table class=\"tftable\" style=\"margin-top:10pt\">");
         boolean next = false;
@@ -1263,12 +1263,12 @@ public class JSONBaseHTML  {
 
     public void sampleRun(@SuppressWarnings("rawtypes") Class parent,
                           String header, ProtocolStep[] protocol_steps) throws IOException {
-        StringBuffer buffer = addParagraphObject("Sample Run").append(header);
+        StringBuilder buffer = addParagraphObject("Sample Run").append(header);
         renderProtocolSteps(parent, buffer, protocol_steps);
     }
     
     static String makeName(String name) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (char c : name.toCharArray()) {
             if (c == ' ') {
                 s.append("&nbsp;");
@@ -1312,7 +1312,7 @@ public class JSONBaseHTML  {
         return "<a href=\"#Reference." + reference + "\">" + brackit(reference) +"</a>"; 
     }
 
-    StringBuffer doc_history;
+    StringBuilder doc_history;
     
     public void addDocumentHistoryLine (String date, String version, String comment) throws IOException {
         if (doc_history == null) {

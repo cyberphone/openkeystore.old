@@ -2597,7 +2597,7 @@ public class JSONTest {
     }
 
     JSONObjectReader simpleObjectType(String string) throws IOException {
-        return JSONParser.parse(new StringBuffer("{\"name\":")
+        return JSONParser.parse(new StringBuilder("{\"name\":")
                 .append(string)
                 .append('}').toString());
     }
@@ -2607,7 +2607,7 @@ public class JSONTest {
     }
 
     JSONArrayReader simpleArrayType(String string) throws IOException {
-        return JSONParser.parse(new StringBuffer("{\"name\":[")
+        return JSONParser.parse(new StringBuilder("{\"name\":[")
                 .append(string)
                 .append("]}").toString()).getArray("name");
     }
@@ -2692,7 +2692,7 @@ public class JSONTest {
     }
 
     String toJavaScript(String json, boolean quote) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (char c : json.toCharArray()) {
             if (quote && c == '\'') {
                 s.append('\\');
@@ -4165,7 +4165,7 @@ public class JSONTest {
 
     @Test
     public void PrettyPrinting() throws Exception {
-        StringBuffer json = new StringBuffer();
+        StringBuilder json = new StringBuilder();
         int index = 0;
         for (byte c : ArrayUtil.getByteArrayFromInputStream(getClass().getResourceAsStream("pretty.txt"))) {
             if (c == '\n') {

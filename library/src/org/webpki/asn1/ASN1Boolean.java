@@ -52,7 +52,7 @@ public final class ASN1Boolean extends Simple {
         return new Boolean(value);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("BOOLEAN ").append(value);
     }
 }

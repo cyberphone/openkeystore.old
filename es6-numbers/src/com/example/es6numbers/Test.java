@@ -49,8 +49,8 @@ public class Test {
         }
 
         // 4. Serialize using Java with 15 digits of precision.
-        StringBuffer num = 
-            new StringBuffer(new DecimalFormat(Math.abs(value)
+        StringBuilder num = 
+            new StringBuilder(new DecimalFormat(Math.abs(value)
                     < LOW_PRECISION ? "0.#############E000" : "0.##############E000",
                              new DecimalFormatSymbols(Locale.ENGLISH))
                 .format(value));

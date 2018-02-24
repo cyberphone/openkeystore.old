@@ -49,7 +49,7 @@ import org.webpki.util.DebugFormatter;
  */
 public class ReadSignature {
 
-    private StringBuffer result = new StringBuffer();
+    private StringBuilder result = new StringBuilder();
 
     private String cryptoBinary(BigInteger value, KeyAlgorithms key_alg)
             throws IOException {
@@ -70,7 +70,7 @@ public class ReadSignature {
             crypto_binary = wo_zero;
         }
         String pre = "";
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         int i = 0;
         for (char c : DebugFormatter.getHexString(crypto_binary).toCharArray()) {
             if (++i % 80 == 0) {
@@ -88,7 +88,7 @@ public class ReadSignature {
             PublicKey publicKey = signature.getPublicKey();
             KeyAlgorithms key_alg = KeyAlgorithms
                     .getKeyAlgorithm(publicKey);
-            StringBuffer asym_text = new StringBuffer(
+            StringBuilder asym_text = new StringBuilder(
                     "Asymmetric key signature validated for:\n")
                     .append(key_alg.isECKey() ? "EC" : "RSA")
                     .append(" Public Key (")

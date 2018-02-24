@@ -20,11 +20,11 @@ import java.io.IOException;
 
 public class HTMLHeader {
 
-    public static StringBuffer createHTMLHeader(boolean dialog_style,
+    public static StringBuilder createHTMLHeader(boolean dialog_style,
                                                 boolean autoscrollbars,
                                                 String title,
                                                 String java_script) throws IOException {
-        StringBuffer s = new StringBuffer("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\"><html><head>");
+        StringBuilder s = new StringBuilder("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\"><html><head>");
         if (title != null) {
             s.append("<title>").append(title).append("</title>");
         }

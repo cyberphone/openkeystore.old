@@ -1104,7 +1104,7 @@ public class SKSTest {
         assertTrue(PUKCheck(PassphraseFormat.NUMERIC, "1234"));
         assertTrue(PUKCheck(PassphraseFormat.STRING, "azAB13.\n"));
         assertTrue(PUKCheck(PassphraseFormat.BINARY, "12300234FF"));
-        StringBuffer long_puk = new StringBuffer();
+        StringBuilder long_puk = new StringBuilder();
         for (int i = 0; i < SecureKeyStore.MAX_LENGTH_PIN_PUK; i++) {
             long_puk.append((char) ('0' + i % 10));
         }

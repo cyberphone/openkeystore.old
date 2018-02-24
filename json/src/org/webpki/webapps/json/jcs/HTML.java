@@ -63,7 +63,7 @@ public class HTML {
 
     static String encode(String val) {
         if (val != null) {
-            StringBuffer buf = new StringBuffer(val.length() + 8);
+            StringBuilder buf = new StringBuilder(val.length() + 8);
             char c;
 
             for (int i = 0; i < val.length(); i++) {
@@ -96,7 +96,7 @@ public class HTML {
     }
 
     static String newLines2HTML(String text_with_newlines) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         for (char c : text_with_newlines.toCharArray()) {
             if (c == '\n') {
                 result.append("<br>");
@@ -108,7 +108,7 @@ public class HTML {
     }
 
     static String getHTML(String javascript, String bodyscript, String box) {
-        StringBuffer s = new StringBuffer(HTML_INIT);
+        StringBuilder s = new StringBuilder(HTML_INIT);
         if (javascript != null) {
             s.append("<script type=\"text/javascript\">").append(javascript)
                     .append("</script>");
@@ -213,7 +213,7 @@ public class HTML {
     }
 
     private static String javaScript(String string) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (char c : string.toCharArray()) {
             if (c == '\n') {
                 s.append("\\n");
@@ -226,7 +226,7 @@ public class HTML {
 
     public static void webCryptoPage(HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuffer html = new StringBuffer(
+        StringBuilder html = new StringBuilder(
                 "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
         + "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "
         + "</style></head>\n"

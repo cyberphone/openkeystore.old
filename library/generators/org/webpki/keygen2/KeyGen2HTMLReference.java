@@ -61,8 +61,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
 
         static final String BAR_COLOR = "#909090";
         
-        StringBuffer s;
-        ProtocolDescription(StringBuffer s) {
+        StringBuilder s;
+        ProtocolDescription(StringBuilder s) {
             this.s = s;
         }
 
@@ -384,7 +384,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
     }
 
     static String getKeyContainers() throws IOException {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean next = false;
         for (KeyContainerTypes kct : KeyContainerTypes.values()) {
             s.append(next ? "<li style=\"padding-top:4pt\">" : "<li>");
@@ -423,7 +423,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         return s.toString();
     }
 
-    static void getLogotype(StringBuffer s, String type, boolean li_add, String comment) {
+    static void getLogotype(StringBuilder s, String type, boolean li_add, String comment) {
         s.append("<li")
          .append(li_add ? " style=\"padding-top:4pt\"" : "")
          .append("><code>")
@@ -435,7 +435,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
 
 
     static String getLogotypes() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         getLogotype(s, KeyGen2URIs.LOGOTYPES.LIST, false, "This type is meant to be " +
                    "used in credential lists and management dialogs where you could use a " +
                    "logotype together with a &quot;friendly name&quot; string or similar.");
@@ -448,14 +448,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
     }
 
 
-    static void getListAttribute(StringBuffer s, String attribute) {
+    static void getListAttribute(StringBuilder s, String attribute) {
         s.append("<li><code>")
          .append(attribute)
          .append("</code></li>");
     }
 
     static String clientAttributes() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         getListAttribute(s, KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER);
         getListAttribute(s, KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS);
         getListAttribute(s, KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
@@ -469,7 +469,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                              String purpose,
                              String sksMethod,
                              String sksParameter) throws IOException {
-        return new StringBuffer(rsaSupport ? "RSA or " : "")
+        return new StringBuilder(rsaSupport ? "RSA or " : "")
           .append("EC public key in JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
           .append(" <code>&quot;" + JSONCryptoHelper.JWK_JSON + "&quot;</code> format")
@@ -486,7 +486,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
     }
 
     static String ecCurveSupport() throws IOException {
-        StringBuffer buffer =  new StringBuffer(
+        StringBuilder buffer =  new StringBuilder(
                 "EC curves can be expressed in SKS ")
          .append(json.createReference(JSONBaseHTML.REF_SKS))
          .append(" or JWA ")
@@ -510,7 +510,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
     }
     
     static String getKeyUsageBits() {
-        StringBuffer s = new StringBuffer("<ul>");
+        StringBuilder s = new StringBuilder("<ul>");
         for (KeyUsageBits kub : KeyUsageBits.values()) {
             getListAttribute (s, kub.getX509Name());
         }

@@ -82,7 +82,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     
 
     static String enumerateJoseEcCurves() throws IOException  {
-        StringBuffer buffer = new StringBuffer("<ul>");
+        StringBuilder buffer = new StringBuilder("<ul>");
         for (KeyAlgorithms algorithm : KeyAlgorithms.values()) {
             if (algorithm.isECKey()) {
                 String joseName = algorithm.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
@@ -101,7 +101,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String formatCode(String code) {
-        StringBuffer s = new StringBuffer("<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all\"><code>");
+        StringBuilder s = new StringBuilder("<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all\"><code>");
         int lc = 0;
         for (char c : code.toCharArray()) {
             if (c == '\n') {
@@ -266,7 +266,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
     }
 
     static String aesCrypto(String[] encObjects) throws IOException, GeneralSecurityException {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (String name : encObjects) {
             JSONObjectReader rd = json.readJson2(name);
             JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
@@ -667,7 +667,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                 @Override
                 public Column execute(Column column) throws IOException {
                     for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
-                        column.addString(new StringBuffer("<li>")
+                        column.addString(new StringBuilder("<li>")
                                                .append(JSONBaseHTML.codeVer(kea.toString(), 16)).toString());
                         if (kea.jceName == null) {
                             column.addString("Direct mode" + Types.LINE_SEPARATOR);

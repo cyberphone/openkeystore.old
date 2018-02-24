@@ -23,7 +23,7 @@ public class DebugFormatter {
 
     private DebugFormatter() {}
 
-    private StringBuffer res = new StringBuffer(1000);
+    private StringBuilder res = new StringBuilder(1000);
 
     private void put(char c) {
         res.append(c);

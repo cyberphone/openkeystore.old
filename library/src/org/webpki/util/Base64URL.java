@@ -161,7 +161,7 @@ public class Base64URL {
     public static String generateURLFriendlyRandom(int length) {
         byte[] random = new byte[length];
         new SecureRandom().nextBytes(random);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < length; i++) {
             buffer.append(BASE64URL[random[i] & 0x3F]);
         }

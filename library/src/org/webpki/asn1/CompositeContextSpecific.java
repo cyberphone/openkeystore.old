@@ -62,7 +62,7 @@ public final class CompositeContextSpecific extends Composite {
         return ASN1Util.deepCompare(cs.components, components);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("[").append(tagNumber).append("]");
         compositeString(s, prefix);
     }

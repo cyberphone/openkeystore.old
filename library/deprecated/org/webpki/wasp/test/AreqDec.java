@@ -56,7 +56,7 @@ public class AreqDec {
             areq.verifySignature(verifier);
         }
 
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
 
         for (AuthenticationProfile ap : areq.getAuthenticationProfiles()) {
             s.append("\nAUTHPROF:");

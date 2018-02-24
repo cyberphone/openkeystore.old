@@ -177,7 +177,7 @@ public class DistinguishedName {
     }
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         int i = components.size() - 1;
         s.append(components.elementAt(i));  // Must have at least one element.
 

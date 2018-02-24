@@ -40,7 +40,7 @@ public class DefaultHTML {
     public static void setErrorHTML(HttpServletResponse response, String message, boolean html) throws IOException, ServletException {
         setHTMLMode(response);
 
-        StringBuffer s = HTMLHeader.createHTMLHeader(true, false, "Error", null).
+        StringBuilder s = HTMLHeader.createHTMLHeader(true, false, "Error", null).
                 append("<body><table width=\"100%\" height=\"100%\"><tr><td align=\"center\" valign=\"middle\">" +
                         "<table><tr><td align=\"center\" class=\"headline\">Standard Error Report<br>&nbsp;</td></tr><tr><td align=\"left\">").
                 append(html ? message : HTMLEncoder.encode(message)).append("</td></tr></table></td></tr></table></body></html>");

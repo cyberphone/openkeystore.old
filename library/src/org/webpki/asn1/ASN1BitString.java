@@ -114,7 +114,7 @@ public final class ASN1BitString extends Binary {
         return sameType(o) && ArrayUtil.compare(((ASN1BitString) o).value, value);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         int bits = 8 * value.length - unusedBits;
         s.append(getByteNumber()).append(prefix).append("BIT STRING, ");
         if (bits > 32) {

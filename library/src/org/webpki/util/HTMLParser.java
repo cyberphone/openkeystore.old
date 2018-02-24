@@ -20,7 +20,7 @@ import java.io.IOException;
 
 
 public class HTMLParser {
-    private StringBuffer buf = new StringBuffer();
+    private StringBuilder buf = new StringBuilder();
 
     private boolean active_link;
     private int curr_index;

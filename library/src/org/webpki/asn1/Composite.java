@@ -124,7 +124,7 @@ public abstract class Composite extends BaseASN1Object {
         return ASN1Util.deepCompare(((Composite) o).components, components);
     }
 
-    public boolean diff(BaseASN1Object o, StringBuffer s, String prefix) {
+    public boolean diff(BaseASN1Object o, StringBuilder s, String prefix) {
         if (!sameType(o)) {
             s.append(prefix).append("<-------").append("    ");
             s.append(getClass().getName()).append(": ").append(tagClass).append(", ").append(tagNumber).append('\n');
@@ -139,7 +139,7 @@ public abstract class Composite extends BaseASN1Object {
         int n = Math.max(c.size(), size());
         boolean different = false;
 
-        StringBuffer t = new StringBuffer();
+        StringBuilder t = new StringBuilder();
         if (size() == c.size()) {
             t.append(prefix).append(getClass().getName()).append(": ").append(size()).append('\n');
         } else {
@@ -160,7 +160,7 @@ public abstract class Composite extends BaseASN1Object {
                 t.append('\n');
                 different = true;
             } else {
-                StringBuffer u = new StringBuffer();
+                StringBuilder u = new StringBuilder();
                 if (get(i).diff(c.get(i), u, prefix + "  ")) {
                     t.append(prefix).append("  <---").append(i).append("---> \n");
                     /*if(get(i) instanceof Simple)
@@ -193,7 +193,7 @@ public abstract class Composite extends BaseASN1Object {
                 s.append('\n');//*/
             }
             for (int i = 0; i < size(); i++) {
-                StringBuffer u = new StringBuffer();
+                StringBuilder u = new StringBuilder();
                 if (get(i).diff(c.get(i), u, prefix + "  ")) {
                     s.append(prefix).append("  <---").append(i).append("---> \n");
                     /*if(get(i) instanceof Simple)
@@ -208,7 +208,7 @@ public abstract class Composite extends BaseASN1Object {
         return false;
     }
 
-    void compositeString(StringBuffer s, String prefix) {
+    void compositeString(StringBuilder s, String prefix) {
         s.append("\n  " + getByteNumberBlanks() + prefix + "{");
         for (int i = 0; i < components.size(); i++) {
             s.append("\n");

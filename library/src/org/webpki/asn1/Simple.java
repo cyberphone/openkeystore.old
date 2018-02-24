@@ -45,7 +45,7 @@ public abstract class Simple extends BaseASN1Object {
 
     public abstract Object objValue();
 
-    public boolean diff(BaseASN1Object o, StringBuffer s, String prefix) {
+    public boolean diff(BaseASN1Object o, StringBuilder s, String prefix) {
         if (!sameType(o) || !objValue().equals(((Simple) o).objValue())) {
             s.append(prefix).append("<-------    ");//.append('\n');
             toString(s, prefix);

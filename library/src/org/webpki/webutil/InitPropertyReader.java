@@ -92,7 +92,7 @@ public class InitPropertyReader {
     }
 
     public String listProperties() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (String key : properties.stringPropertyNames()) {
             if (s.length() > 0) {
                 s.append(", ");

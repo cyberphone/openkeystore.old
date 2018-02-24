@@ -66,7 +66,7 @@ public final class ASN1Integer extends Simple {
         return value.intValue();
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("INTEGER ");
         String num = value.toString();
         if (num.length() <= 10) {

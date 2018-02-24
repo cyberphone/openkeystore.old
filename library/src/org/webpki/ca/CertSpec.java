@@ -156,7 +156,7 @@ public class CertSpec {
     public void setSubject(String subject) throws IOException {
         Vector<String> dns = new Vector<String>();
         boolean quote = false;
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         int q = 0;
         while (q < subject.length()) {
             char c = subject.charAt(q++);
@@ -164,7 +164,7 @@ public class CertSpec {
                 String attr = s.toString().trim();
                 if (attr.length() > 0) {
                     dns.add(attr);
-                    s = new StringBuffer();
+                    s = new StringBuilder();
                 }
             } else if (c == '"') {
                 quote = !quote;

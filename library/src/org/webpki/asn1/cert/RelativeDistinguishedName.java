@@ -134,7 +134,7 @@ public class RelativeDistinguishedName {
         if (nameOrOID.indexOf('.') < 0) {
             String t = name2OID(nameOrOID);
             if (t == null) {
-                StringBuffer s = new StringBuffer();
+                StringBuilder s = new StringBuilder();
                 s.append("Unknown attribute '").append(nameOrOID).append("', select among the following:");
                 Enumeration<String> e = name2OID.keys();
                 while (e.hasMoreElements()) {
@@ -192,7 +192,7 @@ public class RelativeDistinguishedName {
      */
     private String rdnCanonical(ASN1String s) {
         if (s instanceof ASN1PrintableString) {
-            StringBuffer t = new StringBuffer(s.value().trim().toUpperCase());
+            StringBuilder t = new StringBuilder(s.value().trim().toUpperCase());
             // Stupid algorithm, but this loop will never be executed.
             int i;
             while ((i = t.toString().indexOf("  ")) != -1)
@@ -244,7 +244,7 @@ public class RelativeDistinguishedName {
     // RFC1779: Characters that cause quoting.
     private final static BitSet quotedChars = StringUtil.charSet(",+=\"\n<>#;");
 
-    public void toString(StringBuffer s) {
+    public void toString(StringBuilder s) {
         boolean first = true;
         for (Enumeration<String> keys = components.keys(); keys.hasMoreElements(); ) {
             String oid = keys.nextElement(),
@@ -293,7 +293,7 @@ public class RelativeDistinguishedName {
     }
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         toString(s);
         return s.toString();
     }

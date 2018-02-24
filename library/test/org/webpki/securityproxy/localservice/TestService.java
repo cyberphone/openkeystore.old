@@ -141,7 +141,7 @@ public class TestService implements ClientRequestHandler {
         }
         properties = new Properties();
         properties.load(is);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (String key : properties.stringPropertyNames()) {
             if (s.length() > 0) {
                 s.append(", ");

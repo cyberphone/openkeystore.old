@@ -23,7 +23,7 @@ import org.webpki.crypto.CertificateFilter;
 
 public class SreqDec {
 
-    static void printcf(CertificateFilter cf, StringBuffer s) {
+    static void printcf(CertificateFilter cf, StringBuilder s) {
         s.append("\nCERTFILTER:");
         if (cf.getFingerPrint() != null)
             s.append("\nSha1=" + DebugFormatter.getHexString(cf.getFingerPrint()));

@@ -368,7 +368,7 @@ public class CommandLineCA {
 
 
     String eccCurves() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean comma = false;
         for (KeyAlgorithms curve : KeyAlgorithms.values()) {
             if (curve.isECKey()) {
@@ -384,7 +384,7 @@ public class CommandLineCA {
 
 
     String sigAlgs() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean comma = false;
         for (AsymSignatureAlgorithms sigalg : AsymSignatureAlgorithms.values()) {
             if (comma) {
@@ -398,7 +398,7 @@ public class CommandLineCA {
 
 
     String keyUsages() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean comma = false;
         for (KeyUsageBits keybit : KeyUsageBits.values()) {
             if (comma) {
@@ -412,7 +412,7 @@ public class CommandLineCA {
 
 
     String ExtkeyUsages() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean comma = false;
         for (ExtendedKeyUsages eku : ExtendedKeyUsages.values()) {
             if (comma) {
@@ -432,7 +432,7 @@ public class CommandLineCA {
         } else {
             cert_spec.setEndEntityConstraint();
         }
-        StringBuffer s = new StringBuffer(", and default KeyUsage [");
+        StringBuilder s = new StringBuilder(", and default KeyUsage [");
         boolean comma = false;
         for (KeyUsageBits kubit : cert_spec.key_usage_set) {
             if (comma) {

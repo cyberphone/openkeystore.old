@@ -38,7 +38,7 @@ public enum JSONOutputFormats {
     }
 
     public static String getOptions() {
-        StringBuffer options = new StringBuffer();
+        StringBuilder options = new StringBuilder();
         for (JSONOutputFormats format : JSONOutputFormats.values()) {
             if (options.length() > 0) {
                 options.append('|');

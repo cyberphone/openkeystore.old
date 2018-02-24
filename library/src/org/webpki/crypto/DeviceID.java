@@ -99,7 +99,7 @@ public class DeviceID {
             hash = half(half(hash));
             baos.write(hash.length == 5 ? half(hash) : hash);
             byte[] data = baos.toByteArray();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (int bit_position = 0; bit_position < totalBits; bit_position += 5) {
                 int bit_position_in_byte = bit_position % 8;
                 int index = bit_position / 8;

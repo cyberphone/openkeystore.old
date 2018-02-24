@@ -47,7 +47,7 @@ public class TestServlet extends HttpServlet {
         + "td {font-family:verdana;font-size:10pt;font-weight:normal;padding:2pt}"
         + "</style></head>";
 
-    static void output (HttpServletResponse response, StringBuffer html) throws IOException, ServletException {
+    static void output (HttpServletResponse response, StringBuilder html) throws IOException, ServletException {
         response.setContentType ("text/html; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
@@ -55,7 +55,7 @@ public class TestServlet extends HttpServlet {
     }
 
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        StringBuffer s = new StringBuffer(HEADER).append("<body>");
+        StringBuilder s = new StringBuilder(HEADER).append("<body>");
         s.append(
             "<form method=\"POST\">" +
             "<input type=\"hidden\" name=\"" + ATTR_START + "\" value=\"true\">" +
@@ -76,7 +76,7 @@ public class TestServlet extends HttpServlet {
 
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        StringBuffer s = new StringBuffer(HEADER);
+        StringBuilder s = new StringBuilder(HEADER);
         HttpSession session = request.getSession(false);
         String start = request.getParameter(ATTR_START); 
         FileInputStream fis = null;

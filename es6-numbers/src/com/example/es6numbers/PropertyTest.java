@@ -23,9 +23,9 @@ public class PropertyTest {
     
     static FileOutputStream fos;
     
-    static StringBuffer testCalls = new StringBuffer();
+    static StringBuilder testCalls = new StringBuilder();
     
-    static StringBuffer testData = new StringBuffer();
+    static StringBuilder testData = new StringBuilder();
     
     static void write(byte[] utf8) throws Exception {
         fos.write(utf8);
@@ -109,7 +109,7 @@ public class PropertyTest {
     static String getProperty() {
         int length  = (int)((Math.random() * (MAX_PROP_LEN - MIN_PROP_LEN + 1)) + MIN_PROP_LEN);
         boolean alpha = true;
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         while (length-- > 0) {
             s.append(getChar(alpha));
             alpha = false;

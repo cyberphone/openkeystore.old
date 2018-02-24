@@ -1701,7 +1701,7 @@ public class SEReferenceImplementation {
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE];
         new SecureRandom().nextBytes(random);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (byte b : random) {
             buffer.append(BASE64_URL[b & 0x3F]);
         }

@@ -49,7 +49,7 @@ public class Configure extends LocalizationServlet {
 
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
 
         response.setContentType("text/html");
         response.setDateHeader("EXPIRES", 0);

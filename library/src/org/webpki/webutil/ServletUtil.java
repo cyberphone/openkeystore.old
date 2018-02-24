@@ -36,7 +36,7 @@ public class ServletUtil {
     private ServletUtil() {}
 
     private static String getServerURL(HttpServletRequest request, String context) {
-        StringBuffer r = new StringBuffer(request.isSecure() ? "https://" : "http://");
+        StringBuilder r = new StringBuilder(request.isSecure() ? "https://" : "http://");
 
         if (request.getHeader("host") == null) {
             r.append(request.getServerName());

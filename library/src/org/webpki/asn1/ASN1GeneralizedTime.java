@@ -82,7 +82,7 @@ public class ASN1GeneralizedTime extends ASN1Time {
         return sameType(o) && ((ASN1GeneralizedTime) o).value.equals(value);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("GeneralizedTime " + dateFormat.format(value));
     }
 

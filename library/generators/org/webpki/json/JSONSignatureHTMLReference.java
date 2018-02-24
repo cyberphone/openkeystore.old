@@ -69,7 +69,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String formatCode(String code) {
-        StringBuffer s = new StringBuffer("<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all\"><code>");
+        StringBuilder s = new StringBuilder("<div style=\"padding:10pt 0pt 10pt 20pt;word-break:break-all\"><code>");
         int lc = 0;
         for (char c : code.toCharArray()) {
             if (c == '\n') {
@@ -172,7 +172,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         return formatCode(raw);
     }
 
-    static void updateNormalization(StringBuffer normalizedSampleSignature,
+    static void updateNormalization(StringBuilder normalizedSampleSignature,
                                     String property,
                                     JSONObjectReader sampleSignatureDecoded) throws IOException {
         int i = normalizedSampleSignature.indexOf("\u0000");
@@ -185,7 +185,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
     }
     
     static String readSymSignature(String[] encObjects) throws IOException, GeneralSecurityException {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (String name : encObjects) {
             String signature = readSignature(name);
             JSONSignatureDecoder dec = JSONParser.parse(signature).getSignature(
@@ -292,7 +292,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
                 "</span>" + 
                 sampleSignature.substring(beginValue);
 
-        StringBuffer normalizedSampleSignature = new StringBuffer(
+        StringBuilder normalizedSampleSignature = new StringBuilder(
             "{&quot;now&quot;:&quot;\u0000&quot;,&quot;escapeMe&quot;:&quot;" +
             "<b style=\"color:red;background:Yellow\">&#x20ac;</b>$<b style=\"color:red;background:Yellow\">" +
             "\\u000f\\nA</b>'B<b style=\"color:red;background:Yellow\">\\&quot;\\\\</b>\\\\\\&quot;" +

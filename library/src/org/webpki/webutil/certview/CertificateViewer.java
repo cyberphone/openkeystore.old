@@ -48,7 +48,7 @@ public abstract class CertificateViewer extends HttpServlet {
     }
 
 
-    private void add(StringBuffer s, String header, String data, String color) {
+    private void add(StringBuilder s, String header, String data, String color) {
         s.append("<tr><td colspan=\"3\" height=\"8\"></td></tr><tr valign=\"top\" bgcolor=\"").
                 append(color).
                 append("\"><td><b>").
@@ -59,12 +59,12 @@ public abstract class CertificateViewer extends HttpServlet {
     }
 
 
-    private void add(StringBuffer s, String header, String data) {
+    private void add(StringBuilder s, String header, String data) {
         add(s, header, data, "#e0e0e8");
     }
 
 
-    private void insertURI(StringBuffer s, String uri) {
+    private void insertURI(StringBuilder s, String uri) {
         s.append("<a href=\"").append(uri).append("\" target=\"_blank\" " +
                 "style=\"font-weight:normal;font-size:8pt;font-family:verdana,arial\">").
                 append(uri).
@@ -72,9 +72,9 @@ public abstract class CertificateViewer extends HttpServlet {
     }
 
 
-    private void printURIs(StringBuffer s, String header, String[] inuris) throws IOException {
+    private void printURIs(StringBuilder s, String header, String[] inuris) throws IOException {
         if (inuris != null) {
-            StringBuffer uris = new StringBuffer();
+            StringBuilder uris = new StringBuilder();
             boolean break_it = false;
             for (String uri : inuris) {
                 boolean http = uri.startsWith("http") && !header.startsWith("OCSP");
@@ -112,7 +112,7 @@ public abstract class CertificateViewer extends HttpServlet {
     }
 
 
-    public StringBuffer createHTMLHeader() throws IOException {
+    public StringBuilder createHTMLHeader() throws IOException {
         return HTMLHeader.createHTMLHeader(false, true, getDocumentTitle(), null);
     }
 
@@ -127,7 +127,7 @@ public abstract class CertificateViewer extends HttpServlet {
                     true);
             return;
         }
-        StringBuffer s = createHTMLHeader().append(
+        StringBuilder s = createHTMLHeader().append(
                 "<body><table cellpadding=\"2\" cellspacing=\"0\">").
                 append("<tr><td colspan=\"3\" class=\"headline\">").
                 append(getDocumentTitle()).

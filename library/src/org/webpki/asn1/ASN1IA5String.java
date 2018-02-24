@@ -27,7 +27,7 @@ public class ASN1IA5String extends ASN1String {
         super(decoder);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("IA5String '").append(value()).append('\'');
     }
 }

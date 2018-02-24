@@ -52,7 +52,7 @@ public class AreqDec {
             areq.verifySignature(verifier);
         }
 
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
 
         for (CertificateFilter cf : areq.getCertificateFilters()) {
             SreqDec.printcf(cf, s);

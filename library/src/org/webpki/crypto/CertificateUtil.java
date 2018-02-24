@@ -274,7 +274,7 @@ public class CertificateUtil {
         dn = trycut(dn, "2.5.4.7=#",              "Locality=");
         dn = trycut(dn, "2.5.4.42=#",             "GivenName=");
         dn = trycut(dn, "2.5.4.41=#",             "Name=");
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         boolean quoted = false;
         int i = 0;
         while (i < dn.length()) {

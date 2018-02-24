@@ -41,7 +41,7 @@ public final class ASN1Null extends Simple {
         return null;
     }
 
-    public boolean diff(BaseASN1Object o, StringBuffer s, String prefix) {
+    public boolean diff(BaseASN1Object o, StringBuilder s, String prefix) {
         if (!sameType(o)) {
             s.append(prefix).append("<-------").append("    ");
             toString(s, prefix);
@@ -55,7 +55,7 @@ public final class ASN1Null extends Simple {
         return false;
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("NULL");
     }
 }

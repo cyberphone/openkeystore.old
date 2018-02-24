@@ -41,7 +41,7 @@ public class HTMLEncoder {
      */
     public static String encode(String val) {
         if (val != null) {
-            StringBuffer buf = new StringBuffer(val.length() + 8);
+            StringBuilder buf = new StringBuilder(val.length() + 8);
             char c;
 
             for (int i = 0; i < val.length(); i++) {
@@ -76,7 +76,7 @@ public class HTMLEncoder {
     @SuppressWarnings("fallthrough")
     public static String encodeWithLineBreaks(byte[] val) {
         if (val != null) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             char c;
             boolean indent = true;
             for (int i = 0; i < val.length; i++) {

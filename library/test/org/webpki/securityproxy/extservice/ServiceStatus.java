@@ -40,7 +40,7 @@ public class ServiceStatus extends HttpServlet {
         response.setContentType("text/html; charset=utf-8");
         response.setHeader("Pragma", "No-Cache");
         response.setDateHeader("EXPIRES", 0);
-        StringBuffer s = new StringBuffer("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>");
+        StringBuilder s = new StringBuilder("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>");
         if (Init.proxy_server.isReady()) {
             s.append("Proxy Client ID = ").append(Init.proxy_server.getProxyClientID()).append("<p>");
             s.append("Last Proxy Upload: ");
@@ -60,7 +60,7 @@ public class ServiceStatus extends HttpServlet {
         response.getWriter().print(s.append("</body></html>").toString());
     }
 
-    private void printElem(StringBuffer s, int index) {
+    private void printElem(StringBuilder s, int index) {
         s.append(new Date(Init.uploads.elementAt(index).getTimeStamp()).toString());
     }
 

@@ -18,21 +18,30 @@ package org.webpki.json;
 
 import java.io.IOException;
 import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECPoint;
+
 import java.util.GregorianCalendar;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
+
 import org.webpki.json.JSONSigner.MultiSignatureHeader;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -63,7 +72,7 @@ public class JSONObjectWriter implements Serializable {
 
     JSONObject root;
 
-    StringBuffer buffer;
+    StringBuilder buffer;
 
     int indent;
 
@@ -1170,7 +1179,7 @@ import org.webpki.json.JSONSignatureDecoder;
      */
     @SuppressWarnings("unchecked")
     public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         indentFactor = outputFormat == JSONOutputFormats.PRETTY_HTML ? htmlIndent : STANDARD_INDENT;
         prettyPrint = outputFormat.pretty;
         javaScriptMode = outputFormat.javascript;

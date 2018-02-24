@@ -159,7 +159,7 @@ public class JSONParser {
 
     JSONValue scanSimpleType() throws IOException {
         index--;
-        StringBuffer tempBuffer = new StringBuffer();
+        StringBuilder tempBuffer = new StringBuilder();
         char c;
         while ((c = testNextNonWhiteSpaceChar()) != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET) {
             if (isWhiteSpace(c = nextChar())) {
@@ -191,7 +191,7 @@ public class JSONParser {
     }
 
     JSONValue scanQuotedString() throws IOException {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         while (true) {
             char c = nextChar();
             if (c < ' ') {

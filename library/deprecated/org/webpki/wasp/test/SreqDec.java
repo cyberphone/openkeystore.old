@@ -43,7 +43,7 @@ public class SreqDec {
         System.exit(3);
     }
 
-    static void printcf(CertificateFilter cf, StringBuffer s) {
+    static void printcf(CertificateFilter cf, StringBuilder s) {
         s.append("\nCERTFILTER:");
         if (cf.getFingerPrint() != null)
             s.append("\nSha1=" + DebugFormatter.getHexString(cf.getFingerPrint()));
@@ -57,7 +57,7 @@ public class SreqDec {
         s.append("\nCERTFILTER\n");
     }
 
-    private static void print(String name, SignatureRequestDecoder.BaseDocument d, StringBuffer s) throws Exception {
+    private static void print(String name, SignatureRequestDecoder.BaseDocument d, StringBuilder s) throws Exception {
         if (d != null) {
             s.append("\n" + name + ":\nURI=" + d.getContentID() +
                     "\nMIMEType=" + d.getMimeType() + "\nValue=\n" +
@@ -93,7 +93,7 @@ public class SreqDec {
             sreq.verifySignature(verifier);
         }
 
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
 
         for (SignatureProfileDecoder spd : sreq.getSignatureProfilesDecoders()) {
             s.append("\nSIGNATUREPROFILE:\n" + spd + "\nSIGNATUREPROFILE\n");

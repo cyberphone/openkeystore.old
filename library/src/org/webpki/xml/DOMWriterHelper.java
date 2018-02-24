@@ -152,7 +152,7 @@ public class DOMWriterHelper {
         instance.createRootObject(doc, e);
         startElement = current = navCurrent = e;
         if (instance.parent_writer != null)
-            indent = new StringBuffer(instance.parent_writer.indent.toString());
+            indent = new StringBuilder(instance.parent_writer.indent.toString());
         return e;
     }
 
@@ -178,7 +178,7 @@ public class DOMWriterHelper {
     }
 
 
-    private StringBuffer indent = new StringBuffer("\n");
+    private StringBuilder indent = new StringBuilder("\n");
 
     private void increaseIndent() {
         indent.append("  ");
@@ -374,7 +374,7 @@ public class DOMWriterHelper {
      * Add a text element to the current element.
      * <p>Uses the <i>value</i>'s {@link Object#toString toString} function and is hence useful
      * when value is an object whos {@link Object#toString toString} returns a suitably formatted
-     * string representation, for example a {@link java.lang.StringBuffer StringBuffer},
+     * string representation, for example a {@link java.lang.StringBuilder StringBuilder},
      * {@link java.math.BigInteger BigInteger} or {@link java.math.BigDecimal BigDecimal}.
      *
      * @param name  The name of the new element.
@@ -389,7 +389,7 @@ public class DOMWriterHelper {
      * Add a text element to the current element if the value is non-null.
      * <p>Uses the <i>value</i>'s {@link Object#toString toString} function and is hence useful
      * when value is an object whos {@link Object#toString toString} returns a suitably formatted
-     * string representation, for example a {@link java.lang.StringBuffer StringBuffer},
+     * string representation, for example a {@link java.lang.StringBuilder StringBuilder},
      * {@link java.math.BigInteger BigInteger} or {@link java.math.BigDecimal BigDecimal}.
      *
      * @param name  The name of the new element.
@@ -502,7 +502,7 @@ public class DOMWriterHelper {
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
     public void setStringAttribute(String name, String value) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (char c : value.toCharArray()) {
             switch (c) {
                 case '"':
@@ -574,7 +574,7 @@ public class DOMWriterHelper {
      * Set an attribute of the current element.
      * <p>Uses the <i>value</i>'s {@link Object#toString toString} function and is hence useful
      * when value is an object whos {@link Object#toString toString} returns a suitably formatted
-     * string representation, for example a {@link java.lang.StringBuffer StringBuffer},
+     * string representation, for example a {@link java.lang.StringBuilder StringBuilder},
      * {@link java.math.BigInteger BigInteger} or {@link java.math.BigDecimal BigDecimal}.
      *
      * @param name  The name of the attribute.

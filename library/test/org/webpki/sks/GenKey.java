@@ -53,7 +53,7 @@ public class GenKey {
     static long serialNumber = 10000;
 
     public GenKey setCertificate(int length) throws IOException, GeneralSecurityException {
-        StringBuffer dn = new StringBuffer("CN=");
+        StringBuilder dn = new StringBuilder("CN=");
         for (int i = 1; i < length; i++) {
             if (i % 64 == 0) {
                 dn.append(",CN=");

@@ -53,7 +53,7 @@ public class ASN1Sequence extends Composite {
                 new ByteArrayInputStream(blob, blobOffset, blob.length - blobOffset));
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("SEQUENCE");
         compositeString(s, prefix);
     }

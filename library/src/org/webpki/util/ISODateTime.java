@@ -106,7 +106,7 @@ public class ISODateTime {
     public static String formatDateTime(GregorianCalendar dateTime, boolean forceUtc) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         sdf.setTimeZone(forceUtc ? TimeZone.getTimeZone("UTC") : dateTime.getTimeZone());
-        StringBuffer s = new StringBuffer(sdf.format(dateTime.getTime()));
+        StringBuilder s = new StringBuilder(sdf.format(dateTime.getTime()));
         int tzo = forceUtc ? 0 : (dateTime.get(Calendar.ZONE_OFFSET) + dateTime.get(Calendar.DST_OFFSET)) / (60 * 1000);
 
         if (tzo == 0) {

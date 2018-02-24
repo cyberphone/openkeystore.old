@@ -52,7 +52,7 @@ public abstract class SchemaViewerServlet extends HttpServlet {
 
     private void bug(String msg, HttpServletResponse response) throws IOException, ServletException {
         setHTMLMode(response);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append("<html><head><title>Error</title></head>" +
                 "<body style=\"" + base + "\">" + msg + "</body></html>");
         response.getOutputStream().print(s.toString());
@@ -94,7 +94,7 @@ public abstract class SchemaViewerServlet extends HttpServlet {
         boolean head = request.getParameter("HEAD") != null;
         String baseurl = ServletUtil.getContextURL(request);
         setHTMLMode(response);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
                 "<html><head>" +
                 "<title>XML Schema: " + url + "</title><style type=\"text/css\">\n" +

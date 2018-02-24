@@ -145,7 +145,7 @@ public final class ASN1ObjectID extends Simple {
         nameToOID = no;
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         String name = oidName(id);
         s.append(getByteNumber()).append(prefix).append("OBJECT IDENTIFIER ");
         if (!name.equals(id)) {

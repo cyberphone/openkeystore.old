@@ -91,7 +91,7 @@ public class ASN1UTCTime extends ASN1Time {
         return sameType(o) && ((ASN1UTCTime) o).value.equals(value);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix + "UTCTime ").append(dateFormat.format(value));
     }
 

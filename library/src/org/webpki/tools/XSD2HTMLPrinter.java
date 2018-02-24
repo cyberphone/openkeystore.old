@@ -87,7 +87,7 @@ public class XSD2HTMLPrinter {
 
     private String xmldata;
 
-    private StringBuffer outdata = new StringBuffer();
+    private StringBuilder outdata = new StringBuilder();
 
     private String[] formatter;
 
@@ -194,7 +194,7 @@ public class XSD2HTMLPrinter {
         }
 
         String getXMLValue(int start, int endp1) throws IOException {
-            StringBuffer s = new StringBuffer();
+            StringBuilder s = new StringBuilder();
             while (start < endp1) {
                 char c = xmldata.charAt(start++);
                 s.append(c);

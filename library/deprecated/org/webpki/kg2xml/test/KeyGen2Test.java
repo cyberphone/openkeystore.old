@@ -336,7 +336,7 @@ public class KeyGen2Test
             }
         }
         
-        private StringBuffer xml = new StringBuffer (kg2keycre);
+        private StringBuilder xml = new StringBuilder (kg2keycre);
         
         private int keyId;
         

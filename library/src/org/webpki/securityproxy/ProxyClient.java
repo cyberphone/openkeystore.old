@@ -400,7 +400,7 @@ public class ProxyClient {
     }
 
     static String toHexString(byte indata[]) {
-        StringBuffer res = new StringBuffer();
+        StringBuilder res = new StringBuilder();
         int i = 0;
         while (i < indata.length) {
             int v = indata[i++] & 0xFF;

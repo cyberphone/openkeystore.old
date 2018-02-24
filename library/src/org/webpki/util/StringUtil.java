@@ -155,7 +155,7 @@ public class StringUtil {
     }
 
     public static String tokenList(String[] list) {
-        StringBuffer t = new StringBuffer();
+        StringBuilder t = new StringBuilder();
         if (list.length > 0) {
             t.append(list[0]);
             for (int i = 1; i < list.length; i++) {
@@ -297,7 +297,7 @@ public class StringUtil {
      * Replace &quot;Java&quot; (C++) escapes.
      */
     public static String javaUnescape(String s) {
-        StringBuffer r = new StringBuffer();
+        StringBuilder r = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == '\\') {
                 if (i + 1 < s.length()) {
@@ -330,7 +330,7 @@ public class StringUtil {
     }
 
     public static String padLeft(String s, int length, char padChar) {
-        StringBuffer r = new StringBuffer(length);
+        StringBuilder r = new StringBuilder(length);
         while (r.length() + s.length() < length) {
             r.append(padChar);
         }

@@ -292,7 +292,7 @@ public class KeyGen2Test {
             }
         }
 
-        private StringBuffer json = new StringBuffer(kg2keycre);
+        private StringBuilder json = new StringBuilder(kg2keycre);
 
         private int keyId;
 

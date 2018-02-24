@@ -185,7 +185,7 @@ public class DocumentSignatures {
 
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append(DIGEST_ALG_ATTR + "=" + digest_algorithm.getAlgorithmId() +
                 "\n" + CN_ALG_ATTR + "=" + canonicalization_algorithm);
         for (ContentIDAndDigest t : signatures) {

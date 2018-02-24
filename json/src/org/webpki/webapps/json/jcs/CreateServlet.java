@@ -49,7 +49,7 @@ public class CreateServlet extends HttpServlet {
             throw new IOException("Missing data for: "
                     + RequestServlet.JCS_ARGUMENT);
         }
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (char c : string.toCharArray()) {
             if (c != '\r') {
                 s.append(c);

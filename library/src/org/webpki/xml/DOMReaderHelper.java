@@ -101,7 +101,7 @@ public class DOMReaderHelper {
         if (l.getLength() == 0) {
             return null;
         }
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         was_CDATA = true;
         for (int i = 0; i < l.getLength(); i++) {
             Node n = l.item(i);

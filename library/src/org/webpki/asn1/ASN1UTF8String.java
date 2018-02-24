@@ -28,7 +28,7 @@ public class ASN1UTF8String extends ASN1String {
         super(decoder);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("UTF8String '").append(value()).append('\'');
     }
 

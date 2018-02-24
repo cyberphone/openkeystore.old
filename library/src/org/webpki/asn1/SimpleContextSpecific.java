@@ -65,7 +65,7 @@ public final class SimpleContextSpecific extends Binary {
                 o.tagNumber == tagNumber;
     }
 
-    public boolean diff(BaseASN1Object o, StringBuffer s, String prefix) {
+    public boolean diff(BaseASN1Object o, StringBuilder s, String prefix) {
         throw new Error("kex");
     }
 
@@ -79,7 +79,7 @@ public final class SimpleContextSpecific extends Binary {
         return ArrayUtil.compare(cs.value, value);
     }
 
-    void toString(StringBuffer s, String prefix) {
+    void toString(StringBuilder s, String prefix) {
         s.append(getByteNumber()).append(prefix).append("[").append(tagNumber).append("], ").append(value.length).append(" bytes");
         hexData(s, value);
     }
