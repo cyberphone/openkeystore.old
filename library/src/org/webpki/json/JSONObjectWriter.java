@@ -659,7 +659,8 @@ import org.webpki.json.JSONSignatureDecoder;
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * <code>"signatures"</code> [] object.<p>
      * This method performs all the processing needed for adding multiple JCS signatures to the current object.</p>
-     * @param signers List with signature interfaces
+     * @param multiSignatureHeader Global options
+     * @param signer Signature interface
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException In case there a problem with keys etc.
      */

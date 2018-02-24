@@ -64,14 +64,22 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
 
     static final String SECURITY_CONSIDERATIONS = "Security Considerations";
  
-    static final String CRIT_TEST_VECTOR     = "p256#ecdh-es+a256kw@crit@jwk.json";
-    static final String SAMPLE_TEST_VECTOR   = "p256#ecdh-es+a256kw@kid.json";
-    static final String MULT_TEST_VECTOR     = "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@mult-kid.json";
-    static final String GLOB_ALG_TEST_VECTOR = "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@mult-glob+alg-kid.json";
-    static final String JWK_TEST_VECTOR      = "p256#ecdh-es+a256kw@jwk.json";
-    static final String JKU_TEST_VECTOR      = "p256#ecdh-es+a256kw@jku.json";
-    static final String X5C_TEST_VECTOR      = "p256#ecdh-es+a256kw@x5c.json";
-    static final String X5U_TEST_VECTOR      = "p256#ecdh-es+a256kw@x5u.json";
+    static final String CRIT_TEST_VECTOR     = "p256#ecdh-es+a256kw@a256gcm@crit-jwk.json";
+    static final String SAMPLE_TEST_VECTOR   = "p256#ecdh-es+a128kw@a128gcm@kid.json";
+    static final String SAMPLE_I_TEST_VECTOR = "p256#ecdh-es+a128kw@a128gcm@imp.json";
+    static final String SAMPLE_A_TEST_VECTOR = "p256#ecdh-es+a256kw@a128cbc-hs256@kid.json";
+    static final String MULT_TEST_VECTOR     = "p256#ecdh-es+a256kw,r2048#rsa-oaep-256@a128cbc-hs256@mult-kid.json";
+    static final String GLOB_ALG_TEST_VECTOR = "p256#ecdh-es+a256kw,p384#ecdh-es+a256kw@a128cbc-hs256@mult-glob+alg-kid.json";
+    static final String JWK_TEST_VECTOR      = "p256#ecdh-es+a256kw@a128cbc-hs256@jwk.json";
+    static final String JKU_TEST_VECTOR      = "p256#ecdh-es+a256kw@a128cbc-hs256@jku.json";
+    static final String X5C_TEST_VECTOR      = "p256#ecdh-es+a256kw@a128cbc-hs256@x5c.json";
+    static final String X5U_TEST_VECTOR      = "p256#ecdh-es+a256kw@a128cbc-hs256@x5u.json";
+    static final String RSA_JWK_TEST_VECTOR  = "r2048#rsa-oaep-256@a256gcm@jwk.json";
+    static final String RSA_IMP_TEST_VECTOR  = "r2048#rsa-oaep-256@a256gcm@imp.json";
+    static final String RSA_KID_TEST_VECTOR  = "r2048#rsa-oaep-256@a256gcm@kid.json";
+    static final String P384_JWK_TEST_VECTOR = "p384#ecdh-es@a256cbc-hs512@jwk.json";
+    static final String P521_JWK_TEST_VECTOR = "p521#ecdh-es+a256kw@a128cbc-hs256@jwk.json";
+    
 
     static String enumerateJoseEcCurves() throws IOException  {
         StringBuffer buffer = new StringBuffer("<ul>");
@@ -297,7 +305,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
         
         json.setFavIcon("../webpkiorg.png");
         
-        dataToEncrypt = json.readFile2("datatobeencrypted.txt");
+        dataToEncrypt = json.readFile3("datatobeencrypted.txt");
      
         AsymKey p256key = readAsymKey("p256");
         AsymKey p384key = readAsymKey("p384");
@@ -420,7 +428,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while using a different set of " +
                            "algorithms both for key encryption and content encryption:" ,
-                   "p256#ecdh-es+a128kw@kid.json") +
+                   SAMPLE_A_TEST_VECTOR) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the public key information in line, " +
@@ -429,20 +437,20 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object but assuming it is known through the <i>context</i>:",
-                   "p256#ecdh-es+a128kw@imp.json") + 
+                   SAMPLE_I_TEST_VECTOR) + 
            showAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an in-line certificate path:",
-                   "p256#ecdh-es+a256kw@x5c.json") + 
+                   X5C_TEST_VECTOR) + 
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "through an <i>external</i> certificate path:",
-                   "p256#ecdh-es+a256kw@x5u.json") + 
+                   X5U_TEST_VECTOR) + 
            showAsymEncryption("ECDH encryption object <i>requiring the same private key</i> " +
                    "as in the sample object while providing the key information " +
                    "through an <i>external</i> public key:",
-                   "p256#ecdh-es+a256kw@jku.json") + 
+                   JKU_TEST_VECTOR) + 
            showKeySet (
                    "JWK " + json.createReference(JSONBaseHTML.REF_JWK) +
                    " key set associated with the preceeding encryption object:", 
@@ -452,25 +460,25 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "as in the sample object while providing the key information " +
                            "in line.  In addition, this object declares <code>" +
                            JSONCryptoHelper.CRIT_JSON + "</code> extensions:",
-                    CRIT_TEST_VECTOR) + 
+                   CRIT_TEST_VECTOR) + 
            showKey(
                    "EC private key for decrypting the subsequent object:",
                     p384key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p384#ecdh-es+a256kw@jwk.json") + 
+                   P384_JWK_TEST_VECTOR) + 
            showKey(
                    "EC private key for decrypting the subsequent object:",
                     p521key) +
            showAsymEncryption(
                    "ECDH encryption object <i>requiring the private key above</i>:",
-                   "p521#ecdh-es+a256kw@jwk.json") + 
+                   P521_JWK_TEST_VECTOR) + 
            showKey(
                    "RSA private key for decrypting the subsequent object:",
                    r2048key) +
            showAsymEncryption(
                    "RSA encryption object <i>requiring the private key above</i>:",
-                   "r2048#rsa-oaep-256@jwk.json") +
+                   RSA_JWK_TEST_VECTOR) +
             showAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example but relying on that this being " +
@@ -478,12 +486,12 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "neither contains a <code>" +
                            JSONCryptoHelper.KID_JSON + "</code>, nor a <code>" +
                            JSONCryptoHelper.JWK_JSON + "</code> property:",
-                    "r2048#rsa-oaep-256@imp.json") +
+                   RSA_IMP_TEST_VECTOR) +
            showAsymEncryption(
                    "RSA encryption object <i>requiring the same private key</i> " +
                            "as in the previous example while using a different set of " +
                            "algorithms both for key encryption and content encryption:",
-                    "r2048#rsa-oaep@kid.json") + 
+                   RSA_KID_TEST_VECTOR) + 
            showAsymEncryption(
                    "Multiple recipient encryption object <i>requiring the same private keys</i> " +
                    "as in the previous examples:",
@@ -493,11 +501,11 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                            "as in the previous examples as well as using a <i>global</i> <code>" +
                            JSONCryptoHelper.ALG_JSON + "</code> property:",
                    GLOB_ALG_TEST_VECTOR) +
-           aesCrypto(new String[]{"a128#a128gcm@kid.json",
-                                  "a256#a128cbc-hs256@kid.json",
-                                  "a256#a256gcm@imp.json",
-                                  "a256#a256gcm@kid.json",
-                                  "a512#a256cbc-hs512@kid.json"}));
+           aesCrypto(new String[]{"a128@a128gcm@kid.json",
+                                  "a256@a128cbc-hs256@kid.json",
+                                  "a256@a256gcm@imp.json",
+                                  "a256@a256gcm@kid.json",
+                                  "a512@a256cbc-hs512@kid.json"}));
 
         json.addReferenceTable();
         

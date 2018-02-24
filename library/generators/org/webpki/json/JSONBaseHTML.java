@@ -210,6 +210,7 @@ public class JSONBaseHTML  {
 
     String fileReaderBase1;
     String fileReaderBase2;
+    String fileReaderBase3;
 
     public void addGlobalStyle(String style) {
         external_styles.append(style);
@@ -223,6 +224,10 @@ public class JSONBaseHTML  {
         return readFile(fileReaderBase2, name);
     }
     
+    public byte[] readFile3(String name) throws IOException {
+        return readFile(fileReaderBase3, name);
+    }
+
     public JSONObjectReader readJson1(String name) throws IOException {
         return JSONParser.parse(readFile1(name));
     }
@@ -246,6 +251,9 @@ public class JSONBaseHTML  {
         }
         if (args.length > 2) {
             fileReaderBase2 = args[2] + File.separator;
+        }
+        if (args.length > 3) {
+            fileReaderBase3 = args[3] + File.separator;
         }
 
         addReferenceEntry(REF_JSON,
