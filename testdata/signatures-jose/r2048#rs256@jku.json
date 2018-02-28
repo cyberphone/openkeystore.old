@@ -1,10 +1,11 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "iss": "joe",
+  "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "RS256",
     "jku": "https://cyberphone.github.io/doc/openkeystore/r2048.jwks",
-    "signature": "InhNwui4oyWGmbEmnocuAW9JuU5uRMDqr1WLr2BczZpXc6VB2t_LEAY_V3EHFcNtstoJxWt62mVtVnEPi5DEmCkQTyCpj64DaD7bbe6Mhrk7BmJMNhUx1DO9nUtahDEYDrdqNAC7P9e85aHYAnpyYPTZ70iN5Cuvqjrxrt_4ZFyzgJoPGWltPrmFAP-fu6tTttWvnHHkJjAMAWCtt1YSX-UquIlPawf70zSRx4EE774Rqn4ViUCU2mBmU-66GUx6fXOZwP8gkJVKcf_ed9I27L-HmTeqTksDX5AvylI_FICNhFFdcat0VQZIN3W1K5R99o6y05-UKvybvWepBu1tJQ"
+    "signature": "P6r84x1-qkkoye8SjWh72oOBDMguh42dNNVDUDPz99lsVDHseQrW_8k6fq3koyXn0H0OYca4bfGvihvsa-DI9ZT02kI6qmI_SSrrTIaK25FeE5H_5wbTp6GV-dqg62gcxcRYg5ffBPRZPU8TcyK7MEwu--xGRm6-yueAr6ptFnyIm5oZq1MPsRcrcRsYsNYwivm5W3J2IaX1qVUsirmsuFWfMwx5mX_lXLBq0eZ6LnQXLqEZSCd2LfBNOTnXBC0FPNzUNmMb3_AuAI9ycMH5EZZJo8FnfMFv52oHL1Pw4D0vPSMqq6APjEVU449bsJwv0mSiRAx8HCyy0IJ4EkM_zA"
   }
 }

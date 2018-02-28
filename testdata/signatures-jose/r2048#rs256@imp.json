@@ -1,9 +1,10 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "iss": "joe",
+  "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "RS256",
-    "signature": "FjgNyZBkctG0KlvC9DtSouTaRATXp3zPbKuVpsikZNsNt9MKGPVd6eNdyQJXMejhTvuBNG33eQlgLN1AHUTSD0lYLr93C2nfpA9xG7IW5lPAZ29NX7jAp2CXeqxNJ5d2h_HIg6RnfuEuhc36hPx2BT9cEkdyRFkwdsYdBDArZmJ4PPIB2CtwHvPvEqjgj6NID5V9r2m5EJnIDrQnvrFG7nUWqWfivDIzdWqwdlS5Omm8JInrnoRVMPQmFIGTWjOObiMl1ONQgCF7uRvK7nK4RYoLQr7tK0Z69kpFv_MkJSukR52huvCJlYukOijK8vYjGNMMcCFOJDL6F1NKuY0GlQ"
+    "signature": "R8R-TRbGA8GbX2DlP3RneJ_hXd-TLtV6o8IrCiG0Kw2sXrfl6umurdSoMFLpNzpPEzsJFnuu0CBYUPBYBmH6PBD7SWyS59a-dYMc--aoqH4PPDvoTwRMws1tlo5xmxRRjtNfxAIKB1H9rxQny0cIeDWv9BtvEBk-PBQC9iysVxxiS9Sm_Zmw5qAbgPeeE9hXLmFPt9AgP56T6m5DlKIiL2TryxgKh9Z1NhfHwJ4IPwfyaGq0aLT8bhbAJJv8q14Ms28ID_C8SakVCZbcM1ZFJGfVwKfMZKzRMZR-3aAJgVnMgEOfNCrNv7FU4na1RZcDfLje4BmnBrmuwwOcHOoGgw"
   }
 }

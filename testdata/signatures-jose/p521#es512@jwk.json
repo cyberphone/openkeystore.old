@@ -1,5 +1,6 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "iss": "joe",
+  "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
@@ -10,6 +11,6 @@
       "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
       "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
     },
-    "signature": "AUN3UZI8Y5B4MdYidZGcdXFZcxJKDXNXajgDIx2dzYWB55Bu_PWeIp9QsgFnYv_TYJhcqD5VIke8MGD5RtMDlRtcAadZrRJB-NiTOMofavrGoM8bS0tKH_OHELuc7GdHA288Ig1NtrdvOcNJBHuCoCx5x8eYWRj1997ffRBCLoD9MicE"
+    "signature": "AbT2E-Q7qUNN75rHuIcpaLfr_fcLcRfIYiTViP1KLtke-mKZN0ZtVxG3EWb_CDkrLXxlrVAVhU-o5T6_8ZDjLoNgADtzdywjjfzlDjOUSQ5Qq9wEs4YA4GQCa4xtwPzuZvZtSNECLFLNCzQOVsLXcknQUvd2I8AVYivpiiE04Cqs0wG4"
   }
 }

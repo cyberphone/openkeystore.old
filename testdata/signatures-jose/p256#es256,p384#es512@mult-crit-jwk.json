@@ -1,5 +1,6 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "iss": "joe",
+  "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
@@ -15,7 +16,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "signature": "0cH7nxg7eRKlae45cZvAR7q2qRbIzSrhJcb4LnYjj7ofX65XV3RRfFg0csTpaxJ1mVutToWPJezoM0GkW1UtyQ"
+      "signature": "H6YwsxvLGzbZKpQJ9-L-H0Wl1pNicb5iewaDq-X7CjyZuzvwQ5Qw_VmnoUwS2C-xD8QA9mr0aLDoPM463sWbUg"
     },{
       "alg": "ES512",
       "jwk": {
@@ -26,7 +27,7 @@
       },
       "crit": ["otherExt"],
       "otherExt": "Other Data",
-      "signature": "pskyjRpSely4lIDG-OqCjQtQuLtOsZNLXYFWBpVOlz0HemnL2D5FIhBVhknCUDwiozQWDnHj5j5JqK8CleRtGp0akMJUF0DOdeQ1uWAa3PHmQV_2T_zFLfFS-CntQ8Lo"
+      "signature": "wgUO74wF1bmyNyheOrhK3dMvygZIWAT-7znwbxCCVHsTlWbZU89PoCyRbqUbkiyQiIX_ddqcGPhXl0yrm9ToxatL1f-tq6ZuCMPPPwVrv8WaCg-JSpCImIcU9e1hwEav"
     }]
   }
 }

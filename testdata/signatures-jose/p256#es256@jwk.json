@@ -1,5 +1,6 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "iss": "joe",
+  "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
@@ -10,6 +11,6 @@
       "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    "signature": "hZYnHZewfgScFLOALe5fDX5VEUf65sBlHqS_O7duWaMLekDfBddcPXqV_Syc6dXqHAScuJY04U5VIKqkw8IONA"
+    "signature": "7lPeWrv19JumNthvGqX2Hjz7srm5B0rybMt8KQtNEM5FLShS7sZO17dkjbE_Z4ZzBV4A48xnR0ozpr4cFwMURw"
   }
 }
