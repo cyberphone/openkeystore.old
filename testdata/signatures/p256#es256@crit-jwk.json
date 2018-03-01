@@ -11,10 +11,10 @@
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
     "crit": ["otherExt","https://example.com/extension"],
-    "otherExt": "Other Data",
+    "otherExt": "Cool Stuff",
     "https://example.com/extension": {
       "life-is-great": true
     },
-    "val": "wNLxU0VTBdHh-e_p7NvMrzyL_eeyUFvny9bq-VzCeW-eR40Z6Lv6VbQ-SwSo6Jl5wLJ4K7XQeOPnh_7uzMmLVA"
+    "val": "ufDLMh3ql579gmChxdjrsDcB72Nbgr5X4msjmxrFtP7_ZXHbOj0lDYGU-dYS8gLZWGP6_-PufyT_S3xapNLVuA"
   }
 }

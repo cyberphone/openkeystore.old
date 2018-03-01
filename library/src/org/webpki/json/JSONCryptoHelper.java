@@ -315,14 +315,16 @@ public class JSONCryptoHelper implements Serializable {
                     if (extensionEntry == null) {
                         throw new IOException("Unexpected \"" + JSONCryptoHelper.CRIT_JSON + "\" extension: " + name);
                     }
-                    try {
-                        JSONCryptoHelper.Extension extension = extensionEntry.extensionClass.newInstance();
-                        extension.decode(innerObject);
-                        extensions.put(name, extension);
-                    } catch (InstantiationException e) {
-                        throw new IOException (e);
-                    } catch (IllegalAccessException e) {
-                        throw new IOException (e);
+                    if (innerObject.hasProperty(name)) {
+                        try {
+                            JSONCryptoHelper.Extension extension = extensionEntry.extensionClass.newInstance();
+                            extension.decode(innerObject);
+                            extensions.put(name, extension);
+                        } catch (InstantiationException e) {
+                            throw new IOException (e);
+                        } catch (IllegalAccessException e) {
+                            throw new IOException (e);
+                        }
                     }
                 }
             }

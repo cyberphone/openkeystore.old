@@ -78,11 +78,12 @@ public class Signatures {
             .setString("myUnsignedData", "something else");
     }
 
-    static JSONObjectWriter getExtensionData(boolean ext1, boolean ext2) throws IOException {
+    static JSONObjectWriter getExtensionData(boolean global, boolean second) throws IOException {
+        boolean ext1 = true;
+        boolean ext2 = second || !global; 
         return new JSONObjectWriter()
-            .setDynamic((wr) -> {
-                return ext1 ? wr.setString(new Extension1().getExtensionUri(), "Other Data") : wr;
-            })
+            .setString(new Extension1().getExtensionUri(), second ?
+                        "Cool Stuff" : "Other Data")
             .setDynamic((wr) -> {
                 return ext2 ? wr.setObject(new Extension2().getExtensionUri(), 
                                            new JSONObjectWriter().setBoolean("life-is-great", true)) : wr;
@@ -110,7 +111,24 @@ public class Signatures {
 
        
         for (String key : new String[]{"p256", "p384", "p521", "r2048"}) {
-            asymSignOptionalPublicKeyInfo(key, true,  false);
+            JSONSignatureDecoder decoder = asymSignOptionalPublicKeyInfo(key, true,  false);
+            if (key.equals("p256")) {
+                boolean next = false;
+                StringBuilder numerics = new StringBuilder(new String(decoder.getNormalizedData(), "utf-8"));
+                numerics.append('\n');
+                int byteCount = 0;
+                for (byte b : decoder.getNormalizedData()) {
+                    if (next) {
+                        numerics.append(", ");
+                    }
+                    next = true;
+                    while (++byteCount % 10 == 0) {
+                        numerics.append('\n');
+                    }
+                    numerics.append(b & 0xff);
+                }
+                System.out.println(numerics);
+            }
             asymSignOptionalPublicKeyInfo(key, false, false);
             asymSignOptionalPublicKeyInfo(key, false, true);
             certSign(key);
@@ -131,6 +149,8 @@ public class Signatures {
         multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, true,  AsymSignatureAlgorithms.ECDSA_SHA512);
         multipleSign("p256", "p384",  MULTI_CRIT.NONE,   true,  false, null);
         multipleSign("p256", "r2048", MULTI_CRIT.NONE,   true,  true, null);
+        multipleSign("p256", "r2048", MULTI_CRIT.NONE,   false, true, null);
+        multipleSign("p256", "r2048", MULTI_CRIT.GLOBAL, false, true, null);
         multipleSign("p256", "p384",  MULTI_CRIT.GLOBAL, false, false, null);
         multipleSign("p256", "p384",  MULTI_CRIT.LOCAL,  false, false, null);
 
@@ -321,7 +341,7 @@ public class Signatures {
         JSONAsymKeySigner signer = new JSONAsymKeySigner(keyPair1.getPrivate(), keyPair1.getPublic(), null);
         boolean global = crit == MULTI_CRIT.GLOBAL;
         if (crit != MULTI_CRIT.NONE) {
-            signer.setExtensions(getExtensionData(global, true));
+            signer.setExtensions(getExtensionData(global, false));
         }
         if (wantKeyId) {
             signer.setKeyId(keyId1);
@@ -330,7 +350,7 @@ public class Signatures {
         signers.add(signer);
         signer = new JSONAsymKeySigner(keyPair2.getPrivate(), keyPair2.getPublic(), null); 
         if (crit != MULTI_CRIT.NONE) {
-            signer.setExtensions(getExtensionData(true, global));
+            signer.setExtensions(getExtensionData(global, true));
         }
         if (wantKeyId) {
             signer.setKeyId(keyId2);
@@ -338,8 +358,8 @@ public class Signatures {
         }
         signers.add(signer);
         JSONCryptoHelper.ExtensionHolder extensionHolder = new JSONCryptoHelper.ExtensionHolder()
-            .addExtension(Extension1.class, global)
-            .addExtension(Extension2.class, global);
+            .addExtension(Extension1.class, false)
+            .addExtension(Extension2.class, false);
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
         JSONSigner.MultiSignatureHeader multiSignatureHeader = new JSONSigner.MultiSignatureHeader(options);
         String fileExt = "";
@@ -386,11 +406,11 @@ public class Signatures {
         return decoder.getAlgorithm().getAlgorithmId(AlgorithmPreferences.JOSE).toLowerCase();
     }
 
-    static void asymSignCore(String keyType, 
-                             boolean wantKeyId,
-                             boolean wantPublicKey,
-                             boolean wantExtensions,
-                             boolean wantExclusions) throws Exception {
+    static JSONSignatureDecoder asymSignCore(String keyType, 
+                                             boolean wantKeyId,
+                                             boolean wantPublicKey,
+                                             boolean wantExtensions,
+                                             boolean wantExclusions) throws Exception {
         KeyPair keyPair = readJwk(keyType);
         JSONSigner signer = 
                 new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null);
@@ -399,7 +419,7 @@ public class Signatures {
         }
         signer.setOutputPublicKeyInfo(wantPublicKey);
         if (wantExtensions) {
-            signer.setExtensions(getExtensionData(true, true));
+            signer.setExtensions(getExtensionData(false, true));
         }
         byte[] signedData;
         if (wantExclusions) {
@@ -428,10 +448,11 @@ public class Signatures {
             JSONParser.parse(signedData).getSignature(options);
         optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + '@' +  
                 addedFeature + keyIndicator(wantKeyId, wantPublicKey), signedData, true);
+        return decoder;
      }
 
-    static void asymSignOptionalPublicKeyInfo(String keyType, boolean wantKeyId, boolean wantPublicKey) throws Exception {
-        asymSignCore(keyType, wantKeyId, wantPublicKey, false, false);
+    static JSONSignatureDecoder asymSignOptionalPublicKeyInfo(String keyType, boolean wantKeyId, boolean wantPublicKey) throws Exception {
+        return asymSignCore(keyType, wantKeyId, wantPublicKey, false, false);
     }
 
     static X509Certificate[] readCertificatePath(String keyType) throws IOException {

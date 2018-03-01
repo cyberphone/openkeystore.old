@@ -1,0 +1,23 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "crit": ["otherExt","https://example.com/extension"],
+    "signers": [{
+      "alg": "ES256",
+      "kid": "example.com:p256",
+      "otherExt": "Other Data",
+      "signature": "S9PqQU5z5zThIGUvErzf7oo8EetiUFEI1v8flisWJzw0HqqY-OuT_pDq1rG4gsSRAFjrazurl4NGyyxcPfeXzw"
+    },{
+      "alg": "RS256",
+      "kid": "example.com:r2048",
+      "otherExt": "Cool Stuff",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "signature": "O-cnYTtgvyGmgX1YMQkcnRE0lnBw1EduMNVpdblKP-Iy0S143BBvXrCQoEW9oTkQm7X9wkJoohWQyU4qvojoxQxmf6GQ0tEXEIHqN7ixkPh_3ySXTl-gKTPiA5UL-GV44AS-k6N71qp8XhLORmUm68UlTWBZaOXL0JTGjsCyGpuwNiAQbx39ZbjabvGq4NfpPIQC2yjx_SKoPMiia54Mp0hz8U_S3oyAmHrG2mKFYrJ7k43aeDHK1RNRu8XrW2w-Ffh4KigpClAq4q272ZSsjizfYPPjW3gqInjMZzQd8yZj5Bi5vCDcBOEKZMDoog-UzIy8SbZNl85TlkhK70oNRQ"
+    }]
+  }
+}

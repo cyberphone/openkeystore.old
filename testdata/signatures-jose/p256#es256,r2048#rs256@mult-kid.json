@@ -1,0 +1,17 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "kid": "example.com:p256",
+      "signature": "83gr5rmjKgngLTaPpxuQWiZaQmlQ555jLHNcZLmcBpgX7JZLeqrNhIrQRg3jTsNwh1RuibDYBzCsaxVUkhGEKg"
+    },{
+      "alg": "RS256",
+      "kid": "example.com:r2048",
+      "signature": "PVQeL8XtjnetambQe98FuMBDuijwWTIFXouyNjL8WX0WvamWkHjv34Iz8VOHHWr9w8t14FXJJuQ22j-h5BR7qPxE7cBVS8XSltR7VvcNidfn-r-TtAVwDwn7Iz_Gk-RI7QIv4ctbreYt1myG64Ikw38OEmNURCxzf9h9w3tvA3R8ZE3MYgELFaQRowSW92JC1HhGZRijzHoIzvH6l_GULP_hf7kggwFNtRrzN8DLXbhBhGaoP-O0cNZsCWY2hbNU6L7km6bdrqHdq88DSOEGg_-5T6qUsIAYbmCgUK7XBi2q-DRPQZYnxr5570mj9Nkh0hpZ-VfAC2ftbzxFAB7ZYg"
+    }]
+  }
+}
