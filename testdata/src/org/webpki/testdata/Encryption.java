@@ -127,6 +127,23 @@ public class Encryption {
         joseMode = Boolean.valueOf(args[3]);
         symmetricKeys = new SymmetricKeys(baseKey);
         dataToBeEncrypted = ArrayUtil.readFile(baseData + "datatobeencrypted.txt");
+        
+        boolean next = false;
+        StringBuilder numerics = new StringBuilder(new String(dataToBeEncrypted, "utf-8"));
+        numerics.append('\n');
+        int byteCount = 0;
+        for (byte b : dataToBeEncrypted) {
+            if (next) {
+                numerics.append(", ");
+            }
+            next = true;
+            while (++byteCount % 10 == 0) {
+                numerics.append('\n');
+            }
+            numerics.append(b & 0xff);
+        }
+        System.out.println(numerics);
+
 
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, false);
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID, false);
