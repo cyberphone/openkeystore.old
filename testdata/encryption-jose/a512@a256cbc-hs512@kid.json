@@ -2,7 +2,7 @@
   "enc": "A256CBC-HS512",
   "alg": "dir",
   "kid": "a512bitkey",
-  "iv": "uugGGh9RHJYTrmVbKzqpNA",
-  "tag": "SvOD3XUAy8vp23ULPcFcyVC_psVS7MEQ8BbYqclrlX8",
-  "ciphertext": "oR076QH7k4jOa5MIVB6OyH8a2yyywzCwcJlPOfBEsEs"
+  "iv": "aQv42nzXcin-UTN9lz0tqw",
+  "tag": "ztOphfvn_rMNBB8C6aHSm816xKccxY-oaHNjpI5iBcI",
+  "ciphertext": "Hk108B97xQF_U2CTOpVdG_GHADK078yJODdajcseYfU"
 }

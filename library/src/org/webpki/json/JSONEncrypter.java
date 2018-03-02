@@ -148,13 +148,13 @@ public abstract class JSONEncrypter implements Serializable {
                                                 foundExtensions.toArray(new String[0]));
             }
             byte[] iv = EncryptionCore.createIv(contentEncryptionAlgorithm);
-            encryptionWriter.setBinary(JSONCryptoHelper.IV_JSON, iv);
             EncryptionCore.SymmetricEncryptionResult symmetricEncryptionResult =
                 EncryptionCore.contentEncryption(contentEncryptionAlgorithm,
                                                  contentEncryptionKey,
                                                  iv,
                                                  unencryptedData,
                                                  encryptionWriter.serializeToBytes(JSONOutputFormats.NORMALIZED));
+            encryptionWriter.setBinary(JSONCryptoHelper.IV_JSON, iv);
             encryptionWriter.setBinary(JSONCryptoHelper.TAG_JSON, symmetricEncryptionResult.getTag());
             encryptionWriter.setBinary(JSONCryptoHelper.CIPHER_TEXT_JSON, symmetricEncryptionResult.getCipherText());
             return encryptionWriter;

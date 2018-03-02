@@ -10,11 +10,11 @@
   "epk": {
     "kty": "EC",
     "crv": "P-384",
-    "x": "pBZNeuhINebh3tKE5zn_e10WDHo-fVRKiGtGZmwjkKTVX4mVUxq9XEGNlIRXa_7O",
-    "y": "TwjfcpsHmp9TZo-Xg4rct_uangR6e_JtPWuxVob59_V7iObSfYv1JBr8iOtbdzvS"
+    "x": "pTpRU3G4LDy23rshM6Wd0eevkgO9NLmmvP_DrvdA9cHtobdZA1IfGdBiogd79tXT",
+    "y": "sPPzOxRO-7Jd1WhOU6iBlS2SG9T9ESRkHf-jiq0qp3YfogB-jH9UiBaFy0SViiAi"
   },
-  "encrypted_key": "FvnjWU8dIFh7SFB71sgPVT44Hr0-uewSR8xNb6392LMuJxJM2DkB-Q",
-  "iv": "ZTPb07B6laVWfMUq16UgLQ",
-  "tag": "f8VBad5w9tWHyDYnU2bLlA",
-  "ciphertext": "1xnxjE9yM8fgOiXxvHSm11z8G7Tg9tnhvdK6ipY1AMs"
+  "encrypted_key": "FLZqHvKHt_vKqgu3IOqMtcI37eSyk9vjJtvPbzlGv7tSJ7SLYcuVxA",
+  "iv": "zajYv-hvyEQqA4k1mqiBVA",
+  "tag": "PFylJqr5YTQ-NtovZ-08bA",
+  "ciphertext": "ChtGFhfSPpXTUAyAnQmxP6aOvDKvNUZziLdXxmbgHcg"
 }

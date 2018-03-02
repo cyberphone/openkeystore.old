@@ -2,7 +2,7 @@
   "enc": "A128GCM",
   "alg": "dir",
   "kid": "a128bitkey",
-  "iv": "iOElfoBYtDyI1NHG",
-  "tag": "gnomka1SM7o6ZGQzyfqgtA",
-  "ciphertext": "KGbYqRQcafyTfUidmb4trJKvFrRmPg"
+  "iv": "PjevacVR8921s6Oz",
+  "tag": "2obn84MDVEjk4LRlCXWKrw",
+  "ciphertext": "Vd4XLDpmlk-iB_3CIHrtorZUDd6fIA"
 }

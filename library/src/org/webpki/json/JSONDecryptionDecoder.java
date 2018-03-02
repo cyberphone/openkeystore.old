@@ -81,8 +81,9 @@ public class JSONDecryptionDecoder {
                     new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
             //                                                                                   //
             // 2. Hide these properties from the serializer..                                    //
-            encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                 //
-            encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);         //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.IV_JSON);                   //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                  //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);          //
             //                                                                                   //
             // 3. Serialize ("JSON.stringify()")                                                 //
             authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
