@@ -57,7 +57,7 @@ import org.webpki.json.WebKey;
 import org.webpki.util.ArrayUtil;
 
 /*
- * Create JCS/JWS test vectors
+ * Create Cleartext JWS/JCS test vectors
  */
 public class Signatures {
     static String baseKey;

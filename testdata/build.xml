@@ -12,6 +12,7 @@
   </condition>
   <property name="signatureBase" location="signatures${joseFile}"/>
   <property name="encryptionBase" location="encryption${joseFile}"/>
+  <property name="normalizationBase" location="normalization"/>
 
   <path id="lib.classpath">
     <fileset dir="../library/dist">
@@ -23,7 +24,7 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help createcerts signatures [-Djose=0] encryption [-Djose=0]"/>
+    <echo message="Targets: help createcerts signatures [-Djose=0] encryption [-Djose=0] normalization"/>
   </target>
 	
   <target name="_compile">
@@ -57,6 +58,7 @@
         <arg value="${dataBase}"/>
         <arg value="${signatureBase}"/>
         <arg value="${joseMode}"/>
+        <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>
 
@@ -75,6 +77,25 @@
         <arg value="${dataBase}"/>
         <arg value="${encryptionBase}"/>
         <arg value="${joseMode}"/>
+        <jvmarg value="-Dfile.encoding=UTF8"/>
+    </java>
+  </target>
+
+  <target name="normalization" depends="_compile">
+  	<!-- Run target -->
+  	<mkdir dir="${normalizationBase}"/>
+    <java fork="yes"
+          classname="org.webpki.testdata.Normalization"
+    	  dir="${temp.dir}"
+          failonerror="true">
+    	<classpath>
+            <pathelement path="${temp.dir}"/>
+       	    <path refid="lib.classpath"/>
+    	</classpath>
+        <arg value="${keyBase}"/>
+        <arg value="${dataBase}"/>
+        <arg value="${normalizationBase}"/>
+        <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>
 

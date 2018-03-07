@@ -1,0 +1,64 @@
+[
+
+{
+  "ieee": "0000000000000000",
+  "json" : "0"
+},{
+  "ieee": "8000000000000000",
+  "comment": "Minus zero",
+  "json" : "0"
+},{
+  "ieee": "0000000000000001",
+  "comment":"Smallest positive",
+  "json" : "5e-324"
+},{
+  "ieee": "8000000000000001",
+  "comment":"Smallest negative",
+  "json" : "-5e-324"
+},{
+  "ieee": "7fefffffffffffff",
+  "comment":"Largest positive",
+  "json" : "1.7976931348623157e+308"
+},{
+  "ieee": "ffefffffffffffff",
+  "comment":"Largest negative",
+  "json" : "-1.7976931348623157e+308"
+},{
+  "ieee": "7fffffffffffffff",
+  "comment":"Error (NaN)"
+},{
+  "ieee": "44B52D02C7E14AF5",
+  "json" : "9.999999999999997e+22"
+},{
+  "ieee": "44B52D02C7E14AF6",
+  "json" : "1e+23"
+},{
+  "ieee": "44B52D02C7E14AF7",
+  "json" : "1.0000000000000001e+23"
+},{
+  "ieee": "444B1AE4D6E2EF4F",
+  "json" : "999999999999999900000"
+},{
+  "ieee": "444B1AE4D6E2EF50",
+  "json" : "1e+21"
+},{
+  "ieee": "444B1AE4D6E2EF51",
+  "json" : "1.0000000000000001e+21"
+},{
+  "ieee": "41B3DE4355555553",
+  "json" : "333333333.3333332"
+},{
+  "ieee": "41B3DE4355555554",
+  "json" : "333333333.33333325"
+},{
+  "ieee": "41B3DE4355555555",
+  "json" : "333333333.3333333"
+},{
+  "ieee": "41B3DE4355555556",
+  "json" : "333333333.3333334"
+},{
+  "ieee": "41B3DE4355555557",
+  "json" : "333333333.33333343"
+}
+
+]

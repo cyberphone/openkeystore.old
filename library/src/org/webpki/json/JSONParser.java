@@ -44,6 +44,8 @@ public class JSONParser {
     int maxLength;
 
     String jsonData;
+    
+    static boolean strictNumericMode = true;
 
     JSONParser() {
     }
@@ -85,6 +87,16 @@ public class JSONParser {
      */
     public static JSONObjectReader parse(byte[] jsonBytes) throws IOException {
         return parse(new String(jsonBytes, "UTF-8"));
+    }
+
+    /**
+     * Define strictness of "Number" parsing.
+     * Default mode is strict making for example 1.50 and 1e+3 fail
+     * since they are not normalized.
+     * @param strict True if strict mode is requested
+     */
+    public static void setStrictNumericMode(boolean strict) {
+        strictNumericMode = strict;
     }
 
     String scanProperty() throws IOException {
@@ -174,7 +186,7 @@ public class JSONParser {
         JSONTypes type = JSONTypes.NUMBER;
         if (NUMBER_PATTERN.matcher(token).matches()) {
             String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(token));
-            if (!serializedNumber.equals(token)) {
+            if (!serializedNumber.equals(token) && strictNumericMode) {
                 throw new IOException("This JSON implementation mandates fully normalized \"Number\" data " +
                                       "according to ES6+.  As a consequence " + token + 
                                       " must be expressed as " + serializedNumber);

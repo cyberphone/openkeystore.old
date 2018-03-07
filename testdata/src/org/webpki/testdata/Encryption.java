@@ -53,7 +53,7 @@ import org.webpki.json.Extension2;
 import org.webpki.util.ArrayUtil;
 
 /*
- * Create JEF test vectors
+ * Create Cleartext JWE/JEF test vectors
  */
 public class Encryption {
     static String baseKey;
