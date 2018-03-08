@@ -17,19 +17,12 @@
 package org.webpki.testdata;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.Vector;
 
-import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.CustomCryptoProvider;
-import org.webpki.crypto.KeyStoreVerifier;
-import org.webpki.crypto.MACAlgorithms;
+import java.io.IOException;
+
+import java.security.KeyPair;
+
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONCryptoHelper;
@@ -37,18 +30,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-import org.webpki.json.JSONRemoteKeys;
-import org.webpki.json.JSONSignatureDecoder;
-import org.webpki.json.JSONSigner;
-import org.webpki.json.JSONSymKeySigner;
-import org.webpki.json.JSONSymKeyVerifier;
-import org.webpki.json.JSONX509Signer;
-import org.webpki.json.JSONX509Verifier;
-// Test
-import org.webpki.json.Extension1;
-import org.webpki.json.Extension2;
-import org.webpki.json.SymmetricKeys;
-import org.webpki.json.WebKey;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
@@ -120,7 +102,7 @@ public class Normalization {
         result.append("\n\n\n");
         StringBuilder table = new StringBuilder(
            "|=================================================================|\n" +
-           "| IEEE-754 Double  |   JSON Representation    |      Comment      |\n" +
+           "|   ES6 Internal   |   JSON Representation    |      Comment      |\n" +
            "|=================================================================|");
         while (jsonNumbers.hasMore()) {
             JSONObjectReader set = jsonNumbers.getObject();
