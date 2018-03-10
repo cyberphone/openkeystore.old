@@ -7,6 +7,8 @@ Set PYTHONPATH to the src sub-directory
 
 On Windows perform "CHCP 65001" to set the console in UTF-8 mode
 
+Install required modules:
+$ pip install ecdsa pycrypto simplejson
 
 2. Running
 ----------
