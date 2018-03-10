@@ -1,5 +1,5 @@
 ## Deviations from the Cleartext JWS/JWE Specifications
-The Cleartext JWS and JWE specifications inherit most of their featues from
+The Cleartext JWS and JWE specifications inherit most of their features from
 the original JWS and JWE specifications.
 
 Some of these features are (IMO) neither good nor useful and have therefore no
@@ -8,7 +8,7 @@ support in my RI ("reference implementation").
 
 ### JWK Support
 JWS and JWE claim that JWKs hold public keys.
-However, if you look into the actual JWK specification, it can host a varity
+However, if you look into the actual JWK specification, it can host a variety
 of other data.
 
 The RI only supports JWKs holding a single public key and _no other
