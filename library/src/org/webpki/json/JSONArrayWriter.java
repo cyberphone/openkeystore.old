@@ -120,7 +120,7 @@ public class JSONArrayWriter implements Serializable {
         // Finally, the signature itself
         signatureObject.setBinary(JSONCryptoHelper._valueLabel,
                                   signer.signData(signer.normalizedData = 
-                                          this.serializeToBytes(JSONOutputFormats.NORMALIZED)));
+                                          this.serializeToBytes(JSONCryptoHelper.cryptoSerialization)));
         return this;
     }
 

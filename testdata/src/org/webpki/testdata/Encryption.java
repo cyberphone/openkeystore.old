@@ -64,7 +64,7 @@ public class Encryption {
     static byte[] dataToBeEncrypted;
     static boolean joseMode;
     
-    public interface Decrypt {
+    public interface LocalDecrypt {
         public byte[] decrypt(JSONObjectReader reader) throws Exception;
     }
 
@@ -92,7 +92,7 @@ public class Encryption {
         return encryptedData.toString();
     }
 
-    static void optionalUpdate(String baseName, byte[] encryptedData, Decrypt decrypter) throws Exception {
+    static void optionalUpdate(String baseName, byte[] encryptedData, LocalDecrypt decrypter) throws Exception {
         String fileName = baseEncryption + baseName;
         JSONObjectReader newEncryptedData = JSONParser.parse(encryptedData);
         if (!ArrayUtil.compare(decrypter.decrypt(newEncryptedData), dataToBeEncrypted)) {
@@ -101,12 +101,14 @@ public class Encryption {
         boolean changed = true;
         try {
             JSONObjectReader oldEncryptedData = JSONParser.parse(ArrayUtil.readFile(fileName));
-            if (ArrayUtil.compare(decrypter.decrypt(oldEncryptedData), dataToBeEncrypted)) {
-                // All good but are the new and old effectively the same?
-                if (cleanEncryption(newEncryptedData).equals(cleanEncryption(oldEncryptedData))) {
-                    return;  // Yes, don't rewrite.
+            try {
+                if (ArrayUtil.compare(decrypter.decrypt(oldEncryptedData), dataToBeEncrypted)) {
+                    // All good but are the new and old effectively the same?
+                    if (cleanEncryption(newEncryptedData).equals(cleanEncryption(oldEncryptedData))) {
+                        return;  // Yes, don't rewrite.
+                    }
                 }
-            }
+            } catch (Exception e) {}
         } catch (Exception  e) {
             changed = false;  // New I guess
         }
@@ -252,7 +254,7 @@ public class Encryption {
         optionalUpdate(keyType + "#" + keyEncryptionAlgorithm.toString().toLowerCase() + 
                            "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
-                       new Decrypt() {
+                       new LocalDecrypt() {
         
                            @Override
                            public byte[] decrypt(JSONObjectReader reader) throws Exception {
@@ -277,7 +279,7 @@ public class Encryption {
                                                         encrypter).serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         optionalUpdate("a" + keyBits + "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
-                       new Decrypt() {
+                       new LocalDecrypt() {
          
                            @Override
                            public byte[] decrypt(JSONObjectReader reader) throws Exception {
@@ -351,7 +353,7 @@ public class Encryption {
         optionalUpdate(keyType + "#" +  keyEncryptionAlgorithm.toString().toLowerCase() + 
                            "@" + contentEncryptionAlgorithm.toString().toLowerCase() + "@" + fileSuffix,
                        encryptedData,
-                       new Decrypt() {
+                       new LocalDecrypt() {
           
                            @Override
                            public byte[] decrypt(JSONObjectReader reader) throws Exception {
