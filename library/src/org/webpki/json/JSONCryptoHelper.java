@@ -32,8 +32,11 @@ import org.webpki.crypto.AlgorithmPreferences;
 public class JSONCryptoHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private JSONCryptoHelper() {}
+
+    // Choose between NORMALIZED or CANONICALIZED
+    static final JSONOutputFormats cryptoSerialization = JSONOutputFormats.NORMALIZED;
 
     // Arguments
     public static final String EC_PUBLIC_KEY           = "EC";

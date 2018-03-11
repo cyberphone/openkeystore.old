@@ -17,15 +17,11 @@
 package org.webpki.json;
 
 import java.io.IOException;
-
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
-
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -73,26 +69,26 @@ public class JSONDecryptionDecoder {
                 globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
             }
 
-            ///////////////////////////////////////////////////////////////////////////////////////
-            // Begin JEF normalization                                                           //
-            //                                                                                   //
-            // 1. Make a shallow copy of the encryption object property list                     //
-            LinkedHashMap<String, JSONValue> savedProperties =                                   //
-                    new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);      //
-            //                                                                                   //
-            // 2. Hide these properties from the serializer..                                    //
-            encryptionObject.root.properties.remove(JSONCryptoHelper.IV_JSON);                   //
-            encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                  //
-            encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);          //
-            //                                                                                   //
-            // 3. Serialize ("JSON.stringify()")                                                 //
-            authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.NORMALIZED); //
-            //                                                                                   //
-            // 4. Restore encryption object property list                                        //
-            encryptionObject.root.properties = savedProperties;                                  //
-            //                                                                                   //
-            // End JEF normalization                                                             //
-            ///////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+            // Begin JEF normalization                                                                   //
+            //                                                                                           //
+            // 1. Make a shallow copy of the encryption object property list                             //
+            LinkedHashMap<String, JSONValue> savedProperties =                                           //
+                    new LinkedHashMap<String, JSONValue>(encryptionObject.root.properties);              //
+            //                                                                                           //
+            // 2. Hide these properties from the serializer..                                            //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.IV_JSON);                           //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                          //
+            encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);                  //
+            //                                                                                           //
+            // 3. Serialize ("JSON.stringify()")                                                         //
+            authenticatedData = encryptionObject.serializeToBytes(JSONCryptoHelper.cryptoSerialization); //
+            //                                                                                           //
+            // 4. Restore encryption object property list                                                //
+            encryptionObject.root.properties = savedProperties;                                          //
+            //                                                                                           //
+            // End JEF normalization                                                                     //
+            ///////////////////////////////////////////////////////////////////////////////////////////////
 
             // Collect mandatory elements
             contentEncryptionAlgorithm = ContentEncryptionAlgorithms

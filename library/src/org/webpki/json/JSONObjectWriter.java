@@ -33,6 +33,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
 
 import java.util.GregorianCalendar;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import java.util.regex.Pattern;
@@ -81,6 +82,8 @@ public class JSONObjectWriter implements Serializable {
     boolean javaScriptMode;
 
     boolean htmlMode;
+    
+    boolean canonicalized;
 
     int indentFactor;
 
@@ -582,7 +585,7 @@ public class JSONObjectWriter implements Serializable {
         // Finally, the signature itself
         signatureWriter.setBinary(JSONCryptoHelper._valueLabel,
                                   signer.signData(signer.normalizedData = 
-                                          signedObject.serializeToBytes(JSONOutputFormats.NORMALIZED)));
+                                          signedObject.serializeToBytes(JSONCryptoHelper.cryptoSerialization)));
     }
 
     /**
@@ -922,7 +925,7 @@ import org.webpki.json.JSONSignatureDecoder;
         indentLine();
         boolean next = false;
         long lastIndex = Long.MIN_VALUE;
-        for (String property : object.properties.keySet()) {
+        for (String property : canonicalized ? new TreeSet<String>(object.properties.keySet()) : object.properties.keySet()) {
             long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
                                                       Long.valueOf(property) : Long.MAX_VALUE;
             if (currentIndex < lastIndex) {
@@ -1184,6 +1187,7 @@ import org.webpki.json.JSONSignatureDecoder;
         prettyPrint = outputFormat.pretty;
         javaScriptMode = outputFormat.javascript;
         htmlMode = outputFormat.html;
+        canonicalized = outputFormat.canonicalized;
         if (root.properties.containsKey(null)) {
             printArray((Vector<JSONValue>) root.properties.get(null).value);
         } else {

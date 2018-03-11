@@ -145,7 +145,7 @@ public class JSONSignatureDecoder implements Serializable {
         innerSignatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
         //                                                                                  //
         // 3. Serialize ("JSON.stringify()")                                                //
-        normalizedData = signedData.serializeToBytes(JSONOutputFormats.NORMALIZED);         //
+        normalizedData = signedData.serializeToBytes(JSONCryptoHelper.cryptoSerialization); //
         //                                                                                  //
         // 4. Restore the signature object                                                  //
         innerSignatureObject.root.properties = savedProperties;                             //
@@ -238,33 +238,16 @@ public class JSONSignatureDecoder implements Serializable {
         }
     }
 
-    void checkVerification(boolean success) throws IOException {
-        if (!success) {
-            String key;
-            switch (getSignatureType()) {
-                case X509_CERTIFICATE:
-                    key = certificatePath[0].getPublicKey().toString();
-                    break;
-
-                case ASYMMETRIC_KEY:
-                    key = publicKey.toString();
-                    break;
-
-                default:
-                    key = getKeyId();
-            }
-            throw new IOException("Bad signature for key: " + key);
-        }
-    }
-
     void asymmetricSignatureVerification(PublicKey publicKey) throws IOException {
         if (((AsymSignatureAlgorithms) algorithm).isRsa() != publicKey instanceof RSAPublicKey) {
             throw new IOException("\"" + algorithmString + "\" doesn't match key type: " + publicKey.getAlgorithm());
         }
         try {
-            checkVerification(new SignatureWrapper((AsymSignatureAlgorithms) algorithm, publicKey)
-                .update(normalizedData)
-                .verify(signatureValue));
+            if (!new SignatureWrapper((AsymSignatureAlgorithms) algorithm, publicKey)
+                         .update(normalizedData)
+                         .verify(signatureValue)) {
+                throw new IOException("Bad signature for key: " + publicKey.toString());
+            }
         } catch (GeneralSecurityException e) {
             throw new IOException(e);
         }
