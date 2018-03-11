@@ -108,7 +108,7 @@ public class Normalization {
             JSONObjectReader set = jsonNumbers.getObject();
             String jsonRepresentation = "";
             Double number = Double.longBitsToDouble(Long.parseUnsignedLong(set.getString("ieee"), 16));
-            if (!number.isNaN()) {
+            if (!number.isNaN() && !number.isInfinite()) {
                 jsonRepresentation = JSONObjectWriter.es6JsonNumberSerialization(number);
                 if (!set.getString("json").equals(jsonRepresentation)) {
                     throw new IOException(jsonRepresentation + "@" + set.getString("json"));
@@ -135,23 +135,6 @@ public class Normalization {
         jsonNumbers1.checkForUnread();
 
         addRFC(table.toString());
-/*
-        <c>Data&nbsp;to&nbsp;be&nbsp;Signed</c>
-        <c>Arbitrary&nbsp;data</c>
-        <c>
-          JSON or JavaScript objects
-        </c>
-        <c>Encoding&nbsp;of&nbsp;Signed&nbsp;Data</c>
-        <c>Base64url</c>
-        <c>None</c>
-        <c>Encoding&nbsp;of&nbsp;Header&nbsp;Parameters</c>
-        <c>Base64url</c>
-        <c>None</c>
-        <c>URL Friendly</c>
-        <c>Core&nbsp;feature</c>
-        <c>Out of scope</c>
-      </texttable>
-*/
         KeyPair keyPair = readJwk("p256");
         byte[] signature = new JSONObjectWriter(parsed)
             .setSignature(new JSONAsymKeySigner(keyPair.getPrivate(), keyPair.getPublic(), null))

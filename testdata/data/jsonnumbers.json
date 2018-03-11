@@ -28,6 +28,9 @@
   "ieee": "7fffffffffffffff",
   "comment":"Error (NaN)"
 },{
+  "ieee": "7ff0000000000000",
+  "comment":"Error (Infinity)"
+},{
   "ieee": "44B52D02C7E14AF5",
   "json" : "9.999999999999997e+22"
 },{
