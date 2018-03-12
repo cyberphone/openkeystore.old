@@ -926,13 +926,15 @@ import org.webpki.json.JSONSignatureDecoder;
         boolean next = false;
         long lastIndex = Long.MIN_VALUE;
         for (String property : canonicalized ? new TreeSet<String>(object.properties.keySet()) : object.properties.keySet()) {
-            long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
-                                                      Long.valueOf(property) : Long.MAX_VALUE;
-            if (currentIndex < lastIndex) {
-                throw new IOException("For strict ES6+ compatibility, this JSON implementation requires properties " +
-                                      "with numeric names (like \"2\":true) to be created first, and in ascending order");
+            if (!canonicalized) {
+                long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
+                                                          Long.valueOf(property) : Long.MAX_VALUE;
+                if (currentIndex < lastIndex) {
+                    throw new IOException("For strict ES6+ compatibility, this JSON implementation requires properties " +
+                                          "with numeric names (like \"2\":true) to be created first, and in ascending order");
+                }
+                lastIndex = currentIndex;
             }
-            lastIndex = currentIndex;
             JSONValue jsonValue = object.properties.get(property);
             if (jsonValue == null) {
                 continue;
