@@ -1,0 +1,16 @@
+{
+  "mySignedData": "something",
+  "myUnsignedData": "something else",
+  "__cleartext_signature": {
+    "excl": ["myUnsignedData"],
+    "signers": [{
+      "alg": "ES256",
+      "kid": "example.com:p256",
+      "signature": "O7kR7jbEIHyJKj1zuzuIOz5g86ITKrcdzCBeUG_bTMTNyiZdxyF9bLcWqp94uoDCuegpVsTRzBJRHL6LPDVyzg"
+    },{
+      "alg": "RS256",
+      "kid": "example.com:r2048",
+      "signature": "UWtxeASpbhgT6PGVItnbyY-Ens1TQT1M_RRdI3j-IsSCrYdlqsgqHhbW-jdfxwNj661Bcn8WClGXEZEfV3zvNlas5l44VwaaRhUOYgSq5SrfVdZAncVph7hdMZMqzwtPwNOZVlpzzyF5VI6eqZ_RnGbPX1ZLogXn-E9v7FWAqrOk7jynW0Sh7_96ALMJ-_E5WQ9oRwMCj3OOPZMAW4Zdn5AFSvCmfRhHNnIF1NcwfbUdaVdPuVOsKpbWafvjpAzjh96kfijImmAmZ4OL1LADOFTYIsnDgZmQ106VlKFBIBbl_62wYOAURM1wEq1APdbFLo2Qf2nso7zQnLrQNFvZpQ"
+    }]
+  }
+}

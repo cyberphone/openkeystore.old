@@ -1,0 +1,26 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "signers": [{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "signature": "ts3suzzE6pxKghLHHkxk0CBB4aG1HJLTH7CJBZxFZIQXJhXYJS4oNrq_endNg_sSNCnhxGHpmG4dZLO445eAQw"
+    },{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "signature": "CshmhV9d43nG_XDxb3oHAxyiBtMTb4bvltlDtxZ6V5ftgK33ThFhp0nxtsstbhArcyPUJnjne2YqCxhGKeF2FGVHXEEceTW52XQBAUVLp7aMvbQCebWvA1oWITaAYe19"
+    }]
+  }
+}

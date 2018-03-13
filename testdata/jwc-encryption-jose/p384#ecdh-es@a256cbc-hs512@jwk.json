@@ -1,0 +1,19 @@
+{
+  "enc": "A256CBC-HS512",
+  "alg": "ECDH-ES",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-384",
+    "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+    "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+  },
+  "epk": {
+    "kty": "EC",
+    "crv": "P-384",
+    "x": "E6LuTP3bYuY76vH8gTliM6q1G6gSHsI5OEw4nv9xWDInSfK75LV7UzXRmSPmecJY",
+    "y": "A1T5QMn55d8p_S7cc2ahObmI5reOpBt_iy6h7IxXsOdbxL0p8ojGkxN9HMZVh6ya"
+  },
+  "iv": "paRS1ueC8ABT7XXUKs7Eug",
+  "tag": "IIMka1v8huf3cptgQYZxTwrdmnXPUhjEyz2PDbyOujc",
+  "ciphertext": "YRtOY9lBJpBtxQTcqkRIS3JPnDNU_Dyv5t_thFjTLSk"
+}

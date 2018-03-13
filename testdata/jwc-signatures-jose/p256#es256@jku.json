@@ -1,0 +1,11 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES256",
+    "jku": "https://cyberphone.github.io/doc/openkeystore/p256.jwks",
+    "signature": "P5Yew2XTw0z_2N9CisjJwSoLaGHnttGofnyKBn95KpI7De9RYObIAMeeeEaw4NIs1kBc6e5bDjt1rGp02fnAlw"
+  }
+}

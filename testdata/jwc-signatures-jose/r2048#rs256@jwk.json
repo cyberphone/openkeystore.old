@@ -1,0 +1,15 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "RS256",
+    "jwk": {
+      "kty": "RSA",
+      "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+      "e": "AQAB"
+    },
+    "signature": "eFbAp3CNvdaVXEshQ3rzXWvuvVCzPuaQf2wYjLAVihhRjiS1nbvHt-OMpWTMXRLOfemjLDE_f1ET5aJAp3X_sHviJk2GxCcj46oMfZhUxnr4gRozEOYL5f4vsP4W8CZFz7lzf5JEvLNMu2dsT6tPGQAyE6_UfaYFcj9wfWoYI8TX5tjpZoUhGa6Gtkl3HEeBK0whhgWI7FUjWjcIeNAikTUllYa-Ti8WzLcfE1Up89pTGSYMAE3O6YzdCiQgU7sWQ-qtBWG_RAXDgZ0KvPumAr57K-dsdw416FJFcUdJ730g7UTHa1sS4eNAhje0jcw7_QSlCL7ei2EZ8_9kFvyfFA"
+  }
+}

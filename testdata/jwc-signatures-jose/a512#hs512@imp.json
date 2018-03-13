@@ -1,0 +1,10 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "HS512",
+    "signature": "aKXzyA2E-ppyi3iSrerGI3W8mP62Qx7TA17qUcUWI2890R0PVNKZP0YeskaiM9AHK4NfbhND1ikINfGIDtQgEA"
+  }
+}

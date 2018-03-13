@@ -35,9 +35,6 @@ public class JSONCryptoHelper implements Serializable {
 
     private JSONCryptoHelper() {}
 
-    // Choose between NORMALIZED or CANONICALIZED
-    static final JSONOutputFormats cryptoSerialization = JSONOutputFormats.NORMALIZED;
-
     // Arguments
     public static final String EC_PUBLIC_KEY           = "EC";
 
@@ -156,6 +153,14 @@ public class JSONCryptoHelper implements Serializable {
 
     public static String _getValueLabel() {
         return _valueLabel;
+    }
+
+    // Choose between NORMALIZED or CANONICALIZED
+    static JSONOutputFormats cryptoSerialization = JSONOutputFormats.NORMALIZED;
+
+    public static void _setCanonicalization(boolean canonicalizationFlag) {
+        cryptoSerialization = canonicalizationFlag ? 
+                   JSONOutputFormats.CANONICALIZED : JSONOutputFormats.NORMALIZED;
     }
 
     /**

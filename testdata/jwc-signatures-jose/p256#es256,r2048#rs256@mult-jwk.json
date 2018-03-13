@@ -1,0 +1,26 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "signature": "8CKyXwvGeyoxhTfZxj44pJ5m9nwYFWyz5hvREJp-RU9V9yDMqSjfKUQ-nLYSizQWWKoDQ5FtUutgCsD3MDu8gw"
+    },{
+      "alg": "RS256",
+      "jwk": {
+        "kty": "RSA",
+        "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+        "e": "AQAB"
+      },
+      "signature": "Dwrug4jPph7asEd_zAr3j6rZ_Tg1Dqu72Ww4Oez9etoP2rpvqzoq7uvRDVdtT4xHhMfGhTbkJ1y8UidLOLDdtWkT0kLHDuCHybyGQc6ptYOwERPwnWh-t43NnZt69Q6m8vTJpjBdImFXtuVBlv6HakfFyMOVbYD1oVJwmWgz-ZQKhdFeoa_bb17ow59vuH1YZXM2hwA-uOD-RFQ6L6_y_ulxDLjaHsd9dNp-WQURt2RKZ9zvvXSlFESsRuwFNn5H5CZaZYAiX7UdolsqcsYDMJQNg7ME0c6ksIG7LuPx5TDhaPVOlmY1V86bcE1SkN-EIXVnJZ0hMIUXhqlRuQIUng"
+    }]
+  }
+}

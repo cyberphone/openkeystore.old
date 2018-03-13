@@ -1,0 +1,21 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES256",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+    },
+    "crit": ["otherExt","https://example.com/extension"],
+    "otherExt": "Cool Stuff",
+    "https://example.com/extension": {
+      "life-is-great": true
+    },
+    "signature": "o9QSBdYDH-IvdYGq8sbgLNJb-a1H1sIG3m0Zc57DfFqljOXaAWq9p6MhB7rReEQOYPj0u5_onKAuZkv1LkbBUQ"
+  }
+}

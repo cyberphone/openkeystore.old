@@ -1,0 +1,11 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "RS256",
+    "jku": "https://cyberphone.github.io/doc/openkeystore/r2048.jwks",
+    "signature": "EWq335RDdrhN9L5q7C7xfNNUfzCQtKZAg-1TQktzee7CNfM31Nf7LFBGLrsiMYoM4ZOpaexRUNJ1dz0g7mofkA9kUjl0opAG9Eo9Nr0GrRhme5YvIg_D4flacoU3-unnA7t7HozmAcaR8_bKM79UGmL4ABN4X3Ndt6oRgwt6V54v78LvzgUDPne85M7oClXs4c5kUOb_bIjz5JSAzUqkQDk6PXPhZuszH8TGF870sKW41rQE92AADe-Ug3nrOjZmJ-7a76-Bka0uboJTv4QwHpA2pYY1BnhdCxIOQxOK0l7Asu1xReE98L2zb-iRfvp9Fxerqyp8rgaFYZ33GRcZTg"
+  }
+}

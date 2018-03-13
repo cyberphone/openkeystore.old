@@ -1,0 +1,20 @@
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-521",
+    "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
+    "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
+  },
+  "epk": {
+    "kty": "EC",
+    "crv": "P-521",
+    "x": "AIPLjd6gSG-9Cn8Dzzny157avkKJYxSASA-IRqiDQzx3JRymxnD2fuqWzoPgatI5CiZcJNjmnyDcMQLLOLSn6JSn",
+    "y": "ATt9VwhgaQGjEPEB7mb8r_qz1NXnV1qit_K4AVKq_Tn143GhYNwH0idbcmXb2yKsQRkNfiRdg2jVgfY-H7bFcwQJ"
+  },
+  "encrypted_key": "Lp4fuMHQWOiDJdGJNCtrcVGxnGhAb1DDK4SY2GStPHoqzMGh40YEVQ",
+  "iv": "AFhnE4uye-dI3AIGufyrTA",
+  "tag": "wb50IS0K3FOi04-Yw1JpnA",
+  "ciphertext": "2TqXwALTMcNjl_1gaOnW3d7-Wn4VaDyWp9J2LPyDMeY"
+}

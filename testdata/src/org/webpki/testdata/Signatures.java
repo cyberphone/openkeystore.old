@@ -67,6 +67,7 @@ public class Signatures {
     static JSONX509Verifier x509Verifier;
     static String keyId;
     static boolean joseMode;
+    static boolean jwcMode;
    
     static final String REMOTE_PATH  = "https://cyberphone.github.io/doc/openkeystore/";
     
@@ -91,7 +92,7 @@ public class Signatures {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 4) {
+        if (args.length != 5) {
             throw new Exception("Wrong number of arguments");
         }
         CustomCryptoProvider.forcedLoad(true);
@@ -99,7 +100,9 @@ public class Signatures {
         baseData = args[1] + File.separator;
         baseSignatures = args[2] + File.separator;
         joseMode = Boolean.valueOf(args[3]);
+        jwcMode = Boolean.valueOf(args[4]);
         JSONCryptoHelper._setMode(joseMode);
+        JSONCryptoHelper._setCanonicalization(jwcMode);
         symmetricKeys = new SymmetricKeys(baseKey);
         
         X509Certificate rootca = JSONParser.parse(ArrayUtil.readFile(baseKey + "rootca.x5c"))
