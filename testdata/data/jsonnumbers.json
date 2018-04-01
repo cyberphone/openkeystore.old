@@ -10,20 +10,28 @@
   "json" : "0"
 },{
   "ieee": "0000000000000001",
-  "comment":"Smallest positive",
+  "comment":"Smallest pos number",
   "json" : "5e-324"
 },{
   "ieee": "8000000000000001",
-  "comment":"Smallest negative",
+  "comment":"Smallest neg number",
   "json" : "-5e-324"
 },{
   "ieee": "7fefffffffffffff",
-  "comment":"Largest positive",
+  "comment":"Largest pos number",
   "json" : "1.7976931348623157e+308"
 },{
   "ieee": "ffefffffffffffff",
-  "comment":"Largest negative",
+  "comment":"Largest neg number",
   "json" : "-1.7976931348623157e+308"
+},{
+  "ieee": "433fffffffffffff",
+  "comment":"Largest pos integer",
+  "json" : "9007199254740991"
+},{
+  "ieee": "c33fffffffffffff",
+  "comment":"Largest neg integer",
+  "json" : "-9007199254740991"
 },{
   "ieee": "7fffffffffffffff",
   "comment":"Error (NaN)"

@@ -101,9 +101,9 @@ public class Normalization {
         }
         result.append("\n\n\n");
         StringBuilder table = new StringBuilder(
-           "|=================================================================|\n" +
-           "|   ES6 Internal   |   JSON Representation    |      Comment      |\n" +
-           "|=================================================================|");
+           "|===================================================================|\n" +
+           "|   ES6 Internal   |   JSON Representation    |       Comment       |\n" +
+           "|===================================================================|");
         while (jsonNumbers.hasMore()) {
             JSONObjectReader set = jsonNumbers.getObject();
             String jsonRepresentation = "";
@@ -120,7 +120,7 @@ public class Normalization {
             }
             String comment = set.getStringConditional("comment", "");
             q = comment.length();
-            while (q++ < 17) {
+            while (q++ < 19) {
                 comment += " ";
             }
             table.append("\n| ")
@@ -130,7 +130,7 @@ public class Normalization {
                  .append(" | ")
                  .append(comment)
                  .append(" |\n" +
-            "|-----------------------------------------------------------------|");
+            "|-------------------------------------------------------------------|");
         }
         jsonNumbers1.checkForUnread();
 
