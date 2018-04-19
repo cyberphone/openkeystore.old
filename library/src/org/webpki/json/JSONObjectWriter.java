@@ -69,7 +69,6 @@ public class JSONObjectWriter implements Serializable {
     public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
 
     static final Pattern JS_ID_PATTERN    = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
-    static final Pattern JS_INDEX_PATTERN = Pattern.compile("[0-9]+");
 
     JSONObject root;
 
@@ -924,17 +923,7 @@ import org.webpki.json.JSONSignatureDecoder;
         buffer.append('{');
         indentLine();
         boolean next = false;
-        long lastIndex = Long.MIN_VALUE;
         for (String property : canonicalized ? new TreeSet<String>(object.properties.keySet()) : object.properties.keySet()) {
-            if (!canonicalized) {
-                long currentIndex = JS_INDEX_PATTERN.matcher(property).matches() ?
-                                                          Long.valueOf(property) : Long.MAX_VALUE;
-                if (currentIndex < lastIndex) {
-                    throw new IOException("For strict ES6+ compatibility, this JSON implementation requires properties " +
-                                          "with numeric names (like \"2\":true) to be created first, and in ascending order");
-                }
-                lastIndex = currentIndex;
-            }
             JSONValue jsonValue = object.properties.get(property);
             if (jsonValue == null) {
                 continue;
