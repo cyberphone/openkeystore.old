@@ -30,6 +30,8 @@ import javax.servlet.ServletContextListener;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreReader;
 
+import org.webpki.json.JSONCryptoHelper;
+
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
@@ -82,6 +84,7 @@ public class JCSService extends InitPropertyReader implements
             clientkey_ec = KeyStoreReader.loadKeyStore(
                     getResource(getPropertyString("clientkey_ec")),
                     key_password);
+            JSONCryptoHelper._setCanonicalization(true);
             logger.info("JCS Demo Successfully Initiated");
         } catch (Exception e) {
             logger.log(Level.SEVERE, "********\n" + e.getMessage()
