@@ -40,7 +40,7 @@ public class ES6Numbers {
                     continue;
                 }
                 String javaDString = Double.toString(d);
-                String jsonDString = JSONObjectWriter.es6JsonNumberSerialization(d);
+                String jsonDString = NumberToJSON.serializeNumber(d);
                 double jsonD = Double.valueOf(jsonDString);
                 if (d != jsonD) {
                     System.out.println("javaDString=" + javaDString + ", jsonDString=" + jsonDString + ", long=" + Long.toString(v, 16));

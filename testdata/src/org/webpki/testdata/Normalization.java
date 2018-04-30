@@ -30,6 +30,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
+import org.webpki.json.NumberToJSON;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
@@ -109,7 +110,7 @@ public class Normalization {
             String jsonRepresentation = "";
             Double number = Double.longBitsToDouble(Long.parseUnsignedLong(set.getString("ieee"), 16));
             if (!number.isNaN() && !number.isInfinite()) {
-                jsonRepresentation = JSONObjectWriter.es6JsonNumberSerialization(number);
+                jsonRepresentation = NumberToJSON.serializeNumber(number);
                 if (!set.getString("json").equals(jsonRepresentation)) {
                     throw new IOException(jsonRepresentation + "@" + set.getString("json"));
                 }

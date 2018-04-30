@@ -185,7 +185,7 @@ public class JSONParser {
         }
         JSONTypes type = JSONTypes.NUMBER;
         if (NUMBER_PATTERN.matcher(token).matches()) {
-            String serializedNumber = JSONObjectWriter.es6JsonNumberSerialization(Double.valueOf(token));
+            String serializedNumber = NumberToJSON.serializeNumber(Double.valueOf(token));
             if (!serializedNumber.equals(token) && strictNumericMode) {
                 throw new IOException("This JSON implementation mandates fully normalized \"Number\" data " +
                                       "according to ES6+.  As a consequence " + token + 

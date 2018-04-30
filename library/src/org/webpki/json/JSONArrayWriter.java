@@ -75,7 +75,7 @@ public class JSONArrayWriter implements Serializable {
     }
 
     public JSONArrayWriter setInt53(long value) throws IOException {
-        return add(JSONTypes.NUMBER, JSONObjectWriter.es6JsonLongSerialization(value));
+        return add(JSONTypes.NUMBER, JSONObjectWriter.serializeLong(value));
     }
 
     public JSONArrayWriter setLong(long value) throws IOException {
@@ -95,7 +95,7 @@ public class JSONArrayWriter implements Serializable {
     }
 
     public JSONArrayWriter setDouble(double value) throws IOException {
-        return add(JSONTypes.NUMBER, JSONObjectWriter.es6JsonNumberSerialization(value));
+        return add(JSONTypes.NUMBER, NumberToJSON.serializeNumber(value));
     }
 
     public JSONArrayWriter setBoolean(boolean value) throws IOException {

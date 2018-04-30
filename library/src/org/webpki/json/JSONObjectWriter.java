@@ -154,37 +154,7 @@ public class JSONObjectWriter implements Serializable {
         return setProperty(name, new JSONValue(JSONTypes.STRING, value));
     }
 
-    /**
-     * Formats a number according to ES6.<p>
-     * This code is emulating 7.1.12.1 of the EcmaScript V6 specification.</p>
-     * @param value Value to be formatted
-     * @return String representation
-     * @throws IOException &nbsp;
-     */
-    public static String es6JsonNumberSerialization(double value) throws IOException {
-        // 1. Check for JSON compatibility.
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IOException("NaN/Infinity are not permitted in JSON");
-        }
-
-        // 2.Deal with zero separately.  Note that this test takes "-0.0" as well
-        if (value == 0.0) {
-            return "0";
-        }
-
-        // 3. Call the DtoA algorithm crunchers
-        // V8 FastDtoa can't convert all numbers, so try it first but
-        // fall back to old DToA in case it fails
-        String result = NumberFastDtoa.numberToString(value);
-        if (result != null) {
-            return result;
-        }
-        StringBuilder buffer = new StringBuilder();
-        NumberDToA.JS_dtostr(buffer, NumberDToA.DTOSTR_STANDARD, 0, value);
-        return buffer.toString();
-    }
-
-    static String es6JsonLongSerialization(long value) throws IOException {
+    static String serializeLong(long value) throws IOException {
         return Long.toString(JSONObjectReader.int53Check(value));
     }
 
@@ -217,7 +187,7 @@ public class JSONObjectWriter implements Serializable {
      * @see #MAX_SAFE_INTEGER
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
-        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6JsonLongSerialization(value)));
+        return setProperty(name, new JSONValue(JSONTypes.NUMBER, serializeLong(value)));
     }
 
     /**
@@ -249,7 +219,9 @@ public class JSONObjectWriter implements Serializable {
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setDouble(String name, double value) throws IOException {
-        return setProperty(name, new JSONValue(JSONTypes.NUMBER, es6JsonNumberSerialization(value)));
+        return setProperty(name, 
+                           new JSONValue(JSONTypes.NUMBER, 
+                           NumberToJSON.serializeNumber(value)));
     }
 
     /**
