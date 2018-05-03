@@ -224,7 +224,7 @@ public class HTML {
         return s.toString();
     }
 
-    public static void webCryptoPage(HttpServletResponse response)
+    public static void webCryptoPage(HttpServletResponse response, boolean jcsMode)
             throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
                 "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
@@ -276,8 +276,22 @@ public class HTML {
         + "        encoded += BASE64URL_ENCODE[(binarray[i] << 2) & 0x3C];\n"
         + "    }\n"
         + "    return encoded;\n"
-        + "}\n\n"
-        + "function convertToUTF8(string) {\n"
+        + "}\n\n");
+        if (jcsMode) {
+            html.append(
+            "JSON.canonicalize = (x) => JSON.stringify(x,(_, x) => {\n" +
+            "  if (x && typeof x === 'object' && !Array.isArray(x)) {\n" +
+            "    const sorted = {}\n" +
+            "    for (let key of Object.getOwnPropertyNames(x).sort()) {\n" +
+            "      sorted[key] = x[key]\n" +
+            "    }\n" +
+            "    return sorted\n" +
+            "  }\n" +
+            "  return x\n" +
+            "});\n\n");
+        }
+        html.append(
+        "function convertToUTF8(string) {\n"
         + " var buffer = [];\n"
         + " for (var i = 0; i < string.length; i++) {\n"
         + "   var c = string.charCodeAt(i);\n"
@@ -350,13 +364,13 @@ public class HTML {
         + "      return;\n"
         + "    }\n"
         + "    if (jsonObject."
-        + JSONCryptoHelper.SIGNATURE_JSON
+        + JSONCryptoHelper._getDefaultSignatureLabel()
         + ") {\n"
         + "      bad('sign.res', 'Object is already signed');\n"
         + "      return;\n"
         + "    }\n"
         + "    var signatureObject = jsonObject."
-        + JSONCryptoHelper.SIGNATURE_JSON
+        + JSONCryptoHelper._getDefaultSignatureLabel()
         + " = {};\n"
         + "    signatureObject."
         + JSONCryptoHelper.ALG_JSON
@@ -387,10 +401,12 @@ public class HTML {
         + "    return;\n"
         + "  }\n"
         + "  crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5'}, privKey,\n"
-        + "                     convertToUTF8(JSON.stringify(jsonObject))).then(function(signature) {\n"
+        + "                     convertToUTF8(JSON.")
+        .append(jcsMode ? "canonicalize" : "stringify")
+        .append("(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
-        + JSONCryptoHelper.VAL_JSON
+        + JSONCryptoHelper._getValueLabel()
         + " = convertToBase64URL(new Uint8Array(signature));\n"
         + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
         + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"

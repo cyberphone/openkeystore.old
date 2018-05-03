@@ -1,0 +1,25 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "ES512",
+    "signers": [{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "val": "kPvffHUTiwvTW1MqjX6Qa9fEd48gimu3snUlRKp-SqxK_OV7U4tNh4mjatx_2Sh5yVC3hOF1XBifTiuIgoZkag"
+    },{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "val": "gsaMh3IMtXAc9yT-KLybAkqDnER1Gv0DkahB-WQzwMmQAjtcfDYstGLSUZWFwq1l87qyU_9JQ_wGOCpgDLCn2Nw3YisF94pZXfTYjPD4QtDRlBIo4HFtTs71T5juv0I_"
+    }]
+  }
+}

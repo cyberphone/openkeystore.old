@@ -1,0 +1,14 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "RS256",
+    "jwk": {
+      "kty": "RSA",
+      "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+      "e": "AQAB"
+    },
+    "val": "R116JRUyrKI7Pe30aBBMa5KJA29G7AGdISo_jWtt1JWNNhm9TlHdo8yR05xqL_0A6zjdFqt0B1tkVLetO28-4oBRdCd7Ft5eyg6oz8WG2rfnwdxfB1MkAMP1ezEJoZX0H9wGRq_wIIFTf5Cc3zz1swNjC6MiTuCgRS6_O9mqzELBlTQaeEM1z7Fwebu8cdpw9rg4Wv4zCCuHMSxApB8tYrOBgdiMVEyug3TQ3UPdDUk5fb0FZjmqXZYvWjMHiV5guKvcGq_nXOLEyweeQnO4CORS4yAsJEHCtylH2PFvIjAPeC5SiND3_a0RMbO0JKeWsfxgjc1PPQM3scfcVkWcww"
+  }
+}

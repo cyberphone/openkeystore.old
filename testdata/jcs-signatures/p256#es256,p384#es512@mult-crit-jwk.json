@@ -1,0 +1,36 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "crit": ["otherExt","https://example.com/extension"],
+      "otherExt": "Other Data",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "val": "BKRv0ysyxFSYmFUY1kLuoCAJ2L0BJhLLlfZPygUBPWUeCT93tGYn54d08gHuvPcTGgKgIaDUUSvO5Y-pxW_NiA"
+    },{
+      "alg": "ES512",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "crit": ["otherExt","https://example.com/extension"],
+      "otherExt": "Cool Stuff",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "val": "edRofnzBcIRIJmOY58MruqhZiAfrsp3hgXyuFe6zsdg1p9XW-dwN5662zd1EQ9jLhxtVKP8Pf4Pj8Wgmo_2DHze0BivN40ZPcQ-nPb3Esv1AMXUYsmtGwjTp-WhApeq3"
+    }]
+  }
+}

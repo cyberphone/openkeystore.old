@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "RS256",
+    "x5u": "https://cyberphone.github.io/doc/openkeystore/r2048certpath.pem",
+    "val": "FMz831j-mTCn7az7-TfF57v3UBmQf8kWJAwUN7qRoKWfVelIMOWNGZKAzmmv0kpL8XGcn5dX0Xx6lGk_WeidgK8vpzAqQ7r8pzZatDdVivEn-rG46JbmVtUJdjKLkZ_OaQwOL4zicPDEETyi5k9AFd68lchDARlUOdA5EozgdXN9XEqQbUYdeYRBnLTWaJlAlxTaqXGMj8XkbTAcvmGQxwY9gHIsFJgLSsg8YSqRtxMXz7fU4q3dYGd85QorSHspgRjvm101-905-9ZP0s7Pa0jFovf_wbNXz12yDlkQssdhDLihHsrmXnE0YeyMYaaMVlUr9dHz8OfqBi6aEZ9Zeg"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "ES512",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+    },
+    "val": "H6fSiPQbF31f5tcDU0SewtAu4qEu1kOTw_Mt3aVhXddZHOK33TfHi4PXxPmvHDT_DNAC7njlSTMbVj1ClY_vgx4gyxH1J1AvJ37o3m8gJLfDSCAlO1ZmV_j041zTSYlZ"
+  }
+}

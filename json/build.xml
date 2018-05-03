@@ -1,4 +1,4 @@
-<project name="JCS (Json Clear-text Signature) Demo" default="help">
+<project name="JWS Clear-text Signature Demo" default="help">
 
   <!-- set properties for this build -->
   <property name="src.dir" value="src"/>
@@ -18,13 +18,26 @@
   
   <property name="debug" value="on"/>
   <property environment="env"/>
-  <property name="libjson" location="../javascript/dist/libjson.js"/>
   <property name="third.party.lib.dir" location="../resources/third-party-jars"/>
   <property name="webpki.lib.dir" location="../library/dist"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
 
+  <condition property="joseMode" value="true" else="false">
+	  <isset property="jose"/>
+  </condition>
+  <condition property="joseFile" value="-jose" else="">
+	  <isset property="jose"/>
+  </condition>
+  <condition property="jcsMode" value="true" else="false">
+	  <isset property="jcs"/>
+  </condition>
+  <condition property="jcsFile" value="jcs-" else="">
+	  <isset property="jcs"/>
+  </condition>
+  <property name="signature.dir" location="${jcsFile}signature${joseFile}"/>
+
 	<resources id="jcs_application.xml">
-<string><![CDATA[    <!-- JCS Demo -->
+<string><![CDATA[    <!-- JWS Demo -->
     <module>
         <web>
             <web-uri>${application}</web-uri>
@@ -40,7 +53,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat ejbca-jcs zip-distribution createcerts"/>
+      <echo message="build tomcat [-Djose=0] [-Djcs=0] ejbca-jcs zip-distribution createcerts"/>
   </target>
 
   <target name="_init" unless="app_path">
@@ -57,15 +70,7 @@
     <mkdir dir="${temp.dir}"/>
   </target>
   
-  <target name="_copy_libjson" if="has_libjson">
-    <copy file="${libjson}" todir="web"/>
-  </target>
-
   <target name="_build">
-    <condition property="has_libjson">
-      <available file="${libjson}"/>
-    </condition>
-    <antcall target="_copy_libjson"/>
     <property name="temp.dir" value=".tmp"/>
     <antcall target="_delete_tmp"/>
     <fixcrlf srcdir="${src.dir}"
@@ -89,6 +94,8 @@
 	  <replacefilter token="@key-password@" value="${keypassword}"/>
 	  <replacefilter token="@clientkey-rsa@" value="${clientkey_rsa}${keyfilext}"/>
 	  <replacefilter token="@clientkey-ec@" value="${clientkey_ec}${keyfilext}"/>
+  	  <replacefilter token="@jose_mode@" value="${joseMode}"/>
+  	  <replacefilter token="@jcs_mode@" value="${jcsMode}"/>
 	</replace>
     <war destfile="${dist.dir}/${application}" webxml="${temp.dir}/web.xml">
       <classes dir="${temp.dir}">
@@ -104,7 +111,8 @@
       <fileset dir="web"/>
       <zipfileset dir="${key.dir}" prefix="${class_war_path}"/>
       <zipfileset dir="${logotype.dir}" prefix="${class_war_path}"/>
-      </war>
+      <zipfileset dir="${signature.dir}" prefix="${class_war_path}"/>
+    </war>
   </target>
 
   <target name="tomcat" depends="_init">

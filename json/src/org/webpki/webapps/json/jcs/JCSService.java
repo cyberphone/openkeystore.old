@@ -47,6 +47,10 @@ public class JCSService extends InitPropertyReader implements
     static KeyStore clientkey_ec;
 
     static String logotype;
+    
+    static String testSignature;
+    
+    static boolean jcsMode;
 
     InputStream getResource(String name) throws IOException {
         InputStream is = this.getClass().getResourceAsStream(name);
@@ -54,6 +58,13 @@ public class JCSService extends InitPropertyReader implements
             throw new IOException("Resource fail for: " + name);
         }
         return is;
+    }
+    
+    String getEmbeddedResourceString(String name) throws IOException {
+        return new String(
+                ArrayUtil
+                .getByteArrayFromInputStream(getResource(name)),
+        "UTF-8");
     }
 
     @Override
@@ -67,10 +78,12 @@ public class JCSService extends InitPropertyReader implements
             // //////////////////////////////////////////////////////////////////////////////////////////
             // Logotype
             // //////////////////////////////////////////////////////////////////////////////////////////
-            logotype = new String(
-                    ArrayUtil
-                            .getByteArrayFromInputStream(getResource("webpki-logo.svg")),
-                    "UTF-8");
+            logotype = getEmbeddedResourceString("webpki-logo.svg");
+
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            // Test signature
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            testSignature = getEmbeddedResourceString("p256#es256@jwk.json");
 
             // //////////////////////////////////////////////////////////////////////////////////////////
             // Keys
@@ -84,7 +97,17 @@ public class JCSService extends InitPropertyReader implements
             clientkey_ec = KeyStoreReader.loadKeyStore(
                     getResource(getPropertyString("clientkey_ec")),
                     key_password);
-            JSONCryptoHelper._setCanonicalization(true);
+
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            // Canonicalize or not?
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            JSONCryptoHelper._setCanonicalization(jcsMode = getPropertyBoolean("jcs_mode"));
+
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            // JOSE (draft) mode or not?
+            // //////////////////////////////////////////////////////////////////////////////////////////
+            JSONCryptoHelper._setMode(getPropertyBoolean("jose_mode"));
+
             logger.info("JCS Demo Successfully Initiated");
         } catch (Exception e) {
             logger.log(Level.SEVERE, "********\n" + e.getMessage()

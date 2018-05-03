@@ -144,9 +144,9 @@ public class ReadSignature {
         for (String property : rd.getProperties()) {
             switch (rd.getPropertyType(property)) {
             case OBJECT:
-                if (property.equals(JSONCryptoHelper.SIGNATURE_JSON)) {
+                if (property.equals(JSONCryptoHelper._getDefaultSignatureLabel())) {
                     boolean multi = false;
-                    JSONObjectReader outer = rd.getObject(JSONCryptoHelper.SIGNATURE_JSON);
+                    JSONObjectReader outer = rd.getObject(JSONCryptoHelper._getDefaultSignatureLabel());
                     JSONObjectReader inner = outer;
                     JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
                     String algo = null;

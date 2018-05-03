@@ -1,0 +1,10 @@
+{
+  "mySignedData": "something",
+  "myUnsignedData": "something else",
+  "signature": {
+    "alg": "ES256",
+    "kid": "example.com:p256",
+    "excl": ["myUnsignedData"],
+    "val": "UQuYOMJ1Otb4BXA1Tgt6Hb8TdWM4S98wIgfSOwWs1BW8QA2ElPyb4R2XRkf3TcnD-kVfIwZqFFz2hQW5se9hDw"
+  }
+}

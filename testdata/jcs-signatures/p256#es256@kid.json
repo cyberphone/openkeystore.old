@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "signature": {
+    "alg": "ES256",
+    "kid": "example.com:p256",
+    "val": "bczspVrRlkeUXtP9UlarIRHDTu73VC71zCd5e_SJv8FSnKFzKN-ab1Z9m0aadMsbJSO7IoJRGn8-YsY16mWiSg"
+  }
+}
