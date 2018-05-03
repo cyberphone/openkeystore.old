@@ -10,14 +10,14 @@
   <condition property="joseFile" value="-jose" else="">
 	  <isset property="jose"/>
   </condition>
-  <condition property="jwcMode" value="true" else="false">
-	  <isset property="jwc"/>
+  <condition property="jcsMode" value="true" else="false">
+	  <isset property="jcs"/>
   </condition>
-  <condition property="jwcFile" value="jwc-" else="">
-	  <isset property="jwc"/>
+  <condition property="jcsFile" value="jcs-" else="">
+	  <isset property="jcs"/>
   </condition>
-  <property name="signatureBase" location="${jwcFile}signatures${joseFile}"/>
-  <property name="encryptionBase" location="${jwcFile}encryption${joseFile}"/>
+  <property name="signatureBase" location="${jcsFile}signatures${joseFile}"/>
+  <property name="encryptionBase" location="${jcsFile}encryption${joseFile}"/>
   <property name="normalizationBase" location="normalization"/>
 
   <path id="lib.classpath">
@@ -64,7 +64,7 @@
         <arg value="${dataBase}"/>
         <arg value="${signatureBase}"/>
         <arg value="${joseMode}"/>
-        <arg value="${jwcMode}"/>
+        <arg value="${jcsMode}"/>
         <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>
@@ -84,7 +84,7 @@
         <arg value="${dataBase}"/>
         <arg value="${encryptionBase}"/>
         <arg value="${joseMode}"/>
-        <arg value="${jwcMode}"/>
+        <arg value="${jcsMode}"/>
         <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>

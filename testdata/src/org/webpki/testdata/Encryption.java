@@ -63,7 +63,7 @@ public class Encryption {
     static String keyId;
     static byte[] dataToBeEncrypted;
     static boolean joseMode;
-    static boolean jwcMode;
+    static boolean jcsMode;
     
     public interface LocalDecrypt {
         public byte[] decrypt(JSONObjectReader reader) throws Exception;
@@ -128,8 +128,8 @@ public class Encryption {
         baseData = args[1] + File.separator;
         baseEncryption = args[2] + File.separator;
         joseMode = Boolean.valueOf(args[3]);
-        jwcMode = Boolean.valueOf(args[4]);
-        JSONCryptoHelper._setCanonicalization(jwcMode);
+        jcsMode = Boolean.valueOf(args[4]);
+        JSONCryptoHelper._setCanonicalization(jcsMode);
         symmetricKeys = new SymmetricKeys(baseKey);
         dataToBeEncrypted = ArrayUtil.readFile(baseData + "datatobeencrypted.txt");
         
