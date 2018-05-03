@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
@@ -121,7 +121,7 @@ public class HTML {
                 "><div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;"
         + "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\""
         + " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
-                .append(JCSService.logotype)
+                .append(JWSService.logotype)
                 .append("</div><table cellapdding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
                 .append(box).append("</table></body></html>");
         return s.toString();
@@ -152,7 +152,7 @@ public class HTML {
     public static String fancyText(int rows, String content) {
         return "<textarea style=\"margin-top:3pt;" + TEXT_BOX + COMMON_BOX
         + "\" rows=\"" + rows + "\" maxlength=\"100000\" name=\""
-        + RequestServlet.JCS_ARGUMENT + "\">" + content + "</textarea>";
+        + RequestServlet.JWS_ARGUMENT + "\">" + content + "</textarea>";
     }
 
     public static void homePage(HttpServletResponse response, String baseurl)
@@ -164,20 +164,24 @@ public class HTML {
                         null,
                         "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">"
         + "<table style=\"max-width=\"300px\">"
-        + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS - JSON Cleartext Signature<br>&nbsp;</td></tr>"
+        + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JSON Clear Text Signature<br>&nbsp;</td></tr>"
         + "<tr><td align=\"left\"><a href=\""
         + baseurl
-        + "/verify\">Verify a JCS on the server</a></td></tr>"
+        + "/verify\">Verify a JWS-CT on the server</a></td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
         + "<tr><td align=\"left\"><a href=\""
         + baseurl
-        + "/create\">Create a JCS on the server</a></td></tr>"
+        + "/create\">Create a JWS-CT on the server</a></td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
         + "<tr><td align=\"left\"><a href=\""
         + baseurl
-        + "/webcrypto\">Create a JCS using WebCrypto</a></td></tr>"
+        + "/webcrypto\">Create a JWS-CT using WebCrypto</a></td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
-        + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jose-jcs.html\">JCS Documentation</a></td></tr>"
+        + "<tr><td align=\"center\" colspan=\"2\"><b>JOSE Mode</b>=" +
+        JWSService.joseMode + " <b>JCS Mode</b>=" + JWSService.jcsMode
+        + "</td></tr>"
+        + "<tr><td>&nbsp;</td></tr>"
+        + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jose-jcs.html\">JWS-CT Documentation</a></td></tr>"
         + "</table></td></tr>"));
     }
 
@@ -227,13 +231,13 @@ public class HTML {
     public static void webCryptoPage(HttpServletResponse response, boolean jcsMode)
             throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
-                "<!DOCTYPE html>\n<html><head><title>WebCrypto/JCS Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
+                "<!DOCTYPE html>\n<html><head><title>WebCrypto/JWS-CT Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
         + "a {font-weight:bold;font-size:8pt;color:blue;font-family:arial,verdana;text-decoration:none} "
         + "</style></head>\n"
         + "<body style=\"padding:10pt;font-size:8pt;color:#000000;font-family:verdana,arial;background-color:white\""
         + HOME
         + ">\n"
-        + "<h3>WebCrypto / JCS Demo</h3>\n\n"
+        + "<h3>WebCrypto / JWS-CT Demo</h3>\n\n"
         + "This demo only relies on ES6 and WebCrypto features and does not refer to any external libraries either."
         + "<p><input type=\"button\" value=\"Create Key\" onClick=\"createKey ()\"/></p>\n\n"
         + "<div id=\"pub.key\"></div>\n\n"
@@ -243,7 +247,7 @@ public class HTML {
         "var pubKey;\n"
         + "var privKey;\n"
         + "var jsonObject;\n"
-        + "var publicKeyInJWKFormat; // The bridge between JCS and WebCrypto\n\n"
+        + "var publicKeyInJWKFormat; // The bridge between JWS-CT and WebCrypto\n\n"
         + "//////////////////////////////////////////////////////////////////////////\n"
         + "// Utility methods                                                      //\n"
         + "//////////////////////////////////////////////////////////////////////////\n"
@@ -408,7 +412,7 @@ public class HTML {
         + "    signatureObject."
         + JSONCryptoHelper._getValueLabel()
         + " = convertToBase64URL(new Uint8Array(signature));\n"
-        + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JCS format', jsonObject) + "
+        + "    document.getElementById('sign.res').innerHTML = fancyJSONBox('Signed data in JVS-CT format', jsonObject) + "
         + "'<p><input type=\"button\" value=\"Verify Signature (on the server)\" onClick=\"verifySignatureOnServer()\"></p>';\n"
         + "  }).then(undefined, function() {\n"
         + "    bad('sign.res', 'WebCrypto failed for unknown reasons');\n"
@@ -419,7 +423,7 @@ public class HTML {
         + "//////////////////////////////////////////////////////////////////////////\n"
         + "function verifySignatureOnServer() {\n"
         + "  document.location.href = 'request?"
-        + RequestServlet.JCS_ARGUMENT
+        + RequestServlet.JWS_ARGUMENT
         + "="
         + "' + "
         + "convertToBase64URL(convertToUTF8(JSON.stringify(jsonObject)));\n"

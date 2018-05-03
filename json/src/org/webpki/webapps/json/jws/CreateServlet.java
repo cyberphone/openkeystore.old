@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
@@ -44,10 +44,10 @@ public class CreateServlet extends HttpServlet {
 
     static public String getTextArea(HttpServletRequest request)
             throws IOException {
-        String string = request.getParameter(RequestServlet.JCS_ARGUMENT);
+        String string = request.getParameter(RequestServlet.JWS_ARGUMENT);
         if (string == null) {
             throw new IOException("Missing data for: "
-                    + RequestServlet.JCS_ARGUMENT);
+                    + RequestServlet.JWS_ARGUMENT);
         }
         StringBuilder s = new StringBuilder();
         for (char c : string.toCharArray()) {
@@ -78,7 +78,7 @@ public class CreateServlet extends HttpServlet {
                     .sign(writer);
             RequestDispatcher rd = request
                     .getRequestDispatcher((jsFlag ? "jssignature?" : "request?")
-                            + RequestServlet.JCS_ARGUMENT
+                            + RequestServlet.JWS_ARGUMENT
                             + "="
                             + Base64URL.encode(signed_json));
             rd.forward(request, response);

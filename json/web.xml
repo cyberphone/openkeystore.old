@@ -41,42 +41,42 @@
     </context-param>
 
     <listener>
-        <listener-class>org.webpki.webapps.json.jcs.JCSService</listener-class>
+        <listener-class>org.webpki.webapps.json.jws.JWSService</listener-class>
      </listener>
 
     <servlet>
 	    <servlet-name>RequestServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.RequestServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.RequestServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.HomeServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.HomeServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>VerifyServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.VerifyServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.VerifyServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>WebCryptoServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.WebCryptoServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.WebCryptoServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>NoWebCryptoServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.NoWebCryptoServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.NoWebCryptoServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>CreateServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.CreateServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.CreateServlet</servlet-class>
     </servlet>
     
     <servlet>
         <servlet-name>JavaScriptSignatureServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.json.jcs.JavaScriptSignatureServlet</servlet-class>
+        <servlet-class>org.webpki.webapps.json.jws.JavaScriptSignatureServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

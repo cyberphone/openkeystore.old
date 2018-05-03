@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
@@ -64,7 +64,7 @@ public class GenerateSignature {
             AsymKeySignerInterface {
         AsymSignatureHelper(KeyStore signer_keystore) throws IOException {
             super(signer_keystore, null);
-            setKey(KEY_NAME, JCSService.key_password);
+            setKey(KEY_NAME, JWSService.key_password);
         }
 
         @Override
@@ -97,13 +97,13 @@ public class GenerateSignature {
     byte[] sign(JSONObjectWriter wr) throws IOException {
         if (action == ACTION.X509) {
             wr.setSignature(new JSONX509Signer(new AsymSignatureHelper(
-                    JCSService.clientkey_rsa).setExtendedCertPath(true)));
+                    JWSService.clientkey_rsa).setExtendedCertPath(true)));
         } else if (action == ACTION.SYM) {
             wr.setSignature(new JSONSymKeySigner(new SymmetricOperations()).setKeyId(KEY_NAME));
         } else {
             wr.setSignature(new JSONAsymKeySigner(new AsymSignatureHelper(
-                    action == ACTION.RSA ? JCSService.clientkey_rsa
-                            : JCSService.clientkey_ec)));
+                    action == ACTION.RSA ? JWSService.clientkey_rsa
+                            : JWSService.clientkey_ec)));
         }
         return wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
     }

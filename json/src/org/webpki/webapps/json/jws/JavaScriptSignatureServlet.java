@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
@@ -40,8 +40,6 @@ public class JavaScriptSignatureServlet extends HttpServlet {
 
     static Logger logger = Logger.getLogger(JavaScriptSignatureServlet.class
             .getName());
-
-    static final String JCS_ARGUMENT = "JCS";
 
     static void error(HttpServletResponse response, String error_message)
             throws IOException, ServletException {
@@ -72,7 +70,7 @@ public class JavaScriptSignatureServlet extends HttpServlet {
         byte[] data = null;
         if (request.getContentType().startsWith(
                 "application/x-www-form-urlencoded")) {
-            data = Base64URL.decode(request.getParameter(JCS_ARGUMENT));
+            data = Base64URL.decode(request.getParameter(RequestServlet.JWS_ARGUMENT));
         } else {
             if (!request.getContentType().startsWith("application/json")) {
                 error(response, "Request didn't have the proper mime-type: "

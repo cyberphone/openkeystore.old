@@ -2,9 +2,9 @@
 
   <!-- set properties for this build -->
   <property name="src.dir" value="src"/>
-  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/json/jcs"/>
+  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/json/jws"/>
   
-  <property name="appcorename" value="jcs"/>
+  <property name="appcorename" value="jws-ct"/>
   <property name="application" value="${appcorename}.war"/>
   
   <property name="keypassword" value="foo123"/>

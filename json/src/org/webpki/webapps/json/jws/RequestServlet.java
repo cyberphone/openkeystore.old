@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
@@ -40,7 +40,7 @@ public class RequestServlet extends HttpServlet {
 
     static Logger logger = Logger.getLogger(RequestServlet.class.getName());
 
-    static final String JCS_ARGUMENT = "JCS";
+    static final String JWS_ARGUMENT = "JWS";
 
     static void error(HttpServletResponse response, String error_message)
             throws IOException, ServletException {
@@ -76,7 +76,7 @@ public class RequestServlet extends HttpServlet {
         byte[] data = null;
         if (request.getContentType().startsWith(
                 "application/x-www-form-urlencoded")) {
-            data = Base64URL.decode(request.getParameter(JCS_ARGUMENT));
+            data = Base64URL.decode(request.getParameter(JWS_ARGUMENT));
         } else {
             if (!request.getContentType().startsWith("application/json")) {
                 error(response, "Request didn't have the proper mime-type: "
@@ -95,9 +95,9 @@ public class RequestServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        String json = request.getParameter(JCS_ARGUMENT);
+        String json = request.getParameter(JWS_ARGUMENT);
         if (json == null) {
-            error(response, "Request didn't contain a \"" + JCS_ARGUMENT
+            error(response, "Request didn't contain a \"" + JWS_ARGUMENT
                     + "\" argment");
             return;
         }

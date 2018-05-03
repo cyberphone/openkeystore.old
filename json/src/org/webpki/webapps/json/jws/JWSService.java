@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.json.jcs;
+package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,9 +36,9 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
 
-public class JCSService extends InitPropertyReader implements
+public class JWSService extends InitPropertyReader implements
         ServletContextListener {
-    static Logger logger = Logger.getLogger(JCSService.class.getName());
+    static Logger logger = Logger.getLogger(JWSService.class.getName());
 
     static String key_password;
 
@@ -50,6 +50,8 @@ public class JCSService extends InitPropertyReader implements
     
     static String testSignature;
     
+    static boolean joseMode;
+
     static boolean jcsMode;
 
     InputStream getResource(String name) throws IOException {
@@ -106,9 +108,9 @@ public class JCSService extends InitPropertyReader implements
             // //////////////////////////////////////////////////////////////////////////////////////////
             // JOSE (draft) mode or not?
             // //////////////////////////////////////////////////////////////////////////////////////////
-            JSONCryptoHelper._setMode(getPropertyBoolean("jose_mode"));
+            JSONCryptoHelper._setMode(joseMode = getPropertyBoolean("jose_mode"));
 
-            logger.info("JCS Demo Successfully Initiated");
+            logger.info("JWS-CT Demo Successfully Initiated");
         } catch (Exception e) {
             logger.log(Level.SEVERE, "********\n" + e.getMessage()
                     + "\n********", e);
