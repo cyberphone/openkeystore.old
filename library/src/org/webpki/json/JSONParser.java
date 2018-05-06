@@ -99,13 +99,6 @@ public class JSONParser {
         strictNumericMode = strict;
     }
 
-    String scanProperty() throws IOException {
-        scanFor(DOUBLE_QUOTE);
-        String property = (String) scanQuotedString().value;
-        scanFor(COLON_CHARACTER);
-        return property;
-    }
-
     JSONValue scanObject(JSONObject holder) throws IOException {
         boolean next = false;
         while (testNextNonWhiteSpaceChar() != RIGHT_CURLY_BRACKET) {
@@ -113,7 +106,9 @@ public class JSONParser {
                 scanFor(COMMA_CHARACTER);
             }
             next = true;
-            String name = scanProperty();
+            scanFor(DOUBLE_QUOTE);
+            String name = (String) scanQuotedString().value;
+            scanFor(COLON_CHARACTER);
             JSONValue value;
             switch (scan()) {
                 case LEFT_CURLY_BRACKET:

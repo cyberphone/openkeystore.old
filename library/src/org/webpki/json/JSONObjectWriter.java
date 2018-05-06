@@ -66,7 +66,7 @@ public class JSONObjectWriter implements Serializable {
     /**
      * Integers outside of this range are not natively supported by JSON.
      */
-    public static final long MAX_SAFE_INTEGER = 9007199254740991L; // 2^53 - 1 ("53-bit precision")
+    public static final long MAX_SAFE_INTEGER = 9007199254740992L; // 2^53 ("53-bit precision")
 
     static final Pattern JS_ID_PATTERN    = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
 

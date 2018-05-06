@@ -2806,7 +2806,9 @@ public class JSONTest {
             int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER + 1);
             fail("long");
         } catch (Exception e) {
-            checkException(e, "Int53 values must not exceeed abs(9007199254740991), found: 9007199254740992");
+            checkException(e, "Int53 values must not exceeed abs(" +
+                    JSONObjectWriter.MAX_SAFE_INTEGER +
+                    "), found: " + (JSONObjectWriter.MAX_SAFE_INTEGER + 1));
         }
         int53Variables(0xa885abafaba0l);
         int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER);
