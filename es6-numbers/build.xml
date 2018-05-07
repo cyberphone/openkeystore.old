@@ -7,7 +7,8 @@
   <property name="third.party.jars" location="../resources/third-party-jars"/>
   <property name="result.file" location="result/es6numbertest.html"/>
   <property name="browsertest.file" location="result/es6numberbrowsertest.html"/>
-  <property name="test.file" location="result/es6testfile.txt"/>
+  <property name="resulttest.file" location="result/es6testfile.txt"/>
+  <property name="verifytest.file" location="c:/es6/numbers/es6testfile100m.txt"/>
   <property name="propertytest.file" location="result/es6propertytest.html"/>
   <property name="application" value="es6numbers.war"/>
   <property environment="env"/>
@@ -57,21 +58,21 @@
   </target>
   
   <target name="es6testfile" depends="_compile">
-    <delete file="${test.file}"/>
+    <delete file="${resulttest.file}"/>
     <java fork="yes"
           classname="com.example.es6numbers.CreateTestFile"
           failonerror="true">
           <classpath>
              <pathelement location="${temp.dir}"/>
           </classpath>
-        <arg value="${test.file}"/>
+        <arg value="${resulttest.file}"/>
      </java>
   </target>
 
   <target name="testservlet" depends="_compile">
     <copy file="web.xml" todir="${temp.dir}"/>
     <replace file="${temp.dir}/web.xml">
-	  <replacefilter token="@testfile@" value="${test.file}"/>
+	  <replacefilter token="@testfile@" value="${verifytest.file}"/>
 	</replace>
     <war destfile="${dist.dir}/${application}" webxml="${temp.dir}/web.xml">
       <classes dir="${temp.dir}">
