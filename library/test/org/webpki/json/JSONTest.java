@@ -2803,15 +2803,15 @@ public class JSONTest {
         integerValue("0", false);
         integerValue("10", false);
         try {
-            int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER + 1);
+            int53Variables(JSONObjectWriter.MAX_INTEGER + 1);
             fail("long");
         } catch (Exception e) {
             checkException(e, "Int53 values must not exceeed abs(" +
-                    JSONObjectWriter.MAX_SAFE_INTEGER +
-                    "), found: " + (JSONObjectWriter.MAX_SAFE_INTEGER + 1));
+                    JSONObjectWriter.MAX_INTEGER +
+                    "), found: " + (JSONObjectWriter.MAX_INTEGER + 1));
         }
         int53Variables(0xa885abafaba0l);
-        int53Variables(JSONObjectWriter.MAX_SAFE_INTEGER);
+        int53Variables(JSONObjectWriter.MAX_INTEGER);
         bigDecimalValues(new BigDecimal("3232323243243234234243234234243243243243243234243"));
         bigDecimalValues(new BigDecimal("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues(new BigInteger("3232323243243234234243234234243243243243243234243"));

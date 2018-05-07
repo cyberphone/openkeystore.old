@@ -66,7 +66,7 @@ public class JSONObjectWriter implements Serializable {
     /**
      * Integers outside of this range are not natively supported by JSON.
      */
-    public static final long MAX_SAFE_INTEGER = 9007199254740992L; // 2^53 ("53-bit precision")
+    public static final long MAX_INTEGER  = 9007199254740992L; // 2^53 ("53-bit precision")
 
     static final Pattern JS_ID_PATTERN    = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
 
@@ -177,14 +177,14 @@ public class JSONObjectWriter implements Serializable {
      * Set a <code>long</code> property.<p>
      * Sample:</p>
      * <p><code>&nbsp;&nbsp;&nbsp;&nbsp;"quiteNegative": -800719925474099</code>
-     * </p> Note that <code>long</code> data is limited to 53 bits of precision ({@value #MAX_SAFE_INTEGER}),
+     * </p> Note that <code>long</code> data is limited to 53 bits of precision ({@value #MAX_INTEGER}),
      * exceeding this limit throws an exception.
      * If you need higher precision use {@link JSONObjectWriter#setLong(String, long)}.
      * @param name Property
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
-     * @see #MAX_SAFE_INTEGER
+     * @see #MAX_INTEGER
      */
     public JSONObjectWriter setInt53(String name, long value) throws IOException {
         return setProperty(name, new JSONValue(JSONTypes.NUMBER, serializeLong(value)));

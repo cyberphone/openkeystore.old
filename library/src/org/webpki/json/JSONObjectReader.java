@@ -130,9 +130,9 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     static long int53Check(long value) throws IOException {
-        if (value > JSONObjectWriter.MAX_SAFE_INTEGER || value < -JSONObjectWriter.MAX_SAFE_INTEGER) {
+        if (value > JSONObjectWriter.MAX_INTEGER || value < -JSONObjectWriter.MAX_INTEGER) {
             throw new IOException("Int53 values must not exceeed abs(" +
-                    JSONObjectWriter.MAX_SAFE_INTEGER +
+                    JSONObjectWriter.MAX_INTEGER +
                     "), found: " + value);
         }
         return value;
@@ -179,7 +179,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @return Java <code>long</code>
      * @throws IOException &nbsp;
      * @see JSONObjectWriter#setInt53(String, long)
-     * @see JSONObjectWriter#MAX_SAFE_INTEGER
+     * @see JSONObjectWriter#MAX_INTEGER
      * @see #getBigInteger(String)
      */
     public long getInt53(String name) throws IOException {
