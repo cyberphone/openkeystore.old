@@ -1,8 +1,6 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "signers": [{
       "alg": "ES256",
@@ -12,7 +10,7 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "signature": "LHzwfwwFgPA8dsBJCQXdDUlXWIxOszKulvg4KjD4LfOhmCf0IN5_MpQMglSB1ftzgXaEE9nYXpWVJDNFaHXD3A"
+      "signature": "CghTspAJ8KW0F0AHpPTHbecVgJsBOplvtDXVQZL6SVxO6nm5bGAyuebIcmzFXFdY4ipbLqnPDeZSDAMYMsVv4Q"
     },{
       "alg": "ES512",
       "jwk": {
@@ -21,7 +19,7 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "signature": "aIVzNXwWI0PW3O3gS4PyWqPmagNgHNuP7RSi3ykjenwTLEoCLgVnuMvn-fLsquM_t8eQGE7PbSrLtJOwfVxCYkOdf-LVwL_lbnYlksprZ2vWgIjWlRqZ5uKSAFpGSLRQ"
+      "signature": "HqKP_tFaUNZgGR6zmphGArj0VV377z20LTkhr6-3AGTSXfOlAsDQf7WKkCJdWmZGAPPskz-nPjs6INCFHW6EpoAkzh8p_NoHB2gcumXJ4TWHadpb4cBvLsgPnGbgAp53"
     }]
   }
 }

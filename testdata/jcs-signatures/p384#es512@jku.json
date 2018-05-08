@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "jku": "https://cyberphone.github.io/doc/openkeystore/p384.jwks",
-    "val": "m2OYx8lUxO5i6rS_7E-P32nyw2vRIHMKOPiId68w1VhZIGpLmvtJ3PPvIDNb0xIz9GgBHl6pMugMRssSJqDWLqmtjx-KFVOOcCqK1JKzlonv_kXjZWdAkByLNZxKOaLh"
+    "val": "Dwtqn-hNOTCdEICwpsTWjEMCY3Z8GPSXfPYP0io21VbUAt4uPlQ14aMxhiP97pj7hmPgicN_MaLAoxTE9_TnKduWhxeqm1Q688NPBU0owKvjubHOjCGIy-MVvQfJp_4Y"
   }
 }

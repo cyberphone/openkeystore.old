@@ -1,7 +1,7 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "jwk": {
@@ -10,6 +10,6 @@
       "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
       "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
     },
-    "val": "ABaANCFgOlwJvGBGIGBHpaZpF3EmFUXcyds62iqgnVHYfBL28TPDqk3NU8WhfwFtbBhO02GRQXeWB0j5bfpEWdSWAIBV7qwOG2mXCqNV2eC50JANR1oQQ5NgJioR3opzLo6dnT0fTLLxAxbSpkZLg-MAlH1RIBcvdKwDVILnLmPDbGwf"
+    "val": "AM1VG_kaU8drxH-785D_1dXl-uw3eiugAHg2saFCisioICF2BdO9gh9Kvwio65B30vLi3c6MLm8yjTYB4hbsp6f2AWaMnT4-BkjGc74SVi0nNNTWVlHcsPeUv9uqSomlWJ4DqIzhyifPtl-aiov5RYcyr9DgSNWplh8Ub8ZK8DYi04kP"
   }
 }

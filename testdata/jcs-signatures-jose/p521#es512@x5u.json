@@ -1,11 +1,9 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "ES512",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/p521certpath.pem",
-    "signature": "AV326i_BylaQyER8lV0IkrHrnp8gnR_6HKiWr6-aqYlBej_trLOy3_X-tnC3o9acPOJz8SDdqD9NfDsi4ObHG-TPASOxy1vz1JXSGMEkUTP-qrul8_p_QYiYr-j4AFUO1gAaLebyofu7ELJJmKqZHQ0MarXi_2zD92F1ZzDWziG93OuV"
+    "signature": "AbbjlFDLSUPO5nYeS59xxFZadZ8jvKmRZrzUTuW3T0AbzorO5qWQ1MCb2NVZ_Z35S6stcF3Zs7PWXMdixNykckNmAAn8W3MU712ceEna63IcxvOP0Nni8dYLgZaP-admILmcEZd-wxNNYRud9EMngWSku0kA2u2-PhdHVJQrmqtcyHCU"
   }
 }

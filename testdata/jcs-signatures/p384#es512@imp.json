@@ -1,9 +1,9 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
-    "val": "bY8D4M7uqAP2g9RvrujYmDy4RzJDTw4t07o7yID34pM8F5_jUb5u6ftnGvc1uidCqpPWL6ml6IT06KBXyjMg2rtFNuj7w1GesfRxIcblLoVFPeWMswUx2RbNL1YQlF1Y"
+    "val": "awPa27dsfnO_TmZcyXlSn2OIpDX3B1y0c2ASyEEuRZSpQqSBu1qybmlRdR---w9a5TY0afWUPMGGEN5k98ZcyotowSMykR5wdUcOaQ1DvpETNrk7AjVcMGzBv16VAyRV"
   }
 }

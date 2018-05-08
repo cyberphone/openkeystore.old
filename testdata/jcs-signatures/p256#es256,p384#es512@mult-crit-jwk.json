@@ -1,7 +1,7 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "signers": [{
       "alg": "ES256",
@@ -16,7 +16,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "BKRv0ysyxFSYmFUY1kLuoCAJ2L0BJhLLlfZPygUBPWUeCT93tGYn54d08gHuvPcTGgKgIaDUUSvO5Y-pxW_NiA"
+      "val": "CmxmGpVwTf4eZk9RUg64RZeDd4en7a6l4hs7NrDvUB1aT4Twfau9gYc47iDUQ862LkjOfLVquBCxGPVgmnc2LA"
     },{
       "alg": "ES512",
       "jwk": {
@@ -30,7 +30,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "edRofnzBcIRIJmOY58MruqhZiAfrsp3hgXyuFe6zsdg1p9XW-dwN5662zd1EQ9jLhxtVKP8Pf4Pj8Wgmo_2DHze0BivN40ZPcQ-nPb3Esv1AMXUYsmtGwjTp-WhApeq3"
+      "val": "EA6M98VyJjqzFXMJksxM2y7UotTsZ78BwME5hLQ6BK68M0zIE1rEvLAJHBxsqSeEnA0M1xlDl8XJqA2LiwAsWCyUcO9KYEmEQNRNm-o0UO2iLDaiolXAol8aKhxPzSHc"
     }]
   }
 }

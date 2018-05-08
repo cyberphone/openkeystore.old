@@ -1,14 +1,14 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "crit": ["otherExt","https://example.com/extension"],
     "signers": [{
       "alg": "ES256",
       "kid": "example.com:p256",
       "otherExt": "Other Data",
-      "val": "YFkwkTCX4efIT-MdfVIKFKe9w-i29akdCEpLsHuTl7cD8Ng_aZD1BE8YJ0jBAffgWlzOLlpwBP0khVZ9mQvCMw"
+      "val": "k0RmYIaQeGky9fuZcOYAeOE0e0EtPEPmkxu-aU4li0GzS5AjLiRoXaL2lZzW-5P80hYdrA0j1GripQt-CNmNmA"
     },{
       "alg": "RS256",
       "kid": "example.com:r2048",
@@ -16,7 +16,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "C-xcjif5yc2YHGqWd9JEBi38Y70l3hav7Eg-zc2XUIvwIiAJuMXV6B1nsCPKSavKftC51da_FtIMsmbm9XWYjLPteGw4Cg6fsBNiX_kMWm3uXcTW8eR9MEG5DEYhZgjBY9IrC286DSd9a1wVsF_sBdfh2gQLgisHLpHgvkk4hD6vJKR22450p8ZwCmO45zOn6lRDd80FFUtWU5KJyIJi230LlSdeHj2TnhxDKRP-clSrFQ-WSvG8i46TrjS_9F316ct3KIoR2Wv2BKyl6Uu-JIbJpa_BPJ3xpWzNqKPQfC8IfPEsN90yrfSd85MqFVK0HzGkSC44TlsmBxUaB4ebTw"
+      "val": "RRfTxMDGu--1ytJMTwjdJ4IN0fWVbP8LUiz7u99fbxWNCtOmcfNkNLuf3rgrNexGz2tbfza3nbFtSZzXWnpfQF0AsmoVjSZGRUxXZQ-0aqJfKE8KSGSDGRq3U2kFT2Opw_pg-Q2Ja8R2EdOxs3Y0IjwTkf1kBZPRwd_3IEVpxoVSH-Oud8ZTfDrmhoQpaD4xl06x8ZNYk8Lis8xOrDkXQcsyFb4il_BMNqEuenOMm_1eCW-E5PdVK_QDEjg2Zo0h1GZKcGRoxyj_b1BlGoqyHfH-oouofb1vSrpt703eog_5SeF0pnCcjvJhdpcBOmUgWpcMTOoKLA4O_brW_0C8LQ"
     }]
   }
 }

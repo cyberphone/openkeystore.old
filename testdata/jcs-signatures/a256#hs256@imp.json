@@ -1,9 +1,9 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "HS256",
-    "val": "qw7XQOHLBGBwHvxdqeL0oj6OjYvlr7Zj__ESFvU5MWI"
+    "val": "IxyRGlx77oAbgIwi0yEspyYuqrfplIxw0CNDoeNJNX4"
   }
 }

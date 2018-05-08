@@ -1,7 +1,7 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES256",
     "jwk": {
@@ -15,6 +15,6 @@
     "https://example.com/extension": {
       "life-is-great": true
     },
-    "val": "x6kkqBxVTuJRHNKseAOmYSE-MY7ghU23WGdbKQneyC-fBsvYRsNDSO64u23FKSSoynwH_i0joICLDo6Tq8o1OA"
+    "val": "ztTuVZQJkQ8w74LqRppNbOgCUCm8hQZTeQTK3pzlXPsXGHc8A4DYB8UXl1YR9f_DXZ5nvRACue9t0QwcgDoh6A"
   }
 }

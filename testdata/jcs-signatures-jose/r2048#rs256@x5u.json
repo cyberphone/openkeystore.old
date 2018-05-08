@@ -1,11 +1,9 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "RS256",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/r2048certpath.pem",
-    "signature": "NkpAdKaL4ik17xY-JSBVgFprKQ8mo7Yrb_ptjK1D83JHWo6ktXveVqF1uv633ES2qBaIOh9oJmDDxpIu4ueqg-kEBTyepeOfAAVEPB2CnlfZtfduKQAPV6KRWUs1l2XXPIWjUtCnCavaJltZnrr0S-whvaPUKl_8GrQlebuAEp1s1RDKyHC_K3Ij88yYbs3fDnBmzI-UNyegZqdKyoder8pkUolNC4zmQkTrjFJwmEe4uKUKRGBjEABK4a_HjsGL14AxwrfL6sVQ3-NZVeCMv3ApZN9iU5k068H9rvNEwfcr9QNgEEBGoIkUlu_3zUdn31rJMOt_xXahEePv65dXcQ"
+    "signature": "P7F_rzDO5DofX84nnHtg-HtmxSkpUHeHOpApw30aF5G5tnpmD-H9nwDS5vfEcnvAsBaIYflwZp-tFeOqwLmZcx-KCyRovBx4i9swRxTYGN0EdcBh8U8bxy0-UW73qaCQPMGCUClcOAvUpcqAb6vNTBE_KG6UToS8e2J1hgvo3SC5xPqXhauLaLzU8DgMiAntah79zSKjDk4Rtu5w9uHI0Vbs7sznE8EwARMRkTWl6CuPdQHFf4qXI7yVqCthnla3bxBYgBndMy63zr8aXbXfk4PXhCYWMhbrx8R2TI6dTbNh6zmaKYaMRHDWIp9wFQEKDM7PoiTXO81nNp1cyQpzHQ"
   }
 }

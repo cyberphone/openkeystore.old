@@ -1,10 +1,8 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "ES512",
-    "signature": "D1SZedUv5ZrLKrj-D5dmdMxfJ-85VL3VzPmJ_HJIsDwp7iQsFTusoKy5ma_rfvPQ1jzApCzQHRRGGNuRI8DX3cmvRT2d_CTS7YTL0n7zWdXlOwEM9yYg2yJu855aMUUe"
+    "signature": "ntEcOhKxwwvFN0VOZJqnN15sjRCS05jBWBVEb2XXURks3n3hazXnnYV_pCp-ryLvI39Dh_uburne8VbGj6KMjt6gt7BICdfTwbJa61VNpyFicZ8Seo8P6RXxNS-bTAcG"
   }
 }

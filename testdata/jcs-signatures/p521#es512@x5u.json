@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/p521certpath.pem",
-    "val": "Aaqm4pMMqqP4cpvDGa9l35PANIM7RLOw7yrsqY2SmuqvJvZsvDpBVgWfodFgeZlFdgVWy_6lOzDENGvEmb7ozMb5AN7z6e4n_R8-zlHhBvTT_1udrfcB1w_cPGOt-ojLifXKSAEebfeXVNBh0_0DT9fseR6NpY7NRAuTk0FYIfDK79xd"
+    "val": "APp4x8Y9QSNNsEUWEyymxNjhU6SglPW22qAPkZ56GBRQ0Z6w5igBesykqWwn_uZPpQc8_Qc4079-XOZXSTRCxLMSAcuLPTjEGu--BSMV_J5ZfL4uSUSjOtxyFly3ZevIpVoTYYNNJ5W8u-bbhxbUHmSHBXzQjIQcCte8LMaBgpeWmXiY"
   }
 }

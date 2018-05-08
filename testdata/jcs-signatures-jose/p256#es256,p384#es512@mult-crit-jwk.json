@@ -1,8 +1,6 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "signers": [{
       "alg": "ES256",
@@ -17,7 +15,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "signature": "62EW3QbW8VcVFo7feqSjAjeFkiamtydUrDOXbr7Sj_cP9V5CiV6np-9j2sM0FA2oO9xwHOhvd53T4Slo3GpFBQ"
+      "signature": "QomNjwu2mF0uTOuMDP8HaxeXpe_oAjnZeRIlBSBRbxPh4RuRJch0Af35_FHq_RLnZ3B1xldn2dn8zBh5j4HlQA"
     },{
       "alg": "ES512",
       "jwk": {
@@ -31,7 +29,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "signature": "v_reUGHlzG5qKIK62r1MihkKqa4xo6Ua5PM1LfS7WI1qiXkP0VymiMUVaTki1F4R9SRiJmAfOFwj56kn27uaucVzkmjHXa1jWVS_urR3g2piO-ipbVnLkzursI8Q6nBA"
+      "signature": "KY7A7zq2TN8YrtFXT8xrECaXLTBRAIAG0WyuL4r0y3yA5ZgpNvoJsfrkHihmyOLXfxVESm-mUdGz-_8uts5_4zpeFElaq7jQgiMw9Nd9JYyaUN_lXg9YAQzPsf6evBPg"
     }]
   }
 }

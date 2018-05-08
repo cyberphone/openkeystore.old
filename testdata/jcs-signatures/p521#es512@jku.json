@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "jku": "https://cyberphone.github.io/doc/openkeystore/p521.jwks",
-    "val": "ABUyUnnZSXCrzOzR1RPzcrC2idYtsUC-H8W5mC2Bjh7FJwf-ctvIJ88mlJmRrB_ySCl-_VCD8Vapcbq1m3iSSJiSAZlHKyBxbUGxXju-taSBXsuI90fjT8FfVjOdtXRkbm2DwTICF1D6qScyBobr0f7EZtek-G-HhKpf_8O_lJELRyEC"
+    "val": "AfNa7kTJ0F1wMSzObuYwwq_-Rmnkio1GKIzLnNwiciPmeynWa7zhaxuRm2vBkIJfWlm_8qorsj3dUlfStJP4mcU2AYrzL2JU8co95Bu9YT6kUIqjlEub3rsbI49SVrOdJUP9AT844Z7tkM5slEG4IHwt83oWWBiYD6ZmbL72MUsu_Lu3"
   }
 }

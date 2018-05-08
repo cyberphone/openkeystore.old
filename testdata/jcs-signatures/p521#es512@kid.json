@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "kid": "example.com:p521",
-    "val": "AF4vUGbhiNQxiFRNL1kpLEdfaKeempzCHnc4nQtPIc2O3FEKQZO9u0rFh5i4hQWDFaCRJ4Z0SLihXxaTt6fGJPglAcXab85U8wryq6eYSuXtrhGTwR7iXJkxRvS8xUT67NDj3MEBKSN56qdSlSoM2wt2wJbbqmwjukB5G7SbhIvSVNe-"
+    "val": "AQ61N_51Tx_ap1sf2XhJdj5dEeR0dGgxHstuMUPjlVv54rjo2l8dmA2kvJLzKWfYjwuB0M7EzXMZ2BzccYcL_3_yAVUkMJoTFCQ0GipkB92BQ4GnBe77Q1mhAzqhLnp5Z15-SS1fTWwz9seVvZmX5dBAQymJhesXibvV0i4gM3ZdCeep"
   }
 }

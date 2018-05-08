@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES256",
     "jku": "https://cyberphone.github.io/doc/openkeystore/p256.jwks",
-    "val": "PGDztxa2ojMryKvrNU0vWBgFhdxhkmqat3Pl_7_MO75GhjpgGf2SDzdM4caUktol_4Eg1PwumwZj5iZy9cc9xg"
+    "val": "rqdUF2VfQma6glq863NEZgJ6b3s6p5k8lLB8Wbe2qcxkG233TVYH_IPv0IC7zIo8arhXymULcNO4mOD8e6a38g"
   }
 }

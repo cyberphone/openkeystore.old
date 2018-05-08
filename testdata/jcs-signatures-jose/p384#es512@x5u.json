@@ -1,11 +1,9 @@
 {
   "iss": "joe",
   "exp": 1300819380,
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "ES512",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/p384certpath.pem",
-    "signature": "5x-t3ZeNW2bsX0uZLBL9Akx9CpWWNRUBBHwXziMwENiApSgR-loQ8-VZCfSaleRoghXM5ecT6mORiu2FXBXc5xdiHqLMfGJZmZD4P2FtXDm4kw2aMUY9DtCccmk0ncWu"
+    "signature": "zWudYWzkyIFdJf-KohBE5WtL_q5KhdylURqXXesGDnx_e-isrv5riEvC4XHAzaXbblSGDElnEsGf1Q_aJKWd8T7qxjlkC_FR729qZDen3MT35vmKRlAzK5XF4YECu-UV"
   }
 }

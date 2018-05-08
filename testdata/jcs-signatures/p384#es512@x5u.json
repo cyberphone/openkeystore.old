@@ -1,10 +1,10 @@
 {
   "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "name": "Joe",
+  "id": 2200063,
   "signature": {
     "alg": "ES512",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/p384certpath.pem",
-    "val": "ltQaF9c0j01NuaZDKCIO49PypQQatYGkK9b7PgR4BT_o6wj879sH6dKhj-g6M74-gP8Aj3_6LZGOEv-pHERAi0BhsMyqfipe0j3yg5Ay0lPzUSCxbI1atSY6AX_COClg"
+    "val": "kkqjN3YvMUmtf51iGdQUmqr59Jym9QWj5GK_ABOIraKrR3pSkxBAr9J7QPo_RpX36SQ6B-Dm8DRvR_1V156iNWtLNd7WtuQQiR0asuJvnYkPRaH31dJt2wtabkxQo2lX"
   }
 }
