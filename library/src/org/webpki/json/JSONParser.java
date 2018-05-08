@@ -56,7 +56,7 @@ public class JSONParser {
         JSONObject root = new JSONObject();
         if (testNextNonWhiteSpaceChar() == LEFT_BRACKET) {
             scan();
-            root.properties.put(null, scanArray("outer array"));
+            root.properties.put(null, scanArray());
         } else {
             scanFor(LEFT_CURLY_BRACKET);
             scanObject(root);
@@ -99,6 +99,22 @@ public class JSONParser {
         strictNumericMode = strict;
     }
 
+    JSONValue scanElement() throws IOException {
+        switch (scan()) {
+            case LEFT_CURLY_BRACKET:
+                return scanObject(new JSONObject());
+
+            case DOUBLE_QUOTE:
+                return scanQuotedString();
+
+            case LEFT_BRACKET:
+                return scanArray();
+
+            default:
+                return scanSimpleType();
+        }
+    }
+
     JSONValue scanObject(JSONObject holder) throws IOException {
         boolean next = false;
         while (testNextNonWhiteSpaceChar() != RIGHT_CURLY_BRACKET) {
@@ -109,32 +125,14 @@ public class JSONParser {
             scanFor(DOUBLE_QUOTE);
             String name = (String) scanQuotedString().value;
             scanFor(COLON_CHARACTER);
-            JSONValue value;
-            switch (scan()) {
-                case LEFT_CURLY_BRACKET:
-                    value = scanObject(new JSONObject());
-                    break;
-
-                case DOUBLE_QUOTE:
-                    value = scanQuotedString();
-                    break;
-
-                case LEFT_BRACKET:
-                    value = scanArray(name);
-                    break;
-
-                default:
-                    value = scanSimpleType();
-            }
-            holder.setProperty(name, value);
+            holder.setProperty(name, scanElement());
         }
         scan();
         return new JSONValue(JSONTypes.OBJECT, holder);
     }
 
-    JSONValue scanArray(String name) throws IOException {
+    JSONValue scanArray() throws IOException {
         Vector<JSONValue> array = new Vector<JSONValue>();
-        JSONValue value = null;
         boolean next = false;
         while (testNextNonWhiteSpaceChar() != RIGHT_BRACKET) {
             if (next) {
@@ -142,23 +140,7 @@ public class JSONParser {
             } else {
                 next = true;
             }
-            switch (scan()) {
-                case LEFT_BRACKET:
-                    value = scanArray(name);
-                    break;
-
-                case LEFT_CURLY_BRACKET:
-                    value = scanObject(new JSONObject());
-                    break;
-
-                case DOUBLE_QUOTE:
-                    value = scanQuotedString();
-                    break;
-
-                default:
-                    value = scanSimpleType();
-            }
-            array.add(value);
+            array.add(scanElement());
         }
         scan();
         return new JSONValue(JSONTypes.ARRAY, array);
