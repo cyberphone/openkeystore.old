@@ -2395,7 +2395,7 @@ public class JSONTest {
     enum PARSER_ERR {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
-        EXPECTED("This JSON implementation mandates fully normalized \"Number\" data according to ES6+."),
+        EXPECTED("In the \"strict\" mode JSON Numbers must be fully normalized according to ES6+."),
         SYNTAX("Unrecognized or malformed JSON token");
 
         String mess;
