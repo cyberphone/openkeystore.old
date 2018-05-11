@@ -436,10 +436,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "EC private key associated with the subsequent object:" +
         formatCode(p384key) +
         "The following object was signed by the key above:" +
-        readAsymSignature("p384#es512@jwk.json", p384key, new JSONCryptoHelper.Options()) +
+        readAsymSignature("p384#es384@jwk.json", p384key, new JSONCryptoHelper.Options()) +
         "The following signature object uses the same key as in the previous example but featured in " +
         "a certificate path:" +
-        readCertSignature("p384#es512@x5c.json") + LINE_SEPARATOR +
+        readCertSignature("p384#es384@x5c.json") + LINE_SEPARATOR +
         "EC private key associated with the subsequent object:" +
         formatCode(p521key) +
         "The following object was signed by the key above:" +
