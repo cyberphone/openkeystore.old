@@ -3,8 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "alg": "ES512",
+    "alg": "ES384",
     "kid": "example.com:p384",
-    "val": "ekwSDaysPf3yFkOmZSgGnzWOsT35fslqsDMKkGHNNWDgT_y00t08290RZpsESd_ZkBQKjRtKm5ySUxY0gvSDNU6LKDUfQigNiIXSUpKrFRySvw-Y22cq2hIIL3qcxX-G"
+    "val": "fcwFv2Ybeda6ZZleR22QmLlDtWwGBy2lWa8Ook7yphf6CxWJ1wmCOQHkh4U022K6gblpV36HeJS9I-PcIpu_bmKqJSByw0_WSRuLAbdXDWqffGUeEccJyG66tJuxyiSt"
   }
 }

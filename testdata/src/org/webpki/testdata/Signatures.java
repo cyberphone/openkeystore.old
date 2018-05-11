@@ -146,16 +146,16 @@ public class Signatures {
             symmSign(512, MACAlgorithms.HMAC_SHA512, i == 0);
         }
         
-        multipleSign("p256", "r2048", MULTI_CRIT.NONE,   false, false, null);
-        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, false, null);
-        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, false, AsymSignatureAlgorithms.ECDSA_SHA512);
-        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   false, true,  AsymSignatureAlgorithms.ECDSA_SHA512);
-        multipleSign("p256", "p384",  MULTI_CRIT.NONE,   true,  false, null);
-        multipleSign("p256", "r2048", MULTI_CRIT.NONE,   true,  true, null);
-        multipleSign("p256", "r2048", MULTI_CRIT.NONE,   false, true, null);
-        multipleSign("p256", "r2048", MULTI_CRIT.GLOBAL, false, true, null);
-        multipleSign("p256", "p384",  MULTI_CRIT.GLOBAL, false, false, null);
-        multipleSign("p256", "p384",  MULTI_CRIT.LOCAL,  false, false, null);
+        multipleSign("p256", "r2048",  MULTI_CRIT.NONE,   false, false, null);
+        multipleSign("p256", "p384",   MULTI_CRIT.NONE,   false, false, null);
+        multipleSign("p256", "p256-2", MULTI_CRIT.NONE,   false, false, AsymSignatureAlgorithms.ECDSA_SHA256);
+        multipleSign("p256", "p256-2", MULTI_CRIT.NONE,   false, true,  AsymSignatureAlgorithms.ECDSA_SHA256);
+        multipleSign("p256", "p384",   MULTI_CRIT.NONE,   true,  false, null);
+        multipleSign("p256", "r2048",  MULTI_CRIT.NONE,   true,  true,  null);
+        multipleSign("p256", "r2048",  MULTI_CRIT.NONE,   false, true,  null);
+        multipleSign("p256", "r2048",  MULTI_CRIT.GLOBAL, false, true,  null);
+        multipleSign("p256", "p384",   MULTI_CRIT.GLOBAL, false, false, null);
+        multipleSign("p256", "p384",   MULTI_CRIT.LOCAL,  false, false, null);
 
         asymSignCore("p256", false, true,  true,  false); 
         asymSignCore("p256", false, true,  false, true);

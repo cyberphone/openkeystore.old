@@ -3,8 +3,8 @@
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
   "numbers": [1e+30,4.5,6],
   "signature": {
-    "alg": "ES512",
+    "alg": "ES384",
     "x5u": "https://cyberphone.github.io/doc/openkeystore/p384certpath.pem",
-    "val": "cH4uuGw362S-xoxoidQkmFRmw_4HuSlODo1Cwbv1rd0wGa6q2MGUNxJMQKWQveumItJvI_r7OeGq-oodBmMGcY3NCbmOa_etiVxefKeaXNmo6-fihnRlVTyIJPGfytWH"
+    "val": "56rtd4eDEkh8FUFmcHKgQtyetXAKrkejClQFo4xyXtmtiUbUcoDqbZbA_IQYPTt22mA1wW74uPQiBSaOr-MqvtUh6jBswXi0mncUzYPb87onESIpAPHjHkrXILR5WtYu"
   }
 }

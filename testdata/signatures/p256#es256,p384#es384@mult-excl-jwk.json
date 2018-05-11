@@ -1,25 +1,26 @@
 {
-  "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "mySignedData": "something",
+  "myUnsignedData": "something else",
   "signature": {
-    "alg": "ES512",
+    "excl": ["myUnsignedData"],
     "signers": [{
+      "alg": "ES256",
       "jwk": {
         "kty": "EC",
         "crv": "P-256",
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "fomOT2jRVa6RWX4NNcZMPfFQ5ByHgek7J7o79xz-1V_KJ9Cv7EWMASxjvxgc5xpaE58G3ZyxmBWOnEjfsDEhqQ"
+      "val": "DFF-uV_VGubQ58Z0_qrHcFk4XGFScd6JOE_86i9Wie3eZ5mkU0PAClCySaIjjWb0HxxH1_jWOErqgpre-uoArA"
     },{
+      "alg": "ES384",
       "jwk": {
         "kty": "EC",
         "crv": "P-384",
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "val": "Z93ND1s3iodAt4kUsxTm2Izwg4VcUULSdPyeswv1DRCeDnUwpE9WfKaMaoAtva2AzXThiC0Bh-3ayPZlzOAK11td9mFXVKg75uHE_xsA-ZArO-cj3a23AjU8EXdakrZh"
+      "val": "K4NHRSY-5dIPiLbKSmOktTJIFREGN347w8D9bcipkcGWPC2lRmapkORVpbcrArPXwAlv2vfpzIwS2k7gKQOyDeTZt_aA4hQOJWswuEL8nztZXXHqr0oNiktU1k_YZuQK"
     }]
   }
 }

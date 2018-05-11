@@ -13,9 +13,9 @@
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
       "otherExt": "Other Data",
-      "val": "VFtHnsHpgzI9qOB8PJx4HXk_cpzSY6VT4W3HG-ZMZymjhSwfRjxDUQH0cVjS1w1YAT1MMOfS2J2q0xZj5j6FgQ"
+      "val": "pSBz84kv54s9pVKnI1hLEWFCwJBKhQiI6-7YAGofSidxgYoWECxQ_tqnR0TxGxRZyp4jccX_V-bGbk2IfkRYWQ"
     },{
-      "alg": "ES512",
+      "alg": "ES384",
       "jwk": {
         "kty": "EC",
         "crv": "P-384",
@@ -26,7 +26,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "59b8D0H95nNJpGPljiHOVejW9auc6WP7M61L64KjH3IhesXgTZCQLnJN5ZJxM8mcHC0LYwSIw6WeegDel30JVVtwIsfc8jxyoMpj51iHVdCwzpzLlvnyE3CSLO5czmdN"
+      "val": "7aClMPPYhXJmFux2oc65IUBjWZDd_pY0k_nVAn6zeRP8Q4jJ177EIQ2x39CAaFXtW4MHRBkkNTeJVYDf1_LcJ1OpQX6PPmi7nRJK77W46dhuduqIX89V01Rj4-Wpb69P"
     }]
   }
 }

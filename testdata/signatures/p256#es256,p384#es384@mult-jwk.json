@@ -11,16 +11,16 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "1VE04F96VsqUcggO0ghLj2A40FFzdzcJssahMTQS-BKU5wRrjhcOfhMvAgs38xR9tJwGmtwZgQ-fxBKLW2pkog"
+      "val": "uQu76Dytzrpu8KdfPj2pxsfvRDgskmcZsxOodnjaJx0_reQEB2b-w-wMzBwRBZQDCUNRK-ksQfUS48sOiaoEqw"
     },{
-      "alg": "ES512",
+      "alg": "ES384",
       "jwk": {
         "kty": "EC",
         "crv": "P-384",
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "val": "OawQG_JsCmrPpdla52S_MFAA3I3mXPigAhhDizXjM3meBAVybAxj-pUBd2MdVbp5fVwUIigBwI0mFAolKfAjaiEh3r7wu7aJ2GbvSPOt8W2X1dXab48uNGBST1pR4LDq"
+      "val": "r80WQruPJ1J72uvT056gKtzRw5t3Y00iXHJJXSJkBNukbVd7iswCEsFW6eN4o6-R1cH1yQA145QBTl9gaAvnSy6_dpTiomCytb5Df0GSGhuZTCezvvuOgNLsyl9YpdsU"
     }]
   }
 }

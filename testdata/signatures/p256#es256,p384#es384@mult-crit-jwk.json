@@ -16,9 +16,9 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "b5STrNM6jeBOm-6hXBhWz3UP68p6j2YkiILE7399TcHyPGeaWXFf7YptsTXrLwZTkaPLrr1PBGhCS3bGhQpmSA"
+      "val": "YmPcaPl9YEnfEYTEJm_92TFgs0yuN_yPjkCTQ61TqsakRek8XDpwsTS5zJhImmztxC8SuYNG0Hr0cajmjUOntg"
     },{
-      "alg": "ES512",
+      "alg": "ES384",
       "jwk": {
         "kty": "EC",
         "crv": "P-384",
@@ -30,7 +30,7 @@
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "L7JQUBFn8t47jTe549B59YeqdOU3W0oL5fIea2JN9j4qHAzEXCZPmIh60Wh0t-YlheDw2Oos5evXJBnLBf8YwTqCEeJZD5CYZoHrooIcTRlnCm7nJUao0oPSF7jRYUK8"
+      "val": "CKnpz7k9z4fZBzw-77SX-uw0w0BIifqhxMAMxoBUIVo39kw8WWQfSgNBCOGnb2bxj2vJnYEqcQNeMdGttzy4dxmpQj437ZRDx-S04HHOMO_oTedDDljJlrM5Vrw2eF-c"
     }]
   }
 }
