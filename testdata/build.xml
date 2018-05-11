@@ -219,6 +219,9 @@
        <param name="keyprefix" value="p256"/>
     </antcall>
     <antcall target="_create.jwks.x5c.pemcertpath">
+       <param name="keyprefix" value="p256-2"/>
+    </antcall>
+    <antcall target="_create.jwks.x5c.pemcertpath">
        <param name="keyprefix" value="p384"/>
     </antcall>
     <antcall target="_create.jwks.x5c.pemcertpath">

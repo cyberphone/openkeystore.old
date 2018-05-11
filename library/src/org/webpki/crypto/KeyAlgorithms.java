@@ -167,7 +167,7 @@ public enum KeyAlgorithms implements CryptoAlgorithms {
     NIST_P_384  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.p384", "P-384",
                 "secp384r1",
                 384,
-                AsymSignatureAlgorithms.ECDSA_SHA512,
+                AsymSignatureAlgorithms.ECDSA_SHA384,
                 false,
                 true,
                 "1.3.132.0.34",
