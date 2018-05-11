@@ -1,0 +1,15 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "name": "Joe",
+  "id": 2200063,
+  "signature": {
+    "alg": "ES384",
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+    },
+    "val": "oMM9miGforDMFVMR96ewtfAVtVxGtwSgFQw-1CG7Utn_jIyvzKgabsX3uuovLr7sebpTxlpDkVgti5HxuO196G_OBB6IBL2H1pOqscQ-_lL5wB-2eL8CywpgG6oZYhkh"
+  }
+}

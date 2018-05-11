@@ -1,0 +1,26 @@
+{
+  "mySignedData": "something",
+  "myUnsignedData": "something else",
+  "signature": {
+    "excl": ["myUnsignedData"],
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "val": "rVhBuFczne5n71zZv4Ie_lTYcOHvlQzOBrzRpHWpz78WphXCjSPpDDcBEgev6LcvVxl4dsfY_tJtFySYYYfJoQ"
+    },{
+      "alg": "ES384",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "val": "1TlKEe5kG-RnuL35irmBE9_heSKyaf1lqO0xXP63rEE1vZBWZypgUZZE9t7Gt3wEKRhd0Y4HUl_3lDjN1WBCfGWCB_8fF8St7xp0c7hL9NpnZyPzkGYHKTd_QN1tWsJQ"
+    }]
+  }
+}

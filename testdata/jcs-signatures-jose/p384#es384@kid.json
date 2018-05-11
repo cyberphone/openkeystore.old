@@ -1,0 +1,9 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "__cleartext_signature": {
+    "alg": "ES384",
+    "kid": "example.com:p384",
+    "signature": "4ZBvbd-ahVdCUoYsMDVq6yN7tzmlYy4qQdRLYs4lu0iFATK51DISOlBVCVwl5AUmzfd3QOGncC5U7v7QWf0A2GlBF45zz5-0hfwxBwh1sfiRPKZkEBIqAvN9WVflyCQq"
+  }
+}

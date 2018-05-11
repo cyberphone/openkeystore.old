@@ -1,0 +1,25 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "name": "Joe",
+  "id": 2200063,
+  "signature": {
+    "alg": "ES256",
+    "signers": [{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "val": "p5sbbRjSjFaDiI4_ax4SwU_6f1cJGS_vrt7DvvlIbwklAL2TDuQDCy-YL_w1hjfbEIzgkdJGAhKdUuG8BQplBA"
+    },{
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "RgdKcWxBsnqeryzoEv3B5KE9qAQc-nBZEV_A23uQoPs",
+        "y": "73UtZIe1Qfil1WM9Hq1ZiPXWnI1Tu7N__goVvTyjURk"
+      },
+      "val": "mOA9KryDK92LinZwjCKPctMONcUjedulNRPfXeH1pyWNn1WxpwNmbE-yKNka28kX9rTkwiMXU8ttFLPysMFFXg"
+    }]
+  }
+}

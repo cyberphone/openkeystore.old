@@ -1,0 +1,25 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "signature": "ojCObWZiLVcXA3olcKMyeHg8emmoz1Wg08y5KR1kOIIs1trkl_pzSmoVeCIxSnN6q1Cujf1fAEoQVETU7xyX0w"
+    },{
+      "alg": "ES384",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "signature": "r3Q0bmWVjfT1CGf8fvShxsNdee6JZ_IXy-Mv4TbUGmz5I88B8CFJ0bhfUORGtpHUiEjYqsse-2GAWNNPevB7fovEaUORMtIUCNw_znwYxk5CxIME-KrzLaSbGuSRHEdM"
+    }]
+  }
+}

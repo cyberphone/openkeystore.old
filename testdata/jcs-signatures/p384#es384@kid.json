@@ -1,0 +1,10 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "name": "Joe",
+  "id": 2200063,
+  "signature": {
+    "alg": "ES384",
+    "kid": "example.com:p384",
+    "val": "yLVacI_qonxXl6TZW4ajhyvmaUwqYfY7oUrAmXIDk84biKsulj_IQOCziWSAl5Hv1qHAJS4S2PIGuKgTicFX7ex88z2ygJO10vSH5H9qr36ZajsGkVX-koVQXpIQl5fO"
+  }
+}

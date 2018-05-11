@@ -1,0 +1,35 @@
+{
+  "iss": "joe",
+  "exp": 1300819380,
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+        "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      },
+      "crit": ["otherExt","https://example.com/extension"],
+      "otherExt": "Other Data",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "signature": "aTTo9QXCKy6CHyUfFfPWS6PYk6E2mVy9UvHUft1jFvOLCLeObFZ2-ERwPUFMTEh-_GS-TGY4TWEtuv43J8KvxA"
+    },{
+      "alg": "ES384",
+      "jwk": {
+        "kty": "EC",
+        "crv": "P-384",
+        "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+        "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      },
+      "crit": ["otherExt","https://example.com/extension"],
+      "otherExt": "Cool Stuff",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "signature": "W-33kEU1uyq_2yPNXttdWFKyKt50klMPSZsmsyds_fGKg9YiIK48aZToDy-PSU7kqrs23BRihZ3ihzVuDW5ViZ3NLP4X2o7pdUjBul4ywB1fZbZESdHziyw5jUp1dYIB"
+    }]
+  }
+}

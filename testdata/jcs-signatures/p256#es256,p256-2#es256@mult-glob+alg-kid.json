@@ -1,0 +1,15 @@
+{
+  "now": "2018-04-16T11:23:06Z",
+  "name": "Joe",
+  "id": 2200063,
+  "signature": {
+    "alg": "ES256",
+    "signers": [{
+      "kid": "example.com:p256",
+      "val": "th_y6LsxG-bI9MmTEh6nDCckumiXejvF6VPuH_v0_gMjS-mlFM3w7q65FvIQbeI07fdvUppNUKo5h_licpyS0Q"
+    },{
+      "kid": "example.com:p256-2",
+      "val": "EdlSQAth3n2ef3RkoJwJsSyXVXVZa2gI2M6mRDGLb28oIGJ6UIovDJt9901lk1H2sPBT9rz06EpV5EfAks7CNQ"
+    }]
+  }
+}
