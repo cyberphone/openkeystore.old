@@ -192,6 +192,9 @@
        <param name="cmd" value="-out/keyalias example.com:p256 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=example.com, serialNumber=4501, C=FR&quot; -validity/start 2018-01-01T00:00:00 -validity/end 2022-12-31T23:59:59 -out/storetype PKCS12 -out/keystore p256certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_256 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
+       <param name="cmd" value="-out/keyalias example.com:p256-2 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=example.com, serialNumber=4501, C=FR&quot; -validity/start 2018-01-01T00:00:00 -validity/end 2022-12-31T23:59:59 -out/storetype PKCS12 -out/keystore p256-2certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_256 -sigalg ECDSA_SHA512"/>
+    </antcall>
+    <antcall target="_createcert">
        <param name="cmd" value="-out/keyalias example.com:p384 -ca/addpath all -ca/keypass foo123 -ca/storetype PKCS12 -ca/storepass foo123 -ca/keystore subca.p12 -entity/ee -subject &quot;CN=example.com, serialNumber=4501, C=FR&quot; -validity/start 2018-01-01T00:00:00 -validity/end 2022-12-31T23:59:59 -out/storetype PKCS12 -out/keystore p384certificate.p12 -out/storepass foo123 -out/keypass foo123 -ecccurve NIST_P_384 -sigalg ECDSA_SHA512"/>
     </antcall>
     <antcall target="_createcert">
