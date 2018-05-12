@@ -2396,6 +2396,7 @@ public class JSONTest {
         MISS_ARG("Missing argument"),
         ARRAY_LIMIT("Trying to read past of array limit: "),
         EXPECTED("In the \"strict\" mode JSON Numbers must be fully normalized according to ES6+."),
+        COMMA("Expected ',' but got 'e'"),
         SYNTAX("Unrecognized or malformed JSON token");
 
         String mess;
@@ -2784,8 +2785,10 @@ public class JSONTest {
         badArgument("e-3");
         badArgument("flase");
         badArgument("+1");
-        expected_error = PARSER_ERR.EXPECTED;
+        expected_error = PARSER_ERR.COMMA;
         badArgument("1.0 e4");
+        expected_error = PARSER_ERR.EXPECTED;
+        JSONParser.setStrictNumericMode(true);
         floatingPoint("10000", 1.0e4);
         floatingPoint("9.999e-100", 0.9999e-99);
         floatingPoint("10000", 10000);
@@ -2802,6 +2805,7 @@ public class JSONTest {
         integerValue("-9", false);
         integerValue("0", false);
         integerValue("10", false);
+        JSONParser.setStrictNumericMode(false);
         try {
             int53Variables(JSONObjectWriter.MAX_INTEGER + 1);
             fail("long");

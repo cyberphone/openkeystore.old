@@ -45,7 +45,7 @@ public class JSONParser {
 
     String jsonData;
     
-    static boolean strictNumericMode = true;
+    static boolean strictNumericMode = false;
 
     JSONParser() {
     }
@@ -91,8 +91,8 @@ public class JSONParser {
 
     /**
      * Define strictness of "Number" parsing.
-     * Default mode is strict making for example 1.50 and 1e+3 fail
-     * since they are not normalized.
+     * In strict mode 1.50 and 1e+3 would fail
+     * since they are not normalized.  Default mode is not strict.
      * @param strict True if strict mode is requested
      */
     public static void setStrictNumericMode(boolean strict) {
@@ -162,13 +162,15 @@ public class JSONParser {
         }
         JSONTypes type = JSONTypes.NUMBER;
         if (NUMBER_PATTERN.matcher(token).matches()) {
-            String serializedNumber = NumberToJSON.serializeNumber(Double.valueOf(token));
-            if (strictNumericMode && !serializedNumber.equals(token)) {
-                throw new IOException("In the \"strict\" mode JSON Numbers must be fully normalized " +
-                                      "according to ES6+.  As a consequence " + token + 
-                                      " must be expressed as " + serializedNumber);
+            double number = Double.valueOf(token);  // Syntax check...
+            if (strictNumericMode) {
+                String serializedNumber = NumberToJSON.serializeNumber(number);
+                if (!serializedNumber.equals(token)) {
+                    throw new IOException("In the \"strict\" mode JSON Numbers must be fully normalized " +
+                                          "according to ES6+.  As a consequence " + token + 
+                                          " must be expressed as " + serializedNumber);
+                }
             }
-            token = serializedNumber;
         } else if (BOOLEAN_PATTERN.matcher(token).matches()) {
             type = JSONTypes.BOOLEAN;
         } else if (token.equals("null")) {
