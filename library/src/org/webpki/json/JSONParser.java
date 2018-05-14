@@ -170,6 +170,9 @@ public class JSONParser {
                                           "according to ES6+.  As a consequence " + token + 
                                           " must be expressed as " + serializedNumber);
                 }
+                JSONValue strictNum = new JSONValue(type, token);
+                strictNum.preSet = true;
+                return strictNum;
             }
         } else if (BOOLEAN_PATTERN.matcher(token).matches()) {
             type = JSONTypes.BOOLEAN;

@@ -1,15 +1,16 @@
 {
-  "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
+  "description": "This is a clear text JSON signature using canonicalization",
+  "numbers": [333333333.33333329, 1E30, 4.50, 2e-3, 0.000000000000000000000000001],
+  "string": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "literals": [null, true, false],
   "signature": {
     "alg": "ES256",
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+      "x": "PxlJQu9Q6dOvM4LKoZUh2XIe9-pdcLkvKfBfQk11Sb0",
+      "y": "6IDquxrbdq5ABe4-HQ78_dhM6eEBUbvDtdqK31YfRP8"
     },
-    "val": "E5xT3PosbXcPsSGTb7LsxBzbbW7YWvJrtoA1BJmZKQX-FZf8cWVGI_5v7LDvQl0qby9X1NaaaB0c8bio4qCNHg"
+    "val": "uHVZQfrRnVm6rSjM-bQfGGGE-qgUp-gLEj2Y7qaE1UgfU0MiQOWPEIBxBgNSomJGtoXjposxz8Mj8uAtwK9_Ww"
   }
 }

@@ -25,11 +25,13 @@ class JSONValue implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    JSONTypes type;
+    JSONTypes type;    // Number, String, etc.
 
-    Object value;  // Holds either a String, JSONObject or Vector<JSONValue>
+    Object value;      // Holds either a String, JSONObject or Vector<JSONValue>
 
-    boolean readFlag;
+    boolean preSet;    // Number serialization optimizer
+
+    boolean readFlag;  // For verifying that we dodn't forgot something
 
     JSONValue(JSONTypes type, Object value) {
         this.type = type;

@@ -128,6 +128,7 @@ public class JSONObjectWriter implements Serializable {
 
     JSONObjectWriter setProperty(String name, JSONValue value) throws IOException {
         root.setProperty(name, value);
+        value.preSet = true;
         return this;
     }
 
@@ -959,7 +960,7 @@ import org.webpki.json.JSONSignatureDecoder;
         buffer.append(']');
     }
 
-    void printArraySimple(Vector<JSONValue> array) {
+    void printArraySimple(Vector<JSONValue> array) throws IOException {
         int i = 0;
         for (JSONValue value : array) {
             i += ((String) value.value).length();
@@ -1000,7 +1001,7 @@ import org.webpki.json.JSONSignatureDecoder;
     }
 
     @SuppressWarnings("fallthrough")
-    void printSimpleValue(JSONValue value, boolean property) {
+    void printSimpleValue(JSONValue value, boolean property) throws IOException {
         String string = (String) value.value;
         if (value.type != JSONTypes.STRING) {
             if (htmlMode) {
@@ -1008,7 +1009,9 @@ import org.webpki.json.JSONSignatureDecoder;
                         .append(htmlVariableColor)
                         .append("\">");
             }
-            buffer.append(string);
+            buffer.append(value.type != JSONTypes.NUMBER || value.preSet ? 
+                    string : NumberToJSON.serializeNumber(Double.valueOf(string)));
+
             if (htmlMode) {
                 buffer.append("</span>");
             }
@@ -1124,7 +1127,7 @@ import org.webpki.json.JSONSignatureDecoder;
         }
     }
 
-    void printProperty(String name) {
+    void printProperty(String name) throws IOException {
         spaceOut();
         printSimpleValue(new JSONValue(JSONTypes.STRING, name), true);
         buffer.append(':');
