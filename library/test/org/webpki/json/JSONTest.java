@@ -2512,12 +2512,22 @@ public class JSONTest {
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals(value));
     }
 
+    void moneyValues(BigDecimal value) throws IOException {
+        JSONObjectWriter or = new JSONObjectWriter();
+        or.setArray("name").setMoney(value);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getMoney().equals(value));
+        or = new JSONObjectWriter();
+        or.setMoney("name", value);
+        assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getMoney("name").equals(value));
+    }
+
     void bigDecimalValues(BigDecimal value) throws IOException {
         JSONObjectWriter or = new JSONObjectWriter();
         or.setArray("name").setBigDecimal(value);
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigDecimal().equals(value));
         or = new JSONObjectWriter();
         or.setBigDecimal("name", value);
+        System.out.println("V=\n" + or);
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals(value));
     }
 
@@ -2727,12 +2737,12 @@ public class JSONTest {
         assertTrue(simpleObjectType("4").getInt("name") == 4);
         assertTrue(simpleArrayType2("40000000000000000").getBigInteger().equals(new BigInteger("40000000000000000")));
         assertTrue(simpleObjectType2("40000000000000000").getBigInteger("name").equals(new BigInteger("40000000000000000")));
-        assertTrue(simpleArrayType2("40000000000000000").getBigDecimal().equals(new BigDecimal("40000000000000000")));
-        assertTrue(simpleObjectType2("40000000000000000").getBigDecimal("name").equals(new BigDecimal("40000000000000000")));
-        assertTrue(simpleArrayType2("40000000000000000.45").getBigDecimal().equals(new BigDecimal("40000000000000000.45")));
-        assertTrue(simpleObjectType2("40000000000000000.45").getBigDecimal("name").equals(new BigDecimal("40000000000000000.45")));
-        assertTrue(simpleArrayType2("0.0").getBigDecimal().equals(new BigDecimal("0.0")));
-        assertTrue(simpleObjectType2("0.0").getBigDecimal("name").equals(new BigDecimal("0.0")));
+        assertTrue(simpleArrayType2("40000000000000000").getMoney().equals(new BigDecimal("40000000000000000")));
+        assertTrue(simpleObjectType2("40000000000000000").getMoney("name").equals(new BigDecimal("40000000000000000")));
+        assertTrue(simpleArrayType2("40000000000000000.45").getMoney().equals(new BigDecimal("40000000000000000.45")));
+        assertTrue(simpleObjectType2("40000000000000000.45").getMoney("name").equals(new BigDecimal("40000000000000000.45")));
+        assertTrue(simpleArrayType2("0.0").getMoney().equals(new BigDecimal("0.0")));
+        assertTrue(simpleObjectType2("0.0").getMoney("name").equals(new BigDecimal("0.0")));
         assertTrue(simpleArrayType("40000000000000000").getDouble() == new Double("40000000000000000"));
         assertTrue(simpleObjectType("40000000000000000").getDouble("name") == new Double("40000000000000000"));
         assertTrue(simpleArrayType("400000000000.45").getDouble() == 400000000000.45);
@@ -2830,8 +2840,11 @@ public class JSONTest {
         }
         int53Variables(0xa885abafaba0l);
         int53Variables(JSONObjectWriter.MAX_INTEGER);
+        moneyValues(new BigDecimal("3232323243243234234243234234243243243243243234243"));
+        moneyValues(new BigDecimal("323232324324.3234234243234234243243243243243234243"));
+        bigDecimalValues(new BigDecimal("1.0e+999"));
+        bigDecimalValues(new BigDecimal("1.0"));
         bigDecimalValues(new BigDecimal("3232323243243234234243234234243243243243243234243"));
-        bigDecimalValues(new BigDecimal("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues(new BigInteger("3232323243243234234243234234243243243243243234243"));
         dateTimeTest();
         booleanValues(true);
@@ -2850,15 +2863,15 @@ public class JSONTest {
         badInteger(13.1);
         badInteger(1300000.1);
         assertTrue(JSONParser.parse(new JSONObjectWriter()
-                .setBigDecimal("big", new BigDecimal("5.00"))
-                .toString()).getBigDecimal("big").compareTo(BigDecimal.valueOf(5)) == 0);
+                .setMoney("big", new BigDecimal("5.00"))
+                .toString()).getMoney("big").compareTo(BigDecimal.valueOf(5)) == 0);
         assertTrue(JSONParser.parse(new JSONObjectWriter()
-                .setBigDecimal("big", new BigDecimal("5.00"))
-                .toString()).getBigDecimal("big", 2).compareTo(BigDecimal.valueOf(5)) == 0);
+                .setMoney("big", new BigDecimal("5.00"))
+                .toString()).getMoney("big", 2).compareTo(BigDecimal.valueOf(5)) == 0);
         try {
             JSONParser.parse(new JSONObjectWriter()
-                    .setBigDecimal("big", new BigDecimal("5"))
-                    .toString()).getBigDecimal("big", 2);
+                    .setMoney("big", new BigDecimal("5"))
+                    .toString()).getMoney("big", 2);
             fail("bd");
         } catch (Exception e) {
             checkException(e, "Incorrect number of decimals in \"BigDecimal\": 0");

@@ -259,14 +259,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
         return hasProperty(name) ? getBinary(name) : null;
     }
 
-    static BigInteger parseBigInteger(String value) throws IOException {
-        if (INTEGER_PATTERN.matcher(value).matches()) {
-            return new BigInteger(value);
-        }
-        throw new IOException("Malformed \"BigInteger\": " + value);
-    }
-
-    static BigDecimal parseBigDecimal(String value, Integer decimals) throws IOException {
+    static BigDecimal parseMoney(String value, Integer decimals) throws IOException {
         if (INTEGER_PATTERN.matcher(value).matches() ||
                 DECIMAL_PATTERN.matcher(value).matches()) {
             BigDecimal parsed = new BigDecimal(value);
@@ -279,6 +272,58 @@ public class JSONObjectReader implements Serializable, Cloneable {
     }
 
     /**
+     * Read a Money property.<p>
+     * Note: Since JSON does not support a native Money type, this method builds on <i>mapping</i>.</p>
+     * Note: This method is equivalent to <code>getMoney(name, null)</code>.
+     * @param name Property
+     * @return Java <code>BigInteger</code>
+     * @throws IOException &nbsp;
+     * @see JSONObjectWriter#setMoney(String, BigDecimal)
+     */
+    public BigDecimal getMoney(String name) throws IOException {
+        return parseMoney(getString(name), null);
+    }
+
+    /**
+     * Read a Money property.<p>
+     * Note: Since JSON does not support a native Money type, this method builds on <i>mapping</i>.</p>
+     * @param name Property
+     * @param decimals Required number of fractional digits or <b>null</b> if unspecified
+     * @return Java <code>BigDecimal</code>
+     * @throws IOException &nbsp;
+     * @see JSONObjectWriter#setMoney(String, BigDecimal, Integer)
+     */
+    public BigDecimal getMoney(String name, Integer decimals) throws IOException {
+        return parseMoney(getString(name), decimals);
+    }
+
+    static BigDecimal parseBigDecimal(String value) throws IOException {
+        if (JSONParser.NUMBER_PATTERN.matcher(value).matches()) {
+            return new BigDecimal(value);
+        }
+        throw new IOException("Malformed \"getBigDecimal\": " + value);
+    }
+
+    /**
+     * Read a BigDecimal property.<p>
+     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.</p>
+     * @param name Property
+     * @return Java <code>BigInteger</code>
+     * @throws IOException &nbsp;
+     * @see JSONObjectWriter#setBigDecimal(String, BigDecimal)
+     */
+    public BigDecimal getBigDecimal(String name) throws IOException {
+        return parseBigDecimal(getString(name));
+    }
+
+    static BigInteger parseBigInteger(String value) throws IOException {
+        if (INTEGER_PATTERN.matcher(value).matches()) {
+            return new BigInteger(value);
+        }
+        throw new IOException("Malformed \"BigInteger\": " + value);
+    }
+
+    /**
      * Read a BigInteger property.<p>
      * Note: Since JSON does not support a native BigInteger type, this method builds on <i>mapping</i>.</p>
      * @param name Property
@@ -288,32 +333,6 @@ public class JSONObjectReader implements Serializable, Cloneable {
      */
     public BigInteger getBigInteger(String name) throws IOException {
         return parseBigInteger(getString(name));
-    }
-
-    /**
-     * Read a BigDecimal property.<p>
-     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.</p>
-     * Note: This method is equivalent to <code>getBigDecimal(name, null)</code>.
-     * @param name Property
-     * @return Java <code>BigInteger</code>
-     * @throws IOException &nbsp;
-     * @see JSONObjectWriter#setBigDecimal(String, BigDecimal)
-     */
-    public BigDecimal getBigDecimal(String name) throws IOException {
-        return parseBigDecimal(getString(name), null);
-    }
-
-    /**
-     * Read a BigDecimal property.<p>
-     * Note: Since JSON does not support a native BigDecimal type, this method builds on <i>mapping</i>.</p>
-     * @param name Property
-     * @param decimals Required number of fractional digits or <b>null</b> if unspecified
-     * @return Java <code>BigDecimal</code>
-     * @throws IOException &nbsp;
-     * @see JSONObjectWriter#setBigDecimal(String, BigDecimal, Integer)
-     */
-    public BigDecimal getBigDecimal(String name, Integer decimals) throws IOException {
-        return parseBigDecimal(getString(name), decimals);
     }
 
     /**

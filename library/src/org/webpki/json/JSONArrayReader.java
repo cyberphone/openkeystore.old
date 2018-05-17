@@ -106,12 +106,16 @@ public class JSONArrayReader implements Serializable {
         return JSONObjectReader.parseBigInteger(getString());
     }
 
-    public BigDecimal getBigDecimal() throws IOException {
-        return JSONObjectReader.parseBigDecimal(getString(), null);
+    public BigDecimal getMoney() throws IOException {
+        return JSONObjectReader.parseMoney(getString(), null);
     }
 
-    public BigDecimal getBigDecimal(Integer decimals) throws IOException {
-        return JSONObjectReader.parseBigDecimal(getString(), decimals);
+    public BigDecimal getMoney(Integer decimals) throws IOException {
+        return JSONObjectReader.parseMoney(getString(), decimals);
+    }
+
+    public BigDecimal getBigDecimal() throws IOException {
+        return JSONObjectReader.parseBigDecimal(getString());
     }
 
     public GregorianCalendar getDateTime() throws IOException {

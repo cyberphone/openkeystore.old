@@ -82,12 +82,16 @@ public class JSONArrayWriter implements Serializable {
         return setBigInteger(BigInteger.valueOf(value));
     }
 
-    public JSONArrayWriter setBigDecimal(BigDecimal value) throws IOException {
-        return setString(JSONObjectWriter.bigDecimalToString(value, null));
+    public JSONArrayWriter setMoney(BigDecimal value) throws IOException {
+        return setString(JSONObjectWriter.moneyToString(value, null));
     }
 
-    public JSONArrayWriter setBigDecimal(BigDecimal value, Integer decimals) throws IOException {
-        return setString(JSONObjectWriter.bigDecimalToString(value, decimals));
+    public JSONArrayWriter setMoney(BigDecimal value, Integer decimals) throws IOException {
+        return setString(JSONObjectWriter.moneyToString(value, decimals));
+    }
+
+    public JSONArrayWriter setBigDecimal(BigDecimal value) throws IOException {
+        return setString(JSONObjectWriter.bigDecimalToString(value));
     }
 
     public JSONArrayWriter setBigInteger(BigInteger value) throws IOException {

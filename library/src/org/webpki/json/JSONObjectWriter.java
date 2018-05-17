@@ -241,8 +241,8 @@ public class JSONObjectWriter implements Serializable {
         return setString(name, value.toString());
     }
 
-    static String bigDecimalToString(BigDecimal value, Integer decimals) {
-        return (decimals == null ? value : value.setScale(decimals)).toPlainString();
+    static String bigDecimalToString(BigDecimal value) {
+        return value.toString().replace('E', 'e');
     }
 
     /**
@@ -256,24 +256,44 @@ public class JSONObjectWriter implements Serializable {
      * @param value Value
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
-     * @see #setBigDecimal(String, BigDecimal, Integer)
      */
     public JSONObjectWriter setBigDecimal(String name, BigDecimal value) throws IOException {
-        return setString(name, bigDecimalToString(value, null));
+        return setString(name, bigDecimalToString(value));
+    }
+
+    static String moneyToString(BigDecimal value, Integer decimals) {
+        return (decimals == null ? value : value.setScale(decimals)).toPlainString();
     }
 
     /**
-     * Set a <code>BigDecimal</code> property.<p>
-     * Note: this is a <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p>
+     * Set a <code>Money</code> property.<p>
+     * Note: this is a <i>mapped</i> type since there is no <code>Money</code> type in JSON.</p><p>
+     * Sample:
+     * <pre>
+     *    "amount": "568790.25"
+     * </pre>
+     * @param name Property
+     * @param value Value
+     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
+     * @see #setMoney(String, BigDecimal, Integer)
+     */
+    public JSONObjectWriter setMoney(String name, BigDecimal value) throws IOException {
+        return setString(name, moneyToString(value, null));
+    }
+
+    /**
+     * Set a <code>Money</code> property.<p>
+     * Note: this is a <i>mapped</i> type since there is no <code>Money</code> type in JSON.</p>
      * @param name Property
      * @param value Value
      * @param decimals Number of fractional digits
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
-     * @see #setBigDecimal(String, BigDecimal)
+     * @see #setMoney(String, BigDecimal)
      */
-    public JSONObjectWriter setBigDecimal(String name, BigDecimal value, Integer decimals) throws IOException {
-        return setString(name, bigDecimalToString(value, decimals));
+    public JSONObjectWriter setMoney(String name, BigDecimal value, Integer decimals) throws IOException {
+        return setString(name, moneyToString(value, decimals));
     }
 
     /**
