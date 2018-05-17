@@ -250,7 +250,7 @@ public class JSONObjectWriter implements Serializable {
      * Note: this is a <i>mapped</i> type since there is no <code>BigDecimal</code> type in JSON.</p><p>
      * Sample:
      * <pre>
-     *    "amount": "568790.25"
+     *    "big": "56.67e+450"
      * </pre>
      * @param name Property
      * @param value Value
