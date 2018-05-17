@@ -2469,6 +2469,13 @@ public class JSONTest {
         assertTrue("UTC", new JSONObjectWriter().setDateTime("name", gc, true).toString().contains("\"" + dateTimeUtc + "\""));
     }
 
+    void dateTimeFractions(String fractionalSeconds, int milliSeconds) throws IOException {
+        GregorianCalendar dateTime = JSONParser.parse("{\"date\":" +
+                "\"2009-12-24T13:45:23." + fractionalSeconds + "Z\"}")
+                .getDateTime("date");
+        assertTrue("Fraction", dateTime.get(GregorianCalendar.MILLISECOND) == milliSeconds);
+    }
+
     void dateTimeTest() throws IOException {
         GregorianCalendar dateTime = new GregorianCalendar();
         dateTime.setTimeInMillis((dateTime.getTimeInMillis() / 1000) * 1000);
@@ -2487,6 +2494,13 @@ public class JSONTest {
         dateTimeTextual("2009-12-24T05:45:23-08:30", "2009-12-24T14:15:23Z");
         dateTimeTextual("2009-12-24T05:45:23+08:09", "2009-12-23T21:36:23Z");
         dateTimeTextual("2009-12-24T05:45:23-08:09", "2009-12-24T13:54:23Z");
+        dateTimeFractions("001", 1);
+        dateTimeFractions("0027", 2);
+        dateTimeFractions("01", 10);
+        dateTimeFractions("1", 100);
+        dateTimeFractions("100", 100);
+        dateTimeFractions("12", 120);
+        dateTimeFractions("15679223", 156);
     }
 
     void bigIntegerValues(BigInteger value) throws IOException {

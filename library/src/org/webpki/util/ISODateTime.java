@@ -35,13 +35,13 @@ public class ISODateTime {
     private ISODateTime() {}  // No instantiation please
 
     static final Pattern DATE_PATTERN =
-            Pattern.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)");
+            Pattern.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(\\.\\d{1,9})?([+-]\\d{2}:\\d{2}|Z)");
 
 
     /**
      * Parse an ISO formatted dateTime string.<p>
      * <i>Always:</i> <code>yyyy-mm-ddThh:mm:ss</code><br>
-     * <i>Optionally:</i> a '.' followed by 1-3 digits giving millisecond<br>
+     * <i>Optionally:</i> a '.' followed by 1-9 digits holding fractions of a second<br>
      * <i>Finally:</i> 'Z' for UTC or an UTC time-zone difference expressed as <code>+hh:mm</code> or <code>-hh:mm</code></p>
      *
      * @param dateTime String to be parsed
@@ -89,7 +89,12 @@ public class ISODateTime {
         }
         if (milliSeconds.length() > 0) {
             // Milliseconds.
-            gc.set(GregorianCalendar.MILLISECOND, Integer.parseInt(milliSeconds.substring(1)));
+            milliSeconds = milliSeconds.substring(1, milliSeconds.length() > 4 ? 4 : milliSeconds.length());
+            int fraction = Integer.parseInt(milliSeconds) * 100;
+            for (int q = 1; q < milliSeconds.length(); q++) {
+                fraction /= 10;
+            }
+            gc.set(GregorianCalendar.MILLISECOND, fraction);
         }
         return gc;
     }
