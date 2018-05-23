@@ -54,14 +54,14 @@ public class JavaScriptSignatureServlet extends HttpServlet {
                 response,
                 "<table>"
                         + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Signed JavaScript Object<br>&nbsp;</td></tr>"
-                        + "<tr><td align=\"left\">Received Message:</td></tr>"
-                        + "<tr><td align=\"left\"><pre>"
+                        + "<tr><td align=\"left\">"
                         + HTML.fancyBox(
                                 "verify",
                                 new String(
                                         new JSONObjectWriter(parsed_json)
                                                 .serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE),
-                                        "UTF-8")) + "</pre></td></tr>"
+                                        "UTF-8").replace("\n", "<br>").replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;"))
+                        + "</td></tr>"
                         + "</table>");
     }
 

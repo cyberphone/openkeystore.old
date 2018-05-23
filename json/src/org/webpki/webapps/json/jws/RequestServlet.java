@@ -61,14 +61,11 @@ public class RequestServlet extends HttpServlet {
         + "<tr><td align=\"left\">"
         + HTML.newLines2HTML(doc.getResult())
         + "</td></tr>"
-        + "<tr><td align=\"left\">Received Message:</td></tr>"
+        + "<tr><td align=\"left\">Signed JSON Object:</td></tr>"
         + "<tr><td align=\"left\">"
-        + HTML.fancyBox(
-                "verify",
-                new String(
-                        new JSONObjectWriter(parsed_json)
-                                .serializeToBytes(JSONOutputFormats.PRETTY_HTML),
-                        "UTF-8")) + "</td></tr>" + "</table>");
+        + HTML.fancyBox("verify", parsed_json.serializeToString(JSONOutputFormats.PRETTY_HTML))
+        + "</td></tr>"
+        + "</table>");
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)

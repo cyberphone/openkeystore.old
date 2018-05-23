@@ -120,7 +120,7 @@ public class HTML {
         s.append(
                 "><div style=\"cursor:pointer;padding:2pt 0 0 0;position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible;width:100pt;"
         + "height:47pt;border-width:1px;border-style:solid;border-color:black;box-shadow:3pt 3pt 3pt #D0D0D0\""
-        + " onclick=\"document.location.href='http://webpki.org'\" title=\"Home of WebPKI.org\">")
+        + " onclick=\"document.location.href='https://github.com/cyberphone'\" title=\"Home of WebPKI.org\">")
                 .append(JWSService.logotype)
                 .append("</div><table cellapdding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\">")
                 .append(box).append("</table></body></html>");
@@ -198,7 +198,7 @@ public class HTML {
         + request.getRequestURL().toString()
         + "\">"
         + "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Testing JSON Signatures<br>&nbsp;</td></tr>"
-        + "<tr><td align=\"left\">Paste a JSON signature in the text box or try with the default:</td></tr>"
+        + "<tr><td align=\"left\">Paste a signed JSON object in the text box or try with the default:</td></tr>"
         + "<tr><td align=\"left\">"
         + fancyText(20, encode(signature))
         + "</td></tr>"
