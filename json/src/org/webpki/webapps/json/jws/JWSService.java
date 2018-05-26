@@ -19,8 +19,6 @@ package org.webpki.webapps.json.jws;
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.security.KeyStore;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,9 +40,9 @@ public class JWSService extends InitPropertyReader implements
 
     static String key_password;
 
-    static KeyStore clientkey_rsa;
+    static AsymSignatureHelper clientkey_rsa;
 
-    static KeyStore clientkey_ec;
+    static AsymSignatureHelper clientkey_ec;
 
     static String logotype;
     
@@ -93,12 +91,12 @@ public class JWSService extends InitPropertyReader implements
             CustomCryptoProvider
                     .forcedLoad(getPropertyBoolean("bouncycastle_first"));
             key_password = getPropertyString("key_password");
-            clientkey_rsa = KeyStoreReader.loadKeyStore(
+            clientkey_rsa = new AsymSignatureHelper(KeyStoreReader.loadKeyStore(
                     getResource(getPropertyString("clientkey_rsa")),
-                    key_password);
-            clientkey_ec = KeyStoreReader.loadKeyStore(
+                    key_password));
+            clientkey_ec = new AsymSignatureHelper(KeyStoreReader.loadKeyStore(
                     getResource(getPropertyString("clientkey_ec")),
-                    key_password);
+                    key_password));
 
             // //////////////////////////////////////////////////////////////////////////////////////////
             // Canonicalize or not?

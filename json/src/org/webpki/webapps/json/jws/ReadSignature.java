@@ -28,11 +28,13 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
 
 import org.webpki.crypto.AlgorithmPreferences;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
@@ -41,7 +43,6 @@ import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 
 import org.webpki.json.WebKey;  // from "test" actually
-
 import org.webpki.util.DebugFormatter;
 
 /**
@@ -82,12 +83,14 @@ public class ReadSignature {
         return pre + result.toString();
     }
     
-    void processOneSignature(JSONSignatureDecoder signature) throws IOException {
+    void processOneSignature(JSONSignatureDecoder signature, PublicKey preselectedKey) throws IOException {
         switch (signature.getSignatureType()) {
         case ASYMMETRIC_KEY:
-            PublicKey publicKey = signature.getPublicKey();
-            KeyAlgorithms key_alg = KeyAlgorithms
-                    .getKeyAlgorithm(publicKey);
+            PublicKey publicKey = preselectedKey == null ? signature.getPublicKey() : preselectedKey;
+            if (preselectedKey != null) {
+                signature.verify(new JSONAsymKeyVerifier(preselectedKey));
+            }
+            KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm(publicKey);
             StringBuilder asym_text = new StringBuilder(
                     "Asymmetric key signature validated for:\n")
                     .append(key_alg.isECKey() ? "EC" : "RSA")
@@ -95,47 +98,34 @@ public class ReadSignature {
                     .append(key_alg.getPublicKeySizeInBits())
                     .append(" bits)");
             if (key_alg.isECKey()) {
-                asym_text.append(", Curve=").append(
-                        key_alg.getJceName());
-                ECPoint ec_point = ((ECPublicKey) publicKey)
-                        .getW();
+                asym_text.append(", Curve=").append(key_alg.getJceName());
+                ECPoint ec_point = ((ECPublicKey) publicKey).getW();
                 asym_text
                         .append("\nX: ")
-                        .append(cryptoBinary(ec_point.getAffineX(),
-                                key_alg))
+                        .append(cryptoBinary(ec_point.getAffineX(), key_alg))
                         .append("\nY: ")
-                        .append(cryptoBinary(ec_point.getAffineY(),
-                                key_alg));
+                        .append(cryptoBinary(ec_point.getAffineY(), key_alg));
             } else {
                 asym_text
                         .append("\nModulus: ")
-                        .append(cryptoBinary(
-                                ((RSAPublicKey) publicKey)
-                                        .getModulus(), key_alg))
+                        .append(cryptoBinary(((RSAPublicKey) publicKey).getModulus(), key_alg))
                         .append("\nExponent: ")
-                        .append(cryptoBinary(
-                                ((RSAPublicKey) publicKey)
-                                        .getPublicExponent(),
-                                key_alg));
+                        .append(cryptoBinary(((RSAPublicKey) publicKey).getPublicExponent(), key_alg));
             }
             debugOutput(asym_text.toString());
             break;
 
         case SYMMETRIC_KEY:
-            signature.verify(new JSONSymKeyVerifier(
-                    new GenerateSignature.SymmetricOperations()));
+            signature.verify(new JSONSymKeyVerifier(new GenerateSignature.SymmetricOperations()));
             debugOutput("Symmetric key signature validated for Key ID: "
                     + signature.getKeyId()
                     + "\nValue="
-                    + DebugFormatter
-                            .getHexString(GenerateSignature.SYMMETRIC_KEY));
+                    + DebugFormatter.getHexString(GenerateSignature.SYMMETRIC_KEY));
             break;
 
         default:
             debugOutput("X509 signature validated for:\n"
-                    + new CertificateInfo(
-                            signature.getCertificatePath()[0])
-                            .toString());
+                    + new CertificateInfo(signature.getCertificatePath()[0]).toString());
             break;
         }
     }
@@ -159,23 +149,36 @@ public class ReadSignature {
                         algo = inner.getString(JSONCryptoHelper.ALG_JSON);
                     }
                     options.setAlgorithmPreferences(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+                    boolean asymAlg = true;
                     for (MACAlgorithms macs : MACAlgorithms.values()) {
                         if (algo.equals(macs.getAlgorithmId(AlgorithmPreferences.JOSE_ACCEPT_PREFER))) {
                             options.setRequirePublicKeyInfo(false)
                                    .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
+                            asymAlg = false;
+                            break;
                         }
                     }
-                    if (inner.hasProperty(JSONCryptoHelper.JKU_JSON)) {
-                        options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET);
-                    } else if (inner.hasProperty(JSONCryptoHelper.X5U_JSON)) {
-                        options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
+                    PublicKey preselectedKey = null;
+                    if (asymAlg) {
+                        if (inner.hasProperty(JSONCryptoHelper.JKU_JSON)) {
+                            options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET);
+                        } else if (inner.hasProperty(JSONCryptoHelper.X5U_JSON)) {
+                            options.setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH);
+                        } else if (!inner.hasProperty(JSONCryptoHelper.JWK_JSON) && 
+                                   !inner.hasProperty(JSONCryptoHelper.X5C_JSON)) {
+                            preselectedKey =
+                                    (AsymSignatureAlgorithms.getAlgorithmFromId(algo, 
+                                               AlgorithmPreferences.JOSE_ACCEPT_PREFER).isRsa() ?
+                                            JWSService.clientkey_rsa : JWSService.clientkey_ec).getPublicKey();
+                            options.setRequirePublicKeyInfo(false);
+                        }
                     }
                     if (multi) {
                         for (JSONSignatureDecoder signature : rd.getMultiSignature(options)) {
-                            processOneSignature(signature);
+                            processOneSignature(signature, preselectedKey);
                         }
                     } else {
-                        processOneSignature(rd.getSignature(options));
+                        processOneSignature(rd.getSignature(options), preselectedKey);
                     }
                 } else {
                     recurseObject(rd.getObject(property));

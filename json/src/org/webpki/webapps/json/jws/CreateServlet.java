@@ -34,8 +34,9 @@ import org.webpki.util.Base64URL;
 public class CreateServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    static final String KEY_TYPE  = "keytype";
-    static final String JS_FLAG   = "js";
+    static final String KEY_TYPE     = "keytype";
+    static final String JS_FLAG      = "js";
+    static final String KEY_INLINING = "keyinline";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -63,7 +64,8 @@ public class CreateServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String json_object = getTextArea(request);
         GenerateSignature.ACTION action = GenerateSignature.ACTION.EC;
-        boolean jsFlag = new Boolean(request.getParameter(JS_FLAG));
+        boolean jsFlag = request.getParameter(JS_FLAG) != null;
+        boolean keyInlining = request.getParameter(KEY_INLINING) != null;
         String key_type = request.getParameter(KEY_TYPE);
         for (GenerateSignature.ACTION a : GenerateSignature.ACTION.values()) {
             if (a.toString().equals(key_type)) {
@@ -74,7 +76,7 @@ public class CreateServlet extends HttpServlet {
         try {
             JSONObjectReader reader = JSONParser.parse(json_object);
             JSONObjectWriter writer = new JSONObjectWriter(reader);
-            byte[] signed_json = new GenerateSignature(action)
+            byte[] signed_json = new GenerateSignature(action, keyInlining)
                     .sign(writer);
             RequestDispatcher rd = request
                     .getRequestDispatcher((jsFlag ? "jssignature?" : "request?")

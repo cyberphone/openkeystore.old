@@ -18,11 +18,6 @@ package org.webpki.webapps.json.jws;
 
 import java.io.IOException;
 
-import java.security.KeyStore;
-import java.security.PublicKey;
-
-import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
@@ -55,22 +50,11 @@ public class GenerateSignature {
             (byte) 0x74, (byte) 0x34, (byte) 0x69, (byte) 0x09 };
 
     ACTION action;
+    boolean keyInlining;
 
-    GenerateSignature(ACTION action) {
+    GenerateSignature(ACTION action, boolean keyInlining) {
         this.action = action;
-    }
-
-    static class AsymSignatureHelper extends KeyStoreSigner implements
-            AsymKeySignerInterface {
-        AsymSignatureHelper(KeyStore signer_keystore) throws IOException {
-            super(signer_keystore, null);
-            setKey(KEY_NAME, JWSService.key_password);
-        }
-
-        @Override
-        public PublicKey getPublicKey() throws IOException {
-            return getCertificatePath()[0].getPublicKey();
-        }
+        this.keyInlining = keyInlining;
     }
 
     static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface {
@@ -96,14 +80,12 @@ public class GenerateSignature {
 
     byte[] sign(JSONObjectWriter wr) throws IOException {
         if (action == ACTION.X509) {
-            wr.setSignature(new JSONX509Signer(new AsymSignatureHelper(
-                    JWSService.clientkey_rsa).setExtendedCertPath(true)));
+            wr.setSignature(new JSONX509Signer(JWSService.clientkey_rsa.setExtendedCertPath(true)));
         } else if (action == ACTION.SYM) {
             wr.setSignature(new JSONSymKeySigner(new SymmetricOperations()).setKeyId(KEY_NAME));
         } else {
-            wr.setSignature(new JSONAsymKeySigner(new AsymSignatureHelper(
-                    action == ACTION.RSA ? JWSService.clientkey_rsa
-                            : JWSService.clientkey_ec)));
+            wr.setSignature(new JSONAsymKeySigner(action == ACTION.RSA ? 
+                    JWSService.clientkey_rsa : JWSService.clientkey_ec).setOutputPublicKeyInfo(keyInlining));
         }
         return wr.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
     }

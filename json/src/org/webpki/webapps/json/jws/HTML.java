@@ -59,6 +59,8 @@ public class HTML {
         + ".smalltext {font-size:6pt;font-family:verdana,arial} "
         + "button {font-weight:normal;font-size:8pt;font-family:verdana,arial;padding-top:2px;padding-bottom:2px} "
         + ".headline {font-weight:bolder;font-size:10pt;font-family:arial,verdana} "
+        + ".keytable {border-collapse:collapse} "
+        + ".keytable td {border-style:solid;border-color:#a9a9a9;border-width:0px} "
         + "</style>";
 
     static String encode(String val) {
@@ -280,21 +282,54 @@ public class HTML {
         + "        encoded += BASE64URL_ENCODE[(binarray[i] << 2) & 0x3C];\n"
         + "    }\n"
         + "    return encoded;\n"
-        + "}\n\n");
-        if (jcsMode) {
-            html.append(
-            "JSON.canonicalize = (x) => JSON.stringify(x,(_, x) => {\n" +
-            "  if (x && typeof x === 'object' && !Array.isArray(x)) {\n" +
-            "    const sorted = {}\n" +
-            "    for (let key of Object.getOwnPropertyNames(x).sort()) {\n" +
-            "      sorted[key] = x[key]\n" +
-            "    }\n" +
-            "    return sorted\n" +
-            "  }\n" +
-            "  return x\n" +
-            "});\n\n");
-        }
-        html.append(
+        + "}\n\n"
+        + "//////////////////////////////////////////////////////////////////////////\n"
+        + "// Canonicalizer                                                        //\n"
+        + "//////////////////////////////////////////////////////////////////////////\n" +
+        "var canonicalize = function(object) {\n" +
+        "\n" +
+        "    var buffer = '';\n" +
+        "    serialize(object);\n" +
+        "    return buffer;\n" +
+        "\n" +
+        "    function serialize(object) {\n" +
+        "        if (object !== null && typeof object === 'object') {\n" +
+        "            if (Array.isArray(object)) {\n" +
+        "                buffer += '[';\n" +
+        "                let next = false;\n" +
+        "                // Array - Maintain element order\n" +
+        "                object.forEach((element) => {\n" +
+        "                    if (next) {\n" +
+        "                        buffer += ',';\n" +
+        "                    }\n" +
+        "                    next = true;\n" +
+        "                    // Recursive call\n" +
+        "                    serialize(element);\n" +
+        "                });\n" +
+        "                buffer += ']';\n" +
+        "            } else {\n" +
+        "                buffer += '{';\n" +
+        "                let next = false;\n" +
+        "                // Object - Sort properties before serializing\n" +
+        "                Object.keys(object).sort().forEach((property) => {\n" +
+        "                    if (next) {\n" +
+        "                        buffer += ',';\n" +
+        "                    }\n" +
+        "                    next = true;\n" +
+        "                    // Properties are just strings - Use ES6\n" +
+        "                    buffer += JSON.stringify(property);\n" +
+        "                    buffer += ':';\n" +
+        "                    // Recursive call\n" +
+        "                    serialize(object[property]);\n" +
+        "                });\n" +
+        "                buffer += '}';\n" +
+        "            }\n" +
+        "        } else {\n" +
+        "            // Primitive data type - Use ES6\n" +
+        "            buffer += JSON.stringify(object);\n" +
+        "        }\n" +
+        "    }\n" +
+        "};\n\n" +
         "function convertToUTF8(string) {\n"
         + " var buffer = [];\n"
         + " for (var i = 0; i < string.length; i++) {\n"
@@ -317,7 +352,7 @@ public class HTML {
         + "//////////////////////////////////////////////////////////////////////////\n"
         + "function fancyJSONBox(header, json) {\n"
         + "  return header + ':<br><div style=\"margin-top:3pt;background:#F8F8F8;border-width:1px;border-style:solid;border-color:grey;"
-        + "max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + JSON.stringify(json) + '</div>';\n"
+        + "max-width:800pt;padding:10pt;word-wrap:break-word;box-shadow:3pt 3pt 3pt #D0D0D0\">' + JSON.stringify(json, null, '  ').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\n/g,'<br>').replace(/  /g,'&nbsp;&nbsp;&nbsp;&nbsp;') + '</div>';\n"
         + "}\n\n"
         + "//////////////////////////////////////////////////////////////////////////\n"
         + "// Error message helper                                                 //\n"
@@ -405,8 +440,8 @@ public class HTML {
         + "    return;\n"
         + "  }\n"
         + "  crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5'}, privKey,\n"
-        + "                     convertToUTF8(JSON.")
-        .append(jcsMode ? "canonicalize" : "stringify")
+        + "                     convertToUTF8(")
+        .append(jcsMode ? "canonicalize" : "JSON.stringify")
         .append("(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
@@ -476,30 +511,32 @@ public class HTML {
                         + "  &quot;otherProperties&quot;: [2000, true]\n"
                         + "}")
         + "</td></tr>"
-        + "<tr><td align=\"center\"><table>"
-        + "<tr><td valign=\"middle\" rowspan=\"5\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\""
+        + "<tr><td align=\"center\"><table class=\"keytable\" style=\"margin-top:8pt\">"
+        + "<tr><td valign=\"middle\" rowspan=\"5\">Signing&nbsp;parmeters:&nbsp;</td><td align=\"left\" style=\"padding-left:2px\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.SYM
-        + "\">Symmetric key</td></tr>"
-        + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+        + "\"></td><td colspan=\"3\">Symmetric key</td></tr>"
+        + "<tr><td align=\"center\" style=\"border-width:1px 0 0 1px\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.EC
-        + "\" checked>EC Key (P-256)</td></tr>"
-        + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+        + "\" checked></td><td style=\"border-width:1px 0 0 0\">EC Key (P-256)</td><td rowspan=\"2\" align=\"right\" style=\"border-width:1px 0 1px 0\"><input type=\"checkbox\" name=\""
+        + CreateServlet.KEY_INLINING
+        + "\" value=\"false\"></td><td rowspan=\"2\" style=\"border-width:1px 1px 1px 0\">Inlined public key (JWK)&nbsp;</td></tr>"
+        + "<tr><td align=\"center\" style=\"border-width:0 0 1px 1px\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.RSA
-        + "\">RSA Key (2048)</td></tr>"
-        + "<tr><td align=\"left\"><input type=\"radio\" name=\""
+        + "\"></td><td style=\"border-width:0 0 1px 0\">RSA Key (2048)</td></tr>"
+        + "<tr><td align=\"center\" style=\"padding-left:2px\"><input type=\"radio\" name=\""
         + CreateServlet.KEY_TYPE
         + "\" value=\""
         + GenerateSignature.ACTION.X509
-        + "\">X.509 Certificate/Private key</td></tr>"
-        + "<tr><td align=\"left\"><input type=\"checkbox\" name=\""
+        + "\"></td><td colspan=\"3\">X.509 Certificate/Private key</td></tr>"
+        + "<tr><td align=\"center\" style=\"padding-left:2px\"><input type=\"checkbox\" name=\""
         + CreateServlet.JS_FLAG
-        + "\" value=\"true\">Serialize as JavaScript (but do not verify)</td></tr>"
+        + "\" value=\"true\"></td><td colspan=\"3\">Serialize as JavaScript (but do not verify)</td></tr>"
         + "</table></td></tr>"
         + "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>"
         + "</form></table></td></tr>"));
