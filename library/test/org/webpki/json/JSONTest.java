@@ -2527,7 +2527,6 @@ public class JSONTest {
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getBigDecimal().equals(value));
         or = new JSONObjectWriter();
         or.setBigDecimal("name", value);
-        System.out.println("V=\n" + or);
         assertTrue(JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals(value));
     }
 

@@ -996,6 +996,8 @@ import org.webpki.json.JSONSignatureDecoder;
                 buffer.append(',');
                 if (brokenLines) {
                     newLine();
+                } else {
+                    singleSpace();
                 }
             }
             if (brokenLines) {
