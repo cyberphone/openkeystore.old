@@ -1,9 +1,0 @@
-{
-  "enc": "A256GCM",
-  "alg": "RSA-OAEP-256",
-  "kid": "example.com:r2048",
-  "encrypted_key": "EWL8ggrzGBVS-VOG-TuhyyhHT8Q187KKi-YzsxnHXomNn59wTQiz_awlPbmuha15XG_inX1QVlaVUx9lnN3tAG4CffqD9aWF_2UuFBkmb7LX_SuWeQ3sFwx2xh9eRV6mz7OSptLcrdp6mdGoB-uGEw7wYFbr_iqWVVf06rQ-Hl44YHY95iv84XzCc2-5UyPEi1xmG9xSLCqXTms0-ue-6QJZOSFet7WRZ1OGfnEilEsyDKtluoz4qPmsI-dfZxV3Ju6UhsWmv5IHlilLhq9vMQNd4V4tBIimY77dm_BqbA_GkRVrLAWoYf1pmxqv4FACrQKSVZxGJepHev6LILg_bA",
-  "iv": "MXPPSU4WQq4WrbT1",
-  "tag": "OTCJz6IVmRCQ7sPLWlWesQ",
-  "ciphertext": "xbbACsbpHfx9-5CsCvDAkhqN2iv4AQ"
-}

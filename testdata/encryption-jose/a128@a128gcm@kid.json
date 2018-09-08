@@ -1,8 +1,0 @@
-{
-  "enc": "A128GCM",
-  "alg": "dir",
-  "kid": "a128bitkey",
-  "iv": "PjevacVR8921s6Oz",
-  "tag": "2obn84MDVEjk4LRlCXWKrw",
-  "ciphertext": "Vd4XLDpmlk-iB_3CIHrtorZUDd6fIA"
-}

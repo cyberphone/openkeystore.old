@@ -155,14 +155,6 @@ public class JSONCryptoHelper implements Serializable {
         return _valueLabel;
     }
 
-    // Choose between NORMALIZED or CANONICALIZED
-    static JSONOutputFormats cryptoSerialization = JSONOutputFormats.NORMALIZED;
-
-    public static void _setCanonicalization(boolean canonicalizationFlag) {
-        cryptoSerialization = canonicalizationFlag ? 
-                   JSONOutputFormats.CANONICALIZED : JSONOutputFormats.NORMALIZED;
-    }
-
     /**
      * For building "crit" decoders
      */

@@ -1,6 +1,6 @@
 {
   statement: "Hello Signed World!",
-  otherProperties: [2000,true],
+  otherProperties: [2000, true],
   __cleartext_signature: {
     alg: "RS256",
     jwk: {

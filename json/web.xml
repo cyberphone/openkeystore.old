@@ -34,12 +34,6 @@
         <param-value>@jose_mode@</param-value>
     </context-param>
 
-    <context-param>
-        <description>JCS (Canonicalization) Mode</description>
-        <param-name>jcs_mode</param-name>
-        <param-value>@jcs_mode@</param-value>
-    </context-param>
-
     <listener>
         <listener-class>org.webpki.webapps.json.jws.JWSService</listener-class>
      </listener>

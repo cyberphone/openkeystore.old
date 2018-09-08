@@ -145,7 +145,7 @@ public class JSONSignatureDecoder implements Serializable {
         innerSignatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
         //                                                                                  //
         // 3. Serialize ("JSON.stringify()")                                                //
-        normalizedData = signedData.serializeToBytes(JSONCryptoHelper.cryptoSerialization); //
+        normalizedData = signedData.serializeToBytes(JSONOutputFormats.CANONICALIZED);      //
         //                                                                                  //
         // 4. Restore the signature object                                                  //
         innerSignatureObject.root.properties = savedProperties;                             //

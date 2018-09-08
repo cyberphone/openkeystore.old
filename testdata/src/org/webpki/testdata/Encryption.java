@@ -63,7 +63,6 @@ public class Encryption {
     static String keyId;
     static byte[] dataToBeEncrypted;
     static boolean joseMode;
-    static boolean jcsMode;
     
     public interface LocalDecrypt {
         public byte[] decrypt(JSONObjectReader reader) throws Exception;
@@ -120,7 +119,7 @@ public class Encryption {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 5) {
+        if (args.length != 4) {
             throw new Exception("Wrong number of arguments");
         }
         CustomCryptoProvider.forcedLoad(true);
@@ -128,8 +127,6 @@ public class Encryption {
         baseData = args[1] + File.separator;
         baseEncryption = args[2] + File.separator;
         joseMode = Boolean.valueOf(args[3]);
-        jcsMode = Boolean.valueOf(args[4]);
-        JSONCryptoHelper._setCanonicalization(jcsMode);
         symmetricKeys = new SymmetricKeys(baseKey);
         dataToBeEncrypted = ArrayUtil.readFile(baseData + "datatobeencrypted.txt");
         

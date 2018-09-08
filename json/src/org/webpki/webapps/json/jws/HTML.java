@@ -180,7 +180,7 @@ public class HTML {
         + "/webcrypto\">Create a JWS-CT using WebCrypto</a></td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
         + "<tr><td align=\"center\" colspan=\"2\"><b>JOSE Mode</b>=" +
-        JWSService.joseMode + " <b>JCS Mode</b>=" + JWSService.jcsMode
+        JWSService.joseMode 
         + "</td></tr>"
         + "<tr><td>&nbsp;</td></tr>"
         + "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://cyberphone.github.io/doc/security/jose-jcs.html\">JWS-CT Documentation</a></td></tr>"
@@ -230,7 +230,7 @@ public class HTML {
         return s.toString();
     }
 
-    public static void webCryptoPage(HttpServletResponse response, boolean jcsMode)
+    public static void webCryptoPage(HttpServletResponse response)
             throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
                 "<!DOCTYPE html>\n<html><head><title>WebCrypto/JWS-CT Demo</title><link rel=\"icon\" href=\"webpkiorg.png\" sizes=\"192x192\"><style> "
@@ -440,9 +440,7 @@ public class HTML {
         + "    return;\n"
         + "  }\n"
         + "  crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5'}, privKey,\n"
-        + "                     convertToUTF8(")
-        .append(jcsMode ? "canonicalize" : "JSON.stringify")
-        .append("(jsonObject))).then(function(signature) {\n"
+        + "                     convertToUTF8(canonicalize(jsonObject))).then(function(signature) {\n"
         + "    console.log('Sign with RSASSA-PKCS1-v1_5 - SHA-256: PASS');\n"
         + "    signatureObject."
         + JSONCryptoHelper._getValueLabel()

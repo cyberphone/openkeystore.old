@@ -81,8 +81,8 @@ public class JSONDecryptionDecoder {
             encryptionObject.root.properties.remove(JSONCryptoHelper.TAG_JSON);                          //
             encryptionObject.root.properties.remove(JSONCryptoHelper.CIPHER_TEXT_JSON);                  //
             //                                                                                           //
-            // 3. Serialize ("JSON.stringify()")                                                         //
-            authenticatedData = encryptionObject.serializeToBytes(JSONCryptoHelper.cryptoSerialization); //
+            // 3. Canonicalize                                                                           //
+            authenticatedData = encryptionObject.serializeToBytes(JSONOutputFormats.CANONICALIZED);      //
             //                                                                                           //
             // 4. Restore encryption object property list                                                //
             encryptionObject.root.properties = savedProperties;                                          //

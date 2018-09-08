@@ -50,8 +50,6 @@ public class JWSService extends InitPropertyReader implements
     
     static boolean joseMode;
 
-    static boolean jcsMode;
-
     InputStream getResource(String name) throws IOException {
         InputStream is = this.getClass().getResourceAsStream(name);
         if (is == null) {
@@ -97,11 +95,6 @@ public class JWSService extends InitPropertyReader implements
             clientkey_ec = new AsymSignatureHelper(KeyStoreReader.loadKeyStore(
                     getResource(getPropertyString("clientkey_ec")),
                     key_password));
-
-            // //////////////////////////////////////////////////////////////////////////////////////////
-            // Canonicalize or not?
-            // //////////////////////////////////////////////////////////////////////////////////////////
-            JSONCryptoHelper._setCanonicalization(jcsMode = getPropertyBoolean("jcs_mode"));
 
             // //////////////////////////////////////////////////////////////////////////////////////////
             // JOSE (draft) mode or not?

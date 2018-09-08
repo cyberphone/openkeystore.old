@@ -1,9 +1,0 @@
-{
-  "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
-  "signature": {
-    "alg": "RS256",
-    "val": "A_O0lpjDtusyiS4MRLp27cejAQBxAJp5f3exBbs0IOICMWeo88TIzaTV-zHzqxYFlwmVD2-puF2Cv5B8MnoIxgPzseXtBR6nYsqO108rahfjgi7xfhF7YOzBG9o_X-VIHQ5--eig8B5-Flq7-qMhpKW3HZijrGmuopF1gcKHy21xM1Kf-TkHlx0Ul83dFPfuKNPG6HyPP1sA4Q5XmfjMb_f44mQbov6GYEA1tB6J95P9UrklU5e6JllOHjIjMbHMWTE2_E79b9P5kB_vslhIpfDqLYH5_tvr1wf1UhaSu_t12E4YdERrDK1t_V8mRJWPbqKh9qwAASngMMv9sgM5Mg"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "enc": "A128CBC-HS256",
-  "alg": "dir",
-  "kid": "a256bitkey",
-  "iv": "ffdr-ppE29wgqYsr8kzDKA",
-  "tag": "7x55-GjvKr5zxBBbDbmXEw",
-  "ciphertext": "eo7jb7xWRzC6VSNu_C-C9cLO3GSQucXaIv39hw-VTXU"
-}

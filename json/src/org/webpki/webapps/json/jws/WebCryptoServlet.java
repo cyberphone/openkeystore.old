@@ -29,6 +29,6 @@ public class WebCryptoServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        HTML.webCryptoPage(response, JWSService.jcsMode);
+        HTML.webCryptoPage(response);
     }
 }

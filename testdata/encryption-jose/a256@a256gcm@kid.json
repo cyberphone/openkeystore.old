@@ -1,8 +1,0 @@
-{
-  "enc": "A256GCM",
-  "alg": "dir",
-  "kid": "a256bitkey",
-  "iv": "764BCBnN8yMNu1tT",
-  "tag": "6miH9pSBzQ-0nImMsvHmyQ",
-  "ciphertext": "VZ3Zl0-vuFkZxCGJ_w5Q_SOVJTBVSw"
-}

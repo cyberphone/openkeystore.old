@@ -1,9 +1,0 @@
-{
-  "now": "2018-04-16T11:23:06Z",
-  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
-  "numbers": [1e+30,4.5,6],
-  "signature": {
-    "alg": "HS256",
-    "val": "8nP6Fs30zHwZs4QO-fvpZ9HvchBF8OH-AGLV4mOHZLk"
-  }
-}
