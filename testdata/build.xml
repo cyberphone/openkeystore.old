@@ -10,7 +10,7 @@
   <condition property="joseFile" value="-jose" else="">
 	  <isset property="jose"/>
   </condition>
-  <property name="signatureBase" location="jcs-signatures${joseFile}"/>
+  <property name="signatureBase" location="signatures${joseFile}"/>
   <property name="encryptionBase" location="encryption${joseFile}"/>
   <property name="normalizationBase" location="normalization"/>
 

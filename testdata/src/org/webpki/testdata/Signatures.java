@@ -287,7 +287,7 @@ public class Signatures {
 
     static String getDataToSign() throws Exception {
         return new String(ArrayUtil.readFile(baseData +
-                                             "jcs-datatobesigned" + 
+                                             "datatobesigned" + 
                                              (joseMode ? "-jose" : "") +
                                              ".json"), 
                           "UTF-8").replace("\r", "");
