@@ -655,7 +655,7 @@
     	<sysproperty key="org.webpki.sks.ws.client.url" value="${sksws.url}"/>
     	<sysproperty key="json.keys" value="${testdata_dir}/keys"/>
     	<sysproperty key="json.encryption" value="${testdata_dir}/encryption"/>
-    	<sysproperty key="json.signatures" value="${testdata_dir}/jcs-signatures"/>
+    	<sysproperty key="json.signatures" value="${testdata_dir}/signatures"/>
       <formatter type="plain" usefile="false"/>
       <classpath refid="junit.classpath"/>
     </junit>

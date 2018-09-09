@@ -2,7 +2,7 @@
   "enc": "A128CBC-HS256",
   "alg": "dir",
   "kid": "a256bitkey",
-  "iv": "KlbUwIkWKOkZ5fN9uFtEjw",
-  "tag": "N4scztLbNSLsBGCFi_t4OQ",
-  "ciphertext": "g-mC8qE2Ah_lI8rdJeqs1sI_mmIda-exBcE0VEYiQUo"
+  "iv": "T5dPnZ8RpodaVHfGYJpVng",
+  "tag": "CfQipuxPqQOchicRpywOZw",
+  "ciphertext": "tr78QI-hd8_2QriAb6BIWY3eu0_Qgvubnm3_oR0o4CI"
 }

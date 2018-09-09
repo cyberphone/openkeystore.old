@@ -10,16 +10,16 @@
   "epk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "Wcwhj89NzVFg5KFRc7ue2BwaRjNzX-fBpXFrBkoEKxM",
-    "y": "jFb-fB0yMmsxqS_hvhzhKJxNoieSG4GqnzJ0Dexcfnw"
+    "x": "UpvgXp4nbrDQcIlosJ4Lg77BeYITh4LzU8WpiOVRjA0",
+    "y": "jm4-px4TnVV5oOkjvraAR1MTrif9QbBXmCNqEWK_w04"
   },
-  "encrypted_key": "o36Ni79Q17naDGp7s_freBX2wRA0qRLQ_phJWXYs5tZGHCh4h8tiVA",
+  "encrypted_key": "oOm_tnRIPI--VpAYJvCGNfiCEq_fOj47auss-kM1tiRM2cM7EXQt0g",
   "otherExt": "something",
   "https://example.com/extension": {
     "life-is-great": true
   },
-  "crit": ["otherExt","https://example.com/extension"],
-  "iv": "F8nKpoWaoLL-EX_n",
-  "tag": "10gnkZhV9StOvG3XxAIw3w",
-  "ciphertext": "X6AyJSWZvZPAOS4ATWUlG4aw9aY8Sg"
+  "crit": ["otherExt", "https://example.com/extension"],
+  "iv": "JpaScTq1PTgQW-qr",
+  "tag": "tKzCJMySJRPwDLNHBviaGA",
+  "ciphertext": "kVz__Vz7ESzdVwu98aclryQIq3IU_A"
 }

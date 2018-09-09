@@ -2,7 +2,7 @@
   "enc": "A256GCM",
   "alg": "dir",
   "kid": "a256bitkey",
-  "iv": "wBfJFQ-dNpR0ydut",
-  "tag": "SQigJaS5khIKRBK0_SfXYg",
-  "ciphertext": "2UFQkjlGIIVGK7Mc2xZIDtMtLk6pEw"
+  "iv": "LpZzzgnYQpLm6jg_",
+  "tag": "bleNClgc153xjiIoMYIP6Q",
+  "ciphertext": "uuoims-RZGSRmvCyJdE1U_y4OFf3Kg"
 }

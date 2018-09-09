@@ -10,11 +10,11 @@
   "epk": {
     "kty": "EC",
     "crv": "P-384",
-    "x": "pTpRU3G4LDy23rshM6Wd0eevkgO9NLmmvP_DrvdA9cHtobdZA1IfGdBiogd79tXT",
-    "y": "sPPzOxRO-7Jd1WhOU6iBlS2SG9T9ESRkHf-jiq0qp3YfogB-jH9UiBaFy0SViiAi"
+    "x": "0TXMbKdKlEroM_HiESJaKfM39VMSk5L5jCDpi3uIfUDZ54kE6HcSNq0vt-9sIhJW",
+    "y": "Zd5kvOsew9PLM_mlNu0xKtfwWqfF_aScP5D_bija1yKXKCiUMzGmuRVfq3wt7Vxh"
   },
-  "encrypted_key": "FLZqHvKHt_vKqgu3IOqMtcI37eSyk9vjJtvPbzlGv7tSJ7SLYcuVxA",
-  "iv": "zajYv-hvyEQqA4k1mqiBVA",
-  "tag": "PFylJqr5YTQ-NtovZ-08bA",
-  "ciphertext": "ChtGFhfSPpXTUAyAnQmxP6aOvDKvNUZziLdXxmbgHcg"
+  "encrypted_key": "p9bwMFAEtVxpl9cdvSLeOiD7pkdPngYuju6wkkc78e71t0sCunArLw",
+  "iv": "v8UxawS2jcOrQzAdyvT6ow",
+  "tag": "zLee2Z7QV1MTQwFz255KkA",
+  "ciphertext": "9pFEG9d14GuVIk7GcpYf27JhwM28BoRy_BHvFhG45sk"
 }
