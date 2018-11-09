@@ -488,6 +488,19 @@ public class JSONObjectWriter implements Serializable {
         return jsonSetDynamic.set(this);
     }
 
+    /**
+     * Copy arbitrary JSON data from a {@link org.webpki.json.JSONObjectReader}
+     * 
+     * @param newName Property name in the current object
+     * @param sourceName Property name in the source object
+     * @param source The JSON reader object
+     * @return An instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException &nbsp;
+     */
+    public JSONObjectWriter copyElement(String newName, String sourceName, JSONObjectReader source) throws IOException {
+        return setProperty(newName, source.getProperty(sourceName));
+    }
+
     void setCurvePoint(BigInteger value, String name, KeyAlgorithms ec) throws IOException {
         byte[] curvePoint = value.toByteArray();
         if (curvePoint.length > (ec.getPublicKeySizeInBits() + 7) / 8) {
