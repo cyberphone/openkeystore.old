@@ -150,6 +150,9 @@
        <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}privatekey.pem private"/>
     </antcall>
     <antcall target="_createpem">
+       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}publickey.pem public"/>
+    </antcall>
+    <antcall target="_createpem">
        <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certificate-key.pem private certificate"/>
     </antcall>
    </target>
