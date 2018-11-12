@@ -2708,7 +2708,7 @@ public class JSONTest {
         assertTrue("JS", json.equals("{\n  \"5\": \"five\"\n}"));
         writer = new JSONObjectWriter().setString("trouble", "</script>&");
         json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_JS_NATIVE), "UTF-8");
-        assertTrue("JS", json.equals("{\n  trouble: \"\\u003c/script\\u003e\\u0026\"\n}"));
+        assertTrue("JS", json.equals("{\n  trouble: \"</script>&\"\n}"));
         json = new String(writer.serializeToBytes(JSONOutputFormats.PRETTY_PRINT), "UTF-8");
         assertTrue("JS", json.equals("{\n  \"trouble\": \"</script>&\"\n}\n"));
         json = new String(writer.serializeToBytes(JSONOutputFormats.NORMALIZED), "UTF-8");
