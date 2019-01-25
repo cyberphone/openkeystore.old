@@ -112,12 +112,11 @@ public class ISODateTime {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         sdf.setTimeZone(forceUtc ? TimeZone.getTimeZone("UTC") : dateTime.getTimeZone());
         StringBuilder s = new StringBuilder(sdf.format(dateTime.getTime()));
-        int tzo = forceUtc ? 0 : (dateTime.get(Calendar.ZONE_OFFSET) + dateTime.get(Calendar.DST_OFFSET)) / (60 * 1000);
-
-        if (tzo == 0) {
+         if (forceUtc) {
             s.append('Z');
         } else {
-            if (tzo < 0) {
+           int tzo = (dateTime.get(Calendar.ZONE_OFFSET) + dateTime.get(Calendar.DST_OFFSET)) / (60 * 1000);
+           if (tzo < 0) {
                 tzo = - tzo;
                 s.append('-');
             } else {
