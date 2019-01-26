@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 import java.math.BigDecimal;
-
+import java.util.EnumSet;
 import java.util.Vector;
 import java.util.GregorianCalendar;
 
@@ -444,10 +444,13 @@ public class DOMWriterHelper {
      *
      * @param name  The name of the new element.
      * @param value The value of the new element.
+     * @param format The chosen format
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
-    public void addDateTime(String name, GregorianCalendar value) {
-        addString(name, ISODateTime.formatDateTime(value, false));
+    public void addDateTime(String name, 
+                            GregorianCalendar value,
+                            EnumSet<ISODateTime.DatePatterns> format) {
+        addString(name, ISODateTime.formatDateTime(value, format));
     }
 
 
@@ -612,10 +615,13 @@ public class DOMWriterHelper {
      *
      * @param name  The name of the attribute.
      * @param value The value of the attribute.
+     * @param format The chosen format
      * @see <a href="#current">DOMWriterHelper cursor state</a>
      */
-    public void setDateTimeAttribute(String name, GregorianCalendar value) {
-        setStringAttribute(name, ISODateTime.formatDateTime(value, false));
+    public void setDateTimeAttribute(String name,
+                                     GregorianCalendar value,
+                                     EnumSet<ISODateTime.DatePatterns> format) {
+        setStringAttribute(name, ISODateTime.formatDateTime(value, format));
     }
 
     // TODO: document

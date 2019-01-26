@@ -24,6 +24,7 @@ import java.math.BigInteger;
 
 import java.security.cert.X509Certificate;
 
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -118,8 +119,8 @@ public class JSONArrayReader implements Serializable {
         return JSONObjectReader.parseBigDecimal(getString());
     }
 
-    public GregorianCalendar getDateTime() throws IOException {
-        return ISODateTime.parseDateTime(getString());
+    public GregorianCalendar getDateTime(EnumSet<ISODateTime.DatePatterns> format) throws IOException {
+        return ISODateTime.parseDateTime(getString(), format);
     }
 
     public byte[] getBinary() throws IOException {

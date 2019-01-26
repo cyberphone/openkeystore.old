@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -57,6 +58,7 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.ISODateTime;
 import org.webpki.util.MIMETypedObject;
 
 public class ServerState implements Serializable {
@@ -1089,6 +1091,8 @@ public class ServerState implements Serializable {
     ECPublicKey clientEphemeralKey;
 
     PublicKey keyManagementKey;
+    
+    String serverTime;
 
     byte[] savedCloseNonce;
 
@@ -1196,6 +1200,7 @@ public class ServerState implements Serializable {
     public ServerState(ServerCryptoInterface serverCryptoInterface, String issuerUri) {
         this.serverCryptoInterface = serverCryptoInterface;
         this.issuerUri = issuerUri;
+        serverTime = ISODateTime.formatDateTime(new GregorianCalendar(), ISODateTime.UTC_NO_SUBSECONDS);
     }
 
     ServerState addQuery(String typeUri, CAPABILITY what) throws IOException {
@@ -1257,6 +1262,9 @@ public class ServerState implements Serializable {
             clientSessionId = provisioningInitializationResponse.clientSessionId;
             deviceCertificatePath = provisioningInitializationResponse.deviceCertificatePath;
             clientEphemeralKey = provisioningInitializationResponse.clientEphemeralKey;
+            if (!serverTime.equals(provisioningInitializationResponse.serverTime)) {
+                bad("Received \"" + KeyGen2Constants.SERVER_TIME_JSON + "\" mismatch");
+            }
 
             MacGenerator kdf = new MacGenerator();
             kdf.addString(clientSessionId);

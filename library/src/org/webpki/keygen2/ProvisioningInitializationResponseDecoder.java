@@ -17,6 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.util.GregorianCalendar;
 
 import java.security.cert.X509Certificate;
@@ -29,6 +30,8 @@ import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator {
@@ -39,7 +42,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
 
     String clientSessionId;
 
-    GregorianCalendar serverTime;
+    String serverTime;
 
     GregorianCalendar clientTime;
 
@@ -68,9 +71,9 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator 
 
         clientSessionId = getID(rd, CLIENT_SESSION_ID_JSON);
 
-        serverTime = rd.getDateTime(SERVER_TIME_JSON);
+        serverTime = rd.getString(SERVER_TIME_JSON);
 
-        clientTime = rd.getDateTime(CLIENT_TIME_JSON);
+        clientTime = rd.getDateTime(CLIENT_TIME_JSON, ISODateTime.LOCAL_NO_SUBSECONDS);
 
         serverCertificateFingerprint = rd.getBinaryConditional(SERVER_CERT_FP_JSON);
 

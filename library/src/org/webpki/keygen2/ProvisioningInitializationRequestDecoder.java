@@ -148,7 +148,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder {
 
         serverTimeVerbatim = rd.getString(SERVER_TIME_JSON);
 
-        serverTime = ISODateTime.parseDateTime(serverTimeVerbatim);
+        serverTime = ISODateTime.parseDateTime(serverTimeVerbatim, ISODateTime.UTC_NO_SUBSECONDS);
 
         sessionKeyLimit = (short) rd.getInt(SESSION_KEY_LIMIT_JSON);
 

@@ -17,18 +17,20 @@
 package org.webpki.webauth;
 
 import java.io.IOException;
+
 import java.security.Provider;
 import java.security.Security;
-import java.util.GregorianCalendar;
 
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.crypto.DemoKeyStore;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
+
 import org.webpki.webauth.AuthenticationRequestDecoder;
 import org.webpki.webauth.AuthenticationRequestEncoder;
 import org.webpki.webauth.AuthenticationResponseDecoder;
@@ -82,7 +84,6 @@ public class AreqEnc {
                 "  -A       full cert path\n" +
                 "  -I       sign request\n" +
                 "  -R       request client-feature\n" +
-                "  -T       set a fixed server time-stamp\n" +
                 "  -t       set a fixed client time-stamp\n" +
                 "  -i       set a fixed reference ID\n" +
                 "  -f       set certificate filters\n" +
@@ -96,7 +97,6 @@ public class AreqEnc {
         boolean lang = false;
         String authfile = null;
         boolean fixed_client_time = false;
-        boolean fixed_server_time = false;
         boolean certpath = false;
         boolean rsasha1DS = false;
         boolean request_client_feature = false;
@@ -113,7 +113,6 @@ public class AreqEnc {
                 }
                 authfile = args[i];
             } else if (args[i].equals("-R")) request_client_feature = true;
-            else if (args[i].equals("-T")) fixed_server_time = true;
             else if (args[i].equals("-t")) fixed_client_time = true;
             else if (args[i].equals("-i")) iddata = true;
             else if (args[i].equals("-f")) certflt = true;
@@ -147,10 +146,6 @@ public class AreqEnc {
 
         if (lang) {
             areqenc.setPreferredLanguages(new String[]{"eng"});
-        }
-
-        if (fixed_server_time) {
-            areqenc.setServerTime(new GregorianCalendar(2005, 3, 10, 9, 30, 0));
         }
 
         if (request_client_feature) {

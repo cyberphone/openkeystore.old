@@ -448,7 +448,7 @@ public final class NumberToJSON {
         throw new IllegalArgumentException("" + value);
     }
 
-    /**
+    /*
      * Compute the high digits of m * 5^p / 10^q = m * 5^(p - q) / 2^q = m * 5^i
      * / 2^j, with q chosen such that m * 5^i / 2^j has sufficiently many
      * decimal digits to represent the original floating point number.
@@ -473,7 +473,7 @@ public final class NumberToJSON {
                 + bits03 + bits12) >>> 21) + (bits13 << 10)) >>> actualShift;
     }
 
-    /**
+    /*
      * Compute the high digits of m / 5^i / 2^j such that the result is accurate
      * to at least 9 decimal digits. i and j are already chosen appropriately.
      */

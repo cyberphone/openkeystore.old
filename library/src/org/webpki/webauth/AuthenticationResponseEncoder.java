@@ -32,6 +32,8 @@ import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.webauth.WebAuthConstants.*;
 
 
@@ -39,7 +41,7 @@ public class AuthenticationResponseEncoder extends JSONEncoder {
 
     private static final long serialVersionUID = 1L;
 
-    private String serverTime;
+    private GregorianCalendar serverTime;
 
     private GregorianCalendar clientTime;
 
@@ -86,9 +88,9 @@ public class AuthenticationResponseEncoder extends JSONEncoder {
     protected void writeJSONData(JSONObjectWriter wr) throws IOException {
         wr.setString(ID_JSON, id);
 
-        wr.setString(SERVER_TIME_JSON, serverTime);
+        wr.setDateTime(SERVER_TIME_JSON, serverTime, ISODateTime.UTC_NO_SUBSECONDS);
 
-        wr.setDateTime(CLIENT_TIME_JSON, clientTime, false);  // Client local time
+        wr.setDateTime(CLIENT_TIME_JSON, clientTime, ISODateTime.LOCAL_NO_SUBSECONDS);
 
         wr.setString(REQUEST_URL_JSON, requestUrl);
 

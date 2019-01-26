@@ -32,6 +32,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECPoint;
 
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -335,13 +336,15 @@ public class JSONObjectWriter implements Serializable {
      * </pre>
      * @param name Property
      * @param dateTime Date/time value
-     * @param forceUtc <code>true</code> for UTC, <code>false</code> for local time
+     * @param format Requited output format
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
-     * @see org.webpki.util.ISODateTime#formatDateTime(GregorianCalendar, boolean)
+     * @see org.webpki.util.ISODateTime#formatDateTime(GregorianCalendar, EnumSet)
      */
-    public JSONObjectWriter setDateTime(String name, GregorianCalendar dateTime, boolean forceUtc) throws IOException {
-        return setString(name, ISODateTime.formatDateTime(dateTime, forceUtc));
+    public JSONObjectWriter setDateTime(String name, 
+                                        GregorianCalendar dateTime,
+                                        EnumSet<ISODateTime.DatePatterns> format) throws IOException {
+        return setString(name, ISODateTime.formatDateTime(dateTime, format));
     }
 
     /**

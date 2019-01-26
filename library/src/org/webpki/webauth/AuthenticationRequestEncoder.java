@@ -63,11 +63,13 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
 
     Vector<String> requestedClientFeatures = new Vector<String>();
 
-    GregorianCalendar serverTime;
+    String serverTime;
 
     public AuthenticationRequestEncoder(String submitUrl, String optionalAbortUrl) {
         this.submitUrl = submitUrl;
         this.abortUrl = optionalAbortUrl;
+        this.serverTime = 
+                ISODateTime.formatDateTime(new GregorianCalendar(), ISODateTime.UTC_NO_SUBSECONDS);
     }
 
 
@@ -100,12 +102,6 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
     }
 
 
-    public AuthenticationRequestEncoder setServerTime(GregorianCalendar serverTime) {
-        this.serverTime = serverTime;
-        return this;
-    }
-
-
     public AuthenticationRequestEncoder setPreferredLanguages(String[] languageList) {
         this.languageList = languageList;
         return this;
@@ -117,33 +113,33 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
         return this;
     }
 
-    public void checkRequestResponseIntegrity(AuthenticationResponseDecoder authenicationResponse,
+    public void checkRequestResponseIntegrity(AuthenticationResponseDecoder authenticationResponse,
                                               byte[] expectedServerCertificateFingerprint) throws IOException {
         if (expectedServerCertificateFingerprint != null &&
-                (authenicationResponse.serverCertificateFingerprint == null ||
-                        !ArrayUtil.compare(authenicationResponse.serverCertificateFingerprint,
+                (authenticationResponse.serverCertificateFingerprint == null ||
+                        !ArrayUtil.compare(authenticationResponse.serverCertificateFingerprint,
                                 expectedServerCertificateFingerprint))) {
             bad("Server certificate fingerprint");
         }
-        if (!id.equals(authenicationResponse.id)) {
+        if (!id.equals(authenticationResponse.id)) {
             bad("ID attributes");
         }
-        if (!ISODateTime.formatDateTime(serverTime, true).equals(ISODateTime.formatDateTime(authenicationResponse.serverTime, true))) {
+        if (!serverTime.equals(authenticationResponse.serverTime)) {
             bad("ServerTime attribute");
         }
         boolean sigAlgFound = false;
         for (AsymSignatureAlgorithms sigAlg : signatureAlgorithms) {
-            if (sigAlg == authenicationResponse.signatureAlgorithm) {
+            if (sigAlg == authenticationResponse.signatureAlgorithm) {
                 sigAlgFound = true;
                 break;
             }
         }
         if (!sigAlgFound) {
-            bad("Wrong signature algorithm: " + authenicationResponse.signatureAlgorithm);
+            bad("Wrong signature algorithm: " + authenticationResponse.signatureAlgorithm);
         }
-        if (extendedCertPath && certificateFilters.size() > 0 && authenicationResponse.certificatePath != null) {
+        if (extendedCertPath && certificateFilters.size() > 0 && authenticationResponse.certificatePath != null) {
             for (CertificateFilter cf : certificateFilters) {
-                if (cf.matches(authenicationResponse.certificatePath)) {
+                if (cf.matches(authenticationResponse.certificatePath)) {
                     return;
                 }
             }
@@ -162,10 +158,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder {
         }
         wr.setString(ID_JSON, id);
 
-        if (serverTime == null) {
-            serverTime = new GregorianCalendar();
-        }
-        wr.setDateTime(SERVER_TIME_JSON, serverTime, true);  // Server UTC
+        wr.setString(SERVER_TIME_JSON, serverTime);
 
         wr.setString(SUBMIT_URL_JSON, submitUrl);
 

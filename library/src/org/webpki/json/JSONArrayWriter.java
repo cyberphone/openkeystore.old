@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 
 import java.security.cert.X509Certificate;
 
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -110,8 +111,8 @@ public class JSONArrayWriter implements Serializable {
         return add(JSONTypes.NULL, "null");
     }
 
-    public JSONArrayWriter setDateTime(GregorianCalendar dateTime, boolean forceUtc) throws IOException {
-        return setString(ISODateTime.formatDateTime(dateTime, forceUtc));
+    public JSONArrayWriter setDateTime(GregorianCalendar dateTime, EnumSet<ISODateTime.DatePatterns> format) throws IOException {
+        return setString(ISODateTime.formatDateTime(dateTime, format));
     }
 
     public JSONArrayWriter setBinary(byte[] value) throws IOException {

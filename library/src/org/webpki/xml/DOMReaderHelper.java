@@ -18,10 +18,10 @@ package org.webpki.xml;
 
 import java.io.IOException;
 
+import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.SimpleTimeZone;
+
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
@@ -436,17 +436,19 @@ public class DOMReaderHelper {
     }
 
 
-    public GregorianCalendar getDateTime() throws NoSuchElementException, IOException {
-        return ISODateTime.parseDateTime(getString());
+    public GregorianCalendar getDateTime(EnumSet<ISODateTime.DatePatterns> format) throws NoSuchElementException, IOException {
+        return ISODateTime.parseDateTime(getString(), format);
     }
 
-    public GregorianCalendar getDateTime(String name) throws NoSuchElementException, IOException {
-        return ISODateTime.parseDateTime(getString(name));
+    public GregorianCalendar getDateTime(String name,
+                                         EnumSet<ISODateTime.DatePatterns> format) throws NoSuchElementException, IOException {
+        return ISODateTime.parseDateTime(getString(name), format);
     }
 
-    public GregorianCalendar getDateTimeConditional(String name) throws NoSuchElementException, IOException {
+    public GregorianCalendar getDateTimeConditional(String name,
+                                                    EnumSet<ISODateTime.DatePatterns> format) throws NoSuchElementException, IOException {
         String s = getStringConditional(name);
-        return s != null ? ISODateTime.parseDateTime(s) : null;
+        return s != null ? ISODateTime.parseDateTime(s, format) : null;
     }
 
     public static GregorianCalendar parseDate(String s) throws IOException {

@@ -34,6 +34,8 @@ import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSymKeySigner;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
@@ -102,7 +104,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder {
 
         wr.setString(SERVER_TIME_JSON, serverTimeVerbatim);
 
-        wr.setDateTime(CLIENT_TIME_JSON, clientTime, false); // Client keeps local time
+        wr.setDateTime(CLIENT_TIME_JSON, clientTime, ISODateTime.LOCAL_NO_SUBSECONDS);
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

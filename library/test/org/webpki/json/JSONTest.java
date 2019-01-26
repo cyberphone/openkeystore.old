@@ -83,6 +83,7 @@ import org.webpki.json.JSONX509Verifier;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
+import org.webpki.util.ISODateTime;
 
 /**
  * JSON JUnit suite
@@ -2464,15 +2465,15 @@ public class JSONTest {
     }
     
     void dateTimeTextual(String dateTime, String dateTimeUtc) throws IOException {
-        GregorianCalendar gc = JSONParser.parse("{\"name\":\"" + dateTime + "\"}").getDateTime("name");
-        assertTrue("Local", new JSONObjectWriter().setDateTime("name", gc, false).toString().contains("\"" + dateTime + "\""));
-        assertTrue("UTC", new JSONObjectWriter().setDateTime("name", gc, true).toString().contains("\"" + dateTimeUtc + "\""));
+        GregorianCalendar gc = JSONParser.parse("{\"name\":\"" + dateTime + "\"}").getDateTime("name", ISODateTime.COMPLETE);
+        assertTrue("Local", new JSONObjectWriter().setDateTime("name", gc, ISODateTime.LOCAL_NO_SUBSECONDS).toString().contains("\"" + dateTime + "\""));
+        assertTrue("UTC", new JSONObjectWriter().setDateTime("name", gc, ISODateTime.UTC_NO_SUBSECONDS).toString().contains("\"" + dateTimeUtc + "\""));
     }
 
     void dateTimeFractions(String fractionalSeconds, int milliSeconds) throws IOException {
         GregorianCalendar dateTime = JSONParser.parse("{\"date\":" +
                 "\"2009-12-24T13:45:23." + fractionalSeconds + "Z\"}")
-                .getDateTime("date");
+                .getDateTime("date", ISODateTime.COMPLETE);
         assertTrue("Fraction", dateTime.get(GregorianCalendar.MILLISECOND) == milliSeconds);
     }
 
@@ -2480,12 +2481,12 @@ public class JSONTest {
         GregorianCalendar dateTime = new GregorianCalendar();
         dateTime.setTimeInMillis((dateTime.getTimeInMillis() / 1000) * 1000);
         JSONObjectWriter or = new JSONObjectWriter();
-        or.setArray("name").setDateTime(dateTime, false);
-        GregorianCalendar readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime();
+        or.setArray("name").setDateTime(dateTime, ISODateTime.UTC_NO_SUBSECONDS);
+        GregorianCalendar readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getArray("name").getDateTime(ISODateTime.COMPLETE);
         assertTrue("array", readDateTime.getTimeInMillis() == dateTime.getTimeInMillis());
         or = new JSONObjectWriter();
-        or.setDateTime("name", dateTime, false);
-        readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name");
+        or.setDateTime("name", dateTime, ISODateTime.LOCAL_NO_SUBSECONDS);
+        readDateTime = JSONParser.parse(or.serializeToBytes(JSONOutputFormats.PRETTY_PRINT)).getDateTime("name", ISODateTime.COMPLETE);
         assertTrue("object", readDateTime.getTimeInMillis() == dateTime.getTimeInMillis());
         dateTimeTextual("2009-12-24T05:45:23-08:00", "2009-12-24T13:45:23Z");
         dateTimeTextual("2009-12-24T05:45:23+08:00", "2009-12-23T21:45:23Z");

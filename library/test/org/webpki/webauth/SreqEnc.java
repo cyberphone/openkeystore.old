@@ -38,7 +38,7 @@ public class SreqEnc {
                 .setIssuer(cert.getIssuerX500Principal());
 
         CertificateFilter cf2 = new CertificateFilter()
-                .setFingerPrint(new byte[]{1, 4, 5, 3, 6, 7, 8, 3, 0, 3, 5, 6, 1, 4, 5, 3, 6, 7, 8, 3})
+                .setFingerPrint(HashAlgorithms.SHA256.digest(new byte[]{1, 4, 5, 3, 6, 7, 8, 3, 0, 3, 5, 6, 1, 4, 5, 3, 6, 7, 8, 3}))
                 .setIssuer(new X500Principal("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV"))
                 .setExtendedKeyUsageRules(new String[]{"1.56.245.123"})
                 .setKeyUsageRules(new String[]{"nonRepudiation", "-keyEncipherment"})

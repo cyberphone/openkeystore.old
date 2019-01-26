@@ -19,10 +19,12 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.math.BigInteger;
+
 import java.util.GregorianCalendar;
 
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.util.ISODateTime;
 
 abstract class ServerEncoder extends JSONEncoder {
 
@@ -70,7 +72,7 @@ abstract class ServerEncoder extends JSONEncoder {
 
     void setOptionalDateTime(JSONObjectWriter wr, String name, GregorianCalendar dateTime) throws IOException {
         if (dateTime != null) {
-            wr.setDateTime(name, dateTime, true);  // Server UTC
+            wr.setDateTime(name, dateTime, ISODateTime.UTC_NO_SUBSECONDS);  // Server UTC
         }
     }
 }

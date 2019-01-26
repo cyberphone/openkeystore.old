@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
+import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.GregorianCalendar;
 
@@ -162,17 +163,21 @@ public class DOMAttributeReaderHelper {
         return getBigIntegerConditional(name, null);
     }
 
-    public GregorianCalendar getDateTime(String name) throws NoSuchElementException, IOException {
-        return ISODateTime.parseDateTime(getString(name));
+    public GregorianCalendar getDateTime(String name,
+                                         EnumSet<ISODateTime.DatePatterns> format) throws NoSuchElementException, IOException {
+        return ISODateTime.parseDateTime(getString(name), format);
     }
 
-    public GregorianCalendar getDateTimeConditional(String name, GregorianCalendar defaultValue) throws IOException {
+    public GregorianCalendar getDateTimeConditional(String name,
+                                                    EnumSet<ISODateTime.DatePatterns> format,
+                                                    GregorianCalendar defaultValue) throws IOException {
         String s = getStringConditional(name);
-        return s != null ? ISODateTime.parseDateTime(s) : defaultValue;
+        return s != null ? ISODateTime.parseDateTime(s, format) : defaultValue;
     }
 
-    public GregorianCalendar getDateTimeConditional(String name) throws IOException {
-        return getDateTimeConditional(name, null);
+    public GregorianCalendar getDateTimeConditional(String name,
+                                                    EnumSet<ISODateTime.DatePatterns> format) throws IOException {
+        return getDateTimeConditional(name, format, null);
     }
 
     public long getMoney(String name) throws NoSuchElementException, NumberFormatException {

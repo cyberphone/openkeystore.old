@@ -24,7 +24,6 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
-import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.sks.SecureKeyStore;
@@ -118,10 +117,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
     }
 
 
-    public void setServerTime(GregorianCalendar serverTime) {
-        this.serverTime = serverTime;
-    }
-
     private void scanForUpdatedKeys(JSONObjectWriter wr, KeyManagementKeyUpdateHolder kmk) throws IOException {
         if (!kmk.children.isEmpty()) {
             JSONArrayWriter kmkuArr = wr.setArray(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
@@ -137,8 +132,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
 
     String serverSessionId;
 
-    GregorianCalendar serverTime;
-
     ECPublicKey serverEphemeralKey;
 
     int sessionLifeTime;
@@ -152,10 +145,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder {
         //////////////////////////////////////////////////////////////////////////
         wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
 
-        if (serverTime == null) {
-            serverTime = new GregorianCalendar();
-        }
-        wr.setDateTime(SERVER_TIME_JSON, serverTime, true); // Server is UTC
+        wr.setString(SERVER_TIME_JSON, serverState.serverTime);
 
         wr.setString(SESSION_KEY_ALGORITHM_JSON, serverState.provisioningSessionAlgorithm);
 

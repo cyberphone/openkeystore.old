@@ -27,8 +27,10 @@ import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
 
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 import org.webpki.crypto.AlgorithmPreferences;
@@ -228,13 +230,15 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * Read a JSON dateTime property in ISO format.<p>
      * Note: Since JSON does not support a native dateTime type, this method builds on <i>mapping</i>.</p>
      * @param name Property
+     * @param format Required input format
      * @return Java <code>GregorianCalendar</code>
      * @throws IOException &nbsp;
-     * @see org.webpki.util.ISODateTime#parseDateTime(String)
-     * @see JSONObjectWriter#setDateTime(String, GregorianCalendar, boolean)
+     * @see org.webpki.util.ISODateTime#parseDateTime(String, EnumSet)
+     * @see JSONObjectWriter#setDateTime(String, GregorianCalendar, EnumSet)
      */
-    public GregorianCalendar getDateTime(String name) throws IOException {
-        return ISODateTime.parseDateTime(getString(name));
+    public GregorianCalendar getDateTime(String name, 
+                                         EnumSet<ISODateTime.DatePatterns> format) throws IOException {
+        return ISODateTime.parseDateTime(getString(name), format);
     }
 
     /**

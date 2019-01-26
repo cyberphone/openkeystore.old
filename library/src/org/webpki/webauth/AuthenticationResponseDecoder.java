@@ -32,6 +32,8 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.webauth.WebAuthConstants.*;
 
 
@@ -39,7 +41,7 @@ public class AuthenticationResponseDecoder extends InputValidator {
 
     private static final long serialVersionUID = 1L;
 
-    GregorianCalendar serverTime;
+    String serverTime;
 
     private GregorianCalendar clientTime;
 
@@ -93,9 +95,9 @@ public class AuthenticationResponseDecoder extends InputValidator {
         //////////////////////////////////////////////////////////////////////////
         id = rd.getString(ID_JSON);
 
-        serverTime = rd.getDateTime(SERVER_TIME_JSON);
+        serverTime = rd.getString(SERVER_TIME_JSON);
 
-        clientTime = rd.getDateTime(CLIENT_TIME_JSON);
+        clientTime = rd.getDateTime(CLIENT_TIME_JSON, ISODateTime.LOCAL_NO_SUBSECONDS);
 
         requestUrl = rd.getString(REQUEST_URL_JSON);
 

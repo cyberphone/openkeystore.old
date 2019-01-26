@@ -18,6 +18,7 @@ package org.webpki.webauth;
 
 import java.io.IOException;
 
+import java.util.GregorianCalendar;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
@@ -28,6 +29,8 @@ import org.webpki.crypto.KeyContainerTypes;
 
 import org.webpki.json.JSONObjectReader;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.webauth.WebAuthConstants.*;
 
 
@@ -35,7 +38,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
 
     private static final long serialVersionUID = 1L;
 
-    String serverTime;
+    GregorianCalendar serverTime;
 
     String id;
 
@@ -77,7 +80,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
     }
 
 
-    public String getServerTime() {
+    public GregorianCalendar getServerTime() {
         return serverTime;
     }
 
@@ -122,7 +125,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder {
         /////////////////////////////////////////////////////////////////////////////////////////
         id = InputValidator.getID(rd, ID_JSON);
 
-        serverTime = rd.getString(SERVER_TIME_JSON);
+        serverTime = rd.getDateTime(SERVER_TIME_JSON, ISODateTime.UTC_NO_SUBSECONDS);
 
         submitUrl = rd.getString(SUBMIT_URL_JSON);
 
