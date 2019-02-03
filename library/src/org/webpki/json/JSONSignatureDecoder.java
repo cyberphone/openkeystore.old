@@ -47,7 +47,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureWrapper;
 
 /**
- * Decoder for Cleartext JWS signatures.
+ * Decoder for JSF signatures.
  */
 public class JSONSignatureDecoder implements Serializable {
 
@@ -78,9 +78,9 @@ public class JSONSignatureDecoder implements Serializable {
         this.options = options;
         algorithmString = options.globalSignatureAlgorithm;
         if (algorithmString == null) {
-            algorithmString = innerSignatureObject.getString(JSONCryptoHelper.ALG_JSON);
-        } else if (innerSignatureObject.hasProperty(JSONCryptoHelper.ALG_JSON)) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALG_JSON + "\" not allowed");
+            algorithmString = innerSignatureObject.getString(JSONCryptoHelper.ALGORITHM_JSON);
+        } else if (innerSignatureObject.hasProperty(JSONCryptoHelper.ALGORITHM_JSON)) {
+            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" not allowed");
         }
         keyId = options.getKeyId(innerSignatureObject);
         if (options.requirePublicKeyInfo) {
@@ -106,43 +106,43 @@ public class JSONSignatureDecoder implements Serializable {
 
         // Note: the following section will not execute for array signatures
         if (options.exclusions == null) {
-            if (outerSignatureObject.hasProperty(JSONCryptoHelper.EXCL_JSON)) {
-                throw new IOException("Use of \"" + JSONCryptoHelper.EXCL_JSON +
+            if (outerSignatureObject.hasProperty(JSONCryptoHelper.EXCLUDE_JSON)) {
+                throw new IOException("Use of \"" + JSONCryptoHelper.EXCLUDE_JSON +
                                       "\" must be set in options");
             }
         } else {
             saveExcluded = new LinkedHashMap<String, JSONValue>(signedData.root.properties);
             LinkedHashSet<String> parsedExcludes = 
-                    checkExcluded(outerSignatureObject.getStringArray(JSONCryptoHelper.EXCL_JSON));
+                    checkExcluded(outerSignatureObject.getStringArray(JSONCryptoHelper.EXCLUDE_JSON));
             for (String excluded : parsedExcludes.toArray(new String[0])) {
                 if (!options.exclusions.contains(excluded)) {
-                    throw new IOException("Unexpected \"" + JSONCryptoHelper.EXCL_JSON + 
+                    throw new IOException("Unexpected \"" + JSONCryptoHelper.EXCLUDE_JSON + 
                                           "\" property: " + excluded);
                 }
                 signedData.root.properties.remove(excluded);
             }
             for (String excluded : options.exclusions.toArray(new String[0])) {
                 if (!parsedExcludes.contains(excluded)) {
-                    throw new IOException("Missing \"" + JSONCryptoHelper.EXCL_JSON +
+                    throw new IOException("Missing \"" + JSONCryptoHelper.EXCLUDE_JSON +
                                           "\" property: " + excluded);
                 }
             }
             // Hide the exclude property from the serializer...
-            saveExcludeArray = outerSignatureObject.root.properties.get(JSONCryptoHelper.EXCL_JSON);
-            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCL_JSON, null);
+            saveExcludeArray = outerSignatureObject.root.properties.get(JSONCryptoHelper.EXCLUDE_JSON);
+            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCLUDE_JSON, null);
         }
 
-        signatureValue = innerSignatureObject.getBinary(JSONCryptoHelper._valueLabel);
+        signatureValue = innerSignatureObject.getBinary(JSONCryptoHelper.VALUE_JSON);
 
         //////////////////////////////////////////////////////////////////////////////////////
-        // Begin JCS core normalization                                                     //
+        // Begin JSF core normalization                                                     //
         //                                                                                  //
         // 1. Make a shallow copy of the signature object                                   //
         LinkedHashMap<String, JSONValue> savedProperties =                                  //
                 new LinkedHashMap<String, JSONValue>(innerSignatureObject.root.properties); //
         //                                                                                  //
         // 2. Hide the signature value property for the serializer...                       //
-        innerSignatureObject.root.properties.remove(JSONCryptoHelper._valueLabel);          //
+        innerSignatureObject.root.properties.remove(JSONCryptoHelper.VALUE_JSON);           //
         //                                                                                  //
         // 3. Serialize ("JSON.stringify()")                                                //
         normalizedData = signedData.serializeToBytes(JSONOutputFormats.CANONICALIZED);      //
@@ -155,7 +155,7 @@ public class JSONSignatureDecoder implements Serializable {
 
         if (options.exclusions != null) {
             signedData.root.properties = saveExcluded;
-            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCL_JSON, saveExcludeArray);
+            outerSignatureObject.root.properties.put(JSONCryptoHelper.EXCLUDE_JSON, saveExcludeArray);
         }
 
         // Check for unread (=forbidden) data                                            //
@@ -179,16 +179,9 @@ public class JSONSignatureDecoder implements Serializable {
     void getPublicKeyInfo(JSONObjectReader rd) throws IOException {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromId(algorithmString, 
                                                                options.algorithmPreferences);
-        if (options.remoteKeyReader != null) {
-            String url = JSONCryptoHelper.checkHttpsUrl(rd.getString(options.remoteKeyType.jsonName));
-            if (options.remoteKeyType.certificateFlag) {
-                certificatePath = options.remoteKeyReader.readCertificatePath(url);
-            } else {
-                publicKey = options.remoteKeyReader.readPublicKey(url);
-            }
-        } else if (rd.hasProperty(JSONCryptoHelper.X5C_JSON)) {
+        if (rd.hasProperty(JSONCryptoHelper.CERTIFICATE_PATH)) {
             certificatePath = rd.getCertificatePath();
-        } else if (rd.hasProperty(JSONCryptoHelper.JWK_JSON)) {
+        } else if (rd.hasProperty(JSONCryptoHelper.PUBLIC_KEY_JSON)) {
             publicKey = rd.getPublicKey(options.algorithmPreferences);
         } else {
             throw new IOException("Missing key information");
@@ -230,7 +223,7 @@ public class JSONSignatureDecoder implements Serializable {
                 ECPoint w = new ECPoint(getCurvePoint(rd, JSONCryptoHelper.X_JSON, ec), getCurvePoint(rd, JSONCryptoHelper.Y_JSON, ec));
                 publicKey = KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ec.getECParameterSpec()));
             } else {
-                throw new IOException("Unrecognized \"" + JSONCryptoHelper.JWK_JSON + "\": " + type);
+                throw new IOException("Unrecognized \"" + JSONCryptoHelper.KTY_JSON + "\": " + type);
             }
             return publicKey;
         } catch (GeneralSecurityException e) {
@@ -343,12 +336,12 @@ public class JSONSignatureDecoder implements Serializable {
 
     static LinkedHashSet<String> checkExcluded(String[] excluded) throws IOException {
         if (excluded.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoHelper.EXCL_JSON + "\" array not allowed");
+            throw new IOException("Empty \"" + JSONCryptoHelper.EXCLUDE_JSON + "\" array not allowed");
         }
         LinkedHashSet<String> ex = new LinkedHashSet<String>();
         for (String property : excluded) {
             if (!ex.add(property)) {
-                throw new IOException("Duplicate \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + property);
+                throw new IOException("Duplicate \"" + JSONCryptoHelper.EXCLUDE_JSON + "\" property: " + property);
             }
         }
         return ex;

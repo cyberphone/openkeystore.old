@@ -1,9 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "ES512",
-    "jku": "https://cyberphone.github.io/doc/openkeystore/p521.jwks",
-    "signature": "ADtQ6OpO9sYRcMuEkB7slyphWD7kAt-G6JTn4H_VdiUZV4k0jIZTOMRcXu1zQoFxWOwZG1gxQk0NHsvLPOaOWRCIAMLuvVF-DcQwKiBnH31SNCjj_71QJUG609ZUpUMOtfa-tlnOBzHri14a996NZzhA4PPOJIwpLjixsgXHcjL3ouTx"
-  }
-}

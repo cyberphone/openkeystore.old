@@ -4,13 +4,13 @@
   "id": 2200063,
   "signature": {
     "signers": [{
-      "alg": "ES256",
-      "kid": "example.com:p256",
-      "val": "gB-Cas1oydudKfJTupsP47GzS3h1X2UfhBgsyJ6dz3SvABMbBgq7cOFYAFS-UO0LFZjIdv-sMU5xCL5b_P28hg"
+      "algorithm": "ES256",
+      "keyId": "example.com:p256",
+      "value": "T5nVzlP4NX35lwqc7a3sQCoLjE9JE6RV9qb_AOYXH3cEJxdAR1dbR0BkCqBaZX8tmmzX-97EUx0p1TjdpngSmA"
     },{
-      "alg": "RS256",
-      "kid": "example.com:r2048",
-      "val": "IhRx5rD4qZZf1WsLncp1QEmBgtlRFf-ZxeDFC13I4jTckI6MXgMro1gpkY2QbV65JxDxOWgarunC-29dN6V0OQkTXtcZdnIBAUl_wXMT3Tkfn1w4sfinafataxqgn-j1zdAYStYuhRVALylopG-ib2P8x90b0mpvBIRG6TtyB6YCFCXo-UD9OTpdMA1ujYNSrWbk8OaWPKgZM-VHe7mnzEHwQks869RnoNDlOrdyI5D4L4Yf6sHDoUvF1RCXClyRCPzA3uTdUsudRdYhevGl4nQkajm337_0Ae_0ETDsDaX5bxQSEaxixoJKSH_1lvr3Hiwu05GD9W-ZIe1oNJTR0w"
+      "algorithm": "RS256",
+      "keyId": "example.com:r2048",
+      "value": "WPlXUaybkigqVZE4LAxY3Z_dhHIH5pNi96jCAt0RfJyYJfKypPsymsDDEp0Vd2qAcboD57ARLLEz8bh01u3Fy4B9-iFr-0f0kiI0HJbvfz_0XHpJKlN7oLmOGRggT6zv4a6RJlPnw5D3UKQWxoMj_m5jCe3_CrtYzUgn9RceNwRILxISrRUASIeTQYgHlU1ys8zh2YZzXEp_HHh0x4lwG7Rrge_h8tYHOyd445vPzfi_s5KxdbjrQhFazvNGwTHwwPbqbbBLi3RW8Eda3D2SB0bIYMj9GwyEDO7SNOzVU66XBu5ftDXqqcQuxFBqB-h32kiy4JBwYyosA_fsvttSEA"
     }]
   }
 }

@@ -42,20 +42,6 @@ public class JSONX509Encrypter extends JSONEncrypter {
         this.publicKey = certificatePath[0].getPublicKey();
     }
 
-    /**
-     * Set remote key (&quot;x5u&quot;) indicator.
-     * This method <i>suppresses</i> the in-line certificate data.
-     * Note that the certificate path must anyway be provided during <i>encryption</i>. 
-     * @param url Where the (PEM) certificate path resides
-     * @return this
-     * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONRemoteKeys
-     */
-    public JSONX509Encrypter setRemoteKey(String url) throws IOException {
-        setRemoteKey(url, JSONRemoteKeys.PEM_CERT_PATH);
-        return this;
-    }
-
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setCertificatePath(certificatePath);

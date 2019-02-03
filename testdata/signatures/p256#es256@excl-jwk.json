@@ -2,14 +2,14 @@
   "mySignedData": "something",
   "myUnsignedData": "something else",
   "signature": {
-    "alg": "ES256",
-    "jwk": {
+    "algorithm": "ES256",
+    "publicKey": {
       "kty": "EC",
       "crv": "P-256",
       "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    "excl": ["myUnsignedData"],
-    "val": "zP1oAyo7WojF184V_40fr0hmVDtPv27iIJRjPrZk6yzofgOSiJzsiomuM-3-Ky90DZJ_KDfub8VqduhiyqboqQ"
+    "exclude": ["myUnsignedData"],
+    "value": "Z6usMDM8AOYZPZOqwH_LsW2RXZYy_ntSGifpfdu-kjUp-UGmB5RZ7fHQ2TxWO64sd36JHKPLj91SzZud0VXb0w"
   }
 }

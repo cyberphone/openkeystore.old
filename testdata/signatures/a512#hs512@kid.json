@@ -3,8 +3,8 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "HS512",
-    "kid": "a512bitkey",
-    "val": "Yqa-Oefk63uTkokSQD-tC6tWMeOOpHakjXp6V8G2XHzPbLCaH5l4J7pe7NzqlqlyCgkntgbLqXdCAd-acfQPzg"
+    "algorithm": "HS512",
+    "keyId": "a512bitkey",
+    "value": "KNtzYjX5fkOt5p6nHY1qLvHXPiTHCAP8PjG8xE_lIYx1h-00MOWSXYX0Ku37DAJzC-V4juAHDkgSAzp--Jdm4w"
   }
 }

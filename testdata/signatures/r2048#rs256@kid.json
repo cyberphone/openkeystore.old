@@ -3,8 +3,8 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "RS256",
-    "kid": "example.com:r2048",
-    "val": "AQVretd5H5k0p2CnpyqLOCfgk7r4XeMvVYCq1_5vkMivLkXmdY1HgSZ-VBQ-CXTmVwJ5LL4MtpzzioHq26XBcUxCFl4utDouxrTxwZNVQiGUveEI-q7TL-ixbrU4S-n_MtiQUa3R8FXfbVbrB6l8LUgmUSHIuwFoUN72xQrr60KPXYF5f4yk8iYewM31BTF5Kn5Qsm_FDWtayqg1VIGMFoMGh0qoeoBKyTjQM2JaJyptW4U2FP_otxaYYvhor2nUtuMbAKi--__kLLk4R7BTRioZ8_wt5_2WaS-3Q6UEVRi8gqPqiSMuQEHN-lWeetXJC8F8pFTR-6yMVGYZOZ9ZDw"
+    "algorithm": "RS256",
+    "keyId": "example.com:r2048",
+    "value": "gt2PudT23RZaNZHloZjA24e3_BFRj8ROpgMCKYa9Y7MhzZIqfLomDED_WsmgZWePcJZIyE61617S5OrSkHNnnmqeW1KAkn3y1NY2cu23Uh2Ra-m7SjWxKDlZF284djZHjJIWZ_1EWOQw4tvSlYSsmh1GMGmmj797hGknvfyDpHAZn89AVyx4IZ0BwWy_AJ8dOJkoXq4vAPdYZVYpVD9enbW5yQRfCipy3d0OXFYwbvm6ylyfAyY8tjpGEtD1I-nP-Ueo9fTubxSWILbIImw4hK32B1VWT5wglRkBWwNRwB_IegzaW5Ou6rTHh3xBJoUZSWZec2Kp5_NalChj7__zDw"
   }
 }

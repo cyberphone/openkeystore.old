@@ -71,6 +71,8 @@ public class JSONObjectWriter implements Serializable {
 
     static final Pattern JS_ID_PATTERN    = Pattern.compile("[a-zA-Z$_]+[a-zA-Z$_0-9]*");
 
+    public static final String SIGNATURE_DEFAULT_LABEL_JSON = "signature";  // Not a part of the SPEC
+
     JSONObject root;
 
     StringBuilder buffer;
@@ -533,22 +535,17 @@ public class JSONObjectWriter implements Serializable {
                                  JSONObjectWriter signatureWriter,
                                  MultiSignatureHeader multiSignatureHeader) throws IOException {
         if (multiSignatureHeader.globalAlgorithm == null) {
-            signatureWriter.setString(JSONCryptoHelper.ALG_JSON,
+            signatureWriter.setString(JSONCryptoHelper.ALGORITHM_JSON,
                                       signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
         }
 
         // "kid" is always optional
         if (signer.keyId != null) {
-            signatureWriter.setString(JSONCryptoHelper.KID_JSON, signer.keyId);
+            signatureWriter.setString(JSONCryptoHelper.KEY_ID_JSON, signer.keyId);
         }
 
-        // "jku"/"x5u" and "jwk"/"x5c" are mutually exclusive
-        if (signer.remoteUrl == null) {
-            if (signer.outputPublicKeyInfo) {
-                signer.writeKeyData(signatureWriter);
-            }
-        } else {
-            signatureWriter.setString(signer.remoteKeyFormat.jsonName, signer.remoteUrl);
+        if (signer.outputPublicKeyInfo) {
+            signer.writeKeyData(signatureWriter);
         }
 
         // Optional extensions
@@ -556,7 +553,7 @@ public class JSONObjectWriter implements Serializable {
         if (signer.extensions != null) {
             JSONArrayWriter extensions = null;
             if (localExtension) {
-                extensions = signatureWriter.setArray(JSONCryptoHelper.CRIT_JSON);
+                extensions = signatureWriter.setArray(JSONCryptoHelper.CRITICAL_JSON);
             }
             for (String property : signer.extensions.getProperties()) {
                 if (localExtension) {
@@ -580,18 +577,18 @@ public class JSONObjectWriter implements Serializable {
             JSONObjectReader rd = new JSONObjectReader(this).clone();
             for (String property : signer.excluded) {
                 if (!rd.hasProperty(property)) {
-                    throw new IOException("Missing \"" + JSONCryptoHelper.EXCL_JSON + "\" property: " + property);
+                    throw new IOException("Missing \"" + JSONCryptoHelper.EXCLUDE_JSON + "\" property: " + property);
                 }
                 rd.removeProperty(property);
             }
             signedObject = new JSONObjectWriter(rd);
             if (!multiSignatureHeader.multi) {
-                signatureWriter.setStringArray(JSONCryptoHelper.EXCL_JSON, signer.excluded);
+                signatureWriter.setStringArray(JSONCryptoHelper.EXCLUDE_JSON, signer.excluded);
             }
         }
 
         // Finally, the signature itself
-        signatureWriter.setBinary(JSONCryptoHelper._valueLabel,
+        signatureWriter.setBinary(JSONCryptoHelper.VALUE_JSON,
                                   signer.signData(signer.normalizedData = 
                                           signedObject.serializeToBytes(JSONOutputFormats.CANONICALIZED)));
     }
@@ -668,7 +665,7 @@ import org.webpki.json.JSONSignatureDecoder;
 </pre>
     */
     public JSONObjectWriter setSignature(JSONSigner signer) throws IOException {
-        return setSignature(JSONCryptoHelper._defaultSignatureLabel, signer);
+        return setSignature(SIGNATURE_DEFAULT_LABEL_JSON, signer);
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
@@ -686,7 +683,7 @@ import org.webpki.json.JSONSignatureDecoder;
      */
     public JSONObjectWriter setMultiSignature(JSONSigner.MultiSignatureHeader multiSignatureHeader, 
                                               JSONSigner signer) throws IOException {
-        return setMultiSignature(JSONCryptoHelper._defaultSignatureLabel, multiSignatureHeader, signer);
+        return setMultiSignature(SIGNATURE_DEFAULT_LABEL_JSON, multiSignatureHeader, signer);
     }
 
     public JSONObjectWriter setMultiSignature(String signatureLabel,
@@ -706,17 +703,17 @@ import org.webpki.json.JSONSignatureDecoder;
         JSONObjectWriter globalSignatureObject = setObject(signatureLabel);
         if (multiSignatureHeader.globalAlgorithm != null) {
             signer.setGlobalAlgorithm(multiSignatureHeader.globalAlgorithm);
-            globalSignatureObject.setString(JSONCryptoHelper.ALG_JSON,
+            globalSignatureObject.setString(JSONCryptoHelper.ALGORITHM_JSON,
                                             multiSignatureHeader
                                                 .globalAlgorithm
                                                     .getAlgorithmId(multiSignatureHeader.algorithmPreferences));
         }
         if (multiSignatureHeader.excluded != null) {
             signer.setExcluded(multiSignatureHeader.excluded);
-            globalSignatureObject.setupForRewrite(JSONCryptoHelper.EXCL_JSON);
+            globalSignatureObject.setupForRewrite(JSONCryptoHelper.EXCLUDE_JSON);
         }
         if (multiSignatureHeader.OptionalExtensions != null) {
-            globalSignatureObject.setStringArray(JSONCryptoHelper.CRIT_JSON,
+            globalSignatureObject.setStringArray(JSONCryptoHelper.CRITICAL_JSON,
                                                  multiSignatureHeader.OptionalExtensions.getPropertyList());
         }
         JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
@@ -726,7 +723,7 @@ import org.webpki.json.JSONSignatureDecoder;
             signatureArray.array.insertElementAt(new JSONValue(JSONTypes.OBJECT, oldSignatures.get(q)), 0);
         }
         if (multiSignatureHeader.excluded != null) {
-             globalSignatureObject.setStringArray(JSONCryptoHelper.EXCL_JSON, multiSignatureHeader.excluded);
+             globalSignatureObject.setStringArray(JSONCryptoHelper.EXCLUDE_JSON, multiSignatureHeader.excluded);
         }
         if (multiSignatureHeader.optionalFormatVerifier != null) {
             new JSONObjectReader(root).getMultiSignature(signatureLabel, multiSignatureHeader.optionalFormatVerifier);
@@ -789,7 +786,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setPublicKey(PublicKey publicKey, AlgorithmPreferences algorithmPreferences) throws IOException {
-        return setObject(JSONCryptoHelper.JWK_JSON, createCorePublicKey(publicKey, algorithmPreferences));
+        return setObject(JSONCryptoHelper.PUBLIC_KEY_JSON, createCorePublicKey(publicKey, algorithmPreferences));
     }
 
     /**
@@ -819,7 +816,7 @@ import org.webpki.json.JSONSignatureDecoder;
      * @throws IOException &nbsp;
      */
     public JSONObjectWriter setCertificatePath(X509Certificate[] certificatePath) throws IOException {
-        return setArray(JSONCryptoHelper.X5C_JSON, 
+        return setArray(JSONCryptoHelper.CERTIFICATE_PATH, 
                         JSONArrayWriter.createCoreCertificatePath(certificatePath));
     }
 

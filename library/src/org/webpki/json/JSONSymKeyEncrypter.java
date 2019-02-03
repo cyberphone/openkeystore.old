@@ -32,7 +32,7 @@ public class JSONSymKeyEncrypter extends JSONEncrypter {
      */
     public JSONSymKeyEncrypter(byte[] contentEncryptionKey) throws IOException {
         this.contentEncryptionKey = contentEncryptionKey;
-        this.keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID;
+        this.keyEncryptionAlgorithm = null;
     }
 
     @Override

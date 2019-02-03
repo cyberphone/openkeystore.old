@@ -3,8 +3,8 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "HS384",
-    "kid": "a384bitkey",
-    "val": "u3OMm1ZXna6UY7xln_1XhZF85B9YMmTFjS1y2BfdO1thE5nHonkMrUI-U_tBOVyv"
+    "algorithm": "HS384",
+    "keyId": "a384bitkey",
+    "value": "H5QzXtHTau7-3QJxdaLH68H-HySolpNU0kfz10mcPsuBo8akr_5AJxc7-DpSoX9f"
   }
 }

@@ -37,10 +37,6 @@ public abstract class JSONSigner implements Serializable {
 
     boolean outputPublicKeyInfo = true;
 
-    String remoteUrl;
-
-    JSONRemoteKeys remoteKeyFormat;
-    
     byte[] normalizedData;
 
     AlgorithmPreferences algorithmPreferences = AlgorithmPreferences.JOSE_ACCEPT_PREFER;
@@ -115,11 +111,6 @@ public abstract class JSONSigner implements Serializable {
         this.excluded = excluded;
         JSONSignatureDecoder.checkExcluded(excluded);
         return this;
-    }
-
-    void setRemoteKey(String url, JSONRemoteKeys format) throws IOException {
-        this.remoteUrl = JSONCryptoHelper.checkHttpsUrl(url);
-        this.remoteKeyFormat = format;
     }
 
     /**

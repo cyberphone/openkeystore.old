@@ -4,14 +4,8 @@
   <property name="temp.dir" location=".tmp"/>
   <property name="keyBase" location="keys"/>
   <property name="dataBase" location="data"/>
-  <condition property="joseMode" value="true" else="false">
-	  <isset property="jose"/>
-  </condition>
-  <condition property="joseFile" value="-jose" else="">
-	  <isset property="jose"/>
-  </condition>
-  <property name="signatureBase" location="signatures${joseFile}"/>
-  <property name="encryptionBase" location="encryption${joseFile}"/>
+  <property name="signatureBase" location="signatures"/>
+  <property name="encryptionBase" location="encryption"/>
   <property name="normalizationBase" location="normalization"/>
 
   <path id="lib.classpath">
@@ -24,7 +18,7 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help createcerts signatures [-Djose=0] encryption [-Djose=0] normalization"/>
+    <echo message="Targets: help createcerts signatures encryption normalization"/>
   </target>
 	
   <target name="_compile">
@@ -57,7 +51,6 @@
         <arg value="${keyBase}"/>
         <arg value="${dataBase}"/>
         <arg value="${signatureBase}"/>
-        <arg value="${joseMode}"/>
         <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>
@@ -76,7 +69,6 @@
         <arg value="${keyBase}"/>
         <arg value="${dataBase}"/>
         <arg value="${encryptionBase}"/>
-        <arg value="${joseMode}"/>
         <jvmarg value="-Dfile.encoding=UTF8"/>
     </java>
   </target>
@@ -119,29 +111,9 @@
     </java>
    </target>
 	
-   <target name="_create.jwks.x5c.pemcertpath">
-    <antcall target="_createjwk">
-   	  <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}.jwks public"/>
-    </antcall>
-	<replace file="${key.dir}/${keyprefix}.jwks">
-	   <replacefilter>
-          <replacetoken>  </replacetoken>
-          <replacevalue>    </replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>{</replacetoken>
-	      <replacevalue>{&#10;  &quot;keys&quot;: [{</replacevalue>
-	  </replacefilter>
-      <replacefilter>
-	      <replacetoken>}</replacetoken>
-	      <replacevalue>  }]&#10;}</replacevalue>
-	  </replacefilter>
-	</replace>
+   <target name="_creatr.jwk-priv.pem-all">
     <antcall target="_createpem">
        <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certpath.pem certificate"/>
-    </antcall>
-    <antcall target="_createjwk">
-       <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}certificate.x5c certificate"/>
     </antcall>
     <antcall target="_createjwk">
        <param name="cmd" value="${keyprefix}certificate.p12 foo123 ${keyprefix}privatekey.jwk private keyid"/>
@@ -210,19 +182,19 @@
     <exec executable="keytool" failonerror="true" dir="${key.dir}">
        <arg line="-exportcert -keystore unknownca.p12 -alias mykey -storepass foo123 -storetype PKCS12 -file unknownca.cer"/>
     </exec>
-    <antcall target="_create.jwks.x5c.pemcertpath">
+    <antcall target="_creatr.jwk-priv.pem-all">
        <param name="keyprefix" value="r2048"/>
     </antcall>
-    <antcall target="_create.jwks.x5c.pemcertpath">
+    <antcall target="_creatr.jwk-priv.pem-all">
        <param name="keyprefix" value="p256"/>
     </antcall>
-    <antcall target="_create.jwks.x5c.pemcertpath">
+    <antcall target="_creatr.jwk-priv.pem-all">
        <param name="keyprefix" value="p256-2"/>
     </antcall>
-    <antcall target="_create.jwks.x5c.pemcertpath">
+    <antcall target="_creatr.jwk-priv.pem-all">
        <param name="keyprefix" value="p384"/>
     </antcall>
-    <antcall target="_create.jwks.x5c.pemcertpath">
+    <antcall target="_creatr.jwk-priv.pem-all">
        <param name="keyprefix" value="p521"/>
     </antcall>
   </target>

@@ -3,7 +3,7 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "HS512",
-    "val": "CfABYuw0J6SXqYeLPQznmfqDLD2-2I8xWSpbLXovyKQVXdTqooQYt-YHGbTMmTRy9CGOlLS1dwnSNJcolnnXBw"
+    "algorithm": "HS512",
+    "value": "kDIaZG_9lzJ_k1N1z1nLoXHUoF1Uw6QFrVDH3IgFOqlhACms0NR4umoHXYHOFEJTSGnP-pbEOqS55xQ8QKYsPA"
   }
 }

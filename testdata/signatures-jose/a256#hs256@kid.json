@@ -1,9 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "HS256",
-    "kid": "a256bitkey",
-    "signature": "25OmU_3Mre7CxMHDNqsZOsYPdbDk5ayUxHRxXkIRN9M"
-  }
-}

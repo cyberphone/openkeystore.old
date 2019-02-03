@@ -28,6 +28,7 @@ import java.util.Vector;
 
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MACAlgorithms;
@@ -41,7 +42,6 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
@@ -52,12 +52,12 @@ import org.webpki.json.JSONX509Verifier;
 import org.webpki.json.Extension1;
 import org.webpki.json.Extension2;
 import org.webpki.json.SymmetricKeys;
-import org.webpki.json.WebKey;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.PEMDecoder;
 
 /*
- * Create Cleartext JWS/JCS test vectors
+ * Create JSF test vectors
  */
 public class Signatures {
     static String baseKey;
@@ -66,9 +66,6 @@ public class Signatures {
     static SymmetricKeys symmetricKeys;
     static JSONX509Verifier x509Verifier;
     static String keyId;
-    static boolean joseMode;
-    
-    static final String REMOTE_PATH  = "https://cyberphone.github.io/doc/openkeystore/";
     
     static final String[] UNSIGNED_DATA = new String[]{"myUnsignedData"};
     
@@ -79,7 +76,6 @@ public class Signatures {
     }
 
     static JSONObjectWriter getExtensionData(boolean global, boolean second) throws IOException {
-        boolean ext1 = true;
         boolean ext2 = second || !global; 
         return new JSONObjectWriter()
             .setString(new Extension1().getExtensionUri(), second ?
@@ -91,26 +87,44 @@ public class Signatures {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 4) {
+        if (args.length != 3) {
             throw new Exception("Wrong number of arguments");
         }
         CustomCryptoProvider.forcedLoad(true);
         baseKey = args[0] + File.separator;
         baseData = args[1] + File.separator;
         baseSignatures = args[2] + File.separator;
-        joseMode = Boolean.valueOf(args[3]);
-        JSONCryptoHelper._setMode(joseMode);
         symmetricKeys = new SymmetricKeys(baseKey);
         
-        X509Certificate rootca = JSONParser.parse(ArrayUtil.readFile(baseKey + "rootca.x5c"))
-                .getJSONArrayReader().getCertificatePath()[0];
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load (null, null);
-        keyStore.setCertificateEntry ("mykey", rootca);        
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(null, null);
+        keyStore.setCertificateEntry("mykey",
+            CertificateUtil.getCertificateFromBlob(ArrayUtil.readFile(baseKey + "rootca.cer")));
         x509Verifier = new JSONX509Verifier(new KeyStoreVerifier(keyStore));
 
-       
         for (String key : new String[]{"p256", "p384", "p521", "r2048"}) {
+            // Check the PEM reader
+            KeyPair keyPairPem = 
+                    new KeyPair(PEMDecoder.getPublicKey(ArrayUtil.readFile(baseKey + key + "publickey.pem")),
+                                PEMDecoder.getPrivateKey(ArrayUtil.readFile(baseKey + key + "privatekey.pem")));
+            KeyPair keyPairJwk = readJwk(key);
+            if (!keyPairJwk.getPublic().equals(keyPairPem.getPublic())) {
+                throw new IOException("PEM fail at public " + key);
+            }
+            if (!keyPairJwk.getPrivate().equals(keyPairPem.getPrivate())) {
+                throw new IOException("PEM fail at private " + key);
+            }
+            KeyStore keyStorePem = 
+                    PEMDecoder.getKeyStore(ArrayUtil.readFile(baseKey + key + "certificate-key.pem"),
+                                                              "mykey", "foo123");
+            if (!keyPairJwk.getPrivate().equals(keyStorePem.getKey("mykey",
+                                                                   "foo123".toCharArray()))) {
+                throw new IOException("PEM KS fail at private " + key);
+            }
+            if (!keyPairJwk.getPublic().equals(keyStorePem.getCertificate("mykey").getPublicKey())) {
+                throw new IOException("PEM KS fail at public " + key);
+            }
+            // Now to the real stuff
             JSONSignatureDecoder decoder = asymSignOptionalPublicKeyInfo(key, true,  false);
             if (key.equals("p256")) {
                 boolean next = false;
@@ -133,8 +147,6 @@ public class Signatures {
             asymSignOptionalPublicKeyInfo(key, false, true);
             certSign(key);
             asymJavaScriptSignature(key);
-            remoteCertSign(key);
-            remoteKeySign(key);
         }
       
         for (int i = 0; i < 2; i++) {
@@ -161,8 +173,8 @@ public class Signatures {
 
     static String cleanJavaScriptSignature(byte[] signature) throws IOException {
         String text = new String(signature, "utf-8");
-        int i = text.indexOf(" " + JSONCryptoHelper._getValueLabel() + ": \"");
-        int j = text.indexOf('"', i + JSONCryptoHelper._getValueLabel().length() + 4);
+        int i = text.indexOf(" " + JSONCryptoHelper.VALUE_JSON + ": \"");
+        int j = text.indexOf('"', i + JSONCryptoHelper.VALUE_JSON.length() + 4);
         return text.substring(0, i) + text.substring(j);
     }
 
@@ -199,14 +211,14 @@ public class Signatures {
     
     static String cleanSignature(byte[] signedData) throws IOException {
         JSONObjectReader reader = JSONParser.parse(signedData);
-        JSONObjectReader signature = reader.getObject(JSONCryptoHelper._getDefaultSignatureLabel());
+        JSONObjectReader signature = reader.getObject(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON);
         if (signature.hasProperty(JSONCryptoHelper.SIGNERS_JSON)) {
             JSONArrayReader array = signature.getArray(JSONCryptoHelper.SIGNERS_JSON);
             while (array.hasMore()) {
-                array.getObject().removeProperty(JSONCryptoHelper._getValueLabel());
+                array.getObject().removeProperty(JSONCryptoHelper.VALUE_JSON);
             }
         } else {
-            signature.removeProperty(JSONCryptoHelper._getValueLabel());
+            signature.removeProperty(JSONCryptoHelper.VALUE_JSON);
         }
         return reader.toString();
     }
@@ -234,37 +246,6 @@ public class Signatures {
         return;
     }
 
-    static void remoteCertSign(String keyType) throws Exception {
-        String remoteUrl = REMOTE_PATH + keyType + "certpath.pem";
-        KeyPair localKey = readJwk(keyType);
-        X509Certificate[] localPath = readCertificatePath(keyType);
-        JSONX509Signer remoteCertSigner =
-                new JSONX509Signer(localKey.getPrivate(),
-                                   localPath,
-                                   null)
-                    .setRemoteKey(remoteUrl);
-        byte[] remoteSig = createSignature(remoteCertSigner);
-        JSONSignatureDecoder decoder = 
-            JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
-                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
-        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5u.json", remoteSig, true);
-    }
-
-    static void remoteKeySign(String keyType) throws Exception {
-        String remoteUrl = REMOTE_PATH + keyType + ".jwks";
-        KeyPair localKey = readJwk(keyType);
-        JSONAsymKeySigner remoteKeySigner =
-                new JSONAsymKeySigner(localKey.getPrivate(),
-                                      localKey.getPublic(),
-                                      null)
-                    .setRemoteKey(remoteUrl);
-        byte[] remoteSig = createSignature(remoteKeySigner);
-        JSONSignatureDecoder decoder =
-            JSONParser.parse(remoteSig).getSignature(new JSONCryptoHelper.Options()
-                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
-        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@jku.json", remoteSig, true);
-    }
-
     static void symmSign(int keyBits, MACAlgorithms algorithm, boolean wantKeyId) throws Exception {
         byte[] key = symmetricKeys.getValue(keyBits);
         String keyName = symmetricKeys.getName(keyBits);
@@ -287,9 +268,7 @@ public class Signatures {
 
     static String getDataToSign() throws Exception {
         return new String(ArrayUtil.readFile(baseData +
-                                             "datatobesigned" + 
-                                             (joseMode ? "-jose" : "") +
-                                             ".json"), 
+                                             "datatobesigned.json"), 
                           "UTF-8").replace("\r", "");
     }
     
@@ -299,7 +278,7 @@ public class Signatures {
 
     static byte[] createSignature(JSONSigner signer) throws Exception {
         String signed = parseDataToSign().setSignature(signer).toString();
-        int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
+        int i = signed.indexOf(",\n  \"" + JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON + "\":");
         String unsigned = getDataToSign();
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
@@ -316,7 +295,7 @@ public class Signatures {
             return dataToSign.serializeToBytes(JSONOutputFormats.PRETTY_PRINT);
         }
         String signed = dataToSign.toString();
-        int i = signed.indexOf(",\n  \"" + JSONCryptoHelper._getDefaultSignatureLabel() + "\":");
+        int i = signed.indexOf(",\n  \"" + JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON + "\":");
         String unsigned = getDataToSign();
         int j = unsigned.lastIndexOf("\n}");
         return (unsigned.substring(0,j) + signed.substring(i)).getBytes("UTF-8");
@@ -459,8 +438,7 @@ public class Signatures {
     }
 
     static X509Certificate[] readCertificatePath(String keyType) throws IOException {
-        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
-                .getJSONArrayReader().getCertificatePath();
+        return PEMDecoder.getCertificatePath(ArrayUtil.readFile(baseKey + keyType + "certpath.pem"));
     }
 
     static void certSign(String keyType) throws Exception {
@@ -471,6 +449,6 @@ public class Signatures {
         JSONSignatureDecoder decoder = 
                 JSONParser.parse(signedData).getSignature(new JSONCryptoHelper.Options());
         decoder.verify(x509Verifier);
-        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@x5c.json", signedData, true);
+        optionalUpdate(baseSignatures + prefix(keyType) + getAlgorithm(decoder) + "@cer.json", signedData, true);
     }
 }

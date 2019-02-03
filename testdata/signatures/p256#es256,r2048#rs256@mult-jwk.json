@@ -4,22 +4,22 @@
   "id": 2200063,
   "signature": {
     "signers": [{
-      "alg": "ES256",
-      "jwk": {
+      "algorithm": "ES256",
+      "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "g1XFBpYY8Dj7xDbEJU7cDxyfHldxjWw9KJCtsFjwJIQHlBVoN3ybn4UL-4XKUt7A7RkAY6eYH2kCMkFesigTNw"
+      "value": "-yNF8oZqbvtD66nsSi1Ikv30YYDC0hFEBxqDOEY6NPCwK_d3N4mqRFd5m5we-_DrdYp0WFP-n6x26b6hpQosFw"
     },{
-      "alg": "RS256",
-      "jwk": {
+      "algorithm": "RS256",
+      "publicKey": {
         "kty": "RSA",
         "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
         "e": "AQAB"
       },
-      "val": "UwY91At_OYLz-N0fGQUIIrs1ArUV1pOc5_zrlE8Hdm_dTJiO4XZ7tg_yuH30fDSGunjRmjXCzHF5-u5KqIgBPAJJqHanFoRbs6HMJSlppeQkHV5SWzRhVgEPcGP04Pd-jHMBIU0fxW_fqdGS6ERfznDnCa4WJAYJCaC59vemKgZtop_044IjzgSe6dzwyd2uYIxxRtjazpQ3IrEiNLMHl3KUK09D25WTHZhj3HgPzFWhRKxBxLbf-5IRhbXF3qxa-G2EtpoZ7tUlbxZxvW5KxRObtNyAugPJXY0bz6Lh1IrGKwYirHdDZmDsTRyW0PFF571PwCDo6Wf1ycihvozW3A"
+      "value": "Ht5_ewsb5-1LB1sacd8ksyoTaAsNAesoOBpgegDXdQDf4qmd7fdY02xA55lDrSbw3IwoIBIfC_RMUtQU3TPU9uI8hCLZWSmDEoTKbv07KIaJStr7EqfNap_rrSdrkRXN8GC9eZPC2HrnE2ulDc1JPdq1ffqYFod3dGKVQxRl8p7thzxBcfgzf2bxrI06jIlwWP9qxAMOpXxgaphH_vQTDHRnjMH4msbgGBYGL-NHHGp74qtAS1SzTKcTC7e6xLEdNLEOEyaO2UGVydIrShP4KJKvbvf2EWK_1kwTbMsecW6wLn4rF1H2Cj8pVT3wkdu0VcvOUhetyYQqZqDHIdnuHw"
     }]
   }
 }

@@ -19,7 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * Cleartext JWE content encryption algorithms.
+ * JWE content encryption algorithms.
  */
 public enum ContentEncryptionAlgorithms {
 
@@ -80,6 +80,6 @@ public enum ContentEncryptionAlgorithms {
                 return algorithm;
             }
         }
-        throw new IOException("Unexpected argument to \"" + JSONCryptoHelper.ENC_JSON + "\": " + algorithmId);
+        throw new IOException("Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": " + algorithmId);
     }
 }

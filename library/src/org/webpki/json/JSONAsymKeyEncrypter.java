@@ -39,20 +39,6 @@ public class JSONAsymKeyEncrypter extends JSONEncrypter {
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
     }
 
-    /**
-     * Set remote key (&quot;jku&quot;) indicator.
-     * This method <i>suppresses</i> the in-line public key information.
-     * Note that the public key must anyway be provided during <i>encryption</i>. 
-     * @param url Where the key (JWK key set) resides
-     * @return this
-     * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONRemoteKeys
-     */
-    public JSONAsymKeyEncrypter setRemoteKey(String url) throws IOException {
-        setRemoteKey(url, JSONRemoteKeys.JWK_KEY_SET);
-        return this;
-    }
-
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setPublicKey(publicKey, algorithmPreferences);

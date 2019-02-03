@@ -3,20 +3,20 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "crit": ["otherExt","https://example.com/extension"],
+    "critical": ["otherExt", "https://example.com/extension"],
     "signers": [{
-      "alg": "ES256",
-      "kid": "example.com:p256",
+      "algorithm": "ES256",
+      "keyId": "example.com:p256",
       "otherExt": "Other Data",
-      "val": "k0RmYIaQeGky9fuZcOYAeOE0e0EtPEPmkxu-aU4li0GzS5AjLiRoXaL2lZzW-5P80hYdrA0j1GripQt-CNmNmA"
+      "value": "RejixyRst5Lqje22ThMFTrE7TirVLnLZq_F97gsvX6ljJiSVRGebe3GwtCikm7Do00cKNO_oghQeQJliyJ1z7A"
     },{
-      "alg": "RS256",
-      "kid": "example.com:r2048",
+      "algorithm": "RS256",
+      "keyId": "example.com:r2048",
       "otherExt": "Cool Stuff",
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "val": "RRfTxMDGu--1ytJMTwjdJ4IN0fWVbP8LUiz7u99fbxWNCtOmcfNkNLuf3rgrNexGz2tbfza3nbFtSZzXWnpfQF0AsmoVjSZGRUxXZQ-0aqJfKE8KSGSDGRq3U2kFT2Opw_pg-Q2Ja8R2EdOxs3Y0IjwTkf1kBZPRwd_3IEVpxoVSH-Oud8ZTfDrmhoQpaD4xl06x8ZNYk8Lis8xOrDkXQcsyFb4il_BMNqEuenOMm_1eCW-E5PdVK_QDEjg2Zo0h1GZKcGRoxyj_b1BlGoqyHfH-oouofb1vSrpt703eog_5SeF0pnCcjvJhdpcBOmUgWpcMTOoKLA4O_brW_0C8LQ"
+      "value": "FJOz7UBISJig4InZ03Kb_dZ96eNMN2u9XwnUG8YWA3CZq2rwabO5-rJcjl7T2IkbgIsPR35K9Dja_7uBvvaRzWcqPDrtg__UuNffZuICRkjXGedYqNkZeMtLczEEvGxu44wc6r_6i0R23Wo19NCYi1BBT4SLXvQadoj9J34NAZl0FNTjAzxzyULpWBp1xJYGZOPF7_DnyTiPdxMB8B6JAj-kD0Hl3a8iiVY2NZuDH4oIjZ0X8Gp3YMtxKa8ATiHeR3VhJLsT_j9rBSa93qcgTo9mYOcXHgLCRslbm_TEaTPETwbyp8AMclfvAC6R1m1LhOLh9NNf8NHvNfwFUDSasw"
     }]
   }
 }

@@ -3,23 +3,23 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "ES256",
+    "algorithm": "ES256",
     "signers": [{
-      "jwk": {
+      "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "p5sbbRjSjFaDiI4_ax4SwU_6f1cJGS_vrt7DvvlIbwklAL2TDuQDCy-YL_w1hjfbEIzgkdJGAhKdUuG8BQplBA"
+      "value": "dkUjuiOkca96WXTNVvn3XITUh7QFH8zKGz703jjYyTqGf0cD2mjeeiKPME58RehVggF-RNUSezZL-8DsG5L1cQ"
     },{
-      "jwk": {
+      "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "RgdKcWxBsnqeryzoEv3B5KE9qAQc-nBZEV_A23uQoPs",
         "y": "73UtZIe1Qfil1WM9Hq1ZiPXWnI1Tu7N__goVvTyjURk"
       },
-      "val": "mOA9KryDK92LinZwjCKPctMONcUjedulNRPfXeH1pyWNn1WxpwNmbE-yKNka28kX9rTkwiMXU8ttFLPysMFFXg"
+      "value": "k-BjcxgWte0mfNjU1vDU-KyFV7TnoMMD7ROtrM-XqmH1dXlSnfaoxzHcMFkmJGtaYJjBcS7QCPY-9PaSNifO9A"
     }]
   }
 }

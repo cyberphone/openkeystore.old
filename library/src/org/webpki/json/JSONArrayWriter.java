@@ -33,7 +33,6 @@ import java.util.Vector;
 import org.webpki.crypto.CertificateUtil;
 
 import org.webpki.util.Base64URL;
-import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -123,7 +122,7 @@ public class JSONArrayWriter implements Serializable {
         JSONObjectWriter signatureObject = setObject();
         JSONObjectWriter.createHeaderPart(signer, signatureObject, new JSONSigner.MultiSignatureHeader(null));
         // Finally, the signature itself
-        signatureObject.setBinary(JSONCryptoHelper._valueLabel,
+        signatureObject.setBinary(JSONCryptoHelper.VALUE_JSON,
                                   signer.signData(signer.normalizedData = 
                                           this.serializeToBytes(JSONOutputFormats.CANONICALIZED)));
         return this;
@@ -133,7 +132,7 @@ public class JSONArrayWriter implements Serializable {
         JSONArrayWriter arrayWriter = new JSONArrayWriter();
         for (X509Certificate certificate : CertificateUtil.checkCertificatePath(certificatePath)) {
             try {
-                arrayWriter.setString(new Base64(false).getBase64StringFromBinary(certificate.getEncoded()));
+                arrayWriter.setString(Base64URL.encode(certificate.getEncoded()));
             } catch (GeneralSecurityException e) {
                 throw new IOException(e);
             }

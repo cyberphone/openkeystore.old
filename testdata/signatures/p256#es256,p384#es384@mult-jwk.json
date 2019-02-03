@@ -4,23 +4,23 @@
   "id": 2200063,
   "signature": {
     "signers": [{
-      "alg": "ES256",
-      "jwk": {
+      "algorithm": "ES256",
+      "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "val": "Lk8_UIwaaD0DwsdAbbzwKjRRawdVJj5lTCbLLVnCJazH8dkKCT-2SpW87ZgWsFBjRxGqir8hEUa615UX86ecSQ"
+      "value": "thlWmL98-JDqSNsb7p2Ht6T7b1pNrEdtAFBfyM_ZXfKQVos9QTDRR4o_vQykzRfYJMIiXjvrHI91Xv5ED2Eb8Q"
     },{
-      "alg": "ES384",
-      "jwk": {
+      "algorithm": "ES384",
+      "publicKey": {
         "kty": "EC",
         "crv": "P-384",
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "val": "9HaCQ86JuhbTPAqFMi0YXX_Ic33ST1nOol_TMZQg4sE1dKU4h-2sB4AjLviVNFiWXsPcsya3d74YzcsbFHZmflJVdgz-4yNPRNqtH6bNoA1geKMCalLZishcKaLoN_oq"
+      "value": "dIgOYtDZKz66S5CdOr5Z0l1FBsFY8nDkesFRmhsgTskeceIm7e7n4hQWyFnicJOOS63OlVDQo3ImaPPnEwDdMEpg4giR7UYURWUMeLLM3Q8MllivEstXBXyftiBBgX5S"
     }]
   }
 }

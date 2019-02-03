@@ -92,21 +92,6 @@ public class JSONAsymKeySigner extends JSONSigner {
         return this;
     }
 
-    /**
-     * Set remote key (&quot;jku&quot;) indicator.
-     * This method <i>suppress</i> the in-line public key information.
-     * Note that private and public keys must anyway be provided during <i>signing</i>
-     * since the remote key indicator is simply generated &quot;as is&quot;. 
-     * @param url Where the key lives
-     * @return this
-     * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONRemoteKeys
-     */
-    public JSONAsymKeySigner setRemoteKey(String url) throws IOException {
-        setRemoteKey(url, JSONRemoteKeys.JWK_KEY_SET);
-        return this;
-    }
-
     @Override
     SignatureAlgorithms getAlgorithm() {
         return algorithm;

@@ -3,13 +3,13 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "ES256",
-    "jwk": {
+    "algorithm": "ES256",
+    "publicKey": {
       "kty": "EC",
       "crv": "P-256",
       "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    "val": "8ozeaOrGjX-lstNAIDBJJQDXaIur2pL3g04rt3o-2gBG29BOInBXbsTxOxFE72p--GdpGa-3URyD23j7oOE7fg"
+    "value": "JGnfMX8hyGNH_-fhHGPFX5l7XlR2KafiigcUFSBjp-1VSenHFLdhr8CrgEzR_Mx20e4GqexEyGuDTNtTqcx2Sg"
   }
 }

@@ -3,18 +3,18 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "ES256",
-    "jwk": {
+    "algorithm": "ES256",
+    "publicKey": {
       "kty": "EC",
       "crv": "P-256",
       "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    "crit": ["otherExt","https://example.com/extension"],
+    "critical": ["otherExt", "https://example.com/extension"],
     "otherExt": "Cool Stuff",
     "https://example.com/extension": {
       "life-is-great": true
     },
-    "val": "ztTuVZQJkQ8w74LqRppNbOgCUCm8hQZTeQTK3pzlXPsXGHc8A4DYB8UXl1YR9f_DXZ5nvRACue9t0QwcgDoh6A"
+    "value": "an76nHqBUw_y90abVMku1uhtS_Q0HLcUDv7NZVhjxhMjEDzA2Ei5kfTDAydCVlWMiY6tKKPePvqvsnoyAAgNWQ"
   }
 }

@@ -3,8 +3,8 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "ES512",
-    "kid": "example.com:p521",
-    "val": "AQ61N_51Tx_ap1sf2XhJdj5dEeR0dGgxHstuMUPjlVv54rjo2l8dmA2kvJLzKWfYjwuB0M7EzXMZ2BzccYcL_3_yAVUkMJoTFCQ0GipkB92BQ4GnBe77Q1mhAzqhLnp5Z15-SS1fTWwz9seVvZmX5dBAQymJhesXibvV0i4gM3ZdCeep"
+    "algorithm": "ES512",
+    "keyId": "example.com:p521",
+    "value": "AFUCznc4EHzQvzq695Cpq5DifsYlkHvyCDS8Xy6nqrTi2g4ZoCxJ8IeEGOPfWm4LnYupN8MlTQSCZsZttzICvE37Ae-AYHF8mQpwtgxQCKFTcw71f2Z4b9L5xbGGHs0cf1iyXAsP2oSwBgCrejCUy2DI8KgYcfQhCo2iQLp6IOuWEhKQ"
   }
 }

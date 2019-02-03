@@ -22,6 +22,7 @@ import org.webpki.crypto.VerifierInterface;
 
 import org.webpki.json.JSONCryptoHelper;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONX509Verifier;
 
@@ -48,7 +49,7 @@ abstract class ClientDecoder extends KeyGen2Validator {
         //////////////////////////////////////////////////////////////////
         // Must be a Signature otherwise something has gone wrong...
         //////////////////////////////////////////////////////////////////
-        if (rd.hasProperty(JSONCryptoHelper.SIGNATURE_JSON)) {
+        if (rd.hasProperty(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON)) {
             signature = rd.getSignature(new JSONCryptoHelper.Options());
         }
     }

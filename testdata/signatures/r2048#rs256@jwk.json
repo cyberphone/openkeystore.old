@@ -3,12 +3,12 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "RS256",
-    "jwk": {
+    "algorithm": "RS256",
+    "publicKey": {
       "kty": "RSA",
       "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHxklZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8bozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9iak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
       "e": "AQAB"
     },
-    "val": "OTP82AhB5Djw44Fq2yIIreU_GKmV5irchQz8lzX4t4iamlzZCbAMs1X6MobgGc0Co3A9a9J_nbMp_1KvAQA43mC0wauEsGWJ9kbFpscG64RnSkWe_IOl7XaFtxJErOyboYZtUo6gPLfrPBhxc36CV3TgwzY9-tRy8vWwtsWTU_o_gNWuS008YknV0aOlJbKHjsUzOsx8zBcSehYARd1uGcoIK78pvRfZVEPx8qfKJeH34hTp7sv8oyMyvWjQmyVW-1w4Acqr6p3gXEsMBw68p2UV2uCZfXU20rSwGh6yYEQ-6sNafz267DsR4hdC_AkvYLWgzzkWH40h3fCMs12KBA"
+    "value": "QuVKFT_RYL-BE-h3FnObSKuUiJQHul9GUHrSKIf3ci217NNuv4lMSiW6LfO8qTeSfVrQNkN4YVpmGTtRxcfhrJ2wNvoHLS702f_ak9c1aZepo-CJqesMTMT-qJFU-0t6ldwpthVnYZA4tZAQu9oALdKxh6Eo1AyTfWS-5g5BKKuKqw6Az8R4gnJEljkiIL5qRI-71VSxM8UA-vEOFOKlrzfp9u4m4l6hezkiRD-_PbUWRdoqlhLswQpDfiVh_Uvt7lgZobjHtDfZ4DzCLQuulCx8WS-rdKveUuzeYjoSUit6XjdmAOc_vjWCiyZCNyflN7RgxtnuUKiyDH0o3fdxaQ"
   }
 }

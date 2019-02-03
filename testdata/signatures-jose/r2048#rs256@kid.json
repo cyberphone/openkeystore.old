@@ -1,9 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "RS256",
-    "kid": "example.com:r2048",
-    "signature": "A7Coep8d1_aqQIDpkV8yS9fosIs__4hFLM1OuPxCJwBu3lTH008sqoyUFsO-x7_Z44WsD5bqI9SvX5HFryWDLOvvyWKMQ7nHDdmPt8jIz9VzxpHKOIEpPmu46p1a7nXmUHJhCPd6LFdyhxGgoKm93CMOyvrksyEbKloMcLjlkwNSARCAwhmKVGunnYSF5v6nnTHwpQUAnFDMooO5h_3eO_QegdOzzPbWWXLtv443qlrUq83hALGOVJE2fUBOvwhDzDjkqVMumemF_dOWY67z8j0rGdnts7h4E4lpUJgCr_pc5zDWoLT2_fGZz-sy4Tphb0v5F8MyUCNklVLcLxk_Uw"
-  }
-}

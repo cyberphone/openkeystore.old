@@ -30,7 +30,6 @@ import java.util.Vector;
 
 import org.webpki.crypto.CertificateUtil;
 
-import org.webpki.util.Base64;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
@@ -168,7 +167,7 @@ public class JSONArrayReader implements Serializable {
     public X509Certificate[] getCertificatePath() throws IOException {
         Vector<byte[]> blobs = new Vector<byte[]>();
         do {
-            blobs.add(new Base64().getBinaryFromBase64String(getString()));
+            blobs.add(Base64URL.decode(getString()));
         } while (hasMore());
         return CertificateUtil.makeCertificatePath(blobs);
     }

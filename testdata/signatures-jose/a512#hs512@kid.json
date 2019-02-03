@@ -1,9 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "HS512",
-    "kid": "a512bitkey",
-    "signature": "r2PuaUrmy_sZhuL_vzSfchn6TG3lF8v9lAT3h_8GGk1z_AET-tD7VdaiWz4YrUTxryA47_xfkO7Kh7BirEAgKg"
-  }
-}

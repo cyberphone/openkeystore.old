@@ -1,8 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "ES384",
-    "signature": "H-rOvYkE9gaSEpo1dsZeS9bZLf9AQ2uGdshLrf7fPRjC1rJGCDsXX-_pbjm1cMocSG716847MHNV4YAxrC3WO_PKvFbYMTe-FKcJlK2XZ5zGWFbM9x7_7p6550OEwfrv"
-  }
-}

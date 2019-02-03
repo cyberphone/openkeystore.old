@@ -2,15 +2,15 @@
   "mySignedData": "something",
   "myUnsignedData": "something else",
   "signature": {
-    "excl": ["myUnsignedData"],
+    "exclude": ["myUnsignedData"],
     "signers": [{
-      "alg": "ES256",
-      "kid": "example.com:p256",
-      "val": "up-it_z3MP1nzjsIBfUSa2m8HIIiK4E2RibOQgZ7V1iycOWlZkUTjh9cSNKYC1GJ6KE7k6qC_mssvb99N2Q9aA"
+      "algorithm": "ES256",
+      "keyId": "example.com:p256",
+      "value": "l7jtJ4GeGQGqG-S0CiIAAIz8yNfXC-F_N01krIeOv0pazdegsx3BA8IPvePWtfKaxX4p5T8bYfLN8FA-c9Klnw"
     },{
-      "alg": "RS256",
-      "kid": "example.com:r2048",
-      "val": "BFaW_ia6Z5H0mJ50pT-jwPk5qTZpLNzLnKfkPgra0ORr4FJ7PbcWJPJgNahN7-YEqClmk6_Ur3RXb_5lKdnJOP6Z2no1Hp9JZLfaj2qBQ8oydci-yCUPMbuVeWo3KEMm2bbzDQoZ5DqRl2AU_0XhBmTM9t9zX44dK68t50WYgFvxXH6OmOT5JJAIUjthwxNrSKzYwwf1BYCnWxzqHfdjkkiI_zzERnnSpgvuZeL1xjFcIVn9U9Ji4pYRzP1u6D4yiCvtILYRYpswJUU0x3MImxFs0RYEY9NrECZiiutcPsvmhiVpLpmd4oKGyoELwJkp5OpPe_voR8MBzRNnFxfBeg"
+      "algorithm": "RS256",
+      "keyId": "example.com:r2048",
+      "value": "gi4VgggTcn1jKAFANRBK9a8BLN5oIlABLdZERnhHTDY31l57P26WbY5Q7ACqE9w24BE6cRXEDACD3gLFsGIEPhu3EOE38fWWkR-5Y9hfGSJO64vSFxVEktYsf5XKyeCTtMLApmJu1wjggmB5UuC1gKuecy0ChnfJFnrPE46B9TLGOoYskjEqGJRlgPHvvqo7euFkDM61Wz1vggIq-xfqih_FYgz42280Yy2HzE-GDZXTNfji1ka7DTjujLnCjfLAQa7-65H60KFHnrMULe6k9PZiwfoSykMm3TYOF-c9hWdjwpbqOBeB-CPOg92ACBSh6cOtcHqVGVTqW_-9hj0G_w"
     }]
   }
 }

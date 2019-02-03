@@ -17,11 +17,15 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -92,7 +96,7 @@ public class JSONDecryptionDecoder {
 
             // Collect mandatory elements
             contentEncryptionAlgorithm = ContentEncryptionAlgorithms
-                    .getAlgorithmFromId(encryptionObject.getString(JSONCryptoHelper.ENC_JSON));
+                    .getAlgorithmFromId(encryptionObject.getString(JSONCryptoHelper.ALGORITHM_JSON));
             iv = encryptionObject.getBinary(JSONCryptoHelper.IV_JSON);
             tag = encryptionObject.getBinary(JSONCryptoHelper.TAG_JSON);
             encryptedData = encryptionObject.getBinary(JSONCryptoHelper.CIPHER_TEXT_JSON);
@@ -149,8 +153,8 @@ public class JSONDecryptionDecoder {
     }
 
     private static KeyEncryptionAlgorithms getOptionalAlgorithm(JSONObjectReader reader) throws IOException {
-        return reader.hasProperty(JSONCryptoHelper.ALG_JSON) ? 
-            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoHelper.ALG_JSON)) : null;
+        return reader.hasProperty(JSONCryptoHelper.ALGORITHM_JSON) ? 
+            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoHelper.ALGORITHM_JSON)) : null;
     }
 
     /**
@@ -173,28 +177,22 @@ public class JSONDecryptionDecoder {
         if (keyEncryptionAlgorithm == null) {
             keyEncryptionAlgorithm = holder.globalKeyEncryptionAlgorithm;
         } else if (holder.globalKeyEncryptionAlgorithm != null) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALG_JSON + "\" not allowed");
+            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" not allowed");
         }
         if (keyEncryptionAlgorithm == null) {
-            throw new IOException("Missing \"" + JSONCryptoHelper.ALG_JSON  + "\"");
+            throw new IOException("Missing \"" + JSONCryptoHelper.ALGORITHM_JSON  + "\"");
         }
 
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
+// TODO
+if (keyEncryptionAlgorithm == null)  {// Keeps compiler happy
+//        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
             sharedSecretMode = true;
         } else {
             // We are apparently into a two level encryption scheme
             if (holder.options.requirePublicKeyInfo) {
-                if (holder.options.remoteKeyReader != null) {
-                    String url = JSONCryptoHelper.checkHttpsUrl(
-                            encryptionObject.getString(holder.options.remoteKeyType.jsonName));
-                    if (holder.options.remoteKeyType.certificateFlag) {
-                        certificatePath = holder.options.remoteKeyReader.readCertificatePath(url);
-                    } else {
-                        publicKey = holder.options.remoteKeyReader.readPublicKey(url);
-                    }
-                } else if (encryptionObject.hasProperty(JSONCryptoHelper.X5C_JSON)) {
+                if (encryptionObject.hasProperty(JSONCryptoHelper.CERTIFICATE_PATH)) {
                     certificatePath = encryptionObject.getCertificatePath();
-                } else if (encryptionObject.hasProperty(JSONCryptoHelper.JWK_JSON)) {
+                } else if (encryptionObject.hasProperty(JSONCryptoHelper.PUBLIC_KEY_JSON)) {
                     publicKey = encryptionObject.getPublicKey(holder.options.algorithmPreferences);
                 } else {
                     throw new IOException("Missing key information");
@@ -207,7 +205,7 @@ public class JSONDecryptionDecoder {
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
                         (ECPublicKey) encryptionObject
-                            .getObject(JSONCryptoHelper.EPK_JSON)
+                            .getObject(JSONCryptoHelper.EPHEMERAL_KEY_JSON)
                                 .getCorePublicKey(holder.options.algorithmPreferences);
             }
         }

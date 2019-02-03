@@ -3,8 +3,8 @@
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "alg": "ES256",
-    "kid": "example.com:p256",
-    "val": "GagHnDBKhU7ynzLLH1Qs3tYmzbwxyokDtu7f0Iz1mB0GL-9ER_J5fJA9qz3IG6IR_jLHh3fsUEKAzB4GzLex2A"
+    "algorithm": "ES256",
+    "keyId": "example.com:p256",
+    "value": "v5wIzoDS3JBUUY3w5L2smC69ptr1dcDs9quf6aQS2sGSTz7_H6T_3q9t_472uT6G3oiLy9boX4rXAJajW2utZw"
   }
 }

@@ -72,7 +72,6 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-import org.webpki.json.JSONRemoteKeys;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSigner;
 import org.webpki.json.JSONSymKeySigner;
@@ -3084,7 +3083,7 @@ public class JSONTest {
 
     static final String p521_jcs =
             "{" +
-                    "  \"jwk\": " +
+                    "  \"publicKey\": " +
                     "     {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p521\"," +
@@ -3095,7 +3094,7 @@ public class JSONTest {
 
     static final String p521_jcs_jose =
             "{" +
-                    "  \"jwk\": " +
+                    "  \"publicKey\": " +
                     "     {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"P-521\"," +
@@ -3111,7 +3110,7 @@ public class JSONTest {
 
     static final String rsa_jcs =
             "{" +
-                    "  \"jwk\":" +
+                    "  \"publicKey\":" +
                     "    {" +
                     "      \"kty\": \"RSA\"," +
                     "      \"n\": \"tMzneIjQz_C5fptrerKudR4H4LuoAek0HbH4xnKDMvbUbzYYlrfuORkVcvKKPYl5odONGr61d0G3YW3Pvf" +
@@ -3130,7 +3129,7 @@ public class JSONTest {
 
     static final String p256_jcs =
             "{" +
-                    "  \"jwk\":" +
+                    "  \"publicKey\":" +
                     "    {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
@@ -3141,7 +3140,7 @@ public class JSONTest {
 
     static final String p256_jcs_bad =
             "{" +
-                    "  \"jwk\":" +
+                    "  \"publicKey\":" +
                     "    {" +
                     "      \"kty\": \"EC\"," +
                     "      \"crv\": \"http://xmlns.webpki.org/sks/algorithm#ec.nist.p256\"," +
@@ -3166,7 +3165,7 @@ public class JSONTest {
         byte[] spki_bin = Base64URL.decode(spki);
         JSONObjectReader or = JSONParser.parse(jcs);
         PublicKey publicKey = or.getPublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
-        PublicKey public_key2 = or.getObject(JSONCryptoHelper.JWK_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
+        PublicKey public_key2 = or.getObject(JSONCryptoHelper.PUBLIC_KEY_JSON).getCorePublicKey(AlgorithmPreferences.JOSE_ACCEPT_PREFER);
         assertTrue("Public key", ArrayUtil.compare(publicKey.getEncoded(), spki_bin));
         assertTrue("Public key2", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
         JSONObjectWriter ow = new JSONObjectWriter();
@@ -3187,7 +3186,7 @@ public class JSONTest {
         ow = new JSONObjectWriter();
         public_key2 = JSONParser.parse(ow.setPublicKey(public_key2).setInt("OK", 5).toString()).getPublicKey();
         assertTrue("Public key2+", ArrayUtil.compare(public_key2.getEncoded(), spki_bin));
-        JSONObjectReader pub_key_object = or.getObject(JSONCryptoHelper.JWK_JSON);
+        JSONObjectReader pub_key_object = or.getObject(JSONCryptoHelper.PUBLIC_KEY_JSON);
         boolean rsaFlag = pub_key_object.getString(JSONCryptoHelper.KTY_JSON).equals(JSONCryptoHelper.RSA_PUBLIC_KEY);
         String key_parm = rsaFlag ? JSONCryptoHelper.N_JSON : JSONCryptoHelper.Y_JSON;
         byte[] parm_bytes = pub_key_object.getBinary(key_parm);
@@ -3361,7 +3360,7 @@ public class JSONTest {
     
     public static class EncryptionExtForbidden extends JSONCryptoHelper.Extension {
         
-        static final String URI = JSONCryptoHelper.ENC_JSON;
+        static final String URI = "No No";
         
         public String data;
 
@@ -3430,7 +3429,7 @@ public class JSONTest {
                             p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Property \"" + JSONCryptoHelper.JWK_JSON + "\" was never read");
+            checkException(e, "Property \"" + JSONCryptoHelper.PUBLIC_KEY_JSON + "\" was never read");
         }
         try {
             verifySignature(writer, 
@@ -3447,7 +3446,7 @@ public class JSONTest {
             verifySignature(writer, new JSONCryptoHelper.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Use of \"" + JSONCryptoHelper.CRIT_JSON + "\" must be set in options");
+            checkException(e, "Use of \"" + JSONCryptoHelper.CRITICAL_JSON + "\" must be set in options");
         }
         try {
             JSONCryptoHelper.ExtensionHolder holder = new JSONCryptoHelper.ExtensionHolder();
@@ -3494,7 +3493,7 @@ public class JSONTest {
                                  p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRIT_JSON + "\" mandatory extension: https://example.com/ext2");
+            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext2");
         }
         holder = new JSONCryptoHelper.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
@@ -3504,7 +3503,7 @@ public class JSONTest {
             readSignature(writer, new JSONCryptoHelper.Options().setPermittedExtensions(holder));
             fail("Not ok");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext");
         }
         holder = new JSONCryptoHelper.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, false);
@@ -3521,7 +3520,7 @@ public class JSONTest {
             signature.getSignature(new JSONCryptoHelper.Options());
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Use of \"" + JSONCryptoHelper.KID_JSON + "\" must be set in options");
+            checkException(e, "Use of \"" + JSONCryptoHelper.KEY_ID_JSON + "\" must be set in options");
         }
         JSONSignatureDecoder decoder =
             signature.getSignature(new JSONCryptoHelper.Options()
@@ -3559,7 +3558,7 @@ public class JSONTest {
                     .setRequirePublicKeyInfo(false)
                     .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED));
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
+            checkException(e, "Missing \"" + JSONCryptoHelper.KEY_ID_JSON + "\"");
         }
         Vector<JSONSignatureDecoder> signatures;
         writer = new JSONObjectWriter()
@@ -3598,7 +3597,7 @@ public class JSONTest {
                 .setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED));
             fail("Must not pass");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
+            checkException(e, "Missing \"" + JSONCryptoHelper.KEY_ID_JSON + "\"");
         }
         signatures = new JSONObjectReader(writer).getMultiSignature(new JSONCryptoHelper.Options()
             .setRequirePublicKeyInfo(false)
@@ -3610,31 +3609,7 @@ public class JSONTest {
                                        "a384#hs384@kid.json",
                                        "a512#hs512@kid.json"});
 
-        signature = readSignature("r2048#rs256@jku.json");
-        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options()
-            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
-
-        signature = readSignature("p256#es256@x5u.json");
-        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options()
-            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH));
-        JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options()
-            .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(rootCa);
-        try {
-            JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options()
-                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.PEM_CERT_PATH)).verify(unknownCa);
-            fail("Must not pass");
-        } catch (Exception e) {
-            checkException(e, "Unknown CA: CN=Trust Network Root CA1,C=US");
-        }
-
-        writer = new JSONObjectWriter()
-            .setString("myData", "cool")
-            .setSignature(new JSONAsymKeySigner(r2048.getPrivate(), r2048.getPublic(), null)
-                              .setRemoteKey(R2048KEY));
-        JSONParser.parse(writer.toString()).getSignature(new JSONCryptoHelper.Options()
-                .setRemoteKeyReader(new WebKey(), JSONRemoteKeys.JWK_KEY_SET));
-        
-        signature = readSignature("r2048#rs256@x5c.json");
+        signature = readSignature("r2048#rs256@cer.json");
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options());
         JSONParser.parse(signature.toString()).getSignature(new JSONCryptoHelper.Options())
             .verify(rootCa);
@@ -3837,7 +3812,8 @@ public class JSONTest {
         KeyPair alice = JSONParser.parse(aliceKey).getKeyPair();
         byte[] plainText = jwePlainText.getBytes("UTF-8");
         for (KeyEncryptionAlgorithms kea : KeyEncryptionAlgorithms.values()) {
-            if (kea == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
+// TODO completely wrong
+            if (kea == KeyEncryptionAlgorithms.JOSE_ECDH_ES_A128KW_ALG_ID) {
                 continue;
             }
             for (ContentEncryptionAlgorithms enc : ContentEncryptionAlgorithms.values()) {
@@ -4071,7 +4047,7 @@ public class JSONTest {
                              .setPermittedExtensions(extensionHolder));
             fail("Shouldn't");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRIT_JSON + "\" mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext");
         }
 
         try {
@@ -4083,7 +4059,7 @@ public class JSONTest {
                              .setPermittedExtensions(extensionHolder));
             fail("Shouldn't");
         } catch (Exception e) {
-            checkException(e, "Forbidden \"" + JSONCryptoHelper.CRIT_JSON + "\" property: enc");
+            checkException(e, "Forbidden \"" + JSONCryptoHelper.CRITICAL_JSON + "\" property: enc");
         }
 
         encJson = JSONObjectWriter
@@ -4161,12 +4137,12 @@ public class JSONTest {
 
         variousEncryptionErrors("err-wrong-alg1.json", "Property \"" + JSONCryptoHelper.ENCRYPTED_KEY_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg2.json", "Property \"" + JSONCryptoHelper.N_JSON + "\" is missing");
-        variousEncryptionErrors("err-wrong-alg3.json", "Property \"" + JSONCryptoHelper.EPK_JSON + "\" is missing");
+        variousEncryptionErrors("err-wrong-alg3.json", "Property \"" + JSONCryptoHelper.EPHEMERAL_KEY_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg4.json", "Property \"" + JSONCryptoHelper.ENCRYPTED_KEY_JSON + "\" was never read");
         variousEncryptionErrors("err-wrong-alg5.json", "Multiple encryptions only permitted for key wrapping schemes");
-        variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALG_JSON + "\": A256GCM");
-        variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ENC_JSON + "\": RSA-OAEP-256");
-        variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoHelper.ENC_JSON + "\" is missing");
+        variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": A256GCM");
+        variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": RSA-OAEP-256");
+        variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" is missing");
 
         variousEncryptionErrors("err-bad-id.json", "Missing key information");
 

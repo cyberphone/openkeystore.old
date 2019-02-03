@@ -36,6 +36,7 @@ import org.webpki.json.JSONBaseHTML.Types;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
 import org.webpki.json.JSONBaseHTML.ProtocolStep;
 import org.webpki.json.JSONCryptoHelper;
+import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.sks.SecureKeyStore;
 
@@ -472,7 +473,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         return new StringBuilder(rsaSupport ? "RSA or " : "")
           .append("EC public key in JCS ")
           .append(json.createReference(JSONBaseHTML.REF_JCS))
-          .append(" <code>&quot;" + JSONCryptoHelper.JWK_JSON + "&quot;</code> format")
+          .append(" <code>&quot;" + JSONCryptoHelper.PUBLIC_KEY_JSON + "&quot;</code> format")
           .append(purpose)
           .append(".")
           .append(sksMethod == null ? 
@@ -921,8 +922,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                           "This property is mandatory for HTTPS connections.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.SIGNATURE_JSON)
-              .addSymbolicValue(JSONCryptoHelper.SIGNATURE_JSON)
+              .addProperty(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON)
+              .addSymbolicValue(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1073,8 +1074,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addSubItemTable(singularis(UPDATABLE_KEY_MANAGEMENT_KEYS_JSON))
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.JWK_JSON)
-              .addSymbolicValue(JSONCryptoHelper.JWK_JSON)
+              .addProperty(JSONCryptoHelper.PUBLIC_KEY_JSON)
+              .addSymbolicValue(JSONCryptoHelper.PUBLIC_KEY_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1133,16 +1134,16 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                           "Note that at least one search condition <b>must</b> be specified if this option is used. The result of each condition is combined through a logical AND operation.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.SIGNATURE_JSON)
-              .addSymbolicValue(JSONCryptoHelper.SIGNATURE_JSON)
+              .addProperty(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON)
+              .addSymbolicValue(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
              .newColumn()
               .addString("JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
-              .addString(" <code>&quot;" +JSONCryptoHelper.SIGNATURE_JSON + "&quot;</code> object using a key management key signature covering the lookup specifier. " +
-                         "Note that the <code>&quot;" + JSONCryptoHelper.JWK_JSON + "&quot;</code> property <b>must</b> be present. " +
+              .addString(" <code>&quot;" +JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON + "&quot;</code> object using a key management key signature covering the lookup specifier. " +
+                         "Note that the <code>&quot;" + JSONCryptoHelper.PUBLIC_KEY_JSON + "&quot;</code> property <b>must</b> be present. " +
                          "See SKS appendix &quot;Remote Key Lookup&quot; for more details." + LINE_SEPARATOR +
                          "For maximum interoperability, RSA 2048-bit or EC P-256 signature keys <i>should</i> be used with SHA256 as the <i>recommended</i> hash method.");
 
@@ -1187,14 +1188,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString("<code>" + CLIENT_SESSION_ID_JSON + "</code> of matching credential.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.X5C_JSON)
+              .addProperty(JSONCryptoHelper.CERTIFICATE_PATH)
               .addArrayList(CERTIFICATE_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY2)
             .newColumn()
             .newColumn()
               .addString("Certificate path having identical representation to <code>&quot;" +
-                          JSONCryptoHelper.X5C_JSON +
+                          JSONCryptoHelper.CERTIFICATE_PATH +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".")
@@ -1523,8 +1524,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString(" for a specific key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.JWK_JSON)
-              .addSymbolicValue(JSONCryptoHelper.JWK_JSON)
+              .addProperty(JSONCryptoHelper.PUBLIC_KEY_JSON)
+              .addSymbolicValue(JSONCryptoHelper.PUBLIC_KEY_JSON)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.OBJECT)
             .newColumn()
@@ -1532,7 +1533,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
                .addString(sksAsymKey(true,
                                      "",
                                      "createKeyEntry",
-                                     JSONCryptoHelper.JWK_JSON))
+                                     JSONCryptoHelper.PUBLIC_KEY_JSON))
           .newRow()
             .newColumn()
               .addProperty(ATTESTATION_JSON)
@@ -1558,14 +1559,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
               .addString(" for a specific key.")
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.X5C_JSON)
+              .addProperty(JSONCryptoHelper.CERTIFICATE_PATH)
               .addArrayList(CERTIFICATE_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
               .addString("Certificate path having identical representation to <code>&quot;" +
-                          JSONCryptoHelper.X5C_JSON +
+                          JSONCryptoHelper.CERTIFICATE_PATH +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString("." + LINE_SEPARATOR +
@@ -1582,7 +1583,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
             .newColumn()
               .addString("<i>Optional:</i> Flag (with the default value <code>false</code>), " +
                           "which tells if <code>" +
-                          JSONCryptoHelper.X5C_JSON +
+                          JSONCryptoHelper.CERTIFICATE_PATH +
                           "</code> contains a user-installable trust anchor as well." + LINE_SEPARATOR +
                           "Trust anchor installation is meant to be <i>independent</i> of SKS provisioning.")
           .newExtensionRow(new LinkedObject(IMPORT_SYMMETRIC_KEY_JSON,
@@ -1852,14 +1853,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types {
         json.addSubItemTable(DEVICE_ID_JSON)
           .newRow()
             .newColumn()
-              .addProperty(JSONCryptoHelper.X5C_JSON)
+              .addProperty(JSONCryptoHelper.CERTIFICATE_PATH)
               .addArrayList(CERTIFICATE_PATH, 1)
             .newColumn()
               .setType(WEBPKI_DATA_TYPES.BYTE_ARRAY)
             .newColumn()
             .newColumn()
               .addString("Device certificate path having identical representation to <code>&quot;" +
-                          JSONCryptoHelper.X5C_JSON +
+                          JSONCryptoHelper.CERTIFICATE_PATH +
                           "&quot;</code> in JCS ")
               .addString(json.createReference(JSONBaseHTML.REF_JCS))
               .addString(".");

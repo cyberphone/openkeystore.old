@@ -516,7 +516,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONCryptoHelper.Options
      */
     public JSONSignatureDecoder getSignature(JSONCryptoHelper.Options options) throws IOException {
-        return getSignature(JSONCryptoHelper._defaultSignatureLabel, options);
+        return getSignature(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON, options);
     }
 
     public JSONSignatureDecoder getSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
@@ -537,7 +537,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @throws IOException &nbsp;
      */
     public Vector<JSONSignatureDecoder> getMultiSignature(JSONCryptoHelper.Options options) throws IOException {
-        return getMultiSignature(JSONCryptoHelper._defaultSignatureLabel, options);
+        return getMultiSignature(JSONObjectWriter.SIGNATURE_DEFAULT_LABEL_JSON, options);
     }
     
     public Vector<JSONSignatureDecoder> getMultiSignature(String signatureLabel, JSONCryptoHelper.Options options) throws IOException {
@@ -548,8 +548,8 @@ public class JSONObjectReader implements Serializable, Cloneable {
         Vector<JSONValue> save = (Vector<JSONValue>) arrayReader.array.clone();
         Vector<JSONSignatureDecoder> signatures = new Vector<JSONSignatureDecoder>();
         Vector<JSONObjectReader> signatureObjects = new Vector<JSONObjectReader>();
-        options.globalSignatureAlgorithm = outerSignatureObject.getStringConditional(JSONCryptoHelper.ALG_JSON);
-        options.globalExtensions = outerSignatureObject.getStringArrayConditional(JSONCryptoHelper.CRIT_JSON);
+        options.globalSignatureAlgorithm = outerSignatureObject.getStringConditional(JSONCryptoHelper.ALGORITHM_JSON);
+        options.globalExtensions = outerSignatureObject.getStringArrayConditional(JSONCryptoHelper.CRITICAL_JSON);
         do {
             signatureObjects.add(arrayReader.getObject());
         } while(arrayReader.hasMore());
@@ -574,7 +574,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setPublicKey(PublicKey)
      */
     public PublicKey getPublicKey(AlgorithmPreferences algorithmPreferences) throws IOException {
-        return getObject(JSONCryptoHelper.JWK_JSON).getCorePublicKey(algorithmPreferences);
+        return getObject(JSONCryptoHelper.PUBLIC_KEY_JSON).getCorePublicKey(algorithmPreferences);
     }
 
     /**
@@ -695,7 +695,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @see org.webpki.json.JSONObjectWriter#setCertificatePath(X509Certificate[])
      */
     public X509Certificate[] getCertificatePath() throws IOException {
-        return getArray(JSONCryptoHelper.X5C_JSON).getCertificatePath();
+        return getArray(JSONCryptoHelper.CERTIFICATE_PATH).getCertificatePath();
     }
 
     /**

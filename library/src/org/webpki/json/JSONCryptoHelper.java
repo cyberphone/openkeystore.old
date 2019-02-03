@@ -22,12 +22,10 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
-import java.util.regex.Pattern;
-
 import org.webpki.crypto.AlgorithmPreferences;
 
 /**
- * Common crypto support for Cleartext JWS and JWE.
+ * Common crypto support for JSF and JEF.
  */
 public class JSONCryptoHelper implements Serializable {
 
@@ -41,51 +39,37 @@ public class JSONCryptoHelper implements Serializable {
     public static final String RSA_PUBLIC_KEY          = "RSA";
 
     // JSON properties
-    public static final String ALG_JSON                = "alg";
+    public static final String ALGORITHM_JSON          = "algorithm";
 
     public static final String CRV_JSON                = "crv";            // JWK
 
     public static final String E_JSON                  = "e";              // JWK
 
-    public static final String EXCL_JSON               = "excl";           // JCS specific non-protected
+    public static final String EXCLUDE_JSON            = "exclude";        // JSF specific non-protected
 
-    public static final String CRIT_JSON               = "crit";           // JWS extension
+    public static final String CRITICAL_JSON           = "critical";       // JSF extension
 
-    public static final String JKU_JSON                = "jku";            // Remote JWK set url
-
-    public static final String KID_JSON                = "kid";
-
-    public static final String KEYS_JSON               = "keys";           // for JWK sets
+    public static final String KEY_ID_JSON             = "keyId";          // JSF/JEF
 
     public static final String KTY_JSON                = "kty";            // JWK
 
     public static final String N_JSON                  = "n";              // JWK
 
-    public static final String JWK_JSON                = "jwk";            // Public key holder
+    public static final String PUBLIC_KEY_JSON         = "publicKey";      // Public key holder (subset JWK)
 
-    public static final String SIGNATURE_JSON          = "signature";      // JWS - Default label
+    public static final String SIGNERS_JSON            = "signers";        // JSF - Multiple signers
 
-    public static final String SIGNERS_JSON            = "signers";        // JWS - Multiple signers
-
-    public static final String VAL_JSON                = "val";            // JCS specific signature value 
+    public static final String VALUE_JSON              = "value";          // JSF signature value 
 
     public static final String X_JSON                  = "x";              // JWK
 
     public static final String Y_JSON                  = "y";              // JWK
     
-    public static final String X5C_JSON                = "x5c";            // Certificate path
+    public static final String CERTIFICATE_PATH        = "certificatePath";// X.509 Certificate path
 
-    public static final String X5T_JSON                = "x5t";            // Certificate SHA-1 thumbprint
+    public static final String ENCRYPTED_KEY_JSON      = "encryptedKey";   // JEF specific
 
-    public static final String X5T_S256_JSON           = "x5t#s256";       // Certificate SHA-256 thumbprint
-
-    public static final String X5U_JSON                = "x5u";            // PEM certificate path on URL
-    
-    public static final String ENCRYPTED_KEY_JSON      = "encrypted_key";
-
-    public static final String EPK_JSON                = "epk";
-
-    public static final String ENC_JSON                = "enc";
+    public static final String EPHEMERAL_KEY_JSON      = "ephemeralKey";   // JWK subset
 
     public static final String AAD_JSON                = "aad";
 
@@ -93,70 +77,42 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String TAG_JSON                = "tag";
 
-    public static final String CIPHER_TEXT_JSON        = "ciphertext";
+    public static final String CIPHER_TEXT_JSON        = "cipherText";
 
     public static final String RECIPIENTS_JSON         = "recipients";
 
+    
     static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
 
     static {
-        jefReservedWords.add(ALG_JSON);
-        jefReservedWords.add(ENC_JSON);
+        jefReservedWords.add(ALGORITHM_JSON);
         jefReservedWords.add(IV_JSON);
         jefReservedWords.add(TAG_JSON);
         jefReservedWords.add(AAD_JSON);
         jefReservedWords.add(ENCRYPTED_KEY_JSON);
-        jefReservedWords.add(EPK_JSON);
+        jefReservedWords.add(EPHEMERAL_KEY_JSON);
         jefReservedWords.add(CIPHER_TEXT_JSON);
         jefReservedWords.add(RECIPIENTS_JSON);
-        jefReservedWords.add(CRIT_JSON);
-        jefReservedWords.add(KID_JSON);
-        jefReservedWords.add(JWK_JSON);
-        jefReservedWords.add(JKU_JSON);
-        jefReservedWords.add(X5C_JSON);
-        jefReservedWords.add(X5T_JSON);
-        jefReservedWords.add(X5T_S256_JSON);
-        jefReservedWords.add(X5U_JSON);
+        jefReservedWords.add(CRITICAL_JSON);
+        jefReservedWords.add(KEY_ID_JSON);
+        jefReservedWords.add(PUBLIC_KEY_JSON);
+        jefReservedWords.add(CERTIFICATE_PATH);
     }
 
     static final LinkedHashSet<String> jcsReservedWords = new LinkedHashSet<String>();
 
     static {
-        jcsReservedWords.add(ALG_JSON);
-        jcsReservedWords.add(CRIT_JSON);
-        jcsReservedWords.add(EXCL_JSON);
-        jcsReservedWords.add(KID_JSON);
-        jcsReservedWords.add(JWK_JSON);
-        jcsReservedWords.add(JKU_JSON);
-        jcsReservedWords.add(X5C_JSON);
-        jcsReservedWords.add(X5T_JSON);
-        jcsReservedWords.add(X5T_S256_JSON);
-        jcsReservedWords.add(X5U_JSON);
-        jcsReservedWords.add(VAL_JSON);
-    }
-
-    static final Pattern HTTPS_URL_PATTERN = Pattern.compile("^https://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
-    
-    static String _defaultSignatureLabel = SIGNATURE_JSON;
-    static String _valueLabel            = VAL_JSON;
-    
-    public static void _setMode(boolean joseFlag) {
-        if (joseFlag) {
-            _defaultSignatureLabel = "__cleartext_signature";
-            _valueLabel            = "signature";
-        }
-    }
-    
-    public static String _getDefaultSignatureLabel() {
-        return _defaultSignatureLabel;
-    }
-
-    public static String _getValueLabel() {
-        return _valueLabel;
+        jcsReservedWords.add(ALGORITHM_JSON);
+        jcsReservedWords.add(CRITICAL_JSON);
+        jcsReservedWords.add(EXCLUDE_JSON);
+        jcsReservedWords.add(KEY_ID_JSON);
+        jcsReservedWords.add(PUBLIC_KEY_JSON);
+        jcsReservedWords.add(CERTIFICATE_PATH);
+        jcsReservedWords.add(VALUE_JSON);
     }
 
     /**
-     * For building "crit" decoders
+     * For building "critical" decoders
      */
     public static abstract class Extension {
         
@@ -171,7 +127,7 @@ public class JSONCryptoHelper implements Serializable {
     }
 
     /**
-     * Holds list of supported "crit" extension decoders.
+     * Holds list of supported "critical" extension decoders.
      *
      */
     public static class ExtensionHolder {
@@ -208,7 +164,7 @@ public class JSONCryptoHelper implements Serializable {
     public enum KEY_ID_OPTIONS {FORBIDDEN, REQUIRED, OPTIONAL};
 
     /**
-     * Common JEF/JCS decoding options.
+     * Common JEF/JSF decoding options.
      * <p>This class holds options that are checked during decoding.</p>
      * The following options are currently recognized:
      * <ul>
@@ -226,8 +182,6 @@ public class JSONCryptoHelper implements Serializable {
         boolean requirePublicKeyInfo = true;
         KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
         ExtensionHolder extensionHolder = new ExtensionHolder();
-        JSONRemoteKeys.Reader remoteKeyReader;
-        JSONRemoteKeys remoteKeyType;
         LinkedHashSet<String> exclusions;
         
         String globalSignatureAlgorithm;
@@ -242,20 +196,6 @@ public class JSONCryptoHelper implements Serializable {
 
         public Options setRequirePublicKeyInfo(boolean flag) {
             this.requirePublicKeyInfo = flag;
-            return this;
-        }
-
-        /**
-         * Define external remote key reader class.
-         * If set, the signature decoder assumes that there is no in-line public key or certificate information to process.   
-         * @param remoteKeyReader Interface
-         * @param remoteKeyType Expected type
-         * @return this
-         */
-        public Options setRemoteKeyReader(JSONRemoteKeys.Reader remoteKeyReader,
-                                          JSONRemoteKeys remoteKeyType) {
-            this.remoteKeyReader = remoteKeyReader;
-            this.remoteKeyType = remoteKeyType;
             return this;
         }
 
@@ -287,13 +227,13 @@ public class JSONCryptoHelper implements Serializable {
         }
 
         String getKeyId(JSONObjectReader reader) throws IOException {
-            String keyId = reader.getStringConditional(JSONCryptoHelper.KID_JSON);
+            String keyId = reader.getStringConditional(JSONCryptoHelper.KEY_ID_JSON);
             if (keyId == null) {
                 if (keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED) {
-                    throw new IOException("Missing \"" + JSONCryptoHelper.KID_JSON + "\"");
+                    throw new IOException("Missing \"" + JSONCryptoHelper.KEY_ID_JSON + "\"");
                 }
             } else if (keyIdOption == JSONCryptoHelper.KEY_ID_OPTIONS.FORBIDDEN) {
-                throw new IOException("Use of \"" + JSONCryptoHelper.KID_JSON + "\" must be set in options");
+                throw new IOException("Use of \"" + JSONCryptoHelper.KEY_ID_JSON + "\" must be set in options");
             }
             return keyId;
         }
@@ -301,19 +241,19 @@ public class JSONCryptoHelper implements Serializable {
         void getExtensions(JSONObjectReader innerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
             String[] extensionList = globalExtensions;
             if (extensionList == null) {
-                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.CRIT_JSON);
-            } else if (innerObject.hasProperty(JSONCryptoHelper.CRIT_JSON)) {
-                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.CRIT_JSON + "\" not allowed");
+                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.CRITICAL_JSON);
+            } else if (innerObject.hasProperty(JSONCryptoHelper.CRITICAL_JSON)) {
+                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.CRITICAL_JSON + "\" not allowed");
             }
             if (extensionList != null) {
                 checkExtensions(extensionList, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
-                    throw new IOException("Use of \"" + JSONCryptoHelper.CRIT_JSON + "\" must be set in options");
+                    throw new IOException("Use of \"" + JSONCryptoHelper.CRITICAL_JSON + "\" must be set in options");
                 }
                 for (String name : extensionList) {
                     JSONCryptoHelper.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
                     if (extensionEntry == null) {
-                        throw new IOException("Unexpected \"" + JSONCryptoHelper.CRIT_JSON + "\" extension: " + name);
+                        throw new IOException("Unexpected \"" + JSONCryptoHelper.CRITICAL_JSON + "\" extension: " + name);
                     }
                     if (innerObject.hasProperty(name)) {
                         try {
@@ -330,7 +270,7 @@ public class JSONCryptoHelper implements Serializable {
             }
             for (String name : extensionHolder.extensions.keySet()) {
                 if (!extensions.containsKey(name) && extensionHolder.extensions.get(name).mandatory) {
-                    throw new IOException("Missing \"" + JSONCryptoHelper.CRIT_JSON + "\" mandatory extension: " + name);
+                    throw new IOException("Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: " + name);
                 }
             }
         }
@@ -338,23 +278,16 @@ public class JSONCryptoHelper implements Serializable {
 
     private static void checkOneExtension(String property, boolean encryptionMode) throws IOException {
         if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
-            throw new IOException("Forbidden \"" + JSONCryptoHelper.CRIT_JSON + "\" property: " + property);
+            throw new IOException("Forbidden \"" + JSONCryptoHelper.CRITICAL_JSON + "\" property: " + property);
         }
     }
 
     static void checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
         if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoHelper.CRIT_JSON + "\" array not allowed");
+            throw new IOException("Empty \"" + JSONCryptoHelper.CRITICAL_JSON + "\" array not allowed");
         }
         for (String property : properties) {
             checkOneExtension(property, encryptionMode);
         }
-    }
-
-    static String checkHttpsUrl(String url) throws IOException {
-        if (!HTTPS_URL_PATTERN.matcher(url).matches()) {
-            throw new IOException("Invalid URL: " + url);
-        }
-        return url;
     }
 }

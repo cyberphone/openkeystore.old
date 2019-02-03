@@ -1,9 +1,0 @@
-{
-  "iss": "joe",
-  "exp": 1300819380,
-  "__cleartext_signature": {
-    "alg": "ES512",
-    "x5u": "https://cyberphone.github.io/doc/openkeystore/p521certpath.pem",
-    "signature": "AbbjlFDLSUPO5nYeS59xxFZadZ8jvKmRZrzUTuW3T0AbzorO5qWQ1MCb2NVZ_Z35S6stcF3Zs7PWXMdixNykckNmAAn8W3MU712ceEna63IcxvOP0Nni8dYLgZaP-admILmcEZd-wxNNYRud9EMngWSku0kA2u2-PhdHVJQrmqtcyHCU"
-  }
-}

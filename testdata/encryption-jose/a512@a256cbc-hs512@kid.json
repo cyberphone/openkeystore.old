@@ -1,8 +1,0 @@
-{
-  "enc": "A256CBC-HS512",
-  "alg": "dir",
-  "kid": "a512bitkey",
-  "iv": "SySIhXXePDqQJaKkVde9Aw",
-  "tag": "xHAPt5ZAh4mCd0L7TP6h2boqtOUe9pFVOBzMtPWaBd8",
-  "ciphertext": "WgiKsuAjNgr3UcYLEV2uAiCLWrN5X-odtDqAB8YQx-s"
-}
