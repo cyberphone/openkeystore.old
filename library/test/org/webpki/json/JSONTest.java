@@ -3839,7 +3839,7 @@ public class JSONTest {
     void variousEncryptionErrors(String fileName, String exceptionString) throws Exception {
         JSONObjectReader enc = readEncryption(fileName);
         try {
-            if (enc.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
+            if (enc.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
                 enc.getEncryptionObjects(new JSONCryptoHelper.Options());
             } else {
                 enc.getEncryptionObject(new JSONCryptoHelper.Options());
@@ -4108,7 +4108,7 @@ public class JSONTest {
         for (int i = 1; i < 5; i++) {
             try {
                 JSONObjectReader enc = readEncryption("err-missing-alg" + i + ".json");
-                if (enc.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
+                if (enc.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
                     enc.getEncryptionObjects(new JSONCryptoHelper.Options());
                 } else {
                     enc.getEncryptionObject(new JSONCryptoHelper.Options());

@@ -54,8 +54,6 @@ public abstract class JSONEncrypter implements Serializable {
 
         ContentEncryptionAlgorithms contentEncryptionAlgorithm;
 
-        KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
-
         JSONObjectWriter encryptionWriter;
 
         byte[] contentEncryptionKey;
@@ -65,23 +63,17 @@ public abstract class JSONEncrypter implements Serializable {
         Header(ContentEncryptionAlgorithms contentEncryptionAlgorithm, JSONEncrypter encrypter) throws IOException {
             this.contentEncryptionAlgorithm = contentEncryptionAlgorithm;
             contentEncryptionKey = encrypter.contentEncryptionKey;
-            globalKeyEncryptionAlgorithm = encrypter.keyEncryptionAlgorithm;
             encryptionWriter = new JSONObjectWriter();
-// TODO
-//            encryptionWriter.setString(JSONCryptoHelper.ENC_JSON, contentEncryptionAlgorithm.joseName);
-            encryptionWriter.setString(JSONCryptoHelper.ALGORITHM_JSON, globalKeyEncryptionAlgorithm.joseName);
-            if (globalKeyEncryptionAlgorithm.keyWrap) {
+            encryptionWriter.setString(JSONCryptoHelper.ALGORITHM_JSON, contentEncryptionAlgorithm.joseName);
+            if (encrypter.keyEncryptionAlgorithm != null && encrypter.keyEncryptionAlgorithm.keyWrap) {
                 contentEncryptionKey = EncryptionCore.generateRandom(contentEncryptionAlgorithm.keyLength);
             }
         }
 
         void createRecipient(JSONEncrypter encrypter, JSONObjectWriter currentRecipient)
         throws IOException, GeneralSecurityException {
-            currentRecipient.setString(JSONCryptoHelper.ALGORITHM_JSON, encrypter.keyEncryptionAlgorithm.joseName);
-            // Does any of the recipients have a different key encryption algorithm? 
-            if (globalKeyEncryptionAlgorithm != encrypter.keyEncryptionAlgorithm) {
-                encryptionWriter.root.properties.remove(JSONCryptoHelper.ALGORITHM_JSON);
-                globalKeyEncryptionAlgorithm = null;
+            if (encrypter.keyEncryptionAlgorithm != null) {
+                currentRecipient.setString(JSONCryptoHelper.ALGORITHM_JSON, encrypter.keyEncryptionAlgorithm.joseName);
             }
 
             if (encrypter.keyId != null) {
@@ -93,9 +85,7 @@ public abstract class JSONEncrypter implements Serializable {
             }
  
             // The encrypted key part (if any)
-// TODO
-if (encrypter.keyEncryptionAlgorithm !=null) { // keeps compiler happy
-//            if (encrypter.keyEncryptionAlgorithm != KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
+            if (encrypter.keyEncryptionAlgorithm != null) {
                 EncryptionCore.AsymmetricEncryptionResult asymmetricEncryptionResult =
                         encrypter.keyEncryptionAlgorithm.isRsa() ?
                             EncryptionCore.rsaEncryptKey(contentEncryptionKey,
@@ -116,7 +106,7 @@ if (encrypter.keyEncryptionAlgorithm !=null) { // keeps compiler happy
                                                             AlgorithmPreferences.JOSE));
                 }
                 if (encrypter.keyEncryptionAlgorithm.isKeyWrap()) {
-                    currentRecipient.setBinary(JSONCryptoHelper.ENCRYPTED_KEY_JSON,
+                    currentRecipient.setBinary(JSONCryptoHelper.CIPHER_TEXT_JSON,
                                                asymmetricEncryptionResult.getEncryptedKeyData());
                 }
             }
@@ -126,14 +116,6 @@ if (encrypter.keyEncryptionAlgorithm !=null) { // keeps compiler happy
                     foundExtensions.add(property);
                     currentRecipient.setProperty(property, encrypter.extensions.getProperty(property));
                 }
-            }
-        }
-
-        void cleanRecipient(JSONObjectWriter recipient) {
-
-            // All recipients use the same key encryption algorithm?  If so remove the local definition
-            if (globalKeyEncryptionAlgorithm != null) {
-                recipient.root.properties.remove(JSONCryptoHelper.ALGORITHM_JSON);
             }
         }
 

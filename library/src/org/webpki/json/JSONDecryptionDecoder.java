@@ -49,6 +49,8 @@ public class JSONDecryptionDecoder {
     static class Holder {
 
         JSONCryptoHelper.Options options;
+        
+        boolean keyEncryption;
 
         byte[] authenticatedData;
         byte[] iv;
@@ -56,22 +58,15 @@ public class JSONDecryptionDecoder {
         byte[] encryptedData;
         
         ContentEncryptionAlgorithms contentEncryptionAlgorithm;
-        KeyEncryptionAlgorithms globalKeyEncryptionAlgorithm;
         JSONObjectReader globalEncryptionObject;
 
         Holder (JSONCryptoHelper.Options options, 
                 JSONObjectReader encryptionObject,
-                boolean multiple) throws IOException {
+                boolean keyEncryption) throws IOException {
             encryptionObject.clearReadFlags();
             this.options = options;
             this.globalEncryptionObject = encryptionObject;
-            if (multiple) {
-                /////////////////////////////////////////////////////////////////////////////
-                // For encryption objects with multiple recipients we allow a global "alg"
-                // Note: mixing local and global is not permitted
-                /////////////////////////////////////////////////////////////////////////////
-                globalKeyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-            }
+            this.keyEncryption = keyEncryption;
 
             ///////////////////////////////////////////////////////////////////////////////////////////////
             // Begin JEF normalization                                                                   //
@@ -152,11 +147,6 @@ public class JSONDecryptionDecoder {
         return keyEncryptionAlgorithm;
     }
 
-    private static KeyEncryptionAlgorithms getOptionalAlgorithm(JSONObjectReader reader) throws IOException {
-        return reader.hasProperty(JSONCryptoHelper.ALGORITHM_JSON) ? 
-            KeyEncryptionAlgorithms.getAlgorithmFromId(reader.getString(JSONCryptoHelper.ALGORITHM_JSON)) : null;
-    }
-
     /**
      * Decodes a single encryption element.
      * @param holder Global data
@@ -173,22 +163,12 @@ public class JSONDecryptionDecoder {
         keyId = holder.options.getKeyId(encryptionObject);
 
         // Are we using a key encryption scheme?
-        keyEncryptionAlgorithm = getOptionalAlgorithm(encryptionObject);
-        if (keyEncryptionAlgorithm == null) {
-            keyEncryptionAlgorithm = holder.globalKeyEncryptionAlgorithm;
-        } else if (holder.globalKeyEncryptionAlgorithm != null) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" not allowed");
-        }
-        if (keyEncryptionAlgorithm == null) {
-            throw new IOException("Missing \"" + JSONCryptoHelper.ALGORITHM_JSON  + "\"");
-        }
-
-// TODO
-if (keyEncryptionAlgorithm == null)  {// Keeps compiler happy
-//        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithms.JOSE_DIRECT_ALG_ID) {
-            sharedSecretMode = true;
-        } else {
-            // We are apparently into a two level encryption scheme
+        if (holder.keyEncryption)  {
+            keyEncryptionAlgorithm = KeyEncryptionAlgorithms
+                        .getAlgorithmFromId(encryptionObject.getString(JSONCryptoHelper.ALGORITHM_JSON));
+            if (keyEncryptionAlgorithm == null) {
+                throw new IOException("Missing \"" + JSONCryptoHelper.ALGORITHM_JSON  + "\"");
+            }
             if (holder.options.requirePublicKeyInfo) {
                 if (encryptionObject.hasProperty(JSONCryptoHelper.CERTIFICATE_PATH)) {
                     certificatePath = encryptionObject.getCertificatePath();
@@ -200,7 +180,7 @@ if (keyEncryptionAlgorithm == null)  {// Keeps compiler happy
             }
 
             if (keyEncryptionAlgorithm.isKeyWrap()) {
-                encryptedKeyData = encryptionObject.getBinary(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
+                encryptedKeyData = encryptionObject.getBinary(JSONCryptoHelper.CIPHER_TEXT_JSON);
             }
             if (!keyEncryptionAlgorithm.isRsa()) {
                 ephemeralPublicKey =
@@ -208,9 +188,11 @@ if (keyEncryptionAlgorithm == null)  {// Keeps compiler happy
                             .getObject(JSONCryptoHelper.EPHEMERAL_KEY_JSON)
                                 .getCorePublicKey(holder.options.algorithmPreferences);
             }
+        } else {
+            sharedSecretMode = true;
         }
 
-        // An encryption object may also hold "crit" data
+        // An encryption object may also hold "critical" data
         holder.options.getExtensions(encryptionObject, extensions);
 
         if (last) {

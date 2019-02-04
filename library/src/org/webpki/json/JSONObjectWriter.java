@@ -836,12 +836,11 @@ import org.webpki.json.JSONSignatureDecoder;
     throws IOException, GeneralSecurityException {
         JSONEncrypter.Header header = 
                 new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypter);
-        JSONObjectWriter recipient = new JSONObjectWriter();
-        header.createRecipient(encrypter, recipient);
-        header.cleanRecipient(recipient);
-        for (String property : recipient.root.properties.keySet()) {
-            header.encryptionWriter.setProperty(property, recipient.root.properties.get(property));
+        JSONObjectWriter encryptionObject = header.encryptionWriter;
+        if (encrypter.keyEncryptionAlgorithm != null) {
+            encryptionObject = encryptionObject.setObject(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
         }
+        header.createRecipient(encrypter, encryptionObject);
         return header.finalizeEncryption(unencryptedData);
     }
 
@@ -864,17 +863,12 @@ import org.webpki.json.JSONSignatureDecoder;
         }
         JSONEncrypter.Header header = 
                 new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypters.firstElement());
-        Vector<JSONObjectWriter> recipents = new Vector<JSONObjectWriter>();
+        JSONArrayWriter recipientList = 
+                header.encryptionWriter.setArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
         for (JSONEncrypter encrypter : encrypters) {
             JSONDecryptionDecoder.keyWrapCheck(encrypter.keyEncryptionAlgorithm);
-            JSONObjectWriter currentRecipient = new JSONObjectWriter();
-            header.createRecipient(encrypter, currentRecipient);
-            recipents.add(currentRecipient);
-        }
-        JSONArrayWriter recipientList = 
-                header.encryptionWriter.setArray(JSONCryptoHelper.RECIPIENTS_JSON);
-        for (JSONObjectWriter recipient : recipents) {
-            header.cleanRecipient(recipient);
+            JSONObjectWriter recipient = new JSONObjectWriter();
+            header.createRecipient(encrypter, recipient);
             recipientList.setObject(recipient);
         }
         return header.finalizeEncryption(unencryptedData);

@@ -79,7 +79,7 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String CIPHER_TEXT_JSON        = "cipherText";
 
-    public static final String RECIPIENTS_JSON         = "recipients";
+    public static final String ENCRYPTED_KEYS_JSON     = "encryptedKeys";  // JEF specific
 
     
     static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
@@ -92,7 +92,7 @@ public class JSONCryptoHelper implements Serializable {
         jefReservedWords.add(ENCRYPTED_KEY_JSON);
         jefReservedWords.add(EPHEMERAL_KEY_JSON);
         jefReservedWords.add(CIPHER_TEXT_JSON);
-        jefReservedWords.add(RECIPIENTS_JSON);
+        jefReservedWords.add(ENCRYPTED_KEYS_JSON);
         jefReservedWords.add(CRITICAL_JSON);
         jefReservedWords.add(KEY_ID_JSON);
         jefReservedWords.add(PUBLIC_KEY_JSON);

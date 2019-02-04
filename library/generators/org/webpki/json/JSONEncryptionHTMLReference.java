@@ -198,8 +198,8 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
             if (checker.hasProperty(JSONCryptoHelper.KEY_ID_JSON)) {
                 options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
             }
-            if (checker.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
-                JSONArrayReader recipientArray = checker.getArray(JSONCryptoHelper.RECIPIENTS_JSON);
+            if (checker.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
+                JSONArrayReader recipientArray = checker.getArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
                 do {
                     scanObject(recipientArray.getObject(), options);
                 } while (recipientArray.hasMore());
@@ -576,7 +576,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                     json.globalLinkRef(SAMPLE_OBJECT) + ".")
        .newRow()
         .newColumn()
-        .addProperty(JSONCryptoHelper.RECIPIENTS_JSON)
+        .addProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)
         .addArrayLink(KEY_ENCRYPTION, 1)
     .newColumn()
         .setType(Types.WEBPKI_DATA_TYPES.OBJECT)
@@ -601,7 +601,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           "featured in the " +
                   json.globalLinkRef(KEY_ENCRYPTION) +
           " object (or the top level object " +
-          "for the case there is no <code>&quot;" + JSONCryptoHelper.RECIPIENTS_JSON + 
+          "for the case there is no <code>&quot;" + JSONCryptoHelper.ENCRYPTED_KEYS_JSON + 
           "&quot;</code> element)." +
           Types.LINE_SEPARATOR +
           "Extension names <b>must not</b> be <i>duplicated</i> or use any of the JEF <i>reserved words</i> " +
