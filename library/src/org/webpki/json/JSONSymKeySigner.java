@@ -84,9 +84,4 @@ public class JSONSymKeySigner extends JSONSigner {
     @Override
     void writeKeyData(JSONObjectWriter wr) throws IOException {
     }
-
-    @Override
-    void setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm) {
-        algorithm = (MACAlgorithms) signatureAlgorithm;
-    }
 }

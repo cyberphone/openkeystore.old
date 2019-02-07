@@ -121,7 +121,7 @@ public abstract class JSONEncrypter implements Serializable {
 
         JSONObjectWriter finalizeEncryption(byte[] unencryptedData) throws IOException, GeneralSecurityException {
             if (!foundExtensions.isEmpty()) {
-                encryptionWriter.setStringArray(JSONCryptoHelper.CRITICAL_JSON,
+                encryptionWriter.setStringArray(JSONCryptoHelper.EXTENSIONS_JSON,
                                                 foundExtensions.toArray(new String[0]));
             }
             byte[] iv = EncryptionCore.createIv(contentEncryptionAlgorithm);

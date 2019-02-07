@@ -3441,12 +3441,13 @@ public class JSONTest {
         }
         writer = new JSONObjectWriter().setString("myData", "cool!")
         .setSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
-            .setExtensions(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
+            .setExtensionNames(new String[]{"https://example.com/ext"})
+            .setExtensionData(new JSONObjectWriter().setString("https://example.com/ext", "foobar")));
         try {
             verifySignature(writer, new JSONCryptoHelper.Options(), p256.getPublic());
             fail("Should not work");
         } catch (Exception e) {
-            checkException(e, "Use of \"" + JSONCryptoHelper.CRITICAL_JSON + "\" must be set in options");
+            checkException(e, "Use of \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" must be set in options");
         }
         try {
             JSONCryptoHelper.ExtensionHolder holder = new JSONCryptoHelper.ExtensionHolder();
@@ -3493,7 +3494,7 @@ public class JSONTest {
                                  p256.getPublic()).getExtension("https://example.com/ext"))).data));
             fail("Shouldn't work");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext2");
+            checkException(e, "Missing \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" mandatory extension: https://example.com/ext2");
         }
         holder = new JSONCryptoHelper.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, true);
@@ -3503,7 +3504,7 @@ public class JSONTest {
             readSignature(writer, new JSONCryptoHelper.Options().setPermittedExtensions(holder));
             fail("Not ok");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" mandatory extension: https://example.com/ext");
         }
         holder = new JSONCryptoHelper.ExtensionHolder();
         holder.addExtension(ExampleComExtGood.class, false);
@@ -3578,18 +3579,17 @@ public class JSONTest {
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(r2048.getPublic()));
-        JSONSigner.MultiSignatureHeader msh = new JSONSigner.MultiSignatureHeader(null);
         writer = new JSONObjectWriter().setInt("value", 3)
-            .setMultiSignature(msh, new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null))
-            .setMultiSignature(msh, new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
+            .setMultiSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null))
+            .setMultiSignature(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null));
         signatures = new JSONObjectReader(writer).getMultiSignature(new JSONCryptoHelper.Options());
         assertTrue(signatures.size() == 2);
         signatures.get(0).verify(new JSONAsymKeyVerifier(p256.getPublic()));
         signatures.get(1).verify(new JSONAsymKeyVerifier(p521.getPublic()));
         writer = new JSONObjectWriter().setInt("value", 3)
-            .setMultiSignature(msh, new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
+            .setMultiSignature(new JSONAsymKeySigner(p256.getPrivate(), p256.getPublic(), null)
                 .setOutputPublicKeyInfo(false))
-            .setMultiSignature(msh, new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null)
+            .setMultiSignature(new JSONAsymKeySigner(p521.getPrivate(), p521.getPublic(), null)
                 .setOutputPublicKeyInfo(false).setKeyId("mykey"));
         try {
             new JSONObjectReader(writer).clone().getMultiSignature(new JSONCryptoHelper.Options()
@@ -4047,7 +4047,7 @@ public class JSONTest {
                              .setPermittedExtensions(extensionHolder));
             fail("Shouldn't");
         } catch (Exception e) {
-            checkException(e, "Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: https://example.com/ext");
+            checkException(e, "Missing \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" mandatory extension: https://example.com/ext");
         }
 
         try {
@@ -4059,7 +4059,7 @@ public class JSONTest {
                              .setPermittedExtensions(extensionHolder));
             fail("Shouldn't");
         } catch (Exception e) {
-            checkException(e, "Forbidden \"" + JSONCryptoHelper.CRITICAL_JSON + "\" property: enc");
+            checkException(e, "Forbidden \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" property: enc");
         }
 
         encJson = JSONObjectWriter

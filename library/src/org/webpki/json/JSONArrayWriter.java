@@ -118,13 +118,18 @@ public class JSONArrayWriter implements Serializable {
         return setString(Base64URL.encode(value));
     }
 
+    JSONObjectWriter createWriteable() {
+        JSONObject dummy = new JSONObject();
+        dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
+        return new JSONObjectWriter(dummy);
+        
+    }
     public JSONArrayWriter setSignature (JSONSigner signer) throws IOException {
         JSONObjectWriter signatureObject = setObject();
-        JSONObjectWriter.createHeaderPart(signer, signatureObject, new JSONSigner.MultiSignatureHeader(null));
-        // Finally, the signature itself
-        signatureObject.setBinary(JSONCryptoHelper.VALUE_JSON,
-                                  signer.signData(signer.normalizedData = 
-                                          this.serializeToBytes(JSONOutputFormats.CANONICALIZED)));
+        JSONObjectWriter.coreSign(signer, 
+                                  signatureObject,
+                                  signatureObject,
+                                  createWriteable());
         return this;
     }
 
@@ -176,9 +181,7 @@ public class JSONArrayWriter implements Serializable {
     }
 
     public String serializeToString(JSONOutputFormats outputFormat) throws IOException {
-        JSONObject dummy = new JSONObject();
-        dummy.properties.put(null, new JSONValue(JSONTypes.ARRAY, array));
-        return new JSONObjectWriter(dummy).serializeToString(outputFormat);
+        return createWriteable().serializeToString(outputFormat);
     }
 
     public byte[] serializeToBytes(JSONOutputFormats outputFormat) throws IOException {

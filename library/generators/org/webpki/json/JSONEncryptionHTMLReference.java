@@ -182,7 +182,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    !recipient.hasProperty(JSONCryptoHelper.PUBLIC_KEY_JSON)) {
             options.setRequirePublicKeyInfo(false);
         }
-        if (recipient.hasProperty(JSONCryptoHelper.CRITICAL_JSON)) {
+        if (recipient.hasProperty(JSONCryptoHelper.EXTENSIONS_JSON)) {
             options.setPermittedExtensions(new JSONCryptoHelper.ExtensionHolder()
                 .addExtension(Extension1.class, true)
                 .addExtension(Extension2.class, true));
@@ -455,7 +455,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    "ECDH encryption object <i>requiring the same private key</i> " +
                            "as in the sample object while providing the key information " +
                            "in line.  In addition, this object declares <code>" +
-                           JSONCryptoHelper.CRITICAL_JSON + "</code> extensions:",
+                           JSONCryptoHelper.EXTENSIONS_JSON + "</code> extensions:",
                    CRIT_TEST_VECTOR) + 
            showKey(
                    "EC private key for decrypting the subsequent object:",
@@ -590,7 +590,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
                    JSONBaseHTML.referToTestVector(MULT_TEST_VECTOR))
        .newRow()
         .newColumn()
-        .addProperty(JSONCryptoHelper.CRITICAL_JSON)
+        .addProperty(JSONCryptoHelper.EXTENSIONS_JSON)
           .addArrayList(Types.PROPERTY_LIST, 1)
         .newColumn()
           .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -612,7 +612,7 @@ public class JSONEncryptionHTMLReference extends JSONBaseHTML.Types {
           "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
           "A conforming JEF implementation <b>must</b> <i>reject</i> encryption objects listing properties " +
           "that are not found as well as empty <code>&quot;" +
-          JSONCryptoHelper.CRITICAL_JSON + "&quot;</code> objects. " +
+          JSONCryptoHelper.EXTENSIONS_JSON + "&quot;</code> objects. " +
           "Receivers are <i>recommended</i> introducing additional constraints like only accepting predefined extensions." +
           Types.LINE_SEPARATOR +
           JSONBaseHTML.referToTestVector(CRIT_TEST_VECTOR))

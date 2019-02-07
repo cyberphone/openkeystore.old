@@ -417,7 +417,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
         "<span id=\"" + JSONBaseHTML.EXTENSION_EXAMPLE +
         "\">The</span> following signature object uses the same key as in the previous example but also " +
         "includes " +
-        json.globalLinkRef(JSONCryptoHelper.VALUE_JSON, JSONCryptoHelper.CRITICAL_JSON) +
+        json.globalLinkRef(JSONCryptoHelper.VALUE_JSON, JSONCryptoHelper.EXTENSIONS_JSON) +
         " extensions:" + 
         readAsymSignature("p256#es256@crit-jwk.json", p256key, new JSONCryptoHelper.Options()
             .setPermittedExtensions(new ExtensionHolder()
@@ -598,7 +598,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types {
             "For sophisticated <i>peer based</i> counter signature schemes another possibility is using " +
             "<a href=\"#" + JSONBaseHTML.makeLink(MULTIPLE_SIGNATURES) + "\">" + MULTIPLE_SIGNATURES +
             "</a>, <i>optionally</i> including a JCS " +
-            json.globalLinkRef(JSONCryptoHelper.VALUE_JSON, JSONCryptoHelper.CRITICAL_JSON) +
+            json.globalLinkRef(JSONCryptoHelper.VALUE_JSON, JSONCryptoHelper.EXTENSIONS_JSON) +
             " extension holding application specific (per signature) metadata.");
 
         json.addParagraphObject("Usage in Applications").append("JCS is a core element in a proof-of-concept application ")

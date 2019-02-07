@@ -39,15 +39,29 @@ public class JSONCryptoHelper implements Serializable {
     public static final String RSA_PUBLIC_KEY          = "RSA";
 
     // JSON properties
+    public static final String AAD_JSON                = "aad";
+
     public static final String ALGORITHM_JSON          = "algorithm";
+
+    public static final String CERTIFICATE_PATH        = "certificatePath";// X.509 Certificate path
+
+    public static final String CIPHER_TEXT_JSON        = "cipherText";     // JEF specific
 
     public static final String CRV_JSON                = "crv";            // JWK
 
     public static final String E_JSON                  = "e";              // JWK
 
+    public static final String ENCRYPTED_KEY_JSON      = "encryptedKey";   // JEF specific
+
+    public static final String ENCRYPTED_KEYS_JSON     = "encryptedKeys";  // JEF specific
+
+    public static final String EPHEMERAL_KEY_JSON      = "ephemeralKey";   // JWK subset
+
     public static final String EXCLUDE_JSON            = "exclude";        // JSF specific non-protected
 
-    public static final String CRITICAL_JSON           = "critical";       // JSF extension
+    public static final String EXTENSIONS_JSON         = "extensions";     // JSF/JEF extensions
+
+    public static final String IV_JSON                 = "iv";             // JWE/JEF
 
     public static final String KEY_ID_JSON             = "keyId";          // JSF/JEF
 
@@ -59,28 +73,14 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String SIGNERS_JSON            = "signers";        // JSF - Multiple signers
 
+    public static final String TAG_JSON                = "tag";            // JWE/JEF
+
     public static final String VALUE_JSON              = "value";          // JSF signature value 
 
     public static final String X_JSON                  = "x";              // JWK
 
     public static final String Y_JSON                  = "y";              // JWK
     
-    public static final String CERTIFICATE_PATH        = "certificatePath";// X.509 Certificate path
-
-    public static final String ENCRYPTED_KEY_JSON      = "encryptedKey";   // JEF specific
-
-    public static final String EPHEMERAL_KEY_JSON      = "ephemeralKey";   // JWK subset
-
-    public static final String AAD_JSON                = "aad";
-
-    public static final String IV_JSON                 = "iv";
-
-    public static final String TAG_JSON                = "tag";
-
-    public static final String CIPHER_TEXT_JSON        = "cipherText";
-
-    public static final String ENCRYPTED_KEYS_JSON     = "encryptedKeys";  // JEF specific
-
     
     static final LinkedHashSet<String> jefReservedWords = new LinkedHashSet<String>();
 
@@ -93,7 +93,7 @@ public class JSONCryptoHelper implements Serializable {
         jefReservedWords.add(EPHEMERAL_KEY_JSON);
         jefReservedWords.add(CIPHER_TEXT_JSON);
         jefReservedWords.add(ENCRYPTED_KEYS_JSON);
-        jefReservedWords.add(CRITICAL_JSON);
+        jefReservedWords.add(EXTENSIONS_JSON);
         jefReservedWords.add(KEY_ID_JSON);
         jefReservedWords.add(PUBLIC_KEY_JSON);
         jefReservedWords.add(CERTIFICATE_PATH);
@@ -103,7 +103,7 @@ public class JSONCryptoHelper implements Serializable {
 
     static {
         jcsReservedWords.add(ALGORITHM_JSON);
-        jcsReservedWords.add(CRITICAL_JSON);
+        jcsReservedWords.add(EXTENSIONS_JSON);
         jcsReservedWords.add(EXCLUDE_JSON);
         jcsReservedWords.add(KEY_ID_JSON);
         jcsReservedWords.add(PUBLIC_KEY_JSON);
@@ -241,19 +241,19 @@ public class JSONCryptoHelper implements Serializable {
         void getExtensions(JSONObjectReader innerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
             String[] extensionList = globalExtensions;
             if (extensionList == null) {
-                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.CRITICAL_JSON);
-            } else if (innerObject.hasProperty(JSONCryptoHelper.CRITICAL_JSON)) {
-                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.CRITICAL_JSON + "\" not allowed");
+                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.EXTENSIONS_JSON);
+            } else if (innerObject.hasProperty(JSONCryptoHelper.EXTENSIONS_JSON)) {
+                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" not allowed");
             }
             if (extensionList != null) {
                 checkExtensions(extensionList, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
-                    throw new IOException("Use of \"" + JSONCryptoHelper.CRITICAL_JSON + "\" must be set in options");
+                    throw new IOException("Use of \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" must be set in options");
                 }
                 for (String name : extensionList) {
                     JSONCryptoHelper.ExtensionEntry extensionEntry = extensionHolder.extensions.get(name);
                     if (extensionEntry == null) {
-                        throw new IOException("Unexpected \"" + JSONCryptoHelper.CRITICAL_JSON + "\" extension: " + name);
+                        throw new IOException("Unexpected \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" extension: " + name);
                     }
                     if (innerObject.hasProperty(name)) {
                         try {
@@ -270,7 +270,7 @@ public class JSONCryptoHelper implements Serializable {
             }
             for (String name : extensionHolder.extensions.keySet()) {
                 if (!extensions.containsKey(name) && extensionHolder.extensions.get(name).mandatory) {
-                    throw new IOException("Missing \"" + JSONCryptoHelper.CRITICAL_JSON + "\" mandatory extension: " + name);
+                    throw new IOException("Missing \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" mandatory extension: " + name);
                 }
             }
         }
@@ -278,16 +278,36 @@ public class JSONCryptoHelper implements Serializable {
 
     private static void checkOneExtension(String property, boolean encryptionMode) throws IOException {
         if ((encryptionMode ? jefReservedWords : jcsReservedWords).contains(property)) {
-            throw new IOException("Forbidden \"" + JSONCryptoHelper.CRITICAL_JSON + "\" property: " + property);
+            throw new IOException("Forbidden \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" property: " + property);
         }
     }
 
-    static void checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
+    static String[] checkExtensions(String[] properties, boolean encryptionMode) throws IOException {
         if (properties.length == 0) {
-            throw new IOException("Empty \"" + JSONCryptoHelper.CRITICAL_JSON + "\" array not allowed");
+            throw new IOException("Empty \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" array not allowed");
         }
         for (String property : properties) {
             checkOneExtension(property, encryptionMode);
         }
+        return properties;
     }
-}
+
+    static LinkedHashSet<String> createSet(String[] listOfNames) throws IOException {
+        LinkedHashSet<String> set = new LinkedHashSet<String>();
+        for (String name : listOfNames) {
+            if (!set.add(name)) {
+               throw new IOException("Duplicate: \"" + name + "\""); 
+            }
+        }
+        return set;
+    }
+    
+    static class ExtensionsEncoder {
+        
+        LinkedHashSet<String> extensionNames;
+        
+        public void setExtensionNames(String[] names, boolean encryptionMode) throws IOException {
+            this.extensionNames = createSet(checkExtensions(names, encryptionMode));
+        }
+    }
+ }

@@ -25,11 +25,11 @@ import org.webpki.crypto.SignatureAlgorithms;
 /**
  * Support class for signature generators.
  */
-public abstract class JSONSigner implements Serializable {
+public abstract class JSONSigner extends JSONCryptoHelper.ExtensionsEncoder implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    JSONObjectReader extensions;
+    JSONObjectReader extensionData;
     
     String[] excluded;
 
@@ -40,64 +40,38 @@ public abstract class JSONSigner implements Serializable {
     byte[] normalizedData;
 
     AlgorithmPreferences algorithmPreferences = AlgorithmPreferences.JOSE_ACCEPT_PREFER;
-
+    
     JSONSigner() {
-    }
-
-    public static class MultiSignatureHeader {
-
-        boolean multi = false;
-
-        SignatureAlgorithms globalAlgorithm;
-        AlgorithmPreferences algorithmPreferences;
-        
-        JSONCryptoHelper.Options optionalFormatVerifier;
-        
-        String[] excluded;
-        
-        JSONCryptoHelper.ExtensionHolder OptionalExtensions;
-
-        public MultiSignatureHeader(JSONCryptoHelper.Options optionalFormatVerifier) {
-            this.optionalFormatVerifier = optionalFormatVerifier;
-        }
-        
-        public MultiSignatureHeader setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm,
-                                                       AlgorithmPreferences algorithmPreferences) throws IOException {
-            this.globalAlgorithm = signatureAlgorithm;
-            this.algorithmPreferences = algorithmPreferences;
-            return this;
-        }
-
-        public MultiSignatureHeader setExcluded(String[] excluded) throws IOException {
-            this.excluded = excluded;
-            JSONSignatureDecoder.checkExcluded(excluded);
-            return this;
-        }
-
-        public MultiSignatureHeader setExtensions(JSONCryptoHelper.ExtensionHolder extensionHolder) throws IOException {
-            this.OptionalExtensions = extensionHolder;
-            JSONCryptoHelper.checkExtensions(extensionHolder.getPropertyList(), false);
-            return this;
-        }
     }
 
     abstract SignatureAlgorithms getAlgorithm();
     
-    abstract void setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm);
-
     abstract byte[] signData(byte[] data) throws IOException;
 
     abstract void writeKeyData(JSONObjectWriter wr) throws IOException;
 
     /**
-     * Set &quot;crit&quot; for this signature.
+     * Set (object level) list of permitted extension elements.
+     * This must only be done for the first signer in a multi-signature
+     * scenario
+     * @param names A list of permitted extensions 
+     * @return this
+     * @throws IOException 
+     */
+    public JSONSigner setExtensionNames(String[] names) throws IOException {
+        super.setExtensionNames(names, false);
+        return this;
+    }
+
+    /**
+     * Set specific extension data for this signature.
      * @param extensions JSON object holding the extension properties and associated values
      * @return this
      * @throws IOException &nbsp;
      */
-    public JSONSigner setExtensions(JSONObjectWriter extensions) throws IOException {
-        this.extensions = new JSONObjectReader(extensions);
-        JSONCryptoHelper.checkExtensions(this.extensions.getProperties(), false);
+    public JSONSigner setExtensionData(JSONObjectWriter extensions) throws IOException {
+        this.extensionData = new JSONObjectReader(extensions);
+        JSONCryptoHelper.checkExtensions(this.extensionData.getProperties(), false);
         return this;
     }
 

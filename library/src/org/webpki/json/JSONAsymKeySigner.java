@@ -106,9 +106,4 @@ public class JSONAsymKeySigner extends JSONSigner {
     void writeKeyData(JSONObjectWriter wr) throws IOException {
         wr.setPublicKey(publicKey, algorithmPreferences);
     }
-
-    @Override
-    void setGlobalAlgorithm(SignatureAlgorithms signatureAlgorithm) {
-        algorithm = (AsymSignatureAlgorithms)signatureAlgorithm;
-    }
 }

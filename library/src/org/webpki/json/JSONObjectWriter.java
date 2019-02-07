@@ -42,8 +42,6 @@ import java.util.regex.Pattern;
 import org.webpki.crypto.AlgorithmPreferences;
 import org.webpki.crypto.KeyAlgorithms;
 
-import org.webpki.json.JSONSigner.MultiSignatureHeader;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -531,50 +529,40 @@ public class JSONObjectWriter implements Serializable {
         setBinary(name, cryptoBinary);
     }
 
-    static void createHeaderPart(JSONSigner signer,
-                                 JSONObjectWriter signatureWriter,
-                                 MultiSignatureHeader multiSignatureHeader) throws IOException {
-        if (multiSignatureHeader.globalAlgorithm == null) {
-            signatureWriter.setString(JSONCryptoHelper.ALGORITHM_JSON,
-                                      signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
-        }
+    static void coreSign(JSONSigner signer, 
+                          JSONObjectWriter innerObject,
+                          JSONObjectWriter outerObject,
+                          JSONObjectWriter signedObject) throws IOException {
 
-        // "kid" is always optional
+        innerObject.setString(JSONCryptoHelper.ALGORITHM_JSON,
+                              signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
+        
         if (signer.keyId != null) {
-            signatureWriter.setString(JSONCryptoHelper.KEY_ID_JSON, signer.keyId);
+            innerObject.setString(JSONCryptoHelper.KEY_ID_JSON, signer.keyId);
         }
 
         if (signer.outputPublicKeyInfo) {
-            signer.writeKeyData(signatureWriter);
+            signer.writeKeyData(innerObject);
         }
-
+        
         // Optional extensions
-        boolean localExtension = !multiSignatureHeader.multi || multiSignatureHeader.OptionalExtensions == null;
-        if (signer.extensions != null) {
-            JSONArrayWriter extensions = null;
-            if (localExtension) {
-                extensions = signatureWriter.setArray(JSONCryptoHelper.CRITICAL_JSON);
+        if (signer.extensionData != null) {
+            if (signer.extensionNames == null) {
+                throw new IOException("Missing call to \"setExtensionNames()\"");
             }
-            for (String property : signer.extensions.getProperties()) {
-                if (localExtension) {
-                    extensions.setString(property);
+            outerObject.setStringArray(JSONCryptoHelper.EXTENSIONS_JSON,
+                                       signer.extensionNames.toArray(new String[0]));
+            for (String property : signer.extensionData.getProperties()) {
+                if (!signer.extensionNames.contains(property)) {
+                    throw new IOException("Undeclared extension: \"" + property + "\"");
                 }
-                signatureWriter.setProperty(property, signer.extensions.getProperty(property));
+                innerObject.setProperty(property, signer.extensionData.getProperty(property));
             }
         }
-    }
-
-    private void coreSign(JSONSigner signer, 
-                          JSONObjectWriter signatureWriter,
-                          MultiSignatureHeader multiSignatureHeader) throws IOException {
-
-        // Algorithm, keys, and crit
-        createHeaderPart(signer, signatureWriter, multiSignatureHeader);
 
         // Optional excluded properties
-        JSONObjectWriter signedObject = this;
         if (signer.excluded != null) {
-            JSONObjectReader rd = new JSONObjectReader(this).clone();
+            JSONObjectReader rd = new JSONObjectReader(signedObject).clone();
             for (String property : signer.excluded) {
                 if (!rd.hasProperty(property)) {
                     throw new IOException("Missing \"" + JSONCryptoHelper.EXCLUDE_JSON + "\" property: " + property);
@@ -582,15 +570,13 @@ public class JSONObjectWriter implements Serializable {
                 rd.removeProperty(property);
             }
             signedObject = new JSONObjectWriter(rd);
-            if (!multiSignatureHeader.multi) {
-                signatureWriter.setStringArray(JSONCryptoHelper.EXCLUDE_JSON, signer.excluded);
-            }
+            outerObject.setStringArray(JSONCryptoHelper.EXCLUDE_JSON, signer.excluded);
         }
 
         // Finally, the signature itself
-        signatureWriter.setBinary(JSONCryptoHelper.VALUE_JSON,
-                                  signer.signData(signer.normalizedData = 
-                                          signedObject.serializeToBytes(JSONOutputFormats.CANONICALIZED)));
+        innerObject.setBinary(JSONCryptoHelper.VALUE_JSON,
+                              signer.signData(signer.normalizedData = 
+                                  signedObject.serializeToBytes(JSONOutputFormats.CANONICALIZED)));
     }
 
     /**
@@ -669,65 +655,60 @@ import org.webpki.json.JSONSignatureDecoder;
     }
     
     public JSONObjectWriter setSignature(String signatureLabel, JSONSigner signer) throws IOException {
-        coreSign(signer, setObject(signatureLabel), new JSONSigner.MultiSignatureHeader(null));
+        JSONObjectWriter signatureObject = setObject(signatureLabel);
+        coreSign(signer, signatureObject, signatureObject, this);
         return this;
     }
     /**
      * Set a <a href="https://cyberphone.github.io/doc/security/jcs.html" target="_blank"><b>JCS</b></a>
      * <code>"signatures"</code> [] object.<p>
-     * This method performs all the processing needed for adding multiple JCS signatures to the current object.</p>
-     * @param multiSignatureHeader Global options
+     * This method performs all the processing needed for adding multiple JSF signatures to the current object.</p>
      * @param signer Signature interface
      * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException In case there a problem with keys etc.
      */
-    public JSONObjectWriter setMultiSignature(JSONSigner.MultiSignatureHeader multiSignatureHeader, 
-                                              JSONSigner signer) throws IOException {
-        return setMultiSignature(SIGNATURE_DEFAULT_LABEL_JSON, multiSignatureHeader, signer);
+    public JSONObjectWriter setMultiSignature(JSONSigner signer) throws IOException {
+        return setMultiSignature(SIGNATURE_DEFAULT_LABEL_JSON, signer);
     }
 
     public JSONObjectWriter setMultiSignature(String signatureLabel,
-                                              JSONSigner.MultiSignatureHeader multiSignatureHeader,
                                               JSONSigner signer) throws IOException {
-        multiSignatureHeader.multi = true;
         JSONObjectReader reader = new JSONObjectReader(root);
         Vector<JSONObject> oldSignatures = new Vector<JSONObject>();
         if (reader.hasProperty(signatureLabel)) {
-            JSONObjectReader globalSignatureObject = reader.getObject(signatureLabel);
-            JSONArrayReader signatureArray = globalSignatureObject.getArray(JSONCryptoHelper.SIGNERS_JSON);
+            reader = reader.getObject(signatureLabel);
+            if (signer.extensionNames != null) {
+                throw new IOException("Only the first signer can set \"" + 
+                                      JSONCryptoHelper.EXTENSIONS_JSON + "\"");
+            }
+            if (signer.excluded != null) {
+                throw new IOException("Only the first signer can set \"" + 
+                                      JSONCryptoHelper.EXCLUDE_JSON + "\"");
+            }
+            JSONArrayReader signatureArray = reader.getArray(JSONCryptoHelper.SIGNERS_JSON);
             do {
                 oldSignatures.add(signatureArray.getObject().root);
             } while (signatureArray.hasMore());
+            if (reader.hasProperty(JSONCryptoHelper.EXCLUDE_JSON)) {
+                signer.setExcluded(reader.getStringArray(JSONCryptoHelper.EXCLUDE_JSON));
+            }
+            if (reader.hasProperty(JSONCryptoHelper.EXTENSIONS_JSON)) {
+                signer.setExtensionNames(reader.getStringArray(JSONCryptoHelper.EXTENSIONS_JSON));
+            }
             setupForRewrite(signatureLabel);
         }
         JSONObjectWriter globalSignatureObject = setObject(signatureLabel);
-        if (multiSignatureHeader.globalAlgorithm != null) {
-            signer.setGlobalAlgorithm(multiSignatureHeader.globalAlgorithm);
-            globalSignatureObject.setString(JSONCryptoHelper.ALGORITHM_JSON,
-                                            multiSignatureHeader
-                                                .globalAlgorithm
-                                                    .getAlgorithmId(multiSignatureHeader.algorithmPreferences));
-        }
-        if (multiSignatureHeader.excluded != null) {
-            signer.setExcluded(multiSignatureHeader.excluded);
-            globalSignatureObject.setupForRewrite(JSONCryptoHelper.EXCLUDE_JSON);
-        }
-        if (multiSignatureHeader.OptionalExtensions != null) {
-            globalSignatureObject.setStringArray(JSONCryptoHelper.CRITICAL_JSON,
-                                                 multiSignatureHeader.OptionalExtensions.getPropertyList());
-        }
         JSONArrayWriter signatureArray = globalSignatureObject.setArray(JSONCryptoHelper.SIGNERS_JSON);
-        coreSign(signer, signatureArray.setObject(), multiSignatureHeader);
+        coreSign(signer, signatureArray.setObject(), globalSignatureObject, this);
         int q = oldSignatures.size();
         while (--q >= 0) {
             signatureArray.array.insertElementAt(new JSONValue(JSONTypes.OBJECT, oldSignatures.get(q)), 0);
         }
-        if (multiSignatureHeader.excluded != null) {
-             globalSignatureObject.setStringArray(JSONCryptoHelper.EXCLUDE_JSON, multiSignatureHeader.excluded);
-        }
+        /*
         if (multiSignatureHeader.optionalFormatVerifier != null) {
             new JSONObjectReader(root).getMultiSignature(signatureLabel, multiSignatureHeader.optionalFormatVerifier);
         }
+        */
         return this;
     }
 

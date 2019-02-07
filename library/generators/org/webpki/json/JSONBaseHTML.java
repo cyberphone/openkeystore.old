@@ -1445,7 +1445,7 @@ public class JSONBaseHTML  {
                       "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete.")
              .newRow()
                 .newColumn()
-                  .addProperty(JSONCryptoHelper.CRITICAL_JSON)
+                  .addProperty(JSONCryptoHelper.EXTENSIONS_JSON)
                   .addArrayList(Types.PROPERTY_LIST, 1)
                 .newColumn()
                   .setType(Types.WEBPKI_DATA_TYPES.STRING)
@@ -1463,7 +1463,7 @@ public class JSONBaseHTML  {
                   "while private schemes are free using any valid property name." + Types.LINE_SEPARATOR +
                   "A conforming JCS implementation <b>must</b> <i>reject</i> signatures listing properties " +
                   "that are not found as well as empty <code>&quot;" +
-                  JSONCryptoHelper.CRITICAL_JSON + "&quot;</code> objects. " +
+                  JSONCryptoHelper.EXTENSIONS_JSON + "&quot;</code> objects. " +
                   "Verifiers are <i>recommended</i> introducing additional constraints like only accepting predefined extensions." +
                   Types.LINE_SEPARATOR +
                   "Also see <a href=\"#" + EXTENSION_EXAMPLE + "\">test&nbsp;vector</a>.")
