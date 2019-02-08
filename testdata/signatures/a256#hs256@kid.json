@@ -1,10 +1,10 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "now": "2019-02-10T11:23:06Z",
   "name": "Joe",
   "id": 2200063,
   "signature": {
     "algorithm": "HS256",
     "keyId": "a256bitkey",
-    "value": "qh_L_CTP0U4wZjjgaJsyvsWUaUEE-IGOei_6uZ2-mxU"
+    "value": "GJ6Jhb-PfHpN6KPcjHBNxbO9j56ShgUh13JfmZ3ORkI"
   }
 }

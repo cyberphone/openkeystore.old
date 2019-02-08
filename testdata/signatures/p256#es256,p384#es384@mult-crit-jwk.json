@@ -11,12 +11,11 @@
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "critical": ["otherExt", "https://example.com/extension"],
-      "otherExt": "Other Data",
+      "otherExt": "Cool Stuff",
       "https://example.com/extension": {
         "life-is-great": true
       },
-      "value": "9vNUIl01VfDjrEdZGmOqdPRU_XlbBVvevkP7xsiWbhcPzZLnGAi5F2Z3nJ9NYQLBi8NedKSzelNqfh2KsK7MIg"
+      "value": "qn-mevO-Rt94akMYsTMPuMf11opaK1U-3LyhYgnq61Xv88qFnhRPqZIO-b3n1EjVMhxZ4lDGHGbUJ74uGd-7Gw"
     },{
       "algorithm": "ES384",
       "publicKey": {
@@ -25,12 +24,9 @@
         "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
         "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
       },
-      "critical": ["otherExt", "https://example.com/extension"],
-      "otherExt": "Cool Stuff",
-      "https://example.com/extension": {
-        "life-is-great": true
-      },
-      "value": "3uL67GZasSflqBJNMJsMGKQBnlJlWxNTHE-d-x9C8NZw6JBef3Gz_KaMFwPIZ7Oy-Le6eg94w-P6dNvhT6hIxNBFOUF8UkGPHsY4o-LEAoVA07ZVZvSitWkRtG33rJEB"
-    }]
+      "otherExt": "Other Data",
+      "value": "Tr4zkGb_AP5YLxSDYASZBvhitrT_2YWw7CSnsq7TGagSqxzaFhFojrS4Q1ZM6YsPsp2Dh-2YiX_BEYCT2wa8jp8lR4R43AzYeWIDWX3JeDoBu7mLvRjPg0UacBdaOvEO"
+    }],
+    "critical": ["otherExt", "https://example.com/extension"]
   }
 }

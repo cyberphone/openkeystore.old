@@ -1,16 +1,16 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "now": "2019-02-10T11:23:06Z",
   "name": "Joe",
   "id": 2200063,
   "signature": {
     "signers": [{
       "algorithm": "ES256",
       "keyId": "example.com:p256",
-      "value": "T5nVzlP4NX35lwqc7a3sQCoLjE9JE6RV9qb_AOYXH3cEJxdAR1dbR0BkCqBaZX8tmmzX-97EUx0p1TjdpngSmA"
+      "value": "ALSKXRtZnMIH-75sSwMeIa2mG16lpl-arLaEyhdGFUxKODiBMHzZBdTbyYEOfgPWjdt3FoQs3QayLV_AE7Iysg"
     },{
       "algorithm": "RS256",
       "keyId": "example.com:r2048",
-      "value": "WPlXUaybkigqVZE4LAxY3Z_dhHIH5pNi96jCAt0RfJyYJfKypPsymsDDEp0Vd2qAcboD57ARLLEz8bh01u3Fy4B9-iFr-0f0kiI0HJbvfz_0XHpJKlN7oLmOGRggT6zv4a6RJlPnw5D3UKQWxoMj_m5jCe3_CrtYzUgn9RceNwRILxISrRUASIeTQYgHlU1ys8zh2YZzXEp_HHh0x4lwG7Rrge_h8tYHOyd445vPzfi_s5KxdbjrQhFazvNGwTHwwPbqbbBLi3RW8Eda3D2SB0bIYMj9GwyEDO7SNOzVU66XBu5ftDXqqcQuxFBqB-h32kiy4JBwYyosA_fsvttSEA"
+      "value": "WQp3IgeJ_82o8Sg8nX6l6UrIVdA3XEmEpJNeKCqGXodW3Vgb-TKm60p6YmBxoOvaEX-O6yC1WNqGzECBHlLc6xUbwGZNGBA14gEwye-VAo7LIol83vvBCBjRBEOJhQjqwb-JsU0zXRFXpbN87QLCFDu_OSWUALL1eEbTFn5oocqODs3phbIPaZN-VYwLcBbjC4GVSfjdls0GChJ5MwQcclwlJsOhYpZoiuFgzmgGO-wgKrmQwaVnHybYG2Zt8UxmVSPtnPB0BdwV_dJaflI25f0hFvONyJ6z-i14PpYiOwYMWd0galeIjuSOVWLKhSW747YWR8A6YRFxqMe_JATm4A"
     }]
   }
 }

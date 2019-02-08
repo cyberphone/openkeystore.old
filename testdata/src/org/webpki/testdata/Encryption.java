@@ -18,13 +18,9 @@ package org.webpki.testdata;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.security.KeyPair;
-
 import java.security.cert.X509Certificate;
-
 import java.security.interfaces.ECPublicKey;
-
 import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
@@ -47,8 +43,8 @@ import org.webpki.json.KeyEncryptionAlgorithms;
 import org.webpki.json.SymmetricKeys;
 import org.webpki.json.Extension1;
 import org.webpki.json.Extension2;
-
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.PEMDecoder;
 
 /*
  * Create JEF test vectors
@@ -66,8 +62,8 @@ public class Encryption {
     }
 
     static void cleanInner(JSONObjectReader inner) throws Exception {
-        if (inner.hasProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON)) {
-            inner.removeProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
+        if (inner.hasProperty(JSONCryptoHelper.CIPHER_TEXT_JSON)) {
+            inner.removeProperty(JSONCryptoHelper.CIPHER_TEXT_JSON);
         }
         if (inner.hasProperty(JSONCryptoHelper.EPHEMERAL_KEY_JSON)) {
             inner.removeProperty(JSONCryptoHelper.EPHEMERAL_KEY_JSON);
@@ -78,11 +74,13 @@ public class Encryption {
         encryptedData.removeProperty(JSONCryptoHelper.IV_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.TAG_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.CIPHER_TEXT_JSON);
-        if (encryptedData.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
-            JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.RECIPIENTS_JSON);
+        if (encryptedData.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
+            JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
             do {
                 cleanInner(recipients.getObject());
             } while (recipients.hasMore());
+        } else if (encryptedData.hasProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON)) {
+            cleanInner(encryptedData.getObject(JSONCryptoHelper.ENCRYPTED_KEY_JSON));
         } else {
             cleanInner(encryptedData);
         }
@@ -203,8 +201,7 @@ public class Encryption {
     }
 
     static X509Certificate[] getCertificatePath(String keyType) throws IOException {
-        return JSONParser.parse(ArrayUtil.readFile(baseKey + keyType + "certificate.x5c"))
-                    .getJSONArrayReader().getCertificatePath();
+        return PEMDecoder.getCertificatePath(ArrayUtil.readFile(baseKey + keyType + "certpath.pem"));
     }
 
     static void certEnc(String keyType, 

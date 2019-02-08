@@ -1,10 +1,10 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "now": "2019-02-10T11:23:06Z",
   "name": "Joe",
   "id": 2200063,
   "signature": {
     "algorithm": "HS512",
     "keyId": "a512bitkey",
-    "value": "KNtzYjX5fkOt5p6nHY1qLvHXPiTHCAP8PjG8xE_lIYx1h-00MOWSXYX0Ku37DAJzC-V4juAHDkgSAzp--Jdm4w"
+    "value": "VJHJXrZhVMMWTKTJktmdE5J4xBjKwtdf25eItui4fIGuyYsiZD5M9n573WZ0XgM9q48gG1KpTee4q8LCW4a7qQ"
   }
 }

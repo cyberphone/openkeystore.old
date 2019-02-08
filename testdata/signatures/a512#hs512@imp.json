@@ -1,9 +1,9 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "now": "2019-02-10T11:23:06Z",
   "name": "Joe",
   "id": 2200063,
   "signature": {
     "algorithm": "HS512",
-    "value": "kDIaZG_9lzJ_k1N1z1nLoXHUoF1Uw6QFrVDH3IgFOqlhACms0NR4umoHXYHOFEJTSGnP-pbEOqS55xQ8QKYsPA"
+    "value": "VwL_CJg_ckEQIF1E8GuCQpHOYOPC8VZdXTTpIbrysZGBsRM1xOGdNQ5Ic7DexFUFHp7_v6qs4FcfFkfNAbCJcA"
   }
 }

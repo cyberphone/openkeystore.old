@@ -184,7 +184,6 @@ public class JSONCryptoHelper implements Serializable {
         ExtensionHolder extensionHolder = new ExtensionHolder();
         LinkedHashSet<String> exclusions;
         
-        String globalSignatureAlgorithm;
         String[] globalExtensions;
         
         boolean encryptionMode;

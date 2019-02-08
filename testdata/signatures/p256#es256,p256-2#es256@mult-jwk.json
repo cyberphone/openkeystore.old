@@ -1,25 +1,26 @@
 {
-  "now": "2018-04-16T11:23:06Z",
+  "now": "2019-02-10T11:23:06Z",
   "name": "Joe",
   "id": 2200063,
   "signature": {
-    "algorithm": "ES256",
     "signers": [{
+      "algorithm": "ES256",
       "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
         "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
       },
-      "value": "dkUjuiOkca96WXTNVvn3XITUh7QFH8zKGz703jjYyTqGf0cD2mjeeiKPME58RehVggF-RNUSezZL-8DsG5L1cQ"
+      "value": "WpugWVQ-VNB1zyEmzbL7RQfIV7N4OnIwYHEiZHyIZKK4Yo7bwhRgxOoMXmgo3U_Rq_RDYw5Fwypo5OXISAzwqw"
     },{
+      "algorithm": "ES256",
       "publicKey": {
         "kty": "EC",
         "crv": "P-256",
         "x": "RgdKcWxBsnqeryzoEv3B5KE9qAQc-nBZEV_A23uQoPs",
         "y": "73UtZIe1Qfil1WM9Hq1ZiPXWnI1Tu7N__goVvTyjURk"
       },
-      "value": "k-BjcxgWte0mfNjU1vDU-KyFV7TnoMMD7ROtrM-XqmH1dXlSnfaoxzHcMFkmJGtaYJjBcS7QCPY-9PaSNifO9A"
+      "value": "5j_1yp7Unzkl3TEoHmyF7C0N_5XnaqdUhfzk_xbNlIauuc8GprdIXrw-szLVGNl0_D4dEfScV3ioje8bSGK3cQ"
     }]
   }
 }

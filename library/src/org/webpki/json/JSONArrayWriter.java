@@ -61,6 +61,10 @@ public class JSONArrayWriter implements Serializable {
         array = new Vector<JSONValue>();
     }
 
+    public JSONArrayWriter(JSONArrayReader reader) {
+        array = reader.array;
+    }
+
     JSONArrayWriter add(JSONTypes type, Object value) throws IOException {
         array.add(new JSONValue(type, value));
         return this;

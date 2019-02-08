@@ -3634,7 +3634,8 @@ public class JSONTest {
         arrayReader = JSONParser.parse(arraySignature.toString()).getJSONArrayReader();
         while (arrayReader.hasMore()) {
             if (arrayReader.isLastElement()) {
-                arrayReader.getSignature(new JSONCryptoHelper.Options());
+                arrayReader.getSignature(new JSONCryptoHelper.Options())
+                    .verify(new JSONAsymKeyVerifier(p256.getPublic()));;
             }
             arrayReader.scanAway();
         }

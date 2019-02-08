@@ -76,12 +76,7 @@ public class JSONSignatureDecoder implements Serializable {
                          JSONObjectReader outerSignatureObject,
                          JSONCryptoHelper.Options options) throws IOException {
         this.options = options;
-        algorithmString = options.globalSignatureAlgorithm;
-        if (algorithmString == null) {
-            algorithmString = innerSignatureObject.getString(JSONCryptoHelper.ALGORITHM_JSON);
-        } else if (innerSignatureObject.hasProperty(JSONCryptoHelper.ALGORITHM_JSON)) {
-            throw new IOException("Mixing global/local \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" not allowed");
-        }
+        algorithmString = innerSignatureObject.getString(JSONCryptoHelper.ALGORITHM_JSON);
         keyId = options.getKeyId(innerSignatureObject);
         if (options.requirePublicKeyInfo) {
             getPublicKeyInfo(innerSignatureObject);
