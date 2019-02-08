@@ -29,14 +29,14 @@ import java.security.interfaces.ECPublicKey;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-////////////////////////////////////////////////////////////////////////////////
-// JEF is effectively a "remake" of a subset of JWE.  Why a remake?  Because  //
-// the encryption system (naturally) borrows heavily from JCS including clear //
-// text header information and using the ES6+ based normalization scheme for  //
-// creating authenticated data.                                               //
-//                                                                            //
-// The supported algorithms and attributes are though fully JOSE compatible.  //
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+// JEF is effectively a "remake" of of JWE.  Why a remake?  Because the           //
+// encryption system (naturally) borrows heavily from JSF including clear text    //
+// header information and using the JCS based normalization scheme for creating   //
+// authenticated data.                                                            //
+//                                                                                //
+// The supported algorithms and JWK attributes are though fully JOSE compatible.  //
+////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Holds parsed JEF (JSON Encryption Format) data.
@@ -192,8 +192,8 @@ public class JSONDecryptionDecoder {
             sharedSecretMode = true;
         }
 
-        // An encryption object may also hold "critical" data
-        holder.options.getExtensions(encryptionObject, extensions);
+        // An encryption object may also hold "extension" data
+        holder.options.getExtensions(encryptionObject, holder.globalEncryptionObject, extensions);
 
         if (last) {
             // The MUST NOT be any unknown elements inside of a JEF object

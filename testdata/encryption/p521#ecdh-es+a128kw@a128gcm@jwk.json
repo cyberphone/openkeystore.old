@@ -1,20 +1,22 @@
 {
-  "enc": "A128GCM",
-  "alg": "ECDH-ES+A128KW",
-  "jwk": {
-    "kty": "EC",
-    "crv": "P-521",
-    "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
-    "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
+  "algorithm": "A128GCM",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES+A128KW",
+    "publicKey": {
+      "kty": "EC",
+      "crv": "P-521",
+      "x": "AT9Hw32aVQCGd5csltC1dqhSB4fFt-mEWO-QxZqrr9Yrwn69_q7n1YOYrHSWjk_qMkCGk6qQ4f9ZRYIJPGqjfxC9",
+      "y": "AeVHV1elHFzR_P5Lzb22hMyhAzcGSTT1sdwVmFkJGBYt55RKXGNO1H9De2v_p5S-kkK8BZVh3JGzixMyT0Eo_ckS"
+    },
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-521",
+      "x": "AKdUowU--1E33j0OC-96j5EiI2GEHAyipKEd8wXKDz-Up-f4duWIuFuWYzotjsU1Sd-HnOndfs25y8D7cCFpkshg",
+      "y": "ABgYQsF0EkKyk7pKpj53Su27xK4aNc2kWMRzfw5tNgsLg6AvZuG6W1ijII0K4L4TmofKd0DZo_-RX2oTiKg7eRTT"
+    },
+    "cipherText": "GbPZv91ix66Ym8R2SfSj0Qmbv4SQPqoP"
   },
-  "epk": {
-    "kty": "EC",
-    "crv": "P-521",
-    "x": "AWAlQVSrxanazPUMcsIzcNJR9jK28I9c1wqfqGXYhFsasKcgwmag40YUcUBV6xZN4xeNqpw3LL_ogniEOtZG0_fJ",
-    "y": "AD7By9XW-Owc2CL0aVNWcHfkqOjlXYl2eiLlqcm_DxCHCXjYLarIUzpqnL_BMt4VctArSBS7yc7XuRqpw_QQkuDh"
-  },
-  "encrypted_key": "xuZ4s_Yxp9aWuoYW4HbXk0WJm2RmThIh",
-  "iv": "xamDAN37pabO-B8p",
-  "tag": "A_GpsdV5SZME3wSoYL5oyw",
-  "ciphertext": "tZs5ECZePdKBBrUdxd372P0dF665JA"
+  "iv": "ADFk5HD_kIkEJ6HR",
+  "tag": "-Pwi09AaKzRX5qGaHmfJOg",
+  "cipherText": "m3PuIcCyI2J_VgKJvJ8IAxiCF4WrCA"
 }

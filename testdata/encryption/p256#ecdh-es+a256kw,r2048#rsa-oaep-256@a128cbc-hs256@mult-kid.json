@@ -1,21 +1,21 @@
 {
-  "enc": "A128CBC-HS256",
-  "recipients": [{
-    "alg": "ECDH-ES+A256KW",
-    "kid": "example.com:p256",
-    "epk": {
+  "algorithm": "A128CBC-HS256",
+  "encryptedKeys": [{
+    "algorithm": "ECDH-ES+A256KW",
+    "keyId": "example.com:p256",
+    "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "L7mNi83YjSnrakVmwbXKiyunFyDHHZflD0KZ8jbLOyM",
-      "y": "EEmZ3t_RPn3dIPDbI1vyOLHQEf2lhzGbueuI0jERNRE"
+      "x": "xgbuCfLscw-ShbWWFg7-Bo1VFWd8IB_Zhb1dqQldDXk",
+      "y": "B9KbWTHg5ClF4mt0EXkgHSOlmZilslHXaMdAgGHVQrk"
     },
-    "encrypted_key": "Cn0Rq83rbBpYOMIj0s_IAQ1EL6eI63U4fii9x-PHmIUVTboAchdZ6w"
+    "cipherText": "pVCtExln45GHlEwXdfS2DDHAzItYaiGb90a03kvTjaoPFCaTNXUaUg"
   },{
-    "alg": "RSA-OAEP-256",
-    "kid": "example.com:r2048",
-    "encrypted_key": "Or5-qAIEmgH6iuE1uPzeEtmGB4eUMh00VKiYMbA7Pay1LnmszvOd-MMXKfjmIjUEBYpWBpLeX-ohFWvQienhuxm-ux-qBXM0sS4KlaCF1viToq_qZqw7hdYxWrZquwHSPPv_sn6KLCwOcR5k9s1IQGQ2uKGdYuk9Gr6kK8clT87bLp-A_zP9baT2bNTfr5er8BoEN3UeLLWH7jCJefIxv5fnXhR0uql1KXO1d5Dd8-zxRpUOYBvlWRaAhP5nxWdm1TPzgHs2Wew559REc1xv-iaXCEoJqQdLCnLcOoCXEKBmWS0pXOOmpQQcC-lLqigIm9GcTCgC9f7vA1Pt_S6Nug"
+    "algorithm": "RSA-OAEP-256",
+    "keyId": "example.com:r2048",
+    "cipherText": "BPk_UvGMayfwLfjMwpiL7IWm4qgHoWDKZKMX9ecSHvnAok2lzKz2L1O_UsEJMhUGjq8hUESvXPDFSdkwcta5ZWOQ7jqMWG1cUrpRP5tHuERRk0MBplmtur3SEzzx59_aLEzPdOs9a_8KoZldAOUg4uU2nExPNPPmYzlxH7Uc8MRQ0aHjY9oSLNCYmY6wlyxVOV6SLty5BkRXxo-dLnppEWdjamwCzUCq3xY9lbsK5w_YGJbDXVuexozXrmnWXMfMuvwH28SUWKLXmdk0J41Jc2hR1J80QssT4sdQqUtS98h6cpCxhrN92gWZxPIWN4Dsvew1yhJ8SFlZZPumPYXboQ"
   }],
-  "iv": "IXq0hzcH0ka-ciCns9Dc9w",
-  "tag": "XlLxWT2yJFcbrJlKIPztWw",
-  "ciphertext": "FM0WNxtt3JYwMxpJqw7IpCAQUtM9C8gPOxKCgs3Jgmw"
+  "iv": "lb__spHgq8EOKf_0vjSRxQ",
+  "tag": "i-xDnmRRfUdY2kOecs2aWw",
+  "cipherText": "iYsGfjVefKPLIo6vFIV_RMj4KnjdmsDOHE_HFzbhG94"
 }

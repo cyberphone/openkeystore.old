@@ -94,7 +94,7 @@ public class JSONSignatureDecoder implements Serializable {
             }
         }
 
-        options.getExtensions(innerSignatureObject, extensions);
+        options.getExtensions(innerSignatureObject, outerSignatureObject, extensions);
 
         LinkedHashMap<String, JSONValue> saveExcluded = null;
         JSONValue saveExcludeArray = null;

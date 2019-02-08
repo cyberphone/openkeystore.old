@@ -3360,7 +3360,7 @@ public class JSONTest {
     
     public static class EncryptionExtForbidden extends JSONCryptoHelper.Extension {
         
-        static final String URI = "No No";
+        static final String URI = JSONCryptoHelper.ALGORITHM_JSON;
         
         public String data;
 
@@ -4060,7 +4060,8 @@ public class JSONTest {
                              .setPermittedExtensions(extensionHolder));
             fail("Shouldn't");
         } catch (Exception e) {
-            checkException(e, "Forbidden \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" property: enc");
+            checkException(e, "Forbidden \"" + JSONCryptoHelper.EXTENSIONS_JSON + 
+                              "\" property: " + JSONCryptoHelper.ALGORITHM_JSON);
         }
 
         encJson = JSONObjectWriter
@@ -4105,7 +4106,7 @@ public class JSONTest {
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()
                     .equals(JSONParser.parse(decDec.getDecryptedData(malletKeys.getPrivate())).toString()));
-
+/*
         for (int i = 1; i < 5; i++) {
             try {
                 JSONObjectReader enc = readEncryption("err-missing-alg" + i + ".json");
@@ -4166,7 +4167,7 @@ public class JSONTest {
         encryptionFieldErrors("err-bad-key2.json",
                               "p256",
                               "Incorrect parameter \"key\" length (32) for A256CBC-HS512");
-
+*/
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());
         keyAgreement.doPhase(bob.getPublic(), true);

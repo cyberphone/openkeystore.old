@@ -18,9 +18,13 @@ package org.webpki.testdata;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.security.KeyPair;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Vector;
 
 import org.webpki.crypto.CustomCryptoProvider;
@@ -43,6 +47,7 @@ import org.webpki.json.KeyEncryptionAlgorithms;
 import org.webpki.json.SymmetricKeys;
 import org.webpki.json.Extension1;
 import org.webpki.json.Extension2;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.PEMDecoder;
 
@@ -124,23 +129,6 @@ public class Encryption {
         symmetricKeys = new SymmetricKeys(baseKey);
         dataToBeEncrypted = ArrayUtil.readFile(baseData + "datatobeencrypted.txt");
         
-        boolean next = false;
-        StringBuilder numerics = new StringBuilder(new String(dataToBeEncrypted, "utf-8"));
-        numerics.append('\n');
-        int byteCount = 0;
-        for (byte b : dataToBeEncrypted) {
-            if (next) {
-                numerics.append(", ");
-            }
-            next = true;
-            while (++byteCount % 10 == 0) {
-                numerics.append('\n');
-            }
-            numerics.append(b & 0xff);
-        }
-        System.out.println(numerics);
-
-
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID);
         asymEnc("p256", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
         asymEnc("p384", ContentEncryptionAlgorithms.JOSE_A256CBC_HS512_ALG_ID);
@@ -187,7 +175,7 @@ public class Encryption {
         coreSymmEnc(256, "imp.json", ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID, false);
         
         coreAsymEnc("p256", 
-                    "crit-jwk.json",
+                    "exts-jwk.json",
                     ContentEncryptionAlgorithms.JOSE_A256GCM_ALG_ID,
                     false,
                     true,
@@ -228,7 +216,7 @@ public class Encryption {
         JSONX509Encrypter encrypter = new JSONX509Encrypter(getCertificatePath(keyType),
                                                             keyEncryptionAlgorithm);
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
-        String fileSuffix = "x5c.json";
+        String fileSuffix = "cer.json";
         byte[] encryptedData =
                JSONObjectWriter.createEncryptionObject(dataToBeEncrypted, 
                                                        contentEncryptionAlgorithm,
@@ -370,8 +358,6 @@ public class Encryption {
                 new Vector<JSONDecryptionDecoder.DecryptionKeyHolder>();
         Vector<JSONEncrypter> encrypters = new Vector<JSONEncrypter>();
         String algList = "";
-        KeyEncryptionAlgorithms algCheck = null;
-        boolean first = true;
         for (String keyType : keyTypes) {
             KeyPair keyPair = readJwk(keyType);
             KeyEncryptionAlgorithms keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_256_ALG_ID;
@@ -390,14 +376,6 @@ public class Encryption {
                 contentEncryptionAlgorithm == ContentEncryptionAlgorithms.JOSE_A128GCM_ALG_ID) {
                 keyEncryptionAlgorithm = KeyEncryptionAlgorithms.JOSE_RSA_OAEP_ALG_ID;
             }
-            if (first) {
-                algCheck = keyEncryptionAlgorithm;
-            } else {
-                if (algCheck != keyEncryptionAlgorithm) {
-                    algCheck = null;
-                }
-            }
-            first = false;
             decryptionKeys.add(new JSONDecryptionDecoder.DecryptionKeyHolder(keyPair.getPublic(),
                                                                              keyPair.getPrivate(),
                                                                              keyEncryptionAlgorithm,
@@ -414,12 +392,9 @@ public class Encryption {
             encrypters.add(encrypter);
         }
         JSONCryptoHelper.Options options = new JSONCryptoHelper.Options();
-        String fileSuffix = algCheck == null ? "mult-jwk.json" : "mult-glob+alg-jwk.json"; 
+        String fileSuffix = "mult-jwk.json"; 
         if (wantKeyId) {
             fileSuffix = "mult-kid.json"; 
-            if (algCheck != null) {
-                fileSuffix = "mult-glob+alg-kid.json";
-            }
             options.setKeyIdOption(JSONCryptoHelper.KEY_ID_OPTIONS.REQUIRED);
             options.setRequirePublicKeyInfo(false);
         }

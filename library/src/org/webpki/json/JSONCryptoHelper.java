@@ -183,9 +183,6 @@ public class JSONCryptoHelper implements Serializable {
         KEY_ID_OPTIONS keyIdOption = KEY_ID_OPTIONS.FORBIDDEN;
         ExtensionHolder extensionHolder = new ExtensionHolder();
         LinkedHashSet<String> exclusions;
-        
-        String[] globalExtensions;
-        
         boolean encryptionMode;
         
         public Options setAlgorithmPreferences(AlgorithmPreferences algorithmPreferences) {
@@ -237,14 +234,15 @@ public class JSONCryptoHelper implements Serializable {
             return keyId;
         }
 
-        void getExtensions(JSONObjectReader innerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
-            String[] extensionList = globalExtensions;
+        void getExtensions(JSONObjectReader innerObject, JSONObjectReader outerObject, LinkedHashMap<String, Extension> extensions) throws IOException {
+            String[] extensionList = outerObject.getStringArrayConditional(JSONCryptoHelper.EXTENSIONS_JSON);
             if (extensionList == null) {
-                extensionList = innerObject.getStringArrayConditional(JSONCryptoHelper.EXTENSIONS_JSON);
-            } else if (innerObject.hasProperty(JSONCryptoHelper.EXTENSIONS_JSON)) {
-                throw new IOException("Mixing global/local \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" not allowed");
-            }
-            if (extensionList != null) {
+                for (String name : extensionHolder.extensions.keySet()) {
+                    if (extensionHolder.extensions.get(name).mandatory) {
+                        throw new IOException("Missing \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" mandatory extension: " + name);
+                    }
+                }
+            } else {
                 checkExtensions(extensionList, encryptionMode);
                 if (extensionHolder.extensions.isEmpty()) {
                     throw new IOException("Use of \"" + JSONCryptoHelper.EXTENSIONS_JSON + "\" must be set in options");
