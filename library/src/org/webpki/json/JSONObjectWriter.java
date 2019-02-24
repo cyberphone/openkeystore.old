@@ -530,9 +530,9 @@ public class JSONObjectWriter implements Serializable {
     }
 
     static void coreSign(JSONSigner signer, 
-                          JSONObjectWriter innerObject,
-                          JSONObjectWriter outerObject,
-                          JSONObjectWriter signedObject) throws IOException {
+                         JSONObjectWriter innerObject,
+                         JSONObjectWriter outerObject,
+                         JSONObjectWriter signedObject) throws IOException {
 
         innerObject.setString(JSONCryptoHelper.ALGORITHM_JSON,
                               signer.getAlgorithm().getAlgorithmId(signer.algorithmPreferences));
@@ -845,7 +845,7 @@ import org.webpki.json.JSONSignatureDecoder;
         JSONEncrypter.Header header = 
                 new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypters.firstElement());
         JSONArrayWriter recipientList = 
-                header.encryptionWriter.setArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
+                header.encryptionWriter.setArray(JSONCryptoHelper.RECIPIENTS_JSON);
         for (JSONEncrypter encrypter : encrypters) {
             JSONDecryptionDecoder.keyWrapCheck(encrypter.keyEncryptionAlgorithm);
             JSONObjectWriter recipient = new JSONObjectWriter();

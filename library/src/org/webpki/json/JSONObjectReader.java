@@ -648,7 +648,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      */
     public JSONDecryptionDecoder getEncryptionObject(JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(true);
-        if (hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
+        if (hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
             throw new IOException("Please use \"getEncryptionObjects()\" for multiple encryption objects");
         }
         boolean keyEncryption = hasProperty(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
@@ -672,7 +672,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
     public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoHelper.Options options) throws IOException {
         options.encryptionMode(true);
         JSONDecryptionDecoder.Holder holder = new JSONDecryptionDecoder.Holder(options, this, true);
-        JSONArrayReader recipientObjects = getArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
+        JSONArrayReader recipientObjects = getArray(JSONCryptoHelper.RECIPIENTS_JSON);
         Vector<JSONDecryptionDecoder> recipients = new Vector<JSONDecryptionDecoder>();
         do {
             JSONDecryptionDecoder decoder = new JSONDecryptionDecoder(holder, 

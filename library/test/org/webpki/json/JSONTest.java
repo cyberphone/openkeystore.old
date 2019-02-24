@@ -3840,7 +3840,7 @@ public class JSONTest {
     void variousEncryptionErrors(String fileName, String exceptionString) throws Exception {
         JSONObjectReader enc = readEncryption(fileName);
         try {
-            if (enc.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
+            if (enc.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
                 enc.getEncryptionObjects(new JSONCryptoHelper.Options());
             } else {
                 enc.getEncryptionObject(new JSONCryptoHelper.Options());
@@ -4120,24 +4120,8 @@ public class JSONTest {
                 checkException(e, "Missing \"alg\"");
             }
         }
-
-        for (int i = 1; i < 3; i++) {
-            JSONObjectReader enc = readEncryption("err-glob-alg" + i + ".json");
-            try {
-                enc.getEncryptionObject(new JSONCryptoHelper.Options());
-                fail("didn't fail");
-            } catch (Exception e) {
-                checkException(e, "Please use \"getEncryptionObjects()\" for multiple encryption objects");
-            }
-            try {
-                enc.getEncryptionObjects(new JSONCryptoHelper.Options());
-                fail("didn't fail");
-            } catch (Exception e) {
-                checkException(e, "Mixing global/local \"alg\" not allowed");
-            }
-        }
-
-        variousEncryptionErrors("err-wrong-alg1.json", "Property \"" + JSONCryptoHelper.ENCRYPTED_KEY_JSON + "\" is missing");
+*/
+        variousEncryptionErrors("err-wrong-alg1.json", "Property \"" + JSONCryptoHelper.CIPHER_TEXT_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg2.json", "Property \"" + JSONCryptoHelper.N_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg3.json", "Property \"" + JSONCryptoHelper.EPHEMERAL_KEY_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg4.json", "Property \"" + JSONCryptoHelper.ENCRYPTED_KEY_JSON + "\" was never read");
@@ -4145,7 +4129,7 @@ public class JSONTest {
         variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": A256GCM");
         variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": RSA-OAEP-256");
         variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" is missing");
-
+/*
         variousEncryptionErrors("err-bad-id.json", "Missing key information");
 
         encryptionFieldErrors("err-bad-ciphertext.json",

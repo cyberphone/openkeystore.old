@@ -79,8 +79,8 @@ public class Encryption {
         encryptedData.removeProperty(JSONCryptoHelper.IV_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.TAG_JSON);
         encryptedData.removeProperty(JSONCryptoHelper.CIPHER_TEXT_JSON);
-        if (encryptedData.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
-            JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.ENCRYPTED_KEYS_JSON);
+        if (encryptedData.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
+            JSONArrayReader recipients = encryptedData.getArray(JSONCryptoHelper.RECIPIENTS_JSON);
             do {
                 cleanInner(recipients.getObject());
             } while (recipients.hasMore());
@@ -163,7 +163,7 @@ public class Encryption {
                         ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
 
-        multipleAsymEnc(new String[]{"p256", "p256"}, 
+        multipleAsymEnc(new String[]{"p256", "p256-2"}, 
                         ContentEncryptionAlgorithms.JOSE_A128CBC_HS256_ALG_ID, 
                         true);
 

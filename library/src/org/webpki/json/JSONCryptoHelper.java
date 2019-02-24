@@ -53,7 +53,7 @@ public class JSONCryptoHelper implements Serializable {
 
     public static final String ENCRYPTED_KEY_JSON      = "encryptedKey";   // JEF specific
 
-    public static final String ENCRYPTED_KEYS_JSON     = "encryptedKeys";  // JEF specific
+    public static final String RECIPIENTS_JSON         = "recipients";     // JEF specific
 
     public static final String EPHEMERAL_KEY_JSON      = "ephemeralKey";   // JWK subset
 
@@ -92,7 +92,7 @@ public class JSONCryptoHelper implements Serializable {
         jefReservedWords.add(ENCRYPTED_KEY_JSON);
         jefReservedWords.add(EPHEMERAL_KEY_JSON);
         jefReservedWords.add(CIPHER_TEXT_JSON);
-        jefReservedWords.add(ENCRYPTED_KEYS_JSON);
+        jefReservedWords.add(RECIPIENTS_JSON);
         jefReservedWords.add(EXTENSIONS_JSON);
         jefReservedWords.add(KEY_ID_JSON);
         jefReservedWords.add(PUBLIC_KEY_JSON);

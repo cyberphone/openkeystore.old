@@ -17,22 +17,36 @@
 package org.webpki.util;
 
 import java.io.IOException;
+
+import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
+
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAPrivateCrtKey;
+
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.Vector;
 
+import org.webpki.asn1.ASN1Sequence;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
+
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.KeyAlgorithms;
 
 /**
  * Functions for decoding PEM files
@@ -42,8 +56,48 @@ public class PEMDecoder {
     }  // No instantiation please
 
  
+    public static PublicKey ecPublicKeyFromPKCS8(byte[] pkcs8) throws IOException, GeneralSecurityException {
+        ASN1Sequence seq = ParseUtil.sequence(DerDecoder.decode(pkcs8), 3);
+        String oid = ParseUtil.oid(ParseUtil.sequence(seq.get(1), 2).get(1)).oid();
+        seq = ParseUtil.sequence(DerDecoder.decode(ParseUtil.octet(seq.get(2))));
+        byte[] publicKey = ParseUtil.bitstring(ParseUtil.singleContext(seq.get(seq.size() -1), 1));
+        int length = (publicKey.length - 1) / 2;
+        byte[] parm = new byte[length];
+        System.arraycopy(publicKey, 1, parm, 0, length);
+        BigInteger x = new BigInteger(1, parm);
+        System.arraycopy(publicKey, 1 + length, parm, 0, length);
+        BigInteger y = new BigInteger(1, parm);
+        for (KeyAlgorithms ka : KeyAlgorithms.values()) {
+            if (oid.equals(ka.getECDomainOID())) {
+                if (oid.equals(ka.getECDomainOID())) {
+                    ECPoint w = new ECPoint(x, y);
+                    return KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, ka.getECParameterSpec()));
+                }
+            }
+        }
+        throw new IOException("Failed creating EC public key from private key");
+    }
+    
+    private static byte[] getPrivateKeyBlob(byte[] pemBlob) throws IOException {
+        return decodePemObject(pemBlob, "PRIVATE KEY");
+    }
+    
+    private static PrivateKey getPrivateKeyFromPKCS8(byte[] pkcs8)
+    throws IOException, GeneralSecurityException {
+        return getKeyFactory(ParseUtil.sequence(DerDecoder.decode(pkcs8)).get(1))
+                .generatePrivate(new PKCS8EncodedKeySpec(pkcs8));
+    }
+
     public static KeyPair getKeyPair(byte[] pemBlob) throws IOException, GeneralSecurityException {
-        return new KeyPair(getPublicKey(pemBlob), getPrivateKey(pemBlob));
+        byte[] pkcs8 = getPrivateKeyBlob(pemBlob);
+        PrivateKey privateKey =  getPrivateKeyFromPKCS8(pkcs8);
+        if (privateKey instanceof ECKey) {
+            return new KeyPair(ecPublicKeyFromPKCS8(pkcs8), privateKey);
+        }
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        RSAPrivateCrtKey privk = (RSAPrivateCrtKey)privateKey;
+        return new KeyPair(keyFactory.generatePublic(
+            new RSAPublicKeySpec(privk.getModulus(), privk.getPublicExponent())), privateKey);
     }
 
     private static KeyFactory getKeyFactory(BaseASN1Object object) throws IOException, GeneralSecurityException {
@@ -52,9 +106,7 @@ public class PEMDecoder {
     }
 
     public static PrivateKey getPrivateKey(byte[] pemBlob) throws IOException, GeneralSecurityException {
-        byte[] privateKeyBlob = decodePemObject(pemBlob, "PRIVATE KEY");
-        return getKeyFactory(ParseUtil.sequence(DerDecoder.decode(privateKeyBlob)).get(1))
-                .generatePrivate(new PKCS8EncodedKeySpec(privateKeyBlob)); 
+        return getPrivateKeyFromPKCS8(getPrivateKeyBlob(pemBlob)); 
     }
     
     public static PublicKey getPublicKey(byte[] pemBlob) throws GeneralSecurityException, IOException {

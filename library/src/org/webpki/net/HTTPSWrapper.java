@@ -142,6 +142,7 @@ public class HTTPSWrapper {
     private KeyStore key_store;
     private String keyAlias;
     private String key_store_password;
+    private String request_method;
 
     private LinkedHashMap<String, Vector<String>> request_headers = new LinkedHashMap<String, Vector<String>>();
 
@@ -471,7 +472,14 @@ public class HTTPSWrapper {
         }
 
         ///////////////////////////////////////////////
-        // Set GET or POST mode
+        // Override GET or POST mode
+        ///////////////////////////////////////////////
+        if (request_method != null) {
+            conn.setRequestMethod(request_method);
+        }
+
+        ///////////////////////////////////////////////
+        // Set URI(GET) or Body(POST) mode
         ///////////////////////////////////////////////
         conn.setDoOutput(output);
 
@@ -592,6 +600,18 @@ public class HTTPSWrapper {
      */
     public String getDataUTF8() throws IOException {
         return (server_data == null) ? null : new String(server_data, "UTF-8");
+    }
+
+
+    /**
+     * Override te default methods. <br><br>
+     * <p>
+     * This method affects all proceeding requests. <br><br>
+     *
+     * @param requestMethod method to use.
+     */
+    public void setRequestMethod(String requestMethod) {
+        request_method = requestMethod;
     }
 
 
@@ -1172,6 +1192,11 @@ public class HTTPSWrapper {
                 "Perform HTTP POST operation",
                 CmdFrequency.SINGLE);
 
+        CmdLineArgument CMD_override_method = create(CmdLineArgumentGroup.GENERAL,
+                "override", "method",
+                "Override HTTP Method",
+                CmdFrequency.OPTIONAL);
+
         CmdLineArgument CMD_data_file = create(CmdLineArgumentGroup.POST_OPERATION,
                 "input", "file",
                 "POSTed data file",
@@ -1380,6 +1405,10 @@ public class HTTPSWrapper {
 
             if (CMD_proxyhost.found) {
                 wrap.setProxy(CMD_proxyhost.getString(), CMD_proxyport.getInteger());
+            }
+
+            if (CMD_override_method.found) {
+                wrap.setRequestMethod(CMD_override_method.getString());
             }
 
             if (CMD_timeout.found) {
