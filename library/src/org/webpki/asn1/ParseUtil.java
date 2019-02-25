@@ -26,13 +26,9 @@ public class ParseUtil {
         throw new IOException(msg);
     }
 
-    static void bad(String msg, BaseASN1Object o) throws IOException {
-        bad(msg + "\n" + o);
-    }
-
     public static ASN1Sequence sequence(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Sequence)) {
-            bad("Expected Sequence", o);
+            bad("Expected Sequence");
         }
         return (ASN1Sequence) o;
     }
@@ -72,27 +68,27 @@ public class ParseUtil {
 
     public static void nul(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Null)) {
-            bad("Expected Null", o);
+            bad("Expected Null");
         }
     }
 
     public static Composite composite(BaseASN1Object o) throws IOException {
         if (!(o instanceof Composite)) {
-            bad("Expected Composite type", o);
+            bad("Expected Composite type");
         }
         return (Composite) o;
     }
 
     public static Composite setOrSequence(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Sequence) && !(o instanceof ASN1Set)) {
-            bad("Expected Set or Sequence", o);
+            bad("Expected Set or Sequence");
         }
         return (Composite) o;
     }
 
     public static ASN1Set set(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Set)) {
-            bad("Expected Set", o);
+            bad("Expected Set");
         }
         return (ASN1Set) o;
     }
@@ -119,14 +115,14 @@ public class ParseUtil {
 
     public static CompositeContextSpecific compositeContext(BaseASN1Object o) throws IOException {
         if (!(o instanceof CompositeContextSpecific)) {
-            bad("Expected CompositeContextSpecific", o);
+            bad("Expected CompositeContextSpecific");
         }
         return (CompositeContextSpecific) o;
     }
 
     public static SimpleContextSpecific simpleContext(BaseASN1Object o) throws IOException {
         if (!(o instanceof SimpleContextSpecific)) {
-            bad("Expected SimpleContextSpecific", o);
+            bad("Expected SimpleContextSpecific");
         }
         return (SimpleContextSpecific) o;
     }
@@ -183,7 +179,7 @@ public class ParseUtil {
 
     public static ASN1ObjectID oid(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1ObjectID)) {
-            bad("Expected ObjectID", o);
+            bad("Expected ObjectID");
         }
         return (ASN1ObjectID) o;
     }
@@ -208,7 +204,7 @@ public class ParseUtil {
 
     public static ASN1Integer integer(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Integer)) {
-            bad("Expected Integer", o);
+            bad("Expected Integer");
         }
         return (ASN1Integer) o;
     }
@@ -234,7 +230,7 @@ public class ParseUtil {
 
     public static int enumerated(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1Enumerated)) {
-            bad("Expected Enumerated", o);
+            bad("Expected Enumerated");
         }
         return ((ASN1Enumerated) o).intValue();
     }
@@ -260,21 +256,21 @@ public class ParseUtil {
 
     public static byte[] octet(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1OctetString)) {
-            bad("Expected OctetString", o);
+            bad("Expected OctetString");
         }
         return ((ASN1OctetString) o).value();
     }
 
     public static byte[] bitstring(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1BitString)) {
-            bad("Expected BitString", o);
+            bad("Expected BitString");
         }
         return ((ASN1BitString) o).value();
     }
 
     public static byte[] bitstring(BaseASN1Object o, int length) throws IOException {
         if (!(o instanceof ASN1BitString)) {
-            bad("Expected BitString", o);
+            bad("Expected BitString");
         }
         ASN1BitString bs = (ASN1BitString) o;
         byte[] data = bs.value();
@@ -286,7 +282,7 @@ public class ParseUtil {
 
     public static ASN1String string(BaseASN1Object o) throws IOException {
         if (!(o instanceof ASN1String)) {
-            bad("Expected string type", o);
+            bad("Expected string type");
         }
         return (ASN1String) o;
     }
