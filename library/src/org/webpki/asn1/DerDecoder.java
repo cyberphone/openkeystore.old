@@ -47,6 +47,9 @@ public class DerDecoder implements ASN1Constants {
     }
 
     byte[] content() {
+        if (offset + length > source.length) {
+            throw new RuntimeException("Corrupted ASN.1");
+        }
         byte[] r = new byte[length];
         System.arraycopy(source, offset, r, 0, length);
         offset += length;
