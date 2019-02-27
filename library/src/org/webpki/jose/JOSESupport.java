@@ -140,15 +140,17 @@ public class JOSESupport {
                                     JWS_Signature);
     }
 
-    public static String createJwsSignature(JSONObjectWriter jwsHeader,
+    public static String createJwsSignature(JSONObjectWriter JWS_Protected_Header,
                                             byte[] JWS_Payload,
                                             CoreKeyHolder coreKeyHolder,
                                             boolean detached)
     throws IOException, GeneralSecurityException {
-        String jwsHeaderB64U = Base64URL.encode(jwsHeader.serializeToBytes(JSONOutputFormats.NORMALIZED));
+        String jwsHeaderB64U = 
+                Base64URL.encode(JWS_Protected_Header.serializeToBytes(JSONOutputFormats.NORMALIZED));
         String jwsPayloadB64U = Base64URL.encode(JWS_Payload);
         byte[] dataToBeSigned = (jwsHeaderB64U + "." + jwsPayloadB64U).getBytes("utf-8");
-        SignatureAlgorithms signatureAlgorithm = getSignatureAlgorithm(new JSONObjectReader(jwsHeader));
+        SignatureAlgorithms signatureAlgorithm = 
+                getSignatureAlgorithm(new JSONObjectReader(JWS_Protected_Header));
         byte[] signature;
         if (coreKeyHolder.isSymmetric()) {
             signature = ((MACAlgorithms)signatureAlgorithm).digest(coreKeyHolder.getSecretKey(), 
