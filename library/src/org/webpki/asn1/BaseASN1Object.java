@@ -102,7 +102,7 @@ public abstract class BaseASN1Object implements ASN1Constants {
             //   see temporary else-if branch below).
             encodedLength = decoder.endOffset - blobOffset;
         } else if (encodedLength != decoder.endOffset - blobOffset) {
-            throw new RuntimeException("KEXKEXKEX!!!!");
+            throw new RuntimeException("Corrupted ASN.1");
         }
 
         return components;
