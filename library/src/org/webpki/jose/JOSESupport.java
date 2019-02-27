@@ -130,21 +130,24 @@ public class JOSESupport {
         joseObject.setString(ALG_JSON, algorithm.getAlgorithmId(AlgorithmPreferences.JOSE));
     }
 
-    public static void validateDetachedJwsSignature(String jwsProtectedHeaderB64U,
-                                                    byte[] JWS_Payload,
-                                                    byte[] JWS_Signature,
-                                                    CoreSignatureValidator signatureValidator) 
+    public static void validateJwsSignature(String jwsProtectedHeaderB64U,
+                                            byte[] JWS_Payload,
+                                            byte[] JWS_Signature,
+                                            CoreSignatureValidator signatureValidator) 
     throws IOException, GeneralSecurityException {
         signatureValidator.validate((jwsProtectedHeaderB64U + 
                                      "." + Base64URL.encode(JWS_Payload)).getBytes("utf-8"),
                                     JWS_Signature);
     }
-    public static String createDetachedJwsSignature(JSONObjectWriter jwsHeader,
-                                                    byte[] JWS_Payload,
-                                                    CoreKeyHolder coreKeyHolder)
+
+    public static String createJwsSignature(JSONObjectWriter jwsHeader,
+                                            byte[] JWS_Payload,
+                                            CoreKeyHolder coreKeyHolder,
+                                            boolean detached)
     throws IOException, GeneralSecurityException {
         String jwsHeaderB64U = Base64URL.encode(jwsHeader.serializeToBytes(JSONOutputFormats.NORMALIZED));
-        byte[] dataToBeSigned = (jwsHeaderB64U + "." + Base64URL.encode(JWS_Payload)).getBytes("utf-8");
+        String jwsPayloadB64U = Base64URL.encode(JWS_Payload);
+        byte[] dataToBeSigned = (jwsHeaderB64U + "." + jwsPayloadB64U).getBytes("utf-8");
         SignatureAlgorithms signatureAlgorithm = getSignatureAlgorithm(new JSONObjectReader(jwsHeader));
         byte[] signature;
         if (coreKeyHolder.isSymmetric()) {
@@ -154,6 +157,6 @@ public class JOSESupport {
             signature = new SignatureWrapper((AsymSignatureAlgorithms)signatureAlgorithm,
                                              coreKeyHolder.getPrivateKey()).update(dataToBeSigned).sign();
         }
-        return jwsHeaderB64U + ".." + Base64URL.encode(signature);
+        return jwsHeaderB64U + "." + (detached ? "" : jwsPayloadB64U) + "." + Base64URL.encode(signature);
     }
 }
