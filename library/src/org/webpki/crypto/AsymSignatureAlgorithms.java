@@ -96,6 +96,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms {
     }
 
 
+    @Override
     public HashAlgorithms getDigestAlgorithm() {
         return digestAlg;
     }

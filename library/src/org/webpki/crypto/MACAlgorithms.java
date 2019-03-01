@@ -26,20 +26,27 @@ import javax.crypto.spec.SecretKeySpec;
 
 public enum MACAlgorithms implements SignatureAlgorithms {
 
-    HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",        null,    "HmacSHA1",   true),
-    HMAC_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HS256", "HmacSHA256", true),
-    HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HS384", "HmacSHA384", true),
-    HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HS512", "HmacSHA512", true);
+    HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",
+                 null,    "HmacSHA1",   HashAlgorithms.SHA1,   true),
+    HMAC_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", 
+                 "HS256", "HmacSHA256", HashAlgorithms.SHA256, true),
+    HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", 
+                 "HS384", "HmacSHA384", HashAlgorithms.SHA384, true),
+    HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", 
+                 "HS512", "HmacSHA512", HashAlgorithms.SHA512, true);
 
     private final String sksName;   // As expressed in SKS
     private final String joseName;  // JOSE alternative
     private final String jceName;   // As expressed for JCE
+    private HashAlgorithms digestAlg; 
     private boolean sksMandatory;   // If required in SKS
 
-    private MACAlgorithms(String sksName, String joseName, String jceName, boolean sksMandatory) {
+    private MACAlgorithms(String sksName, String joseName, String jceName,
+                          HashAlgorithms digestAlg, boolean sksMandatory) {
         this.sksName = sksName;
         this.joseName = joseName;
         this.jceName = jceName;
+        this.digestAlg = digestAlg;
         this.sksMandatory = sksMandatory;
     }
 
@@ -124,5 +131,11 @@ public enum MACAlgorithms implements SignatureAlgorithms {
     @Override
     public boolean isDeprecated() {
         return this == HMAC_SHA1;
+    }
+
+
+    @Override
+    public HashAlgorithms getDigestAlgorithm() {
+        return digestAlg;
     }
 }
