@@ -117,17 +117,20 @@ public class JOSESupport {
         joseObject.setString(KID_JSON, keyId);
     }
 
-    public static SignatureAlgorithms getSignatureAlgorithm(JSONObjectReader joseObject) throws IOException {
-        String algorithmId = joseObject.getString(ALG_JSON);
+    public static SignatureAlgorithms getSignatureAlgorithm(String algorithmId) throws IOException {
         if (algorithmId.startsWith("HS")) {
             return MACAlgorithms.getAlgorithmFromId(algorithmId, AlgorithmPreferences.JOSE);
         }
         return AsymSignatureAlgorithms.getAlgorithmFromId(algorithmId, AlgorithmPreferences.JOSE);
     }
 
-    public static void setSignatureAlgorithm(JSONObjectWriter joseObject, 
-                                             SignatureAlgorithms algorithm) throws IOException {
-        joseObject.setString(ALG_JSON, algorithm.getAlgorithmId(AlgorithmPreferences.JOSE));
+    public static SignatureAlgorithms getSignatureAlgorithm(JSONObjectReader joseObject) throws IOException {
+        return getSignatureAlgorithm(joseObject.getString(ALG_JSON));
+    }
+
+    public static JSONObjectWriter setSignatureAlgorithm(JSONObjectWriter joseObject, 
+                                                         SignatureAlgorithms algorithm) throws IOException {
+        return joseObject.setString(ALG_JSON, algorithm.getAlgorithmId(AlgorithmPreferences.JOSE));
     }
 
     public static void validateJwsSignature(String jwsProtectedHeaderB64U,
