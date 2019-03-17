@@ -1,19 +1,21 @@
 {
-  "enc": "A256CBC-HS512",
-  "alg": "ECDH-ES",
-  "jwk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-    "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
-  },
-  "epk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "CQFtJbkRCyf_NTe5qO_VEwD2QpcIA6OmS-fv-lTzqmE",
-    "y": "kDwVIBWrJ5RTUNyNvoxkWmM36JcmmELT1sWjH3WRSZM"
+  "algorithm": "A256CBC-HS512",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES",
+    "publicKey": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+      "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+    },
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "J8Aq6JrUgtY3Y7eFGmOpC3mlPuDxV1Jkb5VEYPWd4KI",
+      "y": "xFeKSMOwBv5yKJWRhZr7nzUcnlIKEpEU2SE0N3nGGZ4"
+    }
   },
   "iv": "uqNrzIQrIhUKdjAV",
-  "tag": "KMpNjRECM52vJTddt542UO5g6EqfBiYfjg52IaOFb9o",
-  "ciphertext": "YfxZKxMhR_lmLbfgBoB155P7NRh8Z0NjQYOFDG01-I4"
+  "tag": "cSbJ5oF9uQmDuLXiXKZnp6g-Yq9wCRqvOAs1QGcHvpw",
+  "cipherText": "AtqH6Cag1bfQzWUc9MN0zt69CP21wJVNPTiFWcRT0TU"
 }

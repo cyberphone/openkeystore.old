@@ -1,34 +1,37 @@
 {
-  "enc": "A256CBC-HS512",
-  "alg": "ECDH-ES",
+  "algorithm": "A256CBC-HS512",
   "recipients": [{
-    "jwk": {
+    "algorithm": "ECDH-ES",
+    "publicKey": {
       "kty": "EC",
       "crv": "P-256",
       "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
       "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
     },
-    "epk": {
+    "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "XkSALQaJEZne_R1NUEArIabXRW-w3Jrzngm7xTnCQFc",
-      "y": "NEfmTuPS_LnovZ_J1DP1K4R9tgUemdQxEXqTjvsA9gc"
-    }
+      "x": "eCLY1TH5uxtB0m3WegvV3tNsXeIczlX3lOEe4dPz-4Y",
+      "y": "_XyN4dnpV5bUH9WxOXdPFVQ1695za1kidHxOibN85Lo"
+    },
+    "cipherText": "vkDe4nxoy6l5FvTNd99mXRDrUc-dUsT-IyetS0A4aaOcrGcI9aiCW-AYaEM5EUUcgp9ZvPM-2eY3zcJI9K648PJyl-Rxaw-c"
   },{
-    "jwk": {
+    "algorithm": "ECDH-ES+A256KW",
+    "publicKey": {
       "kty": "EC",
       "crv": "P-384",
       "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
       "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
     },
-    "epk": {
+    "ephemeralKey": {
       "kty": "EC",
       "crv": "P-384",
-      "x": "dJD4Ru71_RKcl1L773xT4Idp4GDz0D0z8WAqcFNbE98zJoyToiyl2As-KqFol0Bv",
-      "y": "uHWnks5DlGU-kjIRYWL67eanaciI92ru6CkZl2EXRUGEUfzp6_Ie7e-n_MvN1wP3"
-    }
-   }],
-  "iv": "w83TpHwwPRbVfgyKK6DeFw",
-  "tag": "YPrwLPvSbl8GyFMG32PIsH2WtwrKaev7GZkc9P3ABaw",
-  "ciphertext": "vatXUegnOGu0pXi_frKCAV62cmi303cFJRg_aBfHRRg"
+      "x": "7rcO6Vp4W_JSrK0foQfY6AuuWPMC3HVok2n4xhwiTLhZJyKH6jSACe5odxqo_z_w",
+      "y": "SeuZms2I8XOeTk58SxeswRWxoyzJjv4QVztcYKQGXcCZllr48cNNUmffwiZgl0Ms"
+    },
+    "cipherText": "SrJfRAlyioIPDSDKxHCl7WXkWsPFig2AGMN_mvTIUa7R9Z-h624z0SYYNoAFjHVOToafY7jkW-GG1N5m_DmRRY5CLdRvjc-X"
+  }],
+  "iv": "dt9btmk3cNbF_lBE6dKNRA",
+  "tag": "MBxpB9NBmgiCwGFqJ6vtI_c3phxtuLehmFqF_pgRsOs",
+  "cipherText": "tVXcNnp8-AdzuSvzuy1hUHP2hfvR0ntlS0PkHY1T8t8"
 }

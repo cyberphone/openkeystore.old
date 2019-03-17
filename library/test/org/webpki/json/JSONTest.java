@@ -4106,30 +4106,27 @@ public class JSONTest {
         assertTrue("Bad JOSE RSA",
                 unEncJson.toString()
                     .equals(JSONParser.parse(decDec.getDecryptedData(malletKeys.getPrivate())).toString()));
-/*
         for (int i = 1; i < 5; i++) {
             try {
                 JSONObjectReader enc = readEncryption("err-missing-alg" + i + ".json");
-                if (enc.hasProperty(JSONCryptoHelper.ENCRYPTED_KEYS_JSON)) {
+                if (enc.hasProperty(JSONCryptoHelper.RECIPIENTS_JSON)) {
                     enc.getEncryptionObjects(new JSONCryptoHelper.Options());
                 } else {
                     enc.getEncryptionObject(new JSONCryptoHelper.Options());
                 }
                 fail("didn't fail");
             } catch (Exception e) {
-                checkException(e, "Missing \"alg\"");
+                checkException(e, "Property \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" is missing");
             }
         }
-*/
         variousEncryptionErrors("err-wrong-alg1.json", "Property \"" + JSONCryptoHelper.CIPHER_TEXT_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg2.json", "Property \"" + JSONCryptoHelper.N_JSON + "\" is missing");
         variousEncryptionErrors("err-wrong-alg3.json", "Property \"" + JSONCryptoHelper.EPHEMERAL_KEY_JSON + "\" is missing");
-        variousEncryptionErrors("err-wrong-alg4.json", "Property \"" + JSONCryptoHelper.ENCRYPTED_KEY_JSON + "\" was never read");
+        variousEncryptionErrors("err-wrong-alg4.json", "Property \"redundant\" was never read");
         variousEncryptionErrors("err-wrong-alg5.json", "Multiple encryptions only permitted for key wrapping schemes");
-        variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": A256GCM");
-        variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": RSA-OAEP-256");
-        variousEncryptionErrors("err-wrong-alg8.json", "Property \"" + JSONCryptoHelper.ALGORITHM_JSON + "\" is missing");
-/*
+        variousEncryptionErrors("err-wrong-alg6.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": SUPERCRYPTO");
+        variousEncryptionErrors("err-wrong-alg7.json", "Unexpected argument to \"" + JSONCryptoHelper.ALGORITHM_JSON + "\": SUPERCRYPTO");
+
         variousEncryptionErrors("err-bad-id.json", "Missing key information");
 
         encryptionFieldErrors("err-bad-ciphertext.json",
@@ -4151,7 +4148,7 @@ public class JSONTest {
         encryptionFieldErrors("err-bad-key2.json",
                               "p256",
                               "Incorrect parameter \"key\" length (32) for A256CBC-HS512");
-*/
+        
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(alice.getPrivate());
         keyAgreement.doPhase(bob.getPublic(), true);

@@ -1,20 +1,22 @@
 {
-  "enc": "A128CBC-HS256",
-  "alg": "ECDH-ES+A256KW",
-  "jwk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-    "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+  "algorithm": "A128CBC-HS256",
+  "encryptedKey": {
+    "algorithm": "ECDH-ES+A256KW",
+    "publicKey": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+    },
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "Of76qtZ4nCfGPZVZaqLX0bFlhTuIiVZmMhI-eeh6zGvMrqKMfzwbKD9NA1kz6tYM",
+      "y": "MHPKtrgauKkHBPcioRd6_uNCY4awQIpUWkzpY4KLz7fTU51SirnuFOeKZEBmABsN"
+    },
+    "cipherText": "reMU12gz9WpkPMkvS4fHhbQwZXOYdqgrB-rtNS7oCN3KZFqG8D-Row"
   },
-  "epk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "EE3a2IBdLB92ePshpcfsN9Yvy7vN63jD33OGZCqY8XY",
-    "y": "9bmU509mBNLLSLZAH43TSvfqamjAJIYi4FzdZoG7zdg"
-  },
-  "encrypted_key": "kDwVIBWrJ5RTUNyNvoxkWmM36JcmmELT1sWjH3WRSZM",
-  "iv": "GXZ_hNz0Uct0v8xbB3b_OQ",
-  "tag": "f9HDAR_bdRinXAkUJLa6AA",
-  "ciphertext": "2as3jE2SWwg4NDg9OrZT_vPMIDHk6MYPKpIl1G959cE"
+  "iv": "Sx0cYU58Ivp74dQpWoNiYA",
+  "tag": "GUOpqDvOYiYhlEQ77625VA",
+  "cipherText": "-xOiLsWe8ZF9pN5pUBdLlcWZjlPXObNfxuh5iTA2x6c"
 }

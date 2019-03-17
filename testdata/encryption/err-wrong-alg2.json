@@ -1,21 +1,14 @@
 {
-  "algorithm": "A256CBC-HS512",
+  "algorithm": "A256GCM",
   "encryptedKey": {
-    "algorithm": "ECDH-ES",
+    "algorithm": "RSA-OAEP-256",
     "publicKey": {
       "kty": "RSA",
-      "crv": "P-384",
-      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
-      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+      "e": "AQAB"
     },
-    "ephemeralKey": {
-      "kty": "EC",
-      "crv": "P-384",
-      "x": "S8juGu9yNokkL3GIXpbYjsMDUKEc5G0lqze9VPRcxnOcgeogyq9AqlZEYrbvjPmb",
-      "y": "Uw7zt0dO1uvLXgrcHotaVQplTHEc_woRVt41f52U4f7S6TgVc6bQvrXsEHWtarH4"
-    }
+    "cipherText": "SGxo4qySRu9TKUYedCCULQ6uKbvSzzDC0otslZl2muzrFhfeZmTNXBX1lvgnp0p_RBQ8mOnu-0DRcdyLdZpIE_Rp7g4ciN4KFTHUwor3OfoU10D-XgXA8H8BG9GJhbZAdkY7oL_MqdtRBcQpB3btehSRWC-pVYeO2hlF52C6QKMxr4j7Yo1wamzsKmC7VjcHWSgTVAW7YEojI0UWz-6X7yOxEvQoVORJabg7PbcNTq5Dan8AxIX-mGNaOwa2xOW8i353FSa9zsIVnZx5PdOh6FQeGbSxXFbKlGLUvg9Y0PO1cJNgT5YANabSNJvXfT5pRGQ-9CD0X7xw4zQSo0xaoQ"
   },
-  "iv": "dLzj1Hx31rMOrzEJXhs5iQ",
-  "tag": "J49c9spnGviE2qGqQwbQZWmFGTWc0IDv_YSRuBinS9U",
-  "cipherText": "RYCsuTOOhUpVABf8G7gATheW9VGfHjM5DeWJiyfQhGs"
+  "iv": "ztNJfef64tiZPtQr",
+  "tag": "Fj2KhIxyVDPmIRmZpXTQvA",
+  "cipherText": "HdbV6GmfRelLh0lWJuXIUhCm51Fm3Q"
 }
