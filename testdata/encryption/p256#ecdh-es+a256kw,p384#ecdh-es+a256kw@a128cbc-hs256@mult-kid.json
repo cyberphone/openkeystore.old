@@ -1,27 +1,27 @@
 {
   "algorithm": "A128CBC-HS256",
-  "encryptedKeys": [{
+  "recipients": [{
     "algorithm": "ECDH-ES+A256KW",
     "keyId": "example.com:p256",
     "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "lCs9dtyqwDzxRmdXeWmVfE2poZxLKnLZLxBzZt9GjZw",
-      "y": "01hf3ReCxIAdbtMIVlXgddkb31Idb3MADCvsEujTDUY"
+      "x": "PneCOBKmJpQrPLqUBcfzAy9oymB1QiLfVMLL7stAqeM",
+      "y": "Km-AzoxPoQ3RXOOPh35YYpGYtIJz1Yo3oN8gyI8MelE"
     },
-    "cipherText": "sDx3HDeXk7EgmSLC2VenToowa3Zj_4MmumCvD-84dYbpr4KyKb-7bA"
+    "cipherText": "LxDpn53g2teHLGr1L_zUwgSxGc_Ne77TS_0e5UGKntMbD4_u545JeA"
   },{
     "algorithm": "ECDH-ES+A256KW",
     "keyId": "example.com:p384",
     "ephemeralKey": {
       "kty": "EC",
       "crv": "P-384",
-      "x": "TQhcHBTHM5GiNOH3tcaUE59LYW3387Ja8a1qYKYzQkhUqLdsn54kKd5vrhxpQSmO",
-      "y": "cqX9ZweJKeb14sveMYIx9JLSnWjGNrbT-EASLJLOMT5N_v2RHdKIl0cGI2oQrfvq"
+      "x": "0D0uvi60hhrIMMUE9Uo4mRyTLzH4ApvdmMa3MsTtK4R0IMaMiT9RFst6i_4qu9Zc",
+      "y": "nSkrRyp4AknGOkvEXQ5HAX0v3a7CKsghelvC28gusZoxHw52jfPjRq8_6qzuVdh4"
     },
-    "cipherText": "YjTMPNmf9p8W36FUUyMYMerJvL0U8tFaShUouYuSiXgIInfxDCLfFA"
+    "cipherText": "mGKC3ZZEYZHKCt60p852uJXvj28V6snQSWd8CTYaPRdTKWmU6j-n9w"
   }],
-  "iv": "-i3YGH5AfbOabUemsgo4uQ",
-  "tag": "TScip7881a0EY70dysDCpg",
-  "cipherText": "XCypTSr2jX-afW7TM7hFTTnDpeLs0RJ2T52CUqfRLEw"
+  "iv": "yUgp3frtnGBI0wm-vR4jDQ",
+  "tag": "X41acxyzE7M8RjPJsipp-Q",
+  "cipherText": "vzIXE4WIef-ExPPgw_hE2pgGbhYvubQ5nlojSSkeyYM"
 }

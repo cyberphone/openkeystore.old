@@ -1,19 +1,21 @@
 {
-  "enc": "A256CBC-HS512",
-  "alg": "RSA-OAEP-256",
-  "jwk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-    "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY"
+  "algorithm": "A256CBC-HS512",
+  "encryptedKey": {
+    "algorithm": "RSA-OAEP-256",
+    "publicKey": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0lpg9",
+      "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9Xxl"
+    },
+    "ephemeralKey": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "S8juGu9yNokkL3GIXpbYjsMDUKEc5G0lqze9VPRcxnOcgeogyq9AqlZEYrbvjPmb",
+      "y": "Uw7zt0dO1uvLXgrcHotaVQplTHEc_woRVt41f52U4f7S6TgVc6bQvrXsEHWtarH4"
+    }
   },
-  "epk": {
-    "kty": "EC",
-    "crv": "P-256",
-    "x": "CQFtJbkRCyf_NTe5qO_VEwD2QpcIA6OmS-fv-lTzqmE",
-    "y": "kDwVIBWrJ5RTUNyNvoxkWmM36JcmmELT1sWjH3WRSZM"
-  },
-  "iv": "0IfJCh-6WkGetE39OxkW3A",
-  "tag": "KMpNjRECM52vJTddt542UO5g6EqfBiYfjg52IaOFb9o",
-  "ciphertext": "YfxZKxMhR_lmLbfgBoB155P7NRh8Z0NjQYOFDG01-I4"
+  "iv": "dLzj1Hx31rMOrzEJXhs5iQ",
+  "tag": "J49c9spnGviE2qGqQwbQZWmFGTWc0IDv_YSRuBinS9U",
+  "cipherText": "RYCsuTOOhUpVABf8G7gATheW9VGfHjM5DeWJiyfQhGs"
 }

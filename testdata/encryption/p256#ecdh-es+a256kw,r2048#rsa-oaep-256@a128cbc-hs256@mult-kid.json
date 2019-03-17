@@ -1,21 +1,21 @@
 {
   "algorithm": "A128CBC-HS256",
-  "encryptedKeys": [{
+  "recipients": [{
     "algorithm": "ECDH-ES+A256KW",
     "keyId": "example.com:p256",
     "ephemeralKey": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "xgbuCfLscw-ShbWWFg7-Bo1VFWd8IB_Zhb1dqQldDXk",
-      "y": "B9KbWTHg5ClF4mt0EXkgHSOlmZilslHXaMdAgGHVQrk"
+      "x": "QjM14ToSlG9yRoFTmva5mlGoNqtgU_mAdT8VeCCwoEU",
+      "y": "eoagbdiG51dwYQjEWZApRTMxm_BW-istJjlZwzjDgjs"
     },
-    "cipherText": "pVCtExln45GHlEwXdfS2DDHAzItYaiGb90a03kvTjaoPFCaTNXUaUg"
+    "cipherText": "n3xNxHfRuPpQT1TyIJ_b90Q_9bwWHS9XFPkA2CZLuYcaq6kruc4b4Q"
   },{
     "algorithm": "RSA-OAEP-256",
     "keyId": "example.com:r2048",
-    "cipherText": "BPk_UvGMayfwLfjMwpiL7IWm4qgHoWDKZKMX9ecSHvnAok2lzKz2L1O_UsEJMhUGjq8hUESvXPDFSdkwcta5ZWOQ7jqMWG1cUrpRP5tHuERRk0MBplmtur3SEzzx59_aLEzPdOs9a_8KoZldAOUg4uU2nExPNPPmYzlxH7Uc8MRQ0aHjY9oSLNCYmY6wlyxVOV6SLty5BkRXxo-dLnppEWdjamwCzUCq3xY9lbsK5w_YGJbDXVuexozXrmnWXMfMuvwH28SUWKLXmdk0J41Jc2hR1J80QssT4sdQqUtS98h6cpCxhrN92gWZxPIWN4Dsvew1yhJ8SFlZZPumPYXboQ"
+    "cipherText": "QYpxcVXqQ5CCfQFpDavba0WoxMuxij_XqJOTMWUzf_eGrAFcwCZjOwsyTmxjHjwOzkl72S0jcXif49zeQAa0pzFeMWdlflhWdHDlPTyCgSFRzqJ-qlRGTK9TIRtqA8ZHAztvkHFefpYgJpjikezO5UyamPH-y0pFL8oL8E3vPPiTy995gmQ6LlgS1cSohl_TebUXNwb4-NW6p0qtv0kzQRWCCuNCTdHjWzoXVKmOWQj9Ot_atweOw8-p5N7KuSaOmsJe6ozUOTLQ6edHMfA8-btbI3A0TN_exLqnHvEXMfMVgFDzASg1X15A95LqrX6dC0GwAl_oPKPgkVb2Wmobyg"
   }],
-  "iv": "lb__spHgq8EOKf_0vjSRxQ",
-  "tag": "i-xDnmRRfUdY2kOecs2aWw",
-  "cipherText": "iYsGfjVefKPLIo6vFIV_RMj4KnjdmsDOHE_HFzbhG94"
+  "iv": "2d1qvkCVma12lJ1WvHALqA",
+  "tag": "vB8btn5byzUpbmRi0NlotQ",
+  "cipherText": "uVBMYgay4t4Eksl6I7Pj4G2ltehkn437eNBdK10Y4mk"
 }
