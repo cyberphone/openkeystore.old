@@ -57,7 +57,7 @@ public class JSONDecryptionDecoder {
         byte[] tag;
         byte[] encryptedData;
         
-        ContentEncryptionAlgorithms contentEncryptionAlgorithm;
+        DataEncryptionAlgorithms dataEncryptionAlgorithm;
         JSONObjectReader globalEncryptionObject;
 
         Holder (JSONCryptoHelper.Options options, 
@@ -90,7 +90,7 @@ public class JSONDecryptionDecoder {
             ///////////////////////////////////////////////////////////////////////////////////////////////
 
             // Collect mandatory elements
-            contentEncryptionAlgorithm = ContentEncryptionAlgorithms
+            dataEncryptionAlgorithm = DataEncryptionAlgorithms
                     .getAlgorithmFromId(encryptionObject.getString(JSONCryptoHelper.ALGORITHM_JSON));
             iv = encryptionObject.getBinary(JSONCryptoHelper.IV_JSON);
             tag = encryptionObject.getBinary(JSONCryptoHelper.TAG_JSON);
@@ -139,8 +139,8 @@ public class JSONDecryptionDecoder {
         return keyId;
     }
 
-    public ContentEncryptionAlgorithms getDataEncryptionAlgorithm() {
-        return holder.contentEncryptionAlgorithm;
+    public DataEncryptionAlgorithms getDataEncryptionAlgorithm() {
+        return holder.dataEncryptionAlgorithm;
     }
 
     public KeyEncryptionAlgorithms getKeyEncryptionAlgorithm() {
@@ -202,7 +202,7 @@ public class JSONDecryptionDecoder {
     }
 
     private byte[] localDecrypt(byte[] dataDecryptionKey) throws IOException, GeneralSecurityException {
-        return EncryptionCore.contentDecryption(holder.contentEncryptionAlgorithm,
+        return EncryptionCore.contentDecryption(holder.dataEncryptionAlgorithm,
                                                 dataDecryptionKey,
                                                 holder.encryptedData,
                                                 holder.iv,
@@ -237,7 +237,7 @@ public class JSONDecryptionDecoder {
                                              privateKey)
                                                            :
                 EncryptionCore.receiverKeyAgreement(keyEncryptionAlgorithm,
-                                                    holder.contentEncryptionAlgorithm,
+                                                    holder.dataEncryptionAlgorithm,
                                                     ephemeralPublicKey,
                                                     privateKey,
                                                     encryptedKeyData));

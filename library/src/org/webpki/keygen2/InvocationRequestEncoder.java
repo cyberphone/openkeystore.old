@@ -39,20 +39,26 @@ public class InvocationRequestEncoder extends ServerEncoder {
     Action action = Action.MANAGE;
 
     String serverSessionId;
+    
+    String optionalCancelUrl;
 
     private ServerState serverState;
 
-    // Constructors
+    // Constructor
 
     public InvocationRequestEncoder(ServerState serverState,
-                                    String serverSessionId) throws IOException {
+                                    String optionalServerSessionId,
+                                    String optionalCancelUrl) throws IOException {
         serverState.checkState(true, ProtocolPhase.INVOCATION);
         this.serverState = serverState;
-        if (serverSessionId == null) {
-            serverSessionId = Long.toHexString(new GregorianCalendar().getTimeInMillis());
-            serverSessionId += Base64URL.generateURLFriendlyRandom(SecureKeyStore.MAX_LENGTH_ID_TYPE - serverSessionId.length());
+        if (optionalServerSessionId == null) {
+            optionalServerSessionId = Long.toHexString(new GregorianCalendar().getTimeInMillis());
+            optionalServerSessionId += 
+                    Base64URL.generateURLFriendlyRandom(
+                            SecureKeyStore.MAX_LENGTH_ID_TYPE - optionalServerSessionId.length());
         }
-        this.serverSessionId = serverState.serverSessionId = serverSessionId;
+        this.serverSessionId = serverState.serverSessionId = optionalServerSessionId;
+        this.optionalCancelUrl = optionalCancelUrl;
     }
 
     public void setAction(Action action) {
@@ -65,6 +71,10 @@ public class InvocationRequestEncoder extends ServerEncoder {
         // Session properties
         //////////////////////////////////////////////////////////////////////////
         wr.setString(SERVER_SESSION_ID_JSON, serverSessionId);
+
+        if (optionalCancelUrl != null) {
+            wr.setString(CANCEL_URL_JSON, optionalCancelUrl);
+        }
 
         wr.setString(ACTION_JSON, action.getJSONName());
 

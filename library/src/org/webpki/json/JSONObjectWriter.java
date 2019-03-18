@@ -805,18 +805,18 @@ import org.webpki.json.JSONSignatureDecoder;
      * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * encrypted object.
      * @param unencryptedData Data to be encrypted
-     * @param contentEncryptionAlgorithm Content encryption algorithm
+     * @param dataEncryptionAlgorithm Content encryption algorithm
      * @param encrypter Holds keys etc.
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
      * @throws GeneralSecurityException &nbsp;
      */
     public static JSONObjectWriter createEncryptionObject(byte[] unencryptedData,
-                                                          ContentEncryptionAlgorithms contentEncryptionAlgorithm,
+                                                          DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                           JSONEncrypter encrypter)
     throws IOException, GeneralSecurityException {
         JSONEncrypter.Header header = 
-                new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypter);
+                new JSONEncrypter.Header(dataEncryptionAlgorithm, encrypter);
         JSONObjectWriter encryptionObject = header.encryptionWriter;
         if (encrypter.keyEncryptionAlgorithm != null) {
             encryptionObject = encryptionObject.setObject(JSONCryptoHelper.ENCRYPTED_KEY_JSON);
@@ -829,21 +829,21 @@ import org.webpki.json.JSONSignatureDecoder;
      * Create a <a href="https://cyberphone.github.io/doc/security/jef.html" target="_blank"><b>JEF</b></a>
      * encrypted object fo multiple recipients.
      * @param unencryptedData Data to be encrypted
-     * @param contentEncryptionAlgorithm Content encryption algorithm
+     * @param dataEncryptionAlgorithm Content encryption algorithm
      * @param encrypters Holds keys etc.
      * @return New instance of {@link org.webpki.json.JSONObjectWriter}
      * @throws IOException &nbsp;
      * @throws GeneralSecurityException &nbsp;
      */
     public static JSONObjectWriter createEncryptionObjects(byte[] unencryptedData,
-                                                           ContentEncryptionAlgorithms contentEncryptionAlgorithm,
+                                                           DataEncryptionAlgorithms dataEncryptionAlgorithm,
                                                            Vector<JSONEncrypter> encrypters)
     throws IOException, GeneralSecurityException {
         if (encrypters.isEmpty()) {
             throw new IOException("Empty encrypter list");
         }
         JSONEncrypter.Header header = 
-                new JSONEncrypter.Header(contentEncryptionAlgorithm, encrypters.firstElement());
+                new JSONEncrypter.Header(dataEncryptionAlgorithm, encrypters.firstElement());
         JSONArrayWriter recipientList = 
                 header.encryptionWriter.setArray(JSONCryptoHelper.RECIPIENTS_JSON);
         for (JSONEncrypter encrypter : encrypters) {

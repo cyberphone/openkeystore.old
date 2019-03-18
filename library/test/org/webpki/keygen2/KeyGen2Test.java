@@ -835,7 +835,7 @@ public class KeyGen2Test {
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
 //            String serverSessionId = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            InvocationRequestEncoder invocation_request = new InvocationRequestEncoder(serverState, null);
+            InvocationRequestEncoder invocation_request = new InvocationRequestEncoder(serverState, null, null);
             if (ask_for_4096) {
                 serverState.addFeatureQuery(KeyAlgorithms.RSA4096.getAlgorithmId(AlgorithmPreferences.SKS))
                         .addFeatureQuery(KeyAlgorithms.RSA2048.getAlgorithmId(AlgorithmPreferences.SKS));

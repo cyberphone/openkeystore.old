@@ -643,7 +643,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @param options Restrictions and requirements
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],ContentEncryptionAlgorithms,JSONEncrypter)
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
      * @see org.webpki.json.JSONCryptoHelper.Options
      */
     public JSONDecryptionDecoder getEncryptionObject(JSONCryptoHelper.Options options) throws IOException {
@@ -666,7 +666,7 @@ public class JSONObjectReader implements Serializable, Cloneable {
      * @param options Global restrictions and requirements
      * @return An object which can be used to retrieve the original (unencrypted) data 
      * @throws IOException &nbsp;
-     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],ContentEncryptionAlgorithms,JSONEncrypter)
+     * @see org.webpki.json.JSONObjectWriter#createEncryptionObject(byte[],DataEncryptionAlgorithms,JSONEncrypter)
      * @see org.webpki.json.JSONCryptoHelper.Options
      */
     public Vector<JSONDecryptionDecoder> getEncryptionObjects(JSONCryptoHelper.Options options) throws IOException {
